@@ -1,7 +1,6 @@
 import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { Box, Menu, MenuItem, useMediaQuery } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -32,7 +31,6 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignTechniciansDialog';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import AttachmentDialog from './AttachmentDialog';
 import Comments from './Comments';
 import CompleteDialog from './CompleteDialog';
 import Logs from './Logs';
@@ -87,7 +85,6 @@ const Service = ({
   const prevOrder = useRef(0);
 
   const [isSubmitting, setSubmitting] = useState(false);
-
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [openProperties, setOpenProperties] = useState(false);
 
@@ -199,8 +196,9 @@ const Service = ({
           setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
         } else {
           if (defaultSelectedService) {
-            setSelectedService(services?.find((e) => e?.uniqueId === defaultSelectedService) || null);
-            if (setDefaultSelectedService) {
+            const defaultSelectedServiceData = services?.find((e) => e?.uniqueId === defaultSelectedService);
+            setSelectedService(defaultSelectedServiceData || null);
+            if (defaultSelectedServiceData && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(defaultSelectedServiceData?.status)) {
               setDefaultSelectedService(null);
             }
           } else {
@@ -708,8 +706,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                      isAllowedToServiceEdit &&
+                      selectedService?.clickable
                       ? false
                       : true
                   }
@@ -725,8 +723,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                      !completed
                       ? false
                       : true
                   }
@@ -761,28 +759,29 @@ const Service = ({
               >
                 Upload Documents
               </MenuItem>
-              {!user?.brandPolicy?.workOrderConsumableHide && resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={!isAllowedToServiceEdit}
-                  onClick={() => {
-                    setConsumablesDialog({
-                      open: true,
-                      uniqueId: selectedService.uniqueId,
-                      service: selectedService._id,
-                      stepId: null,
-                      serviceName: selectedService.serviceName
-                    });
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add/Consume Products
-                </MenuItem>
-              )}
+              {!user?.brandPolicy?.workOrderConsumableHide && (resource === sidebarResource.workOrder
+                || (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
+                  <MenuItem
+                    disabled={!isAllowedToServiceEdit}
+                    onClick={() => {
+                      setConsumablesDialog({
+                        open: true,
+                        uniqueId: selectedService.uniqueId,
+                        service: selectedService._id,
+                        stepId: null,
+                        serviceName: selectedService.serviceName
+                      });
+                      setAnchorEl(null);
+                    }}
+                  >
+                    Add/Consume Products
+                  </MenuItem>
+                )}
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -796,8 +795,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -958,6 +957,7 @@ const Service = ({
           uniqueId={consumablesDialog.uniqueId}
           stepId={consumablesDialog.stepId}
           serviceName={consumablesDialog.serviceName}
+          hideServiceFilter={true}
         />
       )}
       {logsDialog && (

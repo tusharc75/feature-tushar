@@ -70,7 +70,7 @@ const InventoryStatesDialog = ({ onClose, product, warehouse, data, purchaseOrde
               <Table aria-label="customized table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Plant</TableCell>
+                    <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
                     <TableCell>PO Qty</TableCell>
                     <TableCell>Inventory</TableCell>
                     <TableCell>Average Cost</TableCell>
