@@ -28,7 +28,7 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
           onClose={handleCloseDialog}
           aria-labelledby="assign-roles-dialog"
         >
-          <CustomDialogHeader title={`Reason For Reject`} />
+          <CustomDialogHeader onClose={handleCloseDialog} title={`Reason For Reject`} />
           <CustomDialogContent>
             <>
               <List style={{ padding: 0 }}>
