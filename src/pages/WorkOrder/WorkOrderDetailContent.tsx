@@ -396,12 +396,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -424,10 +424,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          !workOrderData?.currentRepairJob &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -497,9 +497,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -512,9 +512,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -571,27 +571,29 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   ] as const;
 
   const renderRightSideContent = () => {
-    return <Box className="control-buttons-v1 items-center">
-      {[sidebarResource.workOrder, sidebarResource.workOrderSupervisor]?.includes(resource) &&
-        <>
-          {workOrderData ? (
-            <>{!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}</>
-          ) : (
-            <Skeleton variant="text" width="150px" height="40px" />
-          )}
-        </>
-      }
-      <ActivityButton
-        referenceId={workOrderData?._id}
-        resource={ACTIVITY_RESOURCE.workOrder}
-        resourceLabel={workOrderData?.workOrderNumber}
-        extraRelatedTo={{
-          referenceId: workOrderData?.repairOrder?.optionValue,
-          resource: ACTIVITY_RESOURCE.repairOrder
-        }}
-      />
-    </Box>
-  }
+    return (
+      <Box className="control-buttons-v1 items-center">
+        {[sidebarResource.workOrder, sidebarResource.workOrderSupervisor]?.includes(resource) && (
+          <>
+            {workOrderData ? (
+              <>{!workOrderData?.deleted && <RenderHeaderButtons buttonOptions={toolbarButtons} />}</>
+            ) : (
+              <Skeleton variant="text" width="150px" height="40px" />
+            )}
+          </>
+        )}
+        <ActivityButton
+          referenceId={workOrderData?._id}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          resourceLabel={workOrderData?.workOrderNumber}
+          extraRelatedTo={{
+            referenceId: workOrderData?.repairOrder?.optionValue,
+            resource: ACTIVITY_RESOURCE.repairOrder
+          }}
+        />
+      </Box>
+    );
+  };
   return (
     <Box className="main-container-v1">
       {resource === sidebarResource.workOrder && (
@@ -601,10 +603,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               routes={[{ ...routes?.workOrder, title: resources?.workOrder?.titlePlural }, { title: workOrderData?.workOrderNumber }]}
             />
           </Box>
-          <Box className="controls-v1 ml-auto">
-            {renderRightSideContent()}
-          </Box>
-        </Box>)}
+          <Box className="controls-v1 ml-auto">{renderRightSideContent()}</Box>
+        </Box>
+      )}
       <Box className={`detail-container-v1`}>
         <Grid container>
           <Grid size={resource === sidebarResource.workOrder ? { xs: 12, sm: 12, md: 12 } : { xs: 8, sm: 8, md: 8 }}>
@@ -620,10 +621,11 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
           </Grid>
-          {[sidebarResource.workOrderTechnician, sidebarResource.workOrderSupervisor]?.includes(resource) &&
-            <Grid container size={{ xs: 4, sm: 4, md: 4 }} sx={{ justifyContent: "flex-end", alignItems: "flex-end", pb: 1 }}>
+          {[sidebarResource.workOrderTechnician, sidebarResource.workOrderSupervisor]?.includes(resource) && (
+            <Grid container size={{ xs: 4, sm: 4, md: 4 }} sx={{ justifyContent: 'flex-end', alignItems: 'flex-end', pb: 1 }}>
               {renderRightSideContent()}
-            </Grid>}
+            </Grid>
+          )}
         </Grid>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -696,11 +698,15 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               allowedToEdit={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
                   ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
-                    ? resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
+                    ? resource === sidebarResource?.workOrderTechnician
+                      ? true
+                      : allowedToEdit
                     : false
                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
                     ? false
-                    : resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
+                    : resource === sidebarResource?.workOrderTechnician
+                      ? true
+                      : allowedToEdit
               }
               isCreate={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
@@ -726,11 +732,15 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               allowedToEdit={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
                   ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
-                    ? resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
+                    ? resource === sidebarResource?.workOrderTechnician
+                      ? true
+                      : allowedToEdit
                     : false
                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
                     ? false
-                    : resource === sidebarResource?.workOrderTechnician ? true : allowedToEdit
+                    : resource === sidebarResource?.workOrderTechnician
+                      ? true
+                      : allowedToEdit
               }
               isCreate={
                 workOrderData.type === WORK_ORDER_TYPE.repairOrder
@@ -786,157 +796,135 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           })}
         <Box my={1} />
       </Box>
-      {
-        showConfirmBox && (
-          <ConfirmationDialog
-            open={showConfirmBox}
-            message={`Are you sure you want to delete ${resources?.workOrder?.titleSingular?.toLowerCase()} : ${workOrderData?.workOrderNumber} ?`}
-            onClose={() => {
-              setShowConfirmBox(false);
-            }}
-            onOk={handleDelete}
-          />
-        )
-      }
-      {
-        showConfirmBoxScrap && (
-          <ConfirmationDialog
-            open={showConfirmBoxScrap}
-            message={`Are you sure you want to scrap asset: ${workOrderData?.serializedAsset?.optionLabel} ?`}
-            onClose={() => {
-              setShowConfirmBoxScrap(false);
-            }}
-            onOk={() => {
-              setShowConfirmBoxScrap(false);
-              updateStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
-            }}
-          />
-        )
-      }
-      {
-        showConfirmVersion.open && (
-          <ConfirmationDialog
-            open={showConfirmVersion.open}
-            message={`Are you sure you want to create a new version ?`}
-            onClose={() => {
-              setShowConfirmVersion({ open: false, withData: 0 });
-            }}
-            onOk={() => {
-              createVersion(showConfirmVersion.withData);
-              setShowConfirmVersion({ open: false, withData: 0 });
-            }}
-          />
-        )
-      }
-      {
-        openUpdateDialog && (
-          <ManageWorkOrder
-            workOrderId={id}
-            onClose={() => {
-              setOpenUpdateDialog(false);
-            }}
-            onSuccess={() => {
-              fetchWorkOrderData();
-              setOpenUpdateDialog(false);
-            }}
-          />
-        )
-      }
-      {
-        versionDialog && (
-          <Versions
-            workOrderId={id}
-            workOrderData={workOrderData}
-            handleClose={() => {
-              setVersionDialog(false);
-            }}
-          />
-        )
-      }
-      {
-        showManageRepairJobDialog.open && (
-          <ManageRepairJob
-            onClose={() => setShowManageRepairJobDialog({ open: false })}
-            onSuccess={(data) => {
-              handleAddAssetInRepairJob(data);
-            }}
-            referenceType={sidebarResource.workOrder}
-            referenceData={{
-              warehouse: workOrderData?.warehouse?.optionValue,
-              workOrder: workOrderData?._id
-            }}
-          />
-        )
-      }
-      {
-        openTotalCostDialog && (
-          <WorkOrderCostDialog
-            id={id}
-            workOrderCostFields={workOrderCostFields}
-            currency={workOrderData?.currency || user.user?.brandCurrency}
-            onClose={() => setOpenTotalCostDialog(false)}
-            onSuccess={(data) => {
-              updateStatus(WORK_ORDER_STATUS.completed, null, data);
-            }}
-            isSubmitting={isSubmitting}
-          />
-        )
-      }
-      {
-        repairJobReceiveConfirmation && (
-          <ConfirmationDialog
-            open={repairJobReceiveConfirmation}
-            message={`Are you sure you want to receive asset?`}
-            onClose={() => {
-              setRepairJobReceiveConfirmation(false);
-            }}
-            onOk={handleReceiveAssetInRepairJob}
-            okBtnLoading={isSubmitting}
-          />
-        )
-      }
-      {
-        showReopenConfirmation && (
-          <ConfirmationDialog
-            open={showReopenConfirmation}
-            message={`Are you sure you want to re-open work order ?`}
-            onClose={() => {
-              setShowReopenConfirmation(false);
-            }}
-            onOk={reOpenWorkOrder}
-            okBtnLoading={isSubmitting}
-          />
-        )
-      }
-      {
-        openAssetDataDialog.open && (
-          <AssetDetailsChangeDialog
-            ids={openAssetDataDialog._ids}
-            statusPolicy={openAssetDataDialog.statusPolicy}
-            setAssetsData={null}
-            onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
-            onSuccess={(data) => {
-              updateStatus(WORK_ORDER_STATUS.completed, null, null, data);
-            }}
-          />
-        )
-      }
-      {
-        openSerializedPackageDialog && (
-          <PackageNumberDialog
-            onClose={() => {
-              setOpenSerializedPackageDialog(false);
-            }}
-            assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
-            workOrderIds={[id]}
-            onSuccess={(_data) => {
-              updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
-            }}
-            isSubmitting={isSubmitting}
-          />
-        )
-      }
-    </Box >
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${resources?.workOrder?.titleSingular?.toLowerCase()} : ${workOrderData?.workOrderNumber} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+        />
+      )}
+      {showConfirmBoxScrap && (
+        <ConfirmationDialog
+          open={showConfirmBoxScrap}
+          message={`Are you sure you want to scrap asset: ${workOrderData?.serializedAsset?.optionLabel} ?`}
+          onClose={() => {
+            setShowConfirmBoxScrap(false);
+          }}
+          onOk={() => {
+            setShowConfirmBoxScrap(false);
+            updateStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
+          }}
+        />
+      )}
+      {showConfirmVersion.open && (
+        <ConfirmationDialog
+          open={showConfirmVersion.open}
+          message={`Are you sure you want to create a new version ?`}
+          onClose={() => {
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+          onOk={() => {
+            createVersion(showConfirmVersion.withData);
+            setShowConfirmVersion({ open: false, withData: 0 });
+          }}
+        />
+      )}
+      {openUpdateDialog && (
+        <ManageWorkOrder
+          workOrderId={id}
+          onClose={() => {
+            setOpenUpdateDialog(false);
+          }}
+          onSuccess={() => {
+            fetchWorkOrderData();
+            setOpenUpdateDialog(false);
+          }}
+        />
+      )}
+      {versionDialog && (
+        <Versions
+          workOrderId={id}
+          workOrderData={workOrderData}
+          handleClose={() => {
+            setVersionDialog(false);
+          }}
+        />
+      )}
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          onClose={() => setShowManageRepairJobDialog({ open: false })}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data);
+          }}
+          referenceType={sidebarResource.workOrder}
+          referenceData={{
+            warehouse: workOrderData?.warehouse?.optionValue,
+            workOrder: workOrderData?._id
+          }}
+        />
+      )}
+      {openTotalCostDialog && (
+        <WorkOrderCostDialog
+          id={id}
+          workOrderCostFields={workOrderCostFields}
+          currency={workOrderData?.currency || user.user?.brandCurrency}
+          onClose={() => setOpenTotalCostDialog(false)}
+          onSuccess={(data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, data);
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {repairJobReceiveConfirmation && (
+        <ConfirmationDialog
+          open={repairJobReceiveConfirmation}
+          message={`Are you sure you want to receive asset?`}
+          onClose={() => {
+            setRepairJobReceiveConfirmation(false);
+          }}
+          onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open work order ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={reOpenWorkOrder}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={openAssetDataDialog._ids}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={null}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
+          onSuccess={(data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, data);
+          }}
+        />
+      )}
+      {openSerializedPackageDialog && (
+        <PackageNumberDialog
+          onClose={() => {
+            setOpenSerializedPackageDialog(false);
+          }}
+          assemblyOrderId={workOrderData?.assemblyOrder?.optionValue}
+          workOrderIds={[id]}
+          onSuccess={(_data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+    </Box>
   );
 };
 
