@@ -10,6 +10,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 type TechnicianListProps = {
   state: TInitialState;
@@ -18,9 +19,18 @@ type TechnicianListProps = {
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
   isMobile: boolean;
+  setOpenTechnicianDialog: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource, container, isMobile }: TechnicianListProps) => {
+const TechnicianList = ({
+  dispatch,
+  setSelectedRecords,
+  state,
+  selectedResource,
+  container,
+  isMobile,
+  setOpenTechnicianDialog
+}: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
   const containerSize = useMemo(() => {
@@ -63,7 +73,14 @@ const TechnicianList = ({ dispatch, setSelectedRecords, state, selectedResource,
         >
           {({ data, index, style }) => (
             <div style={style}>
-              <SingleRow row={data[index]} index={index} setSize={setSize} isMobile={isMobile} selectedType={selectedResource?.key} />
+              <SingleRow
+                row={data[index]}
+                index={index}
+                setSize={setSize}
+                isMobile={isMobile}
+                selectedType={selectedResource?.key}
+                setOpenTechnicianDialog={setOpenTechnicianDialog}
+              />
             </div>
           )}
         </List>
@@ -93,7 +110,7 @@ const RowSkeleton = ({ isMobile }) => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile }: any) => {
+export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog }: any) => {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,
@@ -216,6 +233,16 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
               <p className={cn('text-[13px]', isMobile ? 'line-clamp-1' : '')}>{col.cell}</p>
             </div>
           ))}
+          <div className="flex items-center justify-end">
+            <IconButton
+              size="small"
+              onClick={() => {
+                setOpenTechnicianDialog({ open: true, data: row });
+              }}
+            >
+              <AssignmentIcon fontSize="small" color="primary" />
+            </IconButton>
+          </div>
         </div>
       </div>
     </div>

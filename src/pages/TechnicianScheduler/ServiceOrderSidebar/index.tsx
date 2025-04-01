@@ -3,11 +3,13 @@ import { memo, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { cn, rentalManagement } from 'src/constants/helpers';
+import { cn, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
+import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import dayjs from 'dayjs';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -40,12 +42,14 @@ const ServiceOrderSidebarImpl = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement>(null);
+  const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
 
   const fetchData = (selectedResource: TechnicianResource, cancelToken?: CancelToken) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    axiosInstance().get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
+    axiosInstance()
+      .get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {
@@ -76,12 +80,57 @@ const ServiceOrderSidebarImpl = ({
       });
   };
 
+  const handleAssign = (technicians, resourceData) => {
+    const technician: any = [];
+    technicians.forEach((d) => {
+      const element: any = {};
+      element.technician = d?._id;
+      element.uniqueId = resourceData?._id;
+      element.service = resourceData?.service?._id;
+      element.warehouse = resourceData?.warehouse;
+      if (selectedResource?.key === 'fieldTicket') {
+        element.fieldTicket = resourceData?.resourceId;
+        element.startDate = resourceData?.service?.estimateStartDate || dayjs.tz().toDate();
+        element.endDate = resourceData?.service?.estimateEndDate || dayjs.tz().toDate();
+      } else if (selectedResource?.key === 'rentalJob') {
+        element.rentalJob = resourceData?.resourceId;
+        element.startDate = resourceData?.estimateStartDate || dayjs.tz().toDate();
+        element.endDate = resourceData?.estimateEndDate || dayjs.tz().toDate();
+      } else {
+        element.fieldServiceOrder = resourceData?.resourceId;
+        element.startDate = resourceData?.estimateStartDate || dayjs.tz().toDate();
+        element.endDate = resourceData?.estimateEndDate || dayjs.tz().toDate();
+      }
+      technician.push(element);
+    });
+    const baseApi =
+      selectedResource?.key === 'fieldTicket'
+        ? fieldTicket.api
+        : selectedResource?.key === 'rentalJob'
+          ? rentalManagement.api
+          : selectedResource?.key === 'fieldServiceOrder'
+            ? fieldServiceOrder.api
+            : '';
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`${baseApi}/technician`, { technician: technician })
+      .then(() => {
+        handleSucess();
+        setOpenTechnicianDialog({ open: false, data: null });
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
       .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
       .then(() => {
-        fetchData(selectedResource)
+        fetchData(selectedResource);
         handleSucess();
         setIsSubmitting(false);
         setRefresh((prev) => !prev);
@@ -118,6 +167,7 @@ const ServiceOrderSidebarImpl = ({
           dispatch={dispatch}
           setSelectedRecords={setSelectedRecords}
           state={state}
+          setOpenTechnicianDialog={setOpenTechnicianDialog}
         />
       </div>
       {assignTechnicianDialog.open && (
@@ -125,12 +175,27 @@ const ServiceOrderSidebarImpl = ({
           technicianData={assignTechnicianDialog.technicianData}
           selectedServiceOrder={[assignTechnicianDialog.service]}
           handleSucess={() => {
-            fetchData(selectedResource)
+            fetchData(selectedResource);
             handleSucess();
           }}
           handleClose={() => {
             handleClose();
           }}
+        />
+      )}
+      {openTechnicianDialog.open && (
+        <AssignEmployeeDialog
+          reference={selectedResource.key}
+          onSuccess={(data) => {
+            handleAssign(data, openTechnicianDialog.data);
+          }}
+          handleClose={() => {
+            setOpenTechnicianDialog({ open: false, data: null });
+          }}
+          defaultCompetency={openTechnicianDialog?.data?.service?.competencyType ? [openTechnicianDialog?.data?.service?.competencyType] : []}
+          warehouse={openTechnicianDialog.data?.warehouse}
+          ids={[]}
+          isSubmitting={isSubmitting}
         />
       )}
       {unAssignTechnicianDialog.open && (

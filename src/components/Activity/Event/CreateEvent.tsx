@@ -415,6 +415,14 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       name="description"
                       variant="outlined"
                       onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
+                      InputProps={{
+                        sx: {
+                          '& textarea': {
+                            resize: 'vertical',
+                            overflow: 'auto',
+                          }
+                        }
+                      }}
                     />
                     {eventId && (
                       <Fragment>
