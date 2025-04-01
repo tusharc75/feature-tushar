@@ -5,15 +5,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DesktopRoadmap from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import MobileRoadmap from './MobileRoadmap';
+import TechnicianToServiceDialog from 'src/pages/TechnicianScheduler/Roadmap/TechnicianToServiceDialog';
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
-function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, leftSidebarTitle = '', headerSlot = null, refresh }) {
+function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refresh }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [openAssignTechToServiceDialog, setOpenAssignTechToServiceDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
@@ -46,6 +48,8 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
   const handleSelect = (event, data, type) => {
     if (type === 'map') {
       setSelected(data?._id);
+    } else if (type === 'assign') {
+      setOpenAssignTechToServiceDialog({ open: true, data: data });
     } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
       handleUnAssignTechnician(data);
     }
@@ -74,7 +78,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
         ) : (
           <DesktopRoadmap
             loading={!activity}
-            leftSidebarTitle={leftSidebarTitle}
+            selectedResource={selectedResource}
             activity={activity}
             leftSidebar={leftSidebar}
             handleSelect={handleSelect}
@@ -85,6 +89,19 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
           />
         )}
       </Box>
+      {openAssignTechToServiceDialog.open && (
+        <TechnicianToServiceDialog
+          handleClose={() => {
+            setOpenAssignTechToServiceDialog({ open: false, data: null });
+          }}
+          selectedResource={selectedResource}
+          technician={openAssignTechToServiceDialog.data}
+          handleSucess={() => {
+            fetchRoadmap();
+            setOpenAssignTechToServiceDialog({ open: false, data: null });
+          }}
+        />
+      )}
     </>
   );
 }
