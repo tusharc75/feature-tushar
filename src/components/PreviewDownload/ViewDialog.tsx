@@ -25,7 +25,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
 
   const [initialValue] = useState({
     name: viewData?.name || '',
-    access: viewData?.access || ACCESS_OPTIONS.private,
+    access: viewData?.access || ACCESS_OPTIONS.everyone,
     default: viewData?.default || false
   });
 
