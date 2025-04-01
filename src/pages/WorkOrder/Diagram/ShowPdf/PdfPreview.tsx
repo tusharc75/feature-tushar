@@ -37,6 +37,8 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const [isHighlighterMode, setHighlighterMode] = useState(false);
   const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
   const [brushRedoPaths, setBrushRedoPaths] = useState([]);
+  const [drawingColor, setDrawingColor] = useState('black');
+  const [highlighterColor, setHighlighterColor] = useState('#ffff00');
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -64,10 +66,10 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     }
     setLoading(true);
     axiosInstance()
-      .get(`/user/pdf`,{
-        params:{
-          fileName:data?.url,
-          attachmentId:data?.attachmentId
+      .get(`/user/pdf`, {
+        params: {
+          fileName: data?.url,
+          attachmentId: data?.attachmentId
         }
       })
       .then(({ data }) => {
@@ -276,19 +278,34 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     }
   };
 
+  const handleFreeHandColorChange = (event) => {
+    const newColor = event.target.value;
+
+    if (isHighlighterMode) {
+      const highlighterOpacity = 0.2; // Example: 20% opacity
+      const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(highlighterOpacity).toRgba();
+
+      canvas.freeDrawingBrush.color = rgbaColor;
+    } else if (isDrawingMode) {
+      canvas.freeDrawingBrush.color = newColor;
+    }
+
+    canvas.requestRenderAll();
+  };
+
   const handleUndo = () => {
     if (isHighlighterMode && highlighterPaths.length > 0) {
       const lastHighlighterPath = highlighterPaths.pop();
       setHighlighterPaths(highlighterPaths);
       canvas.remove(lastHighlighterPath);
       canvas.requestRenderAll();
-      setHighlighterRedoPaths(prev => [...prev, lastHighlighterPath]);
+      setHighlighterRedoPaths((prev) => [...prev, lastHighlighterPath]);
     } else if (isDrawingMode && brushPaths.length > 0) {
       const lastBrushPath = brushPaths.pop();
       setBrushPaths(brushPaths);
       canvas.remove(lastBrushPath);
       canvas.requestRenderAll();
-      setBrushRedoPaths(prev => [...prev, lastBrushPath]);
+      setBrushRedoPaths((prev) => [...prev, lastBrushPath]);
     }
   };
 
@@ -299,24 +316,23 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setHighlighterPaths(prev => [...prev, path]);
+      setHighlighterPaths((prev) => [...prev, path]);
     } else if (isDrawingMode && brushRedoPaths.length > 0) {
       const path = brushRedoPaths.pop();
       setBrushRedoPaths(brushRedoPaths);
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setBrushPaths(prev => [...prev, path]);
+      setBrushPaths((prev) => [...prev, path]);
     }
   };
 
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
-
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
-    highlighterBrush.width = 10; // Highlighter stroke width
-
+    const rgbaColor = fabric.Color.fromHex(highlighterColor).setAlpha(0.2).toRgba();
+    highlighterBrush.color = rgbaColor;
+    highlighterBrush.width = 10;
     canvas.freeDrawingBrush = highlighterBrush;
     canvas.isDrawingMode = true;
 
@@ -326,9 +342,8 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
         selectable: true,
         evented: true,
         draggable: true,
-        ishighlighter: true // Additional property to identify highlighter paths
+        ishighlighter: true
       });
-
       setHighlighterPaths((prevPaths) => [...prevPaths, path]);
     });
   };
@@ -357,10 +372,9 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   };
 
   const toggleDrawingMode = () => {
-    setIsDrawingMode(!isDrawingMode);
     if (!isDrawingMode) {
       const drawingBrush = new fabric.PencilBrush(canvas);
-      drawingBrush.color = 'black';
+      drawingBrush.color = drawingColor;
       drawingBrush.width = 2;
       canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;
@@ -376,9 +390,9 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
       });
     } else {
       canvas.isDrawingMode = false;
-      setCanvas(canvas);
       canvas.off('path:created');
     }
+    setIsDrawingMode(!isDrawingMode);
   };
 
   const toggleHighlighterMode = () => {
@@ -441,40 +455,22 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     <Box>
       <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
         <div className={'flex flex-wrap gap-2'}>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddText}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddText}>
             Add Text
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddLine}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddLine}>
             Add Line
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddRectangle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddRectangle}>
             Add Rectangle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddCircle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddCircle}>
             Add Circle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode}
-            onClick={toggleHighlighterMode}
-          >
+          <ThemeButton disabled={loading || isDrawingMode} onClick={toggleHighlighterMode}>
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isHighlighterMode}
-            onClick={toggleDrawingMode}
-          >
+          <ThemeButton disabled={loading || isHighlighterMode} onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
@@ -482,13 +478,11 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
             disabled={loading || isDrawingMode || isHighlighterMode}
             onClick={() => {
               fileInputRef.current.click();
-            }}            >
+            }}
+          >
             Upload Watermark
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || currentPageIndex === 0 || isHighlighterMode}
-            onClick={handlePreviousPage}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || currentPageIndex === 0 || isHighlighterMode} onClick={handlePreviousPage}>
             Previous Page
           </ThemeButton>
           <ThemeButton
@@ -500,22 +494,21 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
 
           {(isDrawingMode || isHighlighterMode) && (
             <>
-              <HtmlTooltip title='Undo'>
-                <IconButton
-                  disabled={loading}
-                  onClick={handleUndo}
-                  size='small'
-                  color={loading ? "default" : "primary"}
-                > <UndoIcon />
+              <HtmlTooltip title="Undo">
+                <IconButton disabled={loading} onClick={handleUndo} size="small" color={loading ? 'default' : 'primary'}>
+                  {' '}
+                  <UndoIcon />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title='Redo'>
+              <HtmlTooltip title="Redo">
                 <IconButton
                   disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
                   onClick={handleRedo}
-                  size='small'
-                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? "default" : "primary"}
-                > <RedoIcon />
+                  size="small"
+                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? 'default' : 'primary'}
+                >
+                  {' '}
+                  <RedoIcon />
                 </IconButton>
               </HtmlTooltip>
             </>
@@ -530,20 +523,22 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
           </Box>
         )}
 
+        {(isDrawingMode || isHighlighterMode) && (
+          <FormControl size="small" margin="none" variant="outlined">
+            <input
+              type="color"
+              value={canvas?.freeDrawingBrush?.color || '#000000'}
+              onChange={handleFreeHandColorChange}
+              style={{ marginLeft: '10px' }}
+            />
+          </FormControl>
+        )}
+
         <div className="flex flex-wrap items-center gap-2">
-          <ThemeButton
-            disabled={isSubmitting || loading}
-            isLoading={isSubmitting}
-            buttonType="theme"
-            onClick={handleSave}
-          >
+          <ThemeButton disabled={isSubmitting || loading} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
-          <ThemeButton
-            disabled={loading}
-            buttonType="theme"
-            onClick={handleDownload}
-          >
+          <ThemeButton disabled={loading} buttonType="theme" onClick={handleDownload}>
             Download
           </ThemeButton>
         </div>

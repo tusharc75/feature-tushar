@@ -1,5 +1,5 @@
 import { Box, Dialog, Typography } from '@mui/material';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -23,7 +23,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const { page, dataRows, limit, selectedRecords, search, filters, sorting, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
-  const toastTimer = useRef(null);
 
   const {
     state: { user }
@@ -147,21 +146,12 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const onCellValueChanged = (data, row) => {
     if (!data || !data?.qty) return;
     if (Number(data.qty) > Number(row.inventory)) {
-      if (toastTimer.current) {
-        clearTimeout(toastTimer.current);
-      }
-      
-      toastTimer.current = setTimeout(() => {
-        toastConfig.setToastConfig({
-          type: 'warning',
-          message: "Qty can't be greater than inventory",
-          open: true
-        });
-      }, 100);
-     return;
-    }
-    if (toastTimer.current) {
-      clearTimeout(toastTimer.current);
+      toastConfig.setToastConfig({
+        type: 'warning',
+        message: "Qty can't be greater then inventory",
+        open: true
+      });
+      return;
     }
     const rows = [...dataRows];
     rows?.forEach((d) => {
