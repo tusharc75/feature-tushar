@@ -1732,7 +1732,6 @@ const Steps = ({
                 uniqueId={attchmentsDialog.uniqueServiceId}
                 stepId={attchmentsDialog.stepId}
                 resource={ACTIVITY_RESOURCE.workOrder}
-                isAddWorkOrderServiceAttachment={true}
               />
             )}
             {consumablesDialog.open && (

@@ -438,9 +438,9 @@ const Consumables = ({
   const fetchServices = async () => {
     const {
       data: { data }
-    }: any = await axiosInstance().get(`${workOrder.api}/${workOrderId}/detail`);
-    if (data?.services?.length) {
-      const serviceData = data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id, uniqueId: s?.uniqueId }));
+    }: any = await axiosInstance().get(`${workOrder.api}/service/service/${workOrderId}`);
+    if (data?.length) {
+      const serviceData = data?.map((s) => ({ optionLabel: s?.serviceDetail?.optionLabel, optionValue: s?.serviceDetail?.optionValue, uniqueId: s?._id }));
       setServiceOption(serviceData);
       if (defaultServiceUniqueId && serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId)) {
         setSelectedService(serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId))
