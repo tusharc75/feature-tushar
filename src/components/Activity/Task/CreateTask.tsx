@@ -226,6 +226,12 @@ export const CreateTask = ({
                             onChange={(e) => {
                               setFieldValue('description', e.target.value);
                             }}
+                            sx={{
+                              '& .MuiInputBase-root textarea': {
+                                resize: 'vertical',
+                                overflow: 'auto',
+                              },
+                            }}
                           />
                         </Box>
                         {id && (

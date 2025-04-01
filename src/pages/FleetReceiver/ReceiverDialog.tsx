@@ -161,6 +161,12 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
+                sx={{
+                  '& .MuiInputBase-root textarea': {
+                    resize: 'vertical',
+                    overflow: 'auto',
+                  },
+                }}
               />
             </Grid>
           </Grid>
