@@ -92,6 +92,12 @@ const Service = ({
     fetchServiceData();
   }, [workOrderId, workOrderData]);
 
+  useEffect(() => {
+    if (setDefaultSelectedService && selectedService) {
+      setDefaultSelectedService(selectedService?.uniqueId)
+    }
+  }, [selectedService]);
+
   const fetchServiceData = async () => {
     var quotation: any = null;
     var isQuotation: any = false;
@@ -198,9 +204,6 @@ const Service = ({
           if (defaultSelectedService) {
             const defaultSelectedServiceData = services?.find((e) => e?.uniqueId === defaultSelectedService);
             setSelectedService(defaultSelectedServiceData || null);
-            if (defaultSelectedServiceData && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(defaultSelectedServiceData?.status)) {
-              setDefaultSelectedService(null);
-            }
           } else {
             setSelectedService(services[pendingServiceIndex]);
           }
@@ -1032,10 +1035,8 @@ const Service = ({
           uniqueId={attchmentsDialog.uniqueServiceId}
           stepId={attchmentsDialog.stepId}
           resource={ACTIVITY_RESOURCE.workOrder}
-          isAddWorkOrderServiceAttachment={true}
         />
       )}
-
       {showManagePurchaseOrder && (
         <ManagePurchaseOrder
           isClone={false}
