@@ -851,6 +851,12 @@ export default function QuoteDetail() {
               rows={3}
               required
               variant="outlined"
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical',
+                  overflow: 'auto',
+                },
+              }}
             />
           </CustomDialogContent>
           <CustomDialogFooter>

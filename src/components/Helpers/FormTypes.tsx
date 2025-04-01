@@ -960,6 +960,12 @@ const FormTypes = (props) => {
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+          sx={{
+            '& .MuiInputBase-root textarea': {
+              resize: 'vertical',
+              overflow: 'auto',
+            },
+          }}
         />
       </InfoLabel>
     ) : type === 'number' ? (

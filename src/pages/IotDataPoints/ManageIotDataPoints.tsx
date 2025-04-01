@@ -240,10 +240,10 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                   else setShowConfirmDialog(true);
                 }}
                 title={`${id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
-                    : `Create ${resources?.iotDataPoints?.titleSingular}`
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldLabel ? `(${initialData.values?.fieldLabel})` : ''}`
+                  : `Create ${resources?.iotDataPoints?.titleSingular}`
                   }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
@@ -338,10 +338,16 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                           error={touched['formula'] && Boolean(errors['formula'])}
                           helperText={touched['formula'] && errors['formula']}
                           onChange={(e) => setFieldValue('formula', e.target.value)}
+                          sx={{
+                            '& .MuiInputBase-root textarea': {
+                              resize: 'vertical',
+                              overflow: 'auto',
+                            },
+                          }}
                         />
                       </Box>
                       <Grid container>
-                        <Grid size={{xs:6}}>
+                        <Grid size={{ xs: 6 }}>
                           {formulaError && (
                             <Typography variant="caption" display="block">
                               {formulaError}{' '}

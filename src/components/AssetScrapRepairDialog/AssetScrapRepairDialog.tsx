@@ -57,6 +57,12 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
               onChange={(e) => {
                 setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
               }}
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical',
+                  overflow: 'auto',
+                },
+              }}
             />
           )}
         </Box>
