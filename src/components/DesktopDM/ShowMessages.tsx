@@ -1,7 +1,7 @@
 import { MoreVert } from '@mui/icons-material';
 import { Avatar, IconButton } from '@mui/material';
 import { groupBy } from 'lodash';
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, Message, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,10 +16,16 @@ export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const ShowMessages = ({ data: panelData, state }: ShowMessagesProps) => {
+export type ShowMessageRef = {
+  onNewMessagePost: (messageId: string) => void;
+};
+
+let timeout: NodeJS.Timeout;
+
+const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
   const { toastConfig, socket, user } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
-  const isUserData = 'avatar' in panelData;
+  const isUserData = panelData && 'avatar' in panelData;
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = async ({ messageId = null, updateMessage = false }: { messageId?: string; updateMessage?: Boolean }) => {
@@ -48,71 +54,99 @@ const ShowMessages = ({ data: panelData, state }: ShowMessagesProps) => {
         }
       });
 
-      setTimeout(() => {
-        containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
-      }, 100);
+      scrollToBottom();
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  // useEffect(() => {
-  //   if (socket) {
-  //     socket.on('fetchUpdatedMessage', (messageId) => {
-  //       fetchMessages({ messageId, updateMessage: true });
-  //     });
-  //     socket.on('fetchMessages', (messageId) => {
-  //       fetchMessages(messageId);
-  //     });
-  //     socket.on('addReaction', ({ messageId, emoji, user }) => {
-  //       setMessages((prevMessages) => {
-  //         let updatedMessages: any = Object.assign({}, prevMessages);
-  //         Object.values(updatedMessages).forEach((u: any) => {
-  //           u.forEach((m) => {
-  //             if (m._id === messageId) {
-  //               if (!m['reactions']) m['reactions'] = [];
-  //               m['reactions'].push({ emoji, user });
-  //             }
-  //           });
-  //         });
-  //         return updatedMessages;
-  //       });
-  //     });
-  //     socket.on('removeReaction', ({ messageId, emoji, user }) => {
-  //       setMessages((prevMessages) => {
-  //         let updatedMessages: any = Object.assign({}, prevMessages);
-  //         Object.values(updatedMessages).forEach((u: any) => {
-  //           u.forEach((m) => {
-  //             if (m._id === messageId) {
-  //               if (m['reactions']) {
-  //                 m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji || reaction.user.optionValue !== user);
-  //               }
-  //             }
-  //           });
-  //         });
-  //         return updatedMessages;
-  //       });
-  //     });
-  //   }
-  //   return () => {
-  //     if (socket) {
-  //       socket.off('fetchUpdatedMessage');
-  //       socket.off('fetchMessages');
-  //       socket.off('addReaction');
-  //       socket.off('removeReaction');
-  //     }
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [socket, panelData._id]);
+  const onNewMessagePost = async (messageId: string) => {
+    if (isUserData) return;
+    try {
+      const api = `/work-space/channel/message/${panelData._id}?after=${messageId}`;
+      const { data } = await axiosInstance().get(api);
+      setMessages((prevMessages) => {
+        let newMessages = data?.data || [];
+        return groupByDate([...Object?.values(prevMessages)?.flat(), ...newMessages]);
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      scrollToBottom();
+    }
+  };
+
+  const scrollToBottom = () => {
+    timeout = setTimeout(() => {
+      containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
+    }, 100);
+    return () => {
+      clearTimeout(timeout);
+    };
+  };
+
+  useImperativeHandle(ref, () => ({
+    onNewMessagePost(messageId) {
+      onNewMessagePost(messageId);
+    }
+  }));
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('fetchUpdatedMessage', (messageId) => {
+        fetchMessages({ messageId, updateMessage: true });
+      });
+      socket.on('fetchMessages', (messageId) => {
+        fetchMessages(messageId);
+      });
+      socket.on('addReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (!m['reactions']) m['reactions'] = [];
+                m['reactions'].push({ emoji, user });
+              }
+            });
+          });
+          return updatedMessages;
+        });
+      });
+      socket.on('removeReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (m['reactions']) {
+                  m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji || reaction.user.optionValue !== user);
+                }
+              }
+            });
+          });
+          return updatedMessages;
+        });
+      });
+    }
+    return () => {
+      if (socket) {
+        socket.off('fetchUpdatedMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket, panelData?._id]);
 
   useEffect(() => {
     fetchMessages({});
-  }, []);
-
-  console.log(messages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelData?._id]);
 
   return (
-    <div ref={containerRef} className="flex-grow overflow-y-auto">
+    <div ref={containerRef} className="flex-grow overflow-y-auto scroll-smooth">
       {messages ? (
         <>
           {Object.keys(messages).map((date) => {
@@ -137,7 +171,7 @@ const ShowMessages = ({ data: panelData, state }: ShowMessagesProps) => {
         </>
       ) : isUserData ? (
         <div className="flex h-full items-center justify-center">
-          <p>No messages</p>
+          <p>Send Message</p>
         </div>
       ) : (
         <div className="p-2">
@@ -146,7 +180,7 @@ const ShowMessages = ({ data: panelData, state }: ShowMessagesProps) => {
       )}
     </div>
   );
-};
+});
 
 export default ShowMessages;
 

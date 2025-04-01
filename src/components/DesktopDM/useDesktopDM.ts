@@ -1,5 +1,5 @@
 import axios, { CancelToken } from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, User } from 'src/components/DesktopDM/types';
 import useUIDesktopDm from 'src/components/DesktopDM/useUIDesktopDm';
@@ -9,6 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 
 const useDesktopDM = () => {
   const uiState = useUIDesktopDm();
+  const { onUserFirstMessageSent: uiOnUserFirstMessageSent, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -20,9 +21,8 @@ const useDesktopDM = () => {
     }
   } = useData();
 
-  useEffect(() => {
-    const tokenSource = axios.CancelToken.source();
-    const fetchData = async (cancelToken: CancelToken) => {
+  const fetchData = useCallback(
+    async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
       if (uiState.isMobile || uiState.isMobileDevice) return;
       try {
         setLoading(true);
@@ -40,18 +40,31 @@ const useDesktopDM = () => {
           chats.push(d);
         }
         setState({ chats, users: data.users });
+        onSuccess();
       } catch (error) {
         toastConfig.setToastConfig(error);
       } finally {
         setLoading(false);
       }
-    };
-    fetchData(tokenSource.token);
+    },
+    [toastConfig, uiState.isMobile, uiState.isMobileDevice, user?._id]
+  );
+
+  useEffect(() => {
+    const tokenSource = axios.CancelToken.source();
+    fetchData({ cancelToken: tokenSource.token });
     return () => {
       tokenSource.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uiState.isMobile, uiState.isMobileDevice]);
+
+  const onUserFirstMessageSent = useCallback(
+    ({ userId, channelId }: { userId: string; channelId: string }) => {
+      fetchData({ onSuccess: () => setTimeout(() => uiOnUserFirstMessageSent({ userId, channelId }), 100) });
+    },
+    [fetchData, uiOnUserFirstMessageSent]
+  );
 
   // notifications
   useEffect(() => {
@@ -79,7 +92,7 @@ const useDesktopDM = () => {
     };
   }, [socket, uiState.openedChats, user?._id]);
 
-  return { ...uiState, ...state, loading, toastConfig, user, socket };
+  return { ...state, loading, toastConfig, user, socket, onUserFirstMessageSent, ...rest };
 };
 
 export default useDesktopDM;

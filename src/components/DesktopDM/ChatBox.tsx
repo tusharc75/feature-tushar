@@ -1,8 +1,9 @@
 import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
-import { useMemo } from 'react';
-import ShowMessages from 'src/components/DesktopDM/ShowMessages';
-import { OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
+import { useMemo, useRef } from 'react';
+import SendMessage from 'src/components/DesktopDM/SendMessage';
+import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessages';
+import { Chat, OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
@@ -17,6 +18,7 @@ const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbo
 
 const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
   const { users, chats, handleToggleChatWindow, closeChatBox } = state;
+  const showMessageRef = useRef<ShowMessageRef>(null);
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const { className } = useDelayedClass(initialClass, delayedClass, 0);
   const data = useMemo(() => {
@@ -26,9 +28,10 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
       return users.find((c) => c._id === openedChat.id);
     }
   }, [users, chats, openedChat]);
-  const isUserData = 'avatar' in data;
+  if (!data) return null;
 
-  const isUserOnline = onlineUsers.includes(isUserData ? data._id : data.to?.optionValue);
+  const isUserData = 'avatar' in data;
+  const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
 
   return (
     <div
@@ -88,7 +91,8 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
           </IconButton>
         </div>
       </header>
-      <ShowMessages data={data} state={state} />
+      <ShowMessages data={data} state={state} ref={showMessageRef} />
+      <SendMessage state={state} data={data} onNewMessagePost={showMessageRef.current?.onNewMessagePost} />
     </div>
   );
 };

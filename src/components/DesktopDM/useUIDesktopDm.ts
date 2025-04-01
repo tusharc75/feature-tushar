@@ -179,6 +179,20 @@ const useUIDesktopDm = () => {
     setUiState({ ...initialState, mainWindow: null });
   }, []);
 
+  const onUserFirstMessageSent = useCallback(({ userId, channelId }: { userId: string; channelId: string }) => {
+    if (!userId || !channelId) return;
+    setUiState((prev) => {
+      const newData = { ...prev };
+      newData.openedChats = prev.openedChats.map((d) => {
+        if (d.id === userId) {
+          return { ...d, id: channelId, type: 'chat' };
+        }
+        return d;
+      });
+      return newData;
+    });
+  }, []);
+
   return {
     ...uiState,
     isMobileDevice,
@@ -192,7 +206,8 @@ const useUIDesktopDm = () => {
     handleChatOpen,
     closeChatBox,
     toggleMainWindow,
-    closeMainWindow
+    closeMainWindow,
+    onUserFirstMessageSent
   };
 };
 

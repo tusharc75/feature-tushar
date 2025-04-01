@@ -2,6 +2,7 @@ import { Close, ExpandMore, Person, Search } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 import { useStore } from 'src/StateProvider/fastContext';
 
@@ -54,7 +55,7 @@ const UserList = ({ state }: UserListProps) => {
               <Person fontSize="small" />
             </Avatar>
           </Badge>
-          <h6 className="text-sm font-semibold">Messaging</h6>
+          <h6 className="text-sm font-semibold">BeConnected</h6>
         </div>
         <div className="buttons flex items-center gap-1">
           <IconButton size="small">
@@ -71,15 +72,7 @@ const UserList = ({ state }: UserListProps) => {
       </header>
       <div className="search  border-b p-2">
         <div className="relative">
-          <span className="absolute left-1 top-1/2 [transform:translateY(-50%)]">
-            <Search fontSize="small" color="secondary" />
-          </span>
-          <input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Search"
-            className="w-full rounded-md border bg-transparent p-[5px_10px_5px_30px] outline-none focus:outline focus:outline-[--new-theme-color] dark:text-white"
-          />
+          <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
         </div>
       </div>
       <section role="list" className="flex-grow overflow-y-auto px-2 py-2">
