@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { backendApi } from 'src/config';
 
@@ -18,7 +18,6 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket => {
       const fullNamespace = `${baseUrl}${namespace}`;
 
       // Check if a socket for this namespace already exists
-
       const s = io(fullNamespace, {
         path,
         auth: { token },
