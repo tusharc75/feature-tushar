@@ -100,6 +100,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const isSelected = useRef(false);
   const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
   const [brushRedoPaths, setBrushRedoPaths] = useState([]);
+  // New state to hold the brush color
+  const [brushColor, setBrushColor] = useState('#000000'); // default color for drawing mode
 
   useEffect(() => {
     // for touchScroll
@@ -108,21 +110,26 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         removeListener = fabric.util.removeListener,
         addEventOptions = { passive: false };
 
-      fabric.util.object.extend(fabric.Canvas.prototype, {
-        _onTouchStart: function (e) {
-          if (isSelected.current) e.preventDefault();
-          if (this.mainTouchId === null) {
-            this.mainTouchId = this.getPointerId(e);
+      fabric.util.object.extend(
+        fabric.Canvas.prototype,
+        /** @lends fabric.Canvas.prototype */ {
+          _onTouchStart: function (e) {
+            // prevent touchScroll if any objce is currently selected
+            if (isSelected.current) e.preventDefault();
+            if (this.mainTouchId === null) {
+              this.mainTouchId = this.getPointerId(e);
+            }
+            this.__onMouseDown(e);
+            this._resetTransformEventData();
+            const canvasElement = this.upperCanvasEl,
+              eventTypePrefix = this._getEventPrefix();
+            addListener(fabric.document, 'touchend', this._onTouchEnd, addEventOptions);
+            addListener(fabric.document, 'touchmove', this._onMouseMove, addEventOptions);
+            // Unbind mousedown to prevent double triggers from touch devices
+            removeListener(canvasElement, eventTypePrefix + 'down', this._onMouseDown);
           }
-          this.__onMouseDown(e);
-          this._resetTransformEventData();
-          const canvasElement = this.upperCanvasEl,
-            eventTypePrefix = this._getEventPrefix();
-          addListener(fabric.document, 'touchend', this._onTouchEnd, addEventOptions);
-          addListener(fabric.document, 'touchmove', this._onMouseMove, addEventOptions);
-          removeListener(canvasElement, eventTypePrefix + 'down', this._onMouseDown);
         }
-      });
+      );
     })();
 
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -151,6 +158,19 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     loadImage(fabricCanvas);
     return () => fabricCanvas.dispose();
   }, [data]);
+
+  // Update the free drawing brush color when brushColor changes
+  useEffect(() => {
+    if (canvas && (isDrawingMode || isHighlighterMode)) {
+      if (isHighlighterMode) {
+        const rgbaColor = fabric.Color.fromHex(brushColor).setAlpha(0.2).toRgba();
+        canvas.freeDrawingBrush.color = rgbaColor;
+      } else if (isDrawingMode) {
+        canvas.freeDrawingBrush.color = brushColor;
+      }
+      canvas.renderAll();
+    }
+  }, [brushColor, canvas, isDrawingMode, isHighlighterMode]);
 
   const loadImage = (fabricCanvas) => {
     if (canvasRef.current) {
@@ -314,39 +334,40 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   const handleColorChange = (event) => {
     const newColor = event.target.value;
-    if (isHighlighterMode) {
-      // Apply with opacity for highlighter mode
-      const highlighterOpacity = 0.2;
-      const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(highlighterOpacity).toRgba();
-      canvas.freeDrawingBrush.color = rgbaColor;
-    } else if (isDrawingMode) {
-      canvas.freeDrawingBrush.color = newColor;
-    } else {
-      // If no drawing mode is active and an object is selected, update its color
-      const activeObject = canvas.getActiveObject();
-      if (activeObject) {
-        if (activeObject.type === 'activeSelection') {
-          activeObject.forEachObject((obj) => {
-            if (obj.type === 'line' || obj.type === 'path') {
-              obj.set('stroke', newColor);
-            } else if (obj.type === 'customArrow') {
-              obj.updateArrowColor(newColor);
-            } else {
-              obj.set('fill', newColor);
-            }
-          });
-        } else {
-          if (activeObject.type === 'line' || activeObject.type === 'path') {
-            activeObject.set('stroke', newColor);
-          } else if (activeObject.type === 'customArrow') {
-            activeObject.updateArrowColor(newColor);
+    const activeObject = canvas.getActiveObject();
+
+    if (activeObject) {
+      if (activeObject.type === 'activeSelection') {
+        activeObject.forEachObject((obj) => {
+          if (obj.type === 'line' || obj.type === 'path') {
+            obj.set('stroke', newColor);
+          } else if (obj.type === 'customArrow') {
+            obj.updateArrowColor(newColor);
           } else {
-            activeObject.set('fill', newColor);
+            obj.set('fill', newColor);
           }
+        });
+      } else if (activeObject && activeObject.ishighlighter) {
+        const highlighterOpacity = 0.2; // Set your desired opacity value
+        const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(highlighterOpacity).toRgba();
+
+        activeObject.set({
+          stroke: rgbaColor,
+          strokeWidth: 10
+        });
+
+        canvas.requestRenderAll();
+      } else {
+        if (activeObject.type === 'line' || activeObject.type === 'path') {
+          activeObject.set('stroke', newColor);
+        } else if (activeObject.type === 'customArrow') {
+          activeObject.updateArrowColor(newColor);
+        } else {
+          activeObject.set('fill', newColor);
         }
       }
+      canvas.requestRenderAll();
     }
-    canvas.requestRenderAll();
   };
 
   const handleUndo = () => {
@@ -385,9 +406,10 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
-
+    // When entering highlighter mode, update the free drawing brush with the current brushColor converted to rgba
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    const rgbaColor = fabric.Color.fromHex(brushColor).setAlpha(0.2).toRgba();
+    highlighterBrush.color = rgbaColor;
     highlighterBrush.width = 10; // Highlighter stroke width
 
     canvas.freeDrawingBrush = highlighterBrush;
@@ -436,7 +458,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     if (!isDrawingMode) {
       isSelected.current = true;
       const drawingBrush = new fabric.PencilBrush(canvas);
-      drawingBrush.color = 'black';
+      drawingBrush.color = brushColor;
       drawingBrush.width = 2;
       canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;
@@ -479,12 +501,20 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         const canvasHeight = canvas.getHeight();
 
         let scalingFactor = Math.min(canvasWidth / img.width, canvasHeight / img.height);
-        scalingFactor *= 0.9;
+
+        const scaleRelativeToCanvas = 0.9;
+        scalingFactor *= scaleRelativeToCanvas;
+
+        // Scale the image
         img.scale(scalingFactor);
+
+        // Set image position to center of the canvas
         img.set({
           left: (canvasWidth - img.width * img.scaleX) / 2,
           top: (canvasHeight - img.height * img.scaleY) / 2
         });
+
+        // Add the image to the canvas
         canvas.add(img).renderAll();
         canvas.setActiveObject(img);
       });
@@ -495,7 +525,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   return (
     <Box>
       <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap gap-2">
+        <div className={'flex flex-wrap gap-2'}>
           <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddText}>
             Add Text
           </ThemeButton>
@@ -518,7 +548,12 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
-          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={() => fileInputRef.current.click()}>
+          <ThemeButton
+            disabled={loading || isDrawingMode || isHighlighterMode}
+            onClick={() => {
+              fileInputRef.current.click();
+            }}
+          >
             Upload Watermark
           </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
@@ -538,20 +573,36 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
                   <RedoIcon />
                 </IconButton>
               </HtmlTooltip>
-              {/* Single color picker for both drawing and highlighter modes */}
-              <FormControl size="small" margin="none" variant="outlined">
-                <input type="color" defaultValue="#000000" onChange={handleColorChange} style={{ marginLeft: '10px' }} />
-              </FormControl>
+              {(isDrawingMode || isHighlighterMode) && (
+                <FormControl size="small" margin="none" variant="outlined">
+                  <input
+                    type="color"
+                    value={canvas?.freeDrawingBrush?.color || '#000000'}
+                    onChange={(e) => setBrushColor(e.target.value)}
+                    style={{ marginLeft: '10px' }}
+                  />
+                </FormControl>
+              )}
             </>
           )}
         </div>
         {selectedObject && (
           <Box className="flex items-center gap-2">
+            <FormControl size="small" margin="none" variant="outlined">
+              <input type="color" value={getSelectedColor()} onChange={handleColorChange} style={{ marginLeft: '10px' }} />
+            </FormControl>
             <DeleteButton text="Remove" onClick={handleRemove} />
           </Box>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <ThemeButton disabled={isSubmitting || loading} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
+          <ThemeButton
+            disabled={isSubmitting || loading}
+            isLoading={isSubmitting}
+            buttonType="theme"
+            onClick={(e) => {
+              handleSave();
+            }}
+          >
             Save
           </ThemeButton>
           <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">
