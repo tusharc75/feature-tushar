@@ -59,7 +59,6 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
-  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions, resources));
