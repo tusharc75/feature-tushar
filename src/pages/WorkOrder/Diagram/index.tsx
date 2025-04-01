@@ -97,10 +97,14 @@ const Diagram = ({
       data: { data }
     }: any = await axiosInstance().get(`${workOrder.api}/service/service/${referenceId}`);
     if (data?.length) {
-      const serviceData = data?.map((s) => ({ optionLabel: s?.serviceDetail?.optionLabel, optionValue: s?.serviceDetail?.optionValue, uniqueId: s?._id }));
+      const serviceData = data?.map((s) => ({
+        optionLabel: s?.serviceDetail?.optionLabel,
+        optionValue: s?.serviceDetail?.optionValue,
+        uniqueId: s?._id
+      }));
       setServiceOption(serviceData);
       if (defaultSelectedUniqueId && serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId)) {
-        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId))
+        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId));
       }
     }
   };
@@ -211,8 +215,8 @@ const Diagram = ({
 
   const customhandleAdd = (request, setLoading) => {
     const serviceId = selectedService ? selectedService?.uniqueId : uniqueId;
-    const serviceName = selectedService ? selectedService?.optionLabel : referenceLabel
-    let data = {
+    const serviceName = selectedService ? selectedService?.optionLabel : referenceLabel;
+    const data: any = {
       name: request?.name,
       attachmentType: request?.attachmentType,
       file: request?.file,
@@ -293,10 +297,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -473,7 +478,7 @@ const Diagram = ({
             showManimizeMaximize={true}
             fetchData={fetchData}
             attachmentType={attachmentType}
-            customhandleAdd={showMaterialFilter ? customhandleAdd : null}
+            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.id && !showMaterialFilter ? customhandleAdd : null}
           />
         </Dialog>
       )}
