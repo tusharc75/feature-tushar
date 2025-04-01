@@ -236,7 +236,7 @@ const Diagram = ({
     <Box>
       <Box className="container-with-border" p={'20px'}>
         {!disableEdit && (
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && !uniqueId ? 'justify-between' : 'justify-end'}`}>
             {resource === ACTIVITY_RESOURCE.workOrder && !uniqueId && (
               <Autocomplete
                 fullWidth
