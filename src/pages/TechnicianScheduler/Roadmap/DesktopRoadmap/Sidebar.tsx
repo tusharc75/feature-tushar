@@ -5,6 +5,7 @@ import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } fr
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 
 type SidebarProps = {
   activity: TActivity[];
@@ -112,6 +113,14 @@ export const SingleTechnician = ({ data, handleSelect, index, className = '' }) 
             }}
           >
             <Map fontSize="medium" />
+          </IconButton>
+          <IconButton
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSelect(event, data, 'assign');
+            }}
+          >
+            <AssignmentIcon fontSize="small" color="primary" />
           </IconButton>
         </div>
       </ListItem>
