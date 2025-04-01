@@ -79,6 +79,12 @@ const FeedbackDialog = ({ handleClose, chatData, chatId }: FeedbackDialogProps) 
           label={'Feedback'}
           multiline
           rows={2}
+          sx={{
+            '& .MuiInputBase-root textarea': {
+              resize: 'vertical',
+              overflow: 'auto',
+            },
+          }}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

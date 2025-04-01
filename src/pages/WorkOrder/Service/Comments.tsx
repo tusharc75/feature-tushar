@@ -198,6 +198,12 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
               label={'Comment'}
               multiline
               rows={2}
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical',
+                  overflow: 'auto',
+                },
+              }}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>

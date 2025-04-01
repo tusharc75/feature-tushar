@@ -142,6 +142,12 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                 onChange={(e) => {
                   setFieldValue('comment', e.target.value);
                 }}
+                sx={{
+                  '& .MuiInputBase-root textarea': {
+                    resize: 'vertical',
+                    overflow: 'auto',
+                  },
+                }}
               />
             </CustomDialogContent>
             <CustomDialogFooter>

@@ -478,6 +478,12 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       onChange={(e) => {
                         setFieldValue('comment', e.target.value);
                       }}
+                      sx={{
+                        '& .MuiInputBase-root textarea': {
+                          resize: 'vertical',
+                          overflow: 'auto',
+                        },
+                      }}
                     />
                   </Box>
                   {product?.length === 1 && product[0]?.serializedProduct && (

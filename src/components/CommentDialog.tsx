@@ -51,6 +51,12 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
             onChange={(e) => {
               setComment(e.target.value);
             }}
+            sx={{
+              '& .MuiInputBase-root textarea': {
+                resize: 'vertical',
+                overflow: 'auto',
+              },
+            }}
           />
         </Box>
       </CustomDialogContent>

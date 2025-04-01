@@ -90,6 +90,12 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
               variant="outlined"
               error={Boolean(commentError)}
               helperText={Boolean(commentError) && commentError}
+              sx={{
+                '& .MuiInputBase-root textarea': {
+                  resize: 'vertical',
+                  overflow: 'auto',
+                },
+              }}
             />
           </Box>
         )}

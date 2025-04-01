@@ -59,6 +59,12 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
                   onChange={handleChange}
                   rows={4}
                   variant="outlined"
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               )}
             </>

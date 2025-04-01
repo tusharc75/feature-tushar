@@ -166,6 +166,12 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                             size="small"
                             value={comment}
                             onChange={(e: any) => setComment(e.target.value)}
+                            sx={{
+                              '& .MuiInputBase-root textarea': {
+                                resize: 'vertical',
+                                overflow: 'auto',
+                              },
+                            }}
                           />
                         </Box>
                         <Box pt={2}>
