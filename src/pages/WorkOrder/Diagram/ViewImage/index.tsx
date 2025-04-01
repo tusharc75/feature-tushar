@@ -100,8 +100,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const isSelected = useRef(false);
   const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
   const [brushRedoPaths, setBrushRedoPaths] = useState([]);
-  // New state to hold the brush color
-  const [brushColor, setBrushColor] = useState('#000000'); // default color for drawing mode
+  const [brushColor, setBrushColor] = useState('#000000'); 
 
   useEffect(() => {
     // for touchScroll
@@ -159,7 +158,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     return () => fabricCanvas.dispose();
   }, [data]);
 
-  // Update the free drawing brush color when brushColor changes
   useEffect(() => {
     if (canvas && (isDrawingMode || isHighlighterMode)) {
       if (isHighlighterMode) {
@@ -406,7 +404,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
 
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
-    // When entering highlighter mode, update the free drawing brush with the current brushColor converted to rgba
     const highlighterBrush = new fabric.PencilBrush(canvas);
     const rgbaColor = fabric.Color.fromHex(brushColor).setAlpha(0.2).toRgba();
     highlighterBrush.color = rgbaColor;

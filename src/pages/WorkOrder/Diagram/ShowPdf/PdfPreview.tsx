@@ -282,7 +282,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
     const newColor = event.target.value;
 
     if (isHighlighterMode) {
-      const highlighterOpacity = 0.2; // Example: 20% opacity
+      const highlighterOpacity = 0.2;
       const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(highlighterOpacity).toRgba();
 
       canvas.freeDrawingBrush.color = rgbaColor;
