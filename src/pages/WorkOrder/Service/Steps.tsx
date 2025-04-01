@@ -483,6 +483,10 @@ const Steps = ({
       }
     }
 
+    if (user?.brandPolicy?.workOrderStepSequence && !step?.isAllowToPerform) {
+      canSkip = false;
+    }
+
     return { fieldData, stepData, isStepValid, canSkip };
   };
 
