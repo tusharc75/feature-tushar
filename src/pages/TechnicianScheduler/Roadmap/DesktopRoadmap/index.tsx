@@ -19,7 +19,7 @@ type DesktopRoadmapProps = {
   handleSelect: HandleSelect;
   setSelected: React.Dispatch<React.SetStateAction<string>>;
   leftSidebar?: (isMobile: boolean) => React.ReactNode;
-  leftSidebarTitle?: React.ReactNode;
+  selectedResource?: any | null;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isSidebarOpen: boolean;
   loading: boolean;
@@ -31,7 +31,7 @@ const DesktopRoadmapImpl = ({
   selected,
   setSelected,
   leftSidebar = null,
-  leftSidebarTitle = null,
+  selectedResource = null,
   isSidebarOpen,
   setIsSidebarOpen,
   loading
@@ -47,7 +47,7 @@ const DesktopRoadmapImpl = ({
       )}
     >
       {leftSidebar ? (
-        <LeftSidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} title={leftSidebarTitle}>
+        <LeftSidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} title={selectedResource?.title}>
           {leftSidebar(false)}
         </LeftSidebar>
       ) : null}

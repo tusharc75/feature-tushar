@@ -29,7 +29,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const invoicePolicyRef = useRef(null);
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [selectedResource, setSelectedResource] = useState(null);
@@ -52,24 +52,32 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const [openManageInvoiceDialog, setOpenManageInvoiceDialog] = useState({ open: false, _id: null });
 
   const GENERATE_RESOURCE = [
-    {
-      key: 'rentalManagement',
-      resource: sidebarResource.rentalManagement,
-      fieldName: 'rentalJobName',
-      invoiceFieldName: 'rentalJob',
-      progressiveBilling: true,
-      path: routes.rentalManagementDetail.path,
-      title: resources?.rentalManagement?.titlePlural
-    },
-    {
-      key: 'sublease',
-      resource: sidebarResource.sublease,
-      fieldName: 'subleaseName',
-      invoiceFieldName: 'sublease',
-      progressiveBilling: true,
-      path: routes.subleaseDetail.path,
-      title: resources?.sublease?.titlePlural
-    },
+    ...(user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead
+      ? [
+          {
+            key: 'rentalManagement',
+            resource: sidebarResource.rentalManagement,
+            fieldName: 'rentalJobName',
+            invoiceFieldName: 'rentalJob',
+            progressiveBilling: true,
+            path: routes.rentalManagementDetail.path,
+            title: resources?.rentalManagement?.titlePlural
+          }
+        ]
+      : []),
+    ...(user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead
+      ? [
+          {
+            key: 'sublease',
+            resource: sidebarResource.sublease,
+            fieldName: 'subleaseName',
+            invoiceFieldName: 'sublease',
+            progressiveBilling: true,
+            path: routes.subleaseDetail.path,
+            title: resources?.sublease?.titlePlural
+          }
+        ]
+      : []),
     {
       key: 'repairOrder',
       resource: sidebarResource.repairOrder,
@@ -245,7 +253,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
         if (selectedResource?.resource === sidebarResource.fieldTicket) {
           setOpenManageInvoiceDialog({ open: true, _id: data?.data?._id });
         } else {
-          window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`)
+          window.open(`${routes.invoiceDetail.path}/${data?.data?._id}`);
         }
         setCreateInvoiceDialog({ open: false, data: null });
         dispatch({ type: 'selection', selectedRecords: [] });

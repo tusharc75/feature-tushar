@@ -1,4 +1,4 @@
-import { Box, Collapse, Dialog, IconButton, Typography } from '@mui/material';
+import { Autocomplete, Box, Collapse, Dialog, IconButton, TextField, Typography } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -45,21 +45,27 @@ const Diagram = ({
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [serviceOption, setServiceOption] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [resource, referenceId, currentVersion]);
+    if (resource === ACTIVITY_RESOURCE.workOrder) {
+      fetchServices();
+    }
+  }, [resource, referenceId, currentVersion, selectedService]);
 
   const fetchData = async () => {
     let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
     if (attachmentType) {
       query = `${query}&attachmentType=${attachmentType}`;
     }
-    if (uniqueId) {
+    const serviceId = uniqueId ? uniqueId : selectedService ? selectedService?.uniqueId : null;
+    if (serviceId) {
       if (isAddWorkOrderServiceAttachment) {
-        query = `${query}&uniqueServiceId=${uniqueId}`;
+        query = `${query}&uniqueServiceId=${serviceId}`;
       } else {
-        query = `${query}&uniqueId=${uniqueId}`;
+        query = `${query}&uniqueId=${serviceId}`;
       }
     }
     if (stepId) {
@@ -81,6 +87,16 @@ const Diagram = ({
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchServices = async () => {
+    const {
+      data: { data }
+    }: any = await axiosInstance().get(`${workOrder.api}/${referenceId}/detail`);
+    if (data?.services?.length) {
+      const serviceData = data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id, uniqueId: s?.uniqueId }));
+      setServiceOption(serviceData);
+    }
   };
 
   const handleDeleteFile = async (ids) => {
@@ -220,18 +236,46 @@ const Diagram = ({
     <Box>
       <Box className="container-with-border" p={'20px'}>
         {!disableEdit && (
-          <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-            <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
-            <ThemeButton
-              onClick={() => {
-                setAttachemntDialog({ open: true, id: null, isClone: false });
-              }}
-              iconForMobile={<Add />}
-              mobileTooltip="Add"
-            >
-              <Add /> Add
-            </ThemeButton>
-          </Box>
+          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && !uniqueId ? 'justify-between' : 'justify-end'}`}>
+            {resource === ACTIVITY_RESOURCE.workOrder && !uniqueId && (
+              <Autocomplete
+                fullWidth
+                className="max-w-[300px]"
+                options={serviceOption}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                isOptionEqualToValue={(option: any, val) => option.uniqueId === val}
+                value={selectedService}
+                onChange={(e, val) => {
+                  setSelectedService(val);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    size="small"
+                    name="service"
+                    placeholder={'Service'}
+                    label={'Service'}
+                    variant="outlined"
+                    fullWidth
+                    className="m-0"
+                  />
+                )}
+              />
+            )}
+            <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+              <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
+              <ThemeButton
+                onClick={() => {
+                  setAttachemntDialog({ open: true, id: null, isClone: false });
+                }}
+                iconForMobile={<Add />}
+                mobileTooltip="Add"
+              >
+                <Add /> Add
+              </ThemeButton>
+            </Box>
+          </div>
         )}
         <Box pt={2} pb={2}>
           <Box className="h-[calc(100vh-300px)] overflow-auto">

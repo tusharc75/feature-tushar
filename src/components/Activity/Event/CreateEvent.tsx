@@ -415,6 +415,12 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       name="description"
                       variant="outlined"
                       onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
+                      sx={{
+                        '& .MuiInputBase-root textarea': {
+                          resize: 'vertical',
+                          overflow: 'auto',
+                        },
+                      }}
                     />
                     {eventId && (
                       <Fragment>

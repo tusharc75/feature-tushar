@@ -1,7 +1,7 @@
 import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
@@ -288,6 +288,7 @@ import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 import CustomMessageDialog from 'src/components/MessageDialog';
+const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
 
@@ -343,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1263,6 +1264,7 @@ function App() {
           {permissions?.equiptAi?.isRead && <AgentChat />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
+      <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
         (!['notFoundError', 'productInventoryAlert'].includes(toast?.toastConfig?.type) ? (

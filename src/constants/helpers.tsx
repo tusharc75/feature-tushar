@@ -4,7 +4,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import { GoogleMapProps } from '@react-google-maps/api';
 import clsx, { ClassValue } from 'clsx';
 import dayjs, { Dayjs } from 'dayjs';
-import { camelCase, cloneDeep, indexOf, isArray, isString, lowerFirst, orderBy, sortBy, uniqBy } from 'lodash';
+import { camelCase, cloneDeep, indexOf, isArray, isEmpty, isString, lowerFirst, orderBy, sortBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import React from 'react';
 import { PiCaretCircleDoubleRight } from 'react-icons/pi';
@@ -1203,7 +1203,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1235,78 +1235,78 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
-              otherwise: string().matches(nameRegex, "Numbers aren't allowed")
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+              }
+            )
           : string().matches(nameRegex, "Numbers aren't allowed").required(message)
         : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().matches(urlRegex, 'Enter valid URL').required(message),
-              otherwise: string().matches(urlRegex, 'Enter valid URL')
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(urlRegex, 'Enter valid URL').required(message),
+                otherwise: string().matches(urlRegex, 'Enter valid URL')
+              }
+            )
           : string().matches(urlRegex, 'Enter valid URL').required(message)
         : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().min(10, 'Mobile number is too short').required(message),
-              otherwise: string().min(10, 'Mobile number is too short')
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().min(10, 'Mobile number is too short').required(message),
+                otherwise: string().min(10, 'Mobile number is too short')
+              }
+            )
           : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
     } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? array().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: array().min(1, message),
-              otherwise: array()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: array().min(1, message),
+                otherwise: array()
+              }
+            )
           : array().min(1, message)
         : array();
     } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? number().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
-              otherwise: number().nullable()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+                otherwise: number().nullable()
+              }
+            )
           : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
@@ -1314,26 +1314,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         input.required && validEmail
           ? validationFields?.length && validation
             ? string().when(
-              validationFields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().email().required(message),
-                otherwise: string().email(`${input.fieldLabel} must be a valid email`)
-              }
-            )
+                validationFields?.map((f) => f?.fieldName),
+                {
+                  is: validation,
+                  then: string().email().required(message),
+                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+                }
+              )
             : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? boolean().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: boolean().required(message),
-              otherwise: boolean()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: boolean().required(message),
+                otherwise: boolean()
+              }
+            )
           : boolean().required(message)
         : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
@@ -1362,13 +1362,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(`${input.fieldLabel} is required`).nullable(),
-              otherwise: string().nullable()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(`${input.fieldLabel} is required`).nullable(),
+                otherwise: string().nullable()
+              }
+            )
           : dateValidation
         : dateValidation;
     } else if (input.type === 'colorPicker') {
@@ -1389,13 +1389,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     }
@@ -1470,6 +1470,10 @@ export const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export const displayDate = (date) => {
   return date ? dayjs.utc(date).tz().format(dateFormat) : date;
+};
+
+export const formatDate = (date: Date | string, format: string) => {
+  return date ? dayjs.utc(date).tz().format(format) : date;
 };
 
 export const displayDateTime = (date, format = null) => {
@@ -3430,6 +3434,30 @@ export const GenerateResourceLineNumber = (fields) => {
     }
   }
   return lineNumber;
+};
+
+export const handleRefrenceData = (data, fields) => {
+  const obj: any = {};
+  if (!isEmpty(data)) {
+    Object.keys(data)?.forEach((_key) => {
+      const field = fields?.find((f) => f?.fieldName === _key);
+      const lookUpDependentOnFields = fields?.filter((f) => f?.lookupDependentOn === field?.fieldName);
+      if (lookUpDependentOnFields?.length > 0) {
+        lookUpDependentOnFields?.forEach((f) => {
+          const option = field?.option?.find((o) => o?.optionValue === data[_key]);
+          if (!data[f?.fieldName] && f?.lookupDependentOnField && option && option[f?.lookupDependentOnField]?.length === 1) {
+            obj[f?.fieldName] = option[f?.lookupDependentOnField][0];
+          } else if (!data[f?.fieldName] && !f?.lookupDependentOnField && option && option[f?.lookupDependentOn]) {
+            obj[f?.fieldName] = data[_key];
+          }
+        });
+      }
+      if (field) {
+        obj[_key] = data[_key];
+      }
+    });
+  }
+  return obj;
 };
 
 export const ROLE_TIER = {

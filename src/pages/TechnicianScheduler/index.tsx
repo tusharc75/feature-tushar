@@ -1,6 +1,6 @@
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Box } from '@mui/material';
-import { useContext, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ButtonMenu from 'src/components/ButtonMenu';
@@ -89,7 +89,7 @@ function TechnicianScheduler() {
             handleUnAssignTechnician={(data) => {
               setUnAssignTechnicianDialog({ open: true, data: data });
             }}
-            leftSidebarTitle={`${selectedResource?.title}`}
+            selectedResource={selectedResource}
             leftSidebar={(isMobile) => (
               <ServiceOrderSidebar
                 isMobile={isMobile}
