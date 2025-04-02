@@ -6,7 +6,7 @@ module.exports = {
     extend: {
       colors: {
         link: 'var(--link)',
-        'new-theme-color': 'hsl(184, 84%, 36%)'
+        'new-theme-color': 'hsl(var(--new-theme-color-hsl))'
       },
       typography: {
         DEFAULT: {
