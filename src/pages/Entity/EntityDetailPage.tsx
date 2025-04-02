@@ -289,9 +289,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-        id: user._id,
-        name: `${user.firstName} ${user.lastName}`
-      }))
+          id: user._id,
+          name: `${user.firstName} ${user.lastName}`
+        }))
       : [];
 
     setUserList(rows);
@@ -312,9 +312,7 @@ const EntityDetailsPage = () => {
                     {'Edit'}
                   </ThemeButton>
                 )}
-                {permissions?.entity?.isDelete && (
-                  <DeleteButton text={'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />
-                )}
+                {permissions?.entity?.isDelete && <DeleteButton text={'Delete'} onClick={() => setShowDeleteEntityDialog(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -412,8 +410,7 @@ const EntityDetailsPage = () => {
                             history.push(`/user`, {
                               id: entityData._id,
                               name: entityData?.entityName,
-                              type: 'entity',
-                              text: 'Entity'
+                              type: 'entity'
                             })
                           }
                           fullWidth
