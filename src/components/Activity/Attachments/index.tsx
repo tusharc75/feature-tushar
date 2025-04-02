@@ -340,9 +340,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     } else {
-      const fileUrl = file.map((f) => encodeURIComponent(f.url));
-      axiosInstance()
-        .put(`user/download`, { files: fileUrl }, { responseType: 'blob' })
+      axiosInstance().get(`attachment/zip/file/${attachmentData?._id}`, { responseType: 'blob' })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');

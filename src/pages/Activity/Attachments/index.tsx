@@ -358,30 +358,20 @@ export default function Attachment() {
           setIsDownloading(false);
         });
     } else {
-      const fileUrl = file.map((f) => encodeURIComponent(f.url));
-      axiosInstance()
-        .put(
-          `user/download`,
-          {
-            files: fileUrl
-          },
-          {
-            responseType: 'blob'
-          }
-        )
-        .then(({ data }) => {
-          const url = window.URL.createObjectURL(new Blob([data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => setIsDownloading(false), 2000);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-          setIsDownloading(false);
-        });
+      axiosInstance().get(`attachment/zip/file/${data1?._id}`, {
+        responseType: 'blob'
+      }).then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => setIsDownloading(false), 2000);
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDownloading(false);
+      });
     }
   };
 
