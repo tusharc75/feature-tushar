@@ -1,4 +1,5 @@
 import { Delete, Edit, SwapHoriz } from '@mui/icons-material';
+import InfoIcon from '@mui/icons-material/Info';
 import { Divider, IconButton, List, ListItemButton, Menu } from '@mui/material';
 import { Table } from '@tanstack/react-table';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -192,6 +193,7 @@ const ArrangeView = ({
     setConfirmationDialog({ open: true, data: data });
   };
 
+
   return (
     <>
       {!isOffline && (
@@ -245,7 +247,7 @@ const ArrangeView = ({
                 <div>
                   <List>
                     {savedData.length > 0 ? (
-                      savedData.map((d, i) => {
+                      savedData.map((d: any, i) => {
                         return (
                           <Fragment key={d._id}>
                             {i !== 0 && <Divider />}
@@ -263,14 +265,21 @@ const ArrangeView = ({
                                   <span className="line-clamp-1 ">{d.name}</span>
                                   {defaultView?._id === d._id && (
                                     <>
-                                      <HtmlTooltip title="Default view">
+                                      <HtmlTooltip title="Default View">
                                         <FaStar size={10} className="text-[var(--new-theme-color)]" />
                                       </HtmlTooltip>
-                                      {/* <span className="block flex-shrink-0 text-[10px] text-gray-400">(default view)</span> */}
                                     </>
                                   )}
                                 </span>
                                 <div className="flex cursor-auto gap-2">
+                                  {d?.createdBy?.user?.firstName &&
+                                    <HtmlTooltip title={`Created By : ${d?.createdBy?.user?.firstName} ${d?.createdBy?.user?.lastName}`}>
+                                      <IconButton
+                                        size={'small'}
+                                      >
+                                        <InfoIcon fontSize="small" color={'primary'} />
+                                      </IconButton>
+                                    </HtmlTooltip>}
                                   <HtmlTooltip title={d?.user === user?.user?._id ? 'Edit' : 'You have not permission to edit'}>
                                     <IconButton
                                       size={'small'}
