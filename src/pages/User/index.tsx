@@ -1,7 +1,7 @@
 import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase, uniqBy } from 'lodash';
+import { camelCase, map, uniq, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
@@ -28,6 +28,7 @@ import {
   CustomDialogTransition,
   gridLoadingTimeout,
   prepareDataForGrid,
+  ROLE_TIER,
   sidebarResource,
   userType
 } from './../../constants/helpers';
@@ -119,6 +120,15 @@ const User: FC = () => {
         ) : (
           <NoDataCell />
         )
+    },
+    {
+      accessor: 'tier',
+      Header: 'Tier',
+      minWidth: 150,
+      width: 150,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (row?.original?.tier ? <div>{row?.original?.tier}</div> : <NoDataCell />)
     },
     {
       accessor: 'status',
@@ -293,9 +303,10 @@ const User: FC = () => {
         let rows = data.map((u) => {
           const { entities } = u;
 
-          const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
+          const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id')?.filter((e) => e) as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
-
+          const tiers = uniq(map(allRegionalWideRoles, 'tier'));
+          console.log('allRegionalWideRoles', allRegionalWideRoles);
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
@@ -309,11 +320,16 @@ const User: FC = () => {
               ?.map((e) => {
                 return { optionLabel: e?.entityName, optionValue: e?._id };
               }),
-            regionalWideRole: allRegionalWideRoles
-              ?.filter((e) => e)
-              ?.map((e) => {
-                return { optionLabel: e?.name, optionValue: e?._id };
-              })
+            regionalWideRole: allRegionalWideRoles?.map((e) => {
+              return { optionLabel: e?.name, optionValue: e?._id };
+            }),
+            tier: tiers?.includes(ROLE_TIER.tier1)
+              ? ROLE_TIER.tier1
+              : tiers?.includes(ROLE_TIER.tier2)
+                ? ROLE_TIER?.tier2
+                : tiers?.includes(ROLE_TIER.tier3)
+                  ? ROLE_TIER.tier3
+                  : ''
           };
           return res;
         });
