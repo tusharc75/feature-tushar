@@ -201,12 +201,12 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
-        {/* <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
+        <ThemeButton onClick={handleCloseDialog} buttonType="transparent">
           Cancel
         </ThemeButton>
         <ThemeButton disabled={!selectedProjectSales.length || isAssigning} isLoading={isAssigning} onClick={handleAssignProjectSales} buttonType="theme">
           Save
-        </ThemeButton> */}
+        </ThemeButton>
       </CustomDialogFooter>
     </Dialog>
   );
