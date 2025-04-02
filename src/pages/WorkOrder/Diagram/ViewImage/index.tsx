@@ -42,7 +42,7 @@ fabric.CustomArrow = fabric.util.createClass(fabric.Group, {
     const arrowHead = new fabric.Triangle({
       width: headWidth,
       height: headHeight,
-      left: width - (headHeight / 2),
+      left: width - headHeight / 2,
       top: 0,
       fill: options.fill || 'black',
       originX: 'center',
@@ -69,7 +69,7 @@ fabric.CustomArrow = fabric.util.createClass(fabric.Group, {
   },
 
   updateArrowColor: function (color) {
-    this.getObjects().forEach(obj => {
+    this.getObjects().forEach((obj) => {
       if (obj.type === 'line') {
         obj.set('stroke', color);
       } else {
@@ -156,6 +156,19 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     loadImage(fabricCanvas);
     return () => fabricCanvas.dispose();
   }, [data]);
+
+  const updateDrawingColor = (event) => {
+    const newColor = event.target.value;
+    if (canvas && (isDrawingMode || isHighlighterMode)) {
+      if (isHighlighterMode) {
+        const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(0.2).toRgba();
+        canvas.freeDrawingBrush.color = rgbaColor;
+      } else if (isDrawingMode) {
+        canvas.freeDrawingBrush.color = newColor;
+      }
+      canvas.renderAll();
+    }
+  };
 
   const loadImage = (fabricCanvas) => {
     if (canvasRef.current) {
@@ -345,8 +358,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       } else {
         if (activeObject.type === 'line' || activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
-        } else if (activeObject.type === 'path') {
-          activeObject.set('stroke', newColor);
         } else if (activeObject.type === 'customArrow') {
           activeObject.updateArrowColor(newColor);
         } else {
@@ -363,13 +374,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       setHighlighterPaths(highlighterPaths);
       canvas.remove(lastHighlighterPath);
       canvas.requestRenderAll();
-      setHighlighterRedoPaths(prev => [...prev, lastHighlighterPath]);
+      setHighlighterRedoPaths((prev) => [...prev, lastHighlighterPath]);
     } else if (isDrawingMode && brushPaths.length > 0) {
       const lastBrushPath = brushPaths.pop();
       setBrushPaths(brushPaths);
       canvas.remove(lastBrushPath);
       canvas.requestRenderAll();
-      setBrushRedoPaths(prev => [...prev, lastBrushPath]);
+      setBrushRedoPaths((prev) => [...prev, lastBrushPath]);
     }
   };
 
@@ -380,22 +391,21 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setHighlighterPaths(prev => [...prev, path]);
+      setHighlighterPaths((prev) => [...prev, path]);
     } else if (isDrawingMode && brushRedoPaths.length > 0) {
       const path = brushRedoPaths.pop();
       setBrushRedoPaths(brushRedoPaths);
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setBrushPaths(prev => [...prev, path]);
+      setBrushPaths((prev) => [...prev, path]);
     }
   };
 
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
-
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity;
     highlighterBrush.width = 10; // Highlighter stroke width
 
     canvas.freeDrawingBrush = highlighterBrush;
@@ -512,46 +522,25 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     <Box>
       <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
         <div className={'flex flex-wrap gap-2'}>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddText}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddText}>
             Add Text
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddLine}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddLine}>
             Add Line
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddRectangle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddRectangle}>
             Add Rectangle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddCircle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddCircle}>
             Add Circle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddArrow}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddArrow}>
             Add Arrow
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode}
-            onClick={toggleHighlighterMode}
-          >
+          <ThemeButton disabled={loading || isDrawingMode} onClick={toggleHighlighterMode}>
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isHighlighterMode}
-            onClick={toggleDrawingMode}
-          >
+          <ThemeButton disabled={loading || isHighlighterMode} onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
@@ -565,24 +554,31 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
             <>
-              <HtmlTooltip title='Undo'>
-                <IconButton
-                  disabled={loading}
-                  onClick={handleUndo}
-                  size='small'
-                  color={loading ? "default" : "primary"}
-                > <UndoIcon />
+              <HtmlTooltip title="Undo">
+                <IconButton disabled={loading} onClick={handleUndo} size="small" color={loading ? 'default' : 'primary'}>
+                  <UndoIcon />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title='Redo'>
+              <HtmlTooltip title="Redo">
                 <IconButton
                   disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
                   onClick={handleRedo}
-                  size='small'
-                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? "default" : "primary"}
-                > <RedoIcon />
+                  size="small"
+                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? 'default' : 'primary'}
+                >
+                  <RedoIcon />
                 </IconButton>
               </HtmlTooltip>
+              {(isDrawingMode || isHighlighterMode) && (
+                <FormControl size="small" margin="none" variant="outlined">
+                  <input
+                    type="color"
+                    value={canvas?.freeDrawingBrush?.color || '#000000'}
+                    onChange={updateDrawingColor}
+                    style={{ marginLeft: '10px' }}
+                  />
+                </FormControl>
+              )}
             </>
           )}
         </div>
@@ -605,11 +601,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           >
             Save
           </ThemeButton>
-          <ThemeButton
-            disabled={loading}
-            onClick={handleDownload}
-            buttonType="theme"
-          >
+          <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">
             Download
           </ThemeButton>
         </div>

@@ -157,11 +157,9 @@ const WorkOrderTechnician = () => {
 
       const extraColumns = [
         {
-          accessor: 'serviceName',
+          accessor: 'service',
           Header: 'Service',
           disabled: true,
-          disableFilters: true,
-          disableSortBy: true,
           Cell: ({ row }) => (
             <>
               {row?.original?.serviceName ? (
