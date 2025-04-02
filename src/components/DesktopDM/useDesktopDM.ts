@@ -9,17 +9,11 @@ import { useData } from 'src/StateProvider/Provider';
 
 const useDesktopDM = () => {
   const uiState = useUIDesktopDm();
-  const { onUserFirstMessageSent: uiOnUserFirstMessageSent, ...rest } = uiState;
+  const { onUserFirstMessageSent: uiOnUserFirstMessageSent, user, permissions, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const socket = useSocket({ namespace: '/workspace/channel' });
-
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
 
   const fetchData = useCallback(
     async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {

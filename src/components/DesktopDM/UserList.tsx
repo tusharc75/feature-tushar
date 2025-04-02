@@ -1,4 +1,4 @@
-import { Close, ExpandMore, Person, Search } from '@mui/icons-material';
+import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
@@ -14,9 +14,11 @@ const UserList = ({ state }: UserListProps) => {
   const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen } = state;
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const [inputValue, setInputValue] = useState('');
+
   const filteredData = useMemo(() => {
+    const smallInput = inputValue.toLowerCase();
+    if (smallInput.trim() === '') return [...chats, ...users];
     const newData = [...chats, ...users].filter((d) => {
-      const smallInput = inputValue.toLowerCase();
       const isUser = 'avatar' in d;
       if (isUser && d?.concatedName?.toLowerCase().includes(smallInput)) {
         return true;
@@ -31,7 +33,7 @@ const UserList = ({ state }: UserListProps) => {
   return (
     <div
       className={cn(
-        'mr-[--chatbox-gap] flex w-[--user-list-container-w] flex-[0_0_var(--user-list-container-w)] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
+        'mr-[--user-list-right-space] flex w-[--user-list-container-w] flex-[0_0_var(--user-list-container-w)] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
         mainWindow && mainWindow === 'partial' ? 'h-[--partially-openned-container-h]' : 'h-[calc(100vh-100px)]'
       )}
     >
@@ -77,7 +79,7 @@ const UserList = ({ state }: UserListProps) => {
       </div>
       <section role="list" className="flex-grow overflow-y-auto px-2 py-2">
         {filteredData?.map((c) => {
-          if ('avatar' in c) {
+          if ('concatedName' in c) {
             return <RenderUser user={c} onClick={(d) => handleChatOpen(c._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
           } else {
             return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(c._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
@@ -112,12 +114,12 @@ const RenderChatUser = ({ chat, onClick, onlineUsers }: { onClick: (d: Chat) => 
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         variant={'dot'}
       >
-        <Avatar src={chat.to?.avatar} sx={{ width: '35px', height: '35px' }} alt={chat.to.optionLabel}>
+        <Avatar src={chat.to?.avatar} sx={{ width: '35px', height: '35px' }} alt={chat.to?.optionLabel}>
           <Person fontSize="small" />
         </Avatar>
       </Badge>
       <p className="flex items-center gap-2 text-xs font-normal">
-        <span className="line-clamp-1">{chat.to.optionLabel}</span>
+        <span className="line-clamp-1">{chat.to?.optionLabel}</span>
         {chat.notifications > 0 && (
           <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
             <span className="text-center text-[10px] leading-[1] text-white">{chat.notifications}</span>

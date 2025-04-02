@@ -1,7 +1,8 @@
 import { useMediaQuery } from '@mui/material';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { isMobile as isMobileDevice } from 'react-device-detect';
 import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
+import { useData } from 'src/StateProvider/Provider';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -10,13 +11,14 @@ const initialState: UIState = {
 };
 
 const CHATBOX_GAP = 16;
+let USER_LIST_RIGHT_SPACE = CHATBOX_GAP;
 const USER_LIST_CONTAINER_WIDTH = 288;
 const FULLY_OPENNED_CHATBOX_WIDTH = 400;
 const PARTIALLY_OPENNED_CHATBOX_WIDTH = 216;
 const PARTIALLY_OPENNED_CONTAINER_HEIGHT = 48;
 
 const getTotalOccupiedWidth = (openedChats: OpenedChat[]) => {
-  let totalSize = USER_LIST_CONTAINER_WIDTH + CHATBOX_GAP;
+  let totalSize = USER_LIST_CONTAINER_WIDTH + USER_LIST_RIGHT_SPACE;
   for (const c of openedChats) {
     if (c.open === 'partial') {
       totalSize += PARTIALLY_OPENNED_CHATBOX_WIDTH + CHATBOX_GAP;
@@ -39,6 +41,16 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 };
 
 const useUIDesktopDm = () => {
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  useEffect(() => {
+    if (permissions?.equiptAi?.isRead) {
+      USER_LIST_RIGHT_SPACE += 100;
+    }
+  }, [permissions?.equiptAi?.isRead]);
+
   const [uiState, setUiState] = useState<UIState>(initialState);
   const isMobile = useMediaQuery('(max-width:768px)');
 
@@ -195,6 +207,8 @@ const useUIDesktopDm = () => {
 
   return {
     ...uiState,
+    user,
+    permissions,
     isMobileDevice,
     isMobile,
     CHATBOX_GAP,
@@ -202,6 +216,7 @@ const useUIDesktopDm = () => {
     FULLY_OPENNED_CHATBOX_WIDTH,
     PARTIALLY_OPENNED_CHATBOX_WIDTH,
     PARTIALLY_OPENNED_CONTAINER_HEIGHT,
+    USER_LIST_RIGHT_SPACE,
     handleToggleChatWindow,
     handleChatOpen,
     closeChatBox,

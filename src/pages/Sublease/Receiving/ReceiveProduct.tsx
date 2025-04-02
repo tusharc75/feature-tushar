@@ -127,6 +127,25 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                 {values.material && values.material.length ? (
                   <Box p={2}>
                     <Form>
+                      {subleaseData?.type === SUBLEASE_TYPE.vendor && (
+                        <div className="datepicker mb-[14px]">
+                          <CustomDatePicker
+                            label="Received Date"
+                            required
+                            size="small"
+                            margin="dense"
+                            name="receiveDate"
+                            placeholder="Receive Date"
+                            value={values.receiveDate}
+                            maxDate={new Date()}
+                            onChange={(value) => {
+                              setFieldValue('receiveDate', value);
+                            }}
+                            error={validateDate(values)?.receiveDate}
+                            helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                          />
+                        </div>
+                      )}
                       <FieldArray
                         name="material"
                         render={(arrayHelpers) => (
@@ -191,25 +210,6 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
                           </div>
                         )}
                       />
-                      {subleaseData?.type === SUBLEASE_TYPE.vendor && (
-                        <div className="datepicker mt-[14px]">
-                          <CustomDatePicker
-                            label="Received Date"
-                            required
-                            size="small"
-                            margin="dense"
-                            name="receiveDate"
-                            placeholder="Receive Date"
-                            value={values.receiveDate}
-                            maxDate={new Date()}
-                            onChange={(value) => {
-                              setFieldValue('receiveDate', value);
-                            }}
-                            error={validateDate(values)?.receiveDate}
-                            helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
-                          />
-                        </div>
-                      )}
                     </Form>
                   </Box>
                 ) : (
