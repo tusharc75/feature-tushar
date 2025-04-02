@@ -988,7 +988,7 @@ const WorkOrder = ({
           uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?.uniqueId : null}
           resource={ACTIVITY_RESOURCE.workOrder}
           attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
-          showMaterialFilter={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? true : false}
+          showMaterialFilter={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? false : true}
         />
       )}
     </>
