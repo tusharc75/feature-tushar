@@ -17,7 +17,7 @@ const DiagramDialog = ({
   stepId = null,
   resource,
   attachmentType = null,
-  isAddWorkOrderServiceAttachment = false
+  showMaterialFilter = false
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const [resourceData, setResourceData] = useState(null);
@@ -69,7 +69,7 @@ const DiagramDialog = ({
             resourceData={resourceData}
             attachmentType={attachmentType}
             referenceLabel={referenceLabel}
-            isAddWorkOrderServiceAttachment={isAddWorkOrderServiceAttachment}
+            showMaterialFilter={showMaterialFilter}
           />
         ) : (
           <Grid container spacing={2}>

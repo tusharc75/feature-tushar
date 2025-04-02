@@ -157,11 +157,9 @@ const WorkOrderTechnician = () => {
 
       const extraColumns = [
         {
-          accessor: 'serviceName',
+          accessor: 'service',
           Header: 'Service',
           disabled: true,
-          disableFilters: true,
-          disableSortBy: true,
           Cell: ({ row }) => (
             <>
               {row?.original?.serviceName ? (
@@ -196,8 +194,6 @@ const WorkOrderTechnician = () => {
         {
           accessor: 'workOrderNumber',
           Header: 'Work Order Number',
-          disableFilters: true,
-          disableSortBy: true,
           defaultVisible: true,
           Cell: ({ row }) => (
             <div className="flex items-center gap-1">

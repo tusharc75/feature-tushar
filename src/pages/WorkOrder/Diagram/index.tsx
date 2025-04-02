@@ -20,7 +20,6 @@ import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder }
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
-import ImageZoomPan from 'src/components/ImageZoomPan';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -34,7 +33,8 @@ const Diagram = ({
   disableEdit = false,
   attachmentType = null,
   referenceLabel = '',
-  isAddWorkOrderServiceAttachment = false
+  showMaterialFilter = false,
+  defaultSelectedUniqueId = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -49,10 +49,13 @@ const Diagram = ({
   const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
-    fetchData();
     if (resource === ACTIVITY_RESOURCE.workOrder) {
       fetchServices();
     }
+  }, [resource, referenceId]);
+
+  useEffect(() => {
+    fetchData();
   }, [resource, referenceId, currentVersion, selectedService]);
 
   const fetchData = async () => {
@@ -62,7 +65,7 @@ const Diagram = ({
     }
     const serviceId = uniqueId ? uniqueId : selectedService ? selectedService?.uniqueId : null;
     if (serviceId) {
-      if (isAddWorkOrderServiceAttachment) {
+      if (resource === ACTIVITY_RESOURCE.workOrder) {
         query = `${query}&uniqueServiceId=${serviceId}`;
       } else {
         query = `${query}&uniqueId=${serviceId}`;
@@ -92,10 +95,17 @@ const Diagram = ({
   const fetchServices = async () => {
     const {
       data: { data }
-    }: any = await axiosInstance().get(`${workOrder.api}/${referenceId}/detail`);
-    if (data?.services?.length) {
-      const serviceData = data?.services?.map((s) => ({ optionLabel: s?.serviceName, optionValue: s?._id, uniqueId: s?.uniqueId }));
+    }: any = await axiosInstance().get(`${workOrder.api}/service/service/${referenceId}`);
+    if (data?.length) {
+      const serviceData = data?.map((s) => ({
+        optionLabel: s?.serviceDetail?.optionLabel,
+        optionValue: s?.serviceDetail?.optionValue,
+        uniqueId: s?._id
+      }));
       setServiceOption(serviceData);
+      if (defaultSelectedUniqueId && serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId)) {
+        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId));
+      }
     }
   };
 
@@ -203,14 +213,16 @@ const Diagram = ({
     return relatedTo;
   };
 
-  const handleAddWorkOrderServiceAttachment = (request, setLoading) => {
-    let data = {
+  const customhandleAdd = (request, setLoading) => {
+    const serviceId = selectedService ? selectedService?.uniqueId : uniqueId;
+    const serviceName = selectedService ? selectedService?.optionLabel : referenceLabel;
+    const data: any = {
       name: request?.name,
       attachmentType: request?.attachmentType,
       file: request?.file,
       workOrderId: referenceId,
-      serviceName: referenceLabel,
-      ...(uniqueId && { uniqueServiceId: uniqueId }),
+      serviceName: serviceName,
+      ...(serviceId && { uniqueServiceId: serviceId }),
       ...(stepId && { stepId: stepId })
     };
     axiosInstance()
@@ -236,8 +248,8 @@ const Diagram = ({
     <Box>
       <Box className="container-with-border" p={'20px'}>
         {!disableEdit && (
-          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && !uniqueId ? 'justify-between' : 'justify-end'}`}>
-            {resource === ACTIVITY_RESOURCE.workOrder && !uniqueId && (
+          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter ? 'justify-between' : 'justify-end'}`}>
+            {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
               <Autocomplete
                 fullWidth
                 className="max-w-[300px]"
@@ -466,7 +478,7 @@ const Diagram = ({
             showManimizeMaximize={true}
             fetchData={fetchData}
             attachmentType={attachmentType}
-            handleAddWorkOrderServiceAttachment={isAddWorkOrderServiceAttachment ? handleAddWorkOrderServiceAttachment : null}
+            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.id && !showMaterialFilter ? customhandleAdd : null}
           />
         </Dialog>
       )}

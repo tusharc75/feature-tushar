@@ -319,14 +319,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.package
-        ? parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -338,6 +339,10 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
+      parent.assetQty =
+        parent.type === MATERIAL_TYPE.product
+          ? material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
+          : 0;
       parent.isValid = true;
       parent.canDelete = parent.workOrder ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
@@ -368,14 +373,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
-        ? _subRow.packageDetail?.packageName
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
@@ -385,6 +391,10 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.assetQty =
+        _subRow.type === MATERIAL_TYPE.product
+          ? material?.filter((m) => m?.parentId === _subRow?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
+          : 0;
       _subRow.isValid = true;
       _subRow.status = _subRow?.serializedAssetDetail?.status || null;
       _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ? (_subRow.workOrder ? false : true) : canDelete;
@@ -575,7 +585,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const actionButtonMenuItems = () => {
     return (
       <>
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product)?.length > 0 && (
+        {selectedRecords?.every((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qty) && (
           <MenuItem
             onClick={() => {
               setAddExistingProductDialog({
