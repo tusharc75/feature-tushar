@@ -75,11 +75,18 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
         }
       })
       .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        const pdfWindow = window.open();
-        pdfWindow.location.href = fileURL;
-        // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        const ext = file.split('.').pop().toLowerCase();
+        let mimeType = 'application/octet-stream';
+        if (ext === 'pdf') {
+          mimeType = 'application/pdf';
+        } else if (['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'].includes(ext)) {
+          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+        }
+
+        const blob = new Blob([data], { type: mimeType });
+        const fileURL = URL.createObjectURL(blob);
+        const newWindow = window.open();
+        newWindow.location.href = fileURL;
         setIsDownloading(false);
       })
       .catch((err) => {
@@ -228,19 +235,19 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             {<GetAppIcon />}
                           </IconButton>
                         </HtmlTooltip>
-                        {_.endsWith(attachment?.url, '.pdf') && (
-                          <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
-                            <IconButton
-                              size={'small'}
-                              onClick={(e) => {
-                                viewPdf(e, attachment.url);
-                              }}
-                              style={{ paddingBottom: 3, width: 30, height: 30 }}
-                            >
-                              <PreviewIcon color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
-                        )}
+                        {/* {_.endsWith(attachment?.url, '.pdf') && ( */}
+                        <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
+                          <IconButton
+                            size={'small'}
+                            onClick={(e) => {
+                              viewPdf(e, attachment.url);
+                            }}
+                            style={{ paddingBottom: 3, width: 30, height: 30 }}
+                          >
+                            <PreviewIcon color="primary" />
+                          </IconButton>
+                        </HtmlTooltip>
+                        {/* )} */}
                         {canEdit && permissions?.attachment?.isDelete ? (
                           <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                             <IconButton
@@ -251,13 +258,13 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                               }}
                               style={{ paddingBottom: 3, width: 30, height: 30 }}
                             >
-                              {<DeleteIcon color="error" fontSize='small' />}
+                              {<DeleteIcon color="error" fontSize="small" />}
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
                           <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
                             <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
-                              <DeleteIcon color="disabled" fontSize='small' />
+                              <DeleteIcon color="disabled" fontSize="small" />
                             </IconButton>
                           </HtmlTooltip>
                         )}
