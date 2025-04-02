@@ -1,8 +1,6 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Box, Checkbox, FormControl, IconButton, TextField } from '@mui/material';
-import Autocomplete, { autocompleteClasses } from '@mui/material/Autocomplete';
-import { AiFillEdit } from 'react-icons/ai';
-import { RiDeleteBin6Fill } from 'react-icons/ri';
+import Autocomplete from '@mui/material/Autocomplete';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ConfirmationDialog from '../Helpers/ConfirmationDialog';
@@ -13,6 +11,9 @@ import ArrangeView from './ArrangeView';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { startCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InfoIcon from '@mui/icons-material/Info';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -113,18 +114,25 @@ export const PreviewFields = ({
               return (
                 <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                   <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-2">
+                    {option?.createdBy?.user?.firstName &&
+                      <HtmlTooltip title={`Created By : ${option?.createdBy?.user?.firstName} ${option?.createdBy?.user?.lastName}`}>
+                        <IconButton
+                          size={'small'}
+                        >
+                          <InfoIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </HtmlTooltip>}
                     <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
                       <IconButton
                         size="small"
-                        style={{ marginRight: '20px' }}
                         disabled={user?._id !== option?.user}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
                       >
-                        <AiFillEdit />
+                        <EditIcon fontSize='small' color={user?._id === option?.user ? 'primary' : 'disabled'} />
                       </IconButton>
                     </HtmlTooltip>
                     <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only delete' : 'Delete'}>
@@ -137,7 +145,7 @@ export const PreviewFields = ({
                         }}
                         disabled={user?._id !== option?.user}
                       >
-                        <RiDeleteBin6Fill />
+                        <DeleteIcon fontSize='small' color={user?._id === option?.user ? 'error' : 'disabled'} />
                       </IconButton>
                     </HtmlTooltip>
                   </div>
