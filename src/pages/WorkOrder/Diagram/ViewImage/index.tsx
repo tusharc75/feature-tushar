@@ -100,7 +100,6 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const isSelected = useRef(false);
   const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
   const [brushRedoPaths, setBrushRedoPaths] = useState([]);
-  const [brushColor, setBrushColor] = useState('#000000'); 
 
   useEffect(() => {
     // for touchScroll
@@ -158,22 +157,17 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     return () => fabricCanvas.dispose();
   }, [data]);
 
-  const updateDrawingColor = (color) => {
+  const updateDrawingColor = (event) => {
+    const newColor = event.target.value;
     if (canvas && (isDrawingMode || isHighlighterMode)) {
       if (isHighlighterMode) {
-        const rgbaColor = fabric.Color.fromHex(color).setAlpha(0.2).toRgba();
+        const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(0.2).toRgba();
         canvas.freeDrawingBrush.color = rgbaColor;
       } else if (isDrawingMode) {
-        canvas.freeDrawingBrush.color = color;
+        canvas.freeDrawingBrush.color = newColor;
       }
       canvas.renderAll();
     }
-  };
-
-  const handleBrushColorChange = (event) => {
-    const newColor = event.target.value;
-    setBrushColor(newColor);
-    updateDrawingColor(newColor);
   };
 
   const loadImage = (fabricCanvas) => {
@@ -411,8 +405,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    const rgbaColor = fabric.Color.fromHex(brushColor).setAlpha(0.2).toRgba();
-    highlighterBrush.color = rgbaColor;
+    highlighterBrush.color =  highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity;
     highlighterBrush.width = 10; // Highlighter stroke width
 
     canvas.freeDrawingBrush = highlighterBrush;
@@ -461,7 +454,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     if (!isDrawingMode) {
       isSelected.current = true;
       const drawingBrush = new fabric.PencilBrush(canvas);
-      drawingBrush.color = brushColor;
+      drawingBrush.color = 'black';
       drawingBrush.width = 2;
       canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;
@@ -581,7 +574,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
                   <input
                     type="color"
                     value={canvas?.freeDrawingBrush?.color || '#000000'}
-                    onChange={handleBrushColorChange}
+                    onChange={updateDrawingColor}
                     style={{ marginLeft: '10px' }}
                   />
                 </FormControl>
