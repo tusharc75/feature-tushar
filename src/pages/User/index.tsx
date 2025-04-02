@@ -221,8 +221,11 @@ const User: FC = () => {
       )
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
@@ -550,7 +553,7 @@ const User: FC = () => {
             setSelectedEntity(newValue);
           }}
           size="small"
-          renderInput={(params) => <TextField {...params} label="Select Entity" size="small" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label={`${resources?.entity?.titleSingular}`} size="small" variant="outlined" />}
         />
         <Autocomplete
           options={filterOptions['Role'] || []}
@@ -561,7 +564,7 @@ const User: FC = () => {
             setSelectedRole(newValue);
           }}
           size="small"
-          renderInput={(params) => <TextField {...params} label="Select Role" size="small" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label={`${resources?.role?.titleSingular}`} size="small" variant="outlined" />}
         />
       </>
     );
@@ -731,6 +734,7 @@ const User: FC = () => {
             onExportToExcelSuccess={() => {
               fetchUsers();
             }}
+            additionalParams={getQueryString()}
           />
         </div>
         <CustomContainer>
