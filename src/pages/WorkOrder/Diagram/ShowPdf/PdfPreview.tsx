@@ -37,8 +37,6 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const [isHighlighterMode, setHighlighterMode] = useState(false);
   const [highlighterRedoPaths, setHighlighterRedoPaths] = useState([]);
   const [brushRedoPaths, setBrushRedoPaths] = useState([]);
-  const [drawingColor, setDrawingColor] = useState('black');
-  const [highlighterColor, setHighlighterColor] = useState('#ffff00');
 
   useEffect(() => {
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
@@ -330,9 +328,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    const rgbaColor = fabric.Color.fromHex(highlighterColor).setAlpha(0.2).toRgba();
-    highlighterBrush.color = rgbaColor;
-    highlighterBrush.width = 10;
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity    highlighterBrush.width = 10;
     canvas.freeDrawingBrush = highlighterBrush;
     canvas.isDrawingMode = true;
 
@@ -374,7 +370,7 @@ const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const toggleDrawingMode = () => {
     if (!isDrawingMode) {
       const drawingBrush = new fabric.PencilBrush(canvas);
-      drawingBrush.color = drawingColor;
+      drawingBrush.color = 'black';
       drawingBrush.width = 2;
       canvas.freeDrawingBrush = drawingBrush;
       canvas.isDrawingMode = true;

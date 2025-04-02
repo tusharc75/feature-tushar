@@ -405,7 +405,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color =  highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity;
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity;
     highlighterBrush.width = 10; // Highlighter stroke width
 
     canvas.freeDrawingBrush = highlighterBrush;
