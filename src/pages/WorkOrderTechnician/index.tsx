@@ -196,8 +196,6 @@ const WorkOrderTechnician = () => {
         {
           accessor: 'workOrderNumber',
           Header: 'Work Order Number',
-          disableFilters: true,
-          disableSortBy: true,
           defaultVisible: true,
           Cell: ({ row }) => (
             <div className="flex items-center gap-1">
