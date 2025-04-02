@@ -306,7 +306,6 @@ const User: FC = () => {
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id')?.filter((e) => e) as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
           const tiers = uniq(map(allRegionalWideRoles, 'tier'));
-          console.log('allRegionalWideRoles', allRegionalWideRoles);
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
