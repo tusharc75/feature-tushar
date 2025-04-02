@@ -144,8 +144,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         {
           accessor: 'service',
           Header: 'Service',
-          disableFilters: true,
-          disableSortBy: true,
           Cell: ({ row }) =>
             row.original['service'] && row.original.serviceId ? (
               <div className="flex items-center gap-1">
@@ -514,7 +512,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
             workStations={
               selectedRecords?.length === 1 ||
-              selectedRecords?.every((val) => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
+                selectedRecords?.every((val) => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
                 ? selectedRecords[0]?.assignedWorkStations
                 : []
             }
