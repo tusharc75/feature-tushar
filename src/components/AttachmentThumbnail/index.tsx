@@ -13,6 +13,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 
+const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+const pdfExtensions = ['pdf'];
+
 const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
   const {
     state: { permissions }
@@ -44,7 +47,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
   };
 
   // VIEW ATTACHMENT
-  const viewPdf = (event, file) => {
+  const viewAttachment = (event, file) => {
     if (event) {
       toastConfig.setToastConfig({
         open: true,
@@ -54,46 +57,42 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     }
     setDownloadProgress(0);
     setIsDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${encodeURIComponent(file)}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setIsDownloading(false);
-            }, 2000);
-          }
+    axiosInstance().get(`user/download?fileName=${encodeURIComponent(file)}`, {
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        setDownloadProgress(percentCompleted);
+        if (percentCompleted === 100) {
+          toastConfig.setToastConfig({
+            message: 'File Downloaded Successfully',
+            open: true,
+            type: 'success'
+          });
+          setTimeout(() => {
+            setDownloadProgress(0);
+            setIsDownloading(false);
+          }, 2000);
         }
-      })
-      .then(({ data }) => {
-        const ext = file.split('.').pop().toLowerCase();
-        let mimeType = 'application/octet-stream';
-        if (ext === 'pdf') {
-          mimeType = 'application/pdf';
-        } else if (['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'].includes(ext)) {
-          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
-        }
-
-        const blob = new Blob([data], { type: mimeType });
-        const fileURL = URL.createObjectURL(blob);
-        const newWindow = window.open();
-        newWindow.location.href = fileURL;
-        setIsDownloading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
+      }
+    }).then(({ data }) => {
+      const ext = file.split('.').pop().toLowerCase();
+      let mimeType = 'application/octet-stream';
+      if (pdfExtensions?.includes(ext)) {
+        mimeType = 'application/pdf';
+      } else if (imageExtensions?.includes(ext)) {
+        mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+      }
+      const blob = new Blob([data], { type: mimeType });
+      const fileURL = URL.createObjectURL(blob);
+      const newWindow = window.open();
+      newWindow.location.href = fileURL;
+      setIsDownloading(false);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+      setIsDownloading(false);
+    });
   };
+
   // DOWNLOAD ATTACHMENT
   const downloadFile = (event, file) => {
     if (event && !file?.base64) {
@@ -235,19 +234,18 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             {<GetAppIcon />}
                           </IconButton>
                         </HtmlTooltip>
-                        {/* {_.endsWith(attachment?.url, '.pdf') && ( */}
-                        <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
-                          <IconButton
-                            size={'small'}
-                            onClick={(e) => {
-                              viewPdf(e, attachment.url);
-                            }}
-                            style={{ paddingBottom: 3, width: 30, height: 30 }}
-                          >
-                            <PreviewIcon color="primary" />
-                          </IconButton>
-                        </HtmlTooltip>
-                        {/* )} */}
+                        {[...imageExtensions, ...pdfExtensions]?.includes(attachment?.url?.split('.')?.pop()?.toLowerCase()) &&
+                          <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
+                            <IconButton
+                              size={'small'}
+                              onClick={(e) => {
+                                viewAttachment(e, attachment.url);
+                              }}
+                              style={{ paddingBottom: 3, width: 30, height: 30 }}
+                            >
+                              <PreviewIcon color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>}
                         {canEdit && permissions?.attachment?.isDelete ? (
                           <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                             <IconButton
