@@ -1,12 +1,10 @@
 import { Box, IconButton, InputBase, Typography } from '@mui/material';
 import { Skeleton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
 import { SendIcon } from 'src/assets/svg/svgIcons';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { backendApi } from 'src/config';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { ChatBoxIcon } from 'src/assets/svg/CollaborateSidebar';
 import dayjs from 'dayjs';
@@ -29,7 +27,7 @@ const Chatter = (props: any) => {
   const [chatterId, setChatterId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSending, setSending] = useState(false);
-  const chatSocket = useSocket({namespace:"/chatter"})
+  const chatSocket = useSocket({ namespace: "/chatter" })
 
   const getChatter = () => {
     setLoading(true);
@@ -53,23 +51,18 @@ const Chatter = (props: any) => {
 
   useEffect(() => {
     if (!relatedTo || relatedTo.length === 0) return;
-
     const timeout = setTimeout(getChatter, 1000);
     return () => clearTimeout(timeout);
   }, [relatedTo]);
 
   useEffect(() => {
-    if (!chatterId || isOffline || !chatSocket.connected) return;
-
-
+    if (!chatterId || isOffline || !chatSocket?.connected) return;
     chatSocket.emit('join', chatterId);
-
     chatSocket.on('data', (data) => {
       setMessages(data.Messages.reverse());
     });
-
-    return () =>  {chatSocket.off("connection")}
-  }, [chatterId, isOffline,chatSocket,chatSocket?.connected]);
+    return () => { chatSocket.off("connection") }
+  }, [chatterId, isOffline, chatSocket, chatSocket?.connected]);
 
   const createChatter = () => {
     axiosInstance()
