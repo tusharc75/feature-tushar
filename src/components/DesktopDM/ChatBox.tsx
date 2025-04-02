@@ -30,7 +30,7 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
   }, [users, chats, openedChat]);
   if (!data) return null;
 
-  const isUserData = 'avatar' in data;
+  const isUserData = 'concatedName' in data;
   const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
 
   return (

@@ -312,7 +312,6 @@ function App() {
     dispatch
   }: any = useData();
 
-  const history = useHistory();
   const handleCloseUpdateModal = () => {
     handleHardReload();
     setIsUpdateModalOpen({ open: false, data: null });
@@ -1262,9 +1261,10 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
           {permissions?.equiptAi?.isRead && <AgentChat />}
+          <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
         </ErrorBoundaryComponent>
       </AnimatePresence>
-      <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
+
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
         (!['notFoundError', 'productInventoryAlert'].includes(toast?.toastConfig?.type) ? (

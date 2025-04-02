@@ -25,7 +25,7 @@ let timeout: NodeJS.Timeout;
 const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
   const { toastConfig, socket, user } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
-  const isUserData = panelData && 'avatar' in panelData;
+  const isUserData = panelData && 'concatedName' in panelData;
   const containerRef = useRef<HTMLDivElement>(null);
 
   const fetchMessages = async ({ messageId = null, updateMessage = false }: { messageId?: string; updateMessage?: Boolean }) => {

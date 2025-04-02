@@ -34,7 +34,7 @@ const SendMessage = ({
   const [files, setFiles] = useState([]);
   const [audioBlobs, setAudioBlobs] = useState([]);
   const editorRef = useRef<Editor['editor'] | null>(null);
-  const isNewChatToUser = panelData && 'avatar' in panelData;
+  const isNewChatToUser = panelData && 'concatedName' in panelData;
 
   const postMessage = async () => {
     setLoading(true);
