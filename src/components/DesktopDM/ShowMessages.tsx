@@ -4,7 +4,6 @@ import { groupBy } from 'lodash';
 import React, { Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, Message, UseDesktopDM, User } from 'src/components/DesktopDM/types';
-import { checkIsUser } from 'src/components/DesktopDM/utils';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn, displayDate, formatDate } from 'src/constants/helpers';
 
@@ -24,7 +23,7 @@ export type ShowMessageRef = {
 let timeout: NodeJS.Timeout;
 
 const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
-  const { toastConfig, socket, user } = state;
+  const { toastConfig, socket, user, checkIsUser } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -4,7 +4,6 @@ import { useMemo, useRef } from 'react';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessages';
 import { Chat, OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
-import { checkIsUser } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
@@ -18,7 +17,7 @@ const initialClass = `h-[--partially-openned-container-h] w-[--partially-openned
 const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbox-w] flex-[0_0_var(--fully-openned-chatbox-w)]`;
 
 const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
-  const { users, chats, handleToggleChatWindow, closeChatBox } = state;
+  const { users, chats, handleToggleChatWindow, closeChatBox, checkIsUser } = state;
   const showMessageRef = useRef<ShowMessageRef>(null);
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const { className } = useDelayedClass(initialClass, delayedClass, 0);

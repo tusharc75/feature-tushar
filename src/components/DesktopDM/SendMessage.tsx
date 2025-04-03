@@ -4,7 +4,6 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
-import { checkIsUser } from 'src/components/DesktopDM/utils';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 type SendMessageProps = {
@@ -26,7 +25,7 @@ const SendMessage = ({
   disabled,
   onNewMessagePost = () => {}
 }: SendMessageProps) => {
-  const { toastConfig, socket, onUserFirstMessageSent } = state;
+  const { toastConfig, socket, onUserFirstMessageSent, checkIsUser } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
