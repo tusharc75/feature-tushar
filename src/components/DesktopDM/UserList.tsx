@@ -2,7 +2,6 @@ import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
-import { checkIsUser } from 'src/components/DesktopDM/utils';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 import { useStore } from 'src/StateProvider/fastContext';
@@ -12,7 +11,7 @@ type UserListProps = {
 };
 
 const UserList = ({ state }: UserListProps) => {
-  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen } = state;
+  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser } = state;
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const [inputValue, setInputValue] = useState('');
 
@@ -29,7 +28,7 @@ const UserList = ({ state }: UserListProps) => {
       return false;
     });
     return newData;
-  }, [users, chats, inputValue]);
+  }, [users, chats, inputValue, checkIsUser]);
 
   return (
     <div

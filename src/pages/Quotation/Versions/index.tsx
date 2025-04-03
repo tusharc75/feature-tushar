@@ -205,6 +205,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
           <CustomReactTable
             height={fullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
             columns={columns}
+            isFullScreen={fullScreen}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
