@@ -1,15 +1,12 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import { Button, IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
 import { TActios, TInitialState } from 'src/components/CustomReactTable';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import RippleButton from 'src/components/RippleButton';
 import { cn, displayDate } from 'src/constants/helpers';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 
