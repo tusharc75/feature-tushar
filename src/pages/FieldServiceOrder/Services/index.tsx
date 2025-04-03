@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -77,6 +77,16 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
+
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.serviceMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const serviceFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.serviceMaster)?.fieldNames || []
     let column: any = [
       {
         accessor: 'index',
@@ -139,9 +149,9 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      {
+      ...(serviceFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => <DropdownCell
           permissions={permissions}
@@ -151,11 +161,12 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
             lookupResource: sidebarResource.competencyType
           }}
           original={row?.original}
-        />
-      },
-      {
+        />,
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(serviceFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
         Cell: ({ row }) =>
           <DropdownCell
@@ -166,8 +177,9 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
               lookupResource: sidebarResource.competencies
             }}
             original={row?.original}
-          />
-      }
+          />,
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : [])
     ];
     column = [...column, ...newColumns];
     column.push({
