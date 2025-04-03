@@ -1,13 +1,15 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { IconButton, Skeleton } from '@mui/material';
+import { Button, IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
 import { TActios, TInitialState } from 'src/components/CustomReactTable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import RippleButton from 'src/components/RippleButton';
 import { cn, displayDate } from 'src/constants/helpers';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 
@@ -232,21 +234,19 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
               <p className={cn('text-[13px]', isMobile ? 'line-clamp-1' : '')}>{col.cell}</p>
             </div>
           ))}
-          <div className="flex items-center justify-end border-t pt-1">
-            <IconButton
+          <div className="">
+            <Button
               size="small"
-              sx={{
-                color: 'white',
-                bgcolor: 'var(--new-theme-color)',
-                padding: '8px',
-                '&:hover': { bgcolor: 'hsla(var(--new-theme-color-hsl) / 70%)' }
-              }}
+              variant="outlined"
+              fullWidth
+              className="text-sm"
+              sx={{ fontSize: '11px' }}
               onClick={() => {
                 setOpenTechnicianDialog({ open: true, data: row });
               }}
             >
-              <AssignmentIcon fontSize="small" />
-            </IconButton>
+              Assign Technicians
+            </Button>
           </div>
         </div>
       </div>
