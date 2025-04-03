@@ -29,7 +29,7 @@ const useDesktopDM = () => {
         const chats: any = [];
         for (const d of data?.chats) {
           d.notifications = d.notifications || 0;
-          const toUser = d?.members?.find((m) => m?.optionValue !== user?.user?._id);
+          const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
           if (toUser) {
             d.title = toUser?.optionLabel;
             d.to = toUser;
@@ -86,7 +86,7 @@ const useDesktopDM = () => {
     [uiState.openedChats]
   );
 
-  const readMessage = useCallback(async (channelId) => {
+  const readMessage = useCallback(async (channelId: string) => {
     await axiosInstance().put('/work-space/channel/message/read', { channelId });
     setState((prev) => {
       const newData = { ...prev };
@@ -103,12 +103,10 @@ const useDesktopDM = () => {
       return newData;
     });
   }, []);
-  // notifications
+
+  // new work space or new channel
   useEffect(() => {
-    let tokenSource;
-    // socket?.on('notification', (channel, userId) => {
-    //   addNotifications(channel, userId);
-    // });
+    let tokenSource = axios.CancelToken.source();
     socket?.on('newWorkSpaceChannel', () => {
       tokenSource = axios.CancelToken.source();
       fetchData({ cancelToken: tokenSource.token });

@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io-client/build/typed-events';
 import { backendApi } from 'src/config';
+
+const allConnections: Record<string, Socket<DefaultEventsMap, DefaultEventsMap>> = {};
 
 interface UseSocketProps {
   namespace: string;
@@ -16,21 +19,26 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket => {
       const baseUrl = backendApi.replace('/api', '');
       const path = backendApi.includes('/api') ? '/api/socket.io' : '/socket.io';
       const fullNamespace = `${baseUrl}${namespace}`;
+      let s: Socket<DefaultEventsMap, DefaultEventsMap>;
 
       // Check if a socket for this namespace already exists
-      const s = io(fullNamespace, {
-        path,
-        auth: { token },
-        reconnectionAttempts: 5,
-        reconnectionDelay: 5000,
-        transports: ['websocket', 'polling']
-      });
-
-      s.on('connect', () => {
+      if (allConnections[fullNamespace]) {
+        s = allConnections[fullNamespace];
         setSocket(s);
-      });
-
-      s.connect();
+      } else {
+        s = io(fullNamespace, {
+          path,
+          auth: { token },
+          reconnectionAttempts: 5,
+          reconnectionDelay: 5000,
+          transports: ['websocket', 'polling']
+        });
+        s.on('connect', () => {
+          setSocket(s);
+        });
+        s.connect();
+        allConnections[fullNamespace] = s;
+      }
 
       return () => {
         s.disconnect();
