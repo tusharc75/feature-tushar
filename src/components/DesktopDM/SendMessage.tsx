@@ -4,6 +4,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import { useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import { checkIsUser } from 'src/components/DesktopDM/utils';
 import { useAppTheme } from 'src/constants/AppConfig';
 
 type SendMessageProps = {
@@ -15,8 +16,6 @@ type SendMessageProps = {
   disabled?: boolean;
   onNewMessagePost?: (messageId: string) => void;
 };
-
-const emptyLineRegex = /^(\s*<p>&nbsp;<\/p>\s*)+$/;
 
 const SendMessage = ({
   state,
@@ -34,7 +33,7 @@ const SendMessage = ({
   const [files, setFiles] = useState([]);
   const [audioBlobs, setAudioBlobs] = useState([]);
   const editorRef = useRef<Editor['editor'] | null>(null);
-  const isNewChatToUser = panelData && 'concatedName' in panelData;
+  const isNewChatToUser = checkIsUser(panelData);
 
   const postMessage = async () => {
     setLoading(true);

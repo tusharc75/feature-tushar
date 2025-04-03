@@ -5,11 +5,10 @@ import { Chat, User } from 'src/components/DesktopDM/types';
 import useUIDesktopDm from 'src/components/DesktopDM/useUIDesktopDm';
 import { useSocket } from 'src/hooks/useSocket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 
 const useDesktopDM = () => {
   const uiState = useUIDesktopDm();
-  const { onUserFirstMessageSent: uiOnUserFirstMessageSent, user, permissions, ...rest } = uiState;
+  const { onUserFirstMessageSent: uiOnUserFirstMessageSent, permissions, user, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -86,7 +85,7 @@ const useDesktopDM = () => {
     };
   }, [socket, uiState.openedChats, user?._id]);
 
-  return { ...state, loading, toastConfig, user, socket, onUserFirstMessageSent, ...rest };
+  return { ...state, loading, toastConfig, permissions, user, socket, onUserFirstMessageSent, ...rest };
 };
 
 export default useDesktopDM;
