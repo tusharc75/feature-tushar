@@ -16,8 +16,6 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
-const emptyLineRegex = /^(\s*<p>&nbsp;<\/p>\s*)+$/;
-
 const SendMessage = ({
   state,
   data: panelData,
@@ -27,14 +25,14 @@ const SendMessage = ({
   disabled,
   onNewMessagePost = () => {}
 }: SendMessageProps) => {
-  const { toastConfig, socket, onUserFirstMessageSent } = state;
+  const { toastConfig, socket, onUserFirstMessageSent, checkIsUser } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState([]);
   const [audioBlobs, setAudioBlobs] = useState([]);
   const editorRef = useRef<Editor['editor'] | null>(null);
-  const isNewChatToUser = panelData && 'concatedName' in panelData;
+  const isNewChatToUser = checkIsUser(panelData);
 
   const postMessage = async () => {
     setLoading(true);

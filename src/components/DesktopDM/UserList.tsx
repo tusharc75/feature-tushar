@@ -11,7 +11,7 @@ type UserListProps = {
 };
 
 const UserList = ({ state }: UserListProps) => {
-  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen } = state;
+  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser } = state;
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const [inputValue, setInputValue] = useState('');
 
@@ -19,7 +19,7 @@ const UserList = ({ state }: UserListProps) => {
     const smallInput = inputValue.toLowerCase();
     if (smallInput.trim() === '') return [...chats, ...users];
     const newData = [...chats, ...users].filter((d) => {
-      const isUser = 'avatar' in d;
+      const isUser = checkIsUser(d);
       if (isUser && d?.concatedName?.toLowerCase().includes(smallInput)) {
         return true;
       } else if (!isUser && d?.to?.optionLabel?.toLowerCase().includes(smallInput)) {
@@ -28,7 +28,7 @@ const UserList = ({ state }: UserListProps) => {
       return false;
     });
     return newData;
-  }, [users, chats, inputValue]);
+  }, [users, chats, inputValue, checkIsUser]);
 
   return (
     <div
@@ -77,12 +77,13 @@ const UserList = ({ state }: UserListProps) => {
           <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
         </div>
       </div>
-      <section role="list" className="flex-grow overflow-y-auto px-2 py-2">
+      <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
         {filteredData?.map((c) => {
-          if ('concatedName' in c) {
-            return <RenderUser user={c} onClick={(d) => handleChatOpen(c._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
+          const isUser = checkIsUser(c);
+          if (isUser) {
+            return <RenderUser user={c} onClick={(d) => handleChatOpen(d._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
           } else {
-            return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(c._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
+            return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(d._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
           }
         })}
       </section>
@@ -156,7 +157,7 @@ const RenderUser = ({ user, onClick, onlineUsers }: { onClick: (d: User) => void
           <Person fontSize="small" />
         </Avatar>
       </Badge>
-      <p className="line-clamp-1 text-xs font-normal">{user.concatedName}</p>
+      <p className="line-clamp-1 text-xs font-normal">{user.concatedName ? user.concatedName : `${user.firstName} ${user.lastName}`}</p>
     </button>
   );
 };

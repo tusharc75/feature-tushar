@@ -1,6 +1,6 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { AccountCircle, Add, Map } from '@mui/icons-material';
+import { AccountCircle, Add, AddCircleOutline, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
@@ -107,31 +107,28 @@ export const SingleTechnician = ({ data, handleSelect, index, className = '' }) 
           </div>
         </div>
         <div className="flex-shrink-0">
-          <IconButton
-            onClick={(event) => {
-              event.stopPropagation();
-              handleSelect(event, data, 'map');
-            }}
-          >
-            <Map fontSize="medium" />
-          </IconButton>
           <HtmlTooltip title="Assign">
             <IconButton
               onClick={(event) => {
                 event.stopPropagation();
                 handleSelect(event, data, 'assign');
               }}
-              sx={{
-                padding: '7px',
-                // color: 'white',
-                // bgcolor: 'var(--new-theme-color)',
-                // '&:hover': { bgcolor: 'hsla(var(--new-theme-color-hsl) / 70%)' }
-                border: '1px solid'
-              }}
+              size="small"
+              color="primary"
             >
-              <Add fontSize="small" />
+              <AddCircleOutline fontSize="small" />
             </IconButton>
           </HtmlTooltip>
+          <IconButton
+            color="primary"
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleSelect(event, data, 'map');
+            }}
+          >
+            <Map fontSize="small" />
+          </IconButton>
         </div>
       </ListItem>
     </li>

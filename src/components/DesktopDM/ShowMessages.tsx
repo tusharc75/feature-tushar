@@ -23,9 +23,9 @@ export type ShowMessageRef = {
 let timeout: NodeJS.Timeout;
 
 const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
-  const { toastConfig, socket, user, readMessage, handleChatOpen, closeChatBox } = state;
+  const { toastConfig, socket, user, readMessage, handleChatOpen, closeChatBox, checkIsUser } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
-  const isUserData = panelData && 'concatedName' in panelData;
+  const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);
   const [channelId, setChannelId] = useState(null);
 

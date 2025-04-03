@@ -17,7 +17,7 @@ const initialClass = `h-[--partially-openned-container-h] w-[--partially-openned
 const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbox-w] flex-[0_0_var(--fully-openned-chatbox-w)]`;
 
 const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
-  const { users, chats, handleToggleChatWindow, closeChatBox } = state;
+  const { users, chats, handleToggleChatWindow, closeChatBox, checkIsUser } = state;
   const showMessageRef = useRef<ShowMessageRef>(null);
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const { className } = useDelayedClass(initialClass, delayedClass, 0);
@@ -30,7 +30,7 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
   }, [users, chats, openedChat]);
   if (!data) return null;
 
-  const isUserData = 'concatedName' in data;
+  const isUserData = checkIsUser(data);
   const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
 
   return (
