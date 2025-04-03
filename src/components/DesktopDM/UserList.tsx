@@ -78,7 +78,7 @@ const UserList = ({ state }: UserListProps) => {
           <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
         </div>
       </div>
-      <section role="list" className="flex-grow overflow-y-auto px-2 py-2">
+      <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
         {filteredData?.map((c) => {
           const isUser = checkIsUser(c);
           if (isUser) {
