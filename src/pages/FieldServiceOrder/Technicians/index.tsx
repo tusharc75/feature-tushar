@@ -2,26 +2,36 @@ import { Autocomplete, IconButton, MenuItem, TextField } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import Consumables from 'src/pages/FieldServiceOrder/Technicians/Consumables';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import TechnicianDialog from 'src/pages/FieldServiceOrder/Technicians/TechnicianDialog';
 
-const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceOrderData, resourcePolicy, stepFullScreen, setNextStep, handleChangeStatus }) => {
-
+const Technicians = ({
+  allowedToEdit,
+  serviceOrderData,
+  fetchData: fetchserviceOrderData,
+  resourcePolicy,
+  stepFullScreen,
+  setNextStep,
+  handleChangeStatus
+}) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -33,12 +43,14 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
+  const [openTechnicianEditDialog, setOpenTechnicianEditDialog] = useState({ open: false, data: null });
 
   const {
     state: { permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumns();
@@ -55,6 +67,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
   }, [selectedService]);
 
   const fetchColumns = async () => {
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderTechnician, serviceOrderData?.currency, false);
     let column: any = [
       {
         accessor: 'index',
@@ -93,90 +106,116 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
+      ...(resourcePolicy?.addServices
+        ? [
+            {
+              accessor: 'service',
+              Header: 'Service',
+              width: 200,
+              Cell: ({ row }) =>
+                row?.original?.serviceId ? (
+                  <div className="flex items-center gap-2">
+                    <p className="text-truncate" title={row.original.service}>
+                      {row.original.service}
+                    </p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
       {
         accessor: 'competencyType',
         Header: 'Competency Type',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencyType',
-            lookupResource: sidebarResource.competencyType
-          }}
-          original={row?.original}
-        />,
-        accessorFn: (original) => AccessorFunction(original, 'competencyType'),
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencyType',
+              lookupResource: sidebarResource.competencyType
+            }}
+            original={row?.original}
+          />
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
       },
       {
         accessor: 'competencies',
         Header: 'Competencies',
         width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencies',
-            lookupResource: sidebarResource.competencies
-          }}
-          original={row?.original}
-        />,
-        accessorFn: (original) => AccessorFunction(original, 'competencies'),
-      },
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 100,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }) => {
-          return allowedToEdit ? (
-            <HtmlTooltip title={'Delete'}>
-              <span>
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencies',
+              lookupResource: sidebarResource.competencies
+            }}
+            original={row?.original}
+          />
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }
+    ];
+    const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
+    column = [...column, ...newColumns];
+    column.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => {
+        return (
+          <>
+            {data?.length ? (
+              <HtmlTooltip title={!allowedToEdit ? '' : 'Edit'}>
                 <IconButton
                   size="small"
                   aria-label="Details"
-                  disabled={!row?.original?.canDelete}
+                  disabled={!allowedToEdit ? true : false}
                   onClick={() => {
-                    setDeleteData([row.original._id]);
+                    setOpenTechnicianEditDialog({ open: true, data: row?.original });
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+                  <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
                 </IconButton>
-              </span>
-            </HtmlTooltip>
-          ) : null;
-        }
+              </HtmlTooltip>
+            ) : null}
+            {allowedToEdit ? (
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Details"
+                    disabled={!row?.original?.canDelete}
+                    onClick={() => {
+                      setDeleteData([row.original._id]);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
+          </>
+        );
       }
-    ];
-    if (resourcePolicy?.addServices) {
-      column.splice(3, 0, {
-        accessor: 'service',
-        Header: 'Service',
-        width: 200,
-        Cell: ({ row }) =>
-          row?.original?.serviceId ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate" title={row.original.service}>
-                {row.original.service}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      });
-    }
+    });
     setColumns(column);
   };
 
@@ -189,28 +228,31 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&uniqueId=${selectedService?._id}`;
     }
-    axiosInstance().get(api).then(({ data: { data } }) => {
-      let rows = data?.technician?.map((u, i) => {
-        let res: any = {
-          ...prepareDataForGrid(u)
-        };
-        res.index = i + 1;
-        res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-        res.technicianId = u?.technician['_id'];
-        res.competencyType = u?.technician?.competencyType;
-        res.competencies = u?.technician?.competencies;
-        return res;
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data } }) => {
+        let rows = data?.technician?.map((u, i) => {
+          let res: any = {
+            ...prepareDataForGrid(u)
+          };
+          res.index = i + 1;
+          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+          res.technicianId = u?.technician['_id'];
+          res.competencyType = u?.technician?.competencyType;
+          res.competencies = u?.technician?.competencies;
+          return res;
+        });
+        if (rows?.length > 0) {
+          setNextStep(true);
+        }
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+        setRefreshChild(!refreshChild);
+      })
+      .catch((error) => {
+        setNextStep(false);
+        toastConfig.setToastConfig(error);
       });
-      if (rows?.length > 0) {
-        setNextStep(true);
-      }
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
-      setRefreshChild(!refreshChild);
-    }).catch((error) => {
-      setNextStep(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const fetchServices = async () => {
@@ -219,7 +261,12 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
     data = response?.data?.data?.material;
     const services = [{ optionLabel: 'All', optionValue: 'All', _id: null, competencies: [] }];
     data?.map((d) => {
-      services.push({ optionLabel: d?.serviceDetail?.serviceName, optionValue: d?.materialId, _id: d?._id, competencies: d?.serviceDetail?.competencies });
+      services.push({
+        optionLabel: d?.serviceDetail?.serviceName,
+        optionValue: d?.materialId,
+        _id: d?._id,
+        competencies: d?.serviceDetail?.competencies
+      });
     });
     setServiceOption(services);
   };
@@ -281,6 +328,21 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
       });
   };
 
+  const handleUpdateTechnician = async (rows: any) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${fieldServiceOrder.api}/technician/${serviceOrderData._id}`, { technician: rows })
+      .then(() => {
+        setIsSubmitting(false);
+        fetchData();
+        setOpenTechnicianEditDialog({ open: false, data: null });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -330,7 +392,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           <DetailsPageHeader
             isAddButtonVisible={true}
             addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
-            addButtonText='Assign'
+            addButtonText="Assign"
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
@@ -360,7 +422,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           )}
         </Grid>
       </Grid>
-      {resourcePolicy?.addConsumables ?
+      {resourcePolicy?.addConsumables ? (
         <Box mt={2}>
           <Consumables
             allowedToEdit={allowedToEdit}
@@ -372,7 +434,7 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
             fetchConsumablesData={fetchData}
           />
         </Box>
-        : null}
+      ) : null}
       {technicianDialog && (
         <AssignEmployeeDialog
           reference={camelCase(sidebarResource.fieldServiceOrder)}
@@ -395,6 +457,17 @@ const Technicians = ({ allowedToEdit, serviceOrderData, fetchData: fetchserviceO
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {openTechnicianEditDialog.open && (
+        <TechnicianDialog
+          handleClose={() => {
+            setOpenTechnicianEditDialog({ open: false, data: null });
+          }}
+          serviceOrderData={serviceOrderData}
+          technicianData={openTechnicianEditDialog.data}
+          loading={isSubmitting}
+          handleUpdate={handleUpdateTechnician}
         />
       )}
     </>

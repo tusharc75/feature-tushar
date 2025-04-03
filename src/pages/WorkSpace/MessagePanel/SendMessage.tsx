@@ -104,11 +104,10 @@ const SendMessage = ({
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
-          await axiosInstance()
-            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(({ data }) => {
-              socket.emit('newMessagePosted', { channelId, messageId });
-            });
+          await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+          // .then(({ data }) => {
+          //   // socket.emit('newMessagePosted', { channelId, messageId });
+          // });
         }
       }
       setMessage('');

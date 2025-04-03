@@ -23,10 +23,20 @@ export type ShowMessageRef = {
 let timeout: NodeJS.Timeout;
 
 const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
-  const { toastConfig, socket, user, checkIsUser } = state;
+  const { toastConfig, socket, user, readMessage, handleChatOpen, closeChatBox, checkIsUser } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [channelId, setChannelId] = useState(null);
+
+  useEffect(() => {
+    if (channelId) {
+      socket.emit('joinChannel', channelId);
+    }
+    return () => {
+      socket.emit('leaveChannel', channelId);
+    };
+  }, [channelId]);
 
   const fetchMessages = async ({ messageId = null, updateMessage = false }: { messageId?: string; updateMessage?: Boolean }) => {
     if (isUserData) return;
@@ -40,8 +50,15 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
 
       const { data } = await axiosInstance().get(api);
 
+      let newMessages = data?.data || [];
+
+      if (!channelId && newMessages[0]) readMessage(newMessages[0].channel);
+
       setMessages((prevMessages) => {
-        let newMessages = data?.data || [];
+        if (!channelId && newMessages[0]) {
+          setChannelId(newMessages[0].channel);
+        }
+
         if (updateMessage) {
           const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
           const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
@@ -60,21 +77,21 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
     }
   };
 
-  const onNewMessagePost = async (messageId: string) => {
-    if (isUserData) return;
-    try {
-      const api = `/work-space/channel/message/${panelData._id}?after=${messageId}`;
-      const { data } = await axiosInstance().get(api);
-      setMessages((prevMessages) => {
-        let newMessages = data?.data || [];
-        return groupByDate([...Object?.values(prevMessages)?.flat(), ...newMessages]);
-      });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    } finally {
-      scrollToBottom();
-    }
-  };
+  // const onNewMessagePost = async (messageId: string) => {
+  //   if (isUserData) return;
+  //   try {
+  //     const api = `/work-space/channel/message/${panelData._id}?after=${messageId}`;
+  //     const { data } = await axiosInstance().get(api);
+  //     setMessages((prevMessages) => {
+  //       let newMessages = data?.data || [];
+  //       return groupByDate([...Object?.values(prevMessages)?.flat(), ...newMessages]);
+  //     });
+  //   } catch (error) {
+  //     toastConfig.setToastConfig(error);
+  //   } finally {
+  //     scrollToBottom();
+  //   }
+  // };
 
   const scrollToBottom = () => {
     timeout = setTimeout(() => {
@@ -85,11 +102,11 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
     };
   };
 
-  useImperativeHandle(ref, () => ({
-    onNewMessagePost(messageId) {
-      onNewMessagePost(messageId);
-    }
-  }));
+  // useImperativeHandle(ref, () => ({
+  //   onNewMessagePost(messageId) {
+  //     onNewMessagePost(messageId);
+  //   }
+  // }));
 
   useEffect(() => {
     if (socket) {

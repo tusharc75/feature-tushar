@@ -453,6 +453,7 @@ export const CHILD_RESOURCE = {
   purchaseRequisitionDetail: 'Purchase Requisition Detail',
   purchaseRequisitionCost: 'Purchase Requisition Cost',
   fieldServiceOrderDetails: 'Field Service Order Detail',
+  fieldServiceOrderTechnician: 'Field Service Order Technician',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
   fieldTicketSubmit: 'Field Ticket Submit',

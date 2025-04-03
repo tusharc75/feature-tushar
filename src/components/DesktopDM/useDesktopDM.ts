@@ -28,8 +28,8 @@ const useDesktopDM = () => {
         } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
         const chats: any = [];
         for (const d of data?.chats) {
-          d.notifications = 0;
-          const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
+          d.notifications = d.notifications || 0;
+          const toUser = d?.members?.find((m) => m?.optionValue !== user?.user?._id);
           if (toUser) {
             d.title = toUser?.optionLabel;
             d.to = toUser;
@@ -63,15 +63,14 @@ const useDesktopDM = () => {
     [fetchData, uiOnUserFirstMessageSent]
   );
 
-  // notifications
-  useEffect(() => {
-    socket?.on('notification', (channel, userId) => {
+  const addNotifications = useCallback(
+    (channelId, userId) => {
       const opennedChatBoxes = uiState.openedChats.filter((d) => d.type === 'chat' && d.open === 'fullyOpen').map((d) => d.id);
-      if (user?._id !== userId && !opennedChatBoxes.includes(channel)) {
+      if (user?._id !== userId && !opennedChatBoxes.includes(channelId)) {
         setState((prev) => {
           const newData = { ...prev };
           const newChats: Chat[] = newData.chats.map((chat) => {
-            if (chat._id === channel) {
+            if (chat._id === channelId) {
               return {
                 ...chat,
                 notifications: chat.notifications + 1
@@ -83,13 +82,49 @@ const useDesktopDM = () => {
           return newData;
         });
       }
+    },
+    [uiState.openedChats]
+  );
+
+  const readMessage = useCallback(async (channelId) => {
+    await axiosInstance().put('/work-space/channel/message/read', { channelId });
+    setState((prev) => {
+      const newData = { ...prev };
+      const newChats: Chat[] = newData.chats.map((chat) => {
+        if (chat._id === channelId) {
+          return {
+            ...chat,
+            notifications: 0
+          } as Chat;
+        }
+        return chat;
+      });
+      newData.chats = newChats;
+      return newData;
+    });
+  }, []);
+  // notifications
+  useEffect(() => {
+    let tokenSource;
+    // socket?.on('notification', (channel, userId) => {
+    //   addNotifications(channel, userId);
+    // });
+    socket?.on('newWorkSpaceChannel', () => {
+      tokenSource = axios.CancelToken.source();
+      fetchData({ cancelToken: tokenSource.token });
+    });
+    socket?.on('newMessage', ({ channelId }) => {
+      addNotifications(channelId, null);
     });
     return () => {
-      socket?.off('notification');
+      // socket?.off('notification');
+      socket?.off('newMessage');
+      socket?.off('newWorkSpaceChannel');
+      tokenSource?.cancel();
     };
   }, [socket, uiState.openedChats, user?._id]);
 
-  return { ...state, loading, toastConfig, permissions, user, socket, onUserFirstMessageSent, checkIsUser, ...rest };
+  return { ...state, loading, toastConfig, user, socket, onUserFirstMessageSent, readMessage, checkIsUser, permissions, ...rest };
 };
 
 export default useDesktopDM;
