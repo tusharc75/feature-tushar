@@ -9,14 +9,14 @@ import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
-  return function () {
-    var result = initHiddenTextarea.apply(this);
-    fabric.document.body.removeChild(this.hiddenTextarea);
-    this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
-    return result;
-  };
-})(fabric.IText.prototype.initHiddenTextarea);
+// fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
+//   return function () {
+//     var result = initHiddenTextarea.apply(this);
+//     fabric.document.body.removeChild(this.hiddenTextarea);
+//     this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
+//     return result;
+//   };
+// })(fabric.IText.prototype.initHiddenTextarea);
 
 // Creating a custom arrow class extending fabric.Group
 fabric.CustomArrow = fabric.util.createClass(fabric.Group, {
