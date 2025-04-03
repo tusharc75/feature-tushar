@@ -30,6 +30,15 @@ const UserList = ({ state }: UserListProps) => {
     return newData;
   }, [users, chats, inputValue, checkIsUser]);
 
+  const totalNotifications = useMemo(() => {
+    return chats.reduce((acc, curr) => {
+      if (curr.notifications > 0) {
+        acc += curr.notifications;
+      }
+      return acc;
+    }, 0);
+  }, [chats]);
+
   return (
     <div
       className={cn(
@@ -58,6 +67,11 @@ const UserList = ({ state }: UserListProps) => {
             </Avatar>
           </Badge>
           <h6 className="text-sm font-semibold">BeConnected</h6>
+          {totalNotifications > 0 && (
+            <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
+              <span className="text-center text-[10px] leading-[15px] text-white">{totalNotifications}</span>
+            </div>
+          )}
         </div>
         <div className="buttons flex items-center gap-1">
           <IconButton size="small">
@@ -123,7 +137,7 @@ const RenderChatUser = ({ chat, onClick, onlineUsers }: { onClick: (d: Chat) => 
         <span className="line-clamp-1">{chat.to?.optionLabel}</span>
         {chat.notifications > 0 && (
           <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
-            <span className="text-center text-[10px] leading-[1] text-white">{chat.notifications}</span>
+            <span className="text-center text-[10px] leading-[15px] text-white">{chat.notifications}</span>
           </div>
         )}
       </p>
