@@ -1,9 +1,7 @@
 import { Box, Dialog, IconButton } from '@mui/material';
-import dayjs from 'dayjs';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import ButtonMenu from 'src/components/ButtonMenu';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -12,11 +10,10 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, displayDate, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
-import { useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, handleSucess }) => {
+const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handleSucess }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'technician_to_service_dialog';
 
@@ -27,35 +24,15 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
-  const [selectedType, setSelectedType] = useState(selectedResource);
-  const technicianResources = useTechnicianResources(toastConfig, setSelectedType);
   const [columns, setColumns] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const headerSLot = useMemo(() => {
-    if (technicianResources)
-      return (
-        <ButtonMenu
-          showChevron={true}
-          getLabel={(d) => d.title}
-          items={technicianResources}
-          getSelectedMenuItem={(item) => item.key === selectedType.key}
-          onItemClick={(e, item) => {
-            setSelectedType(item);
-          }}
-        >
-          <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedType?.title}</span>
-        </ButtonMenu>
-      );
-    return null;
-  }, [selectedType?.key, selectedType?.title, technicianResources]);
-
   useEffect(() => {
-    if (selectedType) {
+    if (selectedResource) {
       fetchGridColumns();
       fetchData();
     }
-  }, [selectedType]);
+  }, [selectedResource]);
 
   const fetchGridColumns = () => {
     setColumns(null);
@@ -69,7 +46,8 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
       },
       {
         accessor: 'resourceNumber',
-        Header: `${selectedType?.key === 'fieldTicket' ? resources?.fieldTicket?.titleSingular : selectedType?.key === 'fieldServiceOrder' ? resources?.fieldServiceOrder?.titleSingular : resources?.rentalManagement?.titleSingular}`,
+        Header: `${selectedResource?.key === 'fieldTicket' ? resources?.fieldTicket?.titleSingular :
+          selectedResource?.key === 'fieldServiceOrder' ? resources?.fieldServiceOrder?.titleSingular : resources?.rentalManagement?.titleSingular}`,
         width: 200,
         Cell: ({ row }) =>
           row.original['resourceNumber'] ? (
@@ -79,7 +57,7 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${selectedType?.key === 'fieldTicket' ? routes.fieldTicketDetail.path : selectedType?.key === 'fieldServiceOrder' ? routes.fieldServiceOrderDetail.path : routes.rentalManagementDetail.path}/${row.original.resourceId}`
+                    `${selectedResource?.key === 'fieldTicket' ? routes.fieldTicketDetail.path : selectedResource?.key === 'fieldServiceOrder' ? routes.fieldServiceOrderDetail.path : routes.rentalManagementDetail.path}/${row.original.resourceId}`
                   );
                 }}
               >
@@ -166,7 +144,7 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     axiosInstance()
-      .get(`/technician-scheduler/un-assign-service?type=${selectedType?.resource}`)
+      .get(`/technician-scheduler/un-assign-service?type=${selectedResource?.resource}`)
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {
@@ -184,8 +162,8 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
           obj.service = ele?.service;
           obj.customerAccount = ele?.customerAccount?.optionLabel;
           obj.customerAccountId = ele?.customerAccount?.optionValue;
-          obj.estimateStartDate = ele?.service?.estimateStartDate;
-          obj.estimateEndDate = ele?.service?.estimateEndDate;
+          obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
+          obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
           obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
           rows.push(obj);
         });
@@ -197,10 +175,6 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
       });
   };
 
-  const leftSideContents = () => {
-    return headerSLot;
-  };
-
   const handleAssign = () => {
     const data: any = [];
     selectedRecords.forEach((d) => {
@@ -209,23 +183,27 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
       element.uniqueId = d?._id;
       element.service = d?.serviceId;
       element.warehouse = d?.warehouse;
-      element.startDate = d?.estimateStartDate || dayjs.tz().toDate();
-      element.endDate = d?.estimateEndDate || dayjs.tz().toDate();
-      if (selectedType?.key === 'fieldTicket') {
+      if (selectedResource?.key === 'fieldTicket') {
         element.fieldTicket = d?.resourceId;
-      } else if (selectedType?.key === 'rentalJob') {
+        element.startDate = d?.estimateStartDate;
+        element.endDate = d?.estimateEndDate;
+      } else if (selectedResource?.key === 'rentalJob') {
         element.rentalJob = d?.resourceId;
+        element.startDate = d?.estimateStartDate;
+        element.endDate = d?.estimateEndDate;
       } else {
         element.fieldServiceOrder = d?.resourceId;
+        element.estimateStartDate = d?.estimateStartDate;
+        element.estimateEndDate = d?.estimateEndDate;
       }
       data.push(element);
     });
     const baseApi =
-      selectedType?.key === 'fieldTicket'
+      selectedResource?.key === 'fieldTicket'
         ? fieldTicket.api
-        : selectedType?.key === 'rentalJob'
+        : selectedResource?.key === 'rentalJob'
           ? rentalManagement.api
-          : selectedType?.key === 'fieldServiceOrder'
+          : selectedResource?.key === 'fieldServiceOrder'
             ? fieldServiceOrder.api
             : '';
     setIsSubmitting(true);
@@ -251,13 +229,12 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
       onClose={handleClose}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Assign ${selectedType?.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
+      <CustomDialogHeader title={`Assign ${selectedResource?.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         {columns ? (
           <>
             <ListingPageHeader
               isActionButtonVisible={false}
-              leftSideContents={leftSideContents()}
               addButtonProps={{
                 iconsEnabled: false,
                 disabled: isSubmitting || selectedRecords?.length === 0,
@@ -289,4 +266,4 @@ const TechnicianToServiceDialog = ({ selectedResource, handleClose, technician, 
   );
 };
 
-export default TechnicianToServiceDialog;
+export default ServiceAssignDialog;

@@ -28,22 +28,6 @@ export const getColorFromPriority = (priority): string => {
   return `${color} ${priority}`;
 };
 
-// export const getPositionOfDate = (taskStartDate, taskEndDate, totalDays, singleDayWidth, totalContainerWidth): React.CSSProperties => {
-//   return {
-//     left: (100 * dayjs(taskStartDate).diff(startDate, 'day')) / totalDay + '%',
-//     right: (100 * endDate.diff(dayjs(taskEndDate), 'day')) / totalDay + '%'
-//   } as React.CSSProperties;
-// };
-
-// export const getPositionOfDate = (taskStartDate, taskEndDate, rangeStartDate, rangeEndDate, totalDays, singleDayWidth) => {
-//   const totalContainerWidth = totalDays * singleDayWidth;
-//   const startDate = dayjs(taskStartDate);
-//   const endDate = dayjs(taskEndDate);
-//   const totalDuration = endDate.diff(startDate, 'day') + 1;
-//   const leftPosition = startDate.diff(dayjs().startOf('day'), 'day') * singleDayWidth;
-//   const rightPosition = leftPosition + totalDuration * singleDayWidth;
-//   return { left: `${leftPosition}px`, right: `${totalContainerWidth - rightPosition}px` };
-// };
 export const getPositionOfDate = (taskStartDate, taskEndDate, rangeStartDate, singleDayWidth) => {
   const startDate = dayjs(taskStartDate);
   const endDate = dayjs(taskEndDate);

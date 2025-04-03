@@ -9,7 +9,6 @@ import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianR
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import dayjs from 'dayjs';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -90,16 +89,16 @@ const ServiceOrderSidebarImpl = ({
       element.warehouse = resourceData?.warehouse;
       if (selectedResource?.key === 'fieldTicket') {
         element.fieldTicket = resourceData?.resourceId;
-        element.startDate = resourceData?.service?.estimateStartDate || dayjs.tz().toDate();
-        element.endDate = resourceData?.service?.estimateEndDate || dayjs.tz().toDate();
+        element.startDate = resourceData?.service?.estimateStartDate;
+        element.endDate = resourceData?.service?.estimateEndDate;
       } else if (selectedResource?.key === 'rentalJob') {
         element.rentalJob = resourceData?.resourceId;
-        element.startDate = resourceData?.estimateStartDate || dayjs.tz().toDate();
-        element.endDate = resourceData?.estimateEndDate || dayjs.tz().toDate();
+        element.startDate = resourceData?.estimateStartDate;
+        element.endDate = resourceData?.estimateEndDate;
       } else {
         element.fieldServiceOrder = resourceData?.resourceId;
-        element.startDate = resourceData?.estimateStartDate || dayjs.tz().toDate();
-        element.endDate = resourceData?.estimateEndDate || dayjs.tz().toDate();
+        element.estimateStartDate = resourceData?.estimateStartDate;
+        element.estimateEndDate = resourceData?.estimateEndDate;
       }
       technician.push(element);
     });

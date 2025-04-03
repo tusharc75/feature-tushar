@@ -37,7 +37,6 @@ const DesktopRoadmapImpl = ({
   loading
 }: DesktopRoadmapProps) => {
   const [container, setContainer] = useState<HTMLDivElement>(null);
-
   return (
     <div
       ref={setContainer}
@@ -67,7 +66,7 @@ const DesktopRoadmapImpl = ({
           <MapImpl selected={selected} setSelected={setSelected} />
         </div>
       )}
-      <Sidebar activity={activity} loading={loading} handleSelect={handleSelect} />
+      <Sidebar selectedResource={selectedResource} activity={activity} loading={loading} handleSelect={handleSelect} />
     </div>
   );
 };
