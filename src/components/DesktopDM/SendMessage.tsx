@@ -53,7 +53,6 @@ const SendMessage = ({
           .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(({ data: { data } }) => {
             onUserFirstMessageSent({ channelId: data?.ops?.[0]?.channel, userId: panelData._id });
-            socket.emit('newChat', { channelId: 'directMessaging' });
           });
       } else {
         formData.append('channelId', panelData._id);
@@ -62,7 +61,6 @@ const SendMessage = ({
           .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(({ data: { data } }) => {
             onNewMessagePost(data?.ops?.[0]?._id);
-            socket.emit('newMessagePosted', { channelId: data._id, messageId });
           });
       }
       setMessage('');
