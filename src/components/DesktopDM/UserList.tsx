@@ -82,16 +82,7 @@ const UserList = ({ state }: UserListProps) => {
         {filteredData?.map((c) => {
           const isUser = checkIsUser(c);
           if (isUser) {
-            return (
-              <RenderUser
-                user={c}
-                onClick={(d) => {
-                  handleChatOpen(d._id, 'user');
-                }}
-                onlineUsers={onlineUsers}
-                key={c._id}
-              />
-            );
+            return <RenderUser user={c} onClick={(d) => handleChatOpen(d._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
           } else {
             return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(d._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
           }
