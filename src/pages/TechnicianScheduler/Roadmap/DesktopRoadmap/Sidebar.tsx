@@ -1,11 +1,12 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { AccountCircle, Map } from '@mui/icons-material';
+import { AccountCircle, Add, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SidebarProps = {
   activity: TActivity[];
@@ -114,14 +115,23 @@ export const SingleTechnician = ({ data, handleSelect, index, className = '' }) 
           >
             <Map fontSize="medium" />
           </IconButton>
-          <IconButton
-            onClick={(event) => {
-              event.stopPropagation();
-              handleSelect(event, data, 'assign');
-            }}
-          >
-            <AssignmentIcon fontSize="small" color="primary" />
-          </IconButton>
+          <HtmlTooltip title="Assign">
+            <IconButton
+              onClick={(event) => {
+                event.stopPropagation();
+                handleSelect(event, data, 'assign');
+              }}
+              sx={{
+                padding: '7px',
+                // color: 'white',
+                // bgcolor: 'var(--new-theme-color)',
+                // '&:hover': { bgcolor: 'hsla(var(--new-theme-color-hsl) / 70%)' }
+                border: '1px solid'
+              }}
+            >
+              <Add fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         </div>
       </ListItem>
     </li>

@@ -1,6 +1,6 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { horizontalListSortingStrategy, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
@@ -10,7 +10,6 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 
 type TechnicianListProps = {
   state: TInitialState;
@@ -233,14 +232,20 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
               <p className={cn('text-[13px]', isMobile ? 'line-clamp-1' : '')}>{col.cell}</p>
             </div>
           ))}
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end border-t pt-1">
             <IconButton
               size="small"
+              sx={{
+                color: 'white',
+                bgcolor: 'var(--new-theme-color)',
+                padding: '8px',
+                '&:hover': { bgcolor: 'hsla(var(--new-theme-color-hsl) / 70%)' }
+              }}
               onClick={() => {
                 setOpenTechnicianDialog({ open: true, data: row });
               }}
             >
-              <AssignmentIcon fontSize="small" color="primary" />
+              <AssignmentIcon fontSize="small" />
             </IconButton>
           </div>
         </div>

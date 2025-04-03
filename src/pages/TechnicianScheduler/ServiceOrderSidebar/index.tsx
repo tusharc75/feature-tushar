@@ -155,7 +155,7 @@ const ServiceOrderSidebarImpl = ({
   return (
     <>
       <div
-        className={cn(isMobile ? 'h-[180px]' : 'h-full', 'max-w-full')}
+        className={cn(isMobile ? 'h-[240px]' : 'h-full', 'max-w-full')}
         ref={(div) => {
           setContainer(div);
         }}
