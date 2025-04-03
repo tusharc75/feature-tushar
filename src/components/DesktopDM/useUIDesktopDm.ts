@@ -42,12 +42,15 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 
 const useUIDesktopDm = () => {
   const {
-    state: { user, permissions }
+    state: {
+      permissions,
+      user: { user }
+    }
   }: any = useData();
 
   useEffect(() => {
     if (permissions?.equiptAi?.isRead) {
-      USER_LIST_RIGHT_SPACE += 100;
+      USER_LIST_RIGHT_SPACE = CHATBOX_GAP + 100;
     }
   }, [permissions?.equiptAi?.isRead]);
 

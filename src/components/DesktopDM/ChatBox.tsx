@@ -4,6 +4,7 @@ import { useMemo, useRef } from 'react';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessages';
 import { Chat, OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
+import { checkIsUser } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
@@ -30,7 +31,7 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
   }, [users, chats, openedChat]);
   if (!data) return null;
 
-  const isUserData = 'concatedName' in data;
+  const isUserData = checkIsUser(data);
   const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
 
   return (
