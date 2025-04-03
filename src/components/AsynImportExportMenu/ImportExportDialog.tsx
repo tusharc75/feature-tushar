@@ -304,7 +304,7 @@ const ImportExportDialog = ({
       }}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
+      slots={{ transition: CustomDialogTransition }}
     >
       <CustomDialogHeader
         title={type}

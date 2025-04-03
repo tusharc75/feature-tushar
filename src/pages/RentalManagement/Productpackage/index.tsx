@@ -29,7 +29,6 @@ import {
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   ACTIVITY_RESOURCE,
-  ATTACHMENT_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,

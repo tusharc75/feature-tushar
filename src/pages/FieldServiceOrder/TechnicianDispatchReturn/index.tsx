@@ -52,6 +52,15 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
 
   const fetchColumns = async () => {
     setColumns(null);
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.employeeMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
     const column: any = [
       {
         accessor: 'index',
@@ -114,9 +123,9 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      {
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -129,11 +138,11 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             original={row?.original}
           />
         ),
-        accessorFn: (original) => AccessorFunction(original, 'competencies'),
-      },
-      {
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -146,8 +155,8 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             original={row?.original}
           />
         ),
-        accessorFn: (original) => AccessorFunction(original, 'competencies'),
-      },
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : []),
       {
         accessor: 'dispatchedDate',
         Header: 'Dispatched Date',

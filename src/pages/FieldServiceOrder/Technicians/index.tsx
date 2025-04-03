@@ -68,6 +68,16 @@ const Technicians = ({
 
   const fetchColumns = async () => {
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderTechnician, serviceOrderData?.currency, false);
+
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.employeeMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
     let column: any = [
       {
         accessor: 'index',
@@ -108,34 +118,34 @@ const Technicians = ({
       },
       ...(resourcePolicy?.addServices
         ? [
-            {
-              accessor: 'service',
-              Header: 'Service',
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original?.serviceId ? (
-                  <div className="flex items-center gap-2">
-                    <p className="text-truncate" title={row.original.service}>
-                      {row.original.service}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'service',
+            Header: 'Service',
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original?.serviceId ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row.original.service}>
+                    {row.original.service}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
-      {
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -149,10 +159,10 @@ const Technicians = ({
           />
         ),
         accessorFn: (original) => AccessorFunction(original, 'competencyType')
-      },
-      {
+      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -166,7 +176,7 @@ const Technicians = ({
           />
         ),
         accessorFn: (original) => AccessorFunction(original, 'competencies')
-      }
+      }] : []),
     ];
     const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
     column = [...column, ...newColumns];
