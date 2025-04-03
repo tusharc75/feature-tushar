@@ -6,9 +6,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import { useAppTheme } from 'src/constants/AppConfig';
 import editorCss from 'src/components/DesktopDM/editorcss.css?raw';
-import RippleButton from 'src/components/RippleButton';
-
-console.log(editorCss);
 
 type SendMessageProps = {
   state: UseDesktopDM;
@@ -29,7 +26,7 @@ const SendMessage = ({
   disabled,
   onNewMessagePost = () => {}
 }: SendMessageProps) => {
-  const { toastConfig, socket, onUserFirstMessageSent, checkIsUser } = state;
+  const { toastConfig, onUserFirstMessageSent, checkIsUser } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -87,7 +84,7 @@ const SendMessage = ({
   };
 
   return (
-    <div className="remove-tiny-mce-toolbar-top-border relative border-t p-3 [--toolbar-width:42px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
+    <div className="remove-tiny-mce-toolbar-top-border relative border-t p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
       <Editor
         onKeyDown={handleKeyDown}
         key={themeColor}

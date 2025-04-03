@@ -91,7 +91,7 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
           </IconButton>
         </div>
       </header>
-      <ShowMessages data={data} state={state} ref={showMessageRef} />
+      <ShowMessages data={data} state={state} ref={showMessageRef} openedChat={openedChat} />
       <SendMessage state={state} data={data} onNewMessagePost={showMessageRef.current?.onNewMessagePost} />
     </div>
   );
