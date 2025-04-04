@@ -371,28 +371,6 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const handleImport = () => {
-    const initialValues = {
-      landscape: false,
-      hideAmountTotalSection: false,
-      tableTotalAtBottom: false,
-      tableFontSize: '',
-      belowTableTotalFontSize: '',
-      pdfFontSize: '',
-      tableHeaderBackgroundColor: '',
-      tableHeaderFontColor: '',
-      productColumns: defaultProductColumns,
-      name: '',
-      pageNumberInFooter: false,
-      header: '',
-      footer: '',
-      aboveTable: '',
-      belowTable: '',
-      tabelSummaryLeftSide: '',
-      entity: selectedEntity ? [selectedEntity] : [],
-      type: '',
-      owner: user.user._id,
-      collaborator: []
-    };
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -422,28 +400,30 @@ export default function NewCreateQuotePdfTemplate() {
 
             setIsLandscapChecked(importedData.landscape);
 
-            (initialValues.landscape = importedData.landscape),
-              (initialValues.hideAmountTotalSection = importedData.hideAmountTotalSection),
-              (initialValues.tableTotalAtBottom = importedData.tableTotalAtBottom),
-              (initialValues.tableFontSize = importedData.tableFontSize ? importedData.tableFontSize : ''),
-              (initialValues.belowTableTotalFontSize = importedData.belowTableTotalFontSize ? importedData.belowTableTotalFontSize : ''),
-              (initialValues.pdfFontSize = importedData.pdfFontSize ? importedData.pdfFontSize : ''),
-              (initialValues.tableHeaderBackgroundColor = importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : ''),
-              (initialValues.tableHeaderFontColor = importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : ''),
-              (initialValues.productColumns = importedData.productColumns ? importedData.productColumns : defaultProductColumns),
-              (initialValues.name = importedData.name ? importedData.name : ''),
-              (initialValues.pageNumberInFooter = importedData.pageNumberInFooter),
-              (initialValues.header = importedData.header),
-              (initialValues.footer = importedData.footer),
-              (initialValues.aboveTable = importedData.aboveTable),
-              (initialValues.belowTable = importedData.belowTable),
-              (initialValues.tabelSummaryLeftSide = importedData.tabelSummaryLeftSide),
-              (initialValues.entity = importedData.entity ? importedData.entity : []),
-              (initialValues.type = importedData.type),
-              (initialValues.owner = importedData.owner && importedData.owner !== undefined ? importedData.owner : user.user._id),
-              (initialValues.collaborator = importedData.collaborator ? importedData.collaborator : []);
+            const newInitialValues = {
+              landscape: importedData.landscape,
+              hideAmountTotalSection: importedData.hideAmountTotalSection,
+              tableTotalAtBottom: importedData.tableTotalAtBottom,
+              tableFontSize: importedData.tableFontSize ? importedData.tableFontSize : '',
+              belowTableTotalFontSize: importedData.belowTableTotalFontSize ? importedData.belowTableTotalFontSize : '',
+              pdfFontSize: importedData.pdfFontSize ? importedData.pdfFontSize : '',
+              tableHeaderBackgroundColor: importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : '',
+              tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
+              productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
+              name: importedData.name ? importedData.name : '',
+              pageNumberInFooter: importedData.pageNumberInFooter,
+              header: importedData.header,
+              footer: importedData.footer,
+              aboveTable: importedData.aboveTable,
+              belowTable: importedData.belowTable,
+              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
+              entity: importedData.entity ? importedData.entity : [],
+              type: importedData.type,
+              owner: importedData.owner && importedData.owner !== undefined ? importedData.owner : user.user._id,
+              collaborator: importedData.collaborator ? importedData.collaborator : []
+            };
 
-            setInitialValues({ ...initialValues });
+            setInitialValues(newInitialValues);
 
             setDetails({
               header: importedData.header,
