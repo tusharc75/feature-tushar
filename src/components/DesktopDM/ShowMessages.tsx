@@ -1,15 +1,16 @@
 import { MoreVert } from '@mui/icons-material';
 import { Avatar, IconButton } from '@mui/material';
 import { groupBy } from 'lodash';
-import React, { Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Chat, Message, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import { Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn, displayDate, formatDate } from 'src/constants/helpers';
 
 type ShowMessagesProps = {
   state: UseDesktopDM;
   data: User | Chat;
+  openedChat: OpenedChat;
 };
 
 export const groupByDate = (messages: Message[]) => {
@@ -22,11 +23,33 @@ export type ShowMessageRef = {
 
 let timeout: NodeJS.Timeout;
 
-const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state }, ref) => {
-  const { toastConfig, socket, user } = state;
+const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state, openedChat }, ref) => {
+  const { toastConfig, socket, user, readMessage, checkIsUser } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
-  const isUserData = panelData && 'concatedName' in panelData;
+  const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const channelId = useMemo(() => {
+    if (isUserData) return null;
+    return panelData._id;
+  }, [isUserData, panelData._id]);
+
+  useEffect(() => {
+    if (channelId) {
+      socket.emit('joinChannel', channelId);
+    }
+    return () => {
+      socket.emit('leaveChannel', channelId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelId]);
+
+  useEffect(() => {
+    if (openedChat.open === 'fullyOpen' && channelId) {
+      readMessage(channelId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openedChat.open, channelId]);
 
   const fetchMessages = async ({ messageId = null, updateMessage = false }: { messageId?: string; updateMessage?: Boolean }) => {
     if (isUserData) return;
@@ -37,11 +60,10 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
       } else if (messageId) {
         api += `?after=${messageId}`;
       }
-
       const { data } = await axiosInstance().get(api);
-
+      let newMessages = data?.data || [];
+      if (!channelId && newMessages[0] && openedChat.open !== 'partial') readMessage(newMessages[0].channel);
       setMessages((prevMessages) => {
-        let newMessages = data?.data || [];
         if (updateMessage) {
           const updatedMessages: Message[] = Object?.values(prevMessages)?.flat();
           const index: number = updatedMessages?.findIndex((message) => message._id === messageId);
@@ -60,22 +82,6 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
     }
   };
 
-  const onNewMessagePost = async (messageId: string) => {
-    if (isUserData) return;
-    try {
-      const api = `/work-space/channel/message/${panelData._id}?after=${messageId}`;
-      const { data } = await axiosInstance().get(api);
-      setMessages((prevMessages) => {
-        let newMessages = data?.data || [];
-        return groupByDate([...Object?.values(prevMessages)?.flat(), ...newMessages]);
-      });
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    } finally {
-      scrollToBottom();
-    }
-  };
-
   const scrollToBottom = () => {
     timeout = setTimeout(() => {
       containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
@@ -84,12 +90,6 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
       clearTimeout(timeout);
     };
   };
-
-  useImperativeHandle(ref, () => ({
-    onNewMessagePost(messageId) {
-      onNewMessagePost(messageId);
-    }
-  }));
 
   useEffect(() => {
     if (socket) {
@@ -141,9 +141,11 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
   }, [socket, panelData?._id]);
 
   useEffect(() => {
-    fetchMessages({});
+    if (!isUserData) {
+      fetchMessages({});
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelData?._id]);
+  }, [panelData?._id, isUserData]);
 
   return (
     <div ref={containerRef} className="flex-grow overflow-y-auto scroll-smooth">

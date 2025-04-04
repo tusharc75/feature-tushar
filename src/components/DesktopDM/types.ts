@@ -20,7 +20,7 @@ export type Chat = {
   _id?: string;
   brand?: string;
   members?: MessageUser[];
-  type?: string;
+  type?: 'chat';
   createdBy?: CreatedBy;
   isOwner?: boolean;
   title?: string;

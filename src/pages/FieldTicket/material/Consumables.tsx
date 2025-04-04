@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldTicket, getObjKeysWithValues, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -39,6 +39,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -64,6 +65,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [addDataFromFieldServiceOrder, setAddDataFromFieldServiceOrder] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -84,7 +86,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   }, [services]);
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -384,38 +386,55 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       fetchData();
       setSubmitting(false);
     } else {
-      var taxCodeData: any = null;
-      if (fieldTicketData?.taxCode) {
-        const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
-        if (taxCodeOptions?.length) {
-          taxCodeData = taxCodeOptions[0];
-        }
-      }
       const material: any = [];
-      rows.forEach((d) => {
-        const element: any = {};
-        element.materialId = d._id;
-        element.type = MATERIAL_TYPE.product;
-        element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-        element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
-        element.qty = d.qty ? parseFloat(d.qty) : 1;
-        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        Object.assign(element, calValues);
-        if (taxCodeData) {
-          element.taxCode = taxCodeData?.optionValue;
-          element.taxPercentage = taxCodeData?.taxRate || 0;
-        }
-        material.push(element);
-      });
-      if (fieldTicketData?.pricingCondition?.optionValue) {
-        const priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
-        AddMaterial(material, priceData);
-      } else {
+      if (assignQuotationDataDialog || addDataFromFieldServiceOrder) {
+        rows?.forEach((d: any) => {
+          rows = rows?.forEach((e: any) => {
+            const obj: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+            if (assignQuotationDataDialog) {
+              obj.isQuotation = true;
+            }
+            if (addDataFromFieldServiceOrder) {
+              obj.isFieldServiceOrder = true;
+            }
+            material.push(obj);
+          })
+        });
         AddMaterial(material, null);
+      }
+      else {
+        var taxCodeData: any = null;
+        if (fieldTicketData?.taxCode) {
+          const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+          if (taxCodeOptions?.length) {
+            taxCodeData = taxCodeOptions[0];
+          }
+        }
+        rows.forEach((d) => {
+          const element: any = {};
+          element.materialId = d._id;
+          element.type = MATERIAL_TYPE.product;
+          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
+          element.qty = d.qty ? parseFloat(d.qty) : 1;
+          element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+          element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+          element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          Object.assign(element, calValues);
+          if (taxCodeData) {
+            element.taxCode = taxCodeData?.optionValue;
+            element.taxPercentage = taxCodeData?.taxRate || 0;
+          }
+          material.push(element);
+        });
+        if (fieldTicketData?.pricingCondition?.optionValue) {
+          const priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
+          AddMaterial(material, priceData);
+        } else {
+          AddMaterial(material, null);
+        }
       }
     }
   };
@@ -435,8 +454,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         }
       });
     }
-    axiosInstance()
-      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
+    axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -445,6 +463,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         });
         setConsumablesDialog(false);
         setAssignQuotationDataDialog(false);
+        setAddDataFromFieldServiceOrder(false);
         fetchData();
         fetchFieldTicketData();
         setSubmitting(false);
@@ -650,7 +669,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           }}
           id={'add-product-consumable'}
         >
-          {`Add Product(s)/Consumable(s)`}
+          {`Add Products/Consumables`}
         </MenuItem>
         {resourcePolicy?.showQuotationAddMaterial && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && !isOffline && (
           <>
@@ -659,7 +678,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
                 setAssignQuotationDataDialog(true);
               }}
             >
-              Add Quotation Consumables
+              {`Add Consumables From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+        {!isOffline && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddDataFromFieldServiceOrder(true);
+              }}
+            >
+              {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
             </MenuItem>
           </>
         )}
@@ -840,6 +870,19 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((row) => row?.materialId)}
+        />
+      )}
+      {addDataFromFieldServiceOrder && (
+        <AddFieldServiceOrderDataDialog
+          onClose={() => {
+            setAddDataFromFieldServiceOrder(false);
+          }}
+          fieldTicketData={fieldTicketData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.product}
+          onSuccess={(rows) => {
+            handleSubmit(rows);
+          }}
         />
       )}
     </>

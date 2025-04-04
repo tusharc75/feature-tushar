@@ -11,7 +11,7 @@ type UserListProps = {
 };
 
 const UserList = ({ state }: UserListProps) => {
-  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen } = state;
+  const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser } = state;
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const [inputValue, setInputValue] = useState('');
 
@@ -19,7 +19,7 @@ const UserList = ({ state }: UserListProps) => {
     const smallInput = inputValue.toLowerCase();
     if (smallInput.trim() === '') return [...chats, ...users];
     const newData = [...chats, ...users].filter((d) => {
-      const isUser = 'avatar' in d;
+      const isUser = checkIsUser(d);
       if (isUser && d?.concatedName?.toLowerCase().includes(smallInput)) {
         return true;
       } else if (!isUser && d?.to?.optionLabel?.toLowerCase().includes(smallInput)) {
@@ -28,7 +28,16 @@ const UserList = ({ state }: UserListProps) => {
       return false;
     });
     return newData;
-  }, [users, chats, inputValue]);
+  }, [users, chats, inputValue, checkIsUser]);
+
+  const totalNotifications = useMemo(() => {
+    return chats.reduce((acc, curr) => {
+      if (curr.notifications > 0) {
+        acc += curr.notifications;
+      }
+      return acc;
+    }, 0);
+  }, [chats]);
 
   return (
     <div
@@ -58,6 +67,11 @@ const UserList = ({ state }: UserListProps) => {
             </Avatar>
           </Badge>
           <h6 className="text-sm font-semibold">BeConnected</h6>
+          {totalNotifications > 0 && (
+            <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
+              <span className="text-center text-[10px] leading-[15px] text-white">{totalNotifications}</span>
+            </div>
+          )}
         </div>
         <div className="buttons flex items-center gap-1">
           <IconButton size="small">
@@ -77,12 +91,13 @@ const UserList = ({ state }: UserListProps) => {
           <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
         </div>
       </div>
-      <section role="list" className="flex-grow overflow-y-auto px-2 py-2">
+      <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
         {filteredData?.map((c) => {
-          if ('concatedName' in c) {
-            return <RenderUser user={c} onClick={(d) => handleChatOpen(c._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
+          const isUser = checkIsUser(c);
+          if (isUser) {
+            return <RenderUser user={c} onClick={(d) => handleChatOpen(d._id, 'user')} onlineUsers={onlineUsers} key={c._id} />;
           } else {
-            return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(c._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
+            return <RenderChatUser chat={c} onClick={(d) => handleChatOpen(d._id, 'chat')} onlineUsers={onlineUsers} key={c._id} />;
           }
         })}
       </section>
@@ -122,7 +137,7 @@ const RenderChatUser = ({ chat, onClick, onlineUsers }: { onClick: (d: Chat) => 
         <span className="line-clamp-1">{chat.to?.optionLabel}</span>
         {chat.notifications > 0 && (
           <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
-            <span className="text-center text-[10px] leading-[1] text-white">{chat.notifications}</span>
+            <span className="text-center text-[10px] leading-[15px] text-white">{chat.notifications}</span>
           </div>
         )}
       </p>
@@ -156,7 +171,7 @@ const RenderUser = ({ user, onClick, onlineUsers }: { onClick: (d: User) => void
           <Person fontSize="small" />
         </Avatar>
       </Badge>
-      <p className="line-clamp-1 text-xs font-normal">{user.concatedName}</p>
+      <p className="line-clamp-1 text-xs font-normal">{user.concatedName ? user.concatedName : `${user.firstName} ${user.lastName}`}</p>
     </button>
   );
 };

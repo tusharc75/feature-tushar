@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import { useAppTheme } from 'src/constants/AppConfig';
+import editorCss from 'src/components/DesktopDM/editorcss.css?raw';
 
 type SendMessageProps = {
   state: UseDesktopDM;
@@ -16,8 +17,6 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
-const emptyLineRegex = /^(\s*<p>&nbsp;<\/p>\s*)+$/;
-
 const SendMessage = ({
   state,
   data: panelData,
@@ -27,14 +26,14 @@ const SendMessage = ({
   disabled,
   onNewMessagePost = () => {}
 }: SendMessageProps) => {
-  const { toastConfig, socket, onUserFirstMessageSent } = state;
+  const { toastConfig, onUserFirstMessageSent, checkIsUser } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [files, setFiles] = useState([]);
   const [audioBlobs, setAudioBlobs] = useState([]);
   const editorRef = useRef<Editor['editor'] | null>(null);
-  const isNewChatToUser = panelData && 'concatedName' in panelData;
+  const isNewChatToUser = checkIsUser(panelData);
 
   const postMessage = async () => {
     setLoading(true);
@@ -53,7 +52,6 @@ const SendMessage = ({
           .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(({ data: { data } }) => {
             onUserFirstMessageSent({ channelId: data?.ops?.[0]?.channel, userId: panelData._id });
-            socket.emit('newChat', { channelId: 'directMessaging' });
           });
       } else {
         formData.append('channelId', panelData._id);
@@ -62,7 +60,6 @@ const SendMessage = ({
           .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(({ data: { data } }) => {
             onNewMessagePost(data?.ops?.[0]?._id);
-            socket.emit('newMessagePosted', { channelId: data._id, messageId });
           });
       }
       setMessage('');
@@ -77,7 +74,8 @@ const SendMessage = ({
 
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = e.key;
-    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+    const keyCombinations = e.ctrlKey || e.metaKey || e.shiftKey;
+    if (key === 'Enter' && !keyCombinations) {
       e.preventDefault();
       if (message && editorRef.current.getContent({ format: 'text' }).length > 0 && message !== initialMessage && !loading) {
         postMessage();
@@ -86,7 +84,7 @@ const SendMessage = ({
   };
 
   return (
-    <div className="remove-tiny-mce-toolbar-top-border relative border-t p-3 [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:pr-[50px] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
+    <div className="remove-tiny-mce-toolbar-top-border relative border-t p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
       <Editor
         onKeyDown={handleKeyDown}
         key={themeColor}
@@ -115,7 +113,8 @@ const SendMessage = ({
           toolbar: `emoticons`,
           toolbar_location: 'bottom',
           toolbar_drawer: 'floating',
-          content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+          // content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:12px }; p {margin-block-start: 0; margin-block-end:8px}',
+          content_style: editorCss,
           setup: (editor) => {
             editor.on('BeforeSetContent', (e) => {
               // Adding 'link' class to <a> tags
@@ -126,11 +125,16 @@ const SendMessage = ({
           }
         }}
       />
-      <span className="absolute bottom-3 right-3 z-10">
-        <IconButton size="small" disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading} onClick={postMessage}>
+      <div className="absolute bottom-3 left-[calc(var(--toolbar-width)+12px)] right-3 z-10 flex">
+        <IconButton
+          className="!ml-auto !flex"
+          size="small"
+          disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading}
+          onClick={postMessage}
+        >
           <Send />
         </IconButton>
-      </span>
+      </div>
     </div>
   );
 };

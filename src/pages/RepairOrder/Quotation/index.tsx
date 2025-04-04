@@ -25,10 +25,8 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
-  PRICING_SETUP_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
-  pricingCondition,
   quotation,
   repairOrder,
   sidebarResource
@@ -622,7 +620,7 @@ const Quotation = ({
             </Box>
           )}
           {allowedToEdit && (
-            <Box display={'flex'} gap={8}>
+            <Box display={'flex'} gap={1}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
                   quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
@@ -721,7 +719,6 @@ const Quotation = ({
           )}
         </Box>
       )}
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable

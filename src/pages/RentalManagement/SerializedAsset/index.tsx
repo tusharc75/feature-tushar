@@ -105,7 +105,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       e.isColumnEditable = false;
     });
     const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
-    let coloum: any = [
+
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.serializedAsset,
+          fieldNames: ['mtrAttached']
+        }
+      ]
+    });
+    const assetFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.serializedAsset)?.fieldNames || []
+    let column: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -307,8 +317,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         Cell: ({ row }) => getAssetAssignedValues(row)
       }
     ];
-    coloum = [...coloum, ...newColumns];
-    setColumns(coloum);
+    if (assetFields?.find((f) => f.fieldName === 'mtrAttached')) {
+      column.push({
+        accessor: 'mtrAttachedView',
+        Header: assetFields?.find((f) => f.fieldName === 'mtrAttached')?.fieldLabel,
+        Cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
+      });
+    }
+    column = [...column, ...newColumns];
+    setColumns(column);
     fetchData();
   };
 
@@ -604,6 +621,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         isTransferAsset: isTransferAsset,
         transferData: transferData,
         isSubleaseAsset: _inventory.inventoryDetail?.subleaseAsset,
+        mtrAttachedView: _inventory?.inventoryDetail?.mtrAttached ? 'Yes' : 'No',
         canRemove: canRemove
       });
     });
