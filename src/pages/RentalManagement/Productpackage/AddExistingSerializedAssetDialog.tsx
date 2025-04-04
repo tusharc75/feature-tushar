@@ -335,9 +335,10 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
 
   const leftSideContentsOfSearchFilter = () => {
     return (
-      <Box mt={0.5} width={'30%'}>
+      <Box mt={0.5}>
         <Autocomplete
           fullWidth
+          sx={{ width: 250 }}
           options={warehouseOption}
           getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
           isOptionEqualToValue={(option: any, val) => option.optionValue === val}
