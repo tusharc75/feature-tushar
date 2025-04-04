@@ -1,4 +1,4 @@
-import { Box, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -8,7 +8,9 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -17,7 +19,8 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE } from 'src/constants/helpers';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -29,7 +32,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [showProductConfirmBox, setShowProductConfirmBox] = useState({ open: false, data: null });
+  const [showProductConfirmBox, setShowProductConfirmBox] = useState(false);
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
   const [arrangeView, setArrangeView] = useState(false);
@@ -40,6 +43,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const { generateColumns } = useColumns();
   const [tabValue, setTabValue] = useState(0);
   const [selectedResource, setSelectedResource] = useState('');
+  const [deleteRecord, setDeleteRecord] = useState(null);
 
   useEffect(() => {
     fetchColumns();
@@ -57,7 +61,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       api += `?type=${selectedResource}`;
     }
     axiosInstance()
-      .get(api).then(({ data: { data } }) => {
+      .get(api)
+      .then(({ data: { data } }) => {
         let rows = data?.map((u, index) => {
           let res: any = {
             ...prepareDataForGrid(u, user)
@@ -89,12 +94,36 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       {
         accessor: 'qty',
         Header: 'Qty',
+        width: 150,
         editable: allowedToEdit,
         disableFilters: true,
         disableSortBy: true,
         canDrag: false,
         disabled: true,
         Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row.original]);
+                setShowProductConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )
       }
     ];
     const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, false);
@@ -121,12 +150,13 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
+    let ids = deleteRecord?.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds, type: selectedResource })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: ids, type: selectedResource })
       .then(({ data }) => {
         setRemovingProducts(false);
-        setShowProductConfirmBox({ open: false, data: null });
+        setShowProductConfirmBox(false);
+        setDeleteRecord(null);
         fetchData();
         setToastConfig({
           open: true,
@@ -136,7 +166,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       })
       .catch((err) => {
         setRemovingProducts(false);
-        setShowProductConfirmBox({ open: false, data: null });
+        setShowProductConfirmBox(false);
         setToastConfig(err);
       });
   };
@@ -173,21 +203,6 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingProducts}
-          onClick={() => {
-            setShowProductConfirmBox({ open: true, data: selectedRecords });
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const handleArrangeUpdate = (rows: any) => {
     setIsArranging(true);
     rows?.forEach((e: any) => {
@@ -196,7 +211,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     });
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Product',
+        packageType: PACKAGE_TYPE.product,
         data: rows || [],
         type: selectedResource
       })
@@ -210,6 +225,20 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
         setArrangeView(false);
         setToastConfig(err);
       });
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowProductConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   const rightSideContents = () => {
@@ -228,9 +257,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
-            <ThemeButton
-              startIcon={<GrDrag fontSize="small" />}
-              onClick={() => setArrangeView(true)}>
+            <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
           ) : null}
@@ -240,35 +267,40 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const handleMainTabChange = (event: any, newValue: number) => {
-    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder :
-      newValue === 2 ? WORK_ORDER_TYPE.preInspectionOrder :
-        newValue === 3 ? WORK_ORDER_TYPE.postInspectionOrder :
-          newValue === 4 ? WORK_ORDER_TYPE.disassemblyOrder :
-            ''
-    )
+    setSelectedResource(
+      newValue === 1
+        ? WORK_ORDER_TYPE.assemblyOrder
+        : newValue === 2
+          ? WORK_ORDER_TYPE.preInspectionOrder
+          : newValue === 3
+            ? WORK_ORDER_TYPE.postInspectionOrder
+            : newValue === 4
+              ? WORK_ORDER_TYPE.disassemblyOrder
+              : ''
+    );
     setTabValue(newValue);
   };
 
   return (
     <>
-      {(permissions?.assemblyOrder?.isRead) && (
+      {permissions?.assemblyOrder?.isRead && (
         <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <CustomTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <CustomTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <CustomTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
-          </CustomTabs>
+          <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
+            <ContainedTab value={0} label={`Individual`} />
+            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
+            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
+            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
+            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+          </ContainedTabs>
         </>
       )}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
         rightSideContents={rightSideContents()}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        isActionButtonVisible={allowedToEdit}
         hasXpadding
       />
       {columns ? (
@@ -292,7 +324,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       )}
       {showProductAssignDialog && (
         <AssignProductDialog
-          serialized={packageData?.packageType === 'Service' ? false : null}
+          serialized={packageData?.packageType === PACKAGE_TYPE.service ? false : null}
           handleCloseDialog={() => setShowProductAssignDialog(false)}
           ids={[...dataRows?.map((e) => e._id)]}
           onSuccess={(rows) => {
@@ -301,12 +333,12 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
           isSubmitting={isSubmitting}
         />
       )}
-      {showProductConfirmBox.open && (
+      {showProductConfirmBox && (
         <ConfirmationDialog
           open={true}
           message={`Are you sure you want to delete ?`}
           onClose={() => {
-            setShowProductConfirmBox({ open: false, data: null });
+            setShowProductConfirmBox(false);
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}

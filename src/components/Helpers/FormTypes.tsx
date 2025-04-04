@@ -722,6 +722,10 @@ const FormTypes = (props) => {
   };
 
   const handleChange = (name, value) => {
+    if (fieldData?.isCounterSubField) {
+      setFieldValue(name, value);
+      return;
+    }
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
     if (setValues && Object.keys(result).length > 1) {
       setValues({ ...values, ...result });
@@ -956,6 +960,12 @@ const FormTypes = (props) => {
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+          sx={{
+            '& .MuiInputBase-root textarea': {
+              resize: 'vertical',
+              overflow: 'auto',
+            },
+          }}
         />
       </InfoLabel>
     ) : type === 'number' ? (
@@ -2768,6 +2778,7 @@ const FormTypes = (props) => {
         fieldData={fieldData}
         touched={touched}
         errors={errors}
+        fields={fields}
       />
     ) : type === 'description' ? (
       <Description fieldData={fieldData} />

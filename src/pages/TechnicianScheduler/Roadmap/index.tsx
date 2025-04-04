@@ -1,26 +1,21 @@
-import { Box, useMediaQuery } from '@mui/material';
-import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import { Box, IconButton, useMediaQuery } from '@mui/material';
+import React, { memo, useEffect, useState } from 'react';
+import { FiSidebar } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DesktopRoadmap from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import MobileRoadmap from './MobileRoadmap';
-
-const dayPixel = 35;
-const height = window.innerHeight / 2;
-const startDate = dayjs('2023-01-01');
-const endDate = dayjs('2025-12-31');
-const totalDay = endDate.diff(startDate, 'day');
+import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAssignDialog';
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
-function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, handleUnAssignTechnician }) {
+function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refresh }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [activity, setActivity] = useState([]);
-  const [loadingRoadmap, setLoadingRoadmap] = useState(false);
+  const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
@@ -31,28 +26,18 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
   }, [filter.fieldTicket]);
 
   const fetchServiceOrders = async (orderId) => {
-    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
       .then(({ data }) => {
         setActivity(data?.data);
-        setLoadingRoadmap(false);
-      })
-      .catch((err) => {
-        setLoadingRoadmap(false);
       });
   };
 
   const fetchRoadmap = async () => {
-    setLoadingRoadmap(true);
     await axiosInstance()
       .get(`/technician-scheduler/get-schedule`)
       .then(({ data: { data } }) => {
         setActivity(data);
-        setLoadingRoadmap(false);
-      })
-      .catch((err) => {
-        setLoadingRoadmap(false);
       });
   };
 
@@ -63,43 +48,73 @@ function Roadmap({ filter, selectedRecords, refresh, handleAssignTechnician, han
   const handleSelect = (event, data, type) => {
     if (type === 'map') {
       setSelected(data?._id);
-    } else if (selectedRecords?.length === 1) {
-      handleAssignTechnician(data);
+    } else if (type === 'assign') {
+      setAssignServiceDialog({ open: true, data: data });
     } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
       handleUnAssignTechnician(data);
     }
   };
 
-  if (loadingRoadmap) {
-    return (
-      <Box p={2} height={height}>
-        <CommonSkeleton lenArray={[...Array(10).keys()]} />
-      </Box>
-    );
-  }
-
   return (
-    <Box bgcolor="var(--dark-secondary, white)">
-      {isMobile ? (
-        <MobileRoadmap
-          activity={
-            selectedRecords?.length === 1
-              ? activity.filter(
-                  (item) => !selectedRecords[0]?.competencyType || selectedRecords[0]?.competencyType === item?.competencyType?.optionLabel
-                )
-              : activity
-          }
-          expanded={expanded}
-          selected={selected}
-          handleToggle={handleToggle}
-          handleSelect={handleSelect}
-          setSelected={setSelected}
-        />
-      ) : (
-        <DesktopRoadmap activity={activity} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
+    <>
+      {headerSlot && (
+        <div className="mb-4 flex items-center gap-2">
+          <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />
+          {headerSlot}
+        </div>
       )}
-    </Box>
+      <Box bgcolor="var(--dark-secondary, white)">
+        {isMobile ? (
+          <MobileRoadmap
+            activity={activity}
+            expanded={expanded}
+            leftSidebar={leftSidebar}
+            selected={selected}
+            handleToggle={handleToggle}
+            handleSelect={handleSelect}
+            setSelected={setSelected}
+            loading={!activity}
+          />
+        ) : (
+          <DesktopRoadmap
+            loading={!activity}
+            selectedResource={selectedResource}
+            activity={activity}
+            leftSidebar={leftSidebar}
+            handleSelect={handleSelect}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+            selected={selected}
+            setSelected={setSelected}
+          />
+        )}
+      </Box>
+      {assignServiceDialog.open && (
+        <ServiceAssignDialog
+          handleClose={() => {
+            setAssignServiceDialog({ open: false, data: null });
+          }}
+          selectedResource={selectedResource}
+          technician={assignServiceDialog.data}
+          handleSucess={() => {
+            fetchRoadmap();
+            setAssignServiceDialog({ open: false, data: null });
+          }}
+        />
+      )}
+    </>
   );
 }
 
 export default Roadmap;
+
+const ToggleSidebar = memo(
+  ({ leftSidebar, setIsSidebarOpen }: { leftSidebar: React.ReactNode; setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>> }) => {
+    if (!leftSidebar) return null;
+    return (
+      <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)}>
+        <FiSidebar />
+      </IconButton>
+    );
+  }
+);

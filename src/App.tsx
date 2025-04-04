@@ -1,7 +1,7 @@
 import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
@@ -288,6 +288,7 @@ import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 import CustomMessageDialog from 'src/components/MessageDialog';
+const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
 
@@ -311,7 +312,6 @@ function App() {
     dispatch
   }: any = useData();
 
-  const history = useHistory();
   const handleCloseUpdateModal = () => {
     handleHardReload();
     setIsUpdateModalOpen({ open: false, data: null });
@@ -343,7 +343,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1243,7 +1243,7 @@ function App() {
             <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
               <PackageCategoryDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.scheduleMaintenance.path}`}>
+            <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
@@ -1261,8 +1261,10 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
           {permissions?.equiptAi?.isRead && <AgentChat />}
+          <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
         </ErrorBoundaryComponent>
       </AnimatePresence>
+
       {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
         (!['notFoundError', 'productInventoryAlert'].includes(toast?.toastConfig?.type) ? (

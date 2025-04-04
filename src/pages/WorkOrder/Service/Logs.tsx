@@ -9,7 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import styles from './logs.module.scss';
 import { BiRefresh } from 'react-icons/bi';
-import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill, BsArrowRepeat } from 'react-icons/bs';
+import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill, BsArrowRepeat, BsTrash } from 'react-icons/bs';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
 import { CustomDialogTransition, displayDate, displayDateTime } from 'src/constants/helpers';
@@ -74,7 +74,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     failed: 'Failed',
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated',
-    consumed: 'consumed'
+    consumed: 'consumed',
+    deleted: 'deleted'
   };
 
   const getIcon = (type: string = 'Fail') => {
@@ -110,6 +111,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
       case operations.consumed:
         icon = <MdBolt />;
         break;
+      case operations.deleted:
+        icon = <BsTrash />;
+        break;
     }
     return icon;
   };
@@ -143,6 +147,10 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         break;
       case operations.valueUpdated:
         color = { '--icon-color': '#138A86', '--icon-bg-color': '#E2FBEC' } as React.CSSProperties;
+        break;
+      case operations.deleted:
+        color = { '--icon-color': '#D15241', '--icon-bg-color': '#FEE4E0' } as React.CSSProperties;
+        break;
     }
     return color;
   };
@@ -186,6 +194,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         break;
       case operations.valueUpdated:
         message = `<span>Updated value</span> ${stepName} ${serviceName}`;
+        break;
+      case operations.deleted:
+        message = `<span>Deleted</span> ${stepName} ${serviceName}`;
         break;
     }
     return message;

@@ -93,7 +93,7 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
     try {
       let rows = []
       if (expenseIds?.length) {
-        const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}`, { cancelToken: cancelTokenSource?.token });
+        const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}&noUserFilter=true`, { cancelToken: cancelTokenSource?.token });
         rows = response?.data?.data;
       }
       rows = rows?.map((e) => {

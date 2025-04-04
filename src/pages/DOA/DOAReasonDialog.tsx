@@ -28,7 +28,7 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
           onClose={handleCloseDialog}
           aria-labelledby="assign-roles-dialog"
         >
-          <CustomDialogHeader title={`Reason For Reject`} />
+          <CustomDialogHeader onClose={handleCloseDialog} title={`Reason For Reject`} />
           <CustomDialogContent>
             <>
               <List style={{ padding: 0 }}>
@@ -59,6 +59,12 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
                   onChange={handleChange}
                   rows={4}
                   variant="outlined"
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               )}
             </>

@@ -263,6 +263,12 @@ const Steps = (props) => {
                     variant="outlined"
                     error={Boolean(commentError)}
                     helperText={Boolean(commentError) && commentError}
+                    sx={{
+                      '& .MuiInputBase-root textarea': {
+                        resize: 'vertical',
+                        overflow: 'auto',
+                      },
+                    }}
                   />
                 </Box>
               )}

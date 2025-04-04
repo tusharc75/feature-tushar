@@ -27,7 +27,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
 const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
@@ -324,15 +324,9 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    if (creditMemoData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${creditMemoData?.taxCode?.optionValue}&materialType=${addDialog.type}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(user, creditMemoData, addDialog.type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
@@ -365,7 +359,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
       });
     }
     const conditionType = creditMemoData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(creditMemoData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.creditMemo, creditMemoData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, creditMemoData?.currency, allFields);

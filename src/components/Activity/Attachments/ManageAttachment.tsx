@@ -45,7 +45,8 @@ export default function ManageAttachment({
   showManimizeMaximize,
   parentFolder = null,
   type = 'file',
-  defaultAttachmentType = ''
+  attachmentType = null,
+  customhandleAdd = null
 }) {
   const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -101,7 +102,7 @@ export default function ManageAttachment({
         });
     } else {
       if (type === 'file') {
-        setInitialValues({ name: '', fileUrl: '', attachmentType: defaultAttachmentType });
+        setInitialValues({ name: '', fileUrl: '', attachmentType: attachmentType || '' });
       } else {
         setInitialValues({ name: '' });
       }
@@ -129,40 +130,44 @@ export default function ManageAttachment({
     }
     setLoading(true);
     if (type === 'file') {
-      if (attachmentId && !isClone) {
-        axiosInstance()
-          .put(`/attachment/${attachmentId}`, request)
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.message
-            });
-            setLoading(false);
-            handleClose();
-            if (fetchData) fetchData();
-          })
-          .catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-          });
+      if (customhandleAdd) {
+        customhandleAdd(request, setLoading);
       } else {
-        axiosInstance()
-          .post(`/attachment`, request)
-          .then(({ data }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.message
+        if (attachmentId && !isClone) {
+          axiosInstance()
+            .put(`/attachment/${attachmentId}`, request)
+            .then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              setLoading(false);
+              handleClose();
+              if (fetchData) fetchData();
+            })
+            .catch((error) => {
+              setLoading(false);
+              toastConfig.setToastConfig(error);
             });
-            setLoading(false);
-            handleClose();
-            if (fetchData) fetchData();
-          })
-          .catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-          });
+        } else {
+          axiosInstance()
+            .post(`/attachment`, request)
+            .then(({ data }) => {
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              setLoading(false);
+              handleClose();
+              if (fetchData) fetchData();
+            })
+            .catch((error) => {
+              setLoading(false);
+              toastConfig.setToastConfig(error);
+            });
+        }
       }
     } else {
       if (attachmentId && !isClone) {
@@ -258,7 +263,7 @@ export default function ManageAttachment({
                           size="small"
                           options={Object.values(ATTACHMENT_TYPE)}
                           renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
-                          disabled={defaultAttachmentType === '' ? !canEdit : true}
+                          disabled={attachmentType ? true : !canEdit}
                           getOptionLabel={(option) => option || ''}
                           isOptionEqualToValue={(option: any, value: any) => option === value}
                           onChange={(e, val) => {

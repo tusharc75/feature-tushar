@@ -54,6 +54,12 @@ const FormTypes = (props) => {
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
+      sx={{
+        '& .MuiInputBase-root textarea': {
+          resize: 'vertical',
+          overflow: 'auto',
+        },
+      }}
       {...others}
     />
   ) : fieldData?.type === 'percent' ? (

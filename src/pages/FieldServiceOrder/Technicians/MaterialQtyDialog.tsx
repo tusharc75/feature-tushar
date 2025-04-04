@@ -6,7 +6,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -21,6 +21,7 @@ import { bulkUpdate, calculateRowsField } from '../../../components/RentalManagm
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -65,6 +66,10 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchData();
@@ -138,7 +143,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       }
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(rowData, pricingMethodOptions);
-      
+
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
           if (element.fieldName === 'qty') {
@@ -172,6 +177,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           if (element.fieldName === 'wellNumber' && isArray(serviceOrderData?.wellNumber)) {
             element.option = element.option?.filter((ele) => serviceOrderData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
           }
+        }
+        if (element.fieldName === 'qty' && !rowData?.canDelete) {
+          element.disabled = true;
         }
       });
       setInitialData({
@@ -216,7 +224,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         (serviceOrderData?.billingAddress &&
           (serviceOrderData?.billingAddress?.zipCode || serviceOrderData?.billingAddress?.state || serviceOrderData?.billingAddress?.county)))
     ) {
-      const taxCodeOptions = await getTaxList(serviceOrderData?.billingAddress, isBulkedit ? rowData[0]?.type : rowData?.type);
+      const taxCodeOptions = await getTaxList(user, serviceOrderData?.billingAddress, isBulkedit ? rowData[0]?.type : rowData?.type);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
@@ -243,7 +251,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(serviceOrderData, [{
+      let priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, [{
         materialId: rowData.materialId,
         type: rowData.type,
         qty: 1,
@@ -255,7 +263,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
   }
-  
+
   const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
     var tempPriceCondition = [...priceData];
     if (values['unit'] && values['unit'] !== '') {

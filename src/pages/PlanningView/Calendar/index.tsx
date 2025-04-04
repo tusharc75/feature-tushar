@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
-import { camelCase, groupBy } from 'lodash';
+import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -158,6 +158,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
+  const EMPLOYEE_MASTER_FILTERS = useMemo(
+    () => [
+      {
+        label: resources?.employeeMaster?.titleSingular,
+        value: 'Employee Master',
+        key: 'technician'
+      },
+      {
+        label: resources?.warehouse?.titlePlural,
+        value: 'Warehouse',
+        key: 'warehouse'
+      }
+    ],
+    [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
+  );
+
   const RENTAL_JOB_FILTERS = useMemo(
     () => [
       {
@@ -207,7 +223,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [isDataFetching, setIsDataFetching] = useState(false);
 
   useEffect(() => {
-    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value)?.toString();
+    const lookupResource = [
+      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value))
+    ]?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
@@ -246,6 +264,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           setFilters(ASSET_FILTERS);
         } else if (selectedResource.resource === sidebarResource.product) {
           setFilters(PRODUCT_FILTERS);
+        } else if (selectedResource.resource === sidebarResource.employeeMaster) {
+          setFilters(EMPLOYEE_MASTER_FILTERS);
         } else if (selectedResource.resource === sidebarResource.rentalManagement) {
           setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
         } else {
@@ -261,6 +281,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       setSelectedFilters(ASSET_FILTERS);
     } else if (selectedResource?.resource === sidebarResource.product) {
       setSelectedFilters(PRODUCT_FILTERS);
+    } else if (selectedResource?.resource === sidebarResource.employeeMaster) {
+      setSelectedFilters(EMPLOYEE_MASTER_FILTERS);
     }
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
@@ -382,6 +404,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             let startDraggable = true;
             let endDraggable = true;
 
+            const extraData: any = {};
+
             if (selectedResource.resource === sidebarResource.rentalManagement) {
               if (d?.parentAccount?.optionLabel) {
                 title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
@@ -402,11 +426,31 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 fulfillStatus = 'ERROR';
               }
             }
+            if (selectedResource.resource === sidebarResource.employeeMaster) {
+              if (d?.referenceType === sidebarResource.fieldTicket) {
+                title = `${d?.fieldTicket?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.fieldTicket?.optionValue;
+              } else if (d?.referenceType === sidebarResource.fieldServiceOrder) {
+                title = `${d?.fieldServiceOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.fieldServiceOrder?.optionValue;
+              } else if (d?.referenceType === sidebarResource.rentalManagement) {
+                title = `${d?.rentalManagement?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.rentalManagement?.optionValue;
+              } else if (d?.referenceType === sidebarResource.workOrder) {
+                title = `${d?.workOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+                extraData.referenceType = d?.referenceType;
+                extraData.referenceId = d?.workOrder?.optionValue;
+              }
+            }
             return {
-              id: d._id,
+              id: d?._id,
               title: title,
               start: start,
               end: end,
+              ...(!isEmpty(extraData) ? extraData : {}),
               allDay: true,
               resource: selectedResource.resource,
               fulfillStatus: fulfillStatus,
@@ -518,6 +562,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setAnchor(target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
+      }
+    } else if (selectedResource.resource === sidebarResource.employeeMaster) {
+      if (data?.referenceType === sidebarResource.fieldTicket) {
+        window.open(`${routes.fieldTicketDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.fieldServiceOrder) {
+        window.open(`${routes.fieldServiceOrderDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.rentalManagement) {
+        window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
+      } else if (data?.referenceType === sidebarResource.workOrder) {
+        window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
       }
     } else {
       if (data.resource) {
@@ -706,7 +760,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               size="small"
               renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
             />
-            {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) && (
+            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) && (
               <Autocomplete
                 multiple
                 options={filters}
@@ -738,7 +792,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 }}
               />
             )}
-            {[sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+            {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
                   <RenderFilter
@@ -752,7 +806,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               })}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
-            {![sidebarResource.serializedAsset, sidebarResource.product].includes(selectedResource?.resource) &&
+            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
                   <RenderFilter

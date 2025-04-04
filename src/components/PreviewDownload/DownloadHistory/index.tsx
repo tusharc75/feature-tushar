@@ -8,6 +8,7 @@ import PreviewIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import Grid from '@mui/material/Grid2';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 var apiCallInterval: any = null;
 
@@ -32,7 +33,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
         if (data?.length && data?.find((e) => e.status === FILE_PROCESS_STATUS.processing)) {
           apiCallInterval = setInterval(async () => {
             await fetchData();
-          }, 30000);
+          }, 5000);
         }
       })
       .catch((err) => {
@@ -122,7 +123,7 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                                 downloadFile(row, 'Preview');
                               }}
                             >
-                              <PreviewIcon />
+                              <PreviewIcon fontSize='small' />
                             </IconButton>
                           </HtmlTooltip>
                           <HtmlTooltip title="Download">
@@ -133,12 +134,12 @@ const DownloadHistory = ({ referenceId, resource, loadingType }) => {
                                 downloadFile(row, 'Download');
                               }}
                             >
-                              <DownloadIcon />
+                              <DownloadIcon fontSize='small' />
                             </IconButton>
                           </HtmlTooltip>
                         </>
-                      ) : (
-                        <SyncIcon className="rotate" />
+                      ) : row?.status === FILE_PROCESS_STATUS.fail ? <HighlightOffIcon fontSize='small' color='error' /> : (
+                        <SyncIcon className="rotate" fontSize='small' />
                       )}
                     </TableCell>
                   </TableRow>

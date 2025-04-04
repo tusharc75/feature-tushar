@@ -113,6 +113,12 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                 onChange={(e) => {
                   setFieldValue('comment', e.target.value);
                 }}
+                sx={{
+                  '& .MuiInputBase-root textarea': {
+                    resize: 'vertical',
+                    overflow: 'auto',
+                  },
+                }}
               />
             </CustomDialogContent>
             <CustomDialogFooter>

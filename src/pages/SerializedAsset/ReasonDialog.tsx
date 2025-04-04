@@ -49,6 +49,12 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
                   multiline={true}
                   rows={3}
                   size="small"
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               </Grid>
             </Grid>

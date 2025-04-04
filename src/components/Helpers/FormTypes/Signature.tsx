@@ -15,6 +15,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ErrorType, useDropZone } from 'src/hooks';
 import axiosInstance from 'src/axios/axiosInstance';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 
 const UseCamera = ({ handleToggleMode, usePad, setPicture, picture, isFullScreen }) => {
   const [cameraCount, setCameraCount] = useState(0);
@@ -137,6 +139,8 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [strokes, setStrokes] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
 
   const handleShowDropDownError = (error: ErrorType) => {
     const fileNames = Object.keys(error);
@@ -159,10 +163,36 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const handleEnd = () => {
     if (!signCanvas.current?.isEmpty()) {
       const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+      const data = signCanvas.current?.toData();
       setPicture(picture);
+      setStrokes(data);
+      setRedoStack([]);
     } else {
       setToastConfig({ open: true, type: 'warning', message: 'Signature cannot be empty!' });
     }
+  };
+
+  const handleUndo = () => {
+    if (strokes.length === 0) return;
+    const currentStrokes = [...strokes];
+    const removedStroke = currentStrokes.pop();
+    setRedoStack((prev) => [...prev, removedStroke]);
+    setStrokes(currentStrokes);
+    signCanvas.current?.fromData(currentStrokes);
+    const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+    setPicture(picture);
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length === 0) return;
+    const newRedoStack = [...redoStack];
+    const strokeToRestore = newRedoStack.pop();
+    const newStrokes = [...strokes, strokeToRestore];
+    setStrokes(newStrokes);
+    setRedoStack(newRedoStack);
+    signCanvas.current?.fromData(newStrokes);
+    const picture = signCanvas.current?.getTrimmedCanvas().toDataURL('image/png');
+    setPicture(picture);
   };
 
   const handleDrop = (files: File[]) => {
@@ -201,9 +231,12 @@ const SignatureDialog = ({ onSave, open, close }) => {
     clearAllData();
     setUsePad((prev) => !prev);
   };
+
   const clearAllData = () => {
     setPicture('');
     setUploadedFile(null);
+    setStrokes([]);
+    setRedoStack([]);
     signCanvas.current?.clear();
   };
 
@@ -220,6 +253,18 @@ const SignatureDialog = ({ onSave, open, close }) => {
         showRequiredLabel={false}
       />
       <CustomDialogContent className="px-[15px]">
+        <div className="mt-2 flex justify-end gap-2">
+          <HtmlTooltip title="Undo">
+            <IconButton onClick={handleUndo} disabled={strokes.length === 0 || uploading} color={uploading ? 'default' : 'primary'} size="small">
+              <UndoIcon />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Redo">
+            <IconButton onClick={handleRedo} disabled={redoStack.length === 0 || uploading} color={uploading ? 'default' : 'primary'} size="small">
+              <RedoIcon />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
         <input
           type="file"
           className="sr-only"

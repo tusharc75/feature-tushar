@@ -1,11 +1,11 @@
-import { Box, IconButton } from '@mui/material';
 import { Info } from '@mui/icons-material';
+import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { isEqual, uniqBy } from 'lodash';
 import React, { Dispatch, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, TActios, TInitialState, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, TActios, TInitialState, useColumns } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,7 +16,6 @@ import {
   gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
   prepareDataForGrid,
-  REPAIR_ORDER_TYPE,
   sidebarResource,
   workOrder,
   WORKORDER_SERVICE_STATUS,
@@ -24,10 +23,10 @@ import {
 } from 'src/constants/helpers';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
+import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 
 type Props = {
   filterQuery: any;
@@ -145,8 +144,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         {
           accessor: 'service',
           Header: 'Service',
-          disableFilters: true,
-          disableSortBy: true,
           Cell: ({ row }) =>
             row.original['service'] && row.original.serviceId ? (
               <div className="flex items-center gap-1">
@@ -515,7 +512,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
             workStations={
               selectedRecords?.length === 1 ||
-              selectedRecords?.every((val) => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
+                selectedRecords?.every((val) => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
                 ? selectedRecords[0]?.assignedWorkStations
                 : []
             }

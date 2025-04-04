@@ -142,6 +142,12 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       onChange={(e) => {
                         setFieldValue('description', e?.target?.value);
                       }}
+                      sx={{
+                        '& .MuiInputBase-root textarea': {
+                          resize: 'vertical',
+                          overflow: 'auto',
+                        },
+                      }}
                     />
                   </Grid>
                   <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>

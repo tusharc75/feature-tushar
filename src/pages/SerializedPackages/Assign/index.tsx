@@ -12,13 +12,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const Assign = ({ serializedPackagesData }) => {
-  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_${serializedPackagesData?.package?.optionLabel}`;
+const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
+
+  const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_Assign`;
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -132,21 +133,21 @@ const Assign = ({ serializedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
@@ -167,7 +168,7 @@ const Assign = ({ serializedPackagesData }) => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {permissions?.serializedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+            {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
@@ -176,8 +177,9 @@ const Assign = ({ serializedPackagesData }) => {
                     setDeleteRecord(row.original);
                     setShowDeleteConfirmBox(true);
                   }}
+                  disabled={!row?.original?.canDelete}
                 >
-                  <Delete color="error" fontSize="small" />
+                  <Delete color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -214,7 +216,8 @@ const Assign = ({ serializedPackagesData }) => {
                 : '';
           parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
           parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
-          parent.assetQty = parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === parent?.materialId)?.length : 0;
+          parent.assetQty =
+            parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length : 0;
           parent.subRows = generateNestedData(data, assets, parent);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -244,23 +247,19 @@ const Assign = ({ serializedPackagesData }) => {
       _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productNumber : '';
       _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
-        _subRow.type === MATERIAL_TYPE.product
-          ? assets.filter((e) => {
-              return e.product === _subRow.materialId && (_subRow.package ? _subRow.materialId === e.package : true);
-            })?.length
-          : 0;
+        _subRow.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === _subRow.materialId && e?._id === _subRow?._id)?.length : 0;
       _subRow.subRows = generateNestedData(material, assets, _subRow);
     });
 
     if (assets?.length > 0) {
-      const assetsSubRows = assets.filter((e) => {
-        return e.product === parent.materialId && (parent.package ? parent.materialId === e.package : true);
-      });
+      const assetsSubRows = assets.filter((e) => e.product === parent.materialId && e?._id === parent?._id);
+      const subRowsLength = subRows?.length || 0;
       assetsSubRows.forEach((_subRow, j) => {
-        _subRow.index = parent.index + '.' + (j + 1 + (subRows?.length || 0));
+        _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
         _subRow.parentId = _subRow?.product;
+        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available;
         subRows.push(_subRow);
       });
     }
@@ -271,14 +270,15 @@ const Assign = ({ serializedPackagesData }) => {
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
-      ids.push(deleteRecord._id);
+      ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
     } else {
-      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d._id);
+      ids = selectedRecords?.filter((r) => r?.canDelete && r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
     }
     axiosInstance()
       .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
+        fetchSerializedPackagesData()
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
@@ -295,6 +295,7 @@ const Assign = ({ serializedPackagesData }) => {
     axiosInstance()
       .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
+        fetchSerializedPackagesData()
         setAssignAssetDialog({ open: false, products: [] });
         setIsAssetAdding(false);
         fetchData();
@@ -327,15 +328,13 @@ const Assign = ({ serializedPackagesData }) => {
                     if (productsMap.has(e.materialId)) {
                       const existingProduct = productsMap.get(e._id);
                       existingProduct.qty += diff;
-                      if (e?.parentId) {
-                        existingProduct.packages = [...existingProduct.packages, e.parentId];
-                      }
+                      existingProduct._id = [...existingProduct._id, e._id];
                     } else {
                       const productDetail = {
                         product: e.materialId,
                         qty: diff,
                         productName: e?.detail,
-                        packages: e?.parentId ? [e?.parentId] : []
+                        _id: [e?._id]
                       };
                       productsMap.set(e.materialId, productDetail);
                     }
@@ -350,7 +349,7 @@ const Assign = ({ serializedPackagesData }) => {
         )}
         {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
-            disabled={!selectedRecords?.some((e) => e.type === MATERIAL_TYPE.serializedAsset)}
+            disabled={selectedRecords?.some((e) => e?.canDelete && e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}

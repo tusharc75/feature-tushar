@@ -68,7 +68,9 @@ function PreviewDownload({
           name: e?.fieldName,
           width: e?.width,
           customLabel: e?.customLabel,
-          showBelowRow: e?.showBelowRow
+          showBelowRow: e?.showBelowRow,
+          alignment: e?.alignment,
+          fontWeight: e?.fontWeight
         };
       })
     );

@@ -4,11 +4,11 @@ import ButtonMenu, { ButtonMenuProps } from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export type NewActionButtonProps<D> = {
+export type NewActionButtonProps<D, I> = {
   itemsVisibleCount?: number;
-} & Omit<ButtonMenuProps<D>, 'showChevron'>;
+} & Omit<ButtonMenuProps<D, I>, 'showChevron'>;
 
-const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }: NewActionButtonProps<D>) => {
+const NewActionButton = <D, I>({ items, itemsVisibleCount = 2, disabled, className, ...rest }: NewActionButtonProps<D, I>) => {
   const visibleItems = [...items].slice(0, itemsVisibleCount);
   const hiddenItems = [...items].slice(itemsVisibleCount);
 
@@ -17,7 +17,7 @@ const NewActionButton = <D,>({ items, itemsVisibleCount = 2, disabled, ...rest }
       {visibleItems.map((item) => {
         const { label, ...rest } = item;
         return (
-          <ThemeButton buttonType="themeBorder" key={item.label} iconForMobile={false} {...(rest as any)}>
+          <ThemeButton buttonType="themeBorder" className={className} key={item.label} iconForMobile={false} {...(rest as any)}>
             {label}
           </ThemeButton>
         );

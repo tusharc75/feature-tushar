@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -56,6 +56,15 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   }, [selectedService]);
 
   const fetchColumns = async () => {
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.employeeMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
     const column: any = [
       {
         accessor: 'index',
@@ -129,9 +138,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      {
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -143,11 +152,12 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             }}
             original={row?.original}
           />
-        )
-      },
-      {
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -159,8 +169,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             }}
             original={row?.original}
           />
-        )
-      },
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : []),
       {
         accessor: 'startDate',
         Header: 'Start Date',
@@ -321,7 +332,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       element.technician = d?._id;
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.status = 'Assigned';
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
       element.startDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
       element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
@@ -461,7 +471,10 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              actionButtonProps={{
+                disabled: !Boolean(selectedRecords?.length),
+              }}
+              addButtonText='Assign'
               hasXpadding
             />
           </>

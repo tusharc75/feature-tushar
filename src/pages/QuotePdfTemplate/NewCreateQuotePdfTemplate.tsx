@@ -26,6 +26,7 @@ import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
+import FormTypes from 'src/components/Helpers/FormTypes';
 
 const defaultProductColumns = 7;
 
@@ -176,6 +177,12 @@ export default function NewCreateQuotePdfTemplate() {
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
+      tableTotalAtBottom: false,
+      tableFontSize: '',
+      belowTableTotalFontSize: '',
+      pdfFontSize: '',
+      tableHeaderBackgroundColor: '',
+      tableHeaderFontColor: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -228,27 +235,33 @@ export default function NewCreateQuotePdfTemplate() {
         }
       }
       if (tempPdfTemplate) {
-        setIsLandscapChecked(tempPdfTemplate.landscape);
-        initialValues.landscape = tempPdfTemplate.landscape;
-        initialValues.hideAmountTotalSection = tempPdfTemplate.hideAmountTotalSection;
-        initialValues.productColumns = tempPdfTemplate.productColumns;
-        initialValues.name = tempPdfTemplate.name;
-        initialValues.pageNumberInFooter = tempPdfTemplate.pageNumberInFooter;
-        initialValues.header = tempPdfTemplate.header;
-        initialValues.footer = tempPdfTemplate.footer;
-        initialValues.aboveTable = tempPdfTemplate.aboveTable;
-        initialValues.belowTable = tempPdfTemplate.belowTable;
-        initialValues.tabelSummaryLeftSide = tempPdfTemplate.tabelSummaryLeftSide;
-        initialValues.entity = tempPdfTemplate.entity ? tempPdfTemplate.entity : [];
-        initialValues.type = tempPdfTemplate.type;
-        initialValues.owner = tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id;
-        initialValues.collaborator = tempPdfTemplate.collaborator ? tempPdfTemplate.collaborator : [];
+        setIsLandscapChecked(tempPdfTemplate?.landscape);
+        initialValues.landscape = tempPdfTemplate?.landscape;
+        initialValues.hideAmountTotalSection = tempPdfTemplate?.hideAmountTotalSection;
+        initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
+        initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
+        initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
+        initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
+        initialValues.tableHeaderBackgroundColor = tempPdfTemplate?.tableHeaderBackgroundColor;
+        initialValues.tableHeaderFontColor = tempPdfTemplate?.tableHeaderFontColor;
+        initialValues.productColumns = tempPdfTemplate?.productColumns;
+        initialValues.name = tempPdfTemplate?.name;
+        initialValues.pageNumberInFooter = tempPdfTemplate?.pageNumberInFooter;
+        initialValues.header = tempPdfTemplate?.header;
+        initialValues.footer = tempPdfTemplate?.footer;
+        initialValues.aboveTable = tempPdfTemplate?.aboveTable;
+        initialValues.belowTable = tempPdfTemplate?.belowTable;
+        initialValues.tabelSummaryLeftSide = tempPdfTemplate?.tabelSummaryLeftSide;
+        initialValues.entity = tempPdfTemplate?.entity ? tempPdfTemplate?.entity : [];
+        initialValues.type = tempPdfTemplate?.type;
+        initialValues.owner = tempPdfTemplate?.owner && tempPdfTemplate?.owner !== undefined ? tempPdfTemplate?.owner : user.user._id;
+        initialValues.collaborator = tempPdfTemplate?.collaborator ? tempPdfTemplate?.collaborator : [];
 
         setDetails({
-          header: tempPdfTemplate.header,
-          footer: tempPdfTemplate.footer,
-          aboveTable: tempPdfTemplate.aboveTable,
-          belowTable: tempPdfTemplate.belowTable,
+          header: tempPdfTemplate?.header,
+          footer: tempPdfTemplate?.footer,
+          aboveTable: tempPdfTemplate?.aboveTable,
+          belowTable: tempPdfTemplate?.belowTable,
           tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide
         });
       } else {
@@ -260,6 +273,12 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
+          initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
+          initialValues.tableFontSize = data?.tableFontSize;
+          initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
+          initialValues.pdfFontSize = data?.pdfFontSize;
+          initialValues.tableHeaderBackgroundColor = data?.tableHeaderBackgroundColor;
+          initialValues.tableHeaderFontColor = data?.tableHeaderFontColor;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -270,7 +289,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tabelSummaryLeftSide = data?.tabelSummaryLeftSide;
           initialValues.entity = data?.entity ? data?.entity : [];
           initialValues.type = data?.type;
-          initialValues.owner = data?.owner && data.owner !== undefined ? data?.owner : user.user._id;
+          initialValues.owner = data?.owner && data?.owner !== undefined ? data?.owner : user.user._id;
           initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
           setDetails({
             header: data?.header,
@@ -380,6 +399,12 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
+          tableFontSize: parseInt(values?.tableFontSize),
+          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+          pdfFontSize: parseInt(values?.pdfFontSize),
+          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+          tableHeaderFontColor: values?.tableHeaderFontColor,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -428,6 +453,12 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
+          tableFontSize: parseInt(values?.tableFontSize),
+          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+          pdfFontSize: parseInt(values?.pdfFontSize),
+          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+          tableHeaderFontColor: values?.tableHeaderFontColor,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -734,8 +765,7 @@ export default function NewCreateQuotePdfTemplate() {
                       helperText="Value must be between 5 to 20"
                     />
                   </div>
-
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-1">
                     <div className="flex gap-2">
                       <FormControlLabel
                         disabled={!isClone && !hasPermissionToUpdate}
@@ -783,6 +813,22 @@ export default function NewCreateQuotePdfTemplate() {
                         }
                         label="Hide Amount Total Section"
                       />
+                      <FormControlLabel
+                        disabled={!isClone && !hasPermissionToUpdate}
+                        value={values['tableTotalAtBottom']}
+                        control={
+                          <Checkbox
+                            name="tableTotalAtBottom"
+                            checked={values['tableTotalAtBottom']}
+                            onChange={(e) => {
+                              setFieldValue('tableTotalAtBottom', e.target.checked);
+                            }}
+                            color="primary"
+                          />
+                        }
+                        label="Show Table Total At Bottom"
+                      />
+
                     </div>
                     {allFields?.length && id && id !== '0' && !isClone && (
                       <ThemeButton onClick={() => setVariableDialog(true)}>
@@ -790,7 +836,98 @@ export default function NewCreateQuotePdfTemplate() {
                       </ThemeButton>
                     )}
                   </div>
-
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex gap-2">
+                      <TextField
+                        variant="outlined"
+                        label={'Table Font Size'}
+                        name="tableFontSize"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        value={values['tableFontSize']}
+                        error={touched['tableFontSize'] && Boolean(errors['tableFontSize'])}
+                        helperText={touched['tableFontSize'] && errors['tableFontSize']}
+                        onChange={(e) => {
+                          setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
+                        }}
+                        sx={{ width: 220 }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pt'
+                          }
+                        }}
+                      />
+                      <TextField
+                        variant="outlined"
+                        label={'Table Total Font Size'}
+                        name="belowTableTotalFontSize"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        sx={{ width: 220 }}
+                        value={values['belowTableTotalFontSize']}
+                        error={touched['belowTableTotalFontSize'] && Boolean(errors['belowTableTotalFontSize'])}
+                        helperText={touched['belowTableTotalFontSize'] && errors['belowTableTotalFontSize']}
+                        onChange={(e) => {
+                          setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
+                        }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pt'
+                          }
+                        }}
+                      />
+                      <TextField
+                        variant="outlined"
+                        label={'Pdf Font Size'}
+                        name="pdfFontSize"
+                        type="number"
+                        margin="none"
+                        size={'small'}
+                        value={values['pdfFontSize']}
+                        error={touched['pdfFontSize'] && Boolean(errors['pdfFontSize'])}
+                        helperText={touched['pdfFontSize'] && errors['pdfFontSize']}
+                        sx={{ width: 220 }}
+                        onChange={(e) => {
+                          setFieldValue('pdfFontSize', parseInt(e.target.value.trimStart()));
+                        }}
+                        slotProps={{
+                          input: {
+                            endAdornment: 'pt'
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex gap-8">
+                      <FormTypes
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        label={'Table Header Background Color'}
+                        name={'tableHeaderBackgroundColor'}
+                        type={'colorPicker'}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        isTooltip={false}
+                      />
+                       <FormTypes
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        label={'Table Header Font Color'}
+                        name={'tableHeaderFontColor'}
+                        type={'colorPicker'}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        isTooltip={false}
+                      />
+                    </div>
+                  </div>
                   <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
                       <Typography className={classes.headingLabel} variant="h5" component="h5">

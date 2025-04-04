@@ -19,7 +19,8 @@ import {
   sidebarResource,
   getObjKeysWithValues,
   displayDate,
-  dateFormatToSend
+  dateFormatToSend,
+  PACKAGE_TYPE
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -176,7 +177,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail?.packageType === 'Product'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service
@@ -357,7 +358,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         data?.inventory
           ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
           ?.forEach((ele: any) => {
-            ele.type = 'serializedAsset';
+            ele.type = MATERIAL_TYPE.serializedAsset;
             ele.qty = 1;
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
@@ -371,7 +372,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             newMaterial.push({ ...rest, ...ele, ...calValues });
           });
       });
-
     data?.material
       ?.filter((d) => d.actualStartDate)
       ?.forEach((element) => {
@@ -390,7 +390,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
               ?.forEach((ele: any) => {
                 ele.parentId = element?._id;
-                ele.type = 'serializedAsset';
+                ele.type = MATERIAL_TYPE.serializedAsset;
                 ele.qty = 1;
                 ele._id = ele?.inventoryDetail?._id;
                 ele.materialId = ele?.inventoryDetail?._id;
@@ -614,7 +614,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        const productStartDateTime = dayjs(new Date(element.actualStartDate));
+        const productStartDateTime = dayjs.tz(new Date(element.actualStartDate)).startOf("day");
         const selectedEndDateTime = dayjs(new Date(endDate));
 
         if (productStartDateTime.isAfter(selectedEndDateTime)) {

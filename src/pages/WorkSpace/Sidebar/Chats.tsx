@@ -1,80 +1,57 @@
 import { ArrowDropDown, ArrowDropUp, Person } from '@mui/icons-material';
 import { Avatar, Badge, CircularProgress, Collapse, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import { debounce } from 'lodash';
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn } from 'src/constants/helpers';
-import { TChat, User } from 'src/pages/WorkSpace/types';
+import { User } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useStore } from 'src/StateProvider/fastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const Chats = ({ state }: { state: UseWorkSpace }) => {
-  const { initChat, selectedChannel, ignoreIds, chats, newChatToUser } = state;
+  const { initChat, selectedChannel, newChatToUser } = state;
   const [onlineUsers] = useStore((state) => state.onlineUsers);
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+
   const [isExpanded, setIsExpanded] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [users, setUsers] = useState<User[]>([]);
-  const [maxCount, setMaxCount] = useState(0);
+  const [allData, setAllData] = useState<User[]>([]);
 
-  const fetchOptions = debounce(async (searchKey: string = '', page: number = 0) => {
-    setLoading(true);
+  const fetchData = async () => {
     try {
-      if (searchKey !== '') {
-        page = 0;
-        setCurrentPage(0);
+      setLoading(true);
+      const {
+        data: { data }
+      } = await axiosInstance().get('/work-space/channel/chats');
+      const chats: any = [];
+      for (const d of data?.chats) {
+        const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
+        if (toUser) {
+          d.title = toUser?.optionLabel;
+          d.to = toUser;
+        }
+        chats.push(d);
       }
-      let query = `user?limit=25&page=${page}&search=${searchKey}&ignoreIds=${JSON.stringify(ignoreIds)}`;
-      const response = await axiosInstance().get(query);
-      const optionsData = response?.data?.data?.map((user) => ({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        concatedName: user.firstName + ' ' + user.lastName,
-        avatar: user.avatar
-      }));
-      setMaxCount(response?.data?.count);
-
-      setUsers((currentOptions) => {
-        return page === 0 ? optionsData : [...currentOptions, ...optionsData];
-      });
-      if (page > 0 && optionsData?.length > 0) {
-        setCurrentPage(page);
-      }
+      setAllData([...chats, ...data?.users]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
       setLoading(false);
     }
-  }, 1000);
-
-  const allData = useMemo(() => {
-    if (chats && users) return [...chats, ...users];
-    return [];
-  }, [chats, users]);
-
-  const hasMore = users.length < maxCount;
-  const isItemLoaded = (index) => {
-    return index < allData.length;
-  };
-  const loadMoreItems = (startIndex) => {
-    if (!isItemLoaded(startIndex)) {
-      fetchOptions('', currentPage + 1);
-    }
   };
 
   useEffect(() => {
-    if (ignoreIds) {
-      fetchOptions();
-    }
-  }, [ignoreIds.length]);
+    fetchData();
+  }, []);
 
   return (
     <div>
@@ -87,24 +64,23 @@ const Chats = ({ state }: { state: UseWorkSpace }) => {
       >
         Chats
       </ThemeButton>
-      {chats ? (
+      {allData?.length ? (
         <Collapse in={isExpanded}>
           <List dense>
-            <InfiniteLoader isItemLoaded={isItemLoaded} itemCount={hasMore ? allData.length + 1 : allData.length} loadMoreItems={loadMoreItems}>
-              {({ onItemsRendered, ref }) => (
-                <FixedSizeList
-                  onItemsRendered={onItemsRendered}
-                  ref={ref}
-                  height={400}
-                  width={'auto'}
-                  itemSize={45}
-                  itemCount={allData.length}
-                  overscanCount={5}
-                >
-                  {(props) => renderRow({ ...props, allData, initChat, selectedChannel, newChatToUser, loading, onlineUsers })}
-                </FixedSizeList>
-              )}
-            </InfiniteLoader>
+            <div style={{ maxHeight: '300px', overflow: 'auto' }}>
+              {allData?.map((_data, i) => {
+                return (
+                  <RenderRow
+                    data={_data}
+                    index={i}
+                    initChat={initChat}
+                    selectedChannel={selectedChannel}
+                    newChatToUser={newChatToUser}
+                    onlineUsers={onlineUsers}
+                  />
+                );
+              })}
+            </div>
           </List>
           {loading && (
             <div className="flex justify-center">
@@ -123,26 +99,14 @@ const Chats = ({ state }: { state: UseWorkSpace }) => {
 
 export default Chats;
 
-function renderRow(
-  props: {
-    allData: (User | TChat)[];
-    initChat: (data: User | TChat) => void;
-    selectedChannel: TChat;
-    newChatToUser: User;
-    loading: boolean;
-    onlineUsers: string[];
-  } & ListChildComponentProps
-) {
-  const { index, style, initChat, selectedChannel, allData, newChatToUser, onlineUsers } = props;
-  const data = allData[index];
+const RenderRow = ({ index, data, initChat, selectedChannel, newChatToUser, onlineUsers }) => {
   const title = 'concatedName' in data ? data.concatedName : data.title;
   const notifications = 'notifications' in data ? data.notifications : 0;
-  const avatar = 'avatar' in data ? data.avatar : data.to.avatar;
-  const userId = 'concatedName' in data ? data._id : data.to.optionValue;
+  const avatar = 'avatar' in data ? data?.avatar : data?.to?.avatar;
+  const userId = 'concatedName' in data ? data._id : data?.to?.optionValue;
 
   return (
     <ListItemButton
-      style={style}
       sx={{ borderRadius: '6px' }}
       key={index}
       className="group"
@@ -186,4 +150,4 @@ function renderRow(
       />
     </ListItemButton>
   );
-}
+};

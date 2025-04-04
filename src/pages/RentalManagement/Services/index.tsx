@@ -9,7 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -27,10 +27,12 @@ import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement,
@@ -44,6 +46,9 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Services = ({
   rentalManagementData,
@@ -88,6 +93,7 @@ const Services = ({
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -137,15 +143,15 @@ const Services = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
+                : row.original?.type === MATERIAL_TYPE.package
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -244,6 +250,17 @@ const Services = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color='primary' />
+              </IconButton>
+            </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -334,7 +351,7 @@ const Services = ({
         });
       }
       let rows = data.material.filter((e) => e.parentId === null);
-      rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === 'Service'));
+      rows = rows.filter((e) => e.type === MATERIAL_TYPE.service || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType === PACKAGE_TYPE.service));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
@@ -420,7 +437,7 @@ const Services = ({
         if (
           data?.material
             ?.filter((e) => e.parentId === null)
-            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))
+            .filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service))
             ?.length
         ) {
           setNextStep(true);
@@ -544,7 +561,7 @@ const Services = ({
     if (material.filter((d) => d.listPrice === null || d.listPrice === undefined || d.listPrice === 0).length === 0) {
       AddMaterial(material, []);
     } else {
-      let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
       AddMaterial(material, priceData);
     }
   };
@@ -810,9 +827,9 @@ const Services = ({
             />
           </Box>
           <Box mt={3}>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-              <CustomTab value={0} label={'Technicians'} />
-            </CustomTabs>
+            <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
+              <ContainedTab value={0} label={'Technicians'} />
+            </ContainedTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
                 allowedToEdit={allowedToEdit}
@@ -841,7 +858,7 @@ const Services = ({
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          packageType="service"
+          packageType={PACKAGE_TYPE.service}
           customerAccount={rentalPolicyData?.customerAccountWisePackages ? rentalManagementData?.customerAccount?.optionValue : null}
           isSubmitting={isSubmitting}
         />
@@ -881,7 +898,7 @@ const Services = ({
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
           isClone={false}
-          referenceData={{ packageType: 'Service', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
+          referenceData={{ packageType: PACKAGE_TYPE.service, customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           open={addExistingProductDialog.open}
           packageId={null}
           onClose={() => setAddExistingProductDialog({ open: false, type: '', parentId: null })}
@@ -929,6 +946,17 @@ const Services = ({
           needCalculate={true}
         />
       }
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={rentalManagementData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.rentalManagement}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
+        />
+      )}
     </Fragment>
   );
 };

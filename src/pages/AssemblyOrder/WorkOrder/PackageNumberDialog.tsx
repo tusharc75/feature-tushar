@@ -15,7 +15,6 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 
 const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrderIds = null, isSubmitting }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
@@ -45,11 +44,11 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
           serializedPackages: material?.map((m) => ({
             package: m?.materialId,
             serializedPackageNumber: '',
-            uniqueId: m?._id,
+            uniqueId: m?._id
           }))
         });
       })
-      .catch((error) => { });
+      .catch((error) => {});
   }, [assemblyOrderId]);
 
   const fetchFieldLabel = async () => {
@@ -72,11 +71,19 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
     if (values?.serializedPackages?.length > 0) {
       values?.serializedPackages?.forEach((d, i) => {
         if (!d.serializedPackageNumber) {
-          if (!errors?.serializedPackageNumber) {
+          if (!errors?.serializedPackages) {
             errors['serializedPackages'] = [];
           }
           errors.serializedPackages[i] = { serializedPackageNumber: 'Serialized Package Number is required' };
+        } else {
+          if (values?.serializedPackages?.filter((s) => s?.serializedPackageNumber === d?.serializedPackageNumber)?.length > 1) {
+            if (!errors?.serializedPackages) {
+              errors['serializedPackages'] = [];
+            }
+            errors.serializedPackages[i] = { serializedPackageNumber: 'Serialized Package Number must be unique' };
+          }
         }
+
         if (!d.package) {
           if (!errors?.package) {
             errors['package'] = [];
@@ -217,12 +224,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
                 <ThemeButton buttonType="transparent" onClick={onClose}>
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  isLoading={isSubmitting}
-                  buttonType="theme"
-                  disabled={isSubmitting}
-                  onClick={submitForm}
-                >
+                <ThemeButton isLoading={isSubmitting} buttonType="theme" disabled={isSubmitting} onClick={submitForm}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

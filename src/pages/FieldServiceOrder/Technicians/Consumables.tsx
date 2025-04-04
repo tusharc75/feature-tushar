@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
@@ -25,9 +25,12 @@ import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -41,10 +44,14 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
-  const [selectedTechnician, setSelectedTechnician] = useState(null);
+  const [selectedTechnician, setSelectedTechnician] = useState<any>({ technicianName: 'All', technicianId: 'All' });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchColumns();
@@ -55,11 +62,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   }, [tabValue, selectedTechnician, refreshChild]);
 
   const fetchColumns = async () => {
-    let fields = await fetch_child_resource_fields_perm(
-      CHILD_RESOURCE.fieldServiceOrderDetails,
-      serviceOrderData?.currency,
-      allowedToEdit
-    );
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(fields)));
     fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, serviceOrderData?.currency);
@@ -78,10 +81,9 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
 
     let data;
     const response = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }]
+      fields: [{ resource: sidebarResource.product, fieldNames: ['productName', 'productNumber', 'productDescription'] }]
     });
     data = response?.data?.data;
-
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
@@ -164,19 +166,19 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         canDrag: false,
         Cell: ({ row, table }: any) => (
           <>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Edit' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={'Edit'}>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!allowedToEdit || !row?.original?.canDelete}
+                disabled={!allowedToEdit}
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
               >
-                <EditIcon fontSize="small" color={row.original?.canDelete && allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Technician for this product/consumable is already dispatched or returned'}>
+            <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Already dispatched/returned'}>
               <span>
                 <IconButton
                   size="small"
@@ -204,7 +206,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
       let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}`;
-      if (selectedTechnician?.technicianId) {
+      if (selectedTechnician?.technicianId && selectedTechnician?.technicianId !== 'All') {
         api = `${api}&technician=${selectedTechnician?.technicianId}`;
       }
       const response = await axiosInstance().get(api);
@@ -216,7 +218,8 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
-        parent.technician = parent?.technician?.optionLabel;
+        parent.technician = parent?.technician?.optionLabel || '';
+        parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -229,22 +232,16 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const handleSubmit = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    if (serviceOrderData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${serviceOrderData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
       element.materialId = d._id;
       element.type = MATERIAL_TYPE.product;
-      element.technician = selectedTechnician?.technicianId;
+      element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -259,7 +256,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       material.push(element);
     });
     if (serviceOrderData?.pricingCondition?.optionValue) {
-      const priceData: any = await getPricingConditions(serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+      const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
       AddMaterial(material, priceData);
     } else {
       AddMaterial(material, null);
@@ -282,24 +279,21 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         }
       });
     }
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setConsumablesDialog(false);
-        fetchData();
-        fetchserviceOrderData();
-        fetchConsumablesData();
-        setSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setSubmitting(false);
+    axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+      setConsumablesDialog(false);
+      fetchData();
+      fetchserviceOrderData();
+      fetchConsumablesData();
+      setSubmitting(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setSubmitting(false);
+    });
   };
 
   const handleDelete = async (rows) => {
@@ -348,21 +342,13 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (!inputField.canDelete) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Technician for this product/consumable is already dispatched or returned'
-      });
-      return;
-    }
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     if (inputField.hasOwnProperty('qty')) {
-      if (parseInt(inputField.qty) === 0) {
+      if (!dataRow?.canDelete) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Quantity cannot be zero'
+          message: 'Already dispatched/returned'
         });
         return;
       }
@@ -425,26 +411,30 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           size="small"
           style={{ minWidth: '300px' }}
           fullWidth
-          options={technicians || []}
+          options={[{ technicianName: 'All', technicianId: 'All' }, ...(technicians || [])]}
           autoHighlight
           value={selectedTechnician}
           getOptionLabel={(option: any) => option?.technicianName || ''}
           isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
           onChange={(_, val) => {
+            let value = val;
+            if (!val) {
+              value = { technicianName: 'All', technicianId: 'All' };
+            }
             dispatch({ type: 'update', data: [] });
-            setSelectedTechnician(val);
+            setSelectedTechnician(value);
           }}
           renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
         />
       </Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+        <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
+      </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
         {allowedToEdit && (
           <>
             <DetailsPageHeader
-              isAddButtonVisible={!isEmpty(selectedTechnician) && selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
+              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
               addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}

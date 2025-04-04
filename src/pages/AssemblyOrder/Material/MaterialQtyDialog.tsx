@@ -25,8 +25,8 @@ interface EditDialogProps {
 }
 
 const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assemblyOrderData, rowData, material, isBulkedit, loading }) => {
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [allFields, setAllFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
@@ -37,7 +37,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
 
   const fetchData = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', true);
-    setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       data.forEach((element) => {
         element.required = false;
@@ -50,7 +49,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
     } else {
       if (rowData?.workOrder) {
         data?.forEach((e) => {
-          if (e.fieldName === 'warehouse') {
+          if (e.fieldName === 'workOrderType') {
             e.disableOnEdit = true;
             e.isUneditable = true;
           }
@@ -76,12 +75,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
     handleSaveData(rows);
   };
 
-  function validate(values) {
-    const errors = {};
-
-    return errors;
-  }
-
   return (
     <Dialog
       maxWidth="md"
@@ -98,7 +91,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
@@ -143,7 +135,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
                     }
                   }}
                 >
-                  {'Close'}
+                  Close
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
@@ -151,7 +143,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
                   buttonType="theme"
                   onClick={submitForm}
                 >
-                  {' '}
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

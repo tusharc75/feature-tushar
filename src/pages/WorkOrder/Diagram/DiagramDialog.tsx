@@ -9,19 +9,34 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const DiagramDialog = ({ handleClose, referenceId }) => {
+const DiagramDialog = ({
+  handleClose,
+  referenceId,
+  referenceLabel = '',
+  uniqueId = null,
+  stepId = null,
+  resource,
+  attachmentType = null,
+  showMaterialFilter = false
+}) => {
   const toastConfig = useContext(CustomToastContext);
-  const [workOrderData, setWorkOrderData] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`${workOrder.api}/current-version/${referenceId}`)
-      .then(({ data: { data } }) => {
-        setWorkOrderData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    if (resource === ACTIVITY_RESOURCE.workOrder) {
+      setLoading(true);
+      axiosInstance()
+        .get(`${workOrder.api}/current-version/${referenceId}`)
+        .then(({ data: { data } }) => {
+          setResourceData(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setLoading(false);
+        });
+    }
   }, [referenceId]);
 
   return (
@@ -41,15 +56,20 @@ const DiagramDialog = ({ handleClose, referenceId }) => {
           handleClose();
         }}
         showRequiredLabel={false}
-        title={`Drawings`}
+        title={attachmentType ? `${attachmentType} ${referenceLabel && ` - ${referenceLabel}`}` : `Attachments - ${referenceLabel}`}
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        {workOrderData ? (
+        {!loading ? (
           <Diagram
-            resource={ACTIVITY_RESOURCE.workOrder}
+            resource={resource}
             referenceId={referenceId}
-            currentVersion={workOrderData?.currentVersion}
-            workOrderData={workOrderData}
+            uniqueId={uniqueId}
+            stepId={stepId}
+            currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+            resourceData={resourceData}
+            attachmentType={attachmentType}
+            referenceLabel={referenceLabel}
+            showMaterialFilter={showMaterialFilter}
           />
         ) : (
           <Grid container spacing={2}>

@@ -1,17 +1,17 @@
 import { Close } from '@mui/icons-material';
-import { Checkbox, Dialog, FormControlLabel, IconButton, Radio, RadioGroup, TextField } from '@mui/material';
+import { Dialog, IconButton } from '@mui/material';
 import { Formik } from 'formik';
 
+import { useCallback } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Content from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Content';
+import HeadInputs from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/HeadInputs';
 import Sidebar from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/Sidebar';
 import useArrangeView from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/useArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { object, string } from 'yup';
 import { ArrangeViewDialogProps } from './types';
-import HeadInputs from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog/HeadInputs';
-import { useCallback } from 'react';
 
 const formSchema = object().shape({
   name: string().min(2, 'Name too short').max(50, 'Name too long!').required('Name is required')

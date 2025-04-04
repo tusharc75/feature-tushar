@@ -6,6 +6,7 @@ import WorkIcon from '@mui/icons-material/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
 import { cn } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme: Theme) => ({
   fleetBox: {
@@ -115,6 +116,11 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
     transition
   };
 
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const activeProps = active?.data?.current?.props;
   const overProps = over?.data?.current?.props;
 
@@ -131,16 +137,16 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
         >
           <div>
             <div className="mb-[14px] md:mb-[24px]">
-              <Typography className={classes.primaryText}>Name : {data?.fleetNumber}</Typography>
+              <Typography className={classes.primaryText}>{resources?.truckMaster?.titleSingular} : {data?.fleetNumber}</Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Location :</strong> {data?.currentLocation?.optionLabel}
               </Typography>
             </div>
-            {/* <Box className={`${classes.gaugeContainer} gap-4`}>
+            <Box className={`${classes.gaugeContainer} gap-4`}>
               <MetricsWithIcon type="temperature" suffixText={<> °F</>} value={data?.temperature || 30} />
               <MetricsWithIcon type="pressure" suffixText={<> PSI</>} value={data?.pressure || 30} />
               <MetricsWithIcon type="volume" suffixText={<> MMcf</>} value={data?.volume || 30} />
-            </Box> */}
+            </Box>
           </div>
         </Box>
       ) : (
@@ -152,7 +158,7 @@ const FleetDispatchBox = ({ data, id, index, cardType }) => {
             <Box>
               <Typography className={classes.primaryText}>{data?.jobNumber}</Typography>
               <Typography className={classes.primaryText}>
-                <strong>Unit :</strong> {data?.asset?.assetNumber}
+                <strong>{resources?.serializedAsset?.titleSingular}  :</strong> {data?.asset?.assetNumber}
               </Typography>
               <Typography className={classes.secondaryText}>
                 <strong>Customer :</strong> {data?.customerContact?.optionLabel}

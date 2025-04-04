@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldTicket, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldTicket, getObjKeysWithValues, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -17,7 +17,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
@@ -36,8 +36,10 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import AddQuotationDataDialog from './AddQuotationDataDialog';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -63,6 +65,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [addDataFromFieldServiceOrder, setAddDataFromFieldServiceOrder] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -83,7 +86,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   }, [services]);
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -383,42 +386,55 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       fetchData();
       setSubmitting(false);
     } else {
-      var taxCodeData: any = null;
-      if (fieldTicketData?.taxCode) {
-        const {
-          data: { data }
-        } = await axiosInstance().get(
-          `${routes?.taxMaster.path}/by-zipcode?taxCode=${fieldTicketData?.taxCode?.optionValue}&materialType=${MATERIAL_TYPE.product}`
-        );
-        if (data?.length) {
-          taxCodeData = data[0];
-        }
-      }
       const material: any = [];
-      rows.forEach((d) => {
-        const element: any = {};
-        element.materialId = d._id;
-        element.type = MATERIAL_TYPE.product;
-        element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-        element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
-        element.qty = d.qty ? parseFloat(d.qty) : 1;
-        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-        element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-        element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-        Object.assign(element, calValues);
-        if (taxCodeData) {
-          element.taxCode = taxCodeData?.optionValue;
-          element.taxPercentage = taxCodeData?.taxRate || 0;
-        }
-        material.push(element);
-      });
-      if (fieldTicketData?.pricingCondition?.optionValue) {
-        const priceData: any = await getPricingConditions(fieldTicketData, material, PRICING_SETUP_TYPE.rent);
-        AddMaterial(material, priceData);
-      } else {
+      if (assignQuotationDataDialog || addDataFromFieldServiceOrder) {
+        rows?.forEach((d: any) => {
+          rows = rows?.forEach((e: any) => {
+            const obj: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+            if (assignQuotationDataDialog) {
+              obj.isQuotation = true;
+            }
+            if (addDataFromFieldServiceOrder) {
+              obj.isFieldServiceOrder = true;
+            }
+            material.push(obj);
+          })
+        });
         AddMaterial(material, null);
+      }
+      else {
+        var taxCodeData: any = null;
+        if (fieldTicketData?.taxCode) {
+          const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+          if (taxCodeOptions?.length) {
+            taxCodeData = taxCodeOptions[0];
+          }
+        }
+        rows.forEach((d) => {
+          const element: any = {};
+          element.materialId = d._id;
+          element.type = MATERIAL_TYPE.product;
+          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
+          element.qty = d.qty ? parseFloat(d.qty) : 1;
+          element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+          element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+          element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+          Object.assign(element, calValues);
+          if (taxCodeData) {
+            element.taxCode = taxCodeData?.optionValue;
+            element.taxPercentage = taxCodeData?.taxRate || 0;
+          }
+          material.push(element);
+        });
+        if (fieldTicketData?.pricingCondition?.optionValue) {
+          const priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
+          AddMaterial(material, priceData);
+        } else {
+          AddMaterial(material, null);
+        }
       }
     }
   };
@@ -438,8 +454,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         }
       });
     }
-    axiosInstance()
-      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
+    axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -448,6 +463,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         });
         setConsumablesDialog(false);
         setAssignQuotationDataDialog(false);
+        setAddDataFromFieldServiceOrder(false);
         fetchData();
         fetchFieldTicketData();
         setSubmitting(false);
@@ -653,7 +669,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           }}
           id={'add-product-consumable'}
         >
-          {`Add Product(s)/Consumable(s)`}
+          {`Add Products/Consumables`}
         </MenuItem>
         {resourcePolicy?.showQuotationAddMaterial && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && !isOffline && (
           <>
@@ -662,7 +678,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
                 setAssignQuotationDataDialog(true);
               }}
             >
-              Add Quotation Consumables
+              {`Add Consumables From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
+        {!isOffline && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddDataFromFieldServiceOrder(true);
+              }}
+            >
+              {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
             </MenuItem>
           </>
         )}
@@ -692,15 +719,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
               dispatch({ type: 'update', data: [] });
               setSelectedServiceOption(value);
             }}
-            renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label={'Service'} variant="outlined" />}
           />
         </Box>
       )}
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-        {!isOffline && <CustomTab value={1} label={'Technicians'} id={'technicians-tab'} />}
-      </CustomTabs>
-
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
+        <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
+        {!isOffline && <ContainedTab value={1} label={'Technicians'} id={'technicians-tab'} />}
+      </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           {allowedToEdit && (
@@ -835,7 +861,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       )}
       {assignQuotationDataDialog && (
         <AddQuotationDataDialog
-          type={MATERIAL_TYPE.product}
           onClose={() => {
             setAssignQuotationDataDialog(false);
           }}
@@ -845,6 +870,19 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((row) => row?.materialId)}
+        />
+      )}
+      {addDataFromFieldServiceOrder && (
+        <AddFieldServiceOrderDataDialog
+          onClose={() => {
+            setAddDataFromFieldServiceOrder(false);
+          }}
+          fieldTicketData={fieldTicketData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.product}
+          onSuccess={(rows) => {
+            handleSubmit(rows);
+          }}
         />
       )}
     </>

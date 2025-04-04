@@ -17,6 +17,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
   cn,
   convertMsToTime,
   getChipColor,
@@ -42,6 +44,7 @@ import Comments from './Comments';
 import CompleteDialog from './CompleteDialog';
 import ServiceFieldValueDialog from './ServiceFieldValueDialog';
 import StepFieldsDialog from './StepFieldsDialog';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 export interface StepDataInterface {
   _id: string;
@@ -195,7 +198,7 @@ const Steps = ({
   const toastConfig = useContext(CustomToastContext);
 
   const [serviceDetails, setServiceDetails] = useState(null);
-  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null, type: '' });
+  const [addServiceConfirmation, setAddServiceConfirmation] = useState({ open: false, status: '', services: [], step: null });
   const [stepState, setStepState] = useState(null);
   const [arrangeView, setArrangeView] = useState(false);
   const [comment, setComment] = useState('');
@@ -238,6 +241,7 @@ const Steps = ({
   const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState(false);
   const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
   const [isSubmittingReceavingAsset, setIsSubmittingReceavingAsset] = useState(false);
+  const [alertMessages, setAlertMessages] = useState({ open: false, message: [] });
 
   useEffect(() => {
     if ((!selectedServiceRef.current || selectedServiceRef.current !== selectedService.uniqueId) && selectedService.uniqueId) {
@@ -392,7 +396,7 @@ const Steps = ({
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
-        setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
+        setAddServiceConfirmation({ open: false, services: [], status: '', step: null });
         fetchService();
       })
       .catch((err) => {
@@ -477,6 +481,10 @@ const Steps = ({
         canSkip = false;
         break;
       }
+    }
+
+    if (user?.brandPolicy?.workOrderStepSequence && !step?.isAllowToPerform) {
+      canSkip = false;
     }
 
     return { fieldData, stepData, isStepValid, canSkip };
@@ -617,8 +625,7 @@ const Steps = ({
               open: true,
               status: WORKORDER_SERVICE_STEP_STATUS.passed,
               services: result?.passAddon,
-              step: step,
-              type: ''
+              step: step
             });
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isFailAddon && result?.failAddon?.length) {
@@ -632,53 +639,62 @@ const Steps = ({
               open: true,
               status: WORKORDER_SERVICE_STEP_STATUS.failed,
               services: result?.failAddon,
-              step: step,
-              type: ''
+              step: step
             });
           }
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
+        }
+
+        if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
+          setAddNewStep({ open: true, clone: false, cloneStepData: null });
+        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isAddStepsOnFail) {
+          setAddNewStep({ open: true, clone: false, cloneStepData: null });
+        }
+
+        const alertMsg: any = [];
+        if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isJumpStepPass && result?.jumpStepsPass?.length) {
           if (resource === sidebarResource.workOrder) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.passed, open: true, type: 'jumpStep' }));
+            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`);
           }
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
+        } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isJumpStepFail && result?.jumpStepsFail?.length) {
           if (resource === sidebarResource.workOrder) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'jumpStep' }));
+            alertMsg.push(`As per the logic applied on this step, we will skip few steps in this service.`);
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isQuoteRevisionOnFail) {
           if (resource === sidebarResource.workOrder) {
-            setAddServiceConfirmation((s) => ({ ...s, status: WORKORDER_SERVICE_STEP_STATUS.failed, open: true, type: 'isQuoteRevisionOnFail' }));
+            alertMsg.push(`Step fail requires Quotation Revision.`);
           }
         } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isReturnToStepOnFail && result?.returnToStepOnFail) {
           if (resource === sidebarResource.workOrder) {
             const returnStep = serviceDetails?.steps?.find((e) => e._id === result?.returnToStepOnFail) || {};
-            setAddServiceConfirmation((s) => ({
-              ...s,
-              status: WORKORDER_SERVICE_STEP_STATUS.failed,
-              open: true,
-              type: 'returnToStepOnFail',
-              step: returnStep
-            }));
+            alertMsg.push(`As per the logic applied on this step, we need to return to step ${returnStep?.stepName || ''}.`);
           }
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isSkipServiceOnPass && !isEmpty(result?.skipServiceOnPass)) {
-          setAddServiceConfirmation((s) => ({
-            ...s,
-            status: WORKORDER_SERVICE_STEP_STATUS.passed,
-            open: true,
-            type: 'skipServices',
-            services: result?.skipServiceOnPass
-          }));
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isSkipServiceOnFail && !isEmpty(result?.skipServiceOnFail)) {
-          setAddServiceConfirmation((s) => ({
-            ...s,
-            status: WORKORDER_SERVICE_STEP_STATUS.failed,
-            open: true,
-            type: 'skipServices',
-            services: result?.skipServiceOnFail
-          }));
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
-          setAddNewStep({ open: true, clone: false, cloneStepData: null });
-        } else if (type === WORKORDER_SERVICE_STEP_STATUS.failed && result?.isAddStepsOnFail) {
-          setAddNewStep({ open: true, clone: false, cloneStepData: null });
+        } else if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isSkipServiceOnPass && result?.skipServiceOnPass?.length) {
+          if (resource === sidebarResource.workOrder) {
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.skipServiceOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`
+            );
+          }
+        } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isSkipServiceOnFail && result?.skipServiceOnFail?.length) {
+          if (resource === sidebarResource.workOrder) {
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.skipServiceOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) has been skipped.`
+            );
+          }
+        } else if (WORKORDER_SERVICE_STEP_STATUS.passed === type && result?.isReperformServicesOnPass && result?.reperformServicesOnPass?.length) {
+          if (resource === sidebarResource.workOrder) {
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.reperformServicesOnPass?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`
+            );
+          }
+        } else if (WORKORDER_SERVICE_STEP_STATUS.failed === type && result?.isReperformServicesOnFail && result?.reperformServicesOnFail?.length) {
+          if (resource === sidebarResource.workOrder) {
+            alertMsg.push(
+              `As per the logic applied on this step, ${result?.reperformServicesOnFail?.map((e) => e?.serviceName || '')?.toString()} service(s) need to be re-performed.`
+            );
+          }
+        }
+        if (alertMsg?.length) {
+          setAlertMessages({ open: true, message: alertMsg });
         }
         toastConfig.setToastConfig({
           open: true,
@@ -1193,12 +1209,20 @@ const Steps = ({
                                     }
                                     onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                                   >
-                                    <DeleteOutline color={allowedToEdit && ![
-                                      WORKORDER_SERVICE_STEP_STATUS.passed,
-                                      WORKORDER_SERVICE_STEP_STATUS.failed,
-                                      WORKORDER_SERVICE_STEP_STATUS.completed,
-                                      WORKORDER_SERVICE_STEP_STATUS.skipped
-                                    ].includes(stepData?.passFailStatus) ? "error" : "disabled"} style={{ fontSize: '20px' }} />
+                                    <DeleteOutline
+                                      color={
+                                        allowedToEdit &&
+                                          ![
+                                            WORKORDER_SERVICE_STEP_STATUS.passed,
+                                            WORKORDER_SERVICE_STEP_STATUS.failed,
+                                            WORKORDER_SERVICE_STEP_STATUS.completed,
+                                            WORKORDER_SERVICE_STEP_STATUS.skipped
+                                          ].includes(stepData?.passFailStatus)
+                                          ? 'error'
+                                          : 'disabled'
+                                      }
+                                      style={{ fontSize: '20px' }}
+                                    />
                                   </IconButton>
                                 </HtmlTooltip>
                               </div>
@@ -1437,12 +1461,20 @@ const Steps = ({
                               }
                               onClick={() => setShowDeleteConfirmBox((prev) => ({ ...prev, open: true, steps: [step] }))}
                             >
-                              <DeleteOutline color={allowedToEdit && ![
-                                WORKORDER_SERVICE_STEP_STATUS.passed,
-                                WORKORDER_SERVICE_STEP_STATUS.failed,
-                                WORKORDER_SERVICE_STEP_STATUS.completed,
-                                WORKORDER_SERVICE_STEP_STATUS.skipped
-                              ].includes(stepData?.passFailStatus) ? "error" : "disabled"} style={{ fontSize: '20px' }} />
+                              <DeleteOutline
+                                color={
+                                  allowedToEdit &&
+                                    ![
+                                      WORKORDER_SERVICE_STEP_STATUS.passed,
+                                      WORKORDER_SERVICE_STEP_STATUS.failed,
+                                      WORKORDER_SERVICE_STEP_STATUS.completed,
+                                      WORKORDER_SERVICE_STEP_STATUS.skipped
+                                    ].includes(stepData?.passFailStatus)
+                                    ? 'error'
+                                    : 'disabled'
+                                }
+                                style={{ fontSize: '20px' }}
+                              />
                             </IconButton>
                           </HtmlTooltip>
                         </div>
@@ -1565,13 +1597,20 @@ const Steps = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         setOpenCompleteDialog({
-                          open: true, status:
-                            stepSubmitedData?.filter((e) => e?.uniqueId === selectedService?.uniqueId)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ?
-                              WORKORDER_SERVICE_STATUS.skipped : WORKORDER_SERVICE_STATUS.completed
+                          open: true,
+                          status: stepSubmitedData
+                            ?.filter((e) => e?.uniqueId === selectedService?.uniqueId)
+                            ?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped)
+                            ? WORKORDER_SERVICE_STATUS.skipped
+                            : WORKORDER_SERVICE_STATUS.completed
                         });
                       }}
                     >
-                      {stepSubmitedData?.filter((e) => e?.uniqueId === selectedService?.uniqueId)?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped) ? "Skip" : "Complete"}
+                      {stepSubmitedData
+                        ?.filter((e) => e?.uniqueId === selectedService?.uniqueId)
+                        ?.every((e) => e?.passFailStatus === WORKORDER_SERVICE_STEP_STATUS.skipped)
+                        ? 'Skip'
+                        : 'Complete'}
                     </ThemeButton>
                   </Grid>
                 </Box>
@@ -1642,33 +1681,27 @@ const Steps = ({
             {addServiceConfirmation.open && (
               <ConfirmationDialog
                 open={true}
-                message={
-                  addServiceConfirmation.type === 'skipServices'
-                    ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                    }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
-                    : addServiceConfirmation.type === 'returnToStepOnFail'
-                      ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
-                      }. Do you want to continue ?`
-                      : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
-                        ? ` Step fail requires Quotation Revision. Do you confirm on this?`
-                        : addServiceConfirmation.type === 'jumpStep'
-                          ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
-                          : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                            ?.map((e) => e.serviceName)
-                            ?.toString()} has been added. Do you want to Add ? `
-                }
+                message={`As per the logic applied on this step, a new service  ${addServiceConfirmation.services?.map((e) => e.serviceName)?.toString()} has been added. Do you want to Add ? `}
                 onClose={() => {
-                  setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
+                  setAddServiceConfirmation({ open: false, services: [], status: '', step: null });
                 }}
                 onOk={() => {
-                  if (addServiceConfirmation.type === '') {
-                    handleAddService(
-                      addServiceConfirmation.services?.map((e) => e._id),
-                      addServiceConfirmation.step
-                    );
-                  }
-                  setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
+                  handleAddService(
+                    addServiceConfirmation.services?.map((e) => e._id),
+                    addServiceConfirmation.step
+                  );
+                  setAddServiceConfirmation({ open: false, services: [], status: '', step: null });
                 }}
+              />
+            )}
+            {alertMessages.open && (
+              <CustomMessageDialog
+                open={alertMessages.open}
+                errorMessages={alertMessages.message}
+                onClose={() => {
+                  setAlertMessages({ open: false, message: [] });
+                }}
+                title={'Message'}
               />
             )}
             {viewStep.open && (
@@ -1690,18 +1723,15 @@ const Steps = ({
               />
             )}
             {attchmentsDialog.open && (
-              <AttachmentDialog
-                workOrderId={workOrderId}
-                uniqueServiceId={attchmentsDialog.uniqueServiceId}
-                stepId={attchmentsDialog.stepId}
-                serviceName={attchmentsDialog.serviceName}
-                stepName={attchmentsDialog.stepName}
+              <DiagramDialog
+                referenceId={workOrderId}
                 handleClose={() => {
                   setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
                 }}
-                handleSuccess={() => {
-                  setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
-                }}
+                referenceLabel={attchmentsDialog.serviceName}
+                uniqueId={attchmentsDialog.uniqueServiceId}
+                stepId={attchmentsDialog.stepId}
+                resource={ACTIVITY_RESOURCE.workOrder}
               />
             )}
             {consumablesDialog.open && (
@@ -1717,6 +1747,7 @@ const Steps = ({
                 stepId={consumablesDialog.stepId}
                 serviceName={consumablesDialog.serviceName}
                 workOrderData={workOrderData}
+                hideServiceFilter={true}
               />
             )}
             {userAssignDialog && (
@@ -1877,6 +1908,8 @@ const Steps = ({
           handleClose={() => {
             setShowDrawing(false);
           }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
       {showManageRepairJobDialog && (

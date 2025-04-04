@@ -27,14 +27,14 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { resources, permissions }
+    state: { resources, permissions, user }
   }: any = useData();
   const [isUpdating, setUpdating] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -330,15 +330,9 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    if (invoiceData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${invoiceData?.taxCode?.optionValue}&materialType=${addDialog.type}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(user, invoiceData, addDialog.type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
@@ -371,7 +365,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       });
     }
     const conditionType = invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(invoiceData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.invoice, invoiceData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, invoiceData?.currency, allFields);

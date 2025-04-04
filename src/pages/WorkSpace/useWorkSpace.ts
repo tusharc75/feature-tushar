@@ -109,14 +109,6 @@ export const useWorkSpace = () => {
   const channels = useMemo(() => {
     return state.allChannels?.filter((a) => a.type !== 'chat');
   }, [state.allChannels]);
-  const chats = useMemo(() => {
-    return state.allChannels?.filter((a) => a.type === 'chat') as TChat[];
-  }, [state.allChannels]);
-
-  const ignoreIds = useMemo(() => {
-    const data = chats?.map((c) => c.to?.optionValue) || [];
-    return [...data, user._id];
-  }, [chats, user]);
 
   const initChat = useCallback(
     (data: User | TChat | TChat) => {
@@ -130,25 +122,17 @@ export const useWorkSpace = () => {
   );
 
   const fetchChannelsAndChats = async (setActiveChannel = false, newDirectMessageChannelId = state.newDirectMessageChannelId) => {
-    const { data } = await axiosInstance().get('/work-space/channel');
-    const newAllChannels: TChannel[] = [];
+    const {
+      data: { data }
+    } = await axiosInstance().get('/work-space/channel');
 
-    for (const d of data.data) {
-      if (d?.type === 'chat' && Boolean(d.members.find((m) => m.optionValue === user?._id))) {
-        const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
-        d.title = toUser?.optionLabel;
-        d.to = toUser;
-        d.description = 'Direct Messaging';
-      }
-      newAllChannels.push(d);
-    }
-    setAllChannels(newAllChannels);
+    setAllChannels(data);
     if (setActiveChannel) {
       const queryParam = new URLSearchParams(window.location.search);
       const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');
       if (channelId) {
-        const channel = data?.data?.find((channel) => channel?._id === channelId);
-        setSelectedChannel(channel, newAllChannels);
+        const channel = data?.find((channel) => channel?._id === channelId);
+        setSelectedChannel(channel, data);
       }
       setState({ action: 'setNewDirectMessageChannelId', payload: null });
     }
@@ -227,8 +211,6 @@ export const useWorkSpace = () => {
     resources,
     socket,
     channels,
-    chats,
-    ignoreIds,
     setNewDirectMessageChannelId,
     setAllChannels,
     fetchChannelsAndChats,

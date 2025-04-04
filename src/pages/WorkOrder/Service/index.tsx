@@ -1,7 +1,6 @@
 import { Add, ExpandMore, LowPriority } from '@mui/icons-material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { Box, Menu, MenuItem, useMediaQuery } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,6 +13,7 @@ import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import {
+  ACTIVITY_RESOURCE,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS,
@@ -31,7 +31,6 @@ import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignTechniciansDialog';
 import AssignWorkStationDialog from './AssignWorkStationDialog';
-import AttachmentDialog from './AttachmentDialog';
 import Comments from './Comments';
 import CompleteDialog from './CompleteDialog';
 import Logs from './Logs';
@@ -39,6 +38,7 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Service = ({
   workOrderId,
@@ -85,13 +85,18 @@ const Service = ({
   const prevOrder = useRef(0);
 
   const [isSubmitting, setSubmitting] = useState(false);
-
   const [reviseQuotation, setReviseQuotation] = useState(false);
   const [openProperties, setOpenProperties] = useState(false);
 
   useEffect(() => {
     fetchServiceData();
   }, [workOrderId, workOrderData]);
+
+  useEffect(() => {
+    if (setDefaultSelectedService && selectedService) {
+      setDefaultSelectedService(selectedService?.uniqueId)
+    }
+  }, [selectedService]);
 
   const fetchServiceData = async () => {
     var quotation: any = null;
@@ -197,10 +202,8 @@ const Service = ({
           setSelectedService(services?.find((e) => e?.uniqueId === selectedService?.uniqueId) || null);
         } else {
           if (defaultSelectedService) {
-            setSelectedService(services?.find((e) => e?.uniqueId === defaultSelectedService) || null);
-            if (setDefaultSelectedService) {
-              setDefaultSelectedService(null);
-            }
+            const defaultSelectedServiceData = services?.find((e) => e?.uniqueId === defaultSelectedService);
+            setSelectedService(defaultSelectedServiceData || null);
           } else {
             setSelectedService(services[pendingServiceIndex]);
           }
@@ -208,11 +211,14 @@ const Service = ({
       }
       setServiceSteps(services);
       if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
-        if ((workOrderData?.canComplete &&
-          !services.filter((e) => e.type === MATERIAL_TYPE.service)
-            ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
+        if (
+          (workOrderData?.canComplete &&
+            !services
+              .filter((e) => e.type === MATERIAL_TYPE.service)
+              ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status))) ||
           (!workOrderData?.canComplete &&
-            services.filter((e) => e.type === MATERIAL_TYPE.service)
+            services
+              .filter((e) => e.type === MATERIAL_TYPE.service)
               ?.every((e) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(e.status)))
         ) {
           fetchWorkOrderData();
@@ -756,23 +762,24 @@ const Service = ({
               >
                 Upload Documents
               </MenuItem>
-              {!user?.brandPolicy?.workOrderConsumableHide && resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={!isAllowedToServiceEdit}
-                  onClick={() => {
-                    setConsumablesDialog({
-                      open: true,
-                      uniqueId: selectedService.uniqueId,
-                      service: selectedService._id,
-                      stepId: null,
-                      serviceName: selectedService.serviceName
-                    });
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add/Consume Products
-                </MenuItem>
-              )}
+              {!user?.brandPolicy?.workOrderConsumableHide && (resource === sidebarResource.workOrder
+                || (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
+                  <MenuItem
+                    disabled={!isAllowedToServiceEdit}
+                    onClick={() => {
+                      setConsumablesDialog({
+                        open: true,
+                        uniqueId: selectedService.uniqueId,
+                        service: selectedService._id,
+                        stepId: null,
+                        serviceName: selectedService.serviceName
+                      });
+                      setAnchorEl(null);
+                    }}
+                  >
+                    Add/Consume Products
+                  </MenuItem>
+                )}
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
@@ -953,6 +960,7 @@ const Service = ({
           uniqueId={consumablesDialog.uniqueId}
           stepId={consumablesDialog.stepId}
           serviceName={consumablesDialog.serviceName}
+          hideServiceFilter={true}
         />
       )}
       {logsDialog && (
@@ -1016,19 +1024,17 @@ const Service = ({
           uniqueId={selectedService?.uniqueId}
         />
       )}
+
       {attchmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={workOrderId}
-          uniqueServiceId={attchmentsDialog.uniqueServiceId}
-          stepId={attchmentsDialog.stepId}
-          serviceName={attchmentsDialog.serviceName}
-          stepName={attchmentsDialog.stepName}
+        <DiagramDialog
+          referenceId={workOrderId}
           handleClose={() => {
             setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
           }}
-          handleSuccess={() => {
-            setAttchmentsDialog({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
-          }}
+          referenceLabel={attchmentsDialog.serviceName}
+          uniqueId={attchmentsDialog.uniqueServiceId}
+          stepId={attchmentsDialog.stepId}
+          resource={ACTIVITY_RESOURCE.workOrder}
         />
       )}
       {showManagePurchaseOrder && (

@@ -1,6 +1,6 @@
 import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,6 +11,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -19,6 +20,12 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
   const [submitting, setSubmitting] = useState(false);
   const [comment, setComment] = useState('');
   const [dispatchData, setDispatchData] = useState({ documents: [], signature: '' });
+
+
+  const {
+    state: { resources }
+  }: any = useData();
+
 
   const handleReceive = () => {
     setSubmitting(true);
@@ -78,10 +85,10 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
               <TextField variant="outlined" type="text" label="Job Number" fullWidth margin="dense" size="small" value={data?.job?.jobNumber} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <TextField variant="outlined" type="text" label="Unit" fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
+              <TextField variant="outlined" type="text" label={resources?.serializedAsset?.titleSingular} fullWidth margin="dense" size="small" value={data?.asset?.assetNumber} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <TextField variant="outlined" type="text" label="Name" fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
+              <TextField variant="outlined" type="text" label={resources?.truckMaster?.titleSingular} fullWidth margin="dense" size="small" value={data?.fleet?.fleetNumber} />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField variant="outlined" type="text" label="Location" fullWidth margin="dense" size="small" value={data?.job?.shippingAddress?.optionLabel} />
@@ -154,6 +161,12 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                 size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
+                sx={{
+                  '& .MuiInputBase-root textarea': {
+                    resize: 'vertical',
+                    overflow: 'auto',
+                  },
+                }}
               />
             </Grid>
           </Grid>

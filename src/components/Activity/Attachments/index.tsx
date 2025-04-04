@@ -340,9 +340,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     } else {
-      const fileUrl = file.map((f) => encodeURIComponent(f.url));
-      axiosInstance()
-        .put(`user/download`, { files: fileUrl }, { responseType: 'blob' })
+      axiosInstance().get(`attachment/zip/file/${attachmentData?._id}`, { responseType: 'blob' })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
@@ -519,7 +517,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               onClose={handleCloseMenu}
             >
               {permissions['attachment']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
-              {attachmentData && (
+              {attachmentData && attachmentData?.file?.length === 1 && (
                 <span onClick={handleCloseMenu}>
                   <PreviewFile fileName={attachmentData?.file[0]?.url} component="MenuItem" />
                 </span>
@@ -527,7 +525,6 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
             </Menu>
-
             <Dialog
               open={open.open}
               aria-labelledby="customized-dialog-title"

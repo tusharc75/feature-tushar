@@ -9,7 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, rentalManagement } from 'src/constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, PACKAGE_TYPE, rentalManagement } from 'src/constants/helpers';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
 const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, material, assetPolicyData }) => {
@@ -30,7 +30,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 
   const fetchData = async () => {
     const data = material
-      ?.filter((e) => e.type === MATERIAL_TYPE.package && e?.packageDetail?.packageType === 'Product')
+      ?.filter((e) => e.type === MATERIAL_TYPE.package && e?.packageDetail?.packageType === PACKAGE_TYPE.product)
       ?.map((e) => {
         return {
           optionLabel: e?.packageDetail?.packageName,
@@ -172,6 +172,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
       </Dialog>
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
+          stopAutoIncrementIds={openAssetDataDialog._ids}
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => { }}

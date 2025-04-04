@@ -19,8 +19,8 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const history = useHistory();
@@ -194,11 +194,11 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           additionalParams={``}
         />
       </Box>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Product Category'} />
-        <CustomTab value={1} label={'Products'} />
-        <CustomTab value={2} label={'Assets'} />
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
+        <ContainedTab value={0} label={'Product Category'} />
+        <ContainedTab value={1} label={'Products'} />
+        <ContainedTab value={2} label={'Assets'} />
+      </ContainedTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
           <>

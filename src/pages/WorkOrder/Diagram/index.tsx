@@ -1,4 +1,4 @@
-import { Box, Collapse, Dialog, IconButton, Typography } from '@mui/material';
+import { Autocomplete, Box, Collapse, Dialog, IconButton, TextField, Typography } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -16,15 +16,26 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, CustomDialogTransition, WORK_ORDER_TYPE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
-import ImageZoomPan from 'src/components/ImageZoomPan';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
-const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVersions = false }) => {
+const Diagram = ({
+  resource,
+  referenceId,
+  uniqueId = null,
+  stepId = null,
+  currentVersion = null,
+  resourceData = null,
+  disableEdit = false,
+  attachmentType = null,
+  referenceLabel = '',
+  showMaterialFilter = false,
+  defaultSelectedUniqueId = null
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [rowData, setRowData] = useState(null);
@@ -34,16 +45,40 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [serviceOption, setServiceOption] = useState([]);
+  const [selectedService, setSelectedService] = useState(null);
+
+  useEffect(() => {
+    if (resource === ACTIVITY_RESOURCE.workOrder) {
+      fetchServices();
+    }
+  }, [resource, referenceId]);
 
   useEffect(() => {
     fetchData();
-  }, [resource, referenceId, currentVersion]);
+  }, [resource, referenceId, currentVersion, selectedService]);
 
   const fetchData = async () => {
+    let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
+    if (attachmentType) {
+      query = `${query}&attachmentType=${attachmentType}`;
+    }
+    const serviceId = uniqueId ? uniqueId : selectedService ? selectedService?.uniqueId : null;
+    if (serviceId) {
+      if (resource === ACTIVITY_RESOURCE.workOrder) {
+        query = `${query}&uniqueServiceId=${serviceId}`;
+      } else {
+        query = `${query}&uniqueId=${serviceId}`;
+      }
+    }
+    if (stepId) {
+      query = `${query}&stepId=${stepId}`;
+    }
+    if (currentVersion) {
+      query = `${query}&version=${currentVersion}`;
+    }
     axiosInstance()
-      .get(
-        `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}&attachmentType=${ATTACHMENT_TYPE.drawing}&version=${currentVersion}`
-      )
+      .get(query)
       .then(({ data: { data } }) => {
         const expend: any = {};
         setRowData(data);
@@ -55,6 +90,23 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchServices = async () => {
+    const {
+      data: { data }
+    }: any = await axiosInstance().get(`${workOrder.api}/service/service/${referenceId}`);
+    if (data?.length) {
+      const serviceData = data?.map((s) => ({
+        optionLabel: s?.serviceDetail?.optionLabel,
+        optionValue: s?.serviceDetail?.optionValue,
+        uniqueId: s?._id
+      }));
+      setServiceOption(serviceData);
+      if (defaultSelectedUniqueId && serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId)) {
+        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId));
+      }
+    }
   };
 
   const handleDeleteFile = async (ids) => {
@@ -129,22 +181,113 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
     );
   };
 
+  const getRelatedTo = () => {
+    const relatedTo: any = [
+      {
+        type: resource,
+        referenceId: referenceId,
+        ...(uniqueId ? { uniqueId: uniqueId } : {}),
+        ...(currentVersion ? { version: currentVersion } : {}),
+        access: true
+      }
+    ];
+
+    if (resource === ACTIVITY_RESOURCE.workOrder && resourceData) {
+      relatedTo.push({
+        type:
+          resourceData?.type === WORK_ORDER_TYPE.repairOrder
+            ? ACTIVITY_RESOURCE.repairOrder
+            : resourceData?.type === WORK_ORDER_TYPE.productionOrder
+              ? ACTIVITY_RESOURCE.productionOrder
+              : ACTIVITY_RESOURCE.assemblyOrder,
+        referenceId:
+          resourceData?.type === WORK_ORDER_TYPE.repairOrder
+            ? resourceData?.repairOrder?.optionValue || resourceData?.repairOrder
+            : resourceData?.type === WORK_ORDER_TYPE.productionOrder
+              ? resourceData?.productionOrder?.optionValue || resourceData?.productionOrder
+              : resourceData?.assemblyOrder?.optionValue || resourceData?.assemblyOrder,
+        access: true
+      });
+    }
+
+    return relatedTo;
+  };
+
+  const customhandleAdd = (request, setLoading) => {
+    const serviceId = selectedService ? selectedService?.uniqueId : uniqueId;
+    const serviceName = selectedService ? selectedService?.optionLabel : referenceLabel;
+    const data: any = {
+      name: request?.name,
+      attachmentType: request?.attachmentType,
+      file: request?.file,
+      workOrderId: referenceId,
+      serviceName: serviceName,
+      ...(serviceId && { uniqueServiceId: serviceId }),
+      ...(stepId && { stepId: stepId })
+    };
+    axiosInstance()
+      .post(`${workOrder.api}/step/attachment`, data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setAttachemntDialog({ open: false, id: null, isClone: false });
+        setFullScreen(false);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box>
       <Box className="container-with-border" p={'20px'}>
-        {!fromVersions && (
-          <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-            <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
-            <ThemeButton
-              onClick={() => {
-                setAttachemntDialog({ open: true, id: null, isClone: false });
-              }}
-              iconForMobile={<Add />}
-              mobileTooltip="Add"
-            >
-              <Add /> Add
-            </ThemeButton>
-          </Box>
+        {!disableEdit && (
+          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter ? 'justify-between' : 'justify-end'}`}>
+            {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
+              <Autocomplete
+                fullWidth
+                className="max-w-[300px]"
+                options={serviceOption}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                isOptionEqualToValue={(option: any, val) => option.uniqueId === val}
+                value={selectedService}
+                onChange={(e, val) => {
+                  setSelectedService(val);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    size="small"
+                    name="service"
+                    placeholder={'Service'}
+                    label={'Service'}
+                    variant="outlined"
+                    fullWidth
+                    className="m-0"
+                  />
+                )}
+              />
+            )}
+            <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+              <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
+              <ThemeButton
+                onClick={() => {
+                  setAttachemntDialog({ open: true, id: null, isClone: false });
+                }}
+                iconForMobile={<Add />}
+                mobileTooltip="Add"
+              >
+                <Add /> Add
+              </ThemeButton>
+            </Box>
+          </div>
         )}
         <Box pt={2} pb={2}>
           <Box className="h-[calc(100vh-300px)] overflow-auto">
@@ -154,10 +297,11 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -173,7 +317,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
                             </Typography>
                           </Box>
                         </div>
-                        {!fromVersions && (
+                        {!disableEdit && (
                           <div className="flex gap-2">
                             <HtmlTooltip title="Edit" placement="top" arrow>
                               <IconButton
@@ -278,7 +422,7 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           fullWidth
         >
           <CustomDialogHeader
-            title={'Show Drawing'}
+            title={selectedAttachment?.name}
             showManimizeMaximize={false}
             showRequiredLabel={false}
             onClose={() => {
@@ -287,13 +431,13 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
           />
           <CustomDialogContent isFooterPresent={false}>
             {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
-              fromVersions ? (
+              disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-              fromVersions ? (
+              disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
@@ -326,24 +470,15 @@ const Diagram = ({ resource, referenceId, currentVersion, workOrderData, fromVer
               setAttachemntDialog({ open: false, id: null, isClone: false });
               setFullScreen(false);
             }}
-            relatedTo={[
-              { type: resource, referenceId: referenceId, version: currentVersion, access: true },
-              {
-                type: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder : ACTIVITY_RESOURCE.productionOrder,
-                referenceId:
-                  workOrderData?.type === WORK_ORDER_TYPE.repairOrder
-                    ? workOrderData?.repairOrder?.optionValue || workOrderData?.repairOrder
-                    : workOrderData?.productionOrder?.optionValue || workOrderData?.productionOrder,
-                access: true
-              }
-            ]}
+            relatedTo={getRelatedTo()}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
             fetchData={fetchData}
-            defaultAttachmentType={ATTACHMENT_TYPE.drawing}
+            attachmentType={attachmentType}
+            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.id && !showMaterialFilter ? customhandleAdd : null}
           />
         </Dialog>
       )}
@@ -402,11 +537,7 @@ const ImagePreview = ({ name, url }: ImagePreviewProps) => {
 
   return (
     <div className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]">
-      {src ? (
-        <img src={src} alt={name} className="mr-auto max-h-full max-w-full" />
-      ) : (
-        <p>Loading...{progress >= 0 ? progress : 0}%</p>
-      )}
+      {src ? <img src={src} alt={name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
     </div>
   );
 };

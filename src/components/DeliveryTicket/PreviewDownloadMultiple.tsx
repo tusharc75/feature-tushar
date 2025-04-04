@@ -49,7 +49,10 @@ function PreviewDownloadMultiple({ referenceIds }) {
         return {
           name: e?.fieldName,
           width: e?.width,
-          customLabel: e?.customLabel
+          customLabel: e?.customLabel,
+          showBelowRow: e?.showBelowRow,
+          alignment: e?.alignment,
+          fontWeight: e?.fontWeight
         };
       })
     );

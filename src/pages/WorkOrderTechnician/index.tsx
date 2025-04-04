@@ -1,57 +1,67 @@
-import { Close } from '@mui/icons-material';
+import { Close, Description, Info } from '@mui/icons-material';
 import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Popover } from '@mui/material';
+import axios, { CancelToken } from 'axios';
 import { camelCase } from 'lodash';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { BiFilterAlt } from 'react-icons/bi';
+import { FiExternalLink } from 'react-icons/fi';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
+import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import ButtonMenu from 'src/components/ButtonMenu';
-import { useCardReducer } from 'src/components/CardColTimeline';
+import { FetchSingleColumnProps, useCardColTimeline } from 'src/components/CardColTimeline1';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { useTableReducer } from 'src/components/CustomReactTable';
+import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Filter from 'src/components/Filter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import { WORKORDER_SERVICE_STATUS, WORKORDER_TECHNICIAN_SERVICE_STATUS, sidebarResource, workOrder, workOrderIconMap } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  WORKORDER_SERVICE_STATUS,
+  WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  prepareDataForGrid,
+  sidebarResource,
+  workOrder
+} from 'src/constants/helpers';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { BiFilterAlt } from 'react-icons/bi';
-import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
-import Filter from 'src/components/Filter';
+
+type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
 type ViewType = 'card-view' | 'table-view';
-type TableViewStatus =
-  | typeof WORKORDER_SERVICE_STATUS.pending
-  | typeof WORKORDER_SERVICE_STATUS.inProgress
-  | typeof WORKORDER_SERVICE_STATUS.completed
-  | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
 const renderedFrom = camelCase(sidebarResource?.workOrderTechnician);
 
+const defaultVisibleRows = [
+  'workOrderNumber',
+  'createDate',
+  'estimateCompleteDate',
+  'serializedAsset',
+  'product',
+  'package',
+  'repairOrder',
+  'assemblyOrder',
+  'productionOrder'
+];
+
+const keyGetter = (d: any) => d?.['_id'] as string;
+
 const WorkOrderTechnician = () => {
-  const toastConfig = useContext(CustomToastContext);
-
-  const { state, dispatch } = useCardReducer();
-  const { selectedRecords: cardSelectedRecords } = state;
-  const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords: tableSelectedRecords } = tableState;
-  const gridViewRef = useRef<GridViewRef>();
-
-  const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
-
-  const resetSelectedRecords = () => {
-    dispatch({ type: 'selection', selectedRecords: [] });
-    tableDispatch({ type: 'selection', selectedRecords: [] });
-  };
-
   const {
     state: {
       permissions,
@@ -59,8 +69,213 @@ const WorkOrderTechnician = () => {
       user: { user }
     }
   }: any = useData();
+  const { generateColumns } = useColumns();
+  const toastConfig = useContext(CustomToastContext);
+  const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
+  const { selectedRecords: tableSelectedRecords } = tableState;
+  const gridViewRef = useRef<GridViewRef>();
+  const [serviceOpen, setServiceOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [columnsDef, setColumnsDef] = useState(null);
+  const history = useHistory();
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState<any[]>([
+    WORKORDER_SERVICE_STATUS.pending,
+    WORKORDER_SERVICE_STATUS.inProgress,
+    WORKORDER_SERVICE_STATUS.completed
+  ]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [filterQuery, setFilterQuery] = useState([]);
+  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const ref: any = useRef();
+  const resetSelectedRecords = () => {
+    cardState.resetSelection();
+    tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
+
+  const fetchSingleColumnData = useCallback(
+    async ({ column, filterQuery, limit, page, cancelToken }: FetchSingleColumnProps<any, Columns>) => {
+      const api = `/work-order-technician?page=${page}&status=${column}&limit=${limit}${filterQuery}`;
+      try {
+        const response = await axiosInstance().get(api, { cancelToken });
+        const {
+          data: { data, count }
+        } = response;
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+          finalObject['serviceName'] = u?.service?.serviceName;
+          finalObject['serviceId'] = u?.service?._id;
+          finalObject['customServiceStatus'] = u?.status;
+          finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          finalObject['uniqueId'] = u?._id;
+          delete workOrderDetailData?._id;
+          delete workOrderDetailData?.id;
+          return { ...finalObject, ...workOrderDetailData };
+        });
+        return { data: rows, count } as { data: any; count: number };
+      } catch (error) {
+        throw error;
+      }
+    },
+    [user]
+  );
+
+  const cardState = useCardColTimeline({
+    fetchSingleColumn: fetchSingleColumnData,
+    columns: WORKORDER_TECHNICIAN_SERVICE_STATUS,
+    initialVisibleColumns: selectedServiceStatus,
+    columnDef: columnsDef,
+    keyGetter
+  });
+
+  useEffect(() => {
+    cardState.setColumnDef(columnsDef);
+  }, [columnsDef]);
+
+  useEffect(() => {
+    cardState.setOrderAndVisibility({ order: tableState.columnOrder, visible: tableState.visibleColumns });
+  }, [tableState.columnOrder, tableState.visibleColumns]);
+
+  useEffect(() => {
+    cardState.setVisibleColumns(selectedServiceStatus);
+  }, [selectedServiceStatus]);
+
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
+
+  const fetchGridColumns = async (cancelToken: CancelToken) => {
+    try {
+      let data;
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken });
+      data = response?.data?.data;
+
+      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
+      const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
+
+      const extraColumns = [
+        {
+          accessor: 'service',
+          Header: 'Service',
+          disabled: true,
+          Cell: ({ row }) => (
+            <>
+              {row?.original?.serviceName ? (
+                <div>
+                  <h5
+                    className="link text-truncate"
+                    onClick={() => {
+                      setSelectedService({
+                        uniqueId: row?.original?._id,
+                        workOrderId: row?.original?.workOrderId,
+                        canPerform: row?.original?.canPerform
+                      });
+                      setServiceOpen(true);
+                    }}
+                  >
+                    {row.original.serviceName}
+                  </h5>
+                  <Box ml={1}>
+                    {row?.original?.canPerformInfo ? (
+                      <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                        <Info className="text-red-500 [font-size:20px_!important]" />
+                      </HtmlTooltip>
+                    ) : null}
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        },
+        {
+          accessor: 'workOrderNumber',
+          Header: 'Work Order Number',
+          defaultVisible: true,
+          Cell: ({ row }) => (
+            <div className="flex items-center gap-1">
+              <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
+              {row.original['workOrderNumber'] ? (
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        },
+        {
+          accessor: 'assignedWorkStations',
+          Header: 'Work Stations',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['assignedWorkStations'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedWorkStations',
+                  lookupResource: sidebarResource.workStations
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
+        }
+      ];
+      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2), ActionsRenderer].map((c) => {
+        const id = c.id || c.accessor;
+        if (defaultVisibleRows.includes(id)) {
+          return { ...c, defaultVisible: true };
+        }
+        return c;
+      });
+      setColumnsDef(finalColumns);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {row?.original?.productionOrderId && (
+          <HtmlTooltip title="Drawings">
+            <IconButton
+              size="small"
+              aria-label="Details"
+              color="primary"
+              onClick={(e) => {
+                setShowDrawingDialog({ open: true, workOrder: row?.original?.workOrderId });
+              }}
+            >
+              <Description fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
 
   const FIELD_TO_FILTER = [
     {
@@ -178,22 +393,10 @@ const WorkOrderTechnician = () => {
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
-  const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
-  const [selectedServiceStatus, setSelectedServiceStatus] = useState([
-    WORKORDER_SERVICE_STATUS.pending,
-    WORKORDER_SERVICE_STATUS.inProgress,
-    WORKORDER_SERVICE_STATUS.completed
-  ]);
-  const [showFilter, setShowFilter] = useState(false);
-  const [filterByIds, setFilterByIds] = useState([]);
-  const [filterTerm, setFilterTerm] = useState({});
-  const [filterQuery, setFilterQuery] = useState([]);
-  const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onClickRefreshIcon = () => {
     if (viewType === 'card-view') {
-      ref?.current?.childFunction();
+      cardState.refreshAllColumns();
     }
     if (viewType === 'table-view') {
       gridViewRef?.current?.refreshGrid();
@@ -205,9 +408,9 @@ const WorkOrderTechnician = () => {
     const data = selectedRecords
       ?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)
       ?.map((_s) => ({
-        workOrder: _s?.workOrderDetail?._id,
+        workOrder: _s?.workOrderId,
         service: _s?.materialId,
-        uniqueId: _s?._id,
+        uniqueId: _s?.uniqueId,
         status: WORKORDER_SERVICE_STATUS.completed
       }));
     axiosInstance()
@@ -223,14 +426,14 @@ const WorkOrderTechnician = () => {
       });
   };
 
-  const newActionButtonProps: NewActionButtonProps<string> = useMemo(() => {
+  const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const items = {
       disabled: selectedRecords?.length === 0,
       items: [
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
@@ -241,35 +444,6 @@ const WorkOrderTechnician = () => {
     };
     return items;
   }, [selectedRecords, viewType]);
-
-  const statusMenuItems = useMemo(() => {
-    return [
-      {
-        label: WORKORDER_SERVICE_STATUS.pending,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.pending,
-        value: WORKORDER_SERVICE_STATUS.pending,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.pending]
-      },
-      {
-        label: WORKORDER_SERVICE_STATUS.inProgress,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgress,
-        value: WORKORDER_SERVICE_STATUS.inProgress,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgress]
-      },
-      {
-        label: WORKORDER_SERVICE_STATUS.completed,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
-        value: WORKORDER_SERVICE_STATUS.completed,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
-      },
-      {
-        label: WORKORDER_SERVICE_STATUS.inProgressByOther,
-        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.inProgressByOther,
-        value: WORKORDER_SERVICE_STATUS.inProgressByOther,
-        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.inProgressByOther]
-      }
-    ];
-  }, [tableViewStatus]);
 
   const getQueryString = (filterByIdsP = filterByIds) => {
     if (filterByIdsP?.length > 0) {
@@ -300,6 +474,12 @@ const WorkOrderTechnician = () => {
   useEffect(() => {
     localStorage.setItem(`${renderedFrom}_view`, viewType);
   }, [viewType]);
+
+  useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+    fetchGridColumns(cancelToken.token);
+    return () => cancelToken.cancel();
+  }, []);
 
   return (
     <Box className="main-container-v1">
@@ -339,55 +519,10 @@ const WorkOrderTechnician = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         {viewType === 'card-view' && (
-          <div className="header-panel pb-0 pt-0">
-            <DetailsPageHeader
-              isAddButtonVisible={false}
-              isActionButtonVisible={false}
-              isNewActionButtonVisible={selectedRecords.length > 0}
-              newActionButtonProps={newActionButtonProps}
-              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-              leftSideContents={
-                <div className="flex items-center gap-2">
-                  <ThemeButton
-                    mobileTooltip="Apply Filters"
-                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                    iconForMobile={<BiFilterAlt />}
-                    onClick={() => {
-                      setShowFilter(true);
-                    }}
-                  >
-                    Show Filters
-                  </ThemeButton>
-                  <DisplayFilterChip
-                    filterTerm={filterTerm}
-                    resourceColumns={FIELD_TO_FILTER}
-                    deepFilters={[]}
-                    filterByIds={filterByIds}
-                    fetchResourceData={(deepFilter, filterById) => {
-                      handleApplyFilter(filterById);
-                    }}
-                    setDeepFilters={null}
-                    setFilterByIds={setFilterByIds}
-                  />
-                </div>
-              }
-              hasXpadding={false}
-              hasYpadding={false}
-            />
-          </div>
-        )}
-
-        {viewType === 'card-view' && (
-          <div className="pt-2">
-            <CardView state={state} dispatch={dispatch} serviceStatus={selectedServiceStatus} filterQuery={filterQuery} ref={ref} />
-          </div>
-        )}
-        {viewType === 'table-view' && (
-          <div className="">
-            <GridView
+          <>
+            <CardView
               renderedFrom={renderedFrom}
-              state={tableState}
-              tableHead={
+              headerSlot={
                 <DetailsPageHeader
                   isAddButtonVisible={false}
                   isActionButtonVisible={false}
@@ -396,18 +531,6 @@ const WorkOrderTechnician = () => {
                   actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
                   leftSideContents={
                     <div className="flex items-center gap-2">
-                      <ButtonMenu
-                        showChevron={true}
-                        items={statusMenuItems}
-                        onItemClick={(e, item) => {
-                          setTableViewStatus(item.value);
-                        }}
-                      >
-                        <span className="flex items-center gap-2  [&_svg]:text-[18px]">
-                          {workOrderIconMap[tableViewStatus]}
-                          Status: {tableViewStatus}
-                        </span>
-                      </ButtonMenu>
                       <ThemeButton
                         mobileTooltip="Apply Filters"
                         startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
@@ -435,9 +558,58 @@ const WorkOrderTechnician = () => {
                   hasYpadding={false}
                 />
               }
+              state={cardState}
+              setSelectedService={setSelectedService}
+              setServiceOpen={setServiceOpen}
+              filterQuery={filterQuery}
+            />
+          </>
+        )}
+        {viewType === 'table-view' && (
+          <div className="">
+            <GridView
+              columns={columnsDef}
+              renderedFrom={renderedFrom}
+              state={tableState}
+              tableHead={
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  className="flex-grow"
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <>
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
+                    </>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                />
+              }
               ref={gridViewRef}
               dispatch={tableDispatch}
-              status={tableViewStatus}
               filterQuery={filterQuery}
               permissions={permissions?.workOrderTechnician}
             />
@@ -460,7 +632,7 @@ const WorkOrderTechnician = () => {
           onClose={() => {
             setShowFilter(false);
             tableDispatch({ type: 'onlyFilter', filters: {} });
-            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+            cardState.setFilterQuery('');
           }}
           loading={false}
           filterTitle={resources?.workOrderTechnician?.titleSingular}
@@ -473,6 +645,31 @@ const WorkOrderTechnician = () => {
           setFilterByIds={setFilterByIds}
           filterTerm={filterTerm}
           setFilterTerm={setFilterTerm}
+        />
+      )}
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={showDrawingDialog.workOrder}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null });
+          }}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          attachmentType={ATTACHMENT_TYPE.drawing}
+        />
+      )}
+
+      {serviceOpen && (
+        <TechnicianDialog
+          handleClose={() => {
+            setServiceOpen(false);
+            setSelectedService(null);
+            if (workOrder) {
+              history.push(`${routes.workOrderTechnician.path}`);
+            }
+          }}
+          workOrderId={selectedService?.workOrderId}
+          uniqueId={selectedService?.uniqueId}
+          canPerform={selectedService?.canPerform}
         />
       )}
     </Box>

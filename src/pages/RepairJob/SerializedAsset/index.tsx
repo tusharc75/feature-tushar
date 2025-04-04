@@ -496,7 +496,7 @@ const SerializedAsset = ({
               }
             }}
           >
-            Receive to Plant
+            {`Receive to ${resources?.warehouse?.titleSingular}`}
           </MenuItem>
         ) : null}
         <MenuItem

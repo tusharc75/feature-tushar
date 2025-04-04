@@ -4,10 +4,9 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -19,13 +18,12 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { bulkUpdate, calculateRowsField } from '../../../components/RentalManagment/helper';
-import routes from 'src/components/Helpers/Routes';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -58,7 +56,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 }) => {
   const ref = useRef(null);
 
-  const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -75,30 +72,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchData();
   }, [rowData]);
-
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-
-    let materialType;
-    if (isBulkedit) {
-      materialType = rowData[0]?.type;
-    } else {
-      materialType = rowData?.type;
-    }
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   const fetchData = async () => {
     setFetchingData(true);
@@ -258,7 +238,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
       !isOffline
     ) {
-      const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
+      const taxCodeOptions = await getTaxList(user, fieldTicketData, isBulkedit ? rowData[0]?.type : rowData?.type);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
@@ -285,7 +265,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(fieldTicketData, [{
+      let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, [{
         materialId: rowData.materialId,
         type: rowData.type,
         qty: 1,

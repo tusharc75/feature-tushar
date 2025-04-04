@@ -72,7 +72,7 @@ import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'sr
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import ReceivingServices from './ReceivingServices';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import ChangePreviousAssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/ChangePreviousAssetDataDialog';
@@ -84,6 +84,7 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import { flattenArray } from 'src/constants/columns';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -2310,10 +2311,10 @@ const ReceivingTicket = ({
   return (
     <>
       {serviceData?.length > 0 && (
-        <CustomTabs value={tabValue} onChange={handleMainTabChange} className="mb-0" tabVariant="underlined">
-          <CustomTab value={0} label={'Assets/Products'} />
-          <CustomTab value={1} label={'Services'} />
-        </CustomTabs>
+        <ContainedTabs value={tabValue} onChange={handleMainTabChange} >
+          <ContainedTab value={0} label={'Assets/Products'} />
+          <ContainedTab value={1} label={'Services'} />
+        </ContainedTabs>
       )}
       <TabPanel value={tabValue} index={0}>
         <DetailsPageHeader
@@ -2667,6 +2668,12 @@ const ReceivingTicket = ({
                   variant="outlined"
                   onChange={(e) => {
                     setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
+                  }}
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
                   }}
                 />
               )}

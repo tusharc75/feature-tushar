@@ -40,10 +40,9 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
             }
             : {
               fieldServiceOrder: ele?.resourceId,
-              startDate: ele?.service?.estimateStartDate,
-              endDate: ele?.service?.estimateEndDate
+              estimateStartDate: ele?.estimateStartDate,
+              estimateEndDate: ele?.estimateEndDate
             }),
-        status: 'Assigned'
       };
     });
     const baseApi =
@@ -73,7 +72,7 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
       <CustomDialogContent>
         <Box p={2}>
           <Typography variant="body1" color="textPrimary">
-            Do You want to assign{' '}
+            Do you want to assign{' '}
             {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName || selectedServiceOrder[0]?.fieldServiceOrderNumber})`}{' '}
             to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
           </Typography>

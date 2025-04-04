@@ -13,7 +13,6 @@ import {
   TableRow
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { kebabCase } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -26,7 +25,7 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 import CustomCalendar from 'src/components/CustomCalendar';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, workOrderSupervisor } from 'src/constants/helpers';
+import { cn, sidebarResource, workOrderSupervisor } from 'src/constants/helpers';
 import '../PlanningView/Calendar/calendarView.scss';
 
 const formats = {
@@ -35,7 +34,7 @@ const formats = {
 
 const localizer = dayjsLocalizer(dayjs);
 
-function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, ref) {
+function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   const {
     state: { resources }
   }: any = useData();
@@ -71,10 +70,10 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
     childFunction
   }));
 
-  const fetchRepairOrderCompetencies = (id: string) => {
+  const fetchCompetencies = (id: string) => {
     setIsDataFetching(true);
     axiosInstance()
-      .get(`${workOrderSupervisor.api}/repair-order-service-competencies/${id}`)
+      .get(`${workOrderSupervisor.api}/competencies/${id}?resource=${reference}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
           setOpenRepairPopup({ open: true, data: data });
@@ -86,34 +85,29 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
 
   const fetchData = () => {
     setIsDataFetching(true);
-    let query = getFilterQuery(false);
-    query = `${query}&from=${dateRange.estimateStartDate}&to=${dateRange.estimateEndDate}`;
+    const urlParams = new URLSearchParams(filterQuery);
+    urlParams.delete('from');
+    urlParams.delete('to');
+    const query = `${urlParams.toString()}&from=${dateRange.estimateStartDate}&to=${dateRange.estimateEndDate}&resource=${reference}`;
     axiosInstance()
-      .get(`${workOrderSupervisor.api}/${kebabCase(reference)}?${query}`)
+      .get(`${workOrderSupervisor.api}?${query}`)
       .then(({ data: { data } }) => {
-        const rows = data?.map((d: any) => {
-          if (reference === 'repairOrder') {
-            return {
-              id: d._id,
-              title: d?.repairOrderNumber,
-              start: new Date(d?.createDate),
-              end: d?.expectedCompletionDate ? new Date(d?.expectedCompletionDate) : new Date(d?.createDate),
-              allDay: true,
-              startDraggable: false,
-              endDraggable: false
-            };
-          } else {
-            return {
-              id: d._id,
-              title: d?.workOrderNumber,
-              start: new Date(d?.createDate),
-              end: d?.estimateCompleteDate ? new Date(d?.estimateCompleteDate) : new Date(d?.createDate),
-              allDay: true,
-              startDraggable: false,
-              endDraggable: false
-            };
-          }
-        });
+        const rows = data?.map((d: any) => ({
+          id: d._id,
+          title:
+            reference === sidebarResource?.repairOrder
+              ? d?.repairOrderNumber
+              : reference === sidebarResource?.productionOrder
+                ? d?.productionOrderNumber
+                : reference === sidebarResource?.assemblyOrder
+                  ? d?.assemblyOrderNumber
+                  : d?.workOrderNumber,
+          start: new Date(d?.createDate),
+          end: d?.expectedCompletionDate ? new Date(d?.expectedCompletionDate) : new Date(d?.createDate),
+          allDay: true,
+          startDraggable: false,
+          endDraggable: false
+        }));
         setEvents([...rows]);
       })
       .catch((err) => {})
@@ -196,8 +190,8 @@ function WorkOrderCalendar({ getFilterQuery, filterQuery, reference, setOpen }, 
           }}
           onNavigate={onNavigate}
           onSelectEvent={(data: any, event: any) => {
-            if (reference === 'repairOrder') {
-              fetchRepairOrderCompetencies(data.id);
+            if ([sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder]?.includes(reference)) {
+              fetchCompetencies(data.id);
               setAnchor(event.nativeEvent.target);
             } else {
               setOpen({ open: true, id: data.id });

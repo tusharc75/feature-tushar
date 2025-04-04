@@ -309,7 +309,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       element.competence = d?.competenciesId;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
-      element.status = 'Assigned';
       element.warehouse = rentalManagementData?.warehouse?.optionValue;
       element.startDate = rentalManagementData?.estimateStartDate || new Date();
       element.endDate = rentalManagementData?.estimateEndDate || new Date();
@@ -321,7 +320,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       technician.push(element);
     });
 
-    let priceData: any = await getPricingConditions(rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, technician, PRICING_SETUP_TYPE.rent);
     AddMaterial(technician, priceData);
   };
 

@@ -122,6 +122,12 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         onChange={(e) => setFieldValue('description', e.target.value)}
                         variant="outlined"
                         value={values['description']}
+                        sx={{
+                          '& .MuiInputBase-root textarea': {
+                            resize: 'vertical',
+                            overflow: 'auto',
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid size={{xs:12}}>

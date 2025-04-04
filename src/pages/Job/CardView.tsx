@@ -84,7 +84,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
             <Grid container spacing={2}>
               {jobs.map((job, index) => {
                 return (
-                  <Grid item md={4} sm={6} xs={12} key={index}>
+                  <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }} >
                     <Box
                       className={`${classes.cardBox} p-[15px] md:p-[22px_22px_26px] `}
                       onClick={(e) => {

@@ -4,7 +4,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { object, string } from 'yup';
 import { Form, Formik } from 'formik';
@@ -25,7 +25,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
 
   const [initialValue] = useState({
     name: viewData?.name || '',
-    access: viewData?.access || ACCESS_OPTIONS.private,
+    access: viewData?.access || ACCESS_OPTIONS.everyone,
     default: viewData?.default || false
   });
 
@@ -36,7 +36,14 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
       name: values?.name,
       access: values?.access,
       default: values?.default,
-      columns: columns?.map((c: any) => ({ name: c.fieldName, width: c.width, customLabel: c.customLabel, showBelowRow: c?.showBelowRow })) || [],
+      columns: columns?.map((c: any) => ({
+        name: c.fieldName,
+        width: c.width,
+        customLabel: c.customLabel,
+        showBelowRow: c?.showBelowRow,
+        alignment: c?.alignment,
+        fontWeight: c?.fontWeight
+      })) || [],
       ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' })
     };
 

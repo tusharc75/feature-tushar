@@ -26,9 +26,10 @@ import { product, serviceMaster } from 'src/constants/helpers';
 import AssignStepDialog from './AssignStepDialog/Index';
 import FrequencyDialog from './FrequencyDialog';
 import { FiExternalLink } from 'react-icons/fi';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
 import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 interface Props {
   renderedFrom: string;
@@ -157,14 +158,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-            {
-              accessor: 'frequency',
-              Header: 'Frequency',
-              width: 150,
-              minWidth: 150,
-              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'frequency',
+            Header: 'Frequency',
+            width: 150,
+            minWidth: 150,
+            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'stepName',
@@ -580,10 +581,10 @@ const ServiceMaster = (props: Props) => {
 
   return (
     <Fragment>
-      <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-        <CustomTab value={0} label={'Normal'} />
-        <CustomTab value={1} label={'Conditional'} />
-      </CustomTabs>
+      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
+        <ContainedTab value={0} label={'Normal'} />
+        <ContainedTab value={1} label={'Conditional'} />
+      </ContainedTabs>
       <TabPanel value={tabValue} index={0}>
         {permissions?.product?.isUpdate && (
           <>

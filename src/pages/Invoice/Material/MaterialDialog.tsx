@@ -1,11 +1,11 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Dialog, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -18,11 +18,10 @@ import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import dayjs from 'dayjs';
-import { getPricingConditions } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
+
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -47,7 +46,6 @@ const MaterialDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
-  const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -62,30 +60,13 @@ const MaterialDialog: FC<EditDialogProps> = ({
   const [pricingMethodList, setPricingMethodList] = useState([]);
   const ref = useRef(null);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchFields();
   }, [rowData]);
-
-  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
-
-    let materialType;
-    if (isBulkedit) {
-      materialType = rowData[0]?.type;
-    } else {
-      materialType = rowData?.type;
-    }
-    try {
-      const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
-      );
-      return response?.data?.data || [];
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-    }
-  };
 
   const fetchFields = async () => {
     setLoading(true);
@@ -191,18 +172,13 @@ const MaterialDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    if (
-      invoiceData?.taxCode ||
-      (invoiceData?.billingAddress &&
-        (invoiceData?.billingAddress?.zipCode || invoiceData?.billingAddress?.state || invoiceData?.billingAddress?.county))
-    ) {
-      const taxCodeOptions = await fetchTaxRate(invoiceData?.billingAddress, invoiceData?.taxCode?.optionValue || null);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
-    }
+
+    const taxCodeOptions = await getTaxList(user, invoiceData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
+    });
     setFields(customData);
   };
 
@@ -240,7 +216,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
       const conditionType = invoiceData?.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-      let priceData: any = await getPricingConditions(invoiceData, [
+      let priceData: any = await getPricingConditions(sidebarResource.invoice, invoiceData, [
         {
           materialId: rowData.materialId,
           type: rowData.type,

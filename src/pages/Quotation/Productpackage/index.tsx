@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
   CHILD_RESOURCE,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
   SERVICE_TYPE,
@@ -40,7 +41,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
-import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
@@ -127,7 +128,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service
@@ -387,15 +388,9 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    if (quotationData?.taxCode) {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?taxCode=${quotationData?.taxCode?.optionValue}&materialType=${addDialog.type}`
-      );
-      if (data?.length) {
-        taxCodeData = data[0];
-      }
+    const taxCodeOptions = await getTaxList(user, quotationData, addDialog.type);
+    if (taxCodeOptions?.length) {
+      taxCodeData = taxCodeOptions[0];
     }
     rows.forEach((d) => {
       const element: any = {};
@@ -428,7 +423,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     });
 
     const conditionType = quotationData.type === QUOTATION_TYPE.salesOrder ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent;
-    let priceData: any = await getPricingConditions(quotationData, material, conditionType);
+    let priceData: any = await getPricingConditions(sidebarResource.quotation, quotationData, material, conditionType);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, quotationData?.currency, allFields);

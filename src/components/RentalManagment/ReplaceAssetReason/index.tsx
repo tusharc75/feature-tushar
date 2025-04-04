@@ -39,6 +39,12 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
                   error={touched['reason'] && Boolean(errors['reason'])}
                   helperText={touched['reason'] && errors['reason']}
                   onChange={(e) => setFieldValue('reason', e.target.value)}
+                  sx={{
+                    '& .MuiInputBase-root textarea': {
+                      resize: 'vertical',
+                      overflow: 'auto',
+                    },
+                  }}
                 />
               </Box>
             </CustomDialogContent>

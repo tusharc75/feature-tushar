@@ -28,13 +28,16 @@ import {
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   MATERIAL_TYPE,
+  PACKAGE_TYPE,
   PRICING_SETUP_TYPE,
   RENTAL_STATUS,
   rentalManagement,
+  SERIALIZED_PACKAGES_STATUS,
   sidebarResource
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
@@ -58,6 +61,8 @@ import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHel
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const Productpackage = ({
   rentalManagementData,
@@ -105,6 +110,7 @@ const Productpackage = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -209,7 +215,7 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === 'Product'
+                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
                     ? '(Product)'
                     : '(Service)'
                   : row.original.type === MATERIAL_TYPE.service
@@ -326,6 +332,17 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color='primary' />
+              </IconButton>
+            </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -344,7 +361,7 @@ const Productpackage = ({
                   }
                 >
                   <span>
-                    <IconButton size="small" aria-label="Details" disabled={true}>
+                    <IconButton size="small" aria-label="Delete" disabled={true}>
                       <DeleteIcon fontSize="small" color={'disabled'} />
                     </IconButton>
                   </span>
@@ -354,7 +371,7 @@ const Productpackage = ({
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="Details"
+                      aria-label="Delete"
                       onClick={() => {
                         const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
                         getNestedSubRows(obj, row.original);
@@ -389,7 +406,7 @@ const Productpackage = ({
     var nextStepMessage = null;
     var invoiceMaterialData: any = [];
     const loadingTicketProducts: any = [];
-    let nonSerializedInventory: any = []
+    let nonSerializedInventory: any = [];
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       // data = data?.additionalCost;
@@ -420,12 +437,12 @@ const Productpackage = ({
           });
         }
       });
-      nonSerializedInventory = data?.nonSerializedInventory || []
+      nonSerializedInventory = data?.nonSerializedInventory || [];
     }
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
 
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
-    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
+    let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== PACKAGE_TYPE.service);
 
     rows = [...products, ...packages, ...additionalCosts];
 
@@ -492,8 +509,10 @@ const Productpackage = ({
           ? loadingTicketProducts
             ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
             ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
-          : nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.length > 0 ?
-            nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : nonSerializedInventory?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)?.length > 0
+            ? nonSerializedInventory
+              ?.filter((e) => e?._id === parent?._id && e?.product?.optionValue === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
             : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -538,7 +557,16 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts, nonSerializedInventory) => {
+  const generateNestedData = (
+    material,
+    inventory,
+    nonSerializeAsset,
+    productSerialNumbers,
+    parent,
+    isPriceRequired,
+    loadingTicketProducts,
+    nonSerializedInventory
+  ) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -567,8 +595,8 @@ const Productpackage = ({
       }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length
-        + nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
+        nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       _subRow.canDelete =
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length
           ? false
@@ -582,8 +610,10 @@ const Productpackage = ({
           !_subRow.serializedProduct &&
           _subRow.assetQty === 0 &&
           _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0 ?
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          ? loadingTicketProducts
+            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -639,7 +669,7 @@ const Productpackage = ({
       element.listPrice = d.listPrice ? d.listPrice : null;
       material.push(element);
     });
-    let priceData: any = await getPricingConditions(rentalManagementData, material, PRICING_SETUP_TYPE.rent);
+    let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, material, PRICING_SETUP_TYPE.rent);
     AddMaterial(material, priceData);
   };
 
@@ -1068,7 +1098,7 @@ const Productpackage = ({
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (
         <ManagePackageDialog
-          referenceData={{ packageType: 'Product', customerAccount: rentalManagementData?.customerAccount?.optionValue }}
+          referenceData={{ packageType: PACKAGE_TYPE.product, customerAccount: rentalManagementData?.customerAccount?.optionValue }}
           isClone={false}
           open={addExistingProductDialog.open}
           packageId={null}
@@ -1137,6 +1167,7 @@ const Productpackage = ({
           handleClose={() => {
             setAddExistingSerializedPackages(false);
           }}
+          extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGES_STATUS.available }]}
           extraFilterById={[{ field: 'warehouse', term: { $in: [rentalManagementData?.warehouse?.optionValue] } }]}
           isSubmitting={isSubmitting}
         />
@@ -1230,6 +1261,17 @@ const Productpackage = ({
           costData={showCostDialog.data}
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={rentalManagementData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.rentalManagement}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

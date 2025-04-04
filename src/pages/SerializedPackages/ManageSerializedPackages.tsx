@@ -41,7 +41,14 @@ const ManageSerializedPackages = ({ onClose, onSuccess, isClone = false, id = nu
       const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.serializedPackages}`);
       data = response?.data?.data?.filter((d) => !['currentOwnerType', 'currentOwner'].includes(d.fieldData.fieldName));
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj.isUpdate)
+        .map((d: any) => {
+          if (['package', 'warehouse']?.includes(d?.fieldData?.fieldName)) {
+            return { ...d?.fieldData, disableOnEdit: true, isUneditable: true };
+          }
+          return d.fieldData;
+        });
 
       if (id) {
         axiosInstance()

@@ -6,6 +6,24 @@
 
 @layer muiReset;
 
+@layer utilities {
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.3;
+    background-color: currentColor;
+    transform: scale(0);
+    animation: ripple-animation 0.55s linear;
+  }
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+}
+
 @layer components {
   .hide-scrollbar {
     -ms-overflow-style: none;
@@ -74,6 +92,7 @@
   --colorProject: yellow;
   --new_theme_color: #0f9fa9;
   --new-theme-color: #0f9fa9;
+  --new-theme-color-hsl: 184 84% 36%;
   --new-theme-color-hover: #0daeb9;
   --new-theme-color-disabled: #45949a;
   --new-theme-secondary-color: #ffc955;
@@ -4627,4 +4646,13 @@ td.google-visualization-orgchart-node {
 
 .rbc-agenda-empty {
   display: none;
+}
+.remove-tiny-mce-toolbar-top-border {
+  .tox-tinymce:not(.tox-tinymce-inline) .tox-editor-header:not(:first-child) .tox-toolbar-overlord:first-child .tox-toolbar__primary,
+  .tox-tinymce:not(.tox-tinymce-inline) .tox-editor-header:not(:first-child) .tox-toolbar:first-child {
+    border-top: 0px;
+  }
+  .tox-sidebar-wrap {
+    border-bottom: 0px !important;
+  }
 }

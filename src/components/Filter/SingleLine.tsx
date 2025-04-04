@@ -96,7 +96,9 @@ const SingleLine = ({ fieldData, allFields, deepFilters, setDeepFilters, filterT
           <p className="text-[16px] font-medium leading-[19px]">{fieldData?.fieldLabel}</p>
         </div>
         <div className="flex items-center justify-between">
-          {filterTerm && setFilterTerm && <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />}
+          {filterTerm && setFilterTerm && fieldData?.type === 'singleLine' && (
+            <InNin filterTerm={filterTerm} setFilterTerm={setFilterTerm} fieldName={fieldData?.fieldName} />
+          )}
           <SearchBox
             onChange={(e) => {
               setSearchVal(e?.target?.value);

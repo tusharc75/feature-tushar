@@ -1,4 +1,4 @@
-import { Box, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { GrDrag } from 'react-icons/gr';
@@ -7,7 +7,10 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { TabPanel } from 'src/components/CustomTabs';
+import DeleteIcon from '@mui/icons-material/Delete';
+import DescriptionIcon from '@mui/icons-material/Description';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -16,7 +19,18 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, prepareDataForGrid, sidebarResource, WORK_ORDER_TYPE, WORK_ORDER_TYPE_LABEL } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  PACKAGE_TYPE,
+  packages,
+  prepareDataForGrid,
+  sidebarResource,
+  WORK_ORDER_TYPE,
+  WORK_ORDER_TYPE_LABEL
+} from 'src/constants/helpers';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -37,6 +51,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const { dataRows, selectedRecords } = state;
   const [tabValue, setTabValue] = useState(0);
   const [selectedResource, setSelectedResource] = useState('');
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDiagramDialog, setShowDiagramDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -46,7 +62,6 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     fetchData();
   }, [selectedResource]);
 
-
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -55,7 +70,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       api += `?type=${selectedResource}`;
     }
     axiosInstance()
-      .get(api).then(({ data: { data } }) => {
+      .get(api)
+      .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user)
@@ -76,6 +92,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       accessor: 'order',
       Header: 'Sequence',
       show: true,
+      width: 150,
       filter: false,
       sortable: false,
       Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
@@ -83,11 +100,48 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     {
       accessor: 'qty',
       Header: 'Qty',
+      width: 150,
       editable: allowedToEdit,
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+    },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title="Drawings">
+            <IconButton
+              size="small"
+              aria-label="Drawings"
+              onClick={(e) => {
+                setShowDiagramDialog({ open: true, _id: row?.original?._id, label: row?.original?.serviceName });
+              }}
+            >
+              <DescriptionIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord([row.original]);
+                setShowServiceConfirmBox(true);
+              }}
+            >
+              <DeleteIcon color="error" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </>
+      )
     }
   ];
 
@@ -114,12 +168,13 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
 
   const removeServices = () => {
     setRemovingServices(true);
-    const Ids = selectedRecords.map((d) => d._id);
+    let ids = deleteRecord?.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/services/remove`, { ids: Ids, type: selectedResource })
+      .put(`${packages.api}/${packageId}/services/remove`, { ids: ids, type: selectedResource })
       .then(() => {
         setRemovingServices(false);
         setShowServiceConfirmBox(false);
+        setDeleteRecord(null);
         fetchData();
       })
       .catch((err) => {
@@ -137,7 +192,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     });
     axiosInstance()
       .put(`${packages.api}/material/${packageId}/order`, {
-        packageType: 'Service',
+        packageType: PACKAGE_TYPE.service,
         data: rows || [],
         type: selectedResource
       })
@@ -186,21 +241,6 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     );
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        <MenuItem
-          disabled={selectedRecords.length === 0 || isRemovingServices}
-          onClick={() => {
-            setShowServiceConfirmBox(true);
-          }}
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
-  };
-
   const rightSideContents = () => {
     return (
       allowedToEdit && (
@@ -217,9 +257,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
-            <ThemeButton
-              startIcon={<GrDrag fontSize="small" />}
-              onClick={() => setArrangeView(true)}>
+            <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
           ) : null}
@@ -229,34 +267,53 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   };
 
   const handleMainTabChange = (event: any, newValue: number) => {
-    setSelectedResource(newValue === 1 ? WORK_ORDER_TYPE.assemblyOrder :
-      newValue === 2 ? WORK_ORDER_TYPE.preInspectionOrder :
-        newValue === 3 ? WORK_ORDER_TYPE.postInspectionOrder :
-          newValue === 4 ? WORK_ORDER_TYPE.disassemblyOrder :
-            ''
-    )
+    setSelectedResource(
+      newValue === 1
+        ? WORK_ORDER_TYPE.assemblyOrder
+        : newValue === 2
+          ? WORK_ORDER_TYPE.preInspectionOrder
+          : newValue === 3
+            ? WORK_ORDER_TYPE.postInspectionOrder
+            : newValue === 4
+              ? WORK_ORDER_TYPE.disassemblyOrder
+              : ''
+    );
     setTabValue(newValue);
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <MenuItem
+        disabled={selectedRecords.length === 0}
+        onClick={() => {
+          setDeleteRecord(selectedRecords);
+          setShowServiceConfirmBox(true);
+        }}
+      >
+        {`Delete (${selectedRecords?.length})`}
+      </MenuItem>
+    );
   };
 
   return (
     <Box>
-      {(permissions?.assemblyOrder?.isRead) && (
+      {permissions?.assemblyOrder?.isRead && (
         <>
-          <CustomTabs value={tabValue} onChange={handleMainTabChange} tabVariant="underlined">
-            <CustomTab value={0} label={`Individual`} />
-            <CustomTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <CustomTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <CustomTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <CustomTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
-          </CustomTabs>
+          <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
+            <ContainedTab value={0} label={`Individual`} />
+            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
+            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
+            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
+            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+          </ContainedTabs>
         </>
       )}
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
         isActionButtonVisible={allowedToEdit}
+        actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
         actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
@@ -270,6 +327,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={onSaveInlineEdit}
+          hideAction={!allowedToEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
         />
@@ -310,6 +368,18 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           handleClose={() => setArrangeView(false)}
           handleSubmit={handleArrangeUpdate}
           loading={isAssigning}
+        />
+      )}
+      {showDiagramDialog.open && (
+        <DiagramDialog
+          referenceId={packageId}
+          uniqueId={showDiagramDialog?._id}
+          referenceLabel={showDiagramDialog.label}
+          resource={ACTIVITY_RESOURCE.packages}
+          handleClose={() => {
+            setShowDiagramDialog({ open: false, _id: null, label: '' });
+          }}
+          attachmentType={ATTACHMENT_TYPE.drawing}
         />
       )}
     </Box>

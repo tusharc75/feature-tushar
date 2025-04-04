@@ -6,7 +6,7 @@ import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOffli
 import { sortBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { fieldServiceOrderAddOffline } from 'src/pages/FieldServiceOrder/Services/OfflineHelper';
+import { fieldServiceOrderAddOffline } from 'src/pages/FieldServiceOrder/helpers/OfflineHelper';
 
 export const CustomOfflineContext = createContext(null);
 

@@ -18,6 +18,73 @@ fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
   };
 })(fabric.IText.prototype.initHiddenTextarea);
 
+// Creating a custom arrow class extending fabric.Group
+fabric.CustomArrow = fabric.util.createClass(fabric.Group, {
+  type: 'customArrow',
+  initialize: function (options) {
+    options || (options = {});
+
+    // Calculating arrow dimensions and coordinates
+    const width = options.width || 100;
+    const strokeWidth = options.strokeWidth || 2;
+    const headWidth = 15;
+    const headHeight = 12;
+
+    // Creating the line part of the arrow - ends exactly at the triangle base
+    const line = new fabric.Line([0, 0, width - headHeight, 0], {
+      stroke: options.fill || 'black',
+      strokeWidth: strokeWidth,
+      selectable: false,
+      evented: false
+    });
+
+    // Creating the arrowhead (triangle) - positioned precisely at the end of the line
+    const arrowHead = new fabric.Triangle({
+      width: headWidth,
+      height: headHeight,
+      left: width - headHeight / 2,
+      top: 0,
+      fill: options.fill || 'black',
+      originX: 'center',
+      originY: 'center',
+      angle: 90,
+      selectable: false,
+      evented: false
+    });
+
+    // Creating group of objects
+    const objects = [line, arrowHead];
+    this.callSuper('initialize', objects, options);
+
+    // Setting additional properties
+    this.set({
+      width: width,
+      height: Math.max(strokeWidth, headWidth),
+      originX: 'left',
+      originY: 'center',
+      left: options.left || 100,
+      top: options.top || 100,
+      angle: options.angle || 0
+    });
+  },
+
+  updateArrowColor: function (color) {
+    this.getObjects().forEach((obj) => {
+      if (obj.type === 'line') {
+        obj.set('stroke', color);
+      } else {
+        obj.set('fill', color);
+      }
+    });
+    return this;
+  }
+});
+
+// Registering the custom class
+fabric.CustomArrow.fromObject = function (object, callback) {
+  return callback(new fabric.CustomArrow(object));
+};
+
 const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -89,6 +156,19 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     loadImage(fabricCanvas);
     return () => fabricCanvas.dispose();
   }, [data]);
+
+  const updateDrawingColor = (event) => {
+    const newColor = event.target.value;
+    if (canvas && (isDrawingMode || isHighlighterMode)) {
+      if (isHighlighterMode) {
+        const rgbaColor = fabric.Color.fromHex(newColor).setAlpha(0.2).toRgba();
+        canvas.freeDrawingBrush.color = rgbaColor;
+      } else if (isDrawingMode) {
+        canvas.freeDrawingBrush.color = newColor;
+      }
+      canvas.renderAll();
+    }
+  };
 
   const loadImage = (fabricCanvas) => {
     if (canvasRef.current) {
@@ -169,6 +249,23 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     canvas.add(newCircle);
   };
 
+  const handleAddArrow = () => {
+    const id = new Date().getMilliseconds();
+    const newArrow = new fabric.CustomArrow({
+      left: 100,
+      top: 150,
+      fill: 'black',
+      id: id,
+      width: 150,
+      angle: 30,
+      strokeWidth: 2
+    });
+
+    canvas.add(newArrow);
+    canvas.setActiveObject(newArrow);
+    canvas.requestRenderAll();
+  };
+
   const handleRemoveObject = (obj) => {
     if (obj.highlighter) {
       const index = highlighterPaths.indexOf(obj);
@@ -242,6 +339,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
         activeObject.forEachObject((obj) => {
           if (obj.type === 'line' || obj.type === 'path') {
             obj.set('stroke', newColor);
+          } else if (obj.type === 'customArrow') {
+            obj.updateArrowColor(newColor);
           } else {
             obj.set('fill', newColor);
           }
@@ -259,8 +358,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       } else {
         if (activeObject.type === 'line' || activeObject.type === 'path') {
           activeObject.set('stroke', newColor);
-        } else if (activeObject.type === 'path') {
-          activeObject.set('stroke', newColor);
+        } else if (activeObject.type === 'customArrow') {
+          activeObject.updateArrowColor(newColor);
         } else {
           activeObject.set('fill', newColor);
         }
@@ -275,13 +374,13 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       setHighlighterPaths(highlighterPaths);
       canvas.remove(lastHighlighterPath);
       canvas.requestRenderAll();
-      setHighlighterRedoPaths(prev => [...prev, lastHighlighterPath]);
+      setHighlighterRedoPaths((prev) => [...prev, lastHighlighterPath]);
     } else if (isDrawingMode && brushPaths.length > 0) {
       const lastBrushPath = brushPaths.pop();
       setBrushPaths(brushPaths);
       canvas.remove(lastBrushPath);
       canvas.requestRenderAll();
-      setBrushRedoPaths(prev => [...prev, lastBrushPath]);
+      setBrushRedoPaths((prev) => [...prev, lastBrushPath]);
     }
   };
 
@@ -292,22 +391,21 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setHighlighterPaths(prev => [...prev, path]);
+      setHighlighterPaths((prev) => [...prev, path]);
     } else if (isDrawingMode && brushRedoPaths.length > 0) {
       const path = brushRedoPaths.pop();
       setBrushRedoPaths(brushRedoPaths);
       canvas.add(path);
       path.setCoords();
       canvas.renderAll();
-      setBrushPaths(prev => [...prev, path]);
+      setBrushPaths((prev) => [...prev, path]);
     }
   };
 
   const enterHighlighterMode = () => {
     setHighlighterMode(true);
-
     const highlighterBrush = new fabric.PencilBrush(canvas);
-    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity
+    highlighterBrush.color = 'rgba(255, 255, 0, 0.2)'; // Yellow color with 20% opacity;
     highlighterBrush.width = 10; // Highlighter stroke width
 
     canvas.freeDrawingBrush = highlighterBrush;
@@ -344,6 +442,8 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
       const objects = activeObject.getObjects();
       if (objects.length === 0) return null;
       return objects[0].type === 'line' || objects[0].type === 'path' ? objects[0].stroke : objects[0].fill;
+    } else if (activeObject.type === 'customArrow') {
+      return activeObject.getObjects()[0].stroke;
     } else {
       return activeObject.type === 'line' || activeObject.type === 'path' ? activeObject.stroke : activeObject.fill;
     }
@@ -422,40 +522,25 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
     <Box>
       <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-between gap-2">
         <div className={'flex flex-wrap gap-2'}>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddText}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddText}>
             Add Text
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddLine}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddLine}>
             Add Line
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddRectangle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddRectangle}>
             Add Rectangle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode || isHighlighterMode}
-            onClick={handleAddCircle}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddCircle}>
             Add Circle
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isDrawingMode}
-            onClick={toggleHighlighterMode}
-          >
+          <ThemeButton disabled={loading || isDrawingMode || isHighlighterMode} onClick={handleAddArrow}>
+            Add Arrow
+          </ThemeButton>
+          <ThemeButton disabled={loading || isDrawingMode} onClick={toggleHighlighterMode}>
             {isHighlighterMode ? 'Exit highlighter Mode' : 'Enter highlighter Mode'}
           </ThemeButton>
-          <ThemeButton
-            disabled={loading || isHighlighterMode}
-            onClick={toggleDrawingMode}
-          >
+          <ThemeButton disabled={loading || isHighlighterMode} onClick={toggleDrawingMode}>
             {isDrawingMode ? 'Exit Drawing Mode' : 'Enter Drawing Mode'}
           </ThemeButton>
           <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleImageUpload} />
@@ -469,24 +554,31 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           </ThemeButton>
           {(isDrawingMode || isHighlighterMode) && (
             <>
-              <HtmlTooltip title='Undo'>
-                <IconButton
-                  disabled={loading}
-                  onClick={handleUndo}
-                  size='small'
-                  color={loading ? "default" : "primary"}
-                > <UndoIcon />
+              <HtmlTooltip title="Undo">
+                <IconButton disabled={loading} onClick={handleUndo} size="small" color={loading ? 'default' : 'primary'}>
+                  <UndoIcon />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title='Redo'>
+              <HtmlTooltip title="Redo">
                 <IconButton
                   disabled={isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading}
                   onClick={handleRedo}
-                  size='small'
-                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? "default" : "primary"}
-                > <RedoIcon />
+                  size="small"
+                  color={(isHighlighterMode ? highlighterRedoPaths.length === 0 : brushRedoPaths.length === 0 || loading) ? 'default' : 'primary'}
+                >
+                  <RedoIcon />
                 </IconButton>
               </HtmlTooltip>
+              {(isDrawingMode || isHighlighterMode) && (
+                <FormControl size="small" margin="none" variant="outlined">
+                  <input
+                    type="color"
+                    value={canvas?.freeDrawingBrush?.color || '#000000'}
+                    onChange={updateDrawingColor}
+                    style={{ marginLeft: '10px' }}
+                  />
+                </FormControl>
+              )}
             </>
           )}
         </div>
@@ -509,11 +601,7 @@ const ViewImage = ({ data, fetchData, setSelectedAttachment }) => {
           >
             Save
           </ThemeButton>
-          <ThemeButton
-            disabled={loading}
-            onClick={handleDownload}
-            buttonType="theme"
-          >
+          <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">
             Download
           </ThemeButton>
         </div>

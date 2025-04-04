@@ -3,7 +3,7 @@ import { Box, Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CustomDialogTransition, PRICING_SETUP_TYPE, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, PRICING_SETUP_TYPE, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -93,7 +93,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (technicianData) {
-      let priceData: any = await getPricingConditions(rentalManagementData, [
+      let priceData: any = await getPricingConditions(sidebarResource.rentalManagement, rentalManagementData, [
         {
           materialId: values.competence,
           type: technicianData.type,

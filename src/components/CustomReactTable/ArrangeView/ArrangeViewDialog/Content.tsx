@@ -94,7 +94,7 @@ const RenderListItem = memo(
       data: {
         type: 'Column',
         index,
-        props: { column, index, hidden }
+        props: { column, index, hidden, from: 'table' }
       },
       disabled: column.lockPosition || hidden
     });
@@ -131,6 +131,7 @@ const RenderListItem = memo(
                   <DragIndicator fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
+
               <h6 className={cn('line-clamp-1 select-none text-sm font-medium leading-4', column.lockPosition ? 'text-gray-500' : '')} id={key}>
                 {column.Header || startCase(key)}
               </h6>

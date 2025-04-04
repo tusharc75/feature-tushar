@@ -330,7 +330,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(salesOrderData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, salesOrderData, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -348,7 +348,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       }
       material.push(element);
     });
-    let priceData: any = await getPricingConditions(salesOrderData, material, PRICING_SETUP_TYPE.price);
+    let priceData: any = await getPricingConditions(sidebarResource.salesOrder, salesOrderData, material, PRICING_SETUP_TYPE.price);
     if (priceData) {
       material.forEach((element) => {
         const calValues = getPricingValue(element, priceData, salesOrderData?.currency, allFields);

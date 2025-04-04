@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
-function NoDataCellImpl() {
-  return <span style={{ color: 'grey' }}>{`- - - - - - - `}</span>;
+export function NoDataCellImpl({ label = 'noDataCell' }) {
+  return <span className="no-data-cell" style={{ color: 'grey' }} aria-label={label}>{`- - - - - - - `}</span>;
 }
 
 const NoDataCell = memo(NoDataCellImpl);

@@ -17,20 +17,20 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
 
-const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }) => {
+const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -107,18 +107,20 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
                     <span>({row.original?.subRows?.length})</span>
                   </Box>
                 )}
-                <Box>
-                  <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
-                    <IconButton
-                      onClick={() => {
-                        setAddDialog({ open: true, parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <Add fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                {!row?.original?.workOrder && (
+                  <Box>
+                    <HtmlTooltip title={`Add Existing ${resources?.packages?.titlePlural}`}>
+                      <IconButton
+                        onClick={() => {
+                          setAddDialog({ open: true, parentId: row.original?._id });
+                        }}
+                        size="small"
+                      >
+                        <Add fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
               </>
             )}
             <Box>
@@ -297,6 +299,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           type: 'success',
           message: data.message
         });
+        fetchAssembleOrderData();
         fetchData();
         setSubmitting(false);
       })
@@ -319,6 +322,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           type: 'success',
           message: data.message
         });
+        fetchAssembleOrderData();
         fetchData();
         setDeleteData(null);
       })
@@ -347,8 +351,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           : {})
       });
     });
-    axiosInstance()
-      .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
+    axiosInstance().put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         setUpdating(false);
@@ -421,12 +424,15 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const actionButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={checkUniqueWarehouse(selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.package))}
-          onClick={() => {
-            setOpenSerializedPackagesDialog(true);
-          }}
-        >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+        {permissions?.serializedPackages?.isRead &&
+          selectedRecords?.filter((e) => e?.workOrderType === WORK_ORDER_TYPE.disassemblyOrder)?.length > 0 && (
+            <MenuItem
+              disabled={checkUniqueWarehouse(selectedRecords?.filter((e) => e?.type === MATERIAL_TYPE.package))}
+              onClick={() => {
+                setOpenSerializedPackagesDialog(true);
+              }}
+            >{`Assign ${resources?.serializedPackages?.titleSingular}`}</MenuItem>
+          )}
         <MenuItem
           disabled={selectedRecords?.every((e) => !e.hideSelection && e.canDelete) ? false : true}
           onClick={() => {
@@ -488,7 +494,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, parentId: null })}
           onSuccess={(rows) => {
-            if (rows?.find((e) => e?.packages?.length)) {
+            if (rows?.find((e) => e?.packages?.filter((e) => e.packageType === PACKAGE_TYPE.product)?.length)) {
               setChildPackageWithoutParentDialog({ open: true, data: rows });
             } else {
               handleAdd(rows);

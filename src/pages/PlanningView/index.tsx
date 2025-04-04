@@ -153,6 +153,15 @@ function PlanningView() {
       fieldName: 'productName',
       start: 'estimateStartDate',
       end: 'estimateEndDate'
+    },
+    {
+      key: 'employeeMaster',
+      resource: sidebarResource.employeeMaster,
+      title: resources?.employeeMaster?.titlePlural,
+      path: routes.employeeMasterDetail.path,
+      fieldName: 'technician',
+      start: 'startDate',
+      end: 'endDate'
     }
   ];
 

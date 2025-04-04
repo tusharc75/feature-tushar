@@ -1,7 +1,7 @@
-import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@mui/material';
+import { Autocomplete, Box, Chip, Dialog, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import { Delete as DeleteIcon } from '@mui/icons-material';
 import axios, { CancelTokenSource } from 'axios';
-import { camelCase, uniqBy } from 'lodash';
+import { camelCase, map, uniq, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
@@ -28,6 +28,8 @@ import {
   CustomDialogTransition,
   gridLoadingTimeout,
   prepareDataForGrid,
+  ROLE_TIER,
+  roleTypes,
   sidebarResource,
   userType
 } from './../../constants/helpers';
@@ -60,14 +62,7 @@ const User: FC = () => {
   const [brandUnAssigningLoading, setBrandUnAssigningLoading] = useState(false);
   const [deleteRec, setDeleteRec] = useState<any>({});
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [unAssignLoading, setUnAssignLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
-  const [entityRoleRedirectDetails, setEntityRoleRedirectDetails] = useState({
-    id: history.location?.state?.id,
-    name: history.location?.state?.name,
-    type: history.location?.state?.type,
-    text: history.location?.state?.text
-  });
   const [userList, setUserList] = useState<any[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteUser, setDeleteUser] = useState<any>([]);
@@ -76,6 +71,17 @@ const User: FC = () => {
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [columns, setColumns] = useState(null);
   const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
+  const [filterOptions, setFilterOptions] = useState({});
+  const [selectedEntity, setSelectedEntity] = useState(null);
+  const [selectedRole, setSelectedRole] = useState(null);
+
+  useEffect(() => {
+    if (history.location?.state?.type === 'entity') {
+      setSelectedEntity({ optionLabel: history.location?.state?.name, optionValue: history.location?.state?.id });
+    } else {
+      setSelectedRole({ optionLabel: history.location?.state?.name, optionValue: history.location?.state?.id, type: history.location?.state?.type });
+    }
+  }, [history.location?.state?.id]);
 
   const extraColumns = [
     {
@@ -121,6 +127,15 @@ const User: FC = () => {
         )
     },
     {
+      accessor: 'tier',
+      Header: 'Tier',
+      minWidth: 150,
+      width: 150,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => (row?.original?.tier ? <div>{row?.original?.tier}</div> : <NoDataCell />)
+    },
+    {
       accessor: 'status',
       Header: 'Status',
       minWidth: 150,
@@ -162,6 +177,17 @@ const User: FC = () => {
       });
   };
 
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=Entity,Role`)
+      .then(({ data: { data } }) => {
+        setFilterOptions(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -195,8 +221,11 @@ const User: FC = () => {
       )
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
 
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
@@ -204,20 +233,12 @@ const User: FC = () => {
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (entityRoleRedirectDetails?.id) {
-      switch (entityRoleRedirectDetails?.type) {
-        case 'entity':
-          filterByIds.push({ field: 'entities.entity', term: entityRoleRedirectDetails?.id });
-          break;
-
-        case 'globalRole':
-          filterByIds.push({ field: 'role', term: entityRoleRedirectDetails?.id });
-          break;
-
-        case 'regionalRole':
-          filterByIds.push({ field: 'entities.role', term: entityRoleRedirectDetails?.id });
-          break;
-      }
+    if (selectedEntity && selectedEntity?.optionValue) {
+      filterByIds.push({ field: 'entities.entity', term: selectedEntity?.optionValue });
+    }
+    if (selectedRole && selectedRole?.optionValue) {
+      const field = selectedRole?.type === roleTypes.find((d) => d.key === 'Global')?.value ? 'role' : 'entities.role';
+      filterByIds.push({ field: field, term: selectedRole?.optionValue });
     }
 
     if (filterByIds?.length) {
@@ -247,7 +268,7 @@ const User: FC = () => {
       fetchUsers(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [search, page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, selectedEntity, selectedRole, showFilteredRecordsOnly]);
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
@@ -293,9 +314,9 @@ const User: FC = () => {
         let rows = data.map((u) => {
           const { entities } = u;
 
-          const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id') as any[];
+          const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id')?.filter((e) => e) as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
-
+          const tiers = uniq(map(allRegionalWideRoles, 'tier'));
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
@@ -309,11 +330,16 @@ const User: FC = () => {
               ?.map((e) => {
                 return { optionLabel: e?.entityName, optionValue: e?._id };
               }),
-            regionalWideRole: allRegionalWideRoles
-              ?.filter((e) => e)
-              ?.map((e) => {
-                return { optionLabel: e?.name, optionValue: e?._id };
-              })
+            regionalWideRole: allRegionalWideRoles?.map((e) => {
+              return { optionLabel: e?.name, optionValue: e?._id };
+            }),
+            tier: tiers?.includes(ROLE_TIER.tier1)
+              ? ROLE_TIER.tier1
+              : tiers?.includes(ROLE_TIER.tier2)
+                ? ROLE_TIER?.tier2
+                : tiers?.includes(ROLE_TIER.tier3)
+                  ? ROLE_TIER.tier3
+                  : ''
           };
           return res;
         });
@@ -450,10 +476,10 @@ const User: FC = () => {
 
     let recs = selectedRecords.map((o) => o.id);
 
-    if (recs && recs.length > 0 && entityRoleRedirectDetails.id) {
+    if (recs && recs.length > 0 && selectedEntity?.optionValue) {
       let dataObj = {
         users: recs,
-        entity: entityRoleRedirectDetails.id
+        entity: selectedEntity?.optionValue
       };
       axiosInstance()
         .put(`/user/unassign-users`, dataObj)
@@ -518,16 +544,28 @@ const User: FC = () => {
   const leftSideContents = () => {
     return (
       <>
-        {entityRoleRedirectDetails.id && (
-          <Chip
-            className="ml-3"
-            color="primary"
-            label={`${entityRoleRedirectDetails.text} : ${entityRoleRedirectDetails.name}`}
-            onDelete={() => {
-              setEntityRoleRedirectDetails({ id: null, name: null, type: null, text: null });
-            }}
-          />
-        )}
+        <Autocomplete
+          options={filterOptions['Entity'] || []}
+          getOptionLabel={(option: any) => (option && option?.optionLabel) || ''}
+          style={{ width: '300px' }}
+          value={selectedEntity}
+          onChange={(event, newValue) => {
+            setSelectedEntity(newValue);
+          }}
+          size="small"
+          renderInput={(params) => <TextField {...params} label={`${resources?.entity?.titleSingular}`} size="small" variant="outlined" />}
+        />
+        <Autocomplete
+          options={filterOptions['Role'] || []}
+          getOptionLabel={(option: any) => (option && option?.optionLabel) || ''}
+          style={{ width: '300px' }}
+          value={selectedRole}
+          onChange={(event, newValue) => {
+            setSelectedRole(newValue);
+          }}
+          size="small"
+          renderInput={(params) => <TextField {...params} label={`${resources?.role?.titleSingular}`} size="small" variant="outlined" />}
+        />
       </>
     );
   };
@@ -569,7 +607,7 @@ const User: FC = () => {
           Assign Entities - Roles
         </MenuItem>
         <MenuItem
-          disabled={!(permissions?.user?.isUpdate && entityRoleRedirectDetails.id && selectedRecords?.length)}
+          disabled={!(permissions?.user?.isUpdate && selectedEntity?.optionValue && selectedRecords?.length)}
           onClick={() => {
             unAssignUsersFromEntity();
           }}
@@ -696,6 +734,7 @@ const User: FC = () => {
             onExportToExcelSuccess={() => {
               fetchUsers();
             }}
+            additionalParams={getQueryString()}
           />
         </div>
         <CustomContainer>
@@ -735,17 +774,13 @@ const User: FC = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={
-              unAssignLoading
-                ? `Are you sure you want to un-assign user from entity ${entityRoleRedirectDetails?.name || ''}?`
-                : `Are you sure you want to delete user ${deleteRec?.name || ''}?`
-            }
+            message={`Are you sure you want to delete user ${deleteRec?.name || ''}?`}
             onClose={() => {
               if (deleteRec) setDeleteRec({});
               setIsConformDialogVisible(false);
             }}
             okBtnLoading={deleteLoading}
-            onOk={unAssignLoading ? unAssignUsersFromEntity : handleDeleteUser}
+            onOk={handleDeleteUser}
           />
         ) : null}
 

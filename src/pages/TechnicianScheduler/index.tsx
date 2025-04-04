@@ -1,25 +1,77 @@
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Box } from '@mui/material';
-import { useState } from 'react';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import Roadmap from './Roadmap';
-import ServiceOrder from './ServiceOrder';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import ButtonMenu from 'src/components/ButtonMenu';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { useDndSensors } from 'src/hooks';
+import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSidebar';
+import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
+import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import Roadmap from './Roadmap';
+import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
+
+const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
 function TechnicianScheduler() {
-  const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldTicket: '' });
-
-  const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
+  const toastConfig = useContext(CustomToastContext);
+  const [selectedResource, setSelectedReSource] = useState<TechnicianResource | null>(null);
+  const technicianResources = useTechnicianResources(toastConfig, setSelectedReSource);
+  const [assignTechnicianDialogData, setAssignTechnicianDialogData] = useState({ open: false, technicianData: null, service: null });
   const [unAssignTechnicianDialog, setUnAssignTechnicianDialog] = useState({ open: false, data: null });
-  const [refresh, setRefresh] = useState(false);
-
   const [selectedRecords, setSelectedRecords] = useState([]);
-  const updateSelectedRecord = (records) => {
-    setSelectedRecords(records);
+  const [activeItem, setActiveItem] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+  const sensors = useDndSensors();
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event.active) return;
+    setActiveItem(event.active.data.current.props);
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveItem(null);
+
+    const { active, over } = event;
+    if (over && over.data.current.accepts.includes(active.data.current.type)) {
+      const activeType = active.data.current.type;
+      const isFromTechnician = activeType === 'technician';
+      let technicianData, service;
+
+      if (isFromTechnician) {
+        technicianData = active.data.current.item;
+        service = over.data.current.row;
+      } else {
+        technicianData = over.data.current.item;
+        service = active.data.current.row;
+      }
+
+      setAssignTechnicianDialogData({ open: true, service, technicianData });
+    }
   };
 
   const {
     state: { resources }
   }: any = useData();
+
+  const headerSLot = useMemo(() => {
+    if (technicianResources)
+      return (
+        <ButtonMenu
+          showChevron={true}
+          getLabel={(d) => d.title}
+          items={technicianResources}
+          getSelectedMenuItem={(item) => item.key === selectedResource.key}
+          onItemClick={(e, item) => {
+            setSelectedReSource(item);
+          }}
+        >
+          <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.title}</span>
+        </ButtonMenu>
+      );
+    return null;
+  }, [selectedResource?.key, selectedResource?.title, technicianResources]);
 
   return (
     <Box className="main-container-v1">
@@ -29,31 +81,44 @@ function TechnicianScheduler() {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Roadmap
-          filter={filter}
-          selectedRecords={selectedRecords}
-          refresh={refresh}
-          handleAssignTechnician={(data) => {
-            setAssignTechnicianDialog({ open: true, data: data });
-          }}
-          handleUnAssignTechnician={(data) => {
-            setUnAssignTechnicianDialog({ open: true, data: data });
-          }}
-        />
-        <ServiceOrder
-          assignTechnicianDialog={assignTechnicianDialog}
-          unAssignTechnicianDialog={unAssignTechnicianDialog}
-          handleSucess={() => {
-            setRefresh(!refresh);
-            setAssignTechnicianDialog({ open: false, data: null });
-            setUnAssignTechnicianDialog({ open: false, data: null });
-          }}
-          handleClose={() => {
-            setAssignTechnicianDialog({ open: false, data: null });
-            setUnAssignTechnicianDialog({ open: false, data: null });
-          }}
-          updateSelectedRecord={updateSelectedRecord}
-        />
+        <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
+          <Roadmap
+            filter={filter}
+            refresh={refresh}
+            selectedRecords={selectedRecords}
+            handleUnAssignTechnician={(data) => {
+              setUnAssignTechnicianDialog({ open: true, data: data });
+            }}
+            selectedResource={selectedResource}
+            leftSidebar={(isMobile) => (
+              <ServiceOrderSidebar
+                isMobile={isMobile}
+                setRefresh={setRefresh}
+                selectedResource={selectedResource}
+                assignTechnicianDialog={assignTechnicianDialogData}
+                unAssignTechnicianDialog={unAssignTechnicianDialog}
+                handleSucess={() => {
+                  setRefresh((prev) => !prev);
+                  setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
+                  setUnAssignTechnicianDialog({ open: false, data: null });
+                }}
+                handleClose={() => {
+                  setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
+                  setUnAssignTechnicianDialog({ open: false, data: null });
+                }}
+                setSelectedRecords={setSelectedRecords}
+              />
+            )}
+            headerSlot={headerSLot}
+          />
+          <DragOverlay>
+            {activeItem?.type === 'technician' ? (
+              <SingleTechnician {...activeItem} className="flex h-[90px] cursor-grabbing items-center justify-center border" />
+            ) : (
+              <SingleRow {...activeItem} className="cursor-grabbing" />
+            )}
+          </DragOverlay>
+        </DndContext>
       </Box>
     </Box>
   );
