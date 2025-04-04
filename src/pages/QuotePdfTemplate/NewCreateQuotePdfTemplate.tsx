@@ -343,8 +343,10 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const handleExport = () => {
+    const { entity, owner, collaborator, ...rest } = initialValues;
+
     const exportData = {
-      ...initialValues,
+      ...rest,
       details,
       table
     };
@@ -366,7 +368,7 @@ export default function NewCreateQuotePdfTemplate() {
     toastConfig.setToastConfig({
       open: true,
       type: 'success',
-      message: 'Exported JSON successfully.'
+      message: 'Exported Successfully.'
     });
   };
 
@@ -417,10 +419,7 @@ export default function NewCreateQuotePdfTemplate() {
               aboveTable: importedData.aboveTable,
               belowTable: importedData.belowTable,
               tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
-              entity: importedData.entity ? importedData.entity : [],
-              type: importedData.type,
-              owner: importedData.owner && importedData.owner !== undefined ? importedData.owner : user.user._id,
-              collaborator: importedData.collaborator ? importedData.collaborator : []
+              type: importedData.type
             };
 
             setInitialValues(newInitialValues);
@@ -440,7 +439,7 @@ export default function NewCreateQuotePdfTemplate() {
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
-              message: 'Template imported successfully.'
+              message: 'Imported successfully.'
             });
           } catch (error) {
             toastConfig.setToastConfig({
