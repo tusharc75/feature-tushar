@@ -8,11 +8,13 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import dayjs from 'dayjs';
 
-export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null }) {
+export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null, notes = '' }) {
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
+    console.log(data)
     if (data) {
       setInitialValues({
         startDate: new Date(data.startDate),
@@ -21,14 +23,18 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
       });
     } else {
       if (minStartDateTime) {
-        const date = new Date(minStartDateTime);
+        const date = dayjs.tz(minStartDateTime).add(1, "minute");
         setInitialValues({
           startDate: date,
-          ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: date.setMinutes(date.getMinutes() + 1) }),
-          notes: ''
+          ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: date.toDate() }),
+          notes: notes
         });
       } else {
-        setInitialValues({ startDate: new Date(), ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: new Date() }), notes: '' });
+        setInitialValues({
+          startDate: dayjs.tz().toDate(),
+          ...(type !== 'startStop' && type !== 'stop' ? {} : { endDate: dayjs.tz().toDate() }),
+          notes: notes
+        });
       }
     }
   }, [data, type]);

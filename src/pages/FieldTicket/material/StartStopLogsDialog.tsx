@@ -13,7 +13,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, Edit } from '@mui/icons-material';
-import StartStopDate from './StartStopDateDialog';
+import StartStopDateDialog from './StartStopDateDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 
@@ -315,7 +315,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
           </Box>
         )}
         {startStopDateDialog.open && (
-          <StartStopDate
+          <StartStopDateDialog
             type={startStopDateDialog?.data?.endDate ? 'startStop' : 'start'}
             onClose={() => {
               setStartStopDateDialog({ open: false, loading: false, minStartDateTime: null, maxEndDateTime: null, data: null });
