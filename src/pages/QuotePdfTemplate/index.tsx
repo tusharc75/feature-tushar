@@ -58,11 +58,11 @@ const QuotePdfTemplate = () => {
         width: 120,
         disabled: true,
         Cell: ({ row }) => (
-          <>
+          <div>
             <Link className="link" to={`${routes.quotePdfTemplateDetail.path}/${row?.original?._id}`} title={row?.original?.name}>
               {row?.original?.name}
             </Link>
-          </>
+          </div>
         )
       },
       {
@@ -76,8 +76,7 @@ const QuotePdfTemplate = () => {
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 100,
-        width: 100,
+        width: 120,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -85,8 +84,12 @@ const QuotePdfTemplate = () => {
         Cell: ({ row }) => (
           <>
             <HtmlTooltip title="Preview">
-              <IconButton size="small" aria-label="Clone" className="md:mr-2" onClick={() => previewPdfTemplate(row?.original?._id)}>
-                <VisibilityIcon color="primary" />
+              <IconButton
+                size="small"
+                aria-label="Clone"
+                className="md:mr-2"
+                onClick={() => previewPdfTemplate(row?.original?._id)}>
+                <VisibilityIcon fontSize='small' color="primary" />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={permissions?.quotePdfTemplate?.isCreate ? 'Clone' : cloneDisable}>
@@ -114,7 +117,7 @@ const QuotePdfTemplate = () => {
                     setShowDeleteConfirmBox(true);
                   }}
                 >
-                  <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                  <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
