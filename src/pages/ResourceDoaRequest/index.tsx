@@ -45,7 +45,9 @@ const ResourceDoaRequest = () => {
           <p
             className="text-truncate link"
             onClick={() => {
-              history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`);
+              history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
+                resource: row?.original?.resource
+              });
             }}
           >
             {row?.original?.refrenceFrom}

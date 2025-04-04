@@ -6,7 +6,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DOA_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -16,7 +16,9 @@ import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 const ResourceDoaRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
+  const history = useHistory();
 
+  const resource = history.location?.state?.resource;
   const {
     state: { user, resources }
   }: any = useData();
@@ -28,46 +30,35 @@ const ResourceDoaRequestDetail = () => {
   useEffect(() => {
     fetchGridColumns();
     fetchData();
-  }, [id]);
-
-  const extraFields = [
-    {
-      fieldData: {
-        fieldName: 'resource',
-        fieldLabel: 'Resource',
-        resource: sidebarResource.resourceDoaRequest,
-        type: 'singleLine',
-        sectionName: 'Information'
-      },
-      isRead: true
-    },
-    {
-      fieldData: {
-        fieldName: 'doaStatus',
-        fieldLabel: 'DOA Status',
-        resource: sidebarResource.resourceDoaRequest,
-        type: 'singleLine',
-        sectionName: 'Information'
-      },
-      isRead: true
-    }
-  ];
+  }, [id, resource]);
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .get(`/field?resource=${resource}`)
       .then(({ data: { data } }) => {
-        setFields([...extraFields, ...data]);
+        setFields([...data]);
       });
   };
 
   const fetchData = async () => {
-    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}`);
+    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource${resource}`);
     if (doaResponse?.data?.data) {
       const _data = doaResponse?.data?.data;
-      setTitle(_data?.serializedAssetStatusChangeRequest?.asset?.optionLabel);
+      const title =
+        resource === sidebarResource.serializedAssetStatusChangeRequest
+          ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel
+          : resource === sidebarResource?.purchaseRequisition
+            ? _data?.purchaseRequisition?.optionLabel
+            : '';
+      setTitle(title);
+      const resourceData =
+        resource === sidebarResource.serializedAssetStatusChangeRequest
+          ? _data?.serializedAssetStatusChangeRequest
+          : resource === sidebarResource?.purchaseRequisition
+            ? _data?.purchaseRequisition
+            : {};
       setDoaData({
-        ..._data?.serializedAssetStatusChangeRequest,
+        ...resourceData,
         _id: _data?._id,
         resource: _data?.resource,
         doaStatus: _data?.status,
