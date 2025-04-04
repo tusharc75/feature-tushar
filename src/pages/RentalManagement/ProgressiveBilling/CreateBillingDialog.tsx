@@ -234,7 +234,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'));
     newColumns?.forEach((e) => {
       if (e.accessor === 'pricingMethod') {
-        e.Cell = ({ row }) => pricingMethodRenderer(row);
+        e.cell = ({ row }) => pricingMethodRenderer(row);
       }
     });
     coloum = [...coloum, ...newColumns];
@@ -268,19 +268,17 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const pricingMethodRenderer = (row) => {
     return row.original['pricingMethod'] ? (
-      <>
-        {' '}
-        {['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
-          <Box display="flex" alignItems="center">
-            <p>{row.original['pricingMethod']}</p>
-            <Box ml={1} />
-            <HtmlTooltip title="Per Day Price is calculated">
-              <InfoIcon fontSize="small" color="primary" />
-            </HtmlTooltip>
-          </Box>
-        ) : (
+      <>{['Per Week', 'Per Month'].includes(row.original['pricingMethod']) && proRata && row.original.isAppliedBill ? (
+        <Box display="flex" alignItems="center">
           <p>{row.original['pricingMethod']}</p>
-        )}
+          <Box ml={1} />
+          <HtmlTooltip title="Per Day Price is calculated">
+            <InfoIcon fontSize="small" color="primary" />
+          </HtmlTooltip>
+        </Box>
+      ) : (
+        <p>{row.original['pricingMethod']}</p>
+      )}
       </>
     ) : (
       <NoDataCell />
