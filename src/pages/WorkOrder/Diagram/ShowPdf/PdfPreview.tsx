@@ -10,14 +10,14 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 
-// fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
-//   return function () {
-//     var result = initHiddenTextarea.apply(this);
-//     fabric.document.body.removeChild(this.hiddenTextarea);
-//     this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
-//     return result;
-//   };
-// })(fabric.IText.prototype.initHiddenTextarea);
+fabric.IText.prototype.initHiddenTextarea = (function (initHiddenTextarea) {
+  return function () {
+    var result = initHiddenTextarea.apply(this);
+    fabric.document.body.removeChild(this.hiddenTextarea);
+    this.canvas.wrapperEl.appendChild(this.hiddenTextarea);
+    return result;
+  };
+})(fabric.IText.prototype.initHiddenTextarea);
 
 const PdfPreview = ({ data, fetchData, setSelectedAttachment }) => {
   const canvasRef = useRef(null);
