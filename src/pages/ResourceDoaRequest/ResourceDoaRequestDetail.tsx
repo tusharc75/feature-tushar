@@ -41,7 +41,7 @@ const ResourceDoaRequestDetail = () => {
   };
 
   const fetchData = async () => {
-    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource${resource}`);
+    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource=${resource}`);
     if (doaResponse?.data?.data) {
       const _data = doaResponse?.data?.data;
       const title =
