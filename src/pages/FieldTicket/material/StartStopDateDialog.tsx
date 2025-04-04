@@ -14,7 +14,6 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
-    console.log(data)
     if (data) {
       setInitialValues({
         startDate: new Date(data.startDate),
