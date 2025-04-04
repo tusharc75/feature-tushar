@@ -90,7 +90,7 @@ const ResourceDoaRequestDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titlePlural }, { title: title }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titleSingular }, { title: title }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

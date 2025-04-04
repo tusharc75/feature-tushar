@@ -157,26 +157,36 @@ const ResourceDoaRequest = () => {
     axiosInstance()
       .get(`${routes.resourceDoaRequest.path}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        const rows = data?.map((d) => ({
-          _id: d?._id,
-          entity: d?.entity,
-          requestedBy: d?.createdBy?.optionLabel,
-          requestedById: d?.createdBy?.optionValue,
-          refrenceFrom:
-            d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
-              ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionLabel
-              : d?.resource === sidebarResource?.purchaseRequisition
-                ? d?.purchaseRequisition?.optionLabel
-                : '',
-          resourceId:
-            d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
-              ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionValue
-              : d?.referenceId,
-          referenceId: d?.referenceId,
-          status: d?.status,
-          resource: d?.resource,
-          canPerform: d?.doaUsers?.find((u) => u?.users?.includes(user?.user?._id))?.isUpdate ? true : false
-        }));
+        const rows = data?.map((d) => {
+          let status = d?.status;
+          const doaUser = d?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id));
+          if (!doaUser?.isUpdate) {
+            const prevDoaUser = d?.doaUsers?.find((u) => u?.index === doaUser?.index - 1);
+            if (prevDoaUser) {
+              status = `${status} - Awaiting for (${prevDoaUser?.users?.map((u) => u?.name)?.join(', ')})`;
+            }
+          }
+          return {
+            _id: d?._id,
+            entity: d?.entity,
+            requestedBy: d?.createdBy?.optionLabel,
+            requestedById: d?.createdBy?.optionValue,
+            refrenceFrom:
+              d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
+                ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionLabel
+                : d?.resource === sidebarResource?.purchaseRequisition
+                  ? d?.purchaseRequisition?.optionLabel
+                  : '',
+            resourceId:
+              d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
+                ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionValue
+                : d?.referenceId,
+            referenceId: d?.referenceId,
+            canPerform: doaUser?.isUpdate || false,
+            status: status,
+            resource: d?.resource
+          };
+        });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });

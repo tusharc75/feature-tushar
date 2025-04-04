@@ -289,6 +289,7 @@ import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDeta
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
+import SerializedAssetStatusChangeRequestDetail from 'src/pages/SerializedAsset/SerializedAssetStatusChangeRequest/SerializedAssetStatusChangeRequestDetail';
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
@@ -1171,6 +1172,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
               <SerializedAssetStatusChangeRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequestDetail.path}/:id`}>
+              <SerializedAssetStatusChangeRequestDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.units.path}>
               <Units />

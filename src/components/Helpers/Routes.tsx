@@ -681,6 +681,9 @@ const routes = {
   serializedAssetStatusChangeRequest: {
     path: '/serialized-asset-status-change-request'
   },
+  serializedAssetStatusChangeRequestDetail: {
+    path: '/serialized-asset-status-change-request/detail'
+  },
   units: {
     path: '/units'
   },

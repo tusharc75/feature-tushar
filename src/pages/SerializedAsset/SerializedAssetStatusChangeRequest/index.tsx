@@ -24,11 +24,14 @@ import {
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Autocomplete from '@mui/material/Autocomplete';
+import { FiExternalLink } from 'react-icons/fi';
+import { useHistory } from 'react-router-dom';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
 const SerializedAssetStatusChangeRequest = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -58,7 +61,31 @@ const SerializedAssetStatusChangeRequest = () => {
       .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data);
-        setColumns([...newColumns, ActionsRenderer]);
+        const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
+        assetColumn.cell = ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p
+              className="text-truncate link"
+              title={row?.original?.asset}
+              onClick={() => {
+                history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
+              }}
+            >
+              {row?.original?.asset}
+            </p>
+            {row?.original?.assetId && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            )}
+          </div>
+        );
+        setColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset'), ActionsRenderer]);
       });
   };
 
