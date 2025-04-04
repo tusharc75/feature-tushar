@@ -75,8 +75,8 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
             <p className="text-[11px] tracking-wide">{isUserOnline ? 'Online' : 'Offline'}</p>
           </div>
           {!isUserData && data.notifications > 0 && (
-            <div className="flex min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1 py-[2px]">
-              <span className="text-[10px] text-white">{data.notifications}</span>
+            <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
+              <span className="text-center text-[10px] leading-[15px] text-white">{data.notifications}</span>
             </div>
           )}
         </div>
@@ -91,7 +91,7 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
           </IconButton>
         </div>
       </header>
-      <ShowMessages data={data} state={state} ref={showMessageRef} />
+      <ShowMessages data={data} state={state} ref={showMessageRef} openedChat={openedChat} />
       <SendMessage state={state} data={data} onNewMessagePost={showMessageRef.current?.onNewMessagePost} />
     </div>
   );

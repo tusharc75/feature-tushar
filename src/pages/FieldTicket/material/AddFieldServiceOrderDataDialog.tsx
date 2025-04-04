@@ -1,5 +1,5 @@
 import { Box, Dialog, IconButton } from '@mui/material';
-import { camelCase, startCase } from 'lodash';
+import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -16,14 +16,15 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, CustomDialogTransition, fieldServiceOrder, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
-const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting = false, onSuccess, ignoreIds = [] }) => {
+const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, materialType, isSubmitting = false, onSuccess, ignoreIds = [] }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_FieldServiceOrder_Material`;
   const {
     state: { permissions, resources }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { search, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
@@ -40,6 +41,15 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, fieldTicketData?.currency, false);
     data = data?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.serviceMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const serviceFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.serviceMaster)?.fieldNames || []
     let column: any = [
       {
         accessor: 'index',
@@ -85,27 +95,26 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      {
+      ...(serviceFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencyType',
-              lookupResource: sidebarResource.competencyType
-            }}
-            original={row?.original}
-          />
-        )
-      },
-      {
+        Cell: ({ row }) => <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'competencyType',
+            lookupResource: sidebarResource.competencyType
+          }}
+          original={row?.original}
+        />,
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(serviceFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
-        Cell: ({ row }) => (
+        Cell: ({ row }) =>
           <DropdownCell
             permissions={permissions}
             permissionForLinks={{}}
@@ -114,9 +123,9 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
               lookupResource: sidebarResource.competencies
             }}
             original={row?.original}
-          />
-        )
-      }
+          />,
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : [])
     ];
     column = [...column, ...newColumns];
     setColumns(column);
@@ -129,11 +138,11 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldTicketData?.fieldServiceOrder?.optionValue}/material`);
     data = response?.data?.data?.material;
 
-    let rows = data?.filter((d: any) => !d.parentId && !ignoreIds?.includes(d?._id));
+    let rows = data?.filter((d: any) => d?.type === materialType && !d.parentId && !ignoreIds?.includes(d?._id));
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName : '';
-      parent.description = parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : '';
+      parent.detail = parent.type === MATERIAL_TYPE.service ? parent.serviceDetail?.serviceName : MATERIAL_TYPE.product ? parent.productDetail?.productName : '';
+      parent.description = parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : MATERIAL_TYPE.product ? parent.productDetail?.productDescription : '';
       parent.competencyType = parent?.serviceDetail?.competencyType;
       parent.competencies = parent?.serviceDetail?.competencies;
     });
@@ -146,7 +155,7 @@ const AddFieldServiceOrderDataDialog = ({ onClose, fieldTicketData, isSubmitting
       fullWidth
       maxWidth="md"
       fullScreen={true}
-      TransitionComponent={CustomDialogTransition}
+      slots={{ transition: CustomDialogTransition }}
       open={true}
       onClose={onClose}
       aria-labelledby="assign-roles-dialog"

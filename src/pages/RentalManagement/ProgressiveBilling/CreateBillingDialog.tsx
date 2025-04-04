@@ -372,8 +372,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             newMaterial.push({ ...rest, ...ele, ...calValues });
           });
       });
-
-    console.log(newMaterial)
     data?.material
       ?.filter((d) => d.actualStartDate)
       ?.forEach((element) => {

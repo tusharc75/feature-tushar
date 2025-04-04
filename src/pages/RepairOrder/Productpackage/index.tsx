@@ -168,10 +168,10 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                         productCategory: row?.original?.productDetail?.productCategory
                       });
                     }
-                    if (row.original.type !== 'product') {
+                    if (row.original.type !== MATERIAL_TYPE.product) {
                       setAddExistingProductDialog({
                         open: true,
-                        type: 'product',
+                        type: MATERIAL_TYPE.product,
                         parentId: row.original?._id,
                         existing: false,
                         productId: null,
@@ -319,15 +319,14 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.assetNumber
-              : ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.package
+        ? parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -373,15 +372,14 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow.serializedAssetDetail.assetNumber
-              : ''
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
+        ? _subRow.packageDetail?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
@@ -416,7 +414,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       const element: any = {};
       element.materialId = d._id;
       element.type = addExistingProductDialog.type;
-      // element.unit = d?.unitMain && d?.unitMain?.length ? d?.unitMain[0] : '';
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = d?.parentId || addExistingProductDialog.parentId || null;
       material.push(element);
@@ -508,7 +505,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           onClick={() => {
             setAddExistingProductDialog({
               open: true,
-              type: 'serializedAsset',
+              type: MATERIAL_TYPE.serializedAsset,
               parentId: null,
               existing: true,
               productId: null,
@@ -527,7 +524,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             onClick={() => {
               setAddExistingProductDialog({
                 open: true,
-                type: 'serializedAsset',
+                type: MATERIAL_TYPE.serializedAsset,
                 parentId: null,
                 existing: false,
                 productId: null,
@@ -542,13 +539,13 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         )}
         {user?.user?.brandPolicy?.repairOrderAddProductPackage && (
           <>
-            {permissions?.product?.isCreate && (
+            {permissions?.product?.isRead && (
               <MenuItem
                 id="add-new-product-menu-item"
                 onClick={() => {
                   setAddExistingProductDialog({
                     open: true,
-                    type: 'product',
+                    type: MATERIAL_TYPE.product,
                     parentId: null,
                     existing: false,
                     productId: null,
@@ -556,15 +553,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                   });
                 }}
               >
-                Add New Products
+                Add Existing Products
               </MenuItem>
             )}
-            {permissions?.packages?.isCreate && (
+            {permissions?.packages?.isRead && (
               <MenuItem
                 onClick={() => {
                   setAddExistingProductDialog({
                     open: true,
-                    type: 'package',
+                    type: MATERIAL_TYPE.package,
                     parentId: null,
                     existing: false,
                     productId: null,
@@ -573,7 +570,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 }}
                 id="add-new-package-menu-item"
               >
-                {`Add New ${resources?.packages?.titleSingular}`}
+                {`Add Existing ${resources?.packages?.titleSingular}`}
               </MenuItem>
             )}
           </>
@@ -585,12 +582,12 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const actionButtonMenuItems = () => {
     return (
       <>
-        {selectedRecords?.every((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qty) && (
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qty)?.length > 0 && (
           <MenuItem
             onClick={() => {
               setAddExistingProductDialog({
                 open: true,
-                type: 'serializedAsset',
+                type: MATERIAL_TYPE.serializedAsset,
                 parentId: null,
                 existing: true,
                 productId: null,
@@ -671,7 +668,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           loading={isUpdating}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'product' && (
+      {addExistingProductDialog.open && addExistingProductDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           serialized={true}
           handleCloseDialog={() =>
@@ -683,7 +680,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           isSubmitting={isAddingProducts}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type === 'package' && (
+      {addExistingProductDialog.open && addExistingProductDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() =>
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
@@ -694,7 +691,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           isSubmitting={isAddingProducts}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.existing === false && addExistingProductDialog.type === 'serializedAsset' && (
+      {addExistingProductDialog.open && addExistingProductDialog.existing === false && addExistingProductDialog.type === MATERIAL_TYPE.serializedAsset && (
         <ManageSerializedAsset
           productId={addExistingProductDialog.productId}
           productCategory={addExistingProductDialog.productCategory}
@@ -712,7 +709,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           }}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === 'serializedAsset' && (
+      {addExistingProductDialog.open && addExistingProductDialog.existing && addExistingProductDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AssignSerializedAssetDialog
           reference="repairOrder"
           handleClose={() =>
@@ -760,7 +757,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               onClick={() => {
                 setAddExistingProductDialog({
                   open: true,
-                  type: 'serializedAsset',
+                  type: MATERIAL_TYPE.serializedAsset,
                   parentId: addchildDialog.parentId,
                   existing: true,
                   productId: addchildDialog.productId,
@@ -776,7 +773,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 onClick={() => {
                   setAddExistingProductDialog({
                     open: true,
-                    type: 'serializedAsset',
+                    type: MATERIAL_TYPE.serializedAsset,
                     parentId: addchildDialog.parentId,
                     existing: false,
                     productId: addchildDialog.productId,
