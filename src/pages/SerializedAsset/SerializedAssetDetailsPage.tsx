@@ -53,6 +53,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -90,6 +91,7 @@ const SerializedAssetDetailsPage = () => {
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
   const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -287,7 +289,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -491,11 +493,15 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              const { policy } = resourceData;
-                              if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
-                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                              if (o?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+                                setStatusChangeRequestDialog(true);
                               } else {
-                                handleStatusChange(o);
+                                const { policy } = resourceData;
+                                if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                                } else {
+                                  handleStatusChange(o);
+                                }
                               }
                             }}
                             value={o}
@@ -685,6 +691,18 @@ const SerializedAssetDetailsPage = () => {
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={assetDetails}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchData();
+          }}
+        />
+      )}
     </Box>
   );
 };

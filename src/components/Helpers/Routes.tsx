@@ -693,6 +693,9 @@ const routes = {
   resourceDoaRequest: {
     path: '/resource-doa-request'
   },
+  resourceDoaRequestDetail: {
+    path: '/resource-doa-request/detail'
+  },
   subcontractAssembly: {
     path: '/subcontract-assembly'
   },

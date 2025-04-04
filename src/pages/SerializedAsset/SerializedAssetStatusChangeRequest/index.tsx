@@ -13,7 +13,14 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import {
+  ASSET_APPROVAL_STATUS,
+  DOA_STATUS,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource
+} from '../../../constants/helpers';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -71,16 +78,13 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Approve"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
+              disabled={!row?.original?.canPerform}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
                 setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
               }}
             >
-              <CheckCircleIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'primary'}
-              />
+              <CheckCircleIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'primary'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -89,16 +93,13 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Reject"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
+              disabled={!row?.original?.canPerform}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
                 setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
               }}
             >
-              <CancelIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'error'}
-              />
+              <CancelIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'error'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -116,6 +117,11 @@ const SerializedAssetStatusChangeRequest = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['canPerform'] = permissions?.serializedAsset?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          if (finalObject['doa_status']) {
+            finalObject['canPerform'] = [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
+          }
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -207,7 +213,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -220,7 +226,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }

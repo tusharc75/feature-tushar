@@ -288,6 +288,7 @@ import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
@@ -1182,6 +1183,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.resourceDoaRequest.path}>
               <ResourceDoaRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.resourceDoaRequestDetail.path}/:id`}>
+              <ResourceDoaRequestDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subcontractAssembly.path}>
               <SubcontractAssembly />
