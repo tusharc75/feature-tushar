@@ -3,6 +3,7 @@ import RecorderClass, { RecordedData } from './RecorderClass';
 import { IconButton } from '@mui/material';
 import { Mic, MicNoneOutlined } from '@mui/icons-material';
 import { cn } from 'src/constants/helpers';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type RecorderProps = {
   onRecordFinish: (data: RecordedData) => void;
@@ -32,19 +33,21 @@ const Recorder = ({ onRecordFinish }: RecorderProps) => {
 
   return (
     <div className="relative">
-      <IconButton
-        size="small"
-        color="primary"
-        onMouseDown={recorderInstance?.startRecording}
-        onMouseUp={recorderInstance?.stopRecording}
-        onMouseLeave={() => {
-          if (isRecording) {
-            recorderInstance?.stopRecording();
-          }
-        }}
-      >
-        <Mic fontSize="small" />
-      </IconButton>
+      <HtmlTooltip title={isRecording ? 'Relese to end recording' : 'Press and Hold to record'} placement="top" arrow>
+        <IconButton
+          size="small"
+          color="primary"
+          onMouseDown={recorderInstance?.startRecording}
+          onMouseUp={recorderInstance?.stopRecording}
+          onMouseLeave={() => {
+            if (isRecording) {
+              recorderInstance?.stopRecording();
+            }
+          }}
+        >
+          <Mic fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
       <div
         className={cn(
           'absolute bottom-0 left-full top-0 z-10 ml-2 flex h-full items-center gap-2 overflow-hidden transition-all duration-300',

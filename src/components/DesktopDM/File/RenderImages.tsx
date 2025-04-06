@@ -24,7 +24,7 @@ const RenderImages = ({ hasToDownload, files, ...rest }: RenderFileProps) => {
   };
 
   return (
-    <div className={cn('grid ', hasToDownload ? 'grid-cols-2 gap-2 [--image-h:100px]' : 'grid-cols-4 gap-1 [--image-h:50px]')}>
+    <div className={cn('grid ', hasToDownload ? 'grid-cols-2 gap-2 [--image-h:80px]' : 'grid-cols-4 gap-1 [--image-h:50px]')}>
       {files.map((file, index) => {
         if (index < DEFAULT_IMAGE_VISIBLE_COUNT) {
           return (
