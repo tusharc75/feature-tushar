@@ -413,10 +413,13 @@ export default function NewCreateQuotePdfTemplate() {
               tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
               productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
               pageNumberInFooter: importedData.pageNumberInFooter,
+              name: initialValues.name ? initialValues.name : "New",
               header: importedData.header,
               footer: importedData.footer,
               aboveTable: importedData.aboveTable,
               belowTable: importedData.belowTable,
+              type:"",
+              owner: "",
               tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
             };
 
