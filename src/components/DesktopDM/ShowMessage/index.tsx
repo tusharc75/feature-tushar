@@ -204,7 +204,7 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
                     return (
                       <div className={cn('flex  items-start gap-2.5', isUserMessage ? 'flex-row-reverse' : '')} key={message._id}>
                         <RenderAvatar message={message} />
-                        <RenderContent message={message} isUserMessage={isUserMessage} className="scroll-m-[50px]" id={`message-${message._id}`} />
+                        <RenderContent message={message} isUserMessage={isUserMessage} className="scroll-m-[60px]" id={`message-${message._id}`} />
                         <RenderButton message={message} isUserMessage={isUserMessage} state={state} />
                       </div>
                     );

@@ -154,14 +154,12 @@ export const RenderButton = ({ message, isUserMessage, state }: { message: Messa
           </ListItemIcon>
           <ListItemText>Reply</ListItemText>
         </MenuItem>
-        {isUserMessage && (
-          <MenuItem onClick={pinMessage}>
-            <ListItemIcon>
-              <PushPin fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>{message.pinned ? 'Unpin' : 'Pin'}</ListItemText>
-          </MenuItem>
-        )}
+        <MenuItem onClick={pinMessage}>
+          <ListItemIcon>
+            <PushPin fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>{message.pinned ? 'Unpin' : 'Pin'}</ListItemText>
+        </MenuItem>
         {/* {isUserMessage && message.message.length > 0 && (
           <MenuItem>
             <ListItemIcon>
