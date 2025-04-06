@@ -62,57 +62,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
         : [])
     ],
     [
@@ -183,12 +183,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
+          {
+            label: resources?.padMaster?.titlePlural,
+            value: 'Pad Master',
+            key: 'padMaster'
+          }
+        ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -316,8 +316,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: new Date(d['estimateStartDate'] || d['startDate']),
-                end: new Date(d['estimateEndDate'] || d['endDate']),
+                start: dayjs.tz(d['estimateStartDate'] || d['startDate']).toDate(),
+                end: dayjs.tz(d['estimateEndDate'] || d['endDate']).toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
@@ -330,8 +330,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
-                      start: new Date(d['date']),
-                      end: new Date(d['date']),
+                      start: dayjs.tz(d['date']).toDate(),
+                      end: dayjs.tz(d['date']).toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
@@ -343,8 +343,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: new Date(d['date']),
-                      end: new Date(d['date']),
+                      start: dayjs.tz(d['date']).toDate(),
+                      end: dayjs.tz(d['date']).toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
@@ -355,8 +355,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.reserved?.length) {
                     otherData.push({
                       title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: new Date(d['date']),
-                      end: new Date(d['date']),
+                      start: dayjs.tz(d['date']).toDate(),
+                      end: dayjs.tz(d['date']).toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'reserved',
@@ -367,8 +367,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.inventory) {
                     otherData.push({
                       title: `Inventory ${d?.inventory}`,
-                      start: new Date(d['date']),
-                      end: new Date(d['date']),
+                      start: dayjs.tz(d['date']).toDate(),
+                      end: dayjs.tz(d['date']).toDate(),
                       allDay: true,
                       resource: selectedResource.resource
                     });
@@ -376,8 +376,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 } else if (property === 'availableByPlanning') {
                   otherData.push({
                     title: `Planned Available ${d?.availableByPlanning || 0}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
+                    start: dayjs.tz(d['date']).toDate(),
+                    end: dayjs.tz(d['date']).toDate(),
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
@@ -387,8 +387,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 } else if (d[property]) {
                   otherData.push({
                     title: `${property} ${d[property]}`,
-                    start: new Date(d['date']),
-                    end: new Date(d['date']),
+                    start: dayjs.tz(d['date']).toDate(),
+                    end: dayjs.tz(d['date']).toDate(),
                     allDay: true,
                     type: 'assetStatus',
                     status: property,
@@ -398,8 +398,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               }
             }
             let title = d[selectedResource.fieldName];
-            let start = new Date(d[selectedResource.start]);
-            let end = new Date(d[selectedResource.end]);
+            let start = dayjs.tz(d[selectedResource.start]).toDate();
+            let end = dayjs.tz(d[selectedResource.end]).toDate();
             let fulfillStatus = d?.fulfillStatus;
             let startDraggable = true;
             let endDraggable = true;
@@ -414,15 +414,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 title = `${title}(Pad-${d?.padName?.optionLabel})`;
               }
               if (d?.actualStartDate) {
-                start = new Date(d?.actualStartDate);
+                start = dayjs.tz(d?.actualStartDate).toDate();
                 startDraggable = false;
               }
               if (d?.actualEndDate) {
-                end = new Date(d?.actualEndDate);
-                end = dayjs.tz(end).endOf('day').toDate();
+                end = dayjs.tz(d?.actualEndDate).endOf('day').toDate();
                 endDraggable = false;
               }
-              if (!d?.actualEndDate && dayjs(new Date()).isAfter(dayjs(d?.estimateEndDate))) {
+              if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
               }
             }
@@ -595,7 +594,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   useEffect(() => {
     if (renderCount !== 0) {
-      onNavigate(new Date());
+      onNavigate(dayjs.tz().toDate());
     } else {
       setRenderCount(renderCount + 1);
     }

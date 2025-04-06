@@ -14,12 +14,11 @@ import SideCard from 'src/pages/Home/SideCard';
 import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
-import { VITE_APP_ENV } from 'src/config';
 import { SVG } from 'src/assets';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
-  link: ['uat', 'local']?.includes(VITE_APP_ENV) ? '/user-manual' : 'https://docs.equip-t.com'
+  link: '/user-manual'
 };
 
 function Dashboard() {
