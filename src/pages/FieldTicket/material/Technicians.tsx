@@ -8,7 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import StartStopLogsDialog, { formatDurationInHrs } from './StartStopLogsDialog';
-import StartStopDate from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { Edit } from '@mui/icons-material';
@@ -35,10 +35,12 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [startEndDateConfermationDialog, setStartEndDateConfermationDialog] = useState({
     open: false,
     type: null,
-    loading: false,
     minDateTime: null,
-    data: null
+    data: null,
+    notes: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
 
   const {
@@ -56,6 +58,15 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   }, [selectedService]);
 
   const fetchColumns = async () => {
+    const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: sidebarResource.employeeMaster,
+          fieldNames: ['competencyType', 'competencies']
+        }
+      ]
+    });
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
     const column: any = [
       {
         accessor: 'index',
@@ -65,18 +76,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Cell: ({ row }) => (
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
-            <HtmlTooltip title={'View Logs'}>
-              <span>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setViewStartStopLog({ open: true, technicianId: row?.original?.technicianId });
-                  }}
-                >
-                  <VisibilityIcon fontSize="small" color="primary" />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
           </div>
         )
       },
@@ -129,9 +128,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      {
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -143,11 +142,12 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             }}
             original={row?.original}
           />
-        )
-      },
-      {
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
         Cell: ({ row }) => (
           <DropdownCell
@@ -159,8 +159,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             }}
             original={row?.original}
           />
-        )
-      },
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : []),
       {
         accessor: 'startDate',
         Header: 'Start Date',
@@ -232,7 +233,13 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                     <IconButton
                       size="small"
                       onClick={() => {
-                        setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDateTime: null, data: row?.original });
+                        setStartEndDateConfermationDialog({
+                          open: true,
+                          type: 'startStop',
+                          minDateTime: null,
+                          data: row?.original,
+                          notes: row?.original?.notes
+                        });
                       }}
                     >
                       <Edit fontSize="small" color={'primary'} />
@@ -240,6 +247,16 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
                   </span>
                 </HtmlTooltip>
               )}
+              <HtmlTooltip title={'View Logs'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setViewStartStopLog({ open: true, technicianId: row?.original?.technicianId });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
               <HtmlTooltip title={'Delete'}>
                 <span>
                   <IconButton
@@ -269,24 +286,21 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        let rows = data?.technician?.map((u, i) => {
-          let res: any = {
-            ...prepareDataForGrid(u)
-          };
-          res.index = i + 1;
-          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-          res.technicianId = u?.technician['_id'];
-          res.competencyType = u?.technician?.competencyType;
-          res.competencies = u?.technician?.competencies;
-          return res;
-        });
-
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      let rows = data?.technician?.map((u, i) => {
+        let res: any = {
+          ...prepareDataForGrid(u)
+        };
+        res.index = i + 1;
+        res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+        res.technicianId = u?.technician['_id'];
+        res.competencyType = u?.technician?.competencyType;
+        res.competencies = u?.technician?.competencies;
+        return res;
+      });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -353,7 +367,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         _id: selectedRecords?.map((r) => r?._id)
       };
     }
-    setStartEndDateConfermationDialog({ ...startEndDateConfermationDialog, loading: true });
     if (type !== 'stop') {
       value.startDate = values?.startDate;
       if (values?.notes) value.notes = values?.notes;
@@ -362,6 +375,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       value.endDate = values?.endDate;
       if (values?.notes) value.notes = values?.notes;
     }
+    setIsSubmitting(true)
     axiosInstance()
       .put(`${fieldTicket.api}/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
       .then(({ data }) => {
@@ -370,11 +384,12 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           type: 'success',
           message: data?.message
         });
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
+        setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, data: null, notes: '' });
+        setIsSubmitting(false)
         fetchData();
       })
       .catch((error) => {
-        setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -396,7 +411,13 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               date = new Date(Math.max(...dates));
               date.setMinutes(date.getMinutes() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'start', loading: false, minDateTime: date, data: null });
+            setStartEndDateConfermationDialog({
+              open: true,
+              type: 'start',
+              minDateTime: date,
+              data: null,
+              notes: ''
+            });
           }}
         >
           Start
@@ -412,7 +433,13 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             if (dates?.length) {
               date = new Date(Math.max(...dates));
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'stop', loading: false, minDateTime: date, data: null });
+            setStartEndDateConfermationDialog({
+              open: true,
+              type: 'stop',
+              minDateTime: date,
+              data: null,
+              notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : ''
+            });
           }}
         >
           Stop
@@ -431,7 +458,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               date = new Date(Math.max(...dates));
               date.setMinutes(date.getMinutes() + 1);
             }
-            setStartEndDateConfermationDialog({ open: true, type: 'startStop', loading: false, minDateTime: date, data: null });
+            setStartEndDateConfermationDialog({ open: true, type: 'startStop', minDateTime: date, data: null, notes: '' });
           }}
         >
           Start/Stop
@@ -454,19 +481,17 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         {allowedToEdit && (
-          <>
-            <DetailsPageHeader
-              isAddButtonVisible={true}
-              addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{
-                disabled: !Boolean(selectedRecords?.length),
-              }}
-              addButtonText='Assign'
-              hasXpadding
-            />
-          </>
+          <DetailsPageHeader
+            isAddButtonVisible={true}
+            addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
+            isActionButtonVisible={true}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            actionButtonProps={{
+              disabled: !Boolean(selectedRecords?.length),
+            }}
+            addButtonText='Assign'
+            hasXpadding
+          />
         )}
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12, sm: 12 }}>
@@ -516,10 +541,10 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       )}
 
       {startEndDateConfermationDialog.open && (
-        <StartStopDate
+        <StartStopDateDialog
           type={startEndDateConfermationDialog.type}
           onClose={() => {
-            setStartEndDateConfermationDialog({ open: false, type: null, loading: false, minDateTime: null, data: null });
+            setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, data: null, notes: '' });
           }}
           handleSubmit={(value, _id) => {
             if (startEndDateConfermationDialog?.data) {
@@ -528,12 +553,12 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
               handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
             }
           }}
-          loading={startEndDateConfermationDialog.loading}
+          loading={isSubmitting}
           minStartDateTime={startEndDateConfermationDialog.minDateTime}
           data={startEndDateConfermationDialog.data}
+          notes={startEndDateConfermationDialog.notes}
         />
       )}
-
       {viewStartStopLog?.open && (
         <StartStopLogsDialog
           onClose={() => {

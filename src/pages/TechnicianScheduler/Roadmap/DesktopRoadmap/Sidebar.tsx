@@ -5,28 +5,33 @@ import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } fr
 import { cn } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SidebarProps = {
   activity: TActivity[];
   handleSelect: HandleSelect;
   loading: boolean;
+  selectedResource: any
 };
 
-const Sidebar = ({ activity, handleSelect, loading }: SidebarProps) => {
+const Sidebar = ({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
   return (
     <aside className="sticky right-0 z-[3] border-l bg-[white] dark:bg-[--dark-primary]">
       <div className="sticky top-0 z-[4] flex h-[--header-h] items-center gap-2 border-b bg-[--dark-primary,white] p-4">
         <Map />
         <Typography variant="body1" display="block">
-          Technician
+          Technicians
         </Typography>
       </div>
       {!loading ? (
         <ul className="list-none">
           {activity?.map((data, index) => {
-            return <SingleTechnician data={data} index={index} handleSelect={handleSelect} key={data._id} />;
+            return <SingleTechnician
+              data={data}
+              index={index}
+              handleSelect={handleSelect}
+              selectedResource={selectedResource}
+              key={data._id} />;
           })}
         </ul>
       ) : (
@@ -68,7 +73,7 @@ const Sidebar = ({ activity, handleSelect, loading }: SidebarProps) => {
 
 export default Sidebar;
 
-export const SingleTechnician = ({ data, handleSelect, index, className = '' }) => {
+export const SingleTechnician = ({ data, handleSelect, index, selectedResource, className = '' }) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: data._id,
     data: {
@@ -107,7 +112,7 @@ export const SingleTechnician = ({ data, handleSelect, index, className = '' }) 
           </div>
         </div>
         <div className="flex-shrink-0">
-          <HtmlTooltip title="Assign">
+          <HtmlTooltip title={`Assign ${selectedResource?.title}`}>
             <IconButton
               onClick={(event) => {
                 event.stopPropagation();

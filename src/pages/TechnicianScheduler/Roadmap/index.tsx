@@ -5,7 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import DesktopRoadmap from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import MobileRoadmap from './MobileRoadmap';
-import TechnicianToServiceDialog from 'src/pages/TechnicianScheduler/Roadmap/TechnicianToServiceDialog';
+import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAssignDialog';
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
@@ -15,7 +15,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [openAssignTechToServiceDialog, setOpenAssignTechToServiceDialog] = useState({ open: false, data: null });
+  const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
@@ -49,7 +49,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
     if (type === 'map') {
       setSelected(data?._id);
     } else if (type === 'assign') {
-      setOpenAssignTechToServiceDialog({ open: true, data: data });
+      setAssignServiceDialog({ open: true, data: data });
     } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
       handleUnAssignTechnician(data);
     }
@@ -89,16 +89,16 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
           />
         )}
       </Box>
-      {openAssignTechToServiceDialog.open && (
-        <TechnicianToServiceDialog
+      {assignServiceDialog.open && (
+        <ServiceAssignDialog
           handleClose={() => {
-            setOpenAssignTechToServiceDialog({ open: false, data: null });
+            setAssignServiceDialog({ open: false, data: null });
           }}
           selectedResource={selectedResource}
-          technician={openAssignTechToServiceDialog.data}
+          technician={assignServiceDialog.data}
           handleSucess={() => {
             fetchRoadmap();
-            setOpenAssignTechToServiceDialog({ open: false, data: null });
+            setAssignServiceDialog({ open: false, data: null });
           }}
         />
       )}

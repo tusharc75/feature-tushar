@@ -20,7 +20,6 @@ const CustomDateTimePicker = (props) => {
     margin,
     size,
     disablePast = false,
-    inputFormat,
     placeholder,
     onInput,
     ...rest
@@ -51,7 +50,7 @@ const CustomDateTimePicker = (props) => {
           ...(onInput ? { onInput: onInput } : {})
         }
       }}
-      format={inputFormat ? inputFormat : (dateFormatForInputControl + ' HH:mm')}
+      format={(dateFormatForInputControl + ' HH:mm')}
     />
   );
 }
