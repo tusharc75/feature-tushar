@@ -412,14 +412,12 @@ export default function NewCreateQuotePdfTemplate() {
               tableHeaderBackgroundColor: importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : '',
               tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
               productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
-              name: importedData.name ? importedData.name : '',
               pageNumberInFooter: importedData.pageNumberInFooter,
               header: importedData.header,
               footer: importedData.footer,
               aboveTable: importedData.aboveTable,
               belowTable: importedData.belowTable,
               tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
-              type: importedData.type
             };
 
             setInitialValues(newInitialValues);
