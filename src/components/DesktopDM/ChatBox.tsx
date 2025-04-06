@@ -2,7 +2,7 @@ import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { useMemo, useRef } from 'react';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
-import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessages';
+import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessage';
 import { Chat, OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';

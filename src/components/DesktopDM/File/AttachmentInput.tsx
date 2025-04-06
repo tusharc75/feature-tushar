@@ -33,7 +33,7 @@ const AttachmentInput = ({ onFileInput }: AttachmentProps) => {
         className="sr-only"
         style={{ display: 'none' }}
         ref={inputRef}
-        accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, audio/*, video/*, .zip, .rar, .7z, .tar, .gz"
       />
       <IconButton size="small" color="primary" onClick={() => inputRef.current?.click()}>
         <AttachFile fontSize="small" />

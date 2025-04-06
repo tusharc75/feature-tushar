@@ -1,4 +1,4 @@
-import { Send } from '@mui/icons-material';
+import { Close, Send } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useRef, useState } from 'react';
@@ -12,6 +12,7 @@ import { RecordedData } from 'src/components/DesktopDM/Audio/RecorderClass';
 import { AUDIO_EXTENSION, AUDIO_FORMAT } from 'src/components/DesktopDM/constants';
 import AttachmentInput from 'src/components/DesktopDM/File/AttachmentInput';
 import FilePreview, { AttachedFileType } from 'src/components/DesktopDM/File/FilePreview';
+import { RenderAvatar, RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
 
 type SendMessageProps = {
   state: UseDesktopDM;
@@ -23,6 +24,8 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
+export const fileUrlCache = new Map<string, string>();
+
 const SendMessage = ({
   state,
   data: panelData,
@@ -32,7 +35,7 @@ const SendMessage = ({
   disabled,
   onNewMessagePost = () => {}
 }: SendMessageProps) => {
-  const { toastConfig, onUserFirstMessageSent, checkIsUser } = state;
+  const { toastConfig, onUserFirstMessageSent, checkIsUser, user } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -61,11 +64,12 @@ const SendMessage = ({
           });
       } else {
         formData.append('channelId', panelData._id);
+        if (state.replyingToMessage) formData.append('parentId', state.replyingToMessage._id);
         if (parentMessageId) formData.append('parentId', parentMessageId);
         await axiosInstance()
           .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
           .then(({ data: { data } }) => {
-            onNewMessagePost(data?.ops?.[0]?._id);
+            onNewMessagePost?.(data?.ops?.[0]?._id);
           });
       }
       setMessage('');
@@ -75,6 +79,7 @@ const SendMessage = ({
       toastConfig.setToastConfig(error);
     } finally {
       setLoading(false);
+      state.setReplyingToMessage(null);
     }
   };
 
@@ -95,12 +100,13 @@ const SendMessage = ({
   };
 
   const handleDeleteFile = (data: AttachedFileType) => {
+    fileUrlCache.delete(data.url);
     URL.revokeObjectURL(data.url);
     setFiles((prev) => prev.filter((d) => d._id !== data._id));
   };
 
   return (
-    <div className="remove-tiny-mce-toolbar-top-border relative border-t p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
+    <div className="remove-tiny-mce-toolbar-top-border relative border-t  p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
       {audioBlobs.length > 0 && (
         <div className="mb-2 max-h-[200px] space-y-1 overflow-y-auto">
           {audioBlobs.map((a) => (
@@ -111,6 +117,18 @@ const SendMessage = ({
       {files.length > 0 && (
         <div className="mb-2">
           <FilePreview hasToDownload={false} files={files} onDelete={handleDeleteFile} />
+        </div>
+      )}
+
+      {state.replyingToMessage && (
+        <div className="flex gap-2 rounded-t-md bg-gray-100 p-2 dark:bg-gray-700">
+          <div className="w-1 rounded-md bg-new-theme-color" />
+          <RenderContent message={state.replyingToMessage} isUserMessage={user._id === state.replyingToMessage.user.optionValue} isReplying />
+          <span className="ml-auto">
+            <IconButton size="small" onClick={() => state.setReplyingToMessage(null)} className="!ml-auto">
+              <Close fontSize="small" />
+            </IconButton>
+          </span>
         </div>
       )}
 

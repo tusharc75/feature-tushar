@@ -25,7 +25,6 @@ const Recorder = ({ onRecordFinish }: RecorderProps) => {
       onTimeElapse: (time) => setTimeElapsed(time)
     });
     setRecorderInstance(recorderInstance);
-    console.log('called');
     return () => {
       recorderInstance.destroy();
     };
