@@ -2,8 +2,12 @@ import { MoreVert } from '@mui/icons-material';
 import { Avatar, IconButton } from '@mui/material';
 import { groupBy } from 'lodash';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { FileIconData, getFileIconData } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import AudioPlayer from 'src/components/DesktopDM/Audio/AudioPlayer';
+import { AUDIO_EXTENSION } from 'src/components/DesktopDM/constants';
+import FilePreview from 'src/components/DesktopDM/File/FilePreview';
+import { Attachment, Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn, displayDate, formatDate } from 'src/constants/helpers';
 
@@ -190,10 +194,27 @@ const RenderAvatar = ({ message }: { message: Message }) => {
   return <Avatar src={message.user.avatar} sx={{ width: '32px', height: '32px' }} alt={message.user.optionLabel} />;
 };
 const RenderContent = ({ message, isUserMessage }: { message: Message; isUserMessage: boolean }) => {
+  const { recordings, files } = useMemo(() => {
+    const data: { recordings: (Attachment & FileIconData)[]; files: (Attachment & FileIconData)[] } = {
+      recordings: [],
+      files: []
+    };
+    if (!message.attachments) return data;
+    for (const attachment of message.attachments) {
+      const fileIconData = getFileIconData(attachment.url);
+      if (fileIconData.type === 'audio') {
+        data.recordings.push({ ...attachment, ...fileIconData });
+      } else {
+        data.files.push({ ...attachment, ...fileIconData });
+      }
+    }
+    return data;
+  }, [message.attachments]);
+
   return (
     <div
       className={cn(
-        'leading-1.5 flex w-fit max-w-[320px] flex-col  p-4 ',
+        'leading-1.5 flex w-fit max-w-[320px] flex-col p-4',
         isUserMessage ? 'rounded-xl rounded-tr-none' : 'rounded-xl rounded-tl-none',
         isUserMessage ? 'border-slate-200 bg-new-theme-color/10 dark:bg-slate-800' : 'border-gray-200 bg-gray-100 dark:bg-gray-700'
       )}
@@ -203,6 +224,18 @@ const RenderContent = ({ message, isUserMessage }: { message: Message; isUserMes
         <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{formatDate(message.date, 'hh:mm A')}</span>
       </div>
       <div className="py-2.5 text-sm font-normal text-gray-900 dark:text-white" dangerouslySetInnerHTML={{ __html: message.message }} />
+      {recordings.length > 0 && (
+        <div className="-mx-2 w-[calc(100%+16px)]">
+          {recordings.map((r) => {
+            return <AudioPlayer height={25} src={r.url} hasToDownload={true} downloadFileName={r.url} />;
+          })}
+        </div>
+      )}
+      {files.length > 0 && (
+        <div>
+          <FilePreview files={files} />
+        </div>
+      )}
     </div>
   );
 };

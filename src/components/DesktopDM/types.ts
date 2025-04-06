@@ -41,9 +41,14 @@ export type Message = {
   parentId?: null;
   date?: Date;
   user?: MessageUser;
-  attachments?: any[];
+  attachments?: Attachment[];
   replies?: any[];
   reactions?: any[];
+};
+export type Attachment = {
+  _id: string;
+  fileName: string;
+  url: string;
 };
 
 export type MessageUser = {
