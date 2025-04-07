@@ -19,6 +19,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
   const [initialValues, setInitialValues] = useState({ serializedPackages: [] });
   const [packageOptions, setPackageOptions] = useState([]);
   const [serializedPackagedLabel, setSerializedPackagedLabel] = useState(null);
+  const [assemblyOrderData, setAssemblyOrderData] = useState(null);
 
   const {
     state: { resources }
@@ -28,28 +29,41 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
     fetchFieldLabel();
   }, []);
 
+  const fetchAssemblyOrderData = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().get(`${routes.assemblyOrder.path}/${assemblyOrderId}`);
+    setAssemblyOrderData(data);
+  };
+
   useEffect(() => {
-    axiosInstance()
-      .get(`${routes.assemblyOrder.path}/material/${assemblyOrderId}`)
-      .then(({ data: { data } }) => {
-        let material = [];
-        material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
-        if (workOrderIds?.length) {
-          material = material?.filter((m) => [...workOrderIds].includes(m?.workOrder?.optionValue));
-        } else {
-          material = material?.filter((m) => !m.parentId);
-        }
-        setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
-        setInitialValues({
-          serializedPackages: material?.map((m) => ({
-            package: m?.materialId,
-            serializedPackageNumber: '',
-            uniqueId: m?._id
-          }))
-        });
-      })
-      .catch((error) => {});
+    fetchAssemblyOrderData();
   }, [assemblyOrderId]);
+
+  useEffect(() => {
+    if (assemblyOrderData) {
+      axiosInstance()
+        .get(`${routes.assemblyOrder.path}/material/${assemblyOrderData?._id}`)
+        .then(({ data: { data } }) => {
+          let material = [];
+          material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
+          if (workOrderIds?.length) {
+            material = material?.filter((m) => [...workOrderIds].includes(m?.workOrder?.optionValue));
+          } else {
+            material = material?.filter((m) => !m.parentId);
+          }
+          setPackageOptions(material?.map((m) => ({ optionValue: m?.materialId, optionLabel: m?.packageDetail?.packageName })));
+          setInitialValues({
+            serializedPackages: material?.map((m) => ({
+              package: m?.materialId,
+              serializedPackageNumber: `${assemblyOrderData?.customerAccount?.optionLabel}_${assemblyOrderData?.warehouse?.optionLabel}_${m?.workOrder?.optionLabel}`,
+              uniqueId: m?._id
+            }))
+          });
+        })
+        .catch((error) => {});
+    }
+  }, [assemblyOrderData]);
 
   const fetchFieldLabel = async () => {
     const {
@@ -145,7 +159,7 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
                                   name="serializedPackageNumber"
                                   placeholder={serializedPackagedLabel || 'Serialized Package Number'}
                                   margin="dense"
-                                  value={data.message}
+                                  value={data.serializedPackageNumber}
                                   required
                                   onChange={(e) => {
                                     arrayHelpers.replace(index, {
