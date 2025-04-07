@@ -174,6 +174,7 @@ export default function NewCreateQuotePdfTemplate() {
   }, [id]);
 
   const fetchData = async () => {
+
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
@@ -343,28 +344,16 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const handleExport = () => {
-    const { entity, owner, collaborator, ...rest } = initialValues;
-
-    const exportData = {
-      ...rest,
-      details,
-      table
-    };
-
+    const exportData = { initialValues, details, table };
     const jsonString = JSON.stringify(exportData, null, 2);
-
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-
     const fileName = `${initialValues.name || 'untitled'}-pdf-template.json`;
-
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
     link.click();
-
     URL.revokeObjectURL(url);
-
     toastConfig.setToastConfig({
       open: true,
       type: 'success',
@@ -399,44 +388,40 @@ export default function NewCreateQuotePdfTemplate() {
           }
           try {
             const importedData = JSON.parse(fileContent);
-
-            setIsLandscapChecked(importedData.landscape);
-
             const newInitialValues = {
-              landscape: importedData.landscape,
-              hideAmountTotalSection: importedData.hideAmountTotalSection,
-              tableTotalAtBottom: importedData.tableTotalAtBottom,
-              tableFontSize: importedData.tableFontSize ? importedData.tableFontSize : '',
-              belowTableTotalFontSize: importedData.belowTableTotalFontSize ? importedData.belowTableTotalFontSize : '',
-              pdfFontSize: importedData.pdfFontSize ? importedData.pdfFontSize : '',
-              tableHeaderBackgroundColor: importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : '',
-              tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
-              productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
-              pageNumberInFooter: importedData.pageNumberInFooter,
+              landscape: importedData?.landscape,
+              hideAmountTotalSection: importedData?.hideAmountTotalSection,
+              tableTotalAtBottom: importedData?.tableTotalAtBottom,
+              tableFontSize: importedData?.tableFontSize,
+              belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
+              pdfFontSize: importedData?.pdfFontSize,
+              tableHeaderBackgroundColor: importedData?.tableHeaderBackgroundColor,
+              tableHeaderFontColor: importedData?.tableHeaderFontColor,
+              productColumns: importedData?.productColumns ? importedData?.productColumns : defaultProductColumns,
+              pageNumberInFooter: importedData?.pageNumberInFooter,
               name: initialValues.name ? initialValues.name : "New",
-              header: importedData.header,
-              footer: importedData.footer,
-              aboveTable: importedData.aboveTable,
-              belowTable: importedData.belowTable,
-              type:"",
-              owner: "",
-              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
+              header: importedData?.header,
+              footer: importedData?.footer,
+              aboveTable: importedData?.aboveTable,
+              belowTable: importedData?.belowTable,
+              type: importedData?.type,
+              owner: initialValues.owner,
+              collaborator: initialValues?.collaborator,
+              entity: initialValues?.entity,
+              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide,
             };
-
             setInitialValues(newInitialValues);
-
+            setIsLandscapChecked(importedData?.landscape);
             setDetails({
-              header: importedData.header,
-              footer: importedData.footer,
-              aboveTable: importedData.aboveTable,
-              belowTable: importedData.belowTable,
-              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide
+              header: importedData?.header,
+              footer: importedData?.footer,
+              aboveTable: importedData?.aboveTable,
+              belowTable: importedData?.belowTable,
+              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
             });
-
-            if (importedData.table) {
-              setTable(importedData.table);
+            if (importedData?.table) {
+              setTable(importedData?.table);
             }
-
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -740,8 +725,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -773,10 +758,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -810,10 +795,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
