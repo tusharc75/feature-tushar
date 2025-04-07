@@ -5,21 +5,14 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleClose, handleSucess }) {
+function AssignTechnicianDialog({ technicianData, selectedResource, selectedServiceOrder, handleClose, handleSucess }) {
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAssign = () => {
-    const type = selectedServiceOrder[0]?.fieldTicketNumber
-      ? 'fieldTicket'
-      : selectedServiceOrder[0]?.rentalJobName
-        ? 'rentalJob'
-        : selectedServiceOrder[0]?.fieldServiceOrderNumber
-          ? 'fieldServiceOrder'
-          : '';
     const data = selectedServiceOrder?.map((ele) => {
       return {
         uniqueId: ele?.service?.uniqueId,
@@ -31,17 +24,9 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
       };
     });
-    const baseApi =
-      type === 'fieldTicket'
-        ? fieldTicket.api
-        : type === 'rentalJob'
-          ? rentalManagement.api
-          : type === 'fieldServiceOrder'
-            ? fieldServiceOrder.api
-            : '';
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${baseApi}/technician`, { technician: data })
+      .post(`${selectedResource.api}/technician`, { technician: data })
       .then(() => {
         handleSucess();
         setIsSubmitting(false);

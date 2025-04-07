@@ -19,7 +19,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { TOOLTIP_MESSAGE, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import { TOOLTIP_MESSAGE, gridLoadingTimeout, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from '../../components/CustomTooltipTitle';
 import AddRemoveDialog from './AddRemove';
 import HistoryDialog from './History/historyDialog';

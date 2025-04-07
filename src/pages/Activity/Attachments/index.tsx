@@ -18,8 +18,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-
+import { CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import FolderIcon from '@mui/icons-material/Folder';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import SendIcon from '@mui/icons-material/Send';
@@ -132,7 +131,7 @@ export default function Attachment() {
             row.original.relatedTo.map((d) => {
               return (
                 <div className="flex items-center gap-2" key={d.name}>
-                  <p>{d.name}</p>
+                  <p>{`${d.name}${d?.index ? ` (${d?.index})` : ''}`}</p>
                   <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
