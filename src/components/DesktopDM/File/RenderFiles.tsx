@@ -11,7 +11,7 @@ const RenderFiles = ({ files, hasToDownload, onDelete, showDownloadButton }: Ren
   return (
     <div className="grid gap-1">
       {files.map((file) => (
-        <div className={cn('flex items-center justify-between gap-2 rounded-md border p-2', hasToDownload ? 'bg-white' : '')}>
+        <div className={cn('flex items-center justify-between gap-2 rounded-md border p-2', hasToDownload ? 'bg-[--dark-primary,white]' : '')}>
           <div className="flex items-center gap-2">
             <file.icon size={30} className="flex-shrink-0" />
             <p className="line-clamp-1 text-sm">{file.fileName}</p>
