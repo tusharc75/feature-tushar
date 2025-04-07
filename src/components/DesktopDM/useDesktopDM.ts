@@ -1,7 +1,7 @@
 import axios, { CancelToken } from 'axios';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Chat, User } from 'src/components/DesktopDM/types';
+import { Chat, Message, User } from 'src/components/DesktopDM/types';
 import useUIDesktopDm from 'src/components/DesktopDM/useUIDesktopDm';
 import { useSocket } from 'src/hooks/useSocket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -14,12 +14,14 @@ const useDesktopDM = () => {
   const uiState = useUIDesktopDm();
   const { onUserFirstMessageSent: uiOnUserFirstMessageSent, permissions, user, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
+  const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const socket = useSocket({ namespace: '/workspace/channel' });
 
   const fetchData = useCallback(
     async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
+      setReplyingToMessage(null);
       if (uiState.isMobile || uiState.isMobileDevice) return;
       try {
         setLoading(true);
@@ -122,7 +124,20 @@ const useDesktopDM = () => {
     };
   }, [socket, uiState.openedChats, user?._id]);
 
-  return { ...state, loading, toastConfig, user, socket, onUserFirstMessageSent, readMessage, checkIsUser, permissions, ...rest };
+  return {
+    ...state,
+    loading,
+    toastConfig,
+    user,
+    socket,
+    onUserFirstMessageSent,
+    readMessage,
+    checkIsUser,
+    permissions,
+    setReplyingToMessage,
+    replyingToMessage,
+    ...rest
+  };
 };
 
 export default useDesktopDM;
