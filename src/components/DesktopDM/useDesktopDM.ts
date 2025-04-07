@@ -15,6 +15,8 @@ const useDesktopDM = () => {
   const { onUserFirstMessageSent: uiOnUserFirstMessageSent, permissions, user, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
+  const [currentlyEditingMessage, setCurrentlyEditingMessage] = useState<Message | null>(null);
+
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const socket = useSocket({ namespace: '/workspace/channel' });
@@ -136,6 +138,8 @@ const useDesktopDM = () => {
     permissions,
     setReplyingToMessage,
     replyingToMessage,
+    setCurrentlyEditingMessage,
+    currentlyEditingMessage,
     ...rest
   };
 };

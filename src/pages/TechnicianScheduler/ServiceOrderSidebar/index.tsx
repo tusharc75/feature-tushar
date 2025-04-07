@@ -87,19 +87,9 @@ const ServiceOrderSidebarImpl = ({
       element.uniqueId = resourceData?._id;
       element.service = resourceData?.service?._id;
       element.warehouse = resourceData?.warehouse;
-      if (selectedResource?.key === 'fieldTicket') {
-        element.fieldTicket = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.service?.estimateStartDate;
-        element.estimateEndDate = resourceData?.service?.estimateEndDate;
-      } else if (selectedResource?.key === 'rentalJob') {
-        element.rentalJob = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.estimateEndDate;
-      } else {
-        element.fieldServiceOrder = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.estimateEndDate;
-      }
+      element.referenceId = resourceData?.resourceId;
+      element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
+      element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
       technician.push(element);
     });
     const baseApi =

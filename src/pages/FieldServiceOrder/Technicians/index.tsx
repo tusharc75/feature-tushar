@@ -308,7 +308,7 @@ const Technicians = ({
     rows.forEach((d) => {
       const element: any = {};
       element.technician = d?._id;
-      element.fieldServiceOrder = serviceOrderData?._id;
+      element.referenceId = serviceOrderData?._id;
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
