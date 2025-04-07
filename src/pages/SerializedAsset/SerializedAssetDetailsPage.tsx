@@ -68,6 +68,7 @@ const SerializedAssetDetailsPage = () => {
 
   const [assetDetails, setAssetDetails] = useState(null);
   const [fields, setFields] = useState(null);
+  const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null, updateStatus: null });
@@ -104,6 +105,7 @@ const SerializedAssetDetailsPage = () => {
     fetchData();
     fetchPolicy();
     fetchAssetStates();
+    fetchFieldSerializedAssetStatusChangeRequest();
   };
 
   const handleMainPoints = (data) => {
@@ -235,6 +237,14 @@ const SerializedAssetDetailsPage = () => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchFieldSerializedAssetStatusChangeRequest = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetStatusChangeRequestFields([...data]);
       });
   };
 
@@ -493,7 +503,11 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              if (o?.optionValue === ASSET_STATUS.scrap && user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+                              if (
+                                o?.optionValue === ASSET_STATUS.scrap &&
+                                user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                                serializedAssetStatusChangeRequestFields?.length > 0
+                              ) {
                                 setStatusChangeRequestDialog(true);
                               } else {
                                 const { policy } = resourceData;
