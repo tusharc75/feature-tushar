@@ -149,6 +149,7 @@
     "uuidv4": "^6.2.12",
     "vis-react": "^0.5.1",
     "vite-plugin-svgr": "^3.2.0",
+    "wavesurfer.js": "^7.9.4",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.3",
     "workbox-broadcast-update": "^5.1.3",

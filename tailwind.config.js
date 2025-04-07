@@ -6,7 +6,11 @@ module.exports = {
     extend: {
       colors: {
         link: 'var(--link)',
-        'new-theme-color': 'hsl(var(--new-theme-color-hsl))'
+        'new-theme-color': 'hsl(var(--new-theme-color-hsl))',
+        theme: 'hsl(var(--new-theme-color-hsl))'
+      },
+      backgroundColor: {
+        theme: 'hsl(var(--new-theme-color-hsl))'
       },
       typography: {
         DEFAULT: {
