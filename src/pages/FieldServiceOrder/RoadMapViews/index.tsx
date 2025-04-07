@@ -2,7 +2,7 @@ import { Box, Paper, Typography } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { COLOUR_MASTER, fieldTicket, invoice, sidebarResource } from 'src/constants/helpers';
+import { COLOUR_MASTER, fieldServiceOrder, fieldTicket, invoice, MATERIAL_TYPE, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ReactFlow, { Controls, ControlButton, ReactFlowProvider } from 'react-flow-renderer';
 import { MdZoomOutMap } from 'react-icons/md';
@@ -10,6 +10,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
 
 const customNodeStyles = {
   fieldServiceOrder: {
@@ -30,7 +31,8 @@ const customNodeStyles = {
   }
 };
 
-function ServiceOrderViews({ serviceData }) {
+function FieldServiceOrderView({ fieldServiceOrderData }) {
+
   const toastConfig = useContext(CustomToastContext);
   const [colorInfo, setColorInfo] = useState(false);
   const [fullDialogueOpen, setFullDialogueOpen] = useState(false);
@@ -38,41 +40,39 @@ function ServiceOrderViews({ serviceData }) {
   const [flowData, setFlowData] = useState([]);
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   useEffect(() => {
     fetchData();
-  }, [serviceData._id]);
+  }, [fieldServiceOrderData._id]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const fieldTickets = await axiosInstance().get(
-        `${fieldTicket.api}?filterById=${JSON.stringify([
-          {
-            field: 'fieldServiceOrder',
-            term: serviceData?._id
-          }
-        ])}`
-      );
-      const invoices = permissions?.invoice?.isRead && (await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${serviceData?._id}`));
+      let fieldTickets: any = await axiosInstance().get(`${fieldTicket.api}?filterById=${JSON.stringify([{ field: 'fieldServiceOrder', term: fieldServiceOrderData?._id }])}`);
+      fieldTickets = fieldTickets?.data?.data
+
+      let invoices: any = []
+      if (permissions?.invoice?.isRead) {
+        invoices = await axiosInstance().get(`${invoice.api}?fieldServiceOrder=${fieldServiceOrderData?._id}`)
+        invoices = invoices?.data?.data;
+      }
 
       var xPosition = 0;
       var flowEdge: any[] = [];
+
       var flow: any[] = [
         {
-          id: `${serviceData?._id}`,
+          id: `${fieldServiceOrderData?._id}`,
           type: 'input',
           className: 'dark-node',
           sourcePosition: 'right',
           data: {
-            ref_type: 'fieldServiceOrder',
-            ref_id: serviceData?._id,
             label: (
               <div>
-                <Typography variant="body2">{sidebarResource?.fieldServiceOrder}</Typography>
-                <Typography variant="subtitle2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
+                <Typography variant="body2">{resources?.fieldServiceOrder?.titleSingular}</Typography>
+                <Typography variant="subtitle2">{fieldServiceOrderData?.fieldServiceOrderNumber}</Typography>
               </div>
             )
           },
@@ -82,22 +82,22 @@ function ServiceOrderViews({ serviceData }) {
       ];
 
       const allFieldTickets = [];
-      if (fieldTickets?.data?.data?.length) {
+      if (fieldTickets?.length) {
         xPosition += 300;
-        fieldTickets?.data?.data?.map((fieldTicket, index) => {
+        fieldTickets?.map((fieldTicket, index) => {
           allFieldTickets.push(fieldTicket._id);
           flow.push({
-            id: `${fieldTicket?._id}`,
+            id: fieldTicket?._id,
             type: 'default',
             sourcePosition: 'right',
             targetPosition: 'left',
             data: {
-              ref_type: 'fieldTicket',
+              ref_url: routes.fieldTicketDetail.path,
               ref_id: fieldTicket?._id,
               label: (
                 <div>
-                  <Typography variant="body2">{'Field Ticket'}</Typography>
-                  <Typography variant="subtitle2">{fieldTicket?.fieldTicketNumber ?? fieldTicket?.fieldTicketNumber}</Typography>
+                  <Typography variant="body2">{resources?.fieldTicket?.titleSingular}</Typography>
+                  <Typography variant="subtitle2">{fieldTicket?.fieldTicketNumber}</Typography>
                 </div>
               )
             },
@@ -105,29 +105,29 @@ function ServiceOrderViews({ serviceData }) {
             style: customNodeStyles.fieldTicket
           });
           flowEdge.push({
-            id: `${fieldTicket?._id}__fieldTicket_edge_${index}`,
-            source: `${serviceData?._id}`,
-            target: `${fieldTicket?._id}`,
+            id: fieldTicket?._id,
+            source: `${fieldServiceOrderData?._id}`,
+            target: fieldTicket?._id,
             arrowHeadType: 'arrow'
           });
         });
       }
 
-      if (invoices?.data?.data?.length) {
+      if (invoices?.length) {
         xPosition += 300;
-        invoices?.data?.data?.map((invoice, index) => {
+        invoices?.map((invoice, index) => {
           flow.push({
-            id: `${invoice?._id}`,
+            id: invoice?._id,
             type: 'default',
             sourcePosition: 'right',
             targetPosition: 'left',
             data: {
-              ref_type: 'invoice',
+              ref_url: routes.invoiceDetail.path,
               ref_id: invoice?._id,
               label: (
                 <div>
-                  <Typography variant="body2">{'Invoice'}</Typography>
-                  <Typography variant="subtitle2">{invoice?.invoiceNumber ?? invoice?.invoiceNumber}</Typography>
+                  <Typography variant="body2">{resources?.invoice?.titleSingular}</Typography>
+                  <Typography variant="subtitle2">{invoice?.invoiceNumber}</Typography>
                 </div>
               )
             },
@@ -143,7 +143,7 @@ function ServiceOrderViews({ serviceData }) {
               flowEdge.push({
                 id: `${ft?.optionValue}__${invoice?._id}_edge_${index}`,
                 source: `${ft?.optionValue}`,
-                target: `${invoice?._id}`,
+                target: invoice?._id,
                 arrowHeadType: 'arrow'
               });
             });
@@ -151,22 +151,20 @@ function ServiceOrderViews({ serviceData }) {
         });
       }
 
-      if (serviceData?.status === 'Closed') {
+      if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.closed) {
         xPosition += 300;
         flow.push({
-          id: `${serviceData?._id}_Closed`,
+          id: `${fieldServiceOrderData?._id}_Closed`,
           type: 'output',
           className: 'dark-node',
           sourcePosition: 'right',
           targetPosition: 'left',
           data: {
-            ref_type: 'received',
-            ref_id: serviceData?._id,
             label: (
-              <HtmlTooltip arrow placement="top" title={serviceData?.status}>
+              <HtmlTooltip arrow placement="top" title={fieldServiceOrderData?.status}>
                 <div>
-                  <Typography variant="body2">{serviceData?.fieldServiceOrderNumber ?? serviceData?.fieldServiceOrderNumber}</Typography>
-                  <Typography variant="subtitle2">{serviceData?.status ?? serviceData?.status}</Typography>
+                  <Typography variant="body2">{fieldServiceOrderData?.fieldServiceOrderNumber ?? fieldServiceOrderData?.fieldServiceOrderNumber}</Typography>
+                  <Typography variant="subtitle2">{fieldServiceOrderData?.status ?? fieldServiceOrderData?.status}</Typography>
                 </div>
               </HtmlTooltip>
             )
@@ -176,40 +174,31 @@ function ServiceOrderViews({ serviceData }) {
         });
         if (!invoices?.data?.data?.length && !fieldTickets?.data?.data?.length) {
           flowEdge.push({
-            id: `${serviceData?._id}_closed_${serviceData?._id}_edge`,
-            source: `${serviceData?._id}`,
-            target: `${serviceData?._id}_Closed`,
+            id: `${fieldServiceOrderData?._id}_closed_${fieldServiceOrderData?._id}_edge`,
+            source: `${fieldServiceOrderData?._id}`,
+            target: `${fieldServiceOrderData?._id}_Closed`,
             arrowHeadType: 'arrow'
           });
         } else {
           invoices?.data?.data?.map((invoice, index) => {
             flowEdge.push({
-              id: `${invoice?._id}_to_close_${serviceData?._id}_edge_${index}`,
+              id: `${invoice?._id}_to_close_${fieldServiceOrderData?._id}_edge_${index}`,
               source: `${invoice?._id}`,
-              target: `${serviceData?._id}_Closed`,
+              target: `${fieldServiceOrderData?._id}_Closed`,
               arrowHeadType: 'arrow'
             });
           });
           fieldTickets?.data?.data?.map((fieldTicket, index) => {
-            // check this fieldTicket is in allFieldTickets
             if (allFieldTickets.indexOf(fieldTicket?._id) > -1) {
               flowEdge.push({
-                id: `${fieldTicket?._id}_to_close_${serviceData?._id}_edge_${index}`,
+                id: `${fieldTicket?._id}_to_close_${fieldServiceOrderData?._id}_edge_${index}`,
                 source: `${fieldTicket?._id}`,
-                target: `${serviceData?._id}_Closed`,
+                target: `${fieldServiceOrderData?._id}_Closed`,
                 arrowHeadType: 'arrow'
               });
             }
           });
         }
-        // allTechnician?.map((technician, index) => {
-        //   flowEdge.push({
-        //     id: `${technician?.technician?._id}__${serviceData?._id}_edge`,
-        //     source: `${technician?.technician?._id}`,
-        //     target: `${serviceData?._id}_Closed`,
-        //     arrowHeadType: 'arrow'
-        //   });
-        // });
       }
 
       setFlowData([...flow, ...flowEdge]);
@@ -225,9 +214,8 @@ function ServiceOrderViews({ serviceData }) {
   };
 
   const onElementClick = (event, element) => {
-    switch (element.data.ref_type) {
-      case 'purchaseOrder':
-        break;
+    if (element?.data?.ref_url && element?.data?.ref_id) {
+      window.open(`${element?.data?.ref_url}/${element?.data?.ref_id}`);
     }
   };
 
@@ -305,4 +293,4 @@ function ServiceOrderViews({ serviceData }) {
   );
 }
 
-export default ServiceOrderViews;
+export default FieldServiceOrderView;
