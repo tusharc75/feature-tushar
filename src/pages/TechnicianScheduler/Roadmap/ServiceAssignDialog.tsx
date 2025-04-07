@@ -185,12 +185,12 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
       element.warehouse = d?.warehouse;
       if (selectedResource?.key === 'fieldTicket') {
         element.fieldTicket = d?.resourceId;
-        element.startDate = d?.estimateStartDate;
-        element.endDate = d?.estimateEndDate;
+        element.estimateStartDate = d?.estimateStartDate;
+        element.estimateEndDate = d?.estimateEndDate;
       } else if (selectedResource?.key === 'rentalJob') {
         element.rentalJob = d?.resourceId;
-        element.startDate = d?.estimateStartDate;
-        element.endDate = d?.estimateEndDate;
+        element.estimateStartDate = d?.estimateStartDate;
+        element.estimateEndDate = d?.estimateEndDate;
       } else {
         element.fieldServiceOrder = d?.resourceId;
         element.estimateStartDate = d?.estimateStartDate;

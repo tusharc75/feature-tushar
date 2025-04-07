@@ -89,12 +89,12 @@ const ServiceOrderSidebarImpl = ({
       element.warehouse = resourceData?.warehouse;
       if (selectedResource?.key === 'fieldTicket') {
         element.fieldTicket = resourceData?.resourceId;
-        element.startDate = resourceData?.service?.estimateStartDate;
-        element.endDate = resourceData?.service?.estimateEndDate;
+        element.estimateStartDate = resourceData?.service?.estimateStartDate;
+        element.estimateEndDate = resourceData?.service?.estimateEndDate;
       } else if (selectedResource?.key === 'rentalJob') {
         element.rentalJob = resourceData?.resourceId;
-        element.startDate = resourceData?.estimateStartDate;
-        element.endDate = resourceData?.estimateEndDate;
+        element.estimateStartDate = resourceData?.estimateStartDate;
+        element.estimateEndDate = resourceData?.estimateEndDate;
       } else {
         element.fieldServiceOrder = resourceData?.resourceId;
         element.estimateStartDate = resourceData?.estimateStartDate;

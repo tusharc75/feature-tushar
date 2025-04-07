@@ -29,14 +29,14 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         ...(type === 'fieldTicket'
           ? {
             fieldTicket: ele?.resourceId,
-            startDate: ele?.service?.estimateStartDate,
-            endDate: ele?.service?.estimateEndDate
+            estimateStartDate: ele?.service?.estimateStartDate,
+            estimateEndDate: ele?.service?.estimateEndDate
           }
           : type === 'rentalJob'
             ? {
               rentalJob: ele?.resourceId,
-              startDate: ele?.estimateStartDate,
-              endDate: ele?.estimateEndDate
+              estimateStartDate: ele?.estimateStartDate,
+              estimateEndDate: ele?.estimateEndDate
             }
             : {
               fieldServiceOrder: ele?.resourceId,
