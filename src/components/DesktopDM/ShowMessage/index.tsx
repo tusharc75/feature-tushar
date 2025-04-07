@@ -204,7 +204,7 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
       {/* Start of Message content */}
       {messages ? (
         <div className={cn('messages relative')}>
-          {currentlyEditingMessage && <div className="absolute inset-0 z-[1] bg-black/50 dark:bg-black/70" />}
+          {currentlyEditingMessage && <div className="absolute inset-0 z-[1] bg-black/50 [backdrop-filter:blur(1px)] dark:bg-black/70" />}
           {Object.keys(messages).map((date) => {
             const messagesInThatDate = messages[date];
             return (
