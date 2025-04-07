@@ -22,9 +22,9 @@ import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDia
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { Edit } from '@mui/icons-material';
-import dayjs from 'dayjs';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -227,26 +227,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         Cell: ({ row }) => {
           return allowedToEdit ? (
             <>
-              {row?.original?.logCount === 1 && (
-                <HtmlTooltip title={`Update Start/End Date`}>
-                  <span>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setStartEndDateConfermationDialog({
-                          open: true,
-                          type: 'startStop',
-                          minDateTime: null,
-                          data: row?.original,
-                          notes: row?.original?.notes
-                        });
-                      }}
-                    >
-                      <Edit fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </span>
-                </HtmlTooltip>
-              )}
               <HtmlTooltip title={'View Logs'}>
                 <IconButton
                   size="small"
@@ -331,13 +311,13 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
-      element.fieldTicket = fieldTicketData?._id;
+      element.referenceId = fieldTicketData?._id;
       element.technician = d?._id;
-      element.uniqueId = selectedService?._id;
+      element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
-      element.estimateStartDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
-      element.estimateEndDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
+      element.estimateStartDate = fieldTicketData?.estimateStartDate;
+      element.estimateEndDate = fieldTicketData?.estimateEndDate;
       technician.push(element);
     });
     axiosInstance()
