@@ -141,7 +141,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
     return [
       {
         id: 'resourceNumber',
-        head: selectedType === 'fieldTicket' ? 'Field Ticket' : selectedType === 'fieldServiceOrder' ? 'Field Service Order' : 'Rental Job',
+        head: 'Job Number',
         cell: row['resourceNumber'] ? (
           <div className="flex items-center ">
             <p title={row.resourceNumber} className="line-clamp-1">
@@ -161,6 +161,28 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         ) : (
           <NoDataCell />
         )
+      },
+      {
+        id: 'customerAccount',
+        head: 'Customer',
+        cell:
+          row?.customerAccount ? (
+            <div className="flex items-center">
+              <p title={row?.customerAccount} className="line-clamp-1">
+                {row?.customerAccount}
+              </p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.customerAccountDetail.path}/${row?.customerAccountId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         id: 'serviceName',
