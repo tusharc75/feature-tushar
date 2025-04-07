@@ -45,6 +45,7 @@ export type Message = {
   replies?: any[];
   reactions?: any[];
   pinned?: boolean;
+  lastModified?: string;
 };
 export type Attachment = {
   _id: string;
