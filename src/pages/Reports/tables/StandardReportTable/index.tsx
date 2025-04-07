@@ -653,59 +653,20 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               </ThemeButton>
             )}
             <span id="importExportLinks" className="space-x-2">
-              {[
-                'inUsedSerializedAsset',
-                'lostAssets',
-                'assetUtilization',
-                'invoiceDetails',
-                'inventoryHistory',
-                'purchaseOrderDetails',
-                'purchaseOrderActualReceivedDetails',
-                'userSession',
-                'numberOfAssetsByStatus',
-                'serializedAssetStatistics',
-                'averagePriceBySupplier',
-                'inventoryEvaluation',
-                'workOrderService',
-                'workOrderTechnicianWorkHours'
-              ].includes(resourceCamelCase) ? (
-                <AsynImportExportMenu
-                  resource={sidebarResource.report}
-                  subResource={selectedReport.resource}
-                  referenceId={null}
-                  permissions={permissions?.report}
-                  module={selectedReport.resource}
-                  api={`/report/${selectedReport.resource}`}
-                  afterImportCompleted={() => { }}
-                  isExportCount={true}
-                  exportCount={0}
-                  ids={[]}
-                  onlyExport={true}
-                  additionalParams={getQueryString(true).query}
-                />
-              ) : (
-                <>
-                  {reportConfig?.isSendMail && <SendMailMenu exportData={exportData} isProcessing={isProcessing} />}
-                  {reportConfig?.isExportPdf && (
-                    <ThemeButton
-                      iconForMobile={false}
-                      disabled={isProcessing === 'pdf'}
-                      onClick={() => exportData('pdf', 'pdf')}
-                      isLoading={isProcessing === 'pdf'}
-                    >
-                      Export To PDF
-                    </ThemeButton>
-                  )}
-                  <ThemeButton
-                    iconForMobile={false}
-                    disabled={isProcessing === 'excel'}
-                    onClick={() => exportData('excel', 'excel')}
-                    isLoading={isProcessing === 'excel'}
-                  >
-                    Export To Excel
-                  </ThemeButton>
-                </>
-              )}
+              <AsynImportExportMenu
+                resource={sidebarResource.report}
+                subResource={selectedReport.resource}
+                referenceId={null}
+                permissions={permissions?.report}
+                module={selectedReport.resource}
+                api={`/report/${selectedReport.resource}`}
+                afterImportCompleted={() => { }}
+                isExportCount={true}
+                exportCount={0}
+                ids={[]}
+                onlyExport={true}
+                additionalParams={getQueryString(true).query}
+              />
             </span>
           </>
         </div>
