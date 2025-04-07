@@ -135,7 +135,6 @@ const Technicians = ({ rentalManagementData }) => {
           res.competencyType = u?.technician['competencyType']?.optionLabel;
           res.competenciesWithIds = u?.technician['competencies'];
           res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString();
-
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });

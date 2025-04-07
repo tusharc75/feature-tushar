@@ -49,7 +49,8 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        dispatch({ type: 'initialize', data: data, count: data?.length });
+        const rows = data?.filter((e) => e?.startDate)
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
