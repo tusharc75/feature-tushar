@@ -9,6 +9,7 @@ import { useParams, useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset, sidebarResource } from 'src/constants/helpers';
+import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 
 const SerializedAssetStatusChangeRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -64,6 +65,7 @@ const SerializedAssetStatusChangeRequestDetail = () => {
       <Box className={`detail-container-v1`}>
         {serializedAssetStatusChangeRequestData && fields?.length ? (
           <div className="p-2">
+            <ShowDoa status={serializedAssetStatusChangeRequestData?.doa_status} data={serializedAssetStatusChangeRequestData} />
             <DetailsPage data={serializedAssetStatusChangeRequestData} fields={fields} />
           </div>
         ) : (

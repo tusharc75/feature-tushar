@@ -148,6 +148,10 @@ const SerializedAssetStatusChangeRequest = () => {
           if (finalObject['doa_status']) {
             finalObject['canPerform'] = [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
             finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
+            const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
+            if (users?.length > 0) {
+              finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
+            }
           }
           return finalObject;
         });
