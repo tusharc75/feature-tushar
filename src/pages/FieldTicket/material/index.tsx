@@ -75,9 +75,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
-  const [assignRentalDataDialog, setAssignRentalDataDialog] = useState({ open: false, type: '' });
-  const [assignQuotationDataDialog, setAssignQuotationDataDialog] = useState(false);
-  const [addDataFromFieldServiceOrder, setAddDataFromFieldServiceOrder] = useState(false);
+  const [addRentalJobDataDialog, setAddRentalJobDataDialog] = useState({ open: false, type: '' });
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
+  const [addFieldServiceOrderDataDialog, setAddFieldServiceOrderDataDialog] = useState(false);
 
   const [refreshChild, setRefreshChild] = useState(false);
 
@@ -459,8 +459,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         fetchMaterial();
         setMaterialDialog({ open: false, type: '', parentId: null });
-        setAssignRentalDataDialog({ open: false, type: '' });
-        setAssignQuotationDataDialog(false);
+        setAddRentalJobDataDialog({ open: false, type: '' });
+        setAddQuotationDataDialog(false);
         setIsSubmitting(false);
       }
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
@@ -485,7 +485,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         }
       }
       const material: any = [];
-      if (assignRentalDataDialog.open || assignQuotationDataDialog || addDataFromFieldServiceOrder) {
+      if (addRentalJobDataDialog.open || addQuotationDataDialog || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
           const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(e, allFields) };
           const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber');
@@ -504,13 +504,13 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
               }
             }
           }
-          if (assignRentalDataDialog.open) {
+          if (addRentalJobDataDialog.open) {
             element.isRental = true;
           }
-          if (assignQuotationDataDialog) {
+          if (addQuotationDataDialog) {
             element.isQuotation = true;
           }
-          if (addDataFromFieldServiceOrder) {
+          if (addFieldServiceOrderDataDialog) {
             element.isFieldServiceOrder = true;
           }
           material.push(element);
@@ -566,9 +566,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         fetchMaterial();
         fetchData();
         setMaterialDialog({ open: false, type: '', parentId: null });
-        setAssignRentalDataDialog({ open: false, type: '' });
-        setAssignQuotationDataDialog(false);
-        setAddDataFromFieldServiceOrder(false);
+        setAddRentalJobDataDialog({ open: false, type: '' });
+        setAddQuotationDataDialog(false);
+        setAddFieldServiceOrderDataDialog(false);
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -880,50 +880,43 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             Add Manual Entry
           </MenuItem>
         )}
-        {resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && !isOffline && (
+        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
-                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
+                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
               }}
             >
               Add Rental Assets
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.product });
-              }}
-            >
-              Add Rental Consumables
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAssignRentalDataDialog({ open: true, type: MATERIAL_TYPE.package });
+                setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.package });
               }}
             >
               {`Add Rental ${resources?.packages?.titlePlural}`}
             </MenuItem>
           </>
         )}
-        {resourcePolicy?.showQuotationAddMaterial &&
+        {!isOffline && resourcePolicy?.showQuotationAddMaterial &&
           fieldTicketData?.quotation?.optionValue &&
           fieldTicketData?.quotationVersion?.optionValue &&
-          !isOffline && (
+          (
             <>
               <MenuItem
                 onClick={() => {
-                  setAssignQuotationDataDialog(true);
+                  setAddQuotationDataDialog(true);
                 }}
               >
-                {`Add From ${resources?.quotation?.titleSingular}`}
+                {`Add Services From ${resources?.quotation?.titleSingular}`}
               </MenuItem>
             </>
           )}
-        {fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
+        {!isOffline && resourcePolicy?.showFieldServiceOrderAddMaterial && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
-                setAddDataFromFieldServiceOrder(true);
+                setAddFieldServiceOrderDataDialog(true);
               }}
             >
               {`Add Services From ${resources?.fieldServiceOrder?.titleSingular}`}
@@ -1100,37 +1093,38 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           loadingEdit={isUpdating}
         />
       )}
-      {assignRentalDataDialog?.open && (
+      {addRentalJobDataDialog?.open && (
         <AddRentalDataDialog
-          type={assignRentalDataDialog?.type}
+          materialType={addRentalJobDataDialog?.type}
           onClose={() => {
-            setAssignRentalDataDialog({ open: false, type: '' });
+            setAddRentalJobDataDialog({ open: false, type: '' });
           }}
           onSuccess={(rows) => {
-            handleAdd(rows, assignRentalDataDialog?.type);
+            handleAdd(rows, addRentalJobDataDialog?.type);
           }}
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
         />
       )}
-      {assignQuotationDataDialog && (
+      {addQuotationDataDialog && (
         <AddQuotationDataDialog
           onClose={() => {
-            setAssignQuotationDataDialog(false);
+            setAddQuotationDataDialog(false);
           }}
           onSuccess={(rows) => {
             handleAdd(rows, null);
           }}
-          fieldTicketData={fieldTicketData}
+          referenceData={fieldTicketData}
           isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.service}
           ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
-      {addDataFromFieldServiceOrder && (
+      {addFieldServiceOrderDataDialog && (
         <AddFieldServiceOrderDataDialog
           onClose={() => {
-            setAddDataFromFieldServiceOrder(false);
+            setAddFieldServiceOrderDataDialog(false);
           }}
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}

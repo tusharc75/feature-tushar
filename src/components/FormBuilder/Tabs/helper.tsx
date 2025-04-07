@@ -76,6 +76,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'showFieldServiceOrderAddMaterial',
+        fieldLabel: 'Show Field Service Order Add Material',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'showAddPackages',
         fieldLabel: 'Show Add Packages',
         type: 'checkBox',
