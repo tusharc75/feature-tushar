@@ -15,7 +15,8 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
-const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitting = false, ids = [] }) => {
+const AddQuotationDataDialog = ({ onSuccess, onClose, referenceData, materialType, isSubmitting = false, ids = [] }) => {
+
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Quotation_Material`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -40,10 +41,10 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitt
   }, [allFields]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, fieldTicketData?.currency, false);
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, referenceData?.currency, false);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
-    const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
+    const newColumns = generateColumns(renderedFrom, data, null, false, referenceData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -111,9 +112,10 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitt
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
-    const response = await axiosInstance().get(`${quotation.api}/productpackage/${fieldTicketData?.quotation?.optionValue}/${fieldTicketData?.quotationVersion?.optionValue}`);
+    const response = await axiosInstance().get(`${quotation.api}/productpackage/${referenceData?.quotation?.optionValue}/${referenceData?.quotationVersion?.optionValue}`);
     data = response?.data?.data?.material;
-    data.forEach((parent, i) => {
+    let rows = data?.filter((d: any) => d?.type === materialType && !d.parentId && !ids?.includes(d?._id));
+    rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.type = parent.type;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName :
@@ -124,7 +126,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, fieldTicketData, isSubmitt
       parent.materialId = parent.materialId;
       parent._id = parent._id;
     });
-    dispatch({ type: 'initialize', data: data, count: data?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
