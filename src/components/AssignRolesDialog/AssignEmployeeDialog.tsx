@@ -9,7 +9,6 @@ import {
   CustomDialogTransition,
   employeeMaster,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';

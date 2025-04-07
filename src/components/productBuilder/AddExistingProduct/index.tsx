@@ -11,7 +11,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, product, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../../constants/helpers';
 import SearchBox from '../../Helpers/SearchBox';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
