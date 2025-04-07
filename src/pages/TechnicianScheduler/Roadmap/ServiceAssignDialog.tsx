@@ -9,11 +9,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { CustomDialogTransition, displayDate, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
 const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handleSucess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'technician_to_service_dialog';
 
@@ -188,17 +189,9 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
       element.estimateEndDate = d?.estimateEndDate;
       data.push(element);
     });
-    const baseApi =
-      selectedResource?.key === 'fieldTicket'
-        ? fieldTicket.api
-        : selectedResource?.key === 'rentalJob'
-          ? rentalManagement.api
-          : selectedResource?.key === 'fieldServiceOrder'
-            ? fieldServiceOrder.api
-            : '';
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${baseApi}/technician`, { technician: data })
+      .post(`${selectedResource.api}/technician`, { technician: data })
       .then(() => {
         handleSucess();
         setIsSubmitting(false);
