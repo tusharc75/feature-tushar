@@ -79,7 +79,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
           setOpenRepairPopup({ open: true, data: data });
         }
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -110,7 +110,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
         }));
         setEvents([...rows]);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -217,27 +217,27 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
           <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
             {openRepairPopup.data?.length
               ? openRepairPopup.data?.map((d) => (
-                  <Accordion key={d._id} defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <div className="flex items-center gap-2">
-                        <p className="text-truncate" title={d.workOrderNumber}>
-                          {d.workOrderNumber}
-                        </p>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <RenderTable data={d.competencies} resources={resources} />
-                    </AccordionDetails>
-                  </Accordion>
-                ))
+                <Accordion key={d._id} defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <div className="flex items-center gap-2">
+                      <p className="text-truncate" title={d.workOrderNumber}>
+                        {d.workOrderNumber}
+                      </p>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <RenderTable data={d.competencies} resources={resources} />
+                  </AccordionDetails>
+                </Accordion>
+              ))
               : null}
           </Box>
         </Popover>
@@ -249,7 +249,6 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
 function EventAgenda({ event, setOpen }) {
   return (
     <ListItem
-      button
       component={'p'}
       className="!-mx-[10px] !-my-[5px] !w-[calc(100%+20px)] cursor-pointer hover:bg-[var(--dark-secondary,gray)]"
       onClick={() => setOpen({ open: true, id: event.id })}

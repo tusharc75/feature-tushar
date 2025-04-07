@@ -1,11 +1,10 @@
 import { Box, Dialog, Typography } from '@mui/material';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import WorkOrderDetailContent from 'src/pages/WorkOrder/WorkOrderDetailContent';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
 const WorkOrderDetailDialog = ({ workOrderId, handleClose }) => {

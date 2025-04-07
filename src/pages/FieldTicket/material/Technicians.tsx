@@ -336,8 +336,8 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.warehouse = fieldTicketData?.warehouse?.optionValue;
-      element.startDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
-      element.endDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
+      element.estimateStartDate = fieldTicketData?.estimateStartDate || dayjs.tz().toDate();
+      element.estimateEndDate = fieldTicketData?.estimateEndDate || dayjs.tz().toDate();
       technician.push(element);
     });
     axiosInstance()
