@@ -5,7 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { cageManagement, gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
+import { cageManagement, gridLoadingTimeout } from 'src/constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';

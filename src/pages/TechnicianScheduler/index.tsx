@@ -22,7 +22,9 @@ function TechnicianScheduler() {
   const [unAssignTechnicianDialog, setUnAssignTechnicianDialog] = useState({ open: false, data: null });
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
-  const [refresh, setRefresh] = useState(false);
+  const [refreshRoadMap, setRefreshRoadMap] = useState(false);
+  const [refreshServiceData, setRefreshServiceData] = useState(false);
+
   const sensors = useDndSensors();
 
   const onDragStart = (event: DragStartEvent) => {
@@ -84,21 +86,23 @@ function TechnicianScheduler() {
         <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <Roadmap
             filter={filter}
-            refresh={refresh}
+            refreshRoadMap={refreshRoadMap}
             selectedRecords={selectedRecords}
             handleUnAssignTechnician={(data) => {
               setUnAssignTechnicianDialog({ open: true, data: data });
+            }}
+            handleSucess={() => {
+              setRefreshServiceData((prev) => !prev);
             }}
             selectedResource={selectedResource}
             leftSidebar={(isMobile) => (
               <ServiceOrderSidebar
                 isMobile={isMobile}
-                setRefresh={setRefresh}
                 selectedResource={selectedResource}
                 assignTechnicianDialog={assignTechnicianDialogData}
                 unAssignTechnicianDialog={unAssignTechnicianDialog}
                 handleSucess={() => {
-                  setRefresh((prev) => !prev);
+                  setRefreshRoadMap((prev) => !prev);
                   setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
                   setUnAssignTechnicianDialog({ open: false, data: null });
                 }}
@@ -107,6 +111,7 @@ function TechnicianScheduler() {
                   setUnAssignTechnicianDialog({ open: false, data: null });
                 }}
                 setSelectedRecords={setSelectedRecords}
+                refreshServiceData={refreshServiceData}
               />
             )}
             headerSlot={headerSLot}

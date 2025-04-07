@@ -11,7 +11,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import SearchBox from '../../../components/Helpers/SearchBox';
-import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -103,7 +103,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
           <Box mb={2}>
             <Grid container>
               <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }} container justifyContent="flex-end">
-              <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
+                <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
                 <Box ml={1}>
                   <ThemeButton
                     onClick={() => {
