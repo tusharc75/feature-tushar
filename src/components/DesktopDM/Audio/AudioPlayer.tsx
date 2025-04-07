@@ -29,7 +29,6 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, onDelete, hasToDownload 
       setLink(url);
       instance.load(url);
     } catch (error) {
-      console.log(error);
     }
   };
 

@@ -342,6 +342,121 @@ export default function NewCreateQuotePdfTemplate() {
       });
   };
 
+  const handleExport = () => {
+    const { entity, owner, collaborator, ...rest } = initialValues;
+
+    const exportData = {
+      ...rest,
+      details,
+      table
+    };
+
+    const jsonString = JSON.stringify(exportData, null, 2);
+
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const fileName = `${initialValues.name || 'untitled'}-pdf-template.json`;
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Exported Successfully.'
+    });
+  };
+
+  const handleImport = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files.length > 0) {
+        const file = target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e: ProgressEvent<FileReader>) => {
+          const result = e.target?.result;
+          let fileContent: string;
+          if (typeof result === 'string') {
+            fileContent = result;
+          } else if (result instanceof ArrayBuffer) {
+            fileContent = new TextDecoder('utf-8').decode(result);
+          } else {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: 'Unexpected file content format.'
+            });
+            return;
+          }
+          try {
+            const importedData = JSON.parse(fileContent);
+
+            setIsLandscapChecked(importedData.landscape);
+
+            const newInitialValues = {
+              landscape: importedData.landscape,
+              hideAmountTotalSection: importedData.hideAmountTotalSection,
+              tableTotalAtBottom: importedData.tableTotalAtBottom,
+              tableFontSize: importedData.tableFontSize ? importedData.tableFontSize : '',
+              belowTableTotalFontSize: importedData.belowTableTotalFontSize ? importedData.belowTableTotalFontSize : '',
+              pdfFontSize: importedData.pdfFontSize ? importedData.pdfFontSize : '',
+              tableHeaderBackgroundColor: importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : '',
+              tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
+              productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
+              pageNumberInFooter: importedData.pageNumberInFooter,
+              name: initialValues.name ? initialValues.name : "New",
+              header: importedData.header,
+              footer: importedData.footer,
+              aboveTable: importedData.aboveTable,
+              belowTable: importedData.belowTable,
+              type:"",
+              owner: "",
+              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
+            };
+
+            setInitialValues(newInitialValues);
+
+            setDetails({
+              header: importedData.header,
+              footer: importedData.footer,
+              aboveTable: importedData.aboveTable,
+              belowTable: importedData.belowTable,
+              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide
+            });
+
+            if (importedData.table) {
+              setTable(importedData.table);
+            }
+
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Imported successfully.'
+            });
+          } catch (error) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'error',
+              message: 'Failed to import file. Please check the file format.'
+            });
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+
+    input.click();
+  };
+
   const previewPdfTemplate = (templateId) => {
     toastConfig.setToastConfig({
       // hideDuration: null,
@@ -514,6 +629,7 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues={initialValues}
         validationSchema={PdfTemplateSchema}
         onSubmit={handleSubmit}
+        enableReinitialize={true}
       >
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form>
@@ -544,6 +660,12 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <ThemeButton disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} onClick={handleImport} isLoading={isUpdating}>
+                    Import
+                  </ThemeButton>
+                  <ThemeButton disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} onClick={handleExport} isLoading={isUpdating}>
+                    Export
+                  </ThemeButton>
                   <ThemeButton
                     disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
                     onClick={submitForm}
@@ -618,8 +740,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -651,10 +773,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -688,10 +810,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -765,7 +887,7 @@ export default function NewCreateQuotePdfTemplate() {
                       helperText="Value must be between 5 to 20"
                     />
                   </div>
-                  <div className="flex justify-between items-center mt-1">
+                  <div className="mt-1 flex items-center justify-between">
                     <div className="flex gap-2">
                       <FormControlLabel
                         disabled={!isClone && !hasPermissionToUpdate}
@@ -828,15 +950,12 @@ export default function NewCreateQuotePdfTemplate() {
                         }
                         label="Show Table Total At Bottom"
                       />
-
                     </div>
                     {allFields?.length && id && id !== '0' && !isClone && (
-                      <ThemeButton onClick={() => setVariableDialog(true)}>
-                        Variables
-                      </ThemeButton>
+                      <ThemeButton onClick={() => setVariableDialog(true)}>Variables</ThemeButton>
                     )}
                   </div>
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="mt-2 flex items-center justify-between">
                     <div className="flex gap-2">
                       <TextField
                         variant="outlined"
@@ -900,7 +1019,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </div>
                   </div>
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="mt-2 flex items-center justify-between">
                     <div className="flex gap-8">
                       <FormTypes
                         values={values}
@@ -914,7 +1033,7 @@ export default function NewCreateQuotePdfTemplate() {
                         }}
                         isTooltip={false}
                       />
-                       <FormTypes
+                      <FormTypes
                         values={values}
                         errors={errors}
                         touched={touched}
@@ -1062,13 +1181,7 @@ export default function NewCreateQuotePdfTemplate() {
                   }}
                 />
               ) : null}
-              {variableDialog ? (
-                <VariablesDialog
-                  fields={allFields}
-                  handleClose={() => setVariableDialog(false)}
-                  id={id}
-                />
-              ) : null}
+              {variableDialog ? <VariablesDialog fields={allFields} handleClose={() => setVariableDialog(false)} id={id} /> : null}
             </div>
           </Form>
         )}
