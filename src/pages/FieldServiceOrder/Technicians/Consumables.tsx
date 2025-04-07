@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CHILD_RESOURCE, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem, TextField } from '@mui/material';
+import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,7 +16,6 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { flattenArray } from 'src/constants/columns';
 import Autocomplete from '@mui/material/Autocomplete';
-import { TabPanel } from 'src/components/CustomTabs';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
@@ -27,7 +26,6 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
-import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
 
@@ -39,7 +37,6 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -59,7 +56,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
 
   useEffect(() => {
     fetchData();
-  }, [tabValue, selectedTechnician, refreshChild]);
+  }, [selectedTechnician, refreshChild]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
@@ -367,11 +364,6 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     setIsBulkEdit(false);
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    dispatch({ type: 'update', data: [] });
-    setTabValue(newValue);
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -427,45 +419,41 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
         />
       </Box>
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange}>
-        <ContainedTab value={0} label={'Products/Consumables'} id={'products-consumables-tab'} />
-      </ContainedTabs>
-      <TabPanel value={tabValue} index={0}>
-        {allowedToEdit && (
-          <>
-            <DetailsPageHeader
-              isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
-              addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
-              isActionButtonVisible={true}
-              actionButtonMenuItems={actionButtonMenuItems()}
-              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-              hasXpadding
-            />
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-                {columns ? (
-                  <CustomReactTable
-                    height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                    columns={columns}
-                    state={state}
-                    dispatch={dispatch}
-                    onSaveEdit={onSaveInlineEdit}
-                    renderedFrom={renderedFrom}
-                    isClientSideGrid={true}
-                    hideSelection={allowedToEdit ? false : true}
-                    hideAction={allowedToEdit ? false : true}
-                    refreshGrid={fetchData}
-                  />
-                ) : (
-                  <Box p={2} height={300}>
-                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                  </Box>
-                )}
-              </Grid>
-            </Grid>
-          </>
-        )}
-      </TabPanel>
+      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Box mb={1}>
+          <Typography variant='subtitle2'>Products/Consumables</Typography>
+        </Box>
+        <DetailsPageHeader
+          isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
+          addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+          hasXpadding
+        />
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+            {columns ? (
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                onSaveEdit={onSaveInlineEdit}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                hideSelection={allowedToEdit ? false : true}
+                hideAction={allowedToEdit ? false : true}
+                refreshGrid={fetchData}
+              />
+            ) : (
+              <Box p={2} height={300}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+      </Box>
       {consumablesDialog && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog(false)}
