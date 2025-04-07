@@ -35,13 +35,13 @@ import Step from '../DynamicForm/Step';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Technicians from './Technicians';
 import TechnicianDispatchReturn from './TechnicianDispatchReturn';
 import Services from './Services';
+import FieldServiceOrderView from './RoadMapViews';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -433,7 +433,10 @@ const ServiceOrderDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
+          <Box>{serviceOrderData &&
+            <FieldServiceOrderView
+              fieldServiceOrderData={serviceOrderData}
+            />}</Box>
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
