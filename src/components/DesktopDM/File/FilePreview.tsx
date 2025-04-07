@@ -62,7 +62,6 @@ const FilePreview = ({ files: allFiles, hasToDownload = false, showDownloadButto
       onSuccess?.(url);
       return url;
     } catch (error) {
-      console.log(error);
     }
   };
 

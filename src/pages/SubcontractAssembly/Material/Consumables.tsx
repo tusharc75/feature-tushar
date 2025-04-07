@@ -13,7 +13,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, MenuItem, TextField } from '@mui/material';
+import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -23,14 +23,12 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import Autocomplete from '@mui/material/Autocomplete';
-import { TabPanel } from 'src/components/CustomTabs';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
-import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen, productFields }) => {
   const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Consumables`;
@@ -40,7 +38,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
   const [consumablesDialog, setConsumablesDialog] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
   const [productOption, setProductOption] = useState(null);
   const [selectedProductOption, setSelectedProductOption] = useState({ optionLabel: 'All', optionValue: 'All', receivedQty: 1 });
   const [allConsumables, setAllConsumables] = useState([]);
@@ -293,11 +290,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
     }
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    dispatch({ type: 'update', data: [] });
-    setTabValue(newValue);
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -353,42 +345,40 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
           />
         </Box>
       )}
-      <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
-        <ContainedTab value={0} label={'Products/Consumables'} />
-      </ContainedTabs>
-      <TabPanel value={tabValue} index={0}>
-        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          <DetailsPageHeader
-            isAddButtonVisible={selectedProductOption?.optionValue !== 'All' && !selectedProductOption?.receivedQty}
-            addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-consumable-button' }}
-            actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            hasXpadding
-            isActionButtonVisible={allowedToEdit}
-          />
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 12, sm: 12 }}>
-              {columns ? (
-                <CustomReactTable
-                  height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  hideSelection={!allowedToEdit}
-                  hideAction={!allowedToEdit}
-                  refreshGrid={fetchMaterial}
-                />
-              ) : (
-                <Box p={2} height={300}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              )}
-            </Grid>
-          </Grid>
+      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Box mb={1}>
+          <Typography variant='subtitle2'>Products/Consumables</Typography>
         </Box>
-      </TabPanel>
+        <DetailsPageHeader
+          isAddButtonVisible={selectedProductOption?.optionValue !== 'All' && !selectedProductOption?.receivedQty}
+          addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-consumable-button' }}
+          actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          hasXpadding
+          isActionButtonVisible={allowedToEdit}
+        />
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+            {columns ? (
+              <CustomReactTable
+                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
+                refreshGrid={fetchMaterial}
+              />
+            ) : (
+              <Box p={2} height={300}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </Grid>
+        </Grid>
+      </Box>
       {consumablesDialog && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog(false)}
