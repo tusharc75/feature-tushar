@@ -1,11 +1,10 @@
-import { MoreVert } from '@mui/icons-material';
-import { Avatar, IconButton } from '@mui/material';
 import { groupBy } from 'lodash';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { RenderAvatar, RenderButton, RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
 import { Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cn, displayDate, formatDate } from 'src/constants/helpers';
+import { cn, displayDate } from 'src/constants/helpers';
 
 type ShowMessagesProps = {
   state: UseDesktopDM;
@@ -19,6 +18,7 @@ export const groupByDate = (messages: Message[]) => {
 
 export type ShowMessageRef = {
   onNewMessagePost: (messageId: string) => void;
+  focusMessage: (messageId: string) => void;
 };
 
 let timeout: NodeJS.Timeout;
@@ -28,6 +28,13 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);
+  const pinndedMessges = useMemo(() => {
+    return messages
+      ? Object.values(messages)
+          .flat()
+          ?.filter((message) => message['pinned'] === true)
+      : [];
+  }, [messages]);
 
   const channelId = useMemo(() => {
     if (isUserData) return null;
@@ -51,7 +58,8 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openedChat.open, channelId]);
 
-  const fetchMessages = async ({ messageId = null, updateMessage = false }: { messageId?: string; updateMessage?: Boolean }) => {
+  const fetchMessages = async (props?: { messageId?: string; updateMessage?: Boolean }) => {
+    const { messageId = null, updateMessage = false } = props || {};
     if (isUserData) return;
     try {
       let api = `/work-space/channel/message/${panelData._id}`;
@@ -147,8 +155,43 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [panelData?._id, isUserData]);
 
+  const focusMessage = (messageId: string) => {
+    if (containerRef.current) {
+      const messageElement = containerRef.current.querySelector(`#message-${messageId}`);
+      if (messageElement) {
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        messageElement.classList.add('outline', 'outline-2', 'outline-theme');
+        setTimeout(() => {
+          console.log('remove outline');
+          messageElement.classList.remove('outline', 'outline-2', 'outline-theme');
+        }, 2000);
+      }
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    onNewMessagePost: (messageId) => {
+      fetchMessages({ messageId });
+    },
+    focusMessage
+  }));
+
   return (
     <div ref={containerRef} className="flex-grow overflow-y-auto scroll-smooth">
+      {pinndedMessges.length > 0 && (
+        <div className="sticky top-0 z-10 flex w-full items-center justify-between border-b bg-white p-2 text-sm font-semibold text-gray-900 dark:bg-slate-800 dark:text-white">
+          <span>Pinned Messages</span>
+          <span className="flex gap-2">
+            {pinndedMessges.map((message) => {
+              return (
+                <div onClick={() => focusMessage(message._id)} className="cursor-pointer" key={message._id}>
+                  <RenderAvatar message={message} key={message._id} />
+                </div>
+              );
+            })}
+          </span>
+        </div>
+      )}
       {messages ? (
         <>
           {Object.keys(messages).map((date) => {
@@ -159,10 +202,10 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
                   {messagesInThatDate.map((message) => {
                     const isUserMessage = user._id === message.user.optionValue;
                     return (
-                      <div className={cn('flex items-start gap-2.5', isUserMessage ? 'flex-row-reverse' : '')} key={message._id}>
+                      <div className={cn('flex  items-start gap-2.5', isUserMessage ? 'flex-row-reverse' : '')} key={message._id}>
                         <RenderAvatar message={message} />
-                        <RenderContent message={message} isUserMessage={isUserMessage} />
-                        <RenderButton message={message} />
+                        <RenderContent message={message} isUserMessage={isUserMessage} className="scroll-m-[60px]" id={`message-${message._id}`} />
+                        <RenderButton message={message} isUserMessage={isUserMessage} state={state} />
                       </div>
                     );
                   })}
@@ -185,31 +228,3 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
 });
 
 export default ShowMessages;
-
-const RenderAvatar = ({ message }: { message: Message }) => {
-  return <Avatar src={message.user.avatar} sx={{ width: '32px', height: '32px' }} alt={message.user.optionLabel} />;
-};
-const RenderContent = ({ message, isUserMessage }: { message: Message; isUserMessage: boolean }) => {
-  return (
-    <div
-      className={cn(
-        'leading-1.5 flex w-fit max-w-[320px] flex-col  p-4 ',
-        isUserMessage ? 'rounded-xl rounded-tr-none' : 'rounded-xl rounded-tl-none',
-        isUserMessage ? 'border-slate-200 bg-new-theme-color/10 dark:bg-slate-800' : 'border-gray-200 bg-gray-100 dark:bg-gray-700'
-      )}
-    >
-      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-        <span className="text-sm font-semibold text-gray-900 dark:text-white">{message.user.optionLabel}</span>
-        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{formatDate(message.date, 'hh:mm A')}</span>
-      </div>
-      <div className="py-2.5 text-sm font-normal text-gray-900 dark:text-white" dangerouslySetInnerHTML={{ __html: message.message }} />
-    </div>
-  );
-};
-const RenderButton = ({ message }: { message: Message }) => {
-  return (
-    <IconButton size={'small'} id={`dropdownMenuIconButton-${message._id}`} className="inline-flex items-center self-center" type="button">
-      <MoreVert fontSize="small" />
-    </IconButton>
-  );
-};
