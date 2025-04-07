@@ -16,7 +16,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 
-const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting = false, currency, ids = [] }) => {
+const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSubmitting = false, currency, ids = [] }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Rental_Material`;
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -144,7 +144,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
     let rows = [];
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}`);
     data = response?.data?.data;
-    if (type === MATERIAL_TYPE.product) {
+    if (materialType === MATERIAL_TYPE.product) {
       rows = data?.material?.filter(
         (e) =>
           e?.status &&
@@ -160,7 +160,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
         parent.description = parent?.productDetail?.productDescription;
         parent.qtyDisplay = parent.qty;
       });
-    } else if (type === MATERIAL_TYPE.serializedAsset) {
+    } else if (materialType === MATERIAL_TYPE.serializedAsset) {
       let inventoryData = data?.inventory || [];
       inventoryData = inventoryData?.filter(
         (e) => e?.status !== RENTAL_INTERNAL_ASSET_STATUS.reserved && !ids?.some((ele) => ele === e?.inventoryDetail?._id)
@@ -179,7 +179,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
         obj._id = parent?.inventoryDetail?._id;
         rows.push(obj);
       });
-    } else if (type === MATERIAL_TYPE.package) {
+    } else if (materialType === MATERIAL_TYPE.package) {
       let material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e._id));
       rows = material?.filter((e) => !e?.parentId);
       rows.forEach((parent, i) => {
@@ -211,7 +211,8 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
     >
       <CustomDialogHeader
         title={
-          type === MATERIAL_TYPE.product ? `Add Rental Consumables` : type === MATERIAL_TYPE.package ? `Add Rental ${resources?.packages?.titlePlural}` : `Add Rental Assets`
+          materialType === MATERIAL_TYPE.product ? `Add Rental Consumables`
+            : materialType === MATERIAL_TYPE.package ? `Add Rental ${resources?.packages?.titlePlural}` : `Add Rental Assets`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}
@@ -244,7 +245,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting 
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               isClientSideGrid={true}
-              expander={type === MATERIAL_TYPE.package}
+              expander={materialType === MATERIAL_TYPE.package}
             />
           ) : (
             <Box p={2} height={500}>

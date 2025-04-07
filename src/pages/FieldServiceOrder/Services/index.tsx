@@ -24,6 +24,7 @@ import {
   SERVICE_ORDER_STATUS,
   SERVICE_TYPE,
   fieldServiceOrder,
+  getObjKeysWithValues,
   sidebarResource,
 } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -33,6 +34,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQtyDialog';
+import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 
 
 const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep }) => {
@@ -50,9 +52,10 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshChild, setRefreshChild] = useState(false);
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
 
   const {
-    state: { permissions, user }
+    state: { permissions, user, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -311,25 +314,34 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
       taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = type;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
-      element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
-      if (taxCodeData) {
-        element.taxCode = taxCodeData?.optionValue;
-        element.taxPercentage = taxCodeData?.taxRate || 0;
-      }
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      Object.assign(element, calValues);
-      material.push(element);
-    });
-    let priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
-    AddMaterial(material, priceData);
+    if (addQuotationDataDialog) {
+      rows?.forEach((e: any) => {
+        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(e, allFields) };
+        material.push(element);
+      });
+      AddMaterial(material, null);
+    }
+    else {
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = type;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
+        element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        Object.assign(element, calValues);
+        material.push(element);
+      });
+      let priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+      AddMaterial(material, priceData);
+    }
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -347,21 +359,19 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
         }
       });
     }
-    await axiosInstance()
-      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: tempMaterial })
-      .then(() => {
-        if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-          handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
-        }
-        fetchMaterial();
-        fetchData();
-        setMaterialDialog(false);
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
+    await axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: tempMaterial }).then(() => {
+      if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+        handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+      }
+      fetchMaterial();
+      fetchData();
+      setAddQuotationDataDialog(false)
+      setMaterialDialog(false);
+      setIsSubmitting(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setIsSubmitting(false);
+    });
   };
 
   const handleDelete = async (rows) => {
@@ -436,8 +446,19 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
           }}
           id={'add-existing-service-menu-item'}
         >
-          Add Existing Service
+          Add Existing Services
         </MenuItem>
+        {serviceOrderData?.quotation?.optionValue && serviceOrderData?.quotationVersion?.optionValue && (
+          <>
+            <MenuItem
+              onClick={() => {
+                setAddQuotationDataDialog(true);
+              }}
+            >
+              {`Add Services From ${resources?.quotation?.titleSingular}`}
+            </MenuItem>
+          </>
+        )}
       </>
     );
   };
@@ -549,6 +570,20 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {addQuotationDataDialog && (
+        <AddQuotationDataDialog
+          onClose={() => {
+            setAddQuotationDataDialog(false);
+          }}
+          onSuccess={(rows) => {
+            handleAdd(rows, null);
+          }}
+          referenceData={serviceOrderData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.service}
+          ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
     </>
