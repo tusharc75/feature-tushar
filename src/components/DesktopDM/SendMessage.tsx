@@ -1,7 +1,7 @@
 import { Check, Close, Send } from '@mui/icons-material';
 import { CircularProgress, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import AudioPlayer from 'src/components/DesktopDM/Audio/AudioPlayer';
 import Recorder from 'src/components/DesktopDM/Audio/Recorder';
@@ -23,7 +23,7 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
-const SendMessage = ({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => {} }: SendMessageProps) => {
+const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => {} }: SendMessageProps) => {
   const { toastConfig, onUserFirstMessageSent, checkIsUser, user, currentlyEditingMessage, socket } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,9 @@ const SendMessage = ({ state, data: panelData, parentMessageId, disabled, onNewM
           await axiosInstance()
             .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
             .then(({ data: { data } }) => {
-              onNewMessagePost?.(data?.ops?.[0]?._id);
+              // onNewMessagePost?.(data?.ops?.[0]?._id);
+              // console.log(data);
+              // socket.emit('newMessagePosted', { channelId: data?.ops?.[0]?.channel, messageId: data?.ops?.[0]?._id });
             });
         }
         setMessage('');
@@ -108,6 +110,13 @@ const SendMessage = ({ state, data: panelData, parentMessageId, disabled, onNewM
       setMessage('');
     }
   }, [currentlyEditingMessage?.message]);
+
+  const onRecordingFinish = useCallback((data: RecordedData) => {
+    setAudioBlobs((prev) => [...prev, data]);
+  }, []);
+  const onFileInput = useCallback((data: AttachedFileType[]) => {
+    setFiles((prev) => [...prev, ...data]);
+  }, []);
 
   return (
     <div className="remove-tiny-mce-toolbar-top-border relative border-t  p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
@@ -179,8 +188,8 @@ const SendMessage = ({ state, data: panelData, parentMessageId, disabled, onNewM
         }}
       />
       <div className="absolute bottom-3 left-[calc(var(--toolbar-width)+12px)] right-3 z-10 flex items-center gap-2">
-        <AttachmentInput onFileInput={(data) => setFiles((prev) => [...prev, ...data])} />
-        <Recorder onRecordFinish={(data) => setAudioBlobs((prev) => [...prev, data])} />
+        <AttachmentInput onFileInput={onFileInput} />
+        <Recorder onRecordFinish={onRecordingFinish} />
         {currentlyEditingMessage ? (
           <>
             <IconButton disabled={loading} className="!ml-auto !flex" size="small" onClick={() => state.setCurrentlyEditingMessage(null)}>
@@ -237,6 +246,6 @@ const SendMessage = ({ state, data: panelData, parentMessageId, disabled, onNewM
       </div>
     </div>
   );
-};
+});
 
 export default SendMessage;

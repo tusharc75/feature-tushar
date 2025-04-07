@@ -69,7 +69,6 @@ const Header = () => {
   const anchorRef = useRef(null);
   const userSocket = useSocket({ namespace: '/user' });
 
-
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
