@@ -107,7 +107,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       Cell: ({ row }) => {
         return (
           <>
-            {row?.original?.duration ? (
+            {row?.original?.duration || row?.original?.duration === 0 ? (
               <>
                 <h5 className="text-truncate">{formatDurationInHrs(row?.original?.duration)}</h5>
               </>

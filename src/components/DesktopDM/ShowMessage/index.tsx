@@ -31,8 +31,8 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
   const pinndedMessges = useMemo(() => {
     return messages
       ? Object.values(messages)
-          .flat()
-          ?.filter((message) => message['pinned'] === true)
+        .flat()
+        ?.filter((message) => message['pinned'] === true)
       : [];
   }, [messages]);
 
@@ -162,7 +162,6 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
         messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         messageElement.classList.add('outline', 'outline-2', 'outline-theme');
         setTimeout(() => {
-          console.log('remove outline');
           messageElement.classList.remove('outline', 'outline-2', 'outline-theme');
         }, 2000);
       }
