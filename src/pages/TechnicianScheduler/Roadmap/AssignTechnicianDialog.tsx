@@ -26,23 +26,9 @@ function AssignTechnicianDialog({ technicianData, selectedServiceOrder, handleCl
         service: ele?.serviceId,
         technician: technicianData?._id,
         warehouse: ele?.warehouse,
-        ...(type === 'fieldTicket'
-          ? {
-            fieldTicket: ele?.resourceId,
-            estimateStartDate: ele?.service?.estimateStartDate,
-            estimateEndDate: ele?.service?.estimateEndDate
-          }
-          : type === 'rentalJob'
-            ? {
-              rentalJob: ele?.resourceId,
-              estimateStartDate: ele?.estimateStartDate,
-              estimateEndDate: ele?.estimateEndDate
-            }
-            : {
-              fieldServiceOrder: ele?.resourceId,
-              estimateStartDate: ele?.estimateStartDate,
-              estimateEndDate: ele?.estimateEndDate
-            }),
+        referenceId: ele?.resourceId,
+        estimateStartDate: ele?.service?.estimateStartDate || ele?.estimateStartDate,
+        estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
       };
     });
     const baseApi =

@@ -183,19 +183,9 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
       element.uniqueId = d?._id;
       element.service = d?.serviceId;
       element.warehouse = d?.warehouse;
-      if (selectedResource?.key === 'fieldTicket') {
-        element.fieldTicket = d?.resourceId;
-        element.estimateStartDate = d?.estimateStartDate;
-        element.estimateEndDate = d?.estimateEndDate;
-      } else if (selectedResource?.key === 'rentalJob') {
-        element.rentalJob = d?.resourceId;
-        element.estimateStartDate = d?.estimateStartDate;
-        element.estimateEndDate = d?.estimateEndDate;
-      } else {
-        element.fieldServiceOrder = d?.resourceId;
-        element.estimateStartDate = d?.estimateStartDate;
-        element.estimateEndDate = d?.estimateEndDate;
-      }
+      element.referenceId = d?.resourceId;
+      element.estimateStartDate = d?.estimateStartDate;
+      element.estimateEndDate = d?.estimateEndDate;
       data.push(element);
     });
     const baseApi =

@@ -52,7 +52,6 @@ export default RenderImages;
 
 const RenderSingleImage = ({
   file,
-  getFileUrl,
   hasToDownload,
   onDelete,
   index,
@@ -60,7 +59,7 @@ const RenderSingleImage = ({
   opneImageSlider
 }: RenderSingleFileProps & { index: number; moreImageCount: number; opneImageSlider: (index: number) => void }) => {
   const overlayVisible = index === DEFAULT_IMAGE_VISIBLE_COUNT - 1 && moreImageCount > 0;
-  const src = useResolveFileUrl({ getFileUrl: getFileUrl, url: file.url, hasToDownload, shouldDownload: index < DEFAULT_IMAGE_VISIBLE_COUNT });
+  const src = useResolveFileUrl({ url: file.url, hasToDownload, shouldDownload: index < DEFAULT_IMAGE_VISIBLE_COUNT });
   return (
     <div
       className={cn('group relative min-h-[--image-h] overflow-hidden ', hasToDownload ? 'rounded-lg' : ' rounded-md')}
