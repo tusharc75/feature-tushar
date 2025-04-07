@@ -9,9 +9,9 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { displayDateTime, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import Autocomplete from '@mui/material/Autocomplete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
+import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_History`;
 
@@ -23,21 +23,26 @@ const History = ({ id }) => {
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
+
+
   const [selectedResource, setSelectedResource] = useState(null);
+  const [tabValue, setTabValue] = useState(null);
+
+
   const [resourceList, setResourceList] = useState([]);
 
   const TECHNICIAN_RESOURCE = [
+    {
+      key: 'fieldServiceOrder',
+      resource: sidebarResource.fieldServiceOrder,
+      path: routes.fieldServiceOrderDetail.path,
+      title: resources?.fieldServiceOrder?.titleSingular
+    },
     {
       key: 'fieldTicket',
       resource: sidebarResource.fieldTicket,
       path: routes.fieldTicketDetail.path,
       title: resources?.fieldTicket?.titleSingular
-    },
-    {
-      key: 'workOrder',
-      resource: sidebarResource.workOrder,
-      path: routes.workOrderDetail.path,
-      title: resources?.workOrder?.titleSingular
     },
     {
       key: 'rentalManagement',
@@ -46,10 +51,10 @@ const History = ({ id }) => {
       title: resources?.rentalManagement?.titleSingular
     },
     {
-      key: 'fieldServiceOrder',
-      resource: sidebarResource.fieldServiceOrder,
-      path: routes.fieldServiceOrderDetail.path,
-      title: resources?.fieldServiceOrder?.titleSingular
+      key: 'workOrder',
+      resource: sidebarResource.workOrder,
+      path: routes.workOrderDetail.path,
+      title: resources?.workOrder?.titleSingular
     },
   ];
 
@@ -63,7 +68,7 @@ const History = ({ id }) => {
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
-      Cell: ({ row }) => (
+      cell: ({ row }) => (
         <>
           {row?.original?.reference?.optionValue ? (
             <div className="flex items-center gap-2">
@@ -89,12 +94,20 @@ const History = ({ id }) => {
       minWidth: 200,
       width: 200,
       disabled: true,
-      Cell: ({ row }) => (
+      cell: ({ row }) => (
         <div>
           {row?.original?.warehouse ? (
-            <a className="link text-truncate" href={`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`} target="_blank">
-              {row?.original?.warehouse?.optionLabel}
-            </a>
+            <div className="flex items-center gap-2">
+              <div>{row?.original?.warehouse?.optionLabel}</div>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )}
@@ -109,12 +122,20 @@ const History = ({ id }) => {
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) => (
+      cell: ({ row }) => (
         <>
           {row?.original?.service ? (
-            <h5 className="text-truncate" title={row?.original?.service?.optionLabel}>
-              {row?.original?.service?.optionLabel}
-            </h5>
+            <div className="flex items-center gap-2">
+              <div>{row?.original?.service?.optionLabel}</div>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row?.original?.service?.optionValue}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )}
@@ -129,7 +150,7 @@ const History = ({ id }) => {
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
-      Cell: ({ row }) => (
+      cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
             <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
@@ -149,7 +170,7 @@ const History = ({ id }) => {
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
-      Cell: ({ row }) => (
+      cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
             <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
@@ -171,7 +192,10 @@ const History = ({ id }) => {
       }
     });
     setResourceList(options);
-    if (options.length > 0) setSelectedResource(options[0]);
+    if (options.length > 0) {
+      setTabValue(options[0]?.key)
+      setSelectedResource(options[0])
+    }
   }, []);
 
   useEffect(() => {
@@ -213,17 +237,23 @@ const History = ({ id }) => {
       });
   };
 
+  const handleMainTabChange = (event: any, newValue: any) => {
+    setTabValue(newValue)
+    setSelectedResource(TECHNICIAN_RESOURCE?.find((e) => e.key === newValue))
+    dispatch({ type: 'pageChange', page: 0 });
+  };
+
   return (
     <Box>
       <DetailsPageHeader
         isActionButtonVisible={false}
         isAddButtonVisible={false}
-        leftSideContents={<LeftSideContents {...{ setSelectedResource, dispatch, selectedResource, resourceList }} />}
+        leftSideContents={<LeftSideContents {...{ handleMainTabChange, dispatch, tabValue, resourceList }} />}
         hasXpadding={false}
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 200px)'}
+          height={'calc(100vh - 300px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -242,23 +272,14 @@ const History = ({ id }) => {
 
 export default History;
 
-const LeftSideContents = ({ setSelectedResource, dispatch, selectedResource, resourceList }) => {
+const LeftSideContents = ({ tabValue, resourceList, handleMainTabChange }) => {
   return (
     <>
-      <Autocomplete
-        id="employeemaster-history"
-        className="max-w-[400px]"
-        fullWidth
-        options={resourceList?.map((item) => item)}
-        renderInput={(params) => <TextField {...params} variant="outlined" label="Resource" fullWidth margin="none" size="small" required={true} />}
-        getOptionLabel={(option) => option?.title}
-        onChange={(e, val) => {
-          setSelectedResource(val);
-          dispatch({ type: 'pageChange', page: 0 });
-        }}
-        disableClearable={true}
-        value={selectedResource}
-      />
+      <ContainedTabs value={tabValue} onChange={(e, value) => handleMainTabChange(e, value)}>
+        {resourceList?.map((res, idx) => (
+          <ContainedTab value={res.key} id={res.key} label={`${res.title}`} />
+        ))}
+      </ContainedTabs>
     </>
   );
 };
