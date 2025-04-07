@@ -664,7 +664,10 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                 'userSession',
                 'numberOfAssetsByStatus',
                 'serializedAssetStatistics',
-                'averagePriceBySupplier'
+                'averagePriceBySupplier',
+                'inventoryEvaluation',
+                'workOrderService',
+                'workOrderTechnicianWorkHours'
               ].includes(resourceCamelCase) ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
