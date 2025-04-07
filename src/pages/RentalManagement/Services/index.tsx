@@ -4,12 +4,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import Autocomplete from '@mui/material/Autocomplete';
 import { startCase } from 'lodash';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { TabPanel } from 'src/components/CustomTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -48,7 +47,6 @@ import { getPricingConditions, getPricingValue } from 'src/components/PricingCon
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 
 const Services = ({
   rentalManagementData,
@@ -83,7 +81,6 @@ const Services = ({
   const [allFields, setAllFields] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
 
-  const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
 
@@ -740,10 +737,6 @@ const Services = ({
     );
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -826,18 +819,13 @@ const Services = ({
               renderInput={(params) => <TextField {...params} label={'Select Service'} variant="outlined" />}
             />
           </Box>
-          <Box mt={3}>
-            <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
-              <ContainedTab value={0} label={'Technicians'} />
-            </ContainedTabs>
-            <TabPanel value={tabValue} index={0}>
-              <Technicians
-                allowedToEdit={allowedToEdit}
-                rentalManagementData={rentalManagementData}
-                selectedService={selectedServiceOption}
-                services={serviceOption}
-              />
-            </TabPanel>
+          <Box mt={1}>
+            <Technicians
+              allowedToEdit={allowedToEdit}
+              rentalManagementData={rentalManagementData}
+              selectedService={selectedServiceOption}
+              services={serviceOption}
+            />
           </Box>
         </div>
       )}

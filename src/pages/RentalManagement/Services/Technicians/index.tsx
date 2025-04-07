@@ -6,11 +6,11 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import { prepareDataForGrid, PRICING_SETUP_TYPE, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from 'src/StateProvider/Provider';
 import { BiChevronDown } from 'react-icons/bi';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
@@ -26,6 +26,7 @@ import { fetch_rental_technician_fields } from 'src/components/RentalManagment/h
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -50,7 +51,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const [allFields, setAllFields] = useState(null);
 
   const {
-    state: { user }
+    state: { permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -94,6 +95,18 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
 
   const fetchColumns = async () => {
     let data = isOffline ? [] : await fetch_rental_technician_fields(rentalManagementData?.currency, false);
+    let technicianFields = []
+    if (!isOffline) {
+      const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
+        fields: [
+          {
+            resource: sidebarResource.employeeMaster,
+            fieldNames: ['competencyType', 'competencies']
+          }
+        ]
+      });
+      technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
+    }
     const column: any = [
       {
         accessor: 'index',
@@ -155,18 +168,40 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      {
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
         accessor: 'competencyType',
-        Header: 'Competency Type',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
         width: 250,
-        Cell: ({ row }) => (row.original['competencyType'] ? <p>{row.original?.competencyType}</p> : <NoDataCell />)
-      },
-      {
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencyType',
+              lookupResource: sidebarResource.competencyType
+            }}
+            original={row?.original}
+          />
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencyType')
+      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
         accessor: 'competencies',
-        Header: 'Competencies',
+        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
         width: 250,
-        Cell: ({ row }) => (row.original['competencies'] ? <p>{row.original?.competencies}</p> : <NoDataCell />)
-      },
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'competencies',
+              lookupResource: sidebarResource.competencies
+            }}
+            original={row?.original}
+          />
+        ),
+        accessorFn: (original) => AccessorFunction(original, 'competencies')
+      }] : []),
       {
         accessor: 'startDate',
         Header: 'Start Date',
@@ -254,10 +289,8 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           res.index = i + 1;
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
-          res.competencyType = u?.technician['competencyType']?.optionLabel;
-          res.competenciesWithIds = u?.technician['competencies'];
-          res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString();
-
+          res.competencyType = u?.technician?.competencyType;
+          res.competencies = u?.technician?.competencies;
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -351,11 +384,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   return (
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+        <Box mb={1}>
+          <Typography variant='subtitle2'>Technicians</Typography>
+        </Box>
         {allowedToEdit && (
           <Box display="flex" justifyContent="space-between" mb={2}>
             <Box display="flex" gap={'8px'} flexWrap={'wrap'}>
               <ThemeButton startIcon={<Add />} onClick={() => setTechnicianDialog(true)}>
-                Add
+                Assign
               </ThemeButton>
             </Box>
             <Box display="flex" ml={1}>
@@ -427,7 +463,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           </Grid>
         </Grid>
       </Box>
-
       {technicianDialog && (
         <AssignEmployeeDialog
           reference={'fieldTicket'}
@@ -440,7 +475,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           warehouse={rentalManagementData?.warehouse?.optionValue}
         />
       )}
-
       {deleteData && (
         <ConfirmationDialog
           open={true}
