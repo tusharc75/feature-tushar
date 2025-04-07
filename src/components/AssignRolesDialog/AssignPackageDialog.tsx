@@ -5,7 +5,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';

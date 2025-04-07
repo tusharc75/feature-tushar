@@ -17,8 +17,8 @@ type ServiceOrderSidebarProps = {
   handleSucess: () => void;
   handleClose: () => void;
   setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
+  refreshServiceData: boolean;
 };
 type DialogData = {
   open: boolean;
@@ -33,9 +33,9 @@ const ServiceOrderSidebarImpl = ({
   handleClose,
   handleSucess,
   setSelectedRecords,
-  setRefresh,
   isMobile,
-  unAssignTechnicianDialog
+  unAssignTechnicianDialog,
+  refreshServiceData
 }: ServiceOrderSidebarProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -87,33 +87,16 @@ const ServiceOrderSidebarImpl = ({
       element.uniqueId = resourceData?._id;
       element.service = resourceData?.service?._id;
       element.warehouse = resourceData?.warehouse;
-      if (selectedResource?.key === 'fieldTicket') {
-        element.fieldTicket = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.service?.estimateStartDate;
-        element.estimateEndDate = resourceData?.service?.estimateEndDate;
-      } else if (selectedResource?.key === 'rentalJob') {
-        element.rentalJob = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.estimateEndDate;
-      } else {
-        element.fieldServiceOrder = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.estimateEndDate;
-      }
+      element.referenceId = resourceData?.resourceId;
+      element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
+      element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
       technician.push(element);
     });
-    const baseApi =
-      selectedResource?.key === 'fieldTicket'
-        ? fieldTicket.api
-        : selectedResource?.key === 'rentalJob'
-          ? rentalManagement.api
-          : selectedResource?.key === 'fieldServiceOrder'
-            ? fieldServiceOrder.api
-            : '';
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${baseApi}/technician`, { technician: technician })
+      .post(`${selectedResource.api}/technician`, { technician: technician })
       .then(() => {
+        fetchData(selectedResource);
         handleSucess();
         setOpenTechnicianDialog({ open: false, data: null });
         setIsSubmitting(false);
@@ -132,7 +115,6 @@ const ServiceOrderSidebarImpl = ({
         fetchData(selectedResource);
         handleSucess();
         setIsSubmitting(false);
-        setRefresh((prev) => !prev);
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -149,7 +131,7 @@ const ServiceOrderSidebarImpl = ({
       cancelToken.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedResource]);
+  }, [selectedResource, refreshServiceData]);
 
   return (
     <>
@@ -171,6 +153,7 @@ const ServiceOrderSidebarImpl = ({
       </div>
       {assignTechnicianDialog.open && (
         <AssignTechnicianDialog
+          selectedResource={selectedResource}
           technicianData={assignTechnicianDialog.technicianData}
           selectedServiceOrder={[assignTechnicianDialog.service]}
           handleSucess={() => {

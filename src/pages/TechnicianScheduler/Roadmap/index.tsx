@@ -9,7 +9,7 @@ import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAs
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
-function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refresh }) {
+function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refreshRoadMap, handleSucess }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
@@ -19,7 +19,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-  }, [filter.view, refresh]);
+  }, [filter.view, refreshRoadMap]);
 
   useEffect(() => {
     filter.fieldTicket !== '' && fetchServiceOrders(filter.fieldTicket);
@@ -97,6 +97,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
           selectedResource={selectedResource}
           technician={assignServiceDialog.data}
           handleSucess={() => {
+            handleSucess()
             fetchRoadmap();
             setAssignServiceDialog({ open: false, data: null });
           }}

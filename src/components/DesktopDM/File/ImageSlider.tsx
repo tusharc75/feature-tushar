@@ -1,7 +1,7 @@
 import React from 'react';
 import { RenderFileProps, RenderSingleFileProps } from 'src/components/DesktopDM/File/FilePreview';
 import Carousel from 'react-material-ui-carousel';
-import { useResolveFileUrl } from 'src/components/DesktopDM/utils';
+import { handleDownload, useResolveFileUrl } from 'src/components/DesktopDM/utils';
 import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
 import { Close, Delete, Download } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -9,8 +9,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 const ImageSlider = ({
   files,
   hasToDownload,
-  getFileUrl,
-  handleDownload,
   onDelete,
   showDownloadButton,
   onCLose,
@@ -59,7 +57,7 @@ const ImageSlider = ({
                 backgroundColor: 'rgba(0,0,0,0.5)',
                 '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
               }}
-              onClick={() => handleDownload(files[activeIndex])}
+              onClick={() => handleDownload(files[activeIndex], hasToDownload)}
             >
               <Download />
             </IconButton>
@@ -99,15 +97,7 @@ const ImageSlider = ({
           navButtonsProps={{ style: { backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' } }}
         >
           {files.map((image, index) => (
-            <SingleImage
-              file={image}
-              getFileUrl={getFileUrl}
-              handleDownload={handleDownload}
-              hasToDownload={hasToDownload}
-              key={image._id}
-              onDelete={onDelete}
-              showDownloadButton={showDownloadButton}
-            />
+            <SingleImage file={image} hasToDownload={hasToDownload} key={image._id} onDelete={onDelete} showDownloadButton={showDownloadButton} />
           ))}
         </Carousel>
       </DialogContent>
@@ -117,8 +107,8 @@ const ImageSlider = ({
 
 export default ImageSlider;
 
-const SingleImage = ({ file, getFileUrl, handleDownload, hasToDownload, onDelete, showDownloadButton }: RenderSingleFileProps) => {
-  const src = useResolveFileUrl({ getFileUrl: getFileUrl, url: file.url, hasToDownload, shouldDownload: true });
+const SingleImage = ({ file, hasToDownload, onDelete, showDownloadButton }: RenderSingleFileProps) => {
+  const src = useResolveFileUrl({ url: file.url, hasToDownload, shouldDownload: true });
   return (
     <div className="relative mx-auto flex h-[calc(100vh-80px)] max-h-fit w-[calc(100vw-60px)] max-w-fit items-center justify-center">
       {src && <img draggable={false} src={src} alt={file.fileName} className="h-full w-full object-contain" />}
