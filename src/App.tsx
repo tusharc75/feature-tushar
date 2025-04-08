@@ -11,8 +11,6 @@ import { VITE_APP_ENV } from 'src/config';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
-import DisassemblyOrder from 'src/pages/DisassemblyOrder';
-import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
 import EquiptAi from 'src/pages/EquiptAi';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 import ExpenseApproval from 'src/pages/ExpenseApproval';
@@ -346,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -939,12 +937,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrder.path}`}>
-              <DisassemblyOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrderDetail.path}/:id`}>
-              <DisassemblyOrderDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.expenses.path}`}>
               <Expenses />
