@@ -9,6 +9,7 @@ const MapView = ({ userIds }) => {
   const [locationData, setLocationData] = React.useState([]);
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [loadingData, setLoadingData] = React.useState(false);
+  const [mapCenter, setMapCenter] = React.useState({ lat: 31.9686, lng: 99.9018 });
   const toastConfig = useContext(CustomToastContext);
 
   const containerStyle = {
@@ -22,14 +23,39 @@ const MapView = ({ userIds }) => {
     fetchData();
   }, [userIds]);
 
+  //calculating map center based on the locations for inital view to cover maximum locations
+  const calculateMapCenter = (locations) => {
+    if (!locations || locations.length === 0) return;
+
+    let totalLat = 0;
+    let totalLng = 0;
+    let validLocations = 0;
+
+    locations.forEach(location => {
+      if (location?.latitude && location?.longitude) {
+        totalLat += parseFloat(location.latitude);
+        totalLng += parseFloat(location.longitude);
+        validLocations++;
+      }
+    });
+
+    if (validLocations > 0) {
+      const centerLat = totalLat / validLocations;
+      const centerLng = totalLng / validLocations;
+      setMapCenter({ lat: centerLat, lng: centerLng });
+    }
+  };
+
   const fetchData = async () => {
     setLoadingData(true);
+    setLocationData([]);
     try {
       const {
         data: { data }
       } = await axiosInstance().get(`/user/live-location?userIds=${JSON.stringify(userIds)}`);
-      if (data) {
+      if (data && data.length > 0) {
         setLocationData(data);
+        calculateMapCenter(data);
       }
       setLoadingData(false);
     } catch (error) {
@@ -69,7 +95,7 @@ const MapView = ({ userIds }) => {
           gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
-        center={{ lat: 31.9686, lng: 99.9018 }}
+        center={mapCenter}
         zoom={4}
       >
         <MarkerClusterer>
