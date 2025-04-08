@@ -1,5 +1,5 @@
-import { useContext, useState } from 'react';
-import { Dialog, TextField } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
@@ -13,6 +13,7 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const validationSchema = Yup.object({
   title: Yup.string().required('Title is required'),
@@ -21,30 +22,87 @@ const validationSchema = Yup.object({
   reasons: Yup.string().required('Reasons are required')
 });
 
-function ManageUnavailability({ onClose, onSuccess, id }) {
+function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
   const toastConfig = useContext(CustomToastContext);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [initialData, setInitialData] = useState<any>(null);
 
-  const initialValues = {
-    title: '',
-    startDate: new Date(),
-    endDate: new Date(),
-    reasons: ''
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    // This is your default object for creating a new unavailability.
+    const initialValues = {
+      title: '',
+      startDate: new Date(),
+      endDate: new Date(),
+      reasons: ''
+    };
+
+    try {
+      if (dataId) {
+        // If there's a dataId, fetch the existing record
+        const response = await axiosInstance().get(`${routes?.employeeMaster?.path}/unavailability/${dataId}`);
+        const { data: fetchedData } = response.data;
+        // In your screenshot, the result is an array with one object:
+        // [{ title, reasons, startDate, endDate, technician, ... }]
+
+        if (Array.isArray(fetchedData) && fetchedData.length) {
+          // Get the first record from the array
+          const record = fetchedData[0];
+
+          // Convert date strings to Date objects
+          const editData = {
+            title: record.title || '',
+            reasons: record.reasons || '',
+            startDate: record.startDate ? new Date(record.startDate) : new Date(),
+            endDate: record.endDate ? new Date(record.endDate) : new Date()
+          };
+
+          setInitialData(editData);
+        } else {
+          // If the API doesn't return an array or it's empty, use defaults
+          setInitialData(initialValues);
+        }
+      } else {
+        // If there's no dataId, we are creating a new unavailability
+        setInitialData(initialValues);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
-  const handleSave = (values) => {
-    values.technician = id;
-    console.log('Submitting data:', values);
-    axiosInstance()
-      .post(`${routes?.employeeMaster?.path}/unavailability`, values)
-      .then(({ data }) => {
-        onClose();
-        onSuccess();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const handleSave = (values: any) => {
+    if (dataId) {
+      values._id = dataId;
+      values.technician = id;
+      axiosInstance()
+        .put(`${routes?.employeeMaster?.path}/unavailability`, values)
+        .then(({ data }) => {
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      values.technician = id;
+      axiosInstance()
+        .post(`${routes?.employeeMaster?.path}/unavailability`, values)
+        .then(({ data }) => {
+          onSuccess();
+          toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   return (
@@ -56,93 +114,99 @@ function ManageUnavailability({ onClose, onSuccess, id }) {
       aria-labelledby="customized-dialog-title"
       open={true}
     >
-      <Formik initialValues={initialValues} validateOnMount validationSchema={validationSchema} onSubmit={(values) => handleSave(values)}>
-        {({ values, errors, touched, handleChange, handleBlur, setFieldValue, submitForm }) => (
-          <Form>
-            <CustomDialogHeader
-              title="Unavailability"
-              onClose={onClose}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => setFullScreen((prev) => !prev)}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
-              <Grid container spacing={2} sx={{ alignItems: 'center', marginBottom: 2 }}>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    required
-                    fullWidth
-                    size="small"
-                    label="Title"
-                    name="title"
-                    value={values.title}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    variant="outlined"
-                    error={touched.title && Boolean(errors.title)}
-                    helperText={touched.title && errors.title}
-                  />
+      {initialData ? (
+        <Formik initialValues={initialData} validateOnMount validationSchema={validationSchema} onSubmit={(values) => handleSave(values)}>
+          {({ values, errors, touched, handleChange, handleBlur, setFieldValue, submitForm }) => (
+            <Form>
+              <CustomDialogHeader
+                title="Unavailability"
+                onClose={onClose}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => setFullScreen((prev) => !prev)}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <Grid container spacing={2} sx={{ alignItems: 'center', marginBottom: 2 }}>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      size="small"
+                      label="Title"
+                      name="title"
+                      value={values.title}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      variant="outlined"
+                      error={touched.title && Boolean(errors.title)}
+                      helperText={touched.title && errors.title}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6 }}>
+                    <CustomDatePicker
+                      label="Start Date"
+                      name="startDate"
+                      required
+                      value={values.startDate}
+                      fullWidth
+                      margin="dense"
+                      size="small"
+                      onChange={(value) => setFieldValue('startDate', value)}
+                      onBlur={handleBlur}
+                      error={touched.startDate && Boolean(errors.startDate)}
+                      helperText={touched.startDate && errors.startDate}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 6 }}>
+                    <CustomDatePicker
+                      label="End Date"
+                      name="endDate"
+                      required
+                      value={values.endDate}
+                      fullWidth
+                      margin="dense"
+                      size="small"
+                      onChange={(value) => setFieldValue('endDate', value)}
+                      onBlur={handleBlur}
+                      error={touched.endDate && Boolean(errors.endDate)}
+                      helperText={touched.endDate && errors.endDate}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      required
+                      fullWidth
+                      size="small"
+                      label="Reasons"
+                      name="reasons"
+                      multiline
+                      rows={4}
+                      value={values.reasons}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      variant="outlined"
+                      error={touched.reasons && Boolean(errors.reasons)}
+                      helperText={touched.reasons && errors.reasons}
+                    />
+                  </Grid>
                 </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <CustomDatePicker
-                    label="Start Date"
-                    name="startDate"
-                    required
-                    value={values.startDate}
-                    fullWidth
-                    margin="dense"
-                    size="small"
-                    onChange={(value) => setFieldValue('startDate', value)}
-                    onBlur={handleBlur}
-                    error={touched.startDate && Boolean(errors.startDate)}
-                    helperText={touched.startDate && errors.startDate}
-                  />
-                </Grid>
-                <Grid size={{ xs: 6 }}>
-                  <CustomDatePicker
-                    label="End Date"
-                    name="endDate"
-                    required
-                    value={values.endDate}
-                    fullWidth
-                    margin="dense"
-                    size="small"
-                    onChange={(value) => setFieldValue('endDate', value)}
-                    onBlur={handleBlur}
-                    error={touched.endDate && Boolean(errors.endDate)}
-                    helperText={touched.endDate && errors.endDate}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    required
-                    fullWidth
-                    size="small"
-                    label="Reasons"
-                    name="reasons"
-                    multiline
-                    rows={4}
-                    value={values.reasons}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    variant="outlined"
-                    error={touched.reasons && Boolean(errors.reasons)}
-                    helperText={touched.reasons && errors.reasons}
-                  />
-                </Grid>
-              </Grid>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
-                Cancel
-              </ThemeButton>
-              <ThemeButton buttonType="theme" id="dialog-save-button" onClick={submitForm}>
-                Save
-              </ThemeButton>
-            </CustomDialogFooter>
-          </Form>
-        )}
-      </Formik>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
+                  Cancel
+                </ThemeButton>
+                <ThemeButton buttonType="theme" id="dialog-save-button" onClick={submitForm}>
+                  Save
+                </ThemeButton>
+              </CustomDialogFooter>
+            </Form>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 }

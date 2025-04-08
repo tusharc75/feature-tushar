@@ -1,23 +1,24 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton, TextField } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
-import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
-import { displayDateTime, employeeMaster, sidebarResource } from 'src/constants/helpers';
+import { displayDate, displayDateTime, employeeMaster, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
-import Autocomplete from '@mui/material/Autocomplete';
 import AddIcon from '@mui/icons-material/Add';
-import { FiExternalLink } from 'react-icons/fi';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ManageUnavailability from 'src/pages/EmployeeMaster/Unavailability/ManageUnavailability';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_Unavaiability`;
 
-const Unavailability = ({id}) => {
+const Unavailability = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, resources }
@@ -26,7 +27,10 @@ const Unavailability = ({id}) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const [selectedResource, setSelectedResource] = useState(null);
-  const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState(false);
+  const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState({open:false, dataId:null});
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const columns = [
     {
@@ -62,7 +66,7 @@ const Unavailability = ({id}) => {
         <>
           {row?.original?.startDate ? (
             <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
-              {displayDateTime(row?.original?.startDate)}
+              {displayDate(row?.original?.startDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -82,7 +86,7 @@ const Unavailability = ({id}) => {
         <>
           {row?.original?.endDate ? (
             <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
-              {displayDateTime(row?.original?.endDate)}
+              {displayDate(row?.original?.endDate)}
             </h5>
           ) : (
             <NoDataCell />
@@ -111,6 +115,47 @@ const Unavailability = ({id}) => {
         </>
       )
     },
+    {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Details"
+              disabled={false}
+              onClick={() => {
+                setShowUnavailibilityDialog({open:true, dataId: row.original._id});
+              }}
+            >
+              <EditIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Delete">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={false}
+                onClick={() => {
+                  setDeleteRecord(row.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color="error" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    }
   ];
 
   useEffect(() => {
@@ -124,7 +169,6 @@ const Unavailability = ({id}) => {
     axiosInstance()
       .get(`${employeeMaster.api}/unavailability/${id}`)
       .then(({ data: { data, count } }) => {
-        console.log(data)
         dispatch({ type: 'initialize', data: data, count: count });
         dispatch({ type: 'loading', loading: false });
       })
@@ -134,10 +178,42 @@ const Unavailability = ({id}) => {
       });
   };
 
+  const handleDeleteExpenses = async () => {
+    let recordsToDelete = [];
+    recordsToDelete.push(deleteRecord?._id);
+
+    if (recordsToDelete.length > 0) {
+      setDeleteLoading(true);
+      axiosInstance()
+        .put(`${employeeMaster.api}/unavailability/remove`, {
+          ids: recordsToDelete
+        })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          dispatch({ type: 'selection', selectedRecords: [] });
+          setShowDeleteConfirmBox(false);
+          setDeleteLoading(false);
+          if (deleteRecord) setDeleteRecord({});
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setShowDeleteConfirmBox(false);
+          setDeleteLoading(false);
+        });
+    }
+  };
+
   return (
     <Box>
       <Box pt={2}>
-        <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={() => setShowUnavailibilityDialog(true)}>Add</ThemeButton>
+        <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={() => setShowUnavailibilityDialog({open:true, dataId:null})}>
+          Add
+        </ThemeButton>
       </Box>
       {columns ? (
         <CustomReactTable
@@ -154,9 +230,19 @@ const Unavailability = ({id}) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {showUnavailbiltyDialog && (
-        <ManageUnavailability onClose={() => setShowUnavailibilityDialog(false)} onSuccess={() => fetchData()} id={id}/>
-      )}
+      {showUnavailbiltyDialog.open && <ManageUnavailability onClose={() => setShowUnavailibilityDialog({open:false, dataId:null})} onSuccess={() => {fetchData(), setShowUnavailibilityDialog({open:false, dataId:null})}} id={id} dataId={showUnavailbiltyDialog.dataId}/>}
+      {showDeleteConfirmBox ? (
+        <ConfirmationDialogRaw
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          onOk={handleDeleteExpenses}
+          okBtnLoading={deleteLoading}
+        />
+      ) : null}
     </Box>
   );
 };
