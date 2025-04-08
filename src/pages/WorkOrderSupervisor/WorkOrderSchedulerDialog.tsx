@@ -73,18 +73,17 @@ export default function WorkOrderSchedulerDialog({ onClose, onSuccess }) {
 
   const handleSubmit = (values) => {
     setLoading(true);
-    console.log(values)
-    // axiosInstance()
-    //   .post(`${workOrderSupervisor.api}/work-order-scheduler`, values)
-    //   .then(({ data }) => {
-    //     setLoading(false);
-    //     onSuccess();
-    //     toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-    //   })
-    //   .catch((error) => {
-    //     setLoading(false);
-    //     toastConfig.setToastConfig(error);
-    //   });
+    axiosInstance()
+      .post(`${workOrderSupervisor.api}/work-order-scheduler`, values)
+      .then(({ data }) => {
+        setLoading(false);
+        onSuccess();
+        toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
+      })
+      .catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   function validate(values) {
