@@ -738,12 +738,6 @@ const routes = {
   scheduleAndDispatch: {
     path: '/schedule-and-dispatch'
   },
-  disassemblyOrder: {
-    path: '/disassembly-order'
-  },
-  disassemblyOrderDetail: {
-    path: '/disassembly-order/detail'
-  },
   productTypes: {
     path: '/product-types'
   },

@@ -13,7 +13,7 @@ import { CustomDialogTransition, displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handleSucess }) => {
+const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handleSucess, viewType }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'technician_to_service_dialog';
@@ -70,39 +70,6 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
           )
       },
       {
-        accessor: 'serviceName',
-        Header: 'Service Name',
-        width: 250,
-        Cell: ({ row }) =>
-          row.original.serviceName && row.original.serviceId ? (
-            <div className="flex items-center gap-1">
-              <p title={row.original.serviceName}>{row.original.serviceName}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'competencyType',
-        Header: 'Competency Type',
-        width: 250,
-        Cell: ({ row }) => (row.original['competencyType'] ? <p className="text-truncate">{row.original.competencyType}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'competencies',
-        Header: 'Competencies',
-        width: 250,
-        Cell: ({ row }) => (row.original['competencies'] ? <p className="text-truncate">{row.original.competencies}</p> : <NoDataCell />)
-      },
-      {
         accessor: 'customerAccount',
         Header: 'Customer Account',
         width: 250,
@@ -123,6 +90,40 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
             <NoDataCell />
           )
       },
+      ...(viewType === 'service' ? [
+        {
+          accessor: 'serviceName',
+          Header: 'Service Name',
+          width: 250,
+          Cell: ({ row }) =>
+            row.original.serviceName && row.original.serviceId ? (
+              <div className="flex items-center gap-1">
+                <p title={row.original.serviceName}>{row.original.serviceName}</p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'competencyType',
+          Header: 'Competency Type',
+          width: 250,
+          Cell: ({ row }) => (row.original['competencyType'] ? <p className="text-truncate">{row.original.competencyType}</p> : <NoDataCell />)
+        },
+        {
+          accessor: 'competencies',
+          Header: 'Competencies',
+          width: 250,
+          Cell: ({ row }) => (row.original['competencies'] ? <p className="text-truncate">{row.original.competencies}</p> : <NoDataCell />)
+        }] : []),
       {
         accessor: 'estimateStartDate',
         Header: 'Estimate Start Date',
@@ -144,8 +145,11 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+
+    let api = `/technician-scheduler/un-assign-service?type=${selectedResource?.resource}`
+    api += `&serviceWise=${viewType === 'job' ? 0 : 1}`;
     axiosInstance()
-      .get(`/technician-scheduler/un-assign-service?type=${selectedResource?.resource}`)
+      .get(api)
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {

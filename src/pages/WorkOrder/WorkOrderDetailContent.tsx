@@ -75,6 +75,18 @@ type ToolbarButton = {
 
 type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
+export const columns = [
+  { accessor: 'index', Header: 'Index' },
+  { accessor: 'serviceName', Header: 'Service' },
+  { accessor: 'serviceType', Header: 'Service Type' },
+  { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
+  { accessor: 'assignedWorkStation', Header: 'Assigned WorkStation' },
+  { accessor: 'startDate', Header: 'Start Date' },
+  { accessor: 'endDate', Header: 'End Date' },
+  { accessor: 'status', Header: 'Status' },
+  { accessor: 'serviceStatus', Header: 'Result' }
+];
+
 const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, defaultSelectedService = null, setDefaultSelectedService = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -110,18 +122,6 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
-
-  const columns = [
-    { accessor: 'index', Header: 'Index' },
-    { accessor: 'serviceName', Header: 'Service' },
-    { accessor: 'serviceType', Header: 'Service Type' },
-    { accessor: 'assignedTechnician', Header: 'Assigned Technician' },
-    { accessor: 'assignedWorkStation', Header: 'Assigned WorkStation' },
-    { accessor: 'startDate', Header: 'Start Date' },
-    { accessor: 'endDate', Header: 'End Date' },
-    { accessor: 'status', Header: 'Status' },
-    { accessor: 'serviceStatus', Header: 'Result' }
-  ];
 
   useEffect(() => {
     return history.listen((location) => {

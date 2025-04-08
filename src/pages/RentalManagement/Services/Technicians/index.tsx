@@ -466,7 +466,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       </Box>
       {technicianDialog && (
         <AssignEmployeeDialog
-          reference={'fieldTicket'}
           onSuccess={(data) => {
             handleAssign(data);
           }}
