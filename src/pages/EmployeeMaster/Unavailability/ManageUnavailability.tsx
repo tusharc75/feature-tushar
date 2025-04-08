@@ -41,23 +41,17 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
 
     try {
       if (dataId) {
-        const response = await axiosInstance().get(`${routes?.employeeMaster?.path}/unavailability/${dataId}`);
+        const response = await axiosInstance().get(`${routes?.employeeMaster?.path}/unavailability/update/${dataId}`);
         const { data: fetchedData } = response.data;
 
-        if (Array.isArray(fetchedData) && fetchedData.length) {
-          const record = fetchedData[0];
+        const editData = {
+          title: fetchedData.title || '',
+          reasons: fetchedData.reasons || '',
+          startDate: fetchedData.startDate ? new Date(fetchedData.startDate) : new Date(),
+          endDate: fetchedData.endDate ? new Date(fetchedData.endDate) : new Date()
+        };
 
-          const editData = {
-            title: record.title || '',
-            reasons: record.reasons || '',
-            startDate: record.startDate ? new Date(record.startDate) : new Date(),
-            endDate: record.endDate ? new Date(record.endDate) : new Date()
-          };
-
-          setInitialData(editData);
-        } else {
-          setInitialData(initialValues);
-        }
+        setInitialData(editData);
       } else {
         setInitialData(initialValues);
       }
