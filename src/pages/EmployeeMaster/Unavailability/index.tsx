@@ -21,12 +21,10 @@ const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_Unavaiability
 const Unavailability = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, resources }
+    state: { permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
-  const [selectedResource, setSelectedResource] = useState(null);
   const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState({ open: false, dataId: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -166,7 +164,7 @@ const Unavailability = ({ id }) => {
     if (id) {
       fetchData();
     }
-  }, [id, selectedResource, page, limit, filters, sorting, showFilteredRecordsOnly]);
+  }, [id]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
