@@ -3,6 +3,7 @@ import { CircularProgress, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AudioPlayer from 'src/components/DesktopDM/Audio/AudioPlayer';
 import Recorder from 'src/components/DesktopDM/Audio/Recorder';
 import { RecordedData } from 'src/components/DesktopDM/Audio/RecorderClass';
@@ -14,6 +15,7 @@ import { RenderContent } from 'src/components/DesktopDM/ShowMessage/helperCompon
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import { fileUrlCache } from 'src/components/DesktopDM/utils';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { cn } from 'src/constants/helpers';
 
 type SendMessageProps = {
   state: UseDesktopDM;
@@ -23,7 +25,7 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
-const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => { } }: SendMessageProps) => {
+const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => {} }: SendMessageProps) => {
   const { toastConfig, onUserFirstMessageSent, checkIsUser, user, currentlyEditingMessage, socket } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
@@ -118,7 +120,16 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
   }, []);
 
   return (
-    <div className="remove-tiny-mce-toolbar-top-border relative border-t  p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
+    <div
+      className={cn(
+        'remove-tiny-mce-toolbar-top-border relative border-t  p-3',
+        '[--toolbar-width:45px] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-editor-header]:[transform:_translateY(4px)]',
+        '[&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid]',
+        '[&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none',
+        '[&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none',
+        '[&_.tox-editor-header_button]:rounded-full'
+      )}
+    >
       {audioBlobs.length > 0 && (
         <div className="mb-2 max-h-[200px] space-y-1 overflow-y-auto">
           {audioBlobs.map((a) => (
@@ -191,55 +202,69 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
         <Recorder onRecordFinish={onRecordingFinish} />
         {currentlyEditingMessage ? (
           <>
-            <IconButton disabled={loading} className="!ml-auto !flex" size="small" onClick={() => state.setCurrentlyEditingMessage(null)}>
-              <Close />
-            </IconButton>
-            <IconButton
-              size="small"
-              disabled={
+            <HtmlTooltip title={'Cancel'} className="!ml-auto !flex">
+              <IconButton disabled={loading} size="small" onClick={() => state.setCurrentlyEditingMessage(null)}>
+                <Close />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
                 (message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading || message === currentlyEditingMessage?.message
+                  ? ''
+                  : 'Update Message'
               }
-              onClick={postMessage}
-              sx={{
-                background: 'var(--new-theme-color)',
-                color: 'white',
-                borderRadius: '8px',
-                '&:hover': {
-                  background: 'var(--new-theme-color-hover)'
-                },
-                '&:disabled': {
+            >
+              <IconButton
+                size="small"
+                disabled={
+                  (message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading || message === currentlyEditingMessage?.message
+                }
+                onClick={postMessage}
+                sx={{
                   background: 'var(--new-theme-color)',
                   color: 'white',
-                  opacity: 0.7
-                }
-              }}
-            >
-              {loading ? <CircularProgress size={20} color="inherit" /> : <Check fontSize="small" />}
-            </IconButton>
+                  borderRadius: '8px',
+                  '&:hover': {
+                    background: 'var(--new-theme-color-hover)'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white',
+                    opacity: 0.7
+                  }
+                }}
+              >
+                {loading ? <CircularProgress size={20} color="inherit" /> : <Check fontSize="small" />}
+              </IconButton>
+            </HtmlTooltip>
           </>
         ) : (
           <>
-            <IconButton
+            <HtmlTooltip
               className="!ml-auto !flex"
-              size="small"
-              disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading}
-              onClick={postMessage}
-              sx={{
-                background: 'var(--new-theme-color)',
-                color: 'white',
-                borderRadius: '8px',
-                '&:hover': {
-                  background: 'var(--new-theme-color-hover)'
-                },
-                '&:disabled': {
+              title={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading ? '' : 'Send Message'}
+            >
+              <IconButton
+                size="small"
+                disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading}
+                onClick={postMessage}
+                sx={{
                   background: 'var(--new-theme-color)',
                   color: 'white',
-                  opacity: 0.7
-                }
-              }}
-            >
-              {loading ? <CircularProgress size={20} color="inherit" /> : <Send fontSize="small" />}
-            </IconButton>
+                  borderRadius: '8px',
+                  '&:hover': {
+                    background: 'var(--new-theme-color-hover)'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white',
+                    opacity: 0.7
+                  }
+                }}
+              >
+                {loading ? <CircularProgress size={20} color="inherit" /> : <Send fontSize="small" />}
+              </IconButton>
+            </HtmlTooltip>
           </>
         )}
       </div>

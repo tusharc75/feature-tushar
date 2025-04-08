@@ -9,6 +9,9 @@ import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import { FiExternalLink } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 
 type SidebarProps = {
   activity: TActivity[];
@@ -106,8 +109,17 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
           <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
             <AccountCircle style={{ fontSize: 28 }} />
           </Avatar>
-          <div className="">
-            <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
+          <div>
+            <div className="flex items-center gap-1">
+              <Typography
+                title={`${data?.firstName} ${data?.lastName}`}
+                style={{ fontWeight: 'bolder', fontSize: '1rem' }}
+                className="line-clamp-1"
+              >{`${data?.firstName} ${data?.lastName}`}</Typography>
+              <Link className="flex-shrink-0" to={`${routes.planningView.path}?technician=${data._id}`} target={'_blank'}>
+                <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+              </Link>
+            </div>
             <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
               {`${data?.competencyType?.optionLabel || ''}`}
             </p>
