@@ -17,6 +17,7 @@ type TechnicianListProps = {
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
   isMobile: boolean;
+  viewType: string;
   setOpenTechnicianDialog: React.Dispatch<React.SetStateAction<any>>;
 };
 
@@ -27,6 +28,7 @@ const TechnicianList = ({
   selectedResource,
   container,
   isMobile,
+  viewType,
   setOpenTechnicianDialog
 }: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
@@ -78,6 +80,7 @@ const TechnicianList = ({
                 isMobile={isMobile}
                 selectedType={selectedResource?.key}
                 setOpenTechnicianDialog={setOpenTechnicianDialog}
+                viewType={viewType}
               />
             </div>
           )}
@@ -108,7 +111,7 @@ const RowSkeleton = ({ isMobile }) => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog }: any) => {
+export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
   const rowRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,
@@ -184,9 +187,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
             <NoDataCell />
           )
       },
-      {
+      ...(viewType === 'service' ? [{
         id: 'serviceName',
-        head: 'Service Name',
+        head: 'Service',
         cell:
           row.serviceName && row.serviceId ? (
             <div className="flex items-center">
@@ -205,7 +208,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
           ) : (
             <NoDataCell />
           )
-      },
+      }] : []),
       {
         id: 'estimateStartDate',
         head: 'Estimate Start Date',

@@ -3,13 +3,14 @@ import { memo, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { cn, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { cn, rentalManagement } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { isArray, isObject } from 'lodash';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -20,6 +21,7 @@ type ServiceOrderSidebarProps = {
   setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
   isMobile: boolean;
   refreshServiceData: boolean;
+  viewType: string;
 };
 type DialogData = {
   open: boolean;
@@ -36,7 +38,8 @@ const ServiceOrderSidebarImpl = ({
   setSelectedRecords,
   isMobile,
   unAssignTechnicianDialog,
-  refreshServiceData
+  refreshServiceData,
+  viewType
 }: ServiceOrderSidebarProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -49,36 +52,35 @@ const ServiceOrderSidebarImpl = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `/technician-scheduler/un-assign-service?type=${selectedResource.resource}`;
+    api += `&serviceWise=${viewType === 'job' ? 0 : 1}`;
     if (search) {
       api += `&search=${encodeURIComponent(search)}`;
     }
-    axiosInstance()
-      .get(api, { cancelToken })
-      .then(({ data: { data } }) => {
-        const rows: any = [];
-        data?.forEach((ele, index) => {
-          const obj: any = { ...ele };
-          obj.index = index + 1;
-          obj._id = ele?.service?.uniqueId || ele._id;
-          obj.resourceId = ele._id;
-          obj.warehouse = ele?.warehouse?.optionValue;
-          obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
-          obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
-          obj.serviceName = ele?.service?.serviceName;
-          obj.serviceId = ele?.service?._id;
-          obj.competencyType = ele?.service?.competencyType?.optionLabel;
-          obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
-          obj.service = ele?.service;
-          obj.customerAccount = ele?.customerAccount?.optionLabel;
-          obj.customerAccountId = ele?.customerAccount?.optionValue;
-          obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
-          obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
-          obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
-          rows.push(obj);
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
+    axiosInstance().get(api, { cancelToken }).then(({ data: { data } }) => {
+      const rows: any = [];
+      data?.forEach((ele, index) => {
+        const obj: any = { ...ele };
+        obj.index = index + 1;
+        obj._id = ele?.service?.uniqueId || ele._id;
+        obj.resourceId = ele._id;
+        obj.warehouse = ele?.warehouse?.optionValue;
+        obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
+        obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
+        obj.serviceName = ele?.service?.serviceName;
+        obj.serviceId = ele?.service?._id;
+        obj.competencyType = ele?.service?.competencyType?.optionLabel;
+        obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
+        obj.service = ele?.service;
+        obj.customerAccount = ele?.customerAccount?.optionLabel;
+        obj.customerAccountId = ele?.customerAccount?.optionValue;
+        obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
+        obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
+        obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
+        rows.push(obj);
+      });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -136,7 +138,7 @@ const ServiceOrderSidebarImpl = ({
       cancelToken.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedResource, refreshServiceData, leftSearchValue]);
+  }, [selectedResource, refreshServiceData, leftSearchValue, viewType]);
 
   return (
     <>
@@ -153,6 +155,7 @@ const ServiceOrderSidebarImpl = ({
           dispatch={dispatch}
           setSelectedRecords={setSelectedRecords}
           state={state}
+          viewType={viewType}
           setOpenTechnicianDialog={setOpenTechnicianDialog}
         />
       </div>
@@ -172,14 +175,15 @@ const ServiceOrderSidebarImpl = ({
       )}
       {openTechnicianDialog.open && (
         <AssignEmployeeDialog
-          reference={selectedResource.key}
           onSuccess={(data) => {
             handleAssign(data, openTechnicianDialog.data);
           }}
           handleClose={() => {
             setOpenTechnicianDialog({ open: false, data: null });
           }}
-          defaultCompetency={openTechnicianDialog?.data?.service?.competencyType ? [openTechnicianDialog?.data?.service?.competencyType] : []}
+          defaultCompetencyType={openTechnicianDialog?.data?.service?.competencyType ?
+            isObject(openTechnicianDialog?.data?.service?.competencyType) ? [openTechnicianDialog?.data?.service?.competencyType] :
+              isArray(openTechnicianDialog?.data?.service?.competencyType) ? openTechnicianDialog?.data?.service?.competencyType : [] : []}
           warehouse={openTechnicianDialog.data?.warehouse}
           ids={[]}
           isSubmitting={isSubmitting}

@@ -5,7 +5,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 import Channels from 'src/pages/WorkSpace/Sidebar/Channels';
-import Chats from 'src/pages/WorkSpace/Sidebar/Chats';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
 const Sidebar = ({ state }: { state: UseWorkSpace }) => {
@@ -37,7 +36,6 @@ const Sidebar = ({ state }: { state: UseWorkSpace }) => {
           </HtmlTooltip>
         </div>
         <Channels state={state} />
-        <Chats state={state} />
       </div>
     </>
   );

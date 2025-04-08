@@ -30,13 +30,11 @@ const History = ({ id }) => {
         const to =
           row?.original?.type === sidebarResource?.assemblyOrder
             ? routes.assemblyOrderDetail.path
-            : row?.original?.type === sidebarResource?.disassemblyOrder
-              ? routes?.disassemblyOrderDetail?.path
-              : row?.original?.type === sidebarResource?.serializedPackages
-                ? routes?.serializedPackagesDetail.path
-                : row?.original?.type === sidebarResource?.rentalManagement
-                  ? routes?.rentalManagementDetail?.path
-                  : null;
+            : row?.original?.type === sidebarResource?.serializedPackages
+              ? routes?.serializedPackagesDetail.path
+              : row?.original?.type === sidebarResource?.rentalManagement
+                ? routes?.rentalManagementDetail?.path
+                : null;
         return (
           <div>
             {row.original.reference ? (

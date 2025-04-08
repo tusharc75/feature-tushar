@@ -4,7 +4,15 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
+  MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
+  fieldServiceOrder,
+  getObjKeysWithValues,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -26,9 +34,17 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 
-const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
-
+const Consumables = ({
+  allowedToEdit,
+  serviceOrderData,
+  stepFullScreen,
+  fetchData: fetchserviceOrderData,
+  technicians,
+  refreshChild,
+  fetchConsumablesData
+}) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -42,12 +58,13 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [selectedTechnician, setSelectedTechnician] = useState<any>({ technicianName: 'All', technicianId: 'All' });
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -208,7 +225,6 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       }
       const response = await axiosInstance().get(api);
       consumables = response?.data?.data?.material;
-
       consumables?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.productName = parent?.productDetail?.productName;
@@ -216,7 +232,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
         parent.technician = parent?.technician?.optionLabel || '';
-        parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
+        parent.canDelete = parent?.status ? parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved : true;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -226,7 +242,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     }
   };
 
-  const handleSubmit = async (rows) => {
+  const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
     const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
@@ -234,31 +250,39 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = MATERIAL_TYPE.product;
-      element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
-      element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      Object.assign(element, calValues);
-      if (taxCodeData) {
-        element.taxCode = taxCodeData?.optionValue;
-        element.taxPercentage = taxCodeData?.taxRate || 0;
-      }
-      material.push(element);
-    });
-    if (serviceOrderData?.pricingCondition?.optionValue) {
-      const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
-      AddMaterial(material, priceData);
-    } else {
+    if (addQuotationDataDialog) {
+      rows?.forEach((e: any) => {
+        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+        material.push(element);
+      });
       AddMaterial(material, null);
     }
-
+    else {
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;
+        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
+        element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        Object.assign(element, calValues);
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        material.push(element);
+      });
+      if (serviceOrderData?.pricingCondition?.optionValue) {
+        const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+        AddMaterial(material, priceData);
+      } else {
+        AddMaterial(material, null);
+      }
+    }
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -276,21 +300,25 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         }
       });
     }
-    axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setConsumablesDialog(false);
+        setAddQuotationDataDialog(false)
+        fetchData();
+        fetchserviceOrderData();
+        fetchConsumablesData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
       });
-      setConsumablesDialog(false);
-      fetchData();
-      fetchserviceOrderData();
-      fetchConsumablesData();
-      setSubmitting(false);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setSubmitting(false);
-    });
   };
 
   const handleDelete = async (rows) => {
@@ -364,6 +392,30 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     setIsBulkEdit(false);
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setConsumablesDialog(true);
+          }}
+          id={'add-existing-products-menu-item'}
+        >
+          Add Products/Consumables
+        </MenuItem>
+        {serviceOrderData?.quotation?.optionValue && serviceOrderData?.quotationVersion?.optionValue && (
+          <MenuItem
+            onClick={() => {
+              setAddQuotationDataDialog(true);
+            }}
+          >
+            {`Add Products/Consumables From ${resources?.quotation?.titleSingular}`}
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -376,7 +428,6 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         >
           Bulk Edit
         </MenuItem>
-
         <MenuItem
           disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
           onClick={() => {
@@ -421,11 +472,15 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       </Box>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         <Box mb={1}>
-          <Typography variant='subtitle2'>Products/Consumables</Typography>
+          <Typography variant="subtitle2">Products/Consumables</Typography>
         </Box>
         <DetailsPageHeader
-          isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
-          addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+          isAddButtonVisible={
+            isEmpty(selectedTechnician) ||
+            selectedTechnician?.technicianId === 'All' ||
+            selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved
+          }
+          addButtonMenuItems={<AddButtonMenuItems />}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
@@ -459,7 +514,7 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           handleCloseDialog={() => setConsumablesDialog(false)}
           ids={dataRows?.map((d) => d?.materialId)}
           onSuccess={(rows) => {
-            handleSubmit(rows);
+            handleAdd(rows);
           }}
           serialized={false}
           isSubmitting={isSubmitting}
@@ -492,6 +547,19 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {addQuotationDataDialog && (
+        <AddQuotationDataDialog
+          onClose={() => {
+            setAddQuotationDataDialog(false);
+          }}
+          onSuccess={(rows) => {
+            handleAdd(rows);
+          }}
+          referenceData={serviceOrderData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.product}
         />
       )}
     </>

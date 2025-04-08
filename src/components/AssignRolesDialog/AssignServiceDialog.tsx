@@ -1,4 +1,4 @@
-import { Box, Dialog, IconButton, Menu, Popover } from '@mui/material';
+import { Autocomplete, Box, Dialog, IconButton, Menu, Popover, TextField } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -53,6 +53,9 @@ const AssignServiceDialog = ({
   const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null });
   const { isOffline } = useContext(CustomOfflineContext);
 
+  const [serviceCategoryList, setServiceCategoryList] = useState([]);
+  const [serviceCategory, setServiceCategory] = useState(null);
+
   const defaultColumns = [
     {
       accessor: 'qty',
@@ -73,10 +76,22 @@ const AssignServiceDialog = ({
   }, [tabValue]);
 
   useEffect(() => {
+    if (permissions?.serviceCategory?.isRead) {
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.serviceCategory}`)
+        .then(({ data: { data: lookupResource } }) => {
+          setServiceCategoryList(lookupResource[sidebarResource.serviceCategory] || []);
+        })
+        .catch((err) => toastConfig.setToastConfig(err));
+    }
+  }, []);
+
+
+  useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue, serviceCategory]);
 
   const fetchGridColumns = async () => {
     try {
@@ -220,6 +235,9 @@ const AssignServiceDialog = ({
         updatedFilterByIds.push(e);
       });
     }
+    if (serviceCategory) {
+      updatedFilterByIds.push({ field: "serviceCategory", term: { $in: [serviceCategory] } })
+    }
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
@@ -308,6 +326,16 @@ const AssignServiceDialog = ({
           }}
           isAddButtonVisible={true}
           setQueryString={false}
+          leftSideContents={
+            permissions?.serviceCategory?.isRead ? <LeftSideContent
+              {...{
+                serviceCategoryList,
+                serviceCategory,
+                setServiceCategory,
+                resources
+              }}
+            /> : null
+          }
         />
         {pricingCondition && !isOffline && (
           <Box>
@@ -387,6 +415,43 @@ const AssignServiceDialog = ({
         </div>
       </Popover>
     </Dialog>
+  );
+};
+
+const LeftSideContent = ({
+  serviceCategoryList,
+  serviceCategory,
+  setServiceCategory,
+  resources
+}) => {
+  return (
+    <div className="w-full md:w-auto">
+      <Autocomplete
+        className="flex-grow sm:max-w-[250px] md:min-w-[250px] md:flex-grow-0"
+        options={serviceCategoryList}
+        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+        size="small"
+        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+        value={
+          serviceCategoryList.filter((data) => data.optionValue === serviceCategory).length
+            ? serviceCategoryList.filter((data) => data.optionValue === serviceCategory)[0]
+            : ''
+        }
+        onChange={(e, val) => {
+          setServiceCategory(val && val.optionValue ? val.optionValue : '');
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            margin="none"
+            size="small"
+            name="serviceCategory"
+            label={resources?.serviceCategory?.titleSingular}
+            variant="outlined"
+            fullWidth />
+        )}
+      />
+    </div>
   );
 };
 
