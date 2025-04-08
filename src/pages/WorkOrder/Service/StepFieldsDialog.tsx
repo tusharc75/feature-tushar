@@ -1,6 +1,5 @@
 import { Box, Dialog, IconButton, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Theme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import { Form, Formik } from 'formik';
 import React, { useContext, useEffect } from 'react';
@@ -132,16 +131,16 @@ const StepFieldsDialog = ({
 
   const steps = selectedService?.steps || [];
 
-  const [saveAndComplete, setSaveAndComplete] = React.useState({ saveAndComplete: false, saveAndNextAndComplete: false });
+  const [saveAndComplete, setSaveAndComplete] = React.useState({ status: null, nextStep: false });
 
   const RenderStepData = () => {
     const [time, setTime] = React.useState(
       user?.brandPolicy?.workOrderTimer
         ? convertMsToTime(
-            stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
-              ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
-              : stepData?.duration || 0
-          )
+          stepData?.status === WORKORDER_SERVICE_STEP_STATUS.start
+            ? (stepData?.duration || 0) + (new Date().getTime() - new Date(stepData?.pauseDate || stepData?.startDate).getTime())
+            : stepData?.duration || 0
+        )
         : 0
     );
 
@@ -276,8 +275,8 @@ const StepFieldsDialog = ({
   };
 
   const handleSubmitData = async (values) => {
-    if (saveAndComplete.saveAndComplete || saveAndComplete.saveAndNextAndComplete) {
-      handleSubmit(values, step, saveAndComplete.saveAndComplete, saveAndComplete.saveAndNextAndComplete);
+    if (saveAndComplete.status || saveAndComplete.nextStep) {
+      handleSubmit(values, step, saveAndComplete.status, saveAndComplete.nextStep);
     } else {
       handleSubmit(values, step);
     }
@@ -464,17 +463,30 @@ const StepFieldsDialog = ({
                         <ThemeButton buttonType="transparent" onClick={handleClose}>
                           Cancel
                         </ThemeButton>
+                        {fieldData?.fields?.find((e) => e?.required) ? null : <>
+                          <Box ml={1} />
+                          <ThemeButton
+                            disabled={isSubmitting}
+                            isLoading={isSubmitting}
+                            buttonType="theme"
+                            onClick={() => {
+                              setSaveAndComplete({ status: WORKORDER_SERVICE_STEP_STATUS.skipped, nextStep: false });
+                              submitForm();
+                            }}
+                          >
+                            Skip
+                          </ThemeButton>
+                        </>}
                         <Box ml={1} />
                         <ThemeButton
                           disabled={isSubmitting}
                           isLoading={isSubmitting}
                           buttonType="theme"
                           onClick={() => {
-                            setSaveAndComplete({ saveAndComplete: false, saveAndNextAndComplete: false });
+                            setSaveAndComplete({ status: null, nextStep: false });
                             submitForm();
                           }}
                         >
-                          {' '}
                           Save
                         </ThemeButton>
                         {!step?.isPassFail && (
@@ -485,11 +497,10 @@ const StepFieldsDialog = ({
                               isLoading={isSubmitting}
                               buttonType="theme"
                               onClick={() => {
-                                setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: false });
+                                setSaveAndComplete({ status: WORKORDER_SERVICE_STEP_STATUS.completed, nextStep: false });
                                 submitForm();
                               }}
                             >
-                              {' '}
                               Complete
                             </ThemeButton>
                             {nextStep && (
@@ -500,11 +511,10 @@ const StepFieldsDialog = ({
                                   isLoading={isSubmitting}
                                   buttonType="theme"
                                   onClick={() => {
-                                    setSaveAndComplete({ saveAndComplete: true, saveAndNextAndComplete: true });
+                                    setSaveAndComplete({ status: WORKORDER_SERVICE_STEP_STATUS.completed, nextStep: true });
                                     submitForm();
                                   }}
                                 >
-                                  {' '}
                                   Complete & Next
                                 </ThemeButton>
                               </>
