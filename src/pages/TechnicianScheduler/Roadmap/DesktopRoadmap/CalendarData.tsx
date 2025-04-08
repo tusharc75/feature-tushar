@@ -9,7 +9,7 @@ import { useDroppable } from '@dnd-kit/core';
 
 type CalnedarDataProps = {
   activity: TActivity[];
-  selected: string | null;
+  selected: string[] | [];
   handleSelect: HandleSelect;
   startDate: dayjs.Dayjs;
   dayPixel: number;

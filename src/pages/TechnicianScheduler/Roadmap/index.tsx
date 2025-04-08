@@ -11,7 +11,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
-export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
+export type HandleSelect = (event: React.SyntheticEvent, data: TActivity | string[], type: 'technician' | 'map' | '') => void;
 
 function Roadmap({
   filter,
@@ -29,7 +29,7 @@ function Roadmap({
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const [selected, setSelected] = React.useState<string[] | []>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 
@@ -51,7 +51,7 @@ function Roadmap({
 
   const handleSelect = (event, data, type) => {
     if (type === 'map') {
-      setSelected(data?._id);
+      setSelected(data);
     } else if (type === 'assign') {
       setAssignServiceDialog({ open: true, data: data });
     } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
