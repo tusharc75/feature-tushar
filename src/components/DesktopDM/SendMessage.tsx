@@ -23,7 +23,7 @@ type SendMessageProps = {
   onNewMessagePost?: (messageId: string) => void;
 };
 
-const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => {} }: SendMessageProps) => {
+const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => { } }: SendMessageProps) => {
   const { toastConfig, onUserFirstMessageSent, checkIsUser, user, currentlyEditingMessage, socket } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);

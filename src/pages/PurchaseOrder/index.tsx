@@ -1,4 +1,4 @@
-import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import { Box, Button, Chip, MenuItem, TextField } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -348,7 +348,9 @@ const PurchaseOrder = () => {
                 referenceType,
                 updateQueryParams,
                 fromSalesOrder,
-                setFromSalesOrder
+                setFromSalesOrder,
+                permissions,
+                history
               }}
             />
           }
@@ -425,10 +427,27 @@ const LeftSideContents = ({
   referenceType,
   updateQueryParams,
   fromSalesOrder,
-  setFromSalesOrder
+  setFromSalesOrder,
+  permissions,
+  history
 }) => {
   return (
     <>
+      {permissions?.planningView?.isRead && (
+        <Button
+          className={'toggleButton-v1'}
+          onClick={() => {
+            history.push({
+              pathname: routes.planningView.path,
+              state: {
+                resource: sidebarResource?.purchaseOrder
+              }
+            });
+          }}
+        >
+          <span>{`Calendar`}</span>
+        </Button>
+      )}
       <Autocomplete
         style={{ minWidth: '200px', flexGrow: 1 }}
         className="md:max-w-[250px]"

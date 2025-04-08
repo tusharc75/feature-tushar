@@ -1,4 +1,4 @@
-import { Box, MenuItem } from '@mui/material';
+import { Box, Button, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -389,9 +389,8 @@ const Product = () => {
               },
               {
                 title: 'Service/Consumable Export',
-                api: `${product.api}/unknown/service-master/template?export=true${
-                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+                api: `${product.api}/unknown/service-master/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -406,9 +405,8 @@ const Product = () => {
               },
               {
                 title: 'Service Package Export',
-                api: `${product.api}/unknown/package/template?export=true${
-                  selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
-                }`,
+                api: `${product.api}/unknown/package/template?export=true${selectedRecords.length ? `&ids=${selectedRecords.map((obj) => obj._id)}` : ''
+                  }`,
                 type: 'export'
               },
               {
@@ -436,7 +434,8 @@ const Product = () => {
                 isProductType,
                 productTypeList,
                 productType,
-                setProductType
+                setProductType,
+                history
               }}
             />
           }
@@ -523,10 +522,26 @@ const LeftSideContent = ({
   isProductType,
   productTypeList,
   productType,
-  setProductType
+  setProductType,
+  history
 }) => {
   return (
     <>
+      {permissions?.planningView?.isRead && (
+        <Button
+          className={'toggleButton-v1'}
+          onClick={() => {
+            history.push({
+              pathname: routes.planningView.path,
+              state: {
+                resource: sidebarResource?.product
+              }
+            });
+          }}
+        >
+          <span>{`Calendar`}</span>
+        </Button>
+      )}
       {permissions?.productCategory?.isRead ? (
         <div className="w-full md:w-auto">
           <Autocomplete
