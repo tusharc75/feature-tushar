@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
-import * as Yup from 'yup';
+import { object, string, date, ref } from 'yup';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -15,11 +15,11 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const validationSchema = Yup.object({
-  title: Yup.string().required('Title is required'),
-  startDate: Yup.date().required('Start Date is required'),
-  endDate: Yup.date().required('End Date is required').min(Yup.ref('startDate'), 'End Date must be after Start Date'),
-  reasons: Yup.string().required('Reasons are required')
+const validationSchema = object().shape({
+  title: string().required('Title is required'),
+  startDate: date().required('Start Date is required'),
+  endDate: date().required('End Date is required').min(ref('startDate'), 'End Date must be after Start Date'),
+  reasons: string().required('Reasons are required')
 });
 
 function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
