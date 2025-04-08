@@ -23,6 +23,8 @@ import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDeta
 import Integration from 'src/pages/Integration';
 import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
+import ServiceCategory from 'src/pages/ServiceCategory';
+import ServiceCategoryDetail from 'src/pages/ServiceCategory/ServiceCategoryDetail';
 import PackageInventory from 'src/pages/PackageInventory';
 import ProductTypes from 'src/pages/ProductTypes';
 import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
@@ -288,7 +290,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
-import { useStore } from 'src/StateProvider/fastContext';
+
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
@@ -344,7 +346,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1243,6 +1245,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
               <PackageCategoryDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceCategory.path}`}>
+              <ServiceCategory />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceCategoryDetail.path}/:id`}>
+              <ServiceCategoryDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />

@@ -15,6 +15,7 @@ export const GRID_METADATA = 'gridMetaData';
 export const USER_FAVOURITES = 'userFavorites';
 export const TEMP_USER_FILTER = 'tempUserFilter';
 export const ONLINE_USERS = 'onlineUsers';
+export const HANDLE_OPEN_CHAT = 'handleOpenChat';
 
 const initialState: {
   searchQuery: string;
@@ -31,6 +32,7 @@ const initialState: {
   userFavorites: { [key: string]: boolean } | null;
   tempUserFilter: { [key: string]: any };
   onlineUsers: string[];
+  [HANDLE_OPEN_CHAT]: () => void;
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -45,7 +47,8 @@ const initialState: {
   gridMetaData: {},
   userFavorites: null,
   tempUserFilter: {},
-  onlineUsers: []
+  onlineUsers: [],
+  [HANDLE_OPEN_CHAT]: () => {}
 };
 
 const { Provider, useStore } = createFastContext(initialState);

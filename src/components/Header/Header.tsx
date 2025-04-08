@@ -344,7 +344,6 @@ const Header = () => {
 
       {/* Remove below false to show chat notification icon */}
 
-      <ChatNotification />
       <Notification />
       <MenuItem onClick={openHelperModal}>
         <HelpOutlineIcon />
