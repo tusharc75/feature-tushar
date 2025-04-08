@@ -57,56 +57,43 @@ const useUIDesktopDm = () => {
   const [uiState, setUiState] = useState<UIState>(initialState);
   const isMobile = useMediaQuery('(max-width:768px)');
 
-  const handleChatOpen = useCallback(
-    (id: string, type: OpenedChat['type']) => {
-      const chatBoxOpenedState: OpenedChat = uiState.openedChats.find((d) => d.id === id);
-
-      if (uiState.openedChats.length === 0) {
-        setUiState((prev) => ({ ...prev, openedChats: [{ id, open: 'fullyOpen', type }] }));
+  const handleChatOpen = useCallback((id: string, type: OpenedChat['type']) => {
+    setUiState((prev) => {
+      const chatBoxOpenedState: OpenedChat = prev.openedChats.find((d) => d.id === id);
+      if (prev.openedChats.length === 0) {
+        return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
       } else if (chatBoxOpenedState) {
-        setUiState((prev) => {
-          const newPayload: UIState = { ...prev };
-          newPayload.openedChats = prev.openedChats.map((d) => {
-            if (d.id === id) {
-              return { ...d, open: 'fullyOpen' };
-            }
-            return { ...d, open: 'partial' };
-          });
-          return newPayload;
+        const newPayload: UIState = { ...prev };
+        newPayload.openedChats = prev.openedChats.map((d) => {
+          if (d.id === id) {
+            return { ...d, open: 'fullyOpen' };
+          }
+          return { ...d, open: 'partial' };
         });
-        return;
+        return newPayload;
       } else {
-        const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(uiState.openedChats);
+        const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(prev.openedChats);
         if (canAddNewChatWithoutChangingState) {
-          setUiState((prev) => {
-            const newPayload: UIState = { ...prev };
-            newPayload.openedChats = [...prev.openedChats, { id, open: 'fullyOpen', type }];
-            return newPayload;
-          });
-          return;
-        }
-        const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(uiState.openedChats.map((d) => ({ ...d, open: 'partial' })));
-        if (canAddNewChatIfChatsArePartiallyOpen) {
-          setUiState((prev) => {
-            const newPayload: UIState = { ...prev };
-            const prevOpenedChats = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
-            newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
-            return newPayload;
-          });
-          return;
-        }
-        // Remove oldest chat from list and make rest of the chats partial
-        setUiState((prev) => {
           const newPayload: UIState = { ...prev };
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const [_first, ...prevOpenedChats] = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
+          newPayload.openedChats = [...prev.openedChats, { id, open: 'fullyOpen', type }];
+          return newPayload;
+        }
+        const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(prev.openedChats.map((d) => ({ ...d, open: 'partial' })));
+        if (canAddNewChatIfChatsArePartiallyOpen) {
+          const newPayload: UIState = { ...prev };
+          const prevOpenedChats = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
           newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
           return newPayload;
-        });
+        }
+        // Remove oldest chat from list and make rest of the chats partial
+        const newPayload: UIState = { ...prev };
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_first, ...prevOpenedChats] = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
+        newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
+        return newPayload;
       }
-    },
-    [uiState.openedChats]
-  );
+    });
+  }, []);
 
   const handleToggleChatWindow = useCallback(
     (id: string) => {

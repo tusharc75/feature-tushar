@@ -1,13 +1,13 @@
 import { Close } from '@mui/icons-material';
 import { IconButton, Skeleton } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { DEFAULT_IMAGE_VISIBLE_COUNT } from 'src/components/DesktopDM/constants';
 import { RenderFileProps, RenderSingleFileProps } from 'src/components/DesktopDM/File/FilePreview';
 import ImageSlider from 'src/components/DesktopDM/File/ImageSlider';
 import { useResolveFileUrl } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 
-const RenderImages = ({ hasToDownload, files, ...rest }: RenderFileProps) => {
+const RenderImages = memo(({ hasToDownload, files, ...rest }: RenderFileProps) => {
   const [imageSliderData, setImageSliderData] = useState({ open: false, index: 0 });
   const moreImageCount = useMemo(() => {
     if (files.length > DEFAULT_IMAGE_VISIBLE_COUNT) {
@@ -46,7 +46,7 @@ const RenderImages = ({ hasToDownload, files, ...rest }: RenderFileProps) => {
       )}
     </div>
   );
-};
+});
 
 export default RenderImages;
 

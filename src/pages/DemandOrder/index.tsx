@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -26,6 +26,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { useHistory } from 'react-router-dom';
 
 const DemandOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.demandOrder);
@@ -57,6 +58,7 @@ const DemandOrder = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();
@@ -229,6 +231,29 @@ const DemandOrder = () => {
     );
   };
 
+
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.demandOrder
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -265,6 +290,7 @@ const DemandOrder = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={true}
+          leftSideContents={<LeftSideButtons />}
         />
         {columns ? (
           <CustomReactTable

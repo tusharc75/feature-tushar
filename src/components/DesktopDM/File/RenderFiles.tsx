@@ -1,11 +1,11 @@
 import { Delete, Download, MoreVert } from '@mui/icons-material';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { RenderFileProps } from 'src/components/DesktopDM/File/FilePreview';
 import { handleDownload } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 
-const RenderFiles = ({ files, hasToDownload, onDelete, showDownloadButton }: RenderFileProps) => {
+const RenderFiles = memo(({ files, hasToDownload, onDelete, showDownloadButton }: RenderFileProps) => {
   const [optionMenuAnchor, setOptionMenuAnchor] = useState<HTMLButtonElement | null>(null);
   const isBothButtonVisible = useMemo(() => showDownloadButton && typeof onDelete === 'function', [showDownloadButton, onDelete]);
   return (
@@ -62,6 +62,6 @@ const RenderFiles = ({ files, hasToDownload, onDelete, showDownloadButton }: Ren
       ))}
     </div>
   );
-};
+});
 
 export default RenderFiles;
