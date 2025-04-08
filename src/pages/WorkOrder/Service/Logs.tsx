@@ -75,7 +75,8 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     valueAdded: 'valueAdded',
     valueUpdated: 'valueUpdated',
     consumed: 'consumed',
-    deleted: 'deleted'
+    deleted: 'deleted',
+    clone: 'Clone'
   };
 
   const getIcon = (type: string = 'Fail') => {
@@ -160,6 +161,7 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
     const serviceName = row?.service?.optionLabel ? row?.service?.optionLabel : '';
     const stepName = row?.step?.optionLabel ? row?.step?.optionLabel + ' from' : '';
     const consumedProducts = row?.data?.products;
+    const clonedStepName = row?.data?.stepName;
 
     switch (row?.operation) {
       default:
@@ -197,6 +199,9 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
         break;
       case operations.deleted:
         message = `<span>Deleted</span> ${stepName} ${serviceName}`;
+        break;
+      case operations.clone:
+        message = `<span>Clone</span> ${stepName} ${clonedStepName} from ${serviceName}`;
         break;
     }
     return message;

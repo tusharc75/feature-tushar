@@ -756,6 +756,12 @@ const routes = {
   packageCategoryDetail: {
     path: '/package-category/detail'
   },
+  serviceCategory: {
+    path: '/service-category'
+  },
+  serviceCategoryDetail: {
+    path: '/service-category/detail'
+  },
   schedulingMaintenance: {
     path: '/scheduling-maintenance'
   }

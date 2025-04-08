@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { cn } from 'src/constants/helpers';
+import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import Calendar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Calendar';
 import LeftSidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/LeftSidebar';
@@ -36,6 +37,16 @@ const DesktopRoadmapImpl = ({
   setIsSidebarOpen,
   loading
 }: DesktopRoadmapProps) => {
+  const { technicianSearchValue } = useTechnicianContext();
+  const filteredActivity = useMemo(() => {
+    const searchFor = (technicianSearchValue || '').trim().toLowerCase();
+    if (searchFor) {
+      const data = activity.filter((d) => `${d.firstName} ${d.lastName} ${d.employeeNumber}`.toLowerCase().includes(searchFor)) || [];
+      return data;
+    }
+    return activity;
+  }, [activity, technicianSearchValue]);
+
   const [container, setContainer] = useState<HTMLDivElement>(null);
   return (
     <div
@@ -55,7 +66,7 @@ const DesktopRoadmapImpl = ({
           dayPixel={dayPixel}
           endDate={endDate}
           startDate={startDate}
-          activity={activity}
+          activity={filteredActivity}
           handleSelect={handleSelect}
           selected={selected}
           totalDay={totalDay}
@@ -66,7 +77,7 @@ const DesktopRoadmapImpl = ({
           <MapImpl selected={selected} setSelected={setSelected} />
         </div>
       )}
-      <Sidebar selectedResource={selectedResource} activity={activity} loading={loading} handleSelect={handleSelect} />
+      <Sidebar selectedResource={selectedResource} activity={filteredActivity} loading={loading} handleSelect={handleSelect} />
     </div>
   );
 };
