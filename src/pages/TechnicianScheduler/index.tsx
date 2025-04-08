@@ -25,6 +25,7 @@ function TechnicianSchedulerImpl() {
   const [activeItem, setActiveItem] = useState(null);
   const [refreshRoadMap, setRefreshRoadMap] = useState(false);
   const [refreshServiceData, setRefreshServiceData] = useState(false);
+  const [viewType, setViewType] = useState<any>('job');
 
   const sensors = useDndSensors();
 
@@ -80,7 +81,8 @@ function TechnicianSchedulerImpl() {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
+          <CustomBreadCrumbs
+            routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
@@ -95,10 +97,17 @@ function TechnicianSchedulerImpl() {
             handleSucess={() => {
               setRefreshServiceData((prev) => !prev);
             }}
+            setViewType={setViewType}
+            viewType={viewType}
             selectedResource={selectedResource}
+            refreshAll={() => {
+              setRefreshServiceData((prev) => !prev);
+              setRefreshRoadMap((prev) => !prev);
+            }}
             leftSidebar={(isMobile) => (
               <ServiceOrderSidebar
                 isMobile={isMobile}
+                viewType={viewType}
                 selectedResource={selectedResource}
                 assignTechnicianDialog={assignTechnicianDialogData}
                 unAssignTechnicianDialog={unAssignTechnicianDialog}
