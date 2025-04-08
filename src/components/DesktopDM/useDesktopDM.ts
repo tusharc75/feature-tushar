@@ -6,7 +6,7 @@ import useUIDesktopDm from 'src/components/DesktopDM/useUIDesktopDm';
 import { useSocket } from 'src/hooks/useSocket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function checkIsUser(data: User | Chat): data is User {
+export function checkIsUser(data: User | Chat): data is User {
   return (data as User).firstName !== undefined && (data as User).lastName !== undefined;
 }
 
@@ -124,6 +124,7 @@ const useDesktopDM = () => {
       socket?.off('newWorkSpaceChannel');
       tokenSource?.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, uiState.openedChats, user?._id]);
 
   return {

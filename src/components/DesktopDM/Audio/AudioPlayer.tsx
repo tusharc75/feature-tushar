@@ -1,6 +1,6 @@
 import { Close, Delete, Download, MoreVert, Pause, PlayArrow } from '@mui/icons-material';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { getFileUrl } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 import WaveSurfer from 'wavesurfer.js';
@@ -15,7 +15,14 @@ interface AudioPlayerProps<P> {
   height?: number;
 }
 
-const AudioPlayer = <P,>({ src, onDelete, hasToDownload = false, downloadFileName = false, height = 35, onDeletePayload }: AudioPlayerProps<P>) => {
+const AudioPlayerImpl = <P,>({
+  src,
+  onDelete,
+  hasToDownload = false,
+  downloadFileName = false,
+  height = 35,
+  onDeletePayload
+}: AudioPlayerProps<P>) => {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -133,5 +140,7 @@ const AudioPlayer = <P,>({ src, onDelete, hasToDownload = false, downloadFileNam
     </div>
   );
 };
+
+const AudioPlayer = memo(AudioPlayerImpl) as typeof AudioPlayerImpl;
 
 export default AudioPlayer;

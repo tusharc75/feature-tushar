@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, Chip, IconButton, MenuItem } from '@mui/material';
 import { Delete, Help, Warning } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -296,6 +296,21 @@ const Quotation = () => {
   const LeftSideContent = () => {
     return (
       <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.quotation
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
         {accountDetails.accountId ? (
           <Chip
             className="ml-3"
@@ -364,17 +379,14 @@ const Quotation = () => {
           leftSideContents={<LeftSideContent />}
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.quotation?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.quotation?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
