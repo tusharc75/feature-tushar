@@ -1,18 +1,33 @@
-import { Search, SearchOff } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { Close, Search, SearchOff } from '@mui/icons-material';
+import { Badge, IconButton } from '@mui/material';
 import React, { useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 
-const SearchButton = ({ setValue, value }: { value: string; setValue: React.Dispatch<React.SetStateAction<string>> }) => {
+const SearchButton = ({
+  setValue,
+  value,
+  onOpenToggle
+}: {
+  value: string;
+  setValue: React.Dispatch<React.SetStateAction<string>>;
+  onOpenToggle?: (open: boolean) => void;
+}) => {
   const [open, setOpen] = useState(false);
-  const toggleOpen = () => setOpen((prev) => !prev);
+
+  const toggleOpen = () =>
+    setOpen((prev) => {
+      const val = !prev;
+      onOpenToggle?.(val);
+      return val;
+    });
   return (
     <div className="relative inline-flex min-h-[34px] items-center">
       <div
         className={cn(
           'absolute -top-[0] right-full mr-1 h-[calc(100%+2px)] overflow-hidden bg-[--dark-primary,white] transition-all',
-          open ? 'w-[calc(var(--sidebar-w,290px)-80px)]' : 'w-0'
+          open ? 'w-[calc(var(--sidebar-w,290px)-50px)]' : 'w-0'
         )}
       >
         <div className="p-[1px]">
@@ -28,9 +43,18 @@ const SearchButton = ({ setValue, value }: { value: string; setValue: React.Disp
           />
         </div>
       </div>
-      <IconButton size={'small'} onClick={toggleOpen} color="primary">
-        {open ? <SearchOff fontSize="small" /> : <Search fontSize="small" />}
-      </IconButton>
+      <div className="rounde-full relative">
+        {value && (
+          <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+            <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70" />
+          </span>
+        )}
+        <HtmlTooltip title={open ? 'Close Search' : ''}>
+          <IconButton size={'small'} onClick={toggleOpen} color="primary">
+            {open ? <Close fontSize="small" /> : <Search fontSize="small" />}
+          </IconButton>
+        </HtmlTooltip>
+      </div>
     </div>
   );
 };
