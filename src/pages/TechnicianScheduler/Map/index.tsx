@@ -53,7 +53,7 @@ const MapView = ({ userIds }) => {
       const {
         data: { data }
       } = await axiosInstance().get(`/user/live-location?userIds=${JSON.stringify(userIds)}`);
-      if (data && data.length > 0) {
+      if (data?.length > 0) {
         setLocationData(data);
         calculateMapCenter(data);
       }
