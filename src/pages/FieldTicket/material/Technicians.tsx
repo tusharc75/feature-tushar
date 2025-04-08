@@ -498,7 +498,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
 
       {technicianDialog && (
         <AssignEmployeeDialog
-          reference={'fieldTicket'}
           onSuccess={(data) => {
             handleAssign(data);
           }}

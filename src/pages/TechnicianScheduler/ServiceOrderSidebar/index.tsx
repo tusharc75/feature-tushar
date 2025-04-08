@@ -10,6 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { isArray, isObject } from 'lodash';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -174,14 +175,15 @@ const ServiceOrderSidebarImpl = ({
       )}
       {openTechnicianDialog.open && (
         <AssignEmployeeDialog
-          reference={selectedResource.key}
           onSuccess={(data) => {
             handleAssign(data, openTechnicianDialog.data);
           }}
           handleClose={() => {
             setOpenTechnicianDialog({ open: false, data: null });
           }}
-          defaultCompetency={openTechnicianDialog?.data?.service?.competencyType ? [openTechnicianDialog?.data?.service?.competencyType] : []}
+          defaultCompetencyType={openTechnicianDialog?.data?.service?.competencyType ?
+            isObject(openTechnicianDialog?.data?.service?.competencyType) ? [openTechnicianDialog?.data?.service?.competencyType] :
+              isArray(openTechnicianDialog?.data?.service?.competencyType) ? openTechnicianDialog?.data?.service?.competencyType : [] : []}
           warehouse={openTechnicianDialog.data?.warehouse}
           ids={[]}
           isSubmitting={isSubmitting}
