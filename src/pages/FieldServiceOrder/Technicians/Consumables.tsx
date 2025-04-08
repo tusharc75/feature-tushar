@@ -10,6 +10,7 @@ import {
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   fieldServiceOrder,
+  getObjKeysWithValues,
   sidebarResource
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -224,7 +225,6 @@ const Consumables = ({
       }
       const response = await axiosInstance().get(api);
       consumables = response?.data?.data?.material;
-
       consumables?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.productName = parent?.productDetail?.productName;
@@ -232,7 +232,7 @@ const Consumables = ({
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
         parent.technician = parent?.technician?.optionLabel || '';
-        parent.canDelete = parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved;
+        parent.canDelete = parent?.status ? parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved : true;
       });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -242,7 +242,7 @@ const Consumables = ({
     }
   };
 
-  const handleSubmit = async (rows) => {
+  const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
     const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
@@ -250,29 +250,38 @@ const Consumables = ({
       taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.materialId = d._id;
-      element.type = MATERIAL_TYPE.product;
-      element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
-      element.qty = d.qty ? parseFloat(d.qty) : 1;
-      element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-      element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
-      element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
-      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-      Object.assign(element, calValues);
-      if (taxCodeData) {
-        element.taxCode = taxCodeData?.optionValue;
-        element.taxPercentage = taxCodeData?.taxRate || 0;
-      }
-      material.push(element);
-    });
-    if (serviceOrderData?.pricingCondition?.optionValue) {
-      const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
-      AddMaterial(material, priceData);
-    } else {
+    if (addQuotationDataDialog) {
+      rows?.forEach((e: any) => {
+        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+        material.push(element);
+      });
       AddMaterial(material, null);
+    }
+    else {
+      rows.forEach((d) => {
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;
+        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        element.qty = d.qty ? parseFloat(d.qty) : 1;
+        element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
+        element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+        Object.assign(element, calValues);
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        material.push(element);
+      });
+      if (serviceOrderData?.pricingCondition?.optionValue) {
+        const priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
+        AddMaterial(material, priceData);
+      } else {
+        AddMaterial(material, null);
+      }
     }
   };
 
@@ -300,6 +309,7 @@ const Consumables = ({
           message: data?.message
         });
         setConsumablesDialog(false);
+        setAddQuotationDataDialog(false)
         fetchData();
         fetchserviceOrderData();
         fetchConsumablesData();
@@ -418,7 +428,6 @@ const Consumables = ({
         >
           Bulk Edit
         </MenuItem>
-
         <MenuItem
           disabled={isDeleting || selectedRecords?.some((e) => !e?.canDelete)}
           onClick={() => {
@@ -505,7 +514,7 @@ const Consumables = ({
           handleCloseDialog={() => setConsumablesDialog(false)}
           ids={dataRows?.map((d) => d?.materialId)}
           onSuccess={(rows) => {
-            handleSubmit(rows);
+            handleAdd(rows);
           }}
           serialized={false}
           isSubmitting={isSubmitting}
@@ -546,17 +555,11 @@ const Consumables = ({
             setAddQuotationDataDialog(false);
           }}
           onSuccess={(rows) => {
-            rows?.forEach((d) => {
-              d._id = d?.materialId;
-              d.unitMain = [d?.unit];
-              d.pricingMethodMain = [d?.pricingMethod];
-            });
-            handleSubmit(rows);
+            handleAdd(rows);
           }}
           referenceData={serviceOrderData}
           isSubmitting={isSubmitting}
           materialType={MATERIAL_TYPE.product}
-          ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
     </>
