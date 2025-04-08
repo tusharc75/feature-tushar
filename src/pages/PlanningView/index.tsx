@@ -200,8 +200,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -230,7 +230,7 @@ function PlanningView() {
             />
             <HtmlTooltip title={'Refresh'}>
               <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
-                <RefreshIcon fontSize="small" />
+                <RefreshIcon fontSize="small" color='primary' />
               </IconButton>
             </HtmlTooltip>
           </div>
