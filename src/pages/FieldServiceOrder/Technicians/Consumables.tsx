@@ -4,7 +4,14 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldServiceOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
+  MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
+  fieldServiceOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -26,9 +33,17 @@ import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceFi
 import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 
-const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchData: fetchserviceOrderData, technicians, refreshChild, fetchConsumablesData }) => {
-
+const Consumables = ({
+  allowedToEdit,
+  serviceOrderData,
+  stepFullScreen,
+  fetchData: fetchserviceOrderData,
+  technicians,
+  refreshChild,
+  fetchConsumablesData
+}) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -42,12 +57,13 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
   const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [selectedTechnician, setSelectedTechnician] = useState<any>({ technicianName: 'All', technicianId: 'All' });
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -258,7 +274,6 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     } else {
       AddMaterial(material, null);
     }
-
   };
 
   const AddMaterial = async (material, priceData) => {
@@ -276,21 +291,24 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
         }
       });
     }
-    axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setConsumablesDialog(false);
+        fetchData();
+        fetchserviceOrderData();
+        fetchConsumablesData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
       });
-      setConsumablesDialog(false);
-      fetchData();
-      fetchserviceOrderData();
-      fetchConsumablesData();
-      setSubmitting(false);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setSubmitting(false);
-    });
   };
 
   const handleDelete = async (rows) => {
@@ -364,6 +382,30 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
     setIsBulkEdit(false);
   };
 
+  const AddButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setConsumablesDialog(true);
+          }}
+          id={'add-existing-products-menu-item'}
+        >
+          Add Products/Consumables
+        </MenuItem>
+        {serviceOrderData?.quotation?.optionValue && serviceOrderData?.quotationVersion?.optionValue && (
+          <MenuItem
+            onClick={() => {
+              setAddQuotationDataDialog(true);
+            }}
+          >
+            {`Add Products/Consumables From ${resources?.quotation?.titleSingular}`}
+          </MenuItem>
+        )}
+      </>
+    );
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -421,11 +463,15 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
       </Box>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         <Box mb={1}>
-          <Typography variant='subtitle2'>Products/Consumables</Typography>
+          <Typography variant="subtitle2">Products/Consumables</Typography>
         </Box>
         <DetailsPageHeader
-          isAddButtonVisible={isEmpty(selectedTechnician) || selectedTechnician?.technicianId === 'All' || selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved}
-          addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
+          isAddButtonVisible={
+            isEmpty(selectedTechnician) ||
+            selectedTechnician?.technicianId === 'All' ||
+            selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved
+          }
+          addButtonMenuItems={<AddButtonMenuItems />}
           isActionButtonVisible={true}
           actionButtonMenuItems={actionButtonMenuItems()}
           actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
@@ -492,6 +538,25 @@ const Consumables = ({ allowedToEdit, serviceOrderData, stepFullScreen, fetchDat
           onClose={() => setDeleteData(null)}
           onOk={() => handleDelete(deleteData)}
           okBtnLoading={isDeleting}
+        />
+      )}
+      {addQuotationDataDialog && (
+        <AddQuotationDataDialog
+          onClose={() => {
+            setAddQuotationDataDialog(false);
+          }}
+          onSuccess={(rows) => {
+            rows?.forEach((d) => {
+              d._id = d?.materialId;
+              d.unitMain = [d?.unit];
+              d.pricingMethodMain = [d?.pricingMethod];
+            });
+            handleSubmit(rows);
+          }}
+          referenceData={serviceOrderData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.product}
+          ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
     </>
