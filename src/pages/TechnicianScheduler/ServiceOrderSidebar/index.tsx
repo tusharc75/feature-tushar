@@ -9,6 +9,7 @@ import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianR
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -42,13 +43,17 @@ const ServiceOrderSidebarImpl = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement>(null);
   const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
+  const { leftSearchValue } = useTechnicianContext();
 
-  const fetchData = (selectedResource: TechnicianResource, cancelToken?: CancelToken) => {
+  const fetchData = (selectedResource: TechnicianResource, search?: string, cancelToken?: CancelToken) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
+    let api = `/technician-scheduler/un-assign-service?type=${selectedResource.resource}`;
+    if (search) {
+      api += `&search=${encodeURIComponent(search)}`;
+    }
     axiosInstance()
-      .get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
+      .get(api, { cancelToken })
       .then(({ data: { data } }) => {
         const rows: any = [];
         data?.forEach((ele, index) => {
@@ -125,13 +130,13 @@ const ServiceOrderSidebarImpl = ({
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     if (selectedResource) {
-      fetchData(selectedResource, cancelToken.token);
+      fetchData(selectedResource, leftSearchValue, cancelToken.token);
     }
     return () => {
       cancelToken.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedResource, refreshServiceData]);
+  }, [selectedResource, refreshServiceData, leftSearchValue]);
 
   return (
     <>

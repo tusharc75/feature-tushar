@@ -9,9 +9,21 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   value?: string;
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
   fullWidth?: boolean;
+  debounceTime?: number;
 };
 
-function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, fullWidth, ...otherProps }: SerachBoxProps) {
+function SearchBox({
+  onChange,
+  value,
+  size,
+  width,
+  placeholder,
+  className,
+  containerProps = {},
+  fullWidth,
+  debounceTime = 400,
+  ...otherProps
+}: SerachBoxProps) {
   const [inputvalue, setInputValue] = useState<string>('');
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
   const debounceRef = useRef<DebounceCallBack>(null);
@@ -26,7 +38,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
     if (!debounceRef.current) {
       debounceRef.current = debounceCallBack((e: React.ChangeEvent<HTMLInputElement>) => {
         onChange(e);
-      }, 400);
+      }, debounceTime);
     }
     const [debouncedTracker, _] = debounceRef.current;
     debouncedTracker(e);

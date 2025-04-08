@@ -1,37 +1,39 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { AccountCircle, Add, AddCircleOutline, Map } from '@mui/icons-material';
+import { AccountCircle, AddCircleOutline, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
-import { cn } from 'src/constants/helpers';
-import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
-import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import { memo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cn } from 'src/constants/helpers';
+import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
+import SearchButton from 'src/pages/TechnicianScheduler/Roadmap/SearchButton';
+import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 
 type SidebarProps = {
   activity: TActivity[];
   handleSelect: HandleSelect;
   loading: boolean;
-  selectedResource: any
+  selectedResource: any;
 };
 
-const Sidebar = ({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
+const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
+  const { technicianSearchValue, setTechnicianSearchValue } = useTechnicianContext();
   return (
     <aside className="sticky right-0 z-[3] border-l bg-[white] dark:bg-[--dark-primary]">
-      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center gap-2 border-b bg-[--dark-primary,white] p-4">
-        <Map />
-        <Typography variant="body1" display="block">
-          Technicians
-        </Typography>
+      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center justify-between gap-2 border-b bg-[--dark-primary,white] p-4">
+        <h6 className="line-clamp-1 text-[1rem] font-semibold">Technicians</h6>
+        <div className="flex">
+          <SearchButton value={technicianSearchValue} setValue={setTechnicianSearchValue} />
+          <IconButton size="small" color="primary">
+            <Map fontSize="small" />
+          </IconButton>
+        </div>
       </div>
       {!loading ? (
         <ul className="list-none">
           {activity?.map((data, index) => {
-            return <SingleTechnician
-              data={data}
-              index={index}
-              handleSelect={handleSelect}
-              selectedResource={selectedResource}
-              key={data._id} />;
+            return <SingleTechnician data={data} index={index} handleSelect={handleSelect} selectedResource={selectedResource} key={data._id} />;
           })}
         </ul>
       ) : (
@@ -69,11 +71,11 @@ const Sidebar = ({ activity, selectedResource, handleSelect, loading }: SidebarP
       )}
     </aside>
   );
-};
+});
 
 export default Sidebar;
 
-export const SingleTechnician = ({ data, handleSelect, index, selectedResource, className = '' }) => {
+export const SingleTechnician = memo(({ data, handleSelect, index, selectedResource, className = '' }: any) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: data._id,
     data: {
@@ -138,4 +140,4 @@ export const SingleTechnician = ({ data, handleSelect, index, selectedResource, 
       </ListItem>
     </li>
   );
-};
+});
