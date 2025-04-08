@@ -21,7 +21,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
-import ManageUnavailability from 'src/pages/EmployeeMaster/Unavailability/ManageUnavailability';
 import Unavailability from 'src/pages/EmployeeMaster/Unavailability';
 
 const EmployeeMasterDetail = () => {
