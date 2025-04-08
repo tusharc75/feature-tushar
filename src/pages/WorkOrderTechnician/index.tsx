@@ -178,24 +178,26 @@ const WorkOrderTechnician = () => {
                   >
                     {row.original.serviceName}
                   </h5>
-                  <HtmlTooltip title="Preview PDF">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
-                      }}
-                    >
-                      <Info fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <Box ml={1}>
-                    {row?.original?.canPerformInfo ? (
+                  {row?.original?.canPerformInfo ? (
+                    <Box ml={1}>
                       <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
                         <Info className="text-red-500 [font-size:20px_!important]" />
                       </HtmlTooltip>
-                    ) : null}
+                    </Box>
+                  ) : null}
+                  <Box ml={1}>
+                    <HtmlTooltip title="Preview PDF">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                        }}
+                      >
+                        <Info fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </HtmlTooltip>
                   </Box>
                 </div>
               ) : (
