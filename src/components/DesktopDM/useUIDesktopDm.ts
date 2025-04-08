@@ -47,7 +47,8 @@ const useUIDesktopDm = () => {
   const {
     state: {
       permissions,
-      user: { user }
+      user: { user },
+      resources
     }
   }: any = useData();
 
@@ -206,6 +207,7 @@ const useUIDesktopDm = () => {
   return {
     ...uiState,
     user,
+    resources,
     permissions,
     isMobileDevice,
     isMobile,

@@ -27,7 +27,7 @@ const SearchButton = ({
       <div
         className={cn(
           'absolute -top-[0] right-full mr-1 h-[calc(100%+2px)] overflow-hidden bg-[--dark-primary,white] transition-all',
-          open ? 'w-[calc(var(--sidebar-w,290px)-50px)]' : 'w-0'
+          open ? 'w-[calc(var(--sidebar-w,285px)-50px)]' : 'w-0'
         )}
       >
         <div className="p-[1px]">
@@ -43,6 +43,7 @@ const SearchButton = ({
           />
         </div>
       </div>
+
       <div className="rounde-full relative">
         {value && (
           <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">

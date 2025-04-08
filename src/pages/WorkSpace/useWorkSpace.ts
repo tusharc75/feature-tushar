@@ -2,22 +2,20 @@ import { useMediaQuery } from '@mui/material';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useSocket } from 'src/hooks/useSocket';
-import { TChannel, TChat, User } from 'src/pages/WorkSpace/types';
+import { TChannel, TChat } from 'src/pages/WorkSpace/types';
 import { useData } from 'src/StateProvider/Provider';
 
 type UseWorkSpaceActions =
   | { action: 'setIsSidebarCollapsed'; payload: UseWorkSpaceState['isSidebarCollapsed'] }
   | { action: 'setAllChannels'; payload: UseWorkSpaceState['allChannels'] }
   | { action: 'setSelectedChannel'; payload: UseWorkSpaceState['selectedChannel'] }
-  | { action: 'setNewChatToUser'; payload: UseWorkSpaceState['newChatToUser'] }
   | { action: 'setEditCreateChannelDialogData'; payload: UseWorkSpaceState['editCreateChannelDialogData'] }
   | { action: 'setNewDirectMessageChannelId'; payload: UseWorkSpaceState['newDirectMessageChannelId'] }
   | { action: 'setCurrentDeletingChannelId'; payload: UseWorkSpaceState['currentDeletingChannelId'] };
 
 type UseWorkSpaceState = {
   allChannels: TChannel[] | null;
-  selectedChannel: TChat | null;
-  newChatToUser: User | null;
+  selectedChannel: Partial<TChat> | null;
   editCreateChannelDialogData: { open: boolean; _id: string | null };
   currentDeletingChannelId: string | null;
   isSidebarCollapsed: boolean;
@@ -29,7 +27,6 @@ const initialState: UseWorkSpaceState = {
   allChannels: null,
   currentDeletingChannelId: null,
   editCreateChannelDialogData: { open: false, _id: null },
-  newChatToUser: null,
   selectedChannel: null,
   newDirectMessageChannelId: null
 };
@@ -42,8 +39,6 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
       return { ...state, allChannels: action.payload };
     case 'setSelectedChannel':
       return { ...state, selectedChannel: action.payload };
-    case 'setNewChatToUser':
-      return { ...state, newChatToUser: action.payload };
     case 'setEditCreateChannelDialogData':
       return { ...state, currentEditingChannelId: action.payload };
     case 'setCurrentDeletingChannelId':
@@ -84,18 +79,12 @@ export const useWorkSpace = () => {
           }
         });
         setState({ action: 'setAllChannels', payload: newAllChannels });
-        setState({ action: 'setNewChatToUser', payload: null });
       }
       setState({ action: 'setSelectedChannel', payload });
     },
     [state.allChannels]
   );
-  const setNewChatToUser = useCallback((payload: UseWorkSpaceState['newChatToUser']) => {
-    if (payload) {
-      setState({ action: 'setSelectedChannel', payload: null });
-    }
-    setState({ action: 'setNewChatToUser', payload });
-  }, []);
+
   const setEditCreateChannelDialogData = useCallback((payload: UseWorkSpaceState['editCreateChannelDialogData']) => {
     setState({ action: 'setEditCreateChannelDialogData', payload });
   }, []);
@@ -111,14 +100,10 @@ export const useWorkSpace = () => {
   }, [state.allChannels]);
 
   const initChat = useCallback(
-    (data: User | TChat | TChat) => {
-      if ('firstName' in data) {
-        setNewChatToUser(data);
-      } else {
-        setSelectedChannel(data);
-      }
+    (data: Partial<TChat>) => {
+      setSelectedChannel(data);
     },
-    [setSelectedChannel, setNewChatToUser]
+    [setSelectedChannel]
   );
 
   const fetchChannelsAndChats = async (setActiveChannel = false, newDirectMessageChannelId = state.newDirectMessageChannelId) => {
@@ -218,7 +203,6 @@ export const useWorkSpace = () => {
     handleDeleteChannels,
     initChat,
     setSelectedChannel,
-    setNewChatToUser,
     setEditCreateChannelDialogData,
     setCurrentDeletingChannelId,
     setState
