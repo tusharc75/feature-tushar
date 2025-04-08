@@ -45,7 +45,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
   return (
     <>
       <SearchBox value={searchValue} onChange={handleFilter} />
-      <div>
+      <div className="">
         <ThemeButton
           buttonType="transparent"
           onClick={() => {
@@ -57,7 +57,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
         </ThemeButton>
         {filteredChannels ? (
           <Collapse in={isExpanded}>
-            <List dense>
+            <List dense className="max-h-[calc(100vh-300px)] min-h-[400px] overflow-y-auto">
               {filteredChannels?.map((c, index) => (
                 <>
                   {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}

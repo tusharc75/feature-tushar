@@ -1,6 +1,7 @@
 import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { memo, useMemo, useRef } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessage';
 import { Chat, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
@@ -105,14 +106,18 @@ const ChatBoxHeader = memo(
           )}
         </div>
         <div className="buttons flex items-center gap-1">
-          <IconButton size="small">
-            <span className={cn(openedChat.open === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0', 'origin-center transition-transform')}>
-              <ExpandMore fontSize="small" />
-            </span>
-          </IconButton>
-          <IconButton onClick={(e) => closeChatBox(e, openedChat.id)} size="small">
-            <Close fontSize="small" />
-          </IconButton>
+          <HtmlTooltip title={openedChat.open === 'partial' ? 'Expand' : 'Collapse'}>
+            <IconButton size="small" color="primary">
+              <span className={cn(openedChat.open === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0', 'origin-center transition-transform')}>
+                <ExpandMore fontSize="small" />
+              </span>
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title={'Close'}>
+            <IconButton onClick={(e) => closeChatBox(e, openedChat.id)} size="small" color="primary">
+              <Close fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         </div>
       </header>
     );
