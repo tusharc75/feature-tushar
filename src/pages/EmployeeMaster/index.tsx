@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -18,6 +18,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { useHistory } from 'react-router-dom';
 
 const EmployeeMaster = () => {
   const renderedFrom = camelCase(sidebarResource?.employeeMaster);
@@ -37,6 +38,7 @@ const EmployeeMaster = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
+  const history = useHistory();
 
   useEffect(() => {
     fetchGridColumns();
@@ -205,6 +207,28 @@ const EmployeeMaster = () => {
     );
   };
 
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.employeeMaster
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -228,24 +252,17 @@ const EmployeeMaster = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.employeeMaster?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
+          leftSideContents={<LeftSideButtons />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.employeeMaster?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

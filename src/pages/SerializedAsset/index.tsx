@@ -1,4 +1,4 @@
-import { Box, Chip, MenuItem, TextField } from '@mui/material';
+import { Box, Button, Chip, MenuItem, TextField } from '@mui/material';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
@@ -725,7 +725,8 @@ const SerializedAsset = () => {
                 showScrapAsset,
                 setShowScrapAsset,
                 resources,
-                columns
+                columns,
+                history
               }}
             />
           }
@@ -834,11 +835,27 @@ const LeftSideContent = ({
   showScrapAsset,
   setShowScrapAsset,
   resources,
-  columns
+  columns,
+  history
 }) => {
   return (
     <>
       <Fragment>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.serializedAsset
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
         {permissions?.productCategory?.isRead && columns?.find(c => c?.accessor === 'productCategory') && (
           <Autocomplete
             className={`w-full lg:w-[230px]`}

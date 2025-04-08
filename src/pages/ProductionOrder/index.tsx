@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -27,6 +27,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
 import axios, { CancelTokenSource } from 'axios';
+import { useHistory } from 'react-router-dom';
 
 const ProductionOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
@@ -47,6 +48,7 @@ const ProductionOrder = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
+  const history = useHistory();
 
   const types = [
     {
@@ -242,6 +244,28 @@ const ProductionOrder = () => {
     );
   };
 
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.productionOrder
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -279,8 +303,8 @@ const ProductionOrder = () => {
           }}
           isAddButtonVisible
           setQueryString
+          leftSideContents={<LeftSideButtons />}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -302,12 +326,11 @@ const ProductionOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.productionOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.productionOrderNumber || ''}`
-              : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.productionOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
