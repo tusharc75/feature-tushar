@@ -30,7 +30,15 @@ const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: Sid
         <div className="flex">
           <SearchButton value={technicianSearchValue} setValue={setTechnicianSearchValue} onOpenToggle={setIsSearchOpen} />
           <div className={cn('flex items-center overflow-hidden transition-all', isSearchOpen ? 'w-0' : 'w-[30px] ')}>
-            <IconButton size="small" color="primary">
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                const userIds = activity?.map((d) => d?.user?.optionValue)?.filter(Boolean);
+                handleSelect(e, userIds, 'map');
+              }}
+            >
               <Map fontSize="small" />
             </IconButton>
           </div>
@@ -146,7 +154,9 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
             size="small"
             onClick={(event) => {
               event.stopPropagation();
-              handleSelect(event, data, 'map');
+              if (data?.user?.optionValue) {
+                handleSelect(event, [data?.user?.optionValue], 'map');
+              }
             }}
           >
             <Map fontSize="small" />
