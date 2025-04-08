@@ -50,6 +50,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import { FiExternalLink } from 'react-icons/fi';
+import { FaInfoCircle } from "react-icons/fa";
 
 const LIMIT = 25;
 
@@ -289,7 +290,7 @@ const WorkOrderSupervisor = () => {
         title: resources?.serviceMaster?.titleSingular,
         type: 'title',
         renderer: (data) => (
-          <div className="flex items-center gap-2 ml-6">
+          <div className="flex items-center gap-1 ml-6">
             <h5 className={` line-clamp-1  `}>{data.serviceName || '--'}</h5>
             <IconButton
               size="small"
@@ -303,13 +304,12 @@ const WorkOrderSupervisor = () => {
             <HtmlTooltip title="Preview PDF">
               <IconButton
                 size="small"
-                color="primary"
                 onClick={(e) => {
                   e.stopPropagation();
                   handlePdfPreview(data?.workOrder, user, toastConfig);
                 }}
               >
-                <Info fontSize="small" color={'primary'} />
+                <FaInfoCircle size={16} className="-mt-[2px] text-gray-600" />
               </IconButton>
             </HtmlTooltip>
           </div>

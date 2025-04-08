@@ -11,11 +11,11 @@ import { useDroppable } from '@dnd-kit/core';
 type TProps = {
   activity: TActivity[];
   expanded: any;
-  selected: string | null;
+  selected: string[] | [];
   handleToggle: any;
   handleSelect: any;
   loading: boolean;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   leftSidebar: (isMobile: Boolean) => React.ReactNode;
 };
 
@@ -175,7 +175,7 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
   if (selected)
     return (
       <div className="relative min-h-[400px] w-full overflow-auto p-2">
-        <MapView technician={selected} />
+        <MapView userIds={selected} />
         <IconButton
           onClick={(e) => {
             e.preventDefault();
