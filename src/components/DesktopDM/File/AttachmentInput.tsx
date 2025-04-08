@@ -1,6 +1,6 @@
 import { AttachFile } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { getFileIconData } from 'src/assets/fileIcons';
 import { AttachedFileType } from 'src/components/DesktopDM/File/FilePreview';
 
@@ -8,7 +8,7 @@ type AttachmentProps = {
   onFileInput: (data: AttachedFileType[]) => void;
 };
 
-const AttachmentInput = ({ onFileInput }: AttachmentProps) => {
+const AttachmentInput = memo(({ onFileInput }: AttachmentProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files);
@@ -40,6 +40,6 @@ const AttachmentInput = ({ onFileInput }: AttachmentProps) => {
       </IconButton>
     </>
   );
-};
+});
 
 export default AttachmentInput;

@@ -19,6 +19,7 @@ const DesktopDM = () => {
   } = state;
 
   if (!mainWindow || isMobileDevice || isMobile) return null;
+
   return (
     <div
       className="l-0 pointer-events-none fixed bottom-0 z-[1300] flex h-4 w-full items-end justify-end"
