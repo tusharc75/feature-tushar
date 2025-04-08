@@ -116,7 +116,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
                 style={{ fontWeight: 'bolder', fontSize: '1rem' }}
                 className="line-clamp-1"
               >{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <Link className="flex-shrink-0" to={`${routes.planningView.path}?technician=${data._id}`} target={'_blank'}>
+              <Link className="flex-shrink-0 ml-1" to={`${routes.employeeMasterDetail.path}/${data._id}`} target={'_blank'}>
                 <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
               </Link>
             </div>
