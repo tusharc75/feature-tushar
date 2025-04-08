@@ -16,9 +16,9 @@ const totalDay = endDate.diff(startDate, 'day');
 
 type DesktopRoadmapProps = {
   activity: TActivity[] | null;
-  selected: string | null;
+  selected: string[] | [];
   handleSelect: HandleSelect;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   leftSidebar?: (isMobile: boolean) => React.ReactNode;
   selectedResource?: any | null;
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -61,7 +61,7 @@ const DesktopRoadmapImpl = ({
           {leftSidebar(false)}
         </LeftSidebar>
       ) : null}
-      {!selected ? (
+      {!selected?.length ? (
         <Calendar
           dayPixel={dayPixel}
           endDate={endDate}
