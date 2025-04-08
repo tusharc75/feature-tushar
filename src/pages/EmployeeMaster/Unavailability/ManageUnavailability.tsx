@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Box, Dialog, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
@@ -14,6 +14,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
+import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 
 const validationSchema = object().shape({
   title: string().required('Title is required'),
@@ -24,8 +26,10 @@ const validationSchema = object().shape({
 
 function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
   const toastConfig = useContext(CustomToastContext);
+  const ref = useRef(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState<any>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -99,14 +103,25 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
     >
       {initialData ? (
-        <Formik initialValues={initialData} validateOnMount validationSchema={validationSchema} onSubmit={(values) => handleSave(values)}>
+        <Formik innerRef={ref} initialValues={initialData} validateOnMount validationSchema={validationSchema} onSubmit={(values) => handleSave(values)}>
           {({ values, errors, touched, handleChange, handleBlur, setFieldValue, submitForm }) => (
             <Form>
               <CustomDialogHeader
+                onClose={() => {
+                  if (!isEqual(ref.current.values, initialData)) {
+                    setShowConfirmDialog(true);
+                  } else {
+                    onClose();
+                  }
+                }}
                 title="Unavailability"
-                onClose={onClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => setFullScreen((prev) => !prev)}
                 showManimizeMaximize={true}
@@ -179,13 +194,33 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                 </Grid>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <ThemeButton buttonType="transparent" id="dialog-cancel-button" onClick={onClose}>
+                <ThemeButton
+                  buttonType="transparent"
+                  id="dialog-cancel-button"
+                  onClick={() => {
+                    if (isEqual(initialData, values)) onClose();
+                    else setShowConfirmDialog(true);
+                  }}
+                >
                   Cancel
                 </ThemeButton>
                 <ThemeButton buttonType="theme" id="dialog-save-button" onClick={submitForm}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
+              {showConfirmDialog ? (
+                <ConfirmationCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
+                  }}
+                />
+              ) : null}
             </Form>
           )}
         </Formik>
