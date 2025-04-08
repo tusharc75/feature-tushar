@@ -45,7 +45,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
   return (
     <>
       <SearchBox value={searchValue} onChange={handleFilter} />
-      <div>
+      <div className=" relative">
         <ThemeButton
           buttonType="transparent"
           onClick={() => {
@@ -57,7 +57,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
         </ThemeButton>
         {filteredChannels ? (
           <Collapse in={isExpanded}>
-            <List dense>
+            <List dense className="max-h-[calc(100vh-300px)] min-h-[400px] overflow-y-auto">
               {filteredChannels?.map((c, index) => (
                 <>
                   {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
@@ -107,7 +107,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
               ))}
             </List>
             {channels?.length === 0 && (
-              <div>
+              <div className="absolute left-0 right-0 top-1/2 text-center">
                 <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No channels found</h6>
               </div>
             )}

@@ -23,7 +23,6 @@ import { Integrations } from '@sentry/tracing';
 import { CustomNotificationCountProvider } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import './components/Chatter/style.scss';
 import { CustomChatNotificationCountProvider } from './StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
-import { GlobalChatProvider } from './StateProvider/GlobalChatContext';
 import { CustomOfflineProvider } from './StateProvider/OfflineContext/OfflineContext';
 import { version } from '../package.json';
 import { VITE_APP_ENV } from 'src/config';
@@ -53,15 +52,13 @@ ReactDOM.render(
             <CustomNotificationCountProvider>
               <CustomChatNotificationCountProvider>
                 <MsalProvider instance={AzureInstance}>
-                  <GlobalChatProvider>
-                    <CustomOfflineProvider>
-                      <NewAddressOptionListProvider>
-                        <TimezoneLocalizationProvider>
-                          <App />
-                        </TimezoneLocalizationProvider>
-                      </NewAddressOptionListProvider>
-                    </CustomOfflineProvider>
-                  </GlobalChatProvider>
+                  <CustomOfflineProvider>
+                    <NewAddressOptionListProvider>
+                      <TimezoneLocalizationProvider>
+                        <App />
+                      </TimezoneLocalizationProvider>
+                    </NewAddressOptionListProvider>
+                  </CustomOfflineProvider>
                 </MsalProvider>
               </CustomChatNotificationCountProvider>
             </CustomNotificationCountProvider>

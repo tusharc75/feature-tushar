@@ -4,7 +4,6 @@ import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { cn } from 'src/constants/helpers';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
-import GlobalUserChat from './GlobalUserChat';
 import Sidebar from './Sidebar/Sidebar';
 
 const Layout = ({ children }) => {
@@ -60,7 +59,6 @@ const Layout = ({ children }) => {
             </div>
           </motion.div>
         </Box>
-        {showChat.show && <GlobalUserChat />}
       </div>
     </>
   );

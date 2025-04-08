@@ -124,7 +124,7 @@ const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
-            <p className="text-gray-500">Select a channel/chat to start conversation</p>
+            <p className="text-gray-500">Select a channel to start conversation</p>
           </div>
         )}
       </div>

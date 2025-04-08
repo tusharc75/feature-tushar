@@ -1,10 +1,13 @@
-import { Close, ExpandMore, Person } from '@mui/icons-material';
+import { Close, ExpandMore, Groups, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { memo, useCallback, useMemo, useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 import { useStore } from 'src/StateProvider/fastContext';
+import { Link } from 'react-router-dom';
 
 type UserListProps = {
   state: UseDesktopDM;
@@ -12,7 +15,7 @@ type UserListProps = {
 
 const UserList = memo(
   ({ state }: UserListProps) => {
-    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser } = state;
+    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources } = state;
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const [inputValue, setInputValue] = useState('');
 
@@ -89,35 +92,55 @@ const UserList = memo(
             )}
           </div>
           <div className="buttons flex items-center gap-1">
-            <IconButton size="small">
-              <span
-                className={cn(
-                  mainWindow && mainWindow === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0',
-                  'origin-center transition-transform'
-                )}
-              >
-                <ExpandMore fontSize="small" />
-              </span>
-            </IconButton>
-            <IconButton onClick={closeMainWindow} size="small">
-              <Close fontSize="small" />
-            </IconButton>
+            <HtmlTooltip title={mainWindow && mainWindow === 'partial' ? 'Expand' : 'Collapse'}>
+              <IconButton size="small" color="primary">
+                <span
+                  className={cn(
+                    mainWindow && mainWindow === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0',
+                    'origin-center transition-transform'
+                  )}
+                >
+                  <ExpandMore fontSize="small" />
+                </span>
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title={'Close'}>
+              <IconButton onClick={closeMainWindow} size="small" color="primary">
+                <Close fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
           </div>
         </header>
-        <div className="search  border-b p-2">
-          <div className="relative">
+        <div className="search border-b p-2">
+          <div className="flex gap-2">
             <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+            <Link to={routes.workSpace.path} onClick={() => toggleMainWindow()}>
+              <HtmlTooltip title={resources?.workSpace?.titlePlural}>
+                <IconButton size="small" color="primary">
+                  <Groups fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </Link>
           </div>
         </div>
-        <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
-          {filteredData?.map((c) => {
-            const isUser = checkIsUser(c);
-            if (isUser) {
-              return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
-            } else {
-              return <RenderChatUser chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
-            }
-          })}
+        <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
+          {filteredData?.length > 0 ? (
+            filteredData?.map((c) => {
+              const isUser = checkIsUser(c);
+              if (isUser) {
+                return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
+              } else {
+                return <RenderChatUser chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
+              }
+            })
+          ) : (
+            <div className="absolute left-2 right-2 top-1/3 text-center">
+              <p className="select-none text-sm font-semibold text-gray-500 dark:text-gray-400">
+                No User found with keyword:
+                <pre className="mx-auto mt-1 block max-w-fit rounded-md border bg-gray-100 px-1 py-[2px] dark:bg-gray-800">"{inputValue}"</pre>
+              </p>
+            </div>
+          )}
         </section>
       </div>
     );

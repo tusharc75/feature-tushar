@@ -295,7 +295,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     if (selectedLookUpResourceData) {
       Object.keys(selectedLookUpResourceData).forEach((d) => {
-        const data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+        let data = []
+        if (d === 'technician') {
+          data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
+        }
+        else {
+          data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+        }
         query = `${query}&${d}=${data}`;
       });
     }
