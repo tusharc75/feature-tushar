@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, memo, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
 import { cn, DebounceCallBack, debounceCallBack } from 'src/constants/helpers';
@@ -12,18 +12,10 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   debounceTime?: number;
 };
 
-function SearchBox({
-  onChange,
-  value,
-  size,
-  width,
-  placeholder,
-  className,
-  containerProps = {},
-  fullWidth,
-  debounceTime = 400,
-  ...otherProps
-}: SerachBoxProps) {
+function SearchBox(
+  { onChange, value, size, width, placeholder, className, containerProps = {}, fullWidth, debounceTime = 400, ...otherProps }: SerachBoxProps,
+  ref: any
+) {
   const [inputvalue, setInputValue] = useState<string>('');
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
   const debounceRef = useRef<DebounceCallBack>(null);
@@ -61,6 +53,7 @@ function SearchBox({
         <FiSearch style={{ color: '#737373' }} className="absolute left-[10px] top-1/2 [transform:translateY(-50%)]" />
         <input
           autoComplete="off"
+          ref={ref}
           id="search-input"
           title={'search'}
           value={inputvalue}
@@ -91,4 +84,4 @@ function SearchBox({
   );
 }
 
-export default memo(SearchBox);
+export default memo(forwardRef<HTMLInputElement, SerachBoxProps>(SearchBox));
