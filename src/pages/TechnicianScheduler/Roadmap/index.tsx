@@ -13,9 +13,19 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
 
-function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refreshRoadMap,
-  handleSucess, setViewType, viewType, refreshAll }) {
-
+function Roadmap({
+  filter,
+  selectedRecords,
+  handleUnAssignTechnician,
+  leftSidebar = null,
+  selectedResource = null,
+  headerSlot = null,
+  refreshRoadMap,
+  handleSucess,
+  setViewType,
+  viewType,
+  refreshAll
+}) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
@@ -28,7 +38,8 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
   }, [filter.view, refreshRoadMap]);
 
   const fetchRoadmap = async () => {
-    await axiosInstance().get(`/technician-scheduler/get-schedule`)
+    await axiosInstance()
+      .get(`/technician-scheduler/get-schedule`)
       .then(({ data: { data } }) => {
         setActivity(data);
       });
@@ -54,29 +65,31 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
         <div className="mb-4 flex items-center gap-2">
           <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />
           {headerSlot}
-          <IconButtonTabs
-            items={
-              [
-                {
-                  value: 'job',
-                  icon: <FormatListBulletedIcon />,
-                  tooltip: 'Job View'
-                },
-                {
-                  value: 'service',
-                  icon: <FormatListBulletedIcon />,
-                  tooltip: 'Service View'
-                }
-              ] as const
-            }
-            setValue={setViewType}
-            value={viewType}
-          />
-          <HtmlTooltip title={'Refresh'}>
-            <IconButton size="small" onClick={refreshAll} >
-              <RefreshIcon fontSize="small" color='primary' />
-            </IconButton>
-          </HtmlTooltip>
+          <div className="ml-auto flex gap-1">
+            <IconButtonTabs
+              items={
+                [
+                  {
+                    value: 'job',
+                    icon: <FormatListBulletedIcon />,
+                    tooltip: 'Job View'
+                  },
+                  {
+                    value: 'service',
+                    icon: <FormatListBulletedIcon />,
+                    tooltip: 'Service View'
+                  }
+                ] as const
+              }
+              setValue={setViewType}
+              value={viewType}
+            />
+            <HtmlTooltip title={'Refresh'}>
+              <IconButton size="small" onClick={refreshAll}>
+                <RefreshIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
         </div>
       )}
       <Box bgcolor="var(--dark-secondary, white)">
@@ -113,7 +126,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
           selectedResource={selectedResource}
           technician={assignServiceDialog.data}
           handleSucess={() => {
-            handleSucess()
+            handleSucess();
             fetchRoadmap();
             setAssignServiceDialog({ open: false, data: null });
           }}
