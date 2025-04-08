@@ -3,7 +3,7 @@ import { IconButton } from '@mui/material';
 import React from 'react';
 import { cn } from 'src/constants/helpers';
 import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
-import SearchButton from 'src/pages/TechnicianScheduler/Roadmap/SearchButton';
+import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
 
 type LeftSidebarProps = {
   children: React.ReactNode;

@@ -7,7 +7,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
 import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
-import SearchButton from 'src/pages/TechnicianScheduler/Roadmap/SearchButton';
+import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 
 type SidebarProps = {
