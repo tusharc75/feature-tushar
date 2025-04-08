@@ -1,23 +1,23 @@
-import { Checkbox, Dialog, FormControlLabel, IconButton, ListItemIcon, ListItemText, TextField } from '@mui/material';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DragIndicator, Info } from '@mui/icons-material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
+import { Checkbox, Dialog, FormControlLabel, IconButton, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import update from 'immutability-helper';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../CustomTooltipTitle';
-import Autocomplete from '@mui/material/Autocomplete';
 
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useDndSensors } from 'src/hooks';
-import { CustomDialogTransition } from 'src/constants/helpers';
 import { startCase } from 'lodash';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
+import { useDndSensors } from 'src/hooks';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -157,7 +157,8 @@ export default function ArrangeView({ columns, setColumns }) {
               <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
-                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header, alignment for text position and font weight for bold text.
+                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header, alignment for text position and
+                  font weight for bold text.
                 </p>
               </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
@@ -169,6 +170,7 @@ export default function ArrangeView({ columns, setColumns }) {
                       id={col.id}
                       fieldLabel={col.fieldLabel}
                       width={col.width}
+                      isFullScreen={fullScreen || isMobile || isTablet}
                       setWidth={(w) => {
                         setColumnWidth(col.id, w);
                       }}
@@ -225,125 +227,126 @@ interface ItemProps {
   setShowBelowRow: (value: boolean) => void;
   fontWeight: string;
   setFontWeight: (weight: string) => void;
+  isFullScreen: boolean;
 }
 
-const RenderListItem = ({
-  index,
-  id,
-  fieldLabel,
-  width,
-  setWidth,
-  customLabel,
-  setCustomLabel,
-  alignment,
-  setAlignment,
-  showBelowRow = false,
-  setShowBelowRow,
-  fontWeight= null,
-  setFontWeight
-}: ItemProps) => {
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+const RenderListItem = memo(
+  ({
+    index,
     id,
-    data: {
-      index,
-      props: { index, id, fieldLabel }
-    }
-  });
+    fieldLabel,
+    width,
+    setWidth,
+    customLabel,
+    setCustomLabel,
+    alignment,
+    setAlignment,
+    showBelowRow = false,
+    setShowBelowRow,
+    fontWeight = null,
+    setFontWeight,
+    isFullScreen
+  }: ItemProps) => {
+    const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+      id,
+      data: {
+        index,
+        props: { index, id, fieldLabel, isFullScreen }
+      }
+    });
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition
-  };
+    const style = {
+      transform: CSS.Translate.toString(transform),
+      transition
+    };
 
-  return (
-    <li
-      style={style}
-      ref={setNodeRef}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+    return (
+      <li
+        style={style}
+        ref={setNodeRef}
+        className={`${
+          isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
         } list-none transition-colors`}
-    >
-      <div
-        key={id}
-        className={`grid grid-cols-[20px_1fr_650px] items-center gap-2 p-[8px_0px] [border-bottom:1px_solid_var(--common-border-color)] max-sm:grid-cols-[20px_1fr] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
       >
-        <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
-          <DragIndicator />
-        </ListItemIcon>
-        <ListItemText primary={fieldLabel} />
-        <div className="grid grid-cols-[1fr_1fr_1fr_1fr_1fr] items-center gap-2 max-sm:col-span-2 max-sm:ml-[28px]">
-          <TextField
-            variant="outlined"
-            margin="none"
-            size="small"
-            placeholder="Custom Label"
-            label="Custom Label"
-            fullWidth
-            value={customLabel}
-            onChange={(e) => {
-              setCustomLabel(e?.target?.value);
-            }}
-          />
-          <Autocomplete
-            size="small"
-            fullWidth
-            options={["bold"]}
-            getOptionLabel={(option) => startCase(option)}
-            value={fontWeight}
-            renderInput={(params) => (
-              <TextField {...params} placeholder="Font Weight" variant="outlined" margin="none" label="Font Weight" />
-            )}
-            onChange={(_, newValue) => {
-              setFontWeight(newValue);
-            }}
-          />
-          <Autocomplete
-            size="small"
-            fullWidth
-            options={["left", "center", "right"]}
-            getOptionLabel={(option) => startCase(option)}
-            value={alignment}
-            renderInput={(params) => (
-              <TextField {...params} placeholder="Alignment" variant="outlined" margin="none" />
-            )}
-            onChange={(_, newValue) => {
-              setAlignment(newValue);
-            }}
-          />
-          <TextField
-            variant="outlined"
-            margin="none"
-            size="small"
-            fullWidth
-            value={width}
-            onChange={(e) => {
-              setWidth(e?.target?.value);
-            }}
-            slotProps={{
-              input: {
-                endAdornment: '%'
-              }
-            }}
-            placeholder="Width"
-          />
-          <div className='min-w-[200px]'>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  size="small"
-                  name={'showBelowRow'}
-                  checked={showBelowRow}
-                  onChange={(e) => {
-                    setShowBelowRow(e.target.checked);
-                  }}
-                />
-              }
-              label="Show Below Row"
-              className="ml-2"
+        <div key={id} className={cn(`rounded-md border p-[8px_0px]`, index === 0 ? 'mt-0' : 'mt-2')}>
+          <div className="flex items-center gap-1">
+            <IconButton color="primary" size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
+              <DragIndicator fontSize="small" />
+            </IconButton>
+            <h6 className="text-base font-semibold">{fieldLabel}</h6>
+          </div>
+          <div
+            className={cn('grid gap-2 p-2', isFullScreen ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-2 md:grid-cols-3')}
+          >
+            <TextField
+              variant="outlined"
+              margin="none"
+              size="small"
+              placeholder="Custom Label"
+              label="Custom Label"
+              fullWidth
+              value={customLabel}
+              onChange={(e) => {
+                setCustomLabel(e?.target?.value);
+              }}
             />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={['bold']}
+              getOptionLabel={(option) => startCase(option)}
+              value={fontWeight}
+              renderInput={(params) => <TextField {...params} placeholder="Font Weight" variant="outlined" margin="none" label="Font Weight" />}
+              onChange={(_, newValue) => {
+                setFontWeight(newValue);
+              }}
+            />
+            <Autocomplete
+              size="small"
+              fullWidth
+              options={['left', 'center', 'right']}
+              getOptionLabel={(option) => startCase(option)}
+              value={alignment}
+              renderInput={(params) => <TextField {...params} placeholder="Alignment" variant="outlined" margin="none" />}
+              onChange={(_, newValue) => {
+                setAlignment(newValue);
+              }}
+            />
+            <TextField
+              variant="outlined"
+              margin="none"
+              size="small"
+              fullWidth
+              value={width}
+              onChange={(e) => {
+                setWidth(e?.target?.value);
+              }}
+              slotProps={{
+                input: {
+                  endAdornment: '%'
+                }
+              }}
+              placeholder="Width"
+            />
+            <div className="col-span-2 md:col-span-1">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    name={'showBelowRow'}
+                    checked={showBelowRow}
+                    onChange={(e) => {
+                      setShowBelowRow(e.target.checked);
+                    }}
+                  />
+                }
+                label="Show Below Row"
+                className="!ml-[0px]"
+              />
+            </div>
           </div>
         </div>
-      </div>
-    </li>
-  );
-};
+      </li>
+    );
+  }
+);
