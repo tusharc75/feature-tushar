@@ -503,7 +503,7 @@ const Steps = ({
       : { step: nextStep, stepData: stepData };
   };
 
-  const handleSubmit = async (values, step, autoComplete = false, nextStep = false) => {
+  const handleSubmit = async (values, step, status = null, nextStep = false) => {
     setIsSubmitting(true);
     let tempData = {
       uniqueId: selectedService?.uniqueId,
@@ -524,13 +524,23 @@ const Steps = ({
             handlePassFail(type, step);
           }
         }
-        if (autoComplete && !nextStep) {
-          handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+        if (status && !nextStep) {
+          if (status === WORKORDER_SERVICE_STEP_STATUS.skipped) {
+            handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), step);
+          }
+          else {
+            handlePassFail(status, step);
+          }
           setSelectedStep(null);
           setFieldDialog(false);
-        } else if (autoComplete && nextStep) {
-          if (autoComplete) {
-            handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
+        } else if (status && nextStep) {
+          if (status) {
+            if (status === WORKORDER_SERVICE_STEP_STATUS.skipped) {
+              handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), step);
+            }
+            else {
+              handlePassFail(status, step);
+            }
           }
           const nextStepData = getNextStep(step);
           if (!nextStepData?.stepData) {
