@@ -1,5 +1,5 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { Info, MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -48,6 +48,8 @@ import { BiFilterAlt } from 'react-icons/bi';
 import dayjs from 'dayjs';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
+import { FiExternalLink } from 'react-icons/fi';
 
 const LIMIT = 25;
 
@@ -286,8 +288,32 @@ const WorkOrderSupervisor = () => {
         accessor: 'serviceName',
         title: resources?.serviceMaster?.titleSingular,
         type: 'title',
-        link: (data) => `${routes?.serviceMasterDetail?.path}/${data?.service?.optionValue}`,
-        target: '_blank'
+        renderer: (data) => (
+          <div className="flex items-center gap-2 ml-6">
+            <h5 className={` line-clamp-1  `}>{data.serviceName || '--'}</h5>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(`${routes?.serviceMasterDetail?.path}/${data?.service?.optionValue}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+            <HtmlTooltip title="Preview PDF">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePdfPreview(data?.workOrder, user, toastConfig);
+                }}
+              >
+                <Info fontSize="small" color={'primary'} />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
+        )
       },
       {
         accessor: 'customerAccountName',
