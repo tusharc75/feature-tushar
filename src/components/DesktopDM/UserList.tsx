@@ -1,10 +1,13 @@
-import { Close, ExpandMore, Person } from '@mui/icons-material';
+import { Close, ExpandMore, Groups, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
 import { memo, useCallback, useMemo, useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 import { useStore } from 'src/StateProvider/fastContext';
+import { Link } from 'react-router-dom';
 
 type UserListProps = {
   state: UseDesktopDM;
@@ -12,7 +15,7 @@ type UserListProps = {
 
 const UserList = memo(
   ({ state }: UserListProps) => {
-    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser } = state;
+    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources } = state;
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const [inputValue, setInputValue] = useState('');
 
@@ -89,24 +92,35 @@ const UserList = memo(
             )}
           </div>
           <div className="buttons flex items-center gap-1">
-            <IconButton size="small">
-              <span
-                className={cn(
-                  mainWindow && mainWindow === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0',
-                  'origin-center transition-transform'
-                )}
-              >
-                <ExpandMore fontSize="small" />
-              </span>
-            </IconButton>
-            <IconButton onClick={closeMainWindow} size="small">
-              <Close fontSize="small" />
-            </IconButton>
+            <HtmlTooltip title={mainWindow && mainWindow === 'partial' ? 'Expand' : 'Collapse'}>
+              <IconButton size="small" color="primary">
+                <span
+                  className={cn(
+                    mainWindow && mainWindow === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0',
+                    'origin-center transition-transform'
+                  )}
+                >
+                  <ExpandMore fontSize="small" />
+                </span>
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title={'Close'}>
+              <IconButton onClick={closeMainWindow} size="small" color="primary">
+                <Close fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
           </div>
         </header>
-        <div className="search  border-b p-2">
-          <div className="relative">
+        <div className="search border-b p-2">
+          <div className="flex gap-2">
             <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+            <Link to={routes.workSpace.path} onClick={() => toggleMainWindow()}>
+              <HtmlTooltip title={resources?.workSpace?.titlePlural}>
+                <IconButton size="small" color="primary">
+                  <Groups fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </Link>
           </div>
         </div>
         <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
