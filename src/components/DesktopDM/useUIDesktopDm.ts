@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { isMobile as isMobileDevice } from 'react-device-detect';
 import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
+import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -41,6 +42,8 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 };
 
 const useUIDesktopDm = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setStore] = useStore((state) => state[HANDLE_OPEN_CHAT]);
   const {
     state: {
       permissions,
@@ -173,7 +176,7 @@ const useUIDesktopDm = () => {
   }, []);
 
   const toggleMainWindow = useCallback(() => {
-    setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'partial' ? 'fullyOpen' : 'partial' }));
+    setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' }));
   }, []);
 
   const closeMainWindow = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -194,6 +197,11 @@ const useUIDesktopDm = () => {
       return newData;
     });
   }, []);
+
+  useEffect(() => {
+    setStore({ [HANDLE_OPEN_CHAT]: toggleMainWindow });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toggleMainWindow]);
 
   return {
     ...uiState,
