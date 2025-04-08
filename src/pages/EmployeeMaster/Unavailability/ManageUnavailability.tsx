@@ -32,27 +32,21 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
   }, []);
 
   const fetchData = async () => {
-    // This is your default object for creating a new unavailability.
     const initialValues = {
       title: '',
-      startDate: new Date(),
-      endDate: new Date(),
+      startDate: null,
+      endDate: null,
       reasons: ''
     };
 
     try {
       if (dataId) {
-        // If there's a dataId, fetch the existing record
         const response = await axiosInstance().get(`${routes?.employeeMaster?.path}/unavailability/${dataId}`);
         const { data: fetchedData } = response.data;
-        // In your screenshot, the result is an array with one object:
-        // [{ title, reasons, startDate, endDate, technician, ... }]
 
         if (Array.isArray(fetchedData) && fetchedData.length) {
-          // Get the first record from the array
           const record = fetchedData[0];
 
-          // Convert date strings to Date objects
           const editData = {
             title: record.title || '',
             reasons: record.reasons || '',
@@ -62,11 +56,9 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
 
           setInitialData(editData);
         } else {
-          // If the API doesn't return an array or it's empty, use defaults
           setInitialData(initialValues);
         }
       } else {
-        // If there's no dataId, we are creating a new unavailability
         setInitialData(initialValues);
       }
     } catch (error) {
@@ -166,6 +158,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                       fullWidth
                       margin="dense"
                       size="small"
+                      minDate={values.startDate}
                       onChange={(value) => setFieldValue('endDate', value)}
                       onBlur={handleBlur}
                       error={touched.endDate && Boolean(errors.endDate)}

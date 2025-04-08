@@ -27,7 +27,7 @@ const Unavailability = ({ id }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, showFilteredRecordsOnly } = state;
   const [selectedResource, setSelectedResource] = useState(null);
-  const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState({open:false, dataId:null});
+  const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState({ open: false, dataId: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -126,33 +126,37 @@ const Unavailability = ({ id }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title="Edit">
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={false}
-              onClick={() => {
-                setShowUnavailibilityDialog({open:true, dataId: row.original._id});
-              }}
-            >
-              <EditIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title="Delete">
-            <span>
+          {permissions?.employeeMaster?.isUpdate && (
+            <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
-                aria-label="Delete"
+                aria-label="Details"
                 disabled={false}
                 onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
+                  setShowUnavailibilityDialog({ open: true, dataId: row.original._id });
                 }}
               >
-                <DeleteIcon fontSize="small" color="error" />
+                <EditIcon fontSize="small" color="primary" />
               </IconButton>
-            </span>
-          </HtmlTooltip>
+            </HtmlTooltip>
+          )}
+          {permissions?.employeeMaster?.isDelete && (
+            <HtmlTooltip title="Delete">
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={false}
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )}
         </>
       )
     }
@@ -211,7 +215,7 @@ const Unavailability = ({ id }) => {
   return (
     <Box>
       <Box pt={2}>
-        <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={() => setShowUnavailibilityDialog({open:true, dataId:null})}>
+        <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={() => setShowUnavailibilityDialog({ open: true, dataId: null })}>
           Add
         </ThemeButton>
       </Box>
@@ -230,7 +234,16 @@ const Unavailability = ({ id }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {showUnavailbiltyDialog.open && <ManageUnavailability onClose={() => setShowUnavailibilityDialog({open:false, dataId:null})} onSuccess={() => {fetchData(), setShowUnavailibilityDialog({open:false, dataId:null})}} id={id} dataId={showUnavailbiltyDialog.dataId}/>}
+      {showUnavailbiltyDialog.open && (
+        <ManageUnavailability
+          onClose={() => setShowUnavailibilityDialog({ open: false, dataId: null })}
+          onSuccess={() => {
+            fetchData(), setShowUnavailibilityDialog({ open: false, dataId: null });
+          }}
+          id={id}
+          dataId={showUnavailbiltyDialog.dataId}
+        />
+      )}
       {showDeleteConfirmBox ? (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
