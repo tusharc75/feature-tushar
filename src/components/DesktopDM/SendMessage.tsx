@@ -63,7 +63,6 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
             .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
             .then(({ data: { data } }) => {
               // onNewMessagePost?.(data?.ops?.[0]?._id);
-              // console.log(data);
               // socket.emit('newMessagePosted', { channelId: data?.ops?.[0]?.channel, messageId: data?.ops?.[0]?._id });
             });
         }

@@ -14,7 +14,7 @@ const ChatNotification = () => {
   if (isMobile) return null;
   return (
     <>
-      <HtmlTooltip title={'Chats'}>
+      <HtmlTooltip title={'BeConnected'}>
         <IconButton
           id="notificationButton"
           aria-label="settings"
