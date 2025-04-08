@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, Chip, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -310,6 +310,21 @@ const RepairJob = () => {
   const LeftSideContent = () => {
     return (
       <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.repairJob
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
         {accountDetails.accountId ? (
           <Chip
             className="ml-3"
@@ -408,12 +423,11 @@ const RepairJob = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.repairJob?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairJobName}`
-                : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.repairJob?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

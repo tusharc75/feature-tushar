@@ -1,7 +1,9 @@
+import { CircularProgress } from '@mui/material';
 import { groupBy } from 'lodash';
-import React, { Fragment, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, { Fragment, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { RenderAvatar, RenderButton, RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
+import PinnedMessages from 'src/components/DesktopDM/ShowMessage/PinnedMessages';
 import { Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn, displayDate } from 'src/constants/helpers';
@@ -23,18 +25,11 @@ export type ShowMessageRef = {
 
 let timeout: NodeJS.Timeout;
 
-const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state, openedChat }, ref) => {
+const ShowMessagesImpl = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data: panelData, state, openedChat }, ref) => {
   const { toastConfig, socket, user, readMessage, checkIsUser, currentlyEditingMessage } = state;
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const isUserData = checkIsUser(panelData);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pinndedMessges = useMemo(() => {
-    return messages
-      ? Object.values(messages)
-          .flat()
-          ?.filter((message) => message['pinned'] === true)
-      : [];
-  }, [messages]);
 
   const channelId = useMemo(() => {
     if (isUserData) return null;
@@ -185,23 +180,8 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
 
   return (
     <div ref={containerRef} className={cn('flex-grow scroll-smooth', currentlyEditingMessage ? 'overflow-hidden' : 'overflow-y-auto')}>
-      {/* Pinned messages */}
-      {pinndedMessges.length > 0 && (
-        <div className="sticky top-0 z-10 flex w-full items-center justify-between border-b bg-white p-2 text-sm font-semibold text-gray-900 dark:bg-slate-800 dark:text-white">
-          <span>Pinned Messages</span>
-          <span className="flex gap-2">
-            {pinndedMessges.map((message) => {
-              return (
-                <div onClick={() => focusMessage(message._id)} className="cursor-pointer" key={message._id}>
-                  <RenderAvatar message={message} key={message._id} />
-                </div>
-              );
-            })}
-          </span>
-        </div>
-      )}
-      {/* End of Pinned messages */}
-      {/* Start of Message content */}
+      <PinnedMessages messages={messages} focusMessage={focusMessage} />
+
       {messages ? (
         <div className={cn('messages relative')}>
           {currentlyEditingMessage && <div className="absolute inset-0 z-[1] bg-black/50 [backdrop-filter:blur(1px)] dark:bg-black/70" />}
@@ -236,13 +216,15 @@ const ShowMessages = React.forwardRef<ShowMessageRef, ShowMessagesProps>(({ data
           <p>Send Message</p>
         </div>
       ) : (
-        <div className="p-2">
-          <CommonSkeleton />
+        <div className="flex h-full items-center justify-center p-2">
+          <CircularProgress color="inherit" />
         </div>
       )}
       {/* End of Message content */}
     </div>
   );
 });
+
+const ShowMessages = memo(ShowMessagesImpl) as typeof ShowMessagesImpl;
 
 export default ShowMessages;

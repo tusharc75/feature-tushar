@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, Chip, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
@@ -253,6 +253,34 @@ const Sublease = () => {
     );
   };
 
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.sublease
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+        {referenceType ? <Chip
+          className="ml-3"
+          color="primary"
+          label={`Rental Job : ${referenceType}`}
+          onDelete={updateQueryParams} />
+          : null}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -280,9 +308,6 @@ const Sublease = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          leftSideContents={
-            referenceType ? <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} /> : null
-          }
           searchValue={search}
           onSearch={handleSearch}
           // rightSideContents
@@ -295,6 +320,7 @@ const Sublease = () => {
           }}
           isAddButtonVisible={permissions?.sublease?.isCreate}
           setQueryString={false}
+          leftSideContents={<LeftSideButtons />}
         />
 
         {columns ? (
@@ -329,12 +355,11 @@ const Sublease = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.subleaseName || ''}`
-              : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

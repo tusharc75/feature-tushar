@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import RecorderClass, { RecordedData } from './RecorderClass';
 import { IconButton } from '@mui/material';
 import { Mic, MicNoneOutlined } from '@mui/icons-material';
@@ -9,7 +9,7 @@ type RecorderProps = {
   onRecordFinish: (data: RecordedData) => void;
 };
 
-const Recorder = ({ onRecordFinish }: RecorderProps) => {
+const Recorder = memo(({ onRecordFinish }: RecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recorderInstance, setRecorderInstance] = useState<RecorderClass | null>(null);
   const [timeElapsed, setTimeElapsed] = useState('00:00');
@@ -63,6 +63,6 @@ const Recorder = ({ onRecordFinish }: RecorderProps) => {
       </div>
     </div>
   );
-};
+});
 
 export default Recorder;

@@ -39,6 +39,7 @@ import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import OnField from 'src/pages/FieldServiceOrder/OnField';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -239,7 +240,8 @@ const FieldTicketDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {fieldTicketData?.rentalJob && <CustomTab value={2}>On Field</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -290,11 +292,14 @@ const FieldTicketDetail = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
+        <TabPanel value={tabValue} index={2}>
+          <OnField rentalId={fieldTicketData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldTicket} />
+        </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 2}>
+              <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
                   resourcePolicyId={resourceData?._id}
