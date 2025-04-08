@@ -1,20 +1,21 @@
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Box } from '@mui/material';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ButtonMenu from 'src/components/ButtonMenu';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useDndSensors } from 'src/hooks';
+import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
 import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSidebar';
 import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
-import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
+import Provider from 'src/pages/TechnicianScheduler/Context';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
-function TechnicianScheduler() {
+function TechnicianSchedulerImpl() {
   const toastConfig = useContext(CustomToastContext);
   const [selectedResource, setSelectedReSource] = useState<TechnicianResource | null>(null);
   const technicianResources = useTechnicianResources(toastConfig, setSelectedReSource);
@@ -129,4 +130,9 @@ function TechnicianScheduler() {
   );
 }
 
+const TechnicianScheduler = () => (
+  <Provider>
+    <TechnicianSchedulerImpl />
+  </Provider>
+);
 export default TechnicianScheduler;
