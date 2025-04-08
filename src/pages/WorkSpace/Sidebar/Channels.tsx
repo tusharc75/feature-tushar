@@ -45,7 +45,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
   return (
     <>
       <SearchBox value={searchValue} onChange={handleFilter} />
-      <div className="">
+      <div className=" relative">
         <ThemeButton
           buttonType="transparent"
           onClick={() => {
@@ -107,7 +107,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
               ))}
             </List>
             {channels?.length === 0 && (
-              <div>
+              <div className="absolute left-0 right-0 top-1/2 text-center">
                 <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No channels found</h6>
               </div>
             )}

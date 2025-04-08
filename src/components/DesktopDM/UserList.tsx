@@ -123,15 +123,24 @@ const UserList = memo(
             </Link>
           </div>
         </div>
-        <section role="list" className="flex-grow overflow-y-auto overscroll-contain px-2 py-2">
-          {filteredData?.map((c) => {
-            const isUser = checkIsUser(c);
-            if (isUser) {
-              return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
-            } else {
-              return <RenderChatUser chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
-            }
-          })}
+        <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
+          {filteredData?.length > 0 ? (
+            filteredData?.map((c) => {
+              const isUser = checkIsUser(c);
+              if (isUser) {
+                return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
+              } else {
+                return <RenderChatUser chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
+              }
+            })
+          ) : (
+            <div className="absolute left-2 right-2 top-1/3 text-center">
+              <p className="select-none text-sm font-semibold text-gray-500 dark:text-gray-400">
+                No User found with keyword:
+                <pre className="mx-auto mt-1 block max-w-fit rounded-md border bg-gray-100 px-1 py-[2px] dark:bg-gray-800">"{inputValue}"</pre>
+              </p>
+            </div>
+          )}
         </section>
       </div>
     );
