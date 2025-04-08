@@ -11,7 +11,7 @@ export const useTechnicianResources = (
   setSelectedResource: React.Dispatch<React.SetStateAction<TechnicianResource>>
 ) => {
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
   const [technicianResources, setTechnicianResources] = useState<TechnicianResource[]>([]);
 
@@ -25,7 +25,7 @@ export const useTechnicianResources = (
         api: fieldTicket.api
       });
     }
-    if (permissions?.rentalManagement?.isRead) {
+    if (permissions?.rentalManagement?.isRead && user?.user?.brandPolicy?.rentalService) {
       data.push({
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
@@ -41,17 +41,17 @@ export const useTechnicianResources = (
       const {
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`, { cancelToken });
+      const newResources = [...allResources];
       if (data?.policy?.addTechnicians && permissions?.fieldServiceOrder?.isRead) {
-        const newResources = [...allResources];
         newResources.unshift({
           key: 'fieldServiceOrder',
           resource: sidebarResource.fieldServiceOrder,
           title: resources?.fieldServiceOrder?.titlePlural,
           api: fieldServiceOrder.api
         });
-        setSelectedResource(newResources[0]);
-        setTechnicianResources(newResources);
       }
+      setSelectedResource(newResources[0]);
+      setTechnicianResources(newResources);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
