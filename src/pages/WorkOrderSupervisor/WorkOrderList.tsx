@@ -23,7 +23,7 @@ import {
 } from 'src/constants/helpers';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import { handlePdfPreview, queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -156,6 +156,11 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
+                <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
+                  <IconButton size="small" title={'Preview PDF'} onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}>
+                    <Info fontSize="small" color={'primary'} />{' '}
+                  </IconButton>
+                </HtmlTooltip>
               </div>
             ) : (
               <NoDataCell />

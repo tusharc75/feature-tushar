@@ -40,6 +40,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
+import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -177,6 +178,18 @@ const WorkOrderTechnician = () => {
                   >
                     {row.original.serviceName}
                   </h5>
+                  <HtmlTooltip title="Preview PDF">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                      }}
+                    >
+                      <Info fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
                   <Box ml={1}>
                     {row?.original?.canPerformInfo ? (
                       <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>

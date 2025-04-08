@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,6 +19,7 @@ import axios, { CancelTokenSource } from 'axios';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { useHistory } from 'react-router-dom';
 
 const AssemblyOrder = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -51,7 +52,8 @@ const AssemblyOrder = () => {
 
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
-
+  const history = useHistory();
+  
   useEffect(() => {
     fetchColumns();
   }, []);
@@ -263,6 +265,25 @@ const AssemblyOrder = () => {
           }}
           isAddButtonVisible
           setQueryString
+          leftSideContents={
+            <>
+              {permissions?.planningView?.isRead && (
+                <Button
+                  className={'toggleButton-v1'}
+                  onClick={() => {
+                    history.push({
+                      pathname: routes.planningView.path,
+                      state: {
+                        resource: sidebarResource?.assemblyOrder
+                      }
+                    });
+                  }}
+                >
+                  <span>{`Calendar`}</span>
+                </Button>
+              )}
+            </>
+          }
         />
 
         {columns ? (

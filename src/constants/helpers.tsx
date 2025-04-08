@@ -200,11 +200,6 @@ export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
-export const disassemblyOrderSteps: stepInterface[] = [
-  { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Work Order', title: 'Work Order', icon: 'workOrder' }
-];
-
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'Skipped', 'In-Progress By Other'] as const;
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
@@ -298,7 +293,6 @@ export const sidebarResource = {
   reminder: 'Reminder',
   calendar: 'Calendar',
   dashboard: 'Dashboard',
-  disassemblyOrder: 'Disassembly Order',
   budget: 'Budget',
   marketSegment: 'Market Segment',
   quotePdfTemplate: 'Quote Pdf Template',
@@ -405,6 +399,7 @@ export const sidebarResource = {
   serializedPackages: 'Serialized Packages',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
+  disassemblyOrder: 'Disassembly Order',
   packageInventory: 'Package Inventory',
   scheduleAndDispatch: 'Schedule And Dispatch',
   iotChart: 'Iot Chart',
@@ -536,11 +531,6 @@ export const repairJob = {
 export const expenses = {
   resource: 'expenses',
   api: '/expenses'
-};
-
-export const disassemblyOrder = {
-  resource: 'disassemblyOrder',
-  api: '/disassembly-order'
 };
 
 export const expenseReport = {

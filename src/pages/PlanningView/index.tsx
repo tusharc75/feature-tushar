@@ -162,6 +162,15 @@ function PlanningView() {
       fieldName: 'technician',
       start: 'startDate',
       end: 'endDate'
+    },
+    {
+      key: 'assemblyOrder',
+      resource: sidebarResource.assemblyOrder,
+      title: resources?.assemblyOrder?.titlePlural,
+      path: routes.assemblyOrderDetail.path,
+      fieldName: 'assemblyOrderNumber',
+      start: 'createDate',
+      end: 'estimateCompleteDate'
     }
   ];
 
