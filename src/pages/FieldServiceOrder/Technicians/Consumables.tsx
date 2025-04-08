@@ -389,7 +389,7 @@ const Consumables = ({
           onClick={() => {
             setConsumablesDialog(true);
           }}
-          id={'add-existing-service-menu-item'}
+          id={'add-existing-products-menu-item'}
         >
           Add Products/Consumables
         </MenuItem>
