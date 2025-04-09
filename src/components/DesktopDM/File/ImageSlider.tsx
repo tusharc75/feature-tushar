@@ -19,7 +19,7 @@ const ImageSlider = ({
   const handleDelete = () => {
     if (typeof onDelete === 'function') {
       onDelete(files[activeIndex]);
-      if (!hasToDownload) setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
+      setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
     }
   };
   const images = useMemo(() => files.map((f) => f.url), [files]);
@@ -43,7 +43,8 @@ const ImageSlider = ({
         resolveUrl={resolveUrl}
         carouselProps={{
           onChange: (i) => setActiveIndex(i),
-          index: activeIndex
+          index: activeIndex,
+          animation: 'fade'
         }}
         headerComponent={
           <div className="flex items-center justify-end gap-1">
