@@ -1,6 +1,6 @@
 import { camelCase } from 'lodash';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import { checkIsAllowedToDelete, disassemblyOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, serviceCategory } from 'src/constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -9,7 +9,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable, cloneDisable } from 'src/constants/messageHelpers';
 import { Box, IconButton, MenuItem } from '@mui/material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
@@ -17,11 +17,12 @@ import CustomContainer from 'src/components/CustomContainer';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { ManageDiassemblyOrder } from 'src/pages/DisassemblyOrder/ManageDiassemblyOrder';
+import { ManageServiceCategory } from 'src/pages/ServiceCategory/ManageServiceCategory';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-const DisassemblyOrder = () => {
-  const renderedFrom = camelCase(sidebarResource?.disassemblyOrder);
+const ServiceCategory = () => {
+
+  const renderedFrom = camelCase(sidebarResource?.serviceCategory);
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -30,22 +31,12 @@ const DisassemblyOrder = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [showManageDiassemblyOrder, setShowManageDiassemblyOrder] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageCategory, setshowManageCategory] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.disassemblyOrder));
-  const types = [
-    {
-      key: `My ${resources?.disassemblyOrder?.titlePlural}`,
-      value: 1
-    },
-    {
-      key: `All ${resources?.disassemblyOrder?.titlePlural}`,
-      value: 2
-    }
-  ];
+
 
   useEffect(() => {
     fetchGridColumns();
@@ -55,13 +46,13 @@ const DisassemblyOrder = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedType, selectedEntity, showFilteredRecordsOnly]);
+  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.disassemblyOrder}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceCategory}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.disassemblyOrderDetail?.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes?.serviceCategoryDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -76,36 +67,32 @@ const DisassemblyOrder = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={permissions?.disassemblyOrder?.isCreate ? 'Clone' : cloneDisable}>
+        <HtmlTooltip title={permissions?.serviceCategory?.isCreate ? 'Clone' : cloneDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Clone"
-              disabled={permissions?.disassemblyOrder?.isCreate ? false : true}
+              disabled={permissions?.serviceCategory?.isCreate ? false : true}
               onClick={() => {
-                setShowManageDiassemblyOrder({ open: true, isClone: true, idToClone: row.original._id });
+                setshowManageCategory({ open: true, isClone: true, idToClone: row.original._id });
               }}
             >
-              <FileCopyIcon fontSize="small" color={permissions?.disassemblyOrder?.isCreate ? 'primary' : 'disabled'} />
+              <FileCopyIcon fontSize="small" color={permissions?.serviceCategory?.isCreate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip
-          title={row?.original?.canDelete ? 'Delete' : row?.original?.status === 'New' ? deleteDisable : 'You can not delete because its in progress'}
-        >
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}     >
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+          </IconButton>
         </HtmlTooltip>
       </>
     )
@@ -113,10 +100,6 @@ const DisassemblyOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
-
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -151,16 +134,12 @@ const DisassemblyOrder = () => {
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${disassemblyOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+      const response: any = await axiosInstance().get(`${serviceCategory.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.count;
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = false;
-        finalObject['canDelete'] =
-          permissions?.disassemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.disassemblyOrder, finalObject?.ownerId) &&
-          u?.canDelete;
+        finalObject['canDelete'] = permissions?.serviceCategory?.isDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count });
@@ -177,11 +156,11 @@ const DisassemblyOrder = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleDeleteDisassemblyOrder = async () => {
+  const handleDeleteCategory = async () => {
     let recordsToDelete = deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map((u) => u._id);
     setDeleteLoading(true);
     try {
-      const response = await axiosInstance().put(`${disassemblyOrder.api}/remove`, { ids: recordsToDelete });
+      const response = await axiosInstance().put(`${serviceCategory.api}/remove`, { ids: recordsToDelete });
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -197,6 +176,7 @@ const DisassemblyOrder = () => {
       setDeleteLoading(false);
     }
   };
+
   const ActionMenuItems = () => {
     return (
       <MenuItem
@@ -218,11 +198,11 @@ const DisassemblyOrder = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.disassemblyOrder, title: resources?.disassemblyOrder?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.serviceCategory, title: resources?.serviceCategory?.titlePlural }]} />
         <ImportExportLinks
-          permissions={permissions.disassemblyOrder}
-          module={resources?.disassemblyOrder?.titlePlural}
-          api={disassemblyOrder.api}
+          permissions={permissions.serviceCategory}
+          module={resources?.serviceCategory?.titlePlural}
+          api={serviceCategory.api}
           afterImportCompleted={() => fetchData()}
           isExportAllOrSomeFeature={true}
           total={rowCount}
@@ -233,23 +213,20 @@ const DisassemblyOrder = () => {
           }}
           additionalParams={getQueryString(true)}
           asyncExport={true}
-          resource={sidebarResource.disassemblyOrder}
+          resource={sidebarResource.serviceCategory}
         />
       </div>
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          toggleButtonList={types}
           isActionButtonVisible={true}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setShowManageDiassemblyOrder({ open: true, isClone: false, idToClone: null });
+            setshowManageCategory({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={permissions?.disassemblyOrder?.isCreate}
+          isAddButtonVisible={permissions?.serviceCategory?.isCreate}
         />
         {columns ? (
           <CustomReactTable
@@ -260,7 +237,7 @@ const DisassemblyOrder = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            resource={sidebarResource.disassemblyOrder}
+            resource={sidebarResource.serviceCategory}
             showFilters={true}
           />
         ) : (
@@ -268,29 +245,28 @@ const DisassemblyOrder = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.disassemblyOrder.titleSingular?.toLowerCase()} :
-                      ${deleteRecord?.disassemblyOrderNumber}`
-              : `selected ${resources?.disassemblyOrder?.titlePlural?.toLowerCase()}`
+              ? `${resources?.serviceCategory.titleSingular?.toLowerCase()} :
+                      ${deleteRecord?.serviceCategory}`
+              : `selected ${resources?.serviceCategory?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
             }}
-            onOk={handleDeleteDisassemblyOrder}
+            onOk={handleDeleteCategory}
             okBtnLoading={deleteLoading}
           />
         ) : null}
       </CustomContainer>
-      {showManageDiassemblyOrder.open && (
-        <ManageDiassemblyOrder
-          isClone={showManageDiassemblyOrder.isClone}
-          disassemblyOrderId={showManageDiassemblyOrder.idToClone}
-          onClose={() => setShowManageDiassemblyOrder({ open: false, isClone: false, idToClone: null })}
+      {showManageCategory.open && (
+        <ManageServiceCategory
+          isClone={showManageCategory.isClone}
+          serviceCategoryId={showManageCategory.idToClone}
+          onClose={() => setshowManageCategory({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => { }}
           isRedirectToDetailPage={true}
         />
@@ -299,4 +275,4 @@ const DisassemblyOrder = () => {
   );
 };
 
-export default DisassemblyOrder;
+export default ServiceCategory;

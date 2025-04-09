@@ -1,14 +1,15 @@
 import { AttachFile } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import React, { useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { getFileIconData } from 'src/assets/fileIcons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AttachedFileType } from 'src/components/DesktopDM/File/FilePreview';
 
 type AttachmentProps = {
   onFileInput: (data: AttachedFileType[]) => void;
 };
 
-const AttachmentInput = ({ onFileInput }: AttachmentProps) => {
+const AttachmentInput = memo(({ onFileInput }: AttachmentProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files);
@@ -35,11 +36,13 @@ const AttachmentInput = ({ onFileInput }: AttachmentProps) => {
         ref={inputRef}
         accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, audio/*, video/*, .zip, .rar, .7z, .tar, .gz"
       />
-      <IconButton size="small" color="primary" onClick={() => inputRef.current?.click()}>
-        <AttachFile fontSize="small" />
-      </IconButton>
+      <HtmlTooltip title={'Add Files'}>
+        <IconButton size="small" color="primary" onClick={() => inputRef.current?.click()}>
+          <AttachFile fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
     </>
   );
-};
+});
 
 export default AttachmentInput;

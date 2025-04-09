@@ -40,6 +40,7 @@ import { getPricingConditions, getPricingValue, getTaxList } from 'src/component
 import AddQuotationDataDialog from './AddQuotationDataDialog';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
+import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
@@ -61,11 +62,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const [openLogDialog, setOpenLogDialog] = useState({ open: false, product: '', uniqueId: null, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [isSubmitting, setSubmitting] = useState(false);
-  const [assignQuotationDataDialog, setAssignQuotationDataDialog] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [addDataFromFieldServiceOrder, setAddDataFromFieldServiceOrder] = useState(false);
+
+  const [addRentalJobDataDialog, setAddRentalJobDataDialog] = useState(false);
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
+  const [addFieldServiceOrderDataDialog, setAddFieldServiceOrderDataDialog] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -382,19 +385,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       }
       setConsumablesDialog(false);
-      setAssignQuotationDataDialog(false);
       fetchData();
       setSubmitting(false);
     } else {
       const material: any = [];
-      if (assignQuotationDataDialog || addDataFromFieldServiceOrder) {
+      if (addQuotationDataDialog || addFieldServiceOrderDataDialog) {
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
             const obj: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
-            if (assignQuotationDataDialog) {
+            if (addQuotationDataDialog) {
               obj.isQuotation = true;
             }
-            if (addDataFromFieldServiceOrder) {
+            if (addFieldServiceOrderDataDialog) {
               obj.isFieldServiceOrder = true;
             }
             material.push(obj);
@@ -404,11 +406,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
       else {
         var taxCodeData: any = null;
-        if (fieldTicketData?.taxCode) {
-          const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
-          if (taxCodeOptions?.length) {
-            taxCodeData = taxCodeOptions[0];
-          }
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+        if (taxCodeOptions?.length) {
+          taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
           const element: any = {};
@@ -462,8 +462,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           message: data?.message
         });
         setConsumablesDialog(false);
-        setAssignQuotationDataDialog(false);
-        setAddDataFromFieldServiceOrder(false);
+        setAddQuotationDataDialog(false);
+        setAddFieldServiceOrderDataDialog(false);
         fetchData();
         fetchFieldTicketData();
         setSubmitting(false);
@@ -671,22 +671,34 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         >
           {`Add Products/Consumables`}
         </MenuItem>
-        {resourcePolicy?.showQuotationAddMaterial && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && !isOffline && (
+        {!isOffline && resourcePolicy?.showRentalAddMaterial && fieldTicketData?.rentalJob?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
-                setAssignQuotationDataDialog(true);
+                setAddRentalJobDataDialog(true);
               }}
             >
-              {`Add Consumables From ${resources?.quotation?.titleSingular}`}
+              {`Add Consumables From ${resources?.rentalManagement?.titleSingular}`}
             </MenuItem>
           </>
         )}
-        {!isOffline && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
+        {!isOffline && resourcePolicy?.showQuotationAddMaterial
+          && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && (
+            <>
+              <MenuItem
+                onClick={() => {
+                  setAddQuotationDataDialog(true);
+                }}
+              >
+                {`Add Consumables From ${resources?.quotation?.titleSingular}`}
+              </MenuItem>
+            </>
+          )}
+        {!isOffline && resourcePolicy?.showFieldServiceOrderAddMaterial && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
           <>
             <MenuItem
               onClick={() => {
-                setAddDataFromFieldServiceOrder(true);
+                setAddFieldServiceOrderDataDialog(true);
               }}
             >
               {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
@@ -859,23 +871,38 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           okBtnLoading={isDeleting}
         />
       )}
-      {assignQuotationDataDialog && (
-        <AddQuotationDataDialog
+      {addRentalJobDataDialog && (
+        <AddRentalDataDialog
+          materialType={MATERIAL_TYPE.product}
           onClose={() => {
-            setAssignQuotationDataDialog(false);
+            setAddRentalJobDataDialog(false);
           }}
           onSuccess={(rows) => {
             handleSubmit(rows);
           }}
-          fieldTicketData={fieldTicketData}
+          rentalId={fieldTicketData?.rentalJob?.optionValue}
+          currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {addQuotationDataDialog && (
+        <AddQuotationDataDialog
+          onClose={() => {
+            setAddQuotationDataDialog(false);
+          }}
+          onSuccess={(rows) => {
+            handleSubmit(rows);
+          }}
+          referenceData={fieldTicketData}
+          isSubmitting={isSubmitting}
+          materialType={MATERIAL_TYPE.product}
           ids={dataRows?.map((row) => row?.materialId)}
         />
       )}
-      {addDataFromFieldServiceOrder && (
+      {addFieldServiceOrderDataDialog && (
         <AddFieldServiceOrderDataDialog
           onClose={() => {
-            setAddDataFromFieldServiceOrder(false);
+            setAddFieldServiceOrderDataDialog(false);
           }}
           fieldTicketData={fieldTicketData}
           isSubmitting={isSubmitting}

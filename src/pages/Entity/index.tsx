@@ -16,7 +16,7 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import CustomContainer from '../../components/CustomContainer';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { CustomDialogTransition, entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, entity, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';

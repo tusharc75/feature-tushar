@@ -1,4 +1,4 @@
-import { Box, Chip, MenuItem } from '@mui/material';
+import { Box, Button, Chip, MenuItem } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -338,6 +338,28 @@ const ProjectSales: FC = () => {
     );
   };
 
+  const LeftSideContent = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.projectSales
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -365,20 +387,17 @@ const ProjectSales: FC = () => {
           onToggle={handleFilter}
           selectedType={selectedType}
           setSelectedType={setselectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
+          leftSideContents={<LeftSideContent />}
           addButtonOnclick={() => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.projectSales?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -401,12 +420,11 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.projectName}`
-              : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

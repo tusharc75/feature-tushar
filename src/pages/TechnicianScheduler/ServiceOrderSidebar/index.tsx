@@ -3,12 +3,14 @@ import { memo, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { cn, fieldServiceOrder, fieldTicket, rentalManagement } from 'src/constants/helpers';
+import { cn, rentalManagement } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
+import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { isArray, isObject } from 'lodash';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -17,8 +19,9 @@ type ServiceOrderSidebarProps = {
   handleSucess: () => void;
   handleClose: () => void;
   setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
-  setRefresh: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
+  refreshServiceData: boolean;
+  viewType: string;
 };
 type DialogData = {
   open: boolean;
@@ -33,47 +36,51 @@ const ServiceOrderSidebarImpl = ({
   handleClose,
   handleSucess,
   setSelectedRecords,
-  setRefresh,
   isMobile,
-  unAssignTechnicianDialog
+  unAssignTechnicianDialog,
+  refreshServiceData,
+  viewType
 }: ServiceOrderSidebarProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement>(null);
   const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
+  const { leftSearchValue } = useTechnicianContext();
 
-  const fetchData = (selectedResource: TechnicianResource, cancelToken?: CancelToken) => {
+  const fetchData = (selectedResource: TechnicianResource, search?: string, cancelToken?: CancelToken) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
-    axiosInstance()
-      .get(`/technician-scheduler/un-assign-service?type=${selectedResource.resource}`, { cancelToken })
-      .then(({ data: { data } }) => {
-        const rows: any = [];
-        data?.forEach((ele, index) => {
-          const obj: any = { ...ele };
-          obj.index = index + 1;
-          obj._id = ele?.service?.uniqueId || ele._id;
-          obj.resourceId = ele._id;
-          obj.warehouse = ele?.warehouse?.optionValue;
-          obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
-          obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
-          obj.serviceName = ele?.service?.serviceName;
-          obj.serviceId = ele?.service?._id;
-          obj.competencyType = ele?.service?.competencyType?.optionLabel;
-          obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
-          obj.service = ele?.service;
-          obj.customerAccount = ele?.customerAccount?.optionLabel;
-          obj.customerAccountId = ele?.customerAccount?.optionValue;
-          obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
-          obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
-          obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
-          rows.push(obj);
-        });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
+    let api = `/technician-scheduler/un-assign-service?type=${selectedResource.resource}`;
+    api += `&serviceWise=${viewType === 'job' ? 0 : 1}`;
+    if (search) {
+      api += `&search=${encodeURIComponent(search)}`;
+    }
+    axiosInstance().get(api, { cancelToken }).then(({ data: { data } }) => {
+      const rows: any = [];
+      data?.forEach((ele, index) => {
+        const obj: any = { ...ele };
+        obj.index = index + 1;
+        obj._id = ele?.service?.uniqueId || ele._id;
+        obj.resourceId = ele._id;
+        obj.warehouse = ele?.warehouse?.optionValue;
+        obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
+        obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
+        obj.serviceName = ele?.service?.serviceName;
+        obj.serviceId = ele?.service?._id;
+        obj.competencyType = ele?.service?.competencyType?.optionLabel;
+        obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
+        obj.service = ele?.service;
+        obj.customerAccount = ele?.customerAccount?.optionLabel;
+        obj.customerAccountId = ele?.customerAccount?.optionValue;
+        obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
+        obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
+        obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
+        rows.push(obj);
+      });
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -87,33 +94,16 @@ const ServiceOrderSidebarImpl = ({
       element.uniqueId = resourceData?._id;
       element.service = resourceData?.service?._id;
       element.warehouse = resourceData?.warehouse;
-      if (selectedResource?.key === 'fieldTicket') {
-        element.fieldTicket = resourceData?.resourceId;
-        element.startDate = resourceData?.service?.estimateStartDate;
-        element.endDate = resourceData?.service?.estimateEndDate;
-      } else if (selectedResource?.key === 'rentalJob') {
-        element.rentalJob = resourceData?.resourceId;
-        element.startDate = resourceData?.estimateStartDate;
-        element.endDate = resourceData?.estimateEndDate;
-      } else {
-        element.fieldServiceOrder = resourceData?.resourceId;
-        element.estimateStartDate = resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.estimateEndDate;
-      }
+      element.referenceId = resourceData?.resourceId;
+      element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
+      element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
       technician.push(element);
     });
-    const baseApi =
-      selectedResource?.key === 'fieldTicket'
-        ? fieldTicket.api
-        : selectedResource?.key === 'rentalJob'
-          ? rentalManagement.api
-          : selectedResource?.key === 'fieldServiceOrder'
-            ? fieldServiceOrder.api
-            : '';
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${baseApi}/technician`, { technician: technician })
+      .post(`${selectedResource.api}/technician`, { technician: technician })
       .then(() => {
+        fetchData(selectedResource);
         handleSucess();
         setOpenTechnicianDialog({ open: false, data: null });
         setIsSubmitting(false);
@@ -132,7 +122,6 @@ const ServiceOrderSidebarImpl = ({
         fetchData(selectedResource);
         handleSucess();
         setIsSubmitting(false);
-        setRefresh((prev) => !prev);
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -143,13 +132,13 @@ const ServiceOrderSidebarImpl = ({
   useEffect(() => {
     const cancelToken = axios.CancelToken.source();
     if (selectedResource) {
-      fetchData(selectedResource, cancelToken.token);
+      fetchData(selectedResource, leftSearchValue, cancelToken.token);
     }
     return () => {
       cancelToken.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedResource]);
+  }, [selectedResource, refreshServiceData, leftSearchValue, viewType]);
 
   return (
     <>
@@ -166,11 +155,13 @@ const ServiceOrderSidebarImpl = ({
           dispatch={dispatch}
           setSelectedRecords={setSelectedRecords}
           state={state}
+          viewType={viewType}
           setOpenTechnicianDialog={setOpenTechnicianDialog}
         />
       </div>
       {assignTechnicianDialog.open && (
         <AssignTechnicianDialog
+          selectedResource={selectedResource}
           technicianData={assignTechnicianDialog.technicianData}
           selectedServiceOrder={[assignTechnicianDialog.service]}
           handleSucess={() => {
@@ -184,14 +175,15 @@ const ServiceOrderSidebarImpl = ({
       )}
       {openTechnicianDialog.open && (
         <AssignEmployeeDialog
-          reference={selectedResource.key}
           onSuccess={(data) => {
             handleAssign(data, openTechnicianDialog.data);
           }}
           handleClose={() => {
             setOpenTechnicianDialog({ open: false, data: null });
           }}
-          defaultCompetency={openTechnicianDialog?.data?.service?.competencyType ? [openTechnicianDialog?.data?.service?.competencyType] : []}
+          defaultCompetencyType={openTechnicianDialog?.data?.service?.competencyType ?
+            isObject(openTechnicianDialog?.data?.service?.competencyType) ? [openTechnicianDialog?.data?.service?.competencyType] :
+              isArray(openTechnicianDialog?.data?.service?.competencyType) ? openTechnicianDialog?.data?.service?.competencyType : [] : []}
           warehouse={openTechnicianDialog.data?.warehouse}
           ids={[]}
           isSubmitting={isSubmitting}

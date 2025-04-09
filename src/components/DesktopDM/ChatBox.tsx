@@ -1,9 +1,11 @@
 import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
-import { useMemo, useRef } from 'react';
+import { memo, useMemo, useRef } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessage';
-import { Chat, OpenedChat, UseDesktopDM } from 'src/components/DesktopDM/types';
+import { Chat, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import { checkIsUser } from 'src/components/DesktopDM/useDesktopDM';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
@@ -16,11 +18,11 @@ type ChatBoxProps = {
 const initialClass = `h-[--partially-openned-container-h] w-[--partially-openned-chatbox-w] flex-[0_0_var(--partially-openned-chatbox-w)]`;
 const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbox-w] flex-[0_0_var(--fully-openned-chatbox-w)]`;
 
-const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
-  const { users, chats, handleToggleChatWindow, closeChatBox, checkIsUser } = state;
+const ChatBox = memo(({ state, openedChat }: ChatBoxProps) => {
+  const { users, chats, handleToggleChatWindow, closeChatBox, isMobile } = state;
   const showMessageRef = useRef<ShowMessageRef>(null);
-  const [onlineUsers] = useStore((state) => state.onlineUsers);
-  const { className } = useDelayedClass(initialClass, delayedClass, 0);
+
+  const { className } = useDelayedClass(initialClass, delayedClass, 5);
   const data = useMemo(() => {
     if (openedChat.type === 'chat') {
       return chats.find((c) => c._id === openedChat.id);
@@ -30,18 +32,50 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
   }, [users, chats, openedChat]);
   if (!data) return null;
 
-  const isUserData = checkIsUser(data);
-  const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
-
   return (
     <div
       className={cn(
         'mr-[--chatbox-gap] flex  h-0 flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
         openedChat.open === 'partial'
           ? 'h-[--partially-openned-container-h] w-[--partially-openned-chatbox-w] flex-[0_0_var(--partially-openned-chatbox-w)]'
-          : className
+          : className,
+        isMobile ? 'h-full' : ''
       )}
     >
+      <ChatBoxHeader
+        closeChatBox={closeChatBox}
+        isMobile={isMobile}
+        data={data}
+        handleToggleChatWindow={handleToggleChatWindow}
+        openedChat={openedChat}
+      />
+      <ShowMessages data={data} state={state} ref={showMessageRef} openedChat={openedChat} />
+      <SendMessage state={state} data={data} onNewMessagePost={showMessageRef.current?.onNewMessagePost} />
+    </div>
+  );
+});
+
+export default ChatBox;
+
+const ChatBoxHeader = memo(
+  ({
+    data,
+    handleToggleChatWindow,
+    openedChat,
+    closeChatBox,
+    isMobile
+  }: {
+    data: User | Chat;
+    handleToggleChatWindow: (id: string) => void;
+    openedChat: OpenedChat;
+    closeChatBox: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => void;
+    isMobile: boolean;
+  }) => {
+    const isUserData = checkIsUser(data);
+    const [onlineUsers] = useStore((state) => state.onlineUsers);
+    const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
+
+    return (
       <header
         className="flex h-[--partially-openned-container-h] cursor-pointer items-center justify-between border-b p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
         onClick={() => handleToggleChatWindow(openedChat.id)}
@@ -81,20 +115,22 @@ const ChatBox = ({ state, openedChat }: ChatBoxProps) => {
           )}
         </div>
         <div className="buttons flex items-center gap-1">
-          <IconButton size="small">
-            <span className={cn(openedChat.open === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0', 'origin-center transition-transform')}>
-              <ExpandMore fontSize="small" />
-            </span>
-          </IconButton>
-          <IconButton onClick={(e) => closeChatBox(e, openedChat.id)} size="small">
-            <Close fontSize="small" />
-          </IconButton>
+          {!isMobile && (
+            <HtmlTooltip title={openedChat.open === 'partial' ? 'Expand' : 'Collapse'}>
+              <IconButton size="small" color="primary">
+                <span className={cn(openedChat.open === 'partial' ? '[transform:rotate(180deg)]' : 'rotate-0', 'origin-center transition-transform')}>
+                  <ExpandMore fontSize="small" />
+                </span>
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <HtmlTooltip title={'Close'}>
+            <IconButton onClick={(e) => closeChatBox(e, openedChat.id)} size="small" color="primary">
+              <Close fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
         </div>
       </header>
-      <ShowMessages data={data} state={state} ref={showMessageRef} openedChat={openedChat} />
-      <SendMessage state={state} data={data} onNewMessagePost={showMessageRef.current?.onNewMessagePost} />
-    </div>
-  );
-};
-
-export default ChatBox;
+    );
+  }
+);

@@ -9,7 +9,6 @@ import {
   CustomDialogTransition,
   employeeMaster,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';
@@ -20,7 +19,8 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
+const AssignEmployeeDialog = ({ isSubmitting = false, onSuccess, handleClose, ids = [], defaultCompetencyType = [], extraStaticFilter = [], warehouse = null }) => {
+
   const renderedFrom = `${sidebarResource.employeeMaster}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -37,7 +37,7 @@ const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, hand
   const [competencyOptions, setCompetencyOptions] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
-  const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
+  const [selectedCompetencyType, setSelectedCompetencyType] = useState(defaultCompetencyType?.every((e) => e?.optionLabel) ? defaultCompetencyType : []);
 
   useEffect(() => {
     fetchGridColumns();
@@ -52,7 +52,7 @@ const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, hand
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency, selectedWarehouse]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetencyType, selectedWarehouse]);
 
   const fetchOptionsData = () => {
     axiosInstance()
@@ -119,10 +119,10 @@ const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, hand
     const updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
 
-    if (selectedCompetency?.length > 0) {
+    if (selectedCompetencyType?.length > 0 && permissions?.competencyType?.isRead) {
       updatedFilterByIds.push({
         field: 'competencyType',
-        term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
+        term: { $in: selectedCompetencyType?.map((e) => e?.optionValue) }
       });
     }
     if (selectedWarehouse && selectedWarehouse !== '') {
@@ -197,11 +197,11 @@ const AssignEmployeeDialog = ({ reference, isSubmitting = false, onSuccess, hand
             options={competencyOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
             onChange={(e, val) => {
-              setSelectedCompetency(val);
+              setSelectedCompetencyType(val);
             }}
             multiple
             size={'small'}
-            value={selectedCompetency}
+            value={selectedCompetencyType}
             filterSelectedOptions={true}
             renderInput={(params) => (
               <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />

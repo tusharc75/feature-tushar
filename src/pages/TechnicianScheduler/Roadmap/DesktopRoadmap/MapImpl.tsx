@@ -3,14 +3,14 @@ import { IconButton } from '@mui/material';
 import MapView from 'src/pages/TechnicianScheduler/Map';
 
 type MapImplProps = {
-  selected: string | null;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  selected: string[];
+  setSelected: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 const MapImpl = ({ selected, setSelected }: MapImplProps) => {
   return (
     <div className="relative h-[--container-h] w-full overflow-auto">
-      <MapView technician={selected} />
+      <MapView userIds={selected} />
       <IconButton
         onClick={(e) => {
           e.preventDefault();

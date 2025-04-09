@@ -21,6 +21,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
+import Unavailability from 'src/pages/EmployeeMaster/Unavailability';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -203,6 +204,7 @@ const EmployeeMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'History'} />
+          <CustomTab value={2} label={'Unavailability'} />
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -216,6 +218,9 @@ const EmployeeMasterDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <History id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Unavailability id={id}/>
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&

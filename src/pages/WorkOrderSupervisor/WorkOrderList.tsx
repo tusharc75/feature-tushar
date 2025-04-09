@@ -23,10 +23,11 @@ import {
 } from 'src/constants/helpers';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import { handlePdfPreview, queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 type Props = {
   filterQuery: any;
@@ -174,9 +175,30 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             ) : (
               <NoDataCell />
             )
+        },
+        {
+          accessor: 'action',
+          Header: 'Actions',
+          minWidth: 100,
+          width: 100,
+          sticky: 'right',
+          disableFilters: true,
+          disableSortBy: true,
+          canDrag: false,
+          Cell: ({ row }) => (
+            <>
+              <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
+                <IconButton
+                  size="small"
+                  onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}
+                >
+                  <PictureAsPdfIcon fontSize={'small'} color='primary' />
+                </IconButton>
+              </HtmlTooltip>
+            </>
+          )
         }
       ];
-
       setWorkOrderColumns([...fixedInitialColumns, ...newColumns]);
     };
 

@@ -1,20 +1,21 @@
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Box } from '@mui/material';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ButtonMenu from 'src/components/ButtonMenu';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useDndSensors } from 'src/hooks';
+import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
 import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSidebar';
 import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
-import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
+import Provider from 'src/pages/TechnicianScheduler/Context';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
-function TechnicianScheduler() {
+function TechnicianSchedulerImpl() {
   const toastConfig = useContext(CustomToastContext);
   const [selectedResource, setSelectedReSource] = useState<TechnicianResource | null>(null);
   const technicianResources = useTechnicianResources(toastConfig, setSelectedReSource);
@@ -22,7 +23,10 @@ function TechnicianScheduler() {
   const [unAssignTechnicianDialog, setUnAssignTechnicianDialog] = useState({ open: false, data: null });
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
-  const [refresh, setRefresh] = useState(false);
+  const [refreshRoadMap, setRefreshRoadMap] = useState(false);
+  const [refreshServiceData, setRefreshServiceData] = useState(false);
+  const [viewType, setViewType] = useState<any>('job');
+
   const sensors = useDndSensors();
 
   const onDragStart = (event: DragStartEvent) => {
@@ -77,28 +81,38 @@ function TechnicianScheduler() {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
+          <CustomBreadCrumbs
+            routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
         <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <Roadmap
             filter={filter}
-            refresh={refresh}
+            refreshRoadMap={refreshRoadMap}
             selectedRecords={selectedRecords}
             handleUnAssignTechnician={(data) => {
               setUnAssignTechnicianDialog({ open: true, data: data });
             }}
+            handleSucess={() => {
+              setRefreshServiceData((prev) => !prev);
+            }}
+            setViewType={setViewType}
+            viewType={viewType}
             selectedResource={selectedResource}
+            refreshAll={() => {
+              setRefreshServiceData((prev) => !prev);
+              setRefreshRoadMap((prev) => !prev);
+            }}
             leftSidebar={(isMobile) => (
               <ServiceOrderSidebar
                 isMobile={isMobile}
-                setRefresh={setRefresh}
+                viewType={viewType}
                 selectedResource={selectedResource}
                 assignTechnicianDialog={assignTechnicianDialogData}
                 unAssignTechnicianDialog={unAssignTechnicianDialog}
                 handleSucess={() => {
-                  setRefresh((prev) => !prev);
+                  setRefreshRoadMap((prev) => !prev);
                   setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
                   setUnAssignTechnicianDialog({ open: false, data: null });
                 }}
@@ -107,6 +121,7 @@ function TechnicianScheduler() {
                   setUnAssignTechnicianDialog({ open: false, data: null });
                 }}
                 setSelectedRecords={setSelectedRecords}
+                refreshServiceData={refreshServiceData}
               />
             )}
             headerSlot={headerSLot}
@@ -124,4 +139,9 @@ function TechnicianScheduler() {
   );
 }
 
+const TechnicianScheduler = () => (
+  <Provider>
+    <TechnicianSchedulerImpl />
+  </Provider>
+);
 export default TechnicianScheduler;

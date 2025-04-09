@@ -1,41 +1,32 @@
-import { Close, Send } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { Check, Close, Send } from '@mui/icons-material';
+import { CircularProgress, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
-import { useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
-import { useAppTheme } from 'src/constants/AppConfig';
-import editorCss from 'src/components/DesktopDM/editorcss.css?raw';
-import Recorder from 'src/components/DesktopDM/Audio/Recorder';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AudioPlayer from 'src/components/DesktopDM/Audio/AudioPlayer';
+import Recorder from 'src/components/DesktopDM/Audio/Recorder';
 import { RecordedData } from 'src/components/DesktopDM/Audio/RecorderClass';
 import { AUDIO_EXTENSION, AUDIO_FORMAT } from 'src/components/DesktopDM/constants';
+import editorCss from 'src/components/DesktopDM/editorcss.css?raw';
 import AttachmentInput from 'src/components/DesktopDM/File/AttachmentInput';
 import FilePreview, { AttachedFileType } from 'src/components/DesktopDM/File/FilePreview';
-import { RenderAvatar, RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
+import { RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
+import { Chat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
+import { fileUrlCache } from 'src/components/DesktopDM/utils';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { cn } from 'src/constants/helpers';
 
 type SendMessageProps = {
   state: UseDesktopDM;
   data: User | Chat;
-  messageId?: string;
   parentMessageId?: string;
-  initialMessage?: string;
   disabled?: boolean;
   onNewMessagePost?: (messageId: string) => void;
 };
 
-export const fileUrlCache = new Map<string, string>();
-
-const SendMessage = ({
-  state,
-  data: panelData,
-  messageId,
-  parentMessageId,
-  initialMessage,
-  disabled,
-  onNewMessagePost = () => {}
-}: SendMessageProps) => {
-  const { toastConfig, onUserFirstMessageSent, checkIsUser, user } = state;
+const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, onNewMessagePost = () => {} }: SendMessageProps) => {
+  const { toastConfig, onUserFirstMessageSent, checkIsUser, user, currentlyEditingMessage, socket } = state;
   const [themeColor] = useAppTheme();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -47,39 +38,46 @@ const SendMessage = ({
   const postMessage = async () => {
     setLoading(true);
     try {
-      let formData = new FormData();
-      formData.append('message', message);
-      files.forEach((file) => {
-        formData.append('files', file.file);
-      });
-      audioBlobs?.forEach((audioData, index) => {
-        formData.append('files', new File([audioData.blob], `recording-${index}.${AUDIO_EXTENSION}`, { type: AUDIO_FORMAT }));
-      });
-      if (isNewChatToUser) {
-        formData.append('toUsers', JSON.stringify([panelData._id]));
-        await axiosInstance()
-          .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-          .then(({ data: { data } }) => {
-            onUserFirstMessageSent({ channelId: data?.ops?.[0]?.channel, userId: panelData._id });
-          });
+      if (currentlyEditingMessage) {
+        await axiosInstance().put(`/work-space/channel/message`, { message, messageId: currentlyEditingMessage._id });
+        socket.emit('messageUpdated', { channelId: currentlyEditingMessage.channel, messageId: currentlyEditingMessage._id });
       } else {
-        formData.append('channelId', panelData._id);
-        if (state.replyingToMessage) formData.append('parentId', state.replyingToMessage._id);
-        if (parentMessageId) formData.append('parentId', parentMessageId);
-        await axiosInstance()
-          .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-          .then(({ data: { data } }) => {
-            onNewMessagePost?.(data?.ops?.[0]?._id);
-          });
+        let formData = new FormData();
+        formData.append('message', message);
+        files.forEach((file) => {
+          formData.append('files', file.file);
+        });
+        audioBlobs?.forEach((audioData, index) => {
+          formData.append('files', new File([audioData.blob], `recording-${index}-${Date.now()}.${AUDIO_EXTENSION}`, { type: AUDIO_FORMAT }));
+        });
+        if (isNewChatToUser) {
+          formData.append('toUsers', JSON.stringify([panelData._id]));
+          await axiosInstance()
+            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(({ data: { data } }) => {
+              onUserFirstMessageSent({ channelId: data?.ops?.[0]?.channel, userId: panelData._id });
+            });
+        } else {
+          formData.append('channelId', panelData._id);
+          if (state.replyingToMessage) formData.append('parentId', state.replyingToMessage._id);
+          if (parentMessageId) formData.append('parentId', parentMessageId);
+          await axiosInstance()
+            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+            .then(({ data: { data } }) => {
+              // onNewMessagePost?.(data?.ops?.[0]?._id);
+              // socket.emit('newMessagePosted', { channelId: data?.ops?.[0]?.channel, messageId: data?.ops?.[0]?._id });
+            });
+        }
+        setMessage('');
+        setFiles([]);
+        setAudioBlobs([]);
       }
-      setMessage('');
-      setFiles([]);
-      setAudioBlobs([]);
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
       setLoading(false);
       state.setReplyingToMessage(null);
+      state.setCurrentlyEditingMessage(null);
     }
   };
 
@@ -88,13 +86,14 @@ const SendMessage = ({
     const keyCombinations = e.ctrlKey || e.metaKey || e.shiftKey;
     if (key === 'Enter' && !keyCombinations) {
       e.preventDefault();
-      if (message && editorRef.current.getContent({ format: 'text' }).length > 0 && message !== initialMessage && !loading) {
+      if (message && editorRef.current.getContent({ format: 'text' }).length > 0 && message !== currentlyEditingMessage?.message && !loading) {
         postMessage();
       }
     }
   };
 
   const handleDeleteBlob = (src: string) => {
+    fileUrlCache.delete(src);
     URL.revokeObjectURL(src);
     setAudioBlobs((prev) => prev.filter((d) => d.url !== src));
   };
@@ -105,8 +104,32 @@ const SendMessage = ({
     setFiles((prev) => prev.filter((d) => d._id !== data._id));
   };
 
+  useEffect(() => {
+    if (currentlyEditingMessage?.message) {
+      setMessage(currentlyEditingMessage?.message);
+    } else {
+      setMessage('');
+    }
+  }, [currentlyEditingMessage?.message]);
+
+  const onRecordingFinish = useCallback((data: RecordedData) => {
+    setAudioBlobs((prev) => [...prev, data]);
+  }, []);
+  const onFileInput = useCallback((data: AttachedFileType[]) => {
+    setFiles((prev) => [...prev, ...data]);
+  }, []);
+
   return (
-    <div className="remove-tiny-mce-toolbar-top-border relative border-t  p-3 [--toolbar-width:45px] [&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none [&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none">
+    <div
+      className={cn(
+        'remove-tiny-mce-toolbar-top-border relative border-t  p-3',
+        '[--toolbar-width:45px] [&_.tox-editor-header]:max-w-[--toolbar-width] [&_.tox-editor-header]:[transform:_translateY(4px)]',
+        '[&_.tox-edit-area]:!rounded-md [&_.tox-edit-area]:![border:1px_solid]',
+        '[&_.tox-toolbar__primary]:!border-t-0 [&_.tox-toolbar__primary]:!border-none',
+        '[&_.tox.tox-tinymce.tox-tinymce--toolbar-bottom]:!border-none',
+        '[&_.tox-editor-header_button]:rounded-full'
+      )}
+    >
       {audioBlobs.length > 0 && (
         <div className="mb-2 max-h-[200px] space-y-1 overflow-y-auto">
           {audioBlobs.map((a) => (
@@ -119,11 +142,15 @@ const SendMessage = ({
           <FilePreview hasToDownload={false} files={files} onDelete={handleDeleteFile} />
         </div>
       )}
-
       {state.replyingToMessage && (
         <div className="flex gap-2 rounded-t-md bg-gray-100 p-2 dark:bg-gray-700">
           <div className="w-1 rounded-md bg-new-theme-color" />
-          <RenderContent message={state.replyingToMessage} isUserMessage={user._id === state.replyingToMessage.user.optionValue} isReplying />
+          <RenderContent
+            state={state}
+            message={state.replyingToMessage}
+            isUserMessage={user._id === state.replyingToMessage.user.optionValue}
+            isReplying
+          />
           <span className="ml-auto">
             <IconButton size="small" onClick={() => state.setReplyingToMessage(null)} className="!ml-auto">
               <Close fontSize="small" />
@@ -131,10 +158,9 @@ const SendMessage = ({
           </span>
         </div>
       )}
-
       <Editor
         onKeyDown={handleKeyDown}
-        key={themeColor}
+        key={`${themeColor}`}
         onEditorChange={(d) => {
           if (editorRef.current.isDirty()) {
             setMessage(d);
@@ -144,23 +170,21 @@ const SendMessage = ({
         value={message ? message : '<span></span>'}
         onInit={(_evt, editor) => {
           editorRef.current = editor;
-          if (initialMessage) {
-            editor.setContent(initialMessage);
-          }
         }}
-        initialValue=""
+        initialValue={''}
         disabled={!(isNewChatToUser ? isNewChatToUser : panelData._id) || disabled}
         init={{
           skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
           content_css: themeColor === 'dark' ? 'dark' : 'default',
           height: 100,
           menubar: false,
-          paste_as_text: true,
-          plugins: ['paste', 'autolink', 'link', 'anchor', 'code', 'wordcount', 'emoticons'],
+          paste_as_text: false,
+          plugins: 'paste autolink link anchor code wordcount emoticons',
+          link_default_target: '_blank',
           toolbar: `emoticons`,
           toolbar_location: 'bottom',
           toolbar_drawer: 'floating',
-          // content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:12px }; p {margin-block-start: 0; margin-block-end:8px}',
+          link_default_protocol: 'https',
           content_style: editorCss,
           setup: (editor) => {
             editor.on('BeforeSetContent', (e) => {
@@ -169,23 +193,93 @@ const SendMessage = ({
                 e.content = e.content.replace(/<a(?![^>]*\bclass\b)([^>]*)>/g, '<a class="link"$1>');
               }
             });
+            editor.on('Paste', (event) => {
+              const content = event.clipboardData.getData('text/plain');
+              const urlRegex = /https?:\/\/[^\s]+/g;
+              if (urlRegex.test(content)) {
+                event.preventDefault(); // Prevent default paste action
+                const linkedContent = content.replace(urlRegex, '<a href="$&" class="link" target="_blank">$&</a>');
+                editor.insertContent(linkedContent); // Insert link directly
+              } else {
+                editor.insertContent(content); // Default paste action if not a URL
+              }
+            });
           }
         }}
       />
       <div className="absolute bottom-3 left-[calc(var(--toolbar-width)+12px)] right-3 z-10 flex items-center gap-2">
-        <AttachmentInput onFileInput={(data) => setFiles((prev) => [...prev, ...data])} />
-        <Recorder onRecordFinish={(data) => setAudioBlobs((prev) => [...prev, data])} />
-        <IconButton
-          className="!ml-auto !flex"
-          size="small"
-          disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading}
-          onClick={postMessage}
-        >
-          <Send />
-        </IconButton>
+        <AttachmentInput onFileInput={onFileInput} />
+        <Recorder onRecordFinish={onRecordingFinish} />
+        {currentlyEditingMessage ? (
+          <>
+            <HtmlTooltip title={'Cancel'} className="!ml-auto !flex">
+              <IconButton disabled={loading} size="small" onClick={() => state.setCurrentlyEditingMessage(null)}>
+                <Close />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                (message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading || message === currentlyEditingMessage?.message
+                  ? ''
+                  : 'Update Message'
+              }
+            >
+              <IconButton
+                size="small"
+                disabled={
+                  (message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading || message === currentlyEditingMessage?.message
+                }
+                onClick={postMessage}
+                sx={{
+                  background: 'var(--new-theme-color)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    background: 'var(--new-theme-color-hover)'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white',
+                    opacity: 0.7
+                  }
+                }}
+              >
+                {loading ? <CircularProgress size={20} color="inherit" /> : <Check fontSize="small" />}
+              </IconButton>
+            </HtmlTooltip>
+          </>
+        ) : (
+          <>
+            <HtmlTooltip
+              className="!ml-auto !flex"
+              title={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading ? '' : 'Send Message'}
+            >
+              <IconButton
+                size="small"
+                disabled={(message.length === 0 && files.length === 0 && audioBlobs.length === 0) || loading}
+                onClick={postMessage}
+                sx={{
+                  background: 'var(--new-theme-color)',
+                  color: 'white',
+                  borderRadius: '8px',
+                  '&:hover': {
+                    background: 'var(--new-theme-color-hover)'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white',
+                    opacity: 0.7
+                  }
+                }}
+              >
+                {loading ? <CircularProgress size={20} color="inherit" /> : <Send fontSize="small" />}
+              </IconButton>
+            </HtmlTooltip>
+          </>
+        )}
       </div>
     </div>
   );
-};
+});
 
 export default SendMessage;

@@ -9,7 +9,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
 
 const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);

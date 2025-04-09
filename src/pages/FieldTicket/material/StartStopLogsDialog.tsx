@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDateTime, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, fieldServiceOrder, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -26,7 +26,7 @@ export const formatDurationInHrs = (ms) => {
   return `${hours}:${remainingMinutes.toString().padStart(2, '0')}`;
 };
 
-const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician }) => {
+const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, technician, reference= '' }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_start_stop_logs`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -42,14 +42,15 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    let api = `${fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&technician=${technician}`;
+    let api = `${reference === 'fieldServiceOrder' ? fieldServiceOrder.api : fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&technician=${technician}`;
     if (service && service?.optionValue !== 'All') {
       api = `${api}&service=${service?.optionValue}&uniqueId=${service?._id}`;
     }
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
-        dispatch({ type: 'initialize', data: data, count: data?.length });
+        const rows = data?.filter((e) => e?.startDate)
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((error) => {
@@ -241,7 +242,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
     setStartStopDateDialog({ ...startStopDateDialog, loading: true });
 
     axiosInstance()
-      .put(`${fieldTicket.api}/technician/update-log`, { ...values, _id })
+      .put(`${reference === 'fieldServiceOrder' ? fieldServiceOrder.api : fieldTicket.api}/technician/update-log`, { ...values, _id })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -262,7 +263,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .put(`${fieldTicket.api}/technician/delete-log`, { ids })
+      .put(`${reference === 'fieldServiceOrder' ? fieldServiceOrder.api : fieldTicket.api}/technician/delete-log`, { ids })
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,

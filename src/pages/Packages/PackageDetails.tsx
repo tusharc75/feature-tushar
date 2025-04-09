@@ -128,12 +128,8 @@ const PackageDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          <CustomTab value={1}>
-            {!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Services
-          </CustomTab>
-          <CustomTab value={2}>
-            {!permissions?.assemblyOrder?.isRead && !permissions?.disassemblyOrder?.isRead ? 'Individual ' : ''}Products
-          </CustomTab>
+          <CustomTab value={1}>{!permissions?.assemblyOrder?.isRead ? 'Individual ' : ''}Services</CustomTab>
+          <CustomTab value={2}>{!permissions?.assemblyOrder?.isRead ? 'Individual ' : ''}Products</CustomTab>
           <CustomTab value={3}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
           <CustomTab value={4}>Drawings</CustomTab>
         </CustomTabs>

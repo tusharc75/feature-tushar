@@ -744,12 +744,6 @@ const routes = {
   scheduleAndDispatch: {
     path: '/schedule-and-dispatch'
   },
-  disassemblyOrder: {
-    path: '/disassembly-order'
-  },
-  disassemblyOrderDetail: {
-    path: '/disassembly-order/detail'
-  },
   productTypes: {
     path: '/product-types'
   },
@@ -761,6 +755,12 @@ const routes = {
   },
   packageCategoryDetail: {
     path: '/package-category/detail'
+  },
+  serviceCategory: {
+    path: '/service-category'
+  },
+  serviceCategoryDetail: {
+    path: '/service-category/detail'
   },
   schedulingMaintenance: {
     path: '/scheduling-maintenance'

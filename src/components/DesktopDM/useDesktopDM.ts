@@ -6,7 +6,7 @@ import useUIDesktopDm from 'src/components/DesktopDM/useUIDesktopDm';
 import { useSocket } from 'src/hooks/useSocket';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-function checkIsUser(data: User | Chat): data is User {
+export function checkIsUser(data: User | Chat): data is User {
   return (data as User).firstName !== undefined && (data as User).lastName !== undefined;
 }
 
@@ -15,6 +15,8 @@ const useDesktopDM = () => {
   const { onUserFirstMessageSent: uiOnUserFirstMessageSent, permissions, user, ...rest } = uiState;
   const [state, setState] = useState<{ users: User[]; chats: Chat[] }>({ users: [], chats: [] });
   const [replyingToMessage, setReplyingToMessage] = useState<Message | null>(null);
+  const [currentlyEditingMessage, setCurrentlyEditingMessage] = useState<Message | null>(null);
+
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const socket = useSocket({ namespace: '/workspace/channel' });
@@ -122,6 +124,7 @@ const useDesktopDM = () => {
       socket?.off('newWorkSpaceChannel');
       tokenSource?.cancel();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, uiState.openedChats, user?._id]);
 
   return {
@@ -136,6 +139,8 @@ const useDesktopDM = () => {
     permissions,
     setReplyingToMessage,
     replyingToMessage,
+    setCurrentlyEditingMessage,
+    currentlyEditingMessage,
     ...rest
   };
 };

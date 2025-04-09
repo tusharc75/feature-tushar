@@ -18,6 +18,10 @@ export interface TActivity {
   competencyType?: Address;
   fieldTicket?: PokedexFieldTicket[];
   child?: TActivity[];
+  user?: {
+    optionValue?: string;
+    optionLabel?: string;
+  }
 }
 
 export interface Address {

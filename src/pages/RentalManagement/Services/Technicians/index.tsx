@@ -26,6 +26,7 @@ import { fetch_rental_technician_fields } from 'src/components/RentalManagment/h
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
+import dayjs from 'dayjs';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
@@ -262,7 +263,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     ];
     const newColumns = generateColumns(
       renderedFrom,
-      data?.filter((f) => f?.isRead),
+      data?.filter((f) => f?.isRead && !['endDate', 'startDate'].includes(f?.fieldName)),
       null,
       false,
       rentalManagementData?.currency
@@ -334,17 +335,17 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
-      element.rentalJob = rentalManagementData?._id;
+      element.referenceId = rentalManagementData?._id;
       element.technician = d?._id;
-      element.uniqueId = selectedService?._id || '';
+      element.uniqueId = selectedService?._id || null;
       element.materialId = d?.competenciesId;
       element.type = 'competency';
       element.competence = d?.competenciesId;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.warehouse = rentalManagementData?.warehouse?.optionValue;
-      element.startDate = rentalManagementData?.estimateStartDate || new Date();
-      element.endDate = rentalManagementData?.estimateEndDate || new Date();
+      element.estimateStartDate = rentalManagementData?.estimateStartDate || dayjs.tz().toDate();
+      element.estimateEndDate = rentalManagementData?.estimateEndDate || dayjs.tz().toDate();
       const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       element.duration = 1;
       if (calValues && calValues['duration']) {
@@ -465,7 +466,6 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       </Box>
       {technicianDialog && (
         <AssignEmployeeDialog
-          reference={'fieldTicket'}
           onSuccess={(data) => {
             handleAssign(data);
           }}

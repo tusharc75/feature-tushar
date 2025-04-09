@@ -159,7 +159,7 @@ export default function NewCreateQuotePdfTemplate() {
           });
       }
     }
-  }, [formValues]);
+  }, [formValues?.type]);
 
   async function fetchFieldData(resource) {
     const fields = await axiosInstance().get(`/field?resource=${resource}&entity=${selectedEntity}&view=true`);
@@ -174,6 +174,7 @@ export default function NewCreateQuotePdfTemplate() {
   }, [id]);
 
   const fetchData = async () => {
+
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
@@ -183,6 +184,7 @@ export default function NewCreateQuotePdfTemplate() {
       pdfFontSize: '',
       tableHeaderBackgroundColor: '',
       tableHeaderFontColor: '',
+      tableHeaderFontWeight: '',
       productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
@@ -244,6 +246,7 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
         initialValues.tableHeaderBackgroundColor = tempPdfTemplate?.tableHeaderBackgroundColor;
         initialValues.tableHeaderFontColor = tempPdfTemplate?.tableHeaderFontColor;
+        initialValues.tableHeaderFontWeight = tempPdfTemplate?.tableHeaderFontWeight;
         initialValues.productColumns = tempPdfTemplate?.productColumns;
         initialValues.name = tempPdfTemplate?.name;
         initialValues.pageNumberInFooter = tempPdfTemplate?.pageNumberInFooter;
@@ -279,6 +282,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.pdfFontSize = data?.pdfFontSize;
           initialValues.tableHeaderBackgroundColor = data?.tableHeaderBackgroundColor;
           initialValues.tableHeaderFontColor = data?.tableHeaderFontColor;
+          initialValues.tableHeaderFontWeight = data?.tableHeaderFontWeight;
           initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
@@ -343,28 +347,16 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const handleExport = () => {
-    const { entity, owner, collaborator, ...rest } = initialValues;
-
-    const exportData = {
-      ...rest,
-      details,
-      table
-    };
-
+    const exportData = { initialValues, details, table };
     const jsonString = JSON.stringify(exportData, null, 2);
-
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-
     const fileName = `${initialValues.name || 'untitled'}-pdf-template.json`;
-
     const link = document.createElement('a');
     link.href = url;
     link.download = fileName;
     link.click();
-
     URL.revokeObjectURL(url);
-
     toastConfig.setToastConfig({
       open: true,
       type: 'success',
@@ -399,44 +391,41 @@ export default function NewCreateQuotePdfTemplate() {
           }
           try {
             const importedData = JSON.parse(fileContent);
-
-            setIsLandscapChecked(importedData.landscape);
-
             const newInitialValues = {
-              landscape: importedData.landscape,
-              hideAmountTotalSection: importedData.hideAmountTotalSection,
-              tableTotalAtBottom: importedData.tableTotalAtBottom,
-              tableFontSize: importedData.tableFontSize ? importedData.tableFontSize : '',
-              belowTableTotalFontSize: importedData.belowTableTotalFontSize ? importedData.belowTableTotalFontSize : '',
-              pdfFontSize: importedData.pdfFontSize ? importedData.pdfFontSize : '',
-              tableHeaderBackgroundColor: importedData.tableHeaderBackgroundColor ? importedData.tableHeaderBackgroundColor : '',
-              tableHeaderFontColor: importedData.tableHeaderFontColor ? importedData.tableHeaderFontColor : '',
-              productColumns: importedData.productColumns ? importedData.productColumns : defaultProductColumns,
-              pageNumberInFooter: importedData.pageNumberInFooter,
+              landscape: importedData?.landscape,
+              hideAmountTotalSection: importedData?.hideAmountTotalSection,
+              tableTotalAtBottom: importedData?.tableTotalAtBottom,
+              tableFontSize: importedData?.tableFontSize,
+              belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
+              pdfFontSize: importedData?.pdfFontSize,
+              tableHeaderBackgroundColor: importedData?.tableHeaderBackgroundColor,
+              tableHeaderFontColor: importedData?.tableHeaderFontColor,
+              tableHeaderFontWeight: importedData?.tableHeaderFontWeight,
+              productColumns: importedData?.productColumns ? importedData?.productColumns : defaultProductColumns,
+              pageNumberInFooter: importedData?.pageNumberInFooter,
               name: initialValues.name ? initialValues.name : "New",
-              header: importedData.header,
-              footer: importedData.footer,
-              aboveTable: importedData.aboveTable,
-              belowTable: importedData.belowTable,
-              type:"",
-              owner: "",
-              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide,
+              header: importedData?.header,
+              footer: importedData?.footer,
+              aboveTable: importedData?.aboveTable,
+              belowTable: importedData?.belowTable,
+              type: importedData?.type,
+              owner: initialValues.owner,
+              collaborator: initialValues?.collaborator,
+              entity: initialValues?.entity,
+              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide,
             };
-
             setInitialValues(newInitialValues);
-
+            setIsLandscapChecked(importedData?.landscape);
             setDetails({
-              header: importedData.header,
-              footer: importedData.footer,
-              aboveTable: importedData.aboveTable,
-              belowTable: importedData.belowTable,
-              tabelSummaryLeftSide: importedData.tabelSummaryLeftSide
+              header: importedData?.header,
+              footer: importedData?.footer,
+              aboveTable: importedData?.aboveTable,
+              belowTable: importedData?.belowTable,
+              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
             });
-
-            if (importedData.table) {
-              setTable(importedData.table);
+            if (importedData?.table) {
+              setTable(importedData?.table);
             }
-
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -520,6 +509,7 @@ export default function NewCreateQuotePdfTemplate() {
           pdfFontSize: parseInt(values?.pdfFontSize),
           tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
           tableHeaderFontColor: values?.tableHeaderFontColor,
+          tableHeaderFontWeight: values?.tableHeaderFontWeight,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -574,6 +564,7 @@ export default function NewCreateQuotePdfTemplate() {
           pdfFontSize: parseInt(values?.pdfFontSize),
           tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
           tableHeaderFontColor: values?.tableHeaderFontColor,
+          tableHeaderFontWeight: values?.tableHeaderFontWeight,
           productColumns: parseInt(values?.productColumns)
         })
         .then(({ data: { data, message } }) => {
@@ -740,8 +731,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                                )
+                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -773,10 +764,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -810,10 +801,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                  )
+                                ownerCollaboratorDataConst.filter((data) =>
+                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
                                 )
+                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -1019,33 +1010,46 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </div>
                   </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex gap-8">
-                      <FormTypes
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        label={'Table Header Background Color'}
-                        name={'tableHeaderBackgroundColor'}
-                        type={'colorPicker'}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        isTooltip={false}
-                      />
-                      <FormTypes
-                        values={values}
-                        errors={errors}
-                        touched={touched}
-                        label={'Table Header Font Color'}
-                        name={'tableHeaderFontColor'}
-                        type={'colorPicker'}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        isTooltip={false}
-                      />
-                    </div>
+                  <div className="mt-3 flex items-center gap-5">
+                    <FormTypes
+                      values={values}
+                      errors={errors}
+                      touched={touched}
+                      label={'Table Header Background Color'}
+                      name={'tableHeaderBackgroundColor'}
+                      type={'colorPicker'}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      isTooltip={false}
+                    />
+                    <FormTypes
+                      values={values}
+                      errors={errors}
+                      touched={touched}
+                      label={'Table Header Font Color'}
+                      name={'tableHeaderFontColor'}
+                      type={'colorPicker'}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      isTooltip={false}
+                    />
+                    <Autocomplete
+                      style={{ maxWidth: '300px' }}
+                      size="small"
+                      fullWidth
+                      options={["normal"]}
+                      getOptionLabel={(option) => startCase(option)}
+                      isOptionEqualToValue={(option: any, val) => option === val}
+                      value={values['tableHeaderFontWeight']}
+                      renderInput={(params) => (
+                        <TextField {...params} placeholder="Table Header Font Weight" variant="outlined" margin="none" label="Table Header Font Weight" />
+                      )}
+                      onChange={(_, newValue) => {
+                        setFieldValue('tableHeaderFontWeight', newValue);
+                      }}
+                    />
                   </div>
                   <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>

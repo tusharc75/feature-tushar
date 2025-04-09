@@ -76,6 +76,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'showFieldServiceOrderAddMaterial',
+        fieldLabel: 'Show Field Service Order Add Material',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'showAddPackages',
         fieldLabel: 'Show Add Packages',
         type: 'checkBox',
@@ -366,6 +372,17 @@ export const resourcePolicy = [
       {
         fieldName: 'canCreateRepairOrder',
         fieldLabel: 'Can Create Repair Order',
+        type: 'checkBox',
+        defaultValue: false,
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.workOrderTechnician,
+    policy: [
+      {
+        fieldName: 'showWorkOrderPdfPreviewInTile',
+        fieldLabel: 'Show Work Order Pdf Preview in Tile',
         type: 'checkBox',
         defaultValue: false,
       }

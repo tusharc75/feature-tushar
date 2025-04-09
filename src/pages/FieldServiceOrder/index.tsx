@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -340,6 +340,28 @@ const ServiceOrder = () => {
     );
   };
 
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.fieldServiceOrder
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -377,6 +399,7 @@ const ServiceOrder = () => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={!isOffline && permissions?.fieldServiceOrder?.isCreate}
+          leftSideContents={<LeftSideButtons />}
         />
         {columns ? (
           <CustomReactTable

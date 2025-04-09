@@ -1,17 +1,17 @@
 import axios, { CancelToken } from 'axios';
 import React, { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { sidebarResource } from 'src/constants/helpers';
+import { fieldServiceOrder, fieldTicket, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContextType } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-export type TechnicianResource = { key: string; resource: string; title: string };
+export type TechnicianResource = { key: string; resource: string; title: string, api: string };
 
 export const useTechnicianResources = (
   toastConfig: CustomToastContextType,
   setSelectedResource: React.Dispatch<React.SetStateAction<TechnicianResource>>
 ) => {
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
   const [technicianResources, setTechnicianResources] = useState<TechnicianResource[]>([]);
 
@@ -21,38 +21,37 @@ export const useTechnicianResources = (
       data.push({
         key: 'fieldTicket',
         resource: sidebarResource.fieldTicket,
-        title: resources?.fieldTicket?.titlePlural
+        title: resources?.fieldTicket?.titlePlural,
+        api: fieldTicket.api
       });
     }
-    if (permissions?.rentalManagement?.isRead) {
+    if (permissions?.rentalManagement?.isRead && user?.user?.brandPolicy?.rentalService) {
       data.push({
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
-        title: resources?.rentalManagement?.titlePlural
+        title: resources?.rentalManagement?.titlePlural,
+        api: rentalManagement.api
       });
     }
     return data;
   }, [resources, permissions]);
-
-  useEffect(() => {
-    setSelectedResource(allResources[0]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allResources]);
 
   const fetchfieldServiceOrderPolicy = async (cancelToken: CancelToken) => {
     try {
       const {
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`, { cancelToken });
+      const newResources = [...allResources];
       if (data?.policy?.addTechnicians && permissions?.fieldServiceOrder?.isRead) {
-        const newResources = [...allResources];
-        newResources.push({
+        newResources.unshift({
           key: 'fieldServiceOrder',
           resource: sidebarResource.fieldServiceOrder,
-          title: resources?.fieldServiceOrder?.titlePlural
+          title: resources?.fieldServiceOrder?.titlePlural,
+          api: fieldServiceOrder.api
         });
-        setTechnicianResources(newResources);
       }
+      setSelectedResource(newResources[0]);
+      setTechnicianResources(newResources);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

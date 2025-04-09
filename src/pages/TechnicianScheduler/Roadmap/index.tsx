@@ -6,32 +6,36 @@ import DesktopRoadmap from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import MobileRoadmap from './MobileRoadmap';
 import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAssignDialog';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 
-export type HandleSelect = (event: React.SyntheticEvent, data: TActivity, type: 'technician' | 'map' | '') => void;
+export type HandleSelect = (event: React.SyntheticEvent, data: TActivity | string[], type: 'technician' | 'map' | '') => void;
 
-function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSidebar = null, selectedResource = null, headerSlot = null, refresh }) {
+function Roadmap({
+  filter,
+  selectedRecords,
+  handleUnAssignTechnician,
+  leftSidebar = null,
+  selectedResource = null,
+  headerSlot = null,
+  refreshRoadMap,
+  handleSucess,
+  setViewType,
+  viewType,
+  refreshAll
+}) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
-  const [selected, setSelected] = React.useState<string | null>(null);
+  const [selected, setSelected] = React.useState<string[] | []>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
-  }, [filter.view, refresh]);
-
-  useEffect(() => {
-    filter.fieldTicket !== '' && fetchServiceOrders(filter.fieldTicket);
-  }, [filter.fieldTicket]);
-
-  const fetchServiceOrders = async (orderId) => {
-    await axiosInstance()
-      .get(`/technician-scheduler/service-order?serviceOrders=${orderId}`)
-      .then(({ data }) => {
-        setActivity(data?.data);
-      });
-  };
+  }, [filter.view, refreshRoadMap]);
 
   const fetchRoadmap = async () => {
     await axiosInstance()
@@ -47,7 +51,7 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
 
   const handleSelect = (event, data, type) => {
     if (type === 'map') {
-      setSelected(data?._id);
+      setSelected(data);
     } else if (type === 'assign') {
       setAssignServiceDialog({ open: true, data: data });
     } else if (selectedRecords?.length === 0 && data?.technicianHistoryId) {
@@ -61,6 +65,31 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
         <div className="mb-4 flex items-center gap-2">
           <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />
           {headerSlot}
+          <div className="ml-auto flex gap-1">
+            <IconButtonTabs
+              items={
+                [
+                  {
+                    value: 'job',
+                    icon: <FormatListBulletedIcon />,
+                    tooltip: 'Job View'
+                  },
+                  {
+                    value: 'service',
+                    icon: <FormatListBulletedIcon />,
+                    tooltip: 'Service View'
+                  }
+                ] as const
+              }
+              setValue={setViewType}
+              value={viewType}
+            />
+            <HtmlTooltip title={'Refresh'}>
+              <IconButton size="small" onClick={refreshAll}>
+                <RefreshIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
         </div>
       )}
       <Box bgcolor="var(--dark-secondary, white)">
@@ -97,9 +126,11 @@ function Roadmap({ filter, selectedRecords, handleUnAssignTechnician, leftSideba
           selectedResource={selectedResource}
           technician={assignServiceDialog.data}
           handleSucess={() => {
+            handleSucess();
             fetchRoadmap();
             setAssignServiceDialog({ open: false, data: null });
           }}
+          viewType={viewType}
         />
       )}
     </>

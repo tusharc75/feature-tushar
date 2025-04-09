@@ -1,36 +1,35 @@
-import { Close, Download, Pause, PlayArrow } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
-import axiosInstance from 'src/axios/axiosInstance';
+import { Close, Delete, Download, MoreVert, Pause, PlayArrow } from '@mui/icons-material';
+import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { getFileUrl } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 import WaveSurfer from 'wavesurfer.js';
 import { formatTime } from './RecorderClass';
 
-interface AudioPlayerProps {
+interface AudioPlayerProps<P> {
   src: string;
+  onDeletePayload?: P;
   hasToDownload?: boolean;
-  onDelete?: (src: string) => void;
+  onDelete?: (src: string, payload: P) => void;
   downloadFileName?: string | false;
   height?: number;
 }
 
-const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, onDelete, hasToDownload = false, downloadFileName = false, height = 35 }) => {
+const AudioPlayerImpl = <P,>({
+  src,
+  onDelete,
+  hasToDownload = false,
+  downloadFileName = false,
+  height = 35,
+  onDeletePayload
+}: AudioPlayerProps<P>) => {
   const waveformRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [link, setLink] = useState(src);
-
-  const downloadFile = async (fileUrl: string, instance: WaveSurfer) => {
-    try {
-      const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(fileUrl)}`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([data]));
-      setLink(url);
-      instance.load(url);
-    } catch (error) {
-    }
-  };
+  const [optionMenuAnchor, setOptionMenuAnchor] = useState<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (waveformRef.current) {
@@ -54,14 +53,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, onDelete, hasToDownload 
         setPlaying(false);
       });
       return () => {
-        wavesurferRef.current?.destroy();
+        wavesurferRef.current = null;
       };
     }
   }, [src, hasToDownload, height]);
 
   useEffect(() => {
     if (hasToDownload) {
-      downloadFile(src, wavesurferRef.current);
+      getFileUrl(src).then((url) => {
+        setLink(url);
+        wavesurferRef.current.load(url);
+      });
     } else {
       setLink(src);
       wavesurferRef.current.load(src);
@@ -84,6 +86,8 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, onDelete, hasToDownload 
     document.body.removeChild(anchor);
   };
 
+  const isBothButtonVisible = useMemo(() => typeof onDelete === 'function' && downloadFileName, [downloadFileName, onDelete]);
+
   return (
     <div className={cn('rounded-lg ', hasToDownload ? '' : 'bg-gray-100 p-2 dark:bg-gray-800')}>
       <div className="flex items-center gap-2">
@@ -92,19 +96,51 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({ src, onDelete, hasToDownload 
         </IconButton>
         <div className="flex-grow cursor-pointer" ref={waveformRef}></div>
         <span className="min-w-[35px] text-xs">{playing ? formatTime(Math.floor(currentTime)) : formatTime(Math.floor(duration))}</span>
-        {typeof onDelete === 'function' && (
-          <IconButton size="small" onClick={() => onDelete(src)}>
-            <Close fontSize="small" />
-          </IconButton>
-        )}
-        {downloadFileName && (
-          <IconButton size="small" color="primary" onClick={() => handleDownload()}>
-            <Download fontSize="small" />
-          </IconButton>
+        {isBothButtonVisible ? (
+          <>
+            <IconButton size="small" color={'primary'} onClick={(e) => setOptionMenuAnchor(e.currentTarget)}>
+              <MoreVert fontSize="small" />
+            </IconButton>
+            <Menu
+              anchorEl={optionMenuAnchor}
+              disableScrollLock
+              open={Boolean(optionMenuAnchor)}
+              onClose={() => setOptionMenuAnchor(null)}
+              slotProps={{ paper: { onClick: () => setOptionMenuAnchor(null), sx: { minWidth: '150px' } } }}
+            >
+              <MenuItem onClick={() => handleDownload()}>
+                <ListItemIcon>
+                  <Download color="primary" />
+                </ListItemIcon>
+                <ListItemText>Download</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={() => onDelete(src, onDeletePayload)}>
+                <ListItemIcon>
+                  <Delete color="error" />
+                </ListItemIcon>
+                <ListItemText>Delete</ListItemText>
+              </MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <>
+            {typeof onDelete === 'function' && (
+              <IconButton size="small" onClick={() => onDelete(src, onDeletePayload)}>
+                <Close fontSize="small" />
+              </IconButton>
+            )}
+            {downloadFileName && (
+              <IconButton size="small" color="primary" onClick={() => handleDownload()}>
+                <Download fontSize="small" />
+              </IconButton>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 };
+
+const AudioPlayer = memo(AudioPlayerImpl) as typeof AudioPlayerImpl;
 
 export default AudioPlayer;

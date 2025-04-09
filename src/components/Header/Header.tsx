@@ -69,7 +69,6 @@ const Header = () => {
   const anchorRef = useRef(null);
   const userSocket = useSocket({ namespace: '/user' });
 
-
   const isSupportMenuOpen = Boolean(supportAnchorEl);
   const isArcelorMenuOpen = Boolean(servicesAnchorEl);
   const isEntitiesMenuOpen = Boolean(entitiesEl);
@@ -330,6 +329,11 @@ const Header = () => {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
+      slotProps={{
+        paper: {
+          onClick: handleMobileMenuClose
+        }
+      }}
     >
       {/* <MenuItem onClick={openServicesMenu}>
         <p>Services</p> <ExpandMore />
@@ -343,10 +347,9 @@ const Header = () => {
         </MenuItem>
       )}
 
-      {/* Remove below false to show chat notification icon */}
+      <ChatNotification isMobile={true} />
 
-      <ChatNotification />
-      <Notification />
+      <Notification isMobile={true} />
       <MenuItem onClick={openHelperModal}>
         <HelpOutlineIcon />
         <Box component="span" mx={1} my={2} />

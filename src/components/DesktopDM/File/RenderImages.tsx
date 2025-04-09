@@ -1,13 +1,13 @@
 import { Close } from '@mui/icons-material';
 import { IconButton, Skeleton } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { DEFAULT_IMAGE_VISIBLE_COUNT } from 'src/components/DesktopDM/constants';
 import { RenderFileProps, RenderSingleFileProps } from 'src/components/DesktopDM/File/FilePreview';
 import ImageSlider from 'src/components/DesktopDM/File/ImageSlider';
 import { useResolveFileUrl } from 'src/components/DesktopDM/utils';
 import { cn } from 'src/constants/helpers';
 
-const RenderImages = ({ hasToDownload, files, ...rest }: RenderFileProps) => {
+const RenderImages = memo(({ hasToDownload, files, ...rest }: RenderFileProps) => {
   const [imageSliderData, setImageSliderData] = useState({ open: false, index: 0 });
   const moreImageCount = useMemo(() => {
     if (files.length > DEFAULT_IMAGE_VISIBLE_COUNT) {
@@ -46,13 +46,12 @@ const RenderImages = ({ hasToDownload, files, ...rest }: RenderFileProps) => {
       )}
     </div>
   );
-};
+});
 
 export default RenderImages;
 
 const RenderSingleImage = ({
   file,
-  getFileUrl,
   hasToDownload,
   onDelete,
   index,
@@ -60,7 +59,7 @@ const RenderSingleImage = ({
   opneImageSlider
 }: RenderSingleFileProps & { index: number; moreImageCount: number; opneImageSlider: (index: number) => void }) => {
   const overlayVisible = index === DEFAULT_IMAGE_VISIBLE_COUNT - 1 && moreImageCount > 0;
-  const src = useResolveFileUrl({ getFileUrl: getFileUrl, url: file.url, hasToDownload, shouldDownload: index < DEFAULT_IMAGE_VISIBLE_COUNT });
+  const src = useResolveFileUrl({ url: file.url, hasToDownload, shouldDownload: index < DEFAULT_IMAGE_VISIBLE_COUNT });
   return (
     <div
       className={cn('group relative min-h-[--image-h] overflow-hidden ', hasToDownload ? 'rounded-lg' : ' rounded-md')}
@@ -75,7 +74,7 @@ const RenderSingleImage = ({
           <span className="text-white">+ {moreImageCount}</span>
         </div>
       ) : (
-        <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+        <div className="absolute inset-0 cursor-pointer bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
           {typeof onDelete === 'function' && (
             <span className="absolute right-[2px] top-[2px] rounded-full bg-white opacity-0 group-hover:opacity-100">
               <IconButton

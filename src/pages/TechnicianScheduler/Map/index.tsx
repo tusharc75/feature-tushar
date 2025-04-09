@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow, Polyline } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const MapView = ({ technician }) => {
-  const [center, setCenter] = React.useState(null);
-  const [serviceData, setServiceData] = React.useState([]);
-  const [selectedService, setSelectedService] = React.useState(null);
+const MapView = ({ userIds }) => {
+
+  const [locationData, setLocationData] = React.useState([]);
+  const [selectedUser, setSelectedUser] = React.useState(null);
   const [loadingData, setLoadingData] = React.useState(false);
+  const [mapCenter, setMapCenter] = React.useState({ lat: 31.9686, lng: 99.9018 });
+  const toastConfig = useContext(CustomToastContext);
 
   const containerStyle = {
     minHeight: '500px',
@@ -18,20 +21,46 @@ const MapView = ({ technician }) => {
 
   useEffect(() => {
     fetchData();
-  }, [technician]);
+  }, [userIds]);
+
+  //calculating map center based on the locations for inital view to cover maximum locations
+  const calculateMapCenter = (locations) => {
+    if (!locations || locations.length === 0) return;
+
+    let totalLat = 0;
+    let totalLng = 0;
+    let validLocations = 0;
+
+    locations.forEach(location => {
+      if (location?.latitude && location?.longitude) {
+        totalLat += parseFloat(location.latitude);
+        totalLng += parseFloat(location.longitude);
+        validLocations++;
+      }
+    });
+
+    if (validLocations > 0) {
+      const centerLat = totalLat / validLocations;
+      const centerLng = totalLng / validLocations;
+      setMapCenter({ lat: centerLat, lng: centerLng });
+    }
+  };
 
   const fetchData = async () => {
     setLoadingData(true);
+    setLocationData([]);
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/technician-scheduler/technician-service/${technician}`);
-      if (data) {
-        setServiceData(data);
+      } = await axiosInstance().get(`/user/live-location?userIds=${JSON.stringify(userIds)}`);
+      if (data?.length > 0) {
+        setLocationData(data);
+        calculateMapCenter(data);
       }
       setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -66,13 +95,13 @@ const MapView = ({ technician }) => {
           gestureHandling: 'cooperative'
         }}
         mapContainerStyle={containerStyle}
-        center={center || { lat: 31.9686, lng: 99.9018 }}
+        center={mapCenter}
         zoom={4}
       >
         <MarkerClusterer>
           {(clusterer) => (
             <>
-              {serviceData?.map((data: any, index) => (
+              {locationData?.map((data: any, index) => (
                 <Marker
                   key={data._id}
                   label={{
@@ -82,14 +111,14 @@ const MapView = ({ technician }) => {
                     fontSize: '14px'
                   }}
                   onClick={() => {
-                    setSelectedService(data);
+                    setSelectedUser(data);
                   }}
-                  position={new google.maps.LatLng(data?.shippingAddress?.latitude, data?.shippingAddress?.longitude)}
+                  position={new google.maps.LatLng(data?.latitude, data?.longitude)}
                   clusterer={clusterer}
                 />
               ))}
               <Polyline
-                path={serviceData?.map((data: any) => new google.maps.LatLng(data?.shippingAddress?.latitude, data?.shippingAddress?.longitude))}
+                path={locationData?.map((data: any) => new google.maps.LatLng(data?.latitude, data?.longitude))}
                 options={{
                   strokeColor: '#0000FF',
                   strokeOpacity: 1,
@@ -97,13 +126,15 @@ const MapView = ({ technician }) => {
                   icons: [{ icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 } }]
                 }}
               />
-              {selectedService && (
+              {selectedUser && (
                 <InfoWindow
-                  key={selectedService._id}
-                  position={new google.maps.LatLng(selectedService?.shippingAddress?.latitude, selectedService?.shippingAddress?.longitude)}
-                  onCloseClick={() => setSelectedService(null)}
+                  key={selectedUser._id}
+                  position={new google.maps.LatLng(selectedUser?.latitude, selectedUser?.longitude)}
+                  onCloseClick={() => setSelectedUser(null)}
                 >
-                  <div>{selectedService?.fieldServiceOrderNumber}</div>
+                  <div style={{ backgroundColor: 'white', color: 'black', minWidth: 100 }}>
+                    <h4 style={{ margin: 0 }}>{selectedUser?.user?.optionLabel}</h4>
+                  </div>
                 </InfoWindow>
               )}
             </>

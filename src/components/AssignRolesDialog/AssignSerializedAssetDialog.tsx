@@ -7,7 +7,6 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import {
   CustomDialogTransition,
   gridLoadingTimeout,
-  isObjectEmpty,
   prepareDataForGrid,
   serializedAsset,
   sidebarResource
@@ -235,29 +234,28 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       <>
         {products.length > 0
           ? products?.map((d) => (
-              <Box
-                className={`MuiBox-root cursor-pointer border p-2 text-[13px] dark:text-gray-300 ${
-                  selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+            <Box
+              className={`MuiBox-root cursor-pointer border p-2 text-[13px] dark:text-gray-300 ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                 }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+              borderColor="var(--common-border-color)"
+              onClick={() => {
+                if (selectedProduct === d.id) {
+                  setSelectedProduct(null);
+                } else {
+                  setSelectedProduct(d.id);
+                }
+              }}
+              style={{ display: 'inline-block' }}
+            >
+              {d?.qty < 0 ? (
+                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+              ) : d?.qty === 0 ? (
+                <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+              ) : (
+                <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+              )}
+            </Box>
+          ))
           : null}
       </>
     );

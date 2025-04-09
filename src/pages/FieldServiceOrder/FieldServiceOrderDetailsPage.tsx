@@ -35,13 +35,14 @@ import Step from '../DynamicForm/Step';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Technicians from './Technicians';
 import TechnicianDispatchReturn from './TechnicianDispatchReturn';
 import Services from './Services';
+import FieldServiceOrderView from './RoadMapViews';
+import OnField from 'src/pages/FieldServiceOrder/OnField';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -136,14 +137,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-        data.canDelete &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
@@ -279,12 +280,13 @@ const ServiceOrderDetailsPage = () => {
           {(resourceData?.policy?.addServices || resourceData?.policy?.addTechnicians || resourceData?.policy?.addConsumables) && !isOffline && (
             <CustomTab value={1}>Details</CustomTab>
           )}
-          {(!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables) && (
+          {!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables && (
             <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
           )}
           {!isOffline && permissions?.invoice?.isRead && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
-          {!(isMobile && !isTablet) && !isOffline && <CustomTab value={4}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
+          {serviceOrderData?.rentalJob && <CustomTab value={4}>On Field</CustomTab>}
+          {!(isMobile && !isTablet) && !isOffline && <CustomTab value={5}>Views</CustomTab>}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -314,8 +316,9 @@ const ServiceOrderDetailsPage = () => {
                 }
               }}
             />
-            {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
-              resourceData?.policy?.addServices ? (
+            {steps[currentStep]?.name === steps[0]?.name &&
+              serviceOrderData &&
+              (resourceData?.policy?.addServices ? (
                 <Services
                   serviceOrderData={serviceOrderData}
                   allowedToEdit={allowedToEdit}
@@ -334,10 +337,10 @@ const ServiceOrderDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   fetchData={fetchServiceOrderData}
                 />
-              )
-            )}
-            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              resourceData?.policy?.addServices ? (
+              ))}
+            {steps[currentStep]?.name === steps[1]?.name &&
+              serviceOrderData &&
+              (resourceData?.policy?.addServices ? (
                 <Technicians
                   serviceOrderData={serviceOrderData}
                   allowedToEdit={allowedToEdit}
@@ -354,10 +357,10 @@ const ServiceOrderDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
                 />
-              )
-            )}
-            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && (
-              resourceData?.policy?.addServices ? (
+              ))}
+            {steps[currentStep]?.name === steps[2]?.name &&
+              serviceOrderData &&
+              (resourceData?.policy?.addServices ? (
                 <TechnicianDispatchReturn
                   serviceOrderId={id}
                   setNextStep={setNextStep}
@@ -374,10 +377,10 @@ const ServiceOrderDetailsPage = () => {
                   fetchServiceOrderData={fetchServiceOrderData}
                   noQuotationCheck={true}
                 />
-              )
-            )}
-            {steps[currentStep]?.name === steps[3]?.name && serviceOrderData && (
-              resourceData?.policy?.addServices ? (
+              ))}
+            {steps[currentStep]?.name === steps[3]?.name &&
+              serviceOrderData &&
+              (resourceData?.policy?.addServices ? (
                 <FieldTicket
                   serviceOrderData={serviceOrderData}
                   serviceOrderFields={serviceOrderFields}
@@ -395,8 +398,7 @@ const ServiceOrderDetailsPage = () => {
                   setNextStep={setNextStep}
                   isReturn={true}
                 />
-              )
-            )}
+              ))}
             {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && resourceData?.policy?.addServices && (
               <TechnicianDispatchReturn
                 serviceOrderId={id}
@@ -433,13 +435,16 @@ const ServiceOrderDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
+          <OnField rentalId={serviceOrderData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldServiceOrder} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
+          <Box>{serviceOrderData && <FieldServiceOrderView fieldServiceOrderData={serviceOrderData} />}</Box>
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
           resourceData?.tabs?.map((tab, i) => {
             return (
-              <TabPanel value={tabValue} index={i + 5}>
+              <TabPanel value={tabValue} index={i + 6}>
                 <Step
                   tab={tab}
                   resourcePolicyId={resourceData?._id}

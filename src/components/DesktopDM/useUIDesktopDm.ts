@@ -1,8 +1,8 @@
 import { useMediaQuery } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { isMobile as isMobileDevice } from 'react-device-detect';
 import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
+import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -41,10 +41,13 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 };
 
 const useUIDesktopDm = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setStore] = useStore((state) => state[HANDLE_OPEN_CHAT]);
   const {
     state: {
       permissions,
-      user: { user }
+      user: { user },
+      resources
     }
   }: any = useData();
 
@@ -55,16 +58,18 @@ const useUIDesktopDm = () => {
   }, [permissions?.equiptAi?.isRead]);
 
   const [uiState, setUiState] = useState<UIState>(initialState);
-  const isMobile = useMediaQuery('(max-width:768px)');
+  const isMobile = useMediaQuery('(max-width:800px)');
 
   const handleChatOpen = useCallback(
     (id: string, type: OpenedChat['type']) => {
-      const chatBoxOpenedState: OpenedChat = uiState.openedChats.find((d) => d.id === id);
-
-      if (uiState.openedChats.length === 0) {
-        setUiState((prev) => ({ ...prev, openedChats: [{ id, open: 'fullyOpen', type }] }));
-      } else if (chatBoxOpenedState) {
-        setUiState((prev) => {
+      setUiState((prev) => {
+        if (isMobile) {
+          return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
+        }
+        const chatBoxOpenedState: OpenedChat = prev.openedChats.find((d) => d.id === id);
+        if (prev.openedChats.length === 0) {
+          return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
+        } else if (chatBoxOpenedState) {
           const newPayload: UIState = { ...prev };
           newPayload.openedChats = prev.openedChats.map((d) => {
             if (d.id === id) {
@@ -73,39 +78,30 @@ const useUIDesktopDm = () => {
             return { ...d, open: 'partial' };
           });
           return newPayload;
-        });
-        return;
-      } else {
-        const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(uiState.openedChats);
-        if (canAddNewChatWithoutChangingState) {
-          setUiState((prev) => {
+        } else {
+          const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(prev.openedChats);
+          if (canAddNewChatWithoutChangingState) {
             const newPayload: UIState = { ...prev };
             newPayload.openedChats = [...prev.openedChats, { id, open: 'fullyOpen', type }];
             return newPayload;
-          });
-          return;
-        }
-        const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(uiState.openedChats.map((d) => ({ ...d, open: 'partial' })));
-        if (canAddNewChatIfChatsArePartiallyOpen) {
-          setUiState((prev) => {
+          }
+          const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(prev.openedChats.map((d) => ({ ...d, open: 'partial' })));
+          if (canAddNewChatIfChatsArePartiallyOpen) {
             const newPayload: UIState = { ...prev };
             const prevOpenedChats = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
             newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
             return newPayload;
-          });
-          return;
-        }
-        // Remove oldest chat from list and make rest of the chats partial
-        setUiState((prev) => {
+          }
+          // Remove oldest chat from list and make rest of the chats partial
           const newPayload: UIState = { ...prev };
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const [_first, ...prevOpenedChats] = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
           newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
           return newPayload;
-        });
-      }
+        }
+      });
     },
-    [uiState.openedChats]
+    [isMobile]
   );
 
   const handleToggleChatWindow = useCallback(
@@ -119,7 +115,6 @@ const useUIDesktopDm = () => {
           index = i;
         }
       }
-
       if (!chatBoxOpenedState) return;
       if (chatBoxOpenedState.open === 'fullyOpen') {
         setUiState((prev) => {
@@ -186,7 +181,7 @@ const useUIDesktopDm = () => {
   }, []);
 
   const toggleMainWindow = useCallback(() => {
-    setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'partial' ? 'fullyOpen' : 'partial' }));
+    setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' }));
   }, []);
 
   const closeMainWindow = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -208,11 +203,22 @@ const useUIDesktopDm = () => {
     });
   }, []);
 
+  useEffect(() => {
+    setStore({ [HANDLE_OPEN_CHAT]: toggleMainWindow });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [toggleMainWindow]);
+
+  useEffect(() => {
+    if (isMobile && uiState.openedChats.length > 1) {
+      setUiState((prev) => ({ ...prev, openedChats: [{ ...prev.openedChats[prev.openedChats.length - 1], open: 'fullyOpen' }] }));
+    }
+  }, [isMobile, uiState.openedChats.length]);
+
   return {
     ...uiState,
     user,
+    resources,
     permissions,
-    isMobileDevice,
     isMobile,
     CHATBOX_GAP,
     USER_LIST_CONTAINER_WIDTH,

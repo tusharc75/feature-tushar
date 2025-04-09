@@ -3,7 +3,7 @@ import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, isArray, isObject } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -269,12 +269,13 @@ const Technicians = ({
     let data;
     const response = await axiosInstance().get(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.service}`);
     data = response?.data?.data?.material;
-    const services = [{ optionLabel: 'All', optionValue: 'All', _id: null, competencies: [] }];
+    const services = [{ optionLabel: 'All', optionValue: 'All', _id: null, competencyType: [], competencies: [] }];
     data?.map((d) => {
       services.push({
+        _id: d?._id,
         optionLabel: d?.serviceDetail?.serviceName,
         optionValue: d?.materialId,
-        _id: d?._id,
+        competencyType: d?.serviceDetail?.competencyType,
         competencies: d?.serviceDetail?.competencies
       });
     });
@@ -308,7 +309,7 @@ const Technicians = ({
     rows.forEach((d) => {
       const element: any = {};
       element.technician = d?._id;
-      element.fieldServiceOrder = serviceOrderData?._id;
+      element.referenceId = serviceOrderData?._id;
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
@@ -447,7 +448,6 @@ const Technicians = ({
       ) : null}
       {technicianDialog && (
         <AssignEmployeeDialog
-          reference={camelCase(sidebarResource.fieldServiceOrder)}
           onSuccess={(data) => {
             handleAssign(data);
           }}
@@ -457,7 +457,9 @@ const Technicians = ({
           isSubmitting={isSubmitting}
           warehouse={serviceOrderData?.warehouse?.optionValue}
           ids={dataRows?.map((d) => d?.technicianId)}
-          defaultCompetency={selectedService?.competencies || []}
+          defaultCompetencyType={selectedService?.competencyType ?
+            isObject(selectedService?.competencyType) ? [selectedService?.competencyType] :
+              isArray(selectedService?.competencyType) ? selectedService?.competencyType : [] : []}
         />
       )}
       {deleteData && (

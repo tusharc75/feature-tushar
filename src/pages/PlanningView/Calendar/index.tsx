@@ -295,7 +295,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     if (selectedLookUpResourceData) {
       Object.keys(selectedLookUpResourceData).forEach((d) => {
-        const data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+        let data = []
+        if (d === 'technician') {
+          data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
+        }
+        else {
+          data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+        }
         query = `${query}&${d}=${data}`;
       });
     }
@@ -425,24 +431,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 fulfillStatus = 'ERROR';
               }
             }
+            else if (d?.customerAccount?.optionLabel) {
+              title = `${title} (${d?.customerAccount?.optionLabel})`;
+            }
             if (selectedResource.resource === sidebarResource.employeeMaster) {
-              if (d?.referenceType === sidebarResource.fieldTicket) {
-                title = `${d?.fieldTicket?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
-                extraData.referenceType = d?.referenceType;
-                extraData.referenceId = d?.fieldTicket?.optionValue;
-              } else if (d?.referenceType === sidebarResource.fieldServiceOrder) {
-                title = `${d?.fieldServiceOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
-                extraData.referenceType = d?.referenceType;
-                extraData.referenceId = d?.fieldServiceOrder?.optionValue;
-              } else if (d?.referenceType === sidebarResource.rentalManagement) {
-                title = `${d?.rentalManagement?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
-                extraData.referenceType = d?.referenceType;
-                extraData.referenceId = d?.rentalManagement?.optionValue;
-              } else if (d?.referenceType === sidebarResource.workOrder) {
-                title = `${d?.workOrder?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
-                extraData.referenceType = d?.referenceType;
-                extraData.referenceId = d?.workOrder?.optionValue;
-              }
+              title = `${d?.reference?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
+              extraData.referenceType = d?.referenceType;
+              extraData.referenceId = d?.reference?.optionValue;
             }
             return {
               id: d?._id,
@@ -457,7 +452,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               endDraggable: endDraggable
             };
           });
-
           setEvents([...rows, ...otherData]);
           setStaticEvents([...rows, ...otherData]);
           setIsDataFetching(false);

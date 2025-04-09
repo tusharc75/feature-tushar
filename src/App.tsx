@@ -2,13 +2,35 @@ import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { lazy, Suspense, useContext, useEffect, useState } from 'react';
-import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import AgentChat from 'src/components/AgentChat';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
+import CustomMessageDialog from 'src/components/MessageDialog';
+import { VITE_APP_ENV } from 'src/config';
+import AssemblyOrder from 'src/pages/AssemblyOrder';
+import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
 import EquiptAi from 'src/pages/EquiptAi';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import ExpenseApproval from 'src/pages/ExpenseApproval';
+import Expenses from 'src/pages/Expenses';
+import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetail';
+import ExpenseReport from 'src/pages/ExpensesReport';
+import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetail';
 import Integration from 'src/pages/Integration';
+import PackageCategory from 'src/pages/PackageCategory';
+import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
+import ServiceCategory from 'src/pages/ServiceCategory';
+import ServiceCategoryDetail from 'src/pages/ServiceCategory/ServiceCategoryDetail';
+import PackageInventory from 'src/pages/PackageInventory';
+import ProductTypes from 'src/pages/ProductTypes';
+import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
+import ReportsCenter from 'src/pages/Reports';
+import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
+import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
+import SerializedPackages from 'src/pages/SerializedPackages';
+import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import WorkFlow from 'src/pages/WorkFlow';
@@ -209,6 +231,7 @@ import SerializedAsset from './pages/SerializedAsset';
 import SerializedAssetDetailsPage from './pages/SerializedAsset/SerializedAssetDetailsPage';
 import SerializedAssetStatusChangeRequest from './pages/SerializedAsset/SerializedAssetStatusChangeRequest';
 import SerializedAssetsCertification from './pages/SerializedAssetsCertification';
+import SerializedAssetInspection from './pages/SerializedAssetsInspection';
 import ServiceMaster from './pages/ServiceMaster';
 import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
 import StorageLocation from './pages/StorageLocation';
@@ -243,6 +266,7 @@ import User from './pages/User';
 import UserDetailsPage from './pages/User/UserDetailsPage';
 import UserAttendance from './pages/UserAttendance';
 import UserDownloadRequest from './pages/UserDownloadRequest';
+import UserManual from './pages/UserManual';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import WellMaster from './pages/WellMaster';
@@ -264,32 +288,9 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
-import AssemblyOrder from 'src/pages/AssemblyOrder';
-import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
-import AgentChat from 'src/components/AgentChat';
-import { VITE_APP_ENV } from 'src/config';
-import PackageInventory from 'src/pages/PackageInventory';
-import UserManual from './pages/UserManual';
-import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
-import ReportsCenter from 'src/pages/Reports';
-import Expenses from 'src/pages/Expenses';
-import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetail';
-import ExpenseReport from 'src/pages/ExpensesReport';
-import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetail';
-import ExpenseApproval from 'src/pages/ExpenseApproval';
-import SerializedAssetInspection from './pages/SerializedAssetsInspection';
-import DisassemblyOrder from 'src/pages/DisassemblyOrder';
-import DisassemblyOrderDetail from 'src/pages/DisassemblyOrder/DisassemblyOrderDetail';
-import SerializedPackages from 'src/pages/SerializedPackages';
-import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
-import ProductTypes from 'src/pages/ProductTypes';
-import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
-import PackageCategory from 'src/pages/PackageCategory';
-import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
-import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
-import CustomMessageDialog from 'src/components/MessageDialog';
 import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
 import SerializedAssetStatusChangeRequestDetail from 'src/pages/SerializedAsset/SerializedAssetStatusChangeRequest/SerializedAssetStatusChangeRequestDetail';
+
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
@@ -939,12 +940,6 @@ function App() {
             <PrivateRoute exact path={`${routes.demandOrderDetail.path}/:id`}>
               <DemandOrderDetails />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrder.path}`}>
-              <DisassemblyOrder />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.disassemblyOrderDetail.path}/:id`}>
-              <DisassemblyOrderDetail />
-            </PrivateRoute>
             <PrivateRoute exact path={`${routes.expenses.path}`}>
               <Expenses />
             </PrivateRoute>
@@ -1250,6 +1245,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.packageCategoryDetail.path}/:id`}>
               <PackageCategoryDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceCategory.path}`}>
+              <ServiceCategory />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serviceCategoryDetail.path}/:id`}>
+              <ServiceCategoryDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />

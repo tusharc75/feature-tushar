@@ -1,37 +1,53 @@
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { AccountCircle, Add, AddCircleOutline, Map } from '@mui/icons-material';
+import { AccountCircle, AddCircleOutline, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
-import { cn } from 'src/constants/helpers';
-import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
-import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import { memo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cn } from 'src/constants/helpers';
+import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
+import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
+import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import { FiExternalLink } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 
 type SidebarProps = {
   activity: TActivity[];
   handleSelect: HandleSelect;
   loading: boolean;
-  selectedResource: any
+  selectedResource: any;
 };
 
-const Sidebar = ({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
+const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
+  const { technicianSearchValue, setTechnicianSearchValue } = useTechnicianContext();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   return (
     <aside className="sticky right-0 z-[3] border-l bg-[white] dark:bg-[--dark-primary]">
-      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center gap-2 border-b bg-[--dark-primary,white] p-4">
-        <Map />
-        <Typography variant="body1" display="block">
-          Technicians
-        </Typography>
+      <div className="sticky top-0 z-[4] flex h-[--header-h] items-center justify-between gap-2 border-b bg-[--dark-primary,white] p-4">
+        <h6 className="line-clamp-1 text-[1rem] font-semibold">Technicians</h6>
+        <div className="flex">
+          <SearchButton value={technicianSearchValue} setValue={setTechnicianSearchValue} onOpenToggle={setIsSearchOpen} />
+          <div className={cn('flex items-center overflow-hidden transition-all', isSearchOpen ? 'w-0' : 'w-[30px] ')}>
+            <IconButton
+              size="small"
+              color="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                const userIds = activity?.map((d) => d?.user?.optionValue)?.filter(Boolean);
+                handleSelect(e, userIds, 'map');
+              }}
+            >
+              <Map fontSize="small" />
+            </IconButton>
+          </div>
+        </div>
       </div>
       {!loading ? (
         <ul className="list-none">
           {activity?.map((data, index) => {
-            return <SingleTechnician
-              data={data}
-              index={index}
-              handleSelect={handleSelect}
-              selectedResource={selectedResource}
-              key={data._id} />;
+            return <SingleTechnician data={data} index={index} handleSelect={handleSelect} selectedResource={selectedResource} key={data._id} />;
           })}
         </ul>
       ) : (
@@ -69,11 +85,11 @@ const Sidebar = ({ activity, selectedResource, handleSelect, loading }: SidebarP
       )}
     </aside>
   );
-};
+});
 
 export default Sidebar;
 
-export const SingleTechnician = ({ data, handleSelect, index, selectedResource, className = '' }) => {
+export const SingleTechnician = memo(({ data, handleSelect, index, selectedResource, className = '' }: any) => {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: data._id,
     data: {
@@ -101,8 +117,17 @@ export const SingleTechnician = ({ data, handleSelect, index, selectedResource, 
           <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
             <AccountCircle style={{ fontSize: 28 }} />
           </Avatar>
-          <div className="">
-            <Typography style={{ fontWeight: 'bolder', fontSize: '1rem' }}>{`${data?.firstName} ${data?.lastName}`}</Typography>
+          <div>
+            <div className="flex items-center gap-1">
+              <Typography
+                title={`${data?.firstName} ${data?.lastName}`}
+                style={{ fontWeight: 'bolder', fontSize: '1rem' }}
+                className="line-clamp-1"
+              >{`${data?.firstName} ${data?.lastName}`}</Typography>
+              <Link className="flex-shrink-0 ml-1" to={`${routes.employeeMasterDetail.path}/${data._id}`} target={'_blank'}>
+                <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+              </Link>
+            </div>
             <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
               {`${data?.competencyType?.optionLabel || ''}`}
             </p>
@@ -129,7 +154,9 @@ export const SingleTechnician = ({ data, handleSelect, index, selectedResource, 
             size="small"
             onClick={(event) => {
               event.stopPropagation();
-              handleSelect(event, data, 'map');
+              if (data?.user?.optionValue) {
+                handleSelect(event, [data?.user?.optionValue], 'map');
+              }
             }}
           >
             <Map fontSize="small" />
@@ -138,4 +165,4 @@ export const SingleTechnician = ({ data, handleSelect, index, selectedResource, 
       </ListItem>
     </li>
   );
-};
+});
