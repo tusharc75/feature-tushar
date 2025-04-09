@@ -478,11 +478,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       }
     } else {
       var taxCodeData: any = null;
-      if (fieldTicketData?.taxCode) {
-        const taxCodeOptions = await getTaxList(user, fieldTicketData, type);
-        if (taxCodeOptions?.length) {
-          taxCodeData = taxCodeOptions[0];
-        }
+      const taxCodeOptions = await getTaxList(user, fieldTicketData, type);
+      if (taxCodeOptions?.length) {
+        taxCodeData = taxCodeOptions[0];
       }
       const material: any = [];
       if (addRentalJobDataDialog.open || addQuotationDataDialog || addFieldServiceOrderDataDialog) {
