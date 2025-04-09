@@ -406,11 +406,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
       else {
         var taxCodeData: any = null;
-        if (fieldTicketData?.taxCode) {
-          const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
-          if (taxCodeOptions?.length) {
-            taxCodeData = taxCodeOptions[0];
-          }
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+        if (taxCodeOptions?.length) {
+          taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
           const element: any = {};
