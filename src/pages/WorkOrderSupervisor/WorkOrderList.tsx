@@ -157,8 +157,11 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
                 <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton size="small" title={'Preview PDF'} onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}>
-                    <Info fontSize="small" color={'primary'} />{' '}
+                  <IconButton
+                    size="small"
+                    onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}
+                  >
+                    <Info fontSize="small" color={'primary'} />
                   </IconButton>
                 </HtmlTooltip>
               </div>
