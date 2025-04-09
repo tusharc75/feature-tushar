@@ -49,6 +49,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Productpackage = ({
   quotationData,
+  quotationFields,
   fetchQuotationData,
   setNextStep,
   renderedFrom,
@@ -418,7 +419,7 @@ const Productpackage = ({
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, quotationData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -924,6 +925,7 @@ const Productpackage = ({
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
           quotationData={quotationData}
+          quotationFields={quotationFields}
           rowData={!isProductEdit.isBulkedit ? recordToUpdate : selectedRecords}
           material={material}
           selectedProducts={selectedRecords}
@@ -961,6 +963,7 @@ const Productpackage = ({
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           quotationData={quotationData}
+          quotationFields={quotationFields}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (

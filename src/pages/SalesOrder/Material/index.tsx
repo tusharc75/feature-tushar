@@ -42,7 +42,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 
-const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus, allowedToEdit }) => {
+const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, salesOrderFields, updateJobStatus, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { resources, permissions, user }
@@ -352,7 +352,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, salesOrderData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, salesOrderData, salesOrderFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -730,6 +730,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           material={material}
           selectedProducts={selectedRecords}
           salesOrderData={salesOrderData}
+          salesOrderFields={salesOrderFields}
           loadingEdit={isUpdating}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
         />

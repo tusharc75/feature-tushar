@@ -501,6 +501,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={[]}
           rowData={dataRows?.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}

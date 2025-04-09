@@ -61,7 +61,7 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
-const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
+const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -506,7 +506,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       }
     } else {
       var taxCodeData: any = null;
-      const taxCodeOptions = await getTaxList(user, fieldTicketData, type);
+      const taxCodeOptions = await getTaxList(user, fieldTicketData, fieldTicketFields, type);
       if (taxCodeOptions?.length) {
         taxCodeData = taxCodeOptions[0];
       }
@@ -1033,6 +1033,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           allowedToEdit={allowedToEdit}
           services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
           fieldTicketData={fieldTicketData}
+          fieldTicketFields={fieldTicketFields}
           fetchMaterial={fetchMaterial}
           stepFullScreen={stepFullScreen}
           fetchData={fetchData}
@@ -1092,6 +1093,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           fieldTicketData={fieldTicketData}
+          fieldTicketFields={fieldTicketFields}
           rowData={!isBulkEdit ? isServiceEdit.data : selectedRecords}
           material={dataRows}
           selectedServices={selectedRecords}
@@ -1117,6 +1119,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           handleAddCost={handleAddCost}
           handleUpdateCost={handleUpdateCost}
           fieldTicketData={fieldTicketData}
+          fieldTicketFields={fieldTicketFields}
           costData={showCostDialog?.data}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           loadingEdit={isUpdating}

@@ -987,6 +987,7 @@ const FormTypes = (props) => {
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
+            inputLabel: { shrink: !!values[name] },
             input: {
               inputComponent: CustomFormat as any,
               inputProps: {

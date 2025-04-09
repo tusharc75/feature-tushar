@@ -39,7 +39,7 @@ import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQ
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
-const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep }) => {
+const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Services`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -343,7 +343,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, serviceOrderData, type);
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, serviceOrderFields, type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -592,6 +592,7 @@ const Services = ({ serviceOrderData, stepFullScreen, allowedToEdit, handleChang
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           serviceOrderData={serviceOrderData}
+          serviceOrderFields={serviceOrderFields}
           rowData={!isBulkEdit ? isServiceEdit.data : selectedRecords}
           material={dataRows}
           selectedServices={selectedRecords}

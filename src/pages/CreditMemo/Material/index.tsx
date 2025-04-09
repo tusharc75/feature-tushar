@@ -20,7 +20,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from '../../Invoice/Material/MaterialDialog';
 import AdditionalCostDialog from '../..//Invoice/Material/AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -29,7 +29,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
-const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
+const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -324,7 +324,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, creditMemoData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, creditMemoData, creditMemoFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -721,6 +721,7 @@ const Material = ({ creditMemoData, allowedToEdit, fetchCreditMemoData }) => {
           material={material}
           selectedProducts={selectedRecords}
           invoiceData={creditMemoData}
+          invoiceFields={creditMemoFields}
           loadingEdit={isUpdating}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />

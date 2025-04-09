@@ -25,6 +25,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   salesOrderData: any;
+  salesOrderFields: any;
   rowData?: object | any;
   material: any[];
   selectedProducts: any[];
@@ -39,6 +40,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
   onClose,
   handleSaveData,
   salesOrderData,
+  salesOrderFields,
   rowData,
   material,
   selectedProducts,
@@ -148,7 +150,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-    const taxCodeOptions = await getTaxList(user, salesOrderData, isBulkedit ? selectedProducts[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(user, salesOrderData, salesOrderFields, isBulkedit ? selectedProducts[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;
