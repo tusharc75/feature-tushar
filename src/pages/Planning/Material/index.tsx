@@ -21,10 +21,12 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -46,6 +48,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [isAdding, setIsAdding] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [material, setMaterial] = useState([]);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -170,8 +173,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -190,6 +193,17 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           )}
+          <HtmlTooltip title="Attachments">
+            <IconButton
+              size="small"
+              aria-label="Attachment"
+              onClick={(e) => {
+                setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+              }}
+            >
+              <AttachFileIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
           <IconButton
             size="small"
             aria-label="Details"
@@ -436,7 +450,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             Add Existing Services
           </MenuItem>
         )}
-        {permissions?.packages?.isRead &&
+        {permissions?.packages?.isRead && (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: 'package', parentId: null });
@@ -444,7 +458,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           >
             {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -608,6 +622,17 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           selectedProducts={assetAssignedProduct?.map((i) => {
             return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qty - i.assetQty };
           })}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={planningData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.planning}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>
