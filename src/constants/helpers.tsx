@@ -3641,6 +3641,10 @@ export const DOA_RESOURCE = [
   {
     key: 'purchaseRequisition',
     resorce: sidebarResource.purchaseRequisition
+  },
+  {
+    key: 'serializedAssetStatusChangeRequest',
+    resorce: sidebarResource.serializedAssetStatusChangeRequest
   }
 ];
 

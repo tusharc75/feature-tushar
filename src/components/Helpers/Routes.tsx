@@ -681,6 +681,9 @@ const routes = {
   serializedAssetStatusChangeRequest: {
     path: '/serialized-asset-status-change-request'
   },
+  serializedAssetStatusChangeRequestDetail: {
+    path: '/serialized-asset-status-change-request/detail'
+  },
   units: {
     path: '/units'
   },
@@ -692,6 +695,9 @@ const routes = {
   },
   resourceDoaRequest: {
     path: '/resource-doa-request'
+  },
+  resourceDoaRequestDetail: {
+    path: '/resource-doa-request/detail'
   },
   subcontractAssembly: {
     path: '/subcontract-assembly'

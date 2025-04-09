@@ -288,6 +288,8 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
+import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
+import SerializedAssetStatusChangeRequestDetail from 'src/pages/SerializedAsset/SerializedAssetStatusChangeRequest/SerializedAssetStatusChangeRequestDetail';
 
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
@@ -1166,6 +1168,9 @@ function App() {
             <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
               <SerializedAssetStatusChangeRequest />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequestDetail.path}/:id`}>
+              <SerializedAssetStatusChangeRequestDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.units.path}>
               <Units />
             </PrivateRoute>
@@ -1177,6 +1182,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.resourceDoaRequest.path}>
               <ResourceDoaRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.resourceDoaRequestDetail.path}/:id`}>
+              <ResourceDoaRequestDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subcontractAssembly.path}>
               <SubcontractAssembly />
