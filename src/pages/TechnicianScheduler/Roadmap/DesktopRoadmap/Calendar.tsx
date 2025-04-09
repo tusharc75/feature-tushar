@@ -12,7 +12,7 @@ type CalendarProps = {
   startDate: dayjs.Dayjs;
   totalDay: number;
   handleSelect: HandleSelect;
-  selected: string | null;
+  selected: string[] | [];
   container: HTMLDivElement;
 };
 
