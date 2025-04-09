@@ -24,7 +24,6 @@ const useDesktopDM = () => {
   const fetchData = useCallback(
     async ({ cancelToken, onSuccess = () => {} }: { cancelToken?: CancelToken; onSuccess?: () => void }) => {
       setReplyingToMessage(null);
-      if (uiState.isMobile || uiState.isMobileDevice) return;
       try {
         setLoading(true);
         const {
@@ -48,7 +47,7 @@ const useDesktopDM = () => {
         setLoading(false);
       }
     },
-    [toastConfig, uiState.isMobile, uiState.isMobileDevice, user?._id]
+    [toastConfig, user?._id]
   );
 
   useEffect(() => {
@@ -58,7 +57,7 @@ const useDesktopDM = () => {
       tokenSource.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uiState.isMobile, uiState.isMobileDevice]);
+  }, []);
 
   const onUserFirstMessageSent = useCallback(
     ({ userId, channelId }: { userId: string; channelId: string }) => {

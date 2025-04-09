@@ -4656,3 +4656,17 @@ td.google-visualization-orgchart-node {
     border-bottom: 0px !important;
   }
 }
+
+.col-timeline-data {
+  .max-md\:sr-only.max-md\:hidden {
+    display: block !important;
+    position: initial !important;
+    width: auto;
+    height: auto;
+    margin: 0;
+    clip: unset;
+  }
+  .md\:sr-only.md\:hidden {
+    display: none !important;
+  }
+}

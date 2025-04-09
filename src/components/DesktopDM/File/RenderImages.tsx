@@ -74,8 +74,8 @@ const RenderSingleImage = ({
           <span className="text-white">+ {moreImageCount}</span>
         </div>
       ) : (
-        <div className="absolute inset-0 cursor-pointer bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-          {typeof onDelete === 'function' && (
+        <div className={cn('absolute inset-0 cursor-pointer bg-black/50 opacity-0 transition-opacity group-hover:opacity-100')}>
+          {typeof onDelete === 'function' && !hasToDownload && (
             <span className="absolute right-[2px] top-[2px] rounded-full bg-white opacity-0 group-hover:opacity-100">
               <IconButton
                 size="small"
