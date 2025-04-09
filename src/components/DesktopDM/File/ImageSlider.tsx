@@ -43,7 +43,8 @@ const ImageSlider = ({
         resolveUrl={resolveUrl}
         carouselProps={{
           onChange: (i) => setActiveIndex(i),
-          index: activeIndex
+          index: activeIndex,
+          animation: 'fade'
         }}
         headerComponent={
           <div className="flex items-center justify-end gap-1">

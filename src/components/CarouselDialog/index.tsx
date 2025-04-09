@@ -18,8 +18,6 @@ type CarouselDialogProps = {
   resolveUrl?: (url: string) => Promise<string>;
 };
 
-const classList = ['min-h-[300px]', 'bg-gray-300', 'dark:bg-gray-800'];
-
 const CarouselDialog = ({ images, index = 0, close, title = 'Images', headerComponent, carouselProps = {}, resolveUrl }: CarouselDialogProps) => {
   const [fullScreen, setFullScreen] = useState(isMobile && !isTablet);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,7 +59,7 @@ const CarouselDialog = ({ images, index = 0, close, title = 'Images', headerComp
             {...carouselProps}
           >
             {images.map((item: string, i) => (
-              <RenderSingleImage src={item} resolveUrl={resolveUrl} key={`${i}-${item}`} maxSize={maxSize} />
+              <RenderSingleImage src={item} index={i} resolveUrl={resolveUrl} key={`${i}-${item}`} maxSize={maxSize} />
             ))}
           </Carousel>
         </div>
@@ -75,7 +73,8 @@ export default CarouselDialog;
 const RenderSingleImage = ({
   src,
   maxSize,
-  resolveUrl
+  resolveUrl,
+  index
 }: {
   src: string;
   resolveUrl?: CarouselDialogProps['resolveUrl'];
@@ -83,19 +82,18 @@ const RenderSingleImage = ({
     maxWidth: number;
     maxHeight: number;
   };
+  index: number;
 }) => {
   const [url, setUrl] = useState(src);
-  const handleOnload = (e: SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    target.classList.remove(...classList);
-  };
+
   const handleOnError = (e: SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
     target.src = imageLoadingFailed;
-    target.classList.remove(...classList);
     target.classList.add('max-h-[200px]', 'max-w-[200px]', 'rounded-md');
-    target.width = 300;
-    target.height = 300;
+    target.width = 200;
+    target.height = 200;
+    target.style.width = '200px';
+    target.style.height = '200px';
   };
 
   useEffect(() => {
@@ -116,8 +114,7 @@ const RenderSingleImage = ({
         <img
           draggable={false}
           onError={handleOnError}
-          onLoad={handleOnload}
-          className={cn('h-auto max-h-full w-auto object-contain', ...classList)}
+          className={cn('h-auto max-h-full w-auto object-contain')}
           style={maxSize}
           src={url}
           alt={''}
