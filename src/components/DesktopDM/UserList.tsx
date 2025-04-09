@@ -63,7 +63,7 @@ const UserList = memo(
         className={cn(
           'mr-[--user-list-right-space] flex w-[--user-list-container-w] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
           mainWindow && mainWindow === 'partial' ? 'h-[--partially-openned-container-h]' : 'h-[calc(100vh-100px)]',
-          isMobile ? `w-auto ${permissions?.equiptAi?.isRead ? 'mr-[60px]' : ''}` : 'flex-[0_0_var(--user-list-container-w)]'
+          isMobile ? `w-auto ${permissions?.equiptAi?.isRead ? 'mr-[60px]' : 'mr-2'}` : 'flex-[0_0_var(--user-list-container-w)]'
         )}
       >
         <header
