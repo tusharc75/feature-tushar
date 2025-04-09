@@ -376,5 +376,16 @@ export const resourcePolicy = [
         defaultValue: false,
       }
     ]
+  },
+  {
+    resource: sidebarResource.workOrderTechnician,
+    policy: [
+      {
+        fieldName: 'showWorkOrderPdfPreviewInTile',
+        fieldLabel: 'Show Work Order Pdf Preview in Tile',
+        type: 'checkBox',
+        defaultValue: false,
+      }
+    ]
   }
 ];
