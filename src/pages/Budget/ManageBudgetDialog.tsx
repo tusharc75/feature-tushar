@@ -141,7 +141,6 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
       });
     }
   };
-  console.log(initialData)
 
   return (
     <>
