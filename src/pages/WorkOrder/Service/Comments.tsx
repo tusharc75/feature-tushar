@@ -15,7 +15,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, userId }) => {
+const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, stepName=null, userId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
@@ -100,7 +100,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, use
       aria-labelledby="comments-dialog"
     >
       <CustomDialogHeader
-        title={`Comments - ${serviceName}`}
+        title={stepName ? `Comments - ${stepName} (${serviceName})` : `Comments - ${serviceName}`}
         showRequiredLabel={false}
         onClose={handleClose}
         isMinimized={!fullScreen}
