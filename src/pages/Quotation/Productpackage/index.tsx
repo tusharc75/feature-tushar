@@ -44,7 +44,8 @@ import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
-const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
+const Productpackage = ({ quotationData, quotationFields, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -388,7 +389,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, quotationData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -894,6 +895,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
           quotationData={quotationData}
+          quotationFields={quotationFields}
           rowData={!isProductEdit.isBulkedit ? recordToUpdate : selectedRecords}
           material={material}
           selectedProducts={selectedRecords}
@@ -931,6 +933,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           quotationData={quotationData}
+          quotationFields={quotationFields}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (

@@ -21,7 +21,7 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCondition, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -29,7 +29,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 
-const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -330,7 +330,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, invoiceData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, invoiceData, invoiceFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -690,6 +690,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           material={material}
           selectedProducts={selectedRecords}
           invoiceData={invoiceData}
+          invoiceFields={invoiceFields}
           loadingEdit={isUpdating}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />

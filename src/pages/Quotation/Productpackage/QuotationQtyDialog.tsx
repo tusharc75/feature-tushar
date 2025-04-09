@@ -33,6 +33,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   quotationData: any;
+  quotationFields: any;
   rowData?: object | any;
   material: any[];
   selectedProducts: any[];
@@ -48,6 +49,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   onClose,
   handleSaveData,
   quotationData,
+  quotationFields,
   rowData,
   material,
   selectedProducts,
@@ -266,7 +268,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    const taxCodeOptions = await getTaxList(user, quotationData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationFields, isBulkedit ? rowData[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

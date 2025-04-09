@@ -26,6 +26,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   invoiceData: any;
+  invoiceFields: any;
   rowData?: object | any;
   material: any[];
   selectedProducts: any[];
@@ -39,6 +40,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   onClose,
   handleSaveData,
   invoiceData,
+  invoiceFields,
   rowData,
   material,
   selectedProducts,
@@ -173,7 +175,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    const taxCodeOptions = await getTaxList(user, invoiceData, isBulkedit ? rowData[0]?.type : rowData?.type);
+    const taxCodeOptions = await getTaxList(user, invoiceData, invoiceFields, isBulkedit ? rowData[0]?.type : rowData?.type);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

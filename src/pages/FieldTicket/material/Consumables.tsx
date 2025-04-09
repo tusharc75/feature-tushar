@@ -42,7 +42,7 @@ import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/Contained
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFields, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -406,7 +406,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
       else {
         var taxCodeData: any = null;
-        const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, fieldTicketFields, MATERIAL_TYPE.product);
         if (taxCodeOptions?.length) {
           taxCodeData = taxCodeOptions[0];
         }
@@ -808,6 +808,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           fieldTicketData={fieldTicketData}
+          fieldTicketFields={fieldTicketFields}
           rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
           material={dataRows}
           selectedServices={selectedRecords}

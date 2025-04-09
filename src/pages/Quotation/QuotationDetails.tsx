@@ -608,6 +608,7 @@ const QuotationDetails = () => {
               {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
+                  quotationFields={quotationFields}
                   fetchQuotationData={fetchQuotationData}
                   setNextStep={setNextStep}
                   renderedFrom={`${renderedFrom}_grid-1`}
