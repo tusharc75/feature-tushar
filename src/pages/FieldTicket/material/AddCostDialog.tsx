@@ -49,12 +49,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
     setInitialData({ fields: [], values: {} });
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     data = data?.filter((f) => f?.isRead);
-    if (
-      (fieldTicketData?.taxCode ||
-        (fieldTicketData?.billingAddress &&
-          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
-      !isOffline
-    ) {
+    if (!isOffline) {
       const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.manualEntry);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {

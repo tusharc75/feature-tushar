@@ -231,13 +231,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-
-    if (
-      (fieldTicketData?.taxCode ||
-        (fieldTicketData?.billingAddress &&
-          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
-      !isOffline
-    ) {
+    if (!isOffline) {
       const taxCodeOptions = await getTaxList(user, fieldTicketData, isBulkedit ? rowData[0]?.type : rowData?.type);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
