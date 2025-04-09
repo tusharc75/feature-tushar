@@ -1655,6 +1655,7 @@ const Steps = ({
                 uniqueId={selectedService?.uniqueId}
                 serviceName={selectedService?.serviceName}
                 stepId={selectedStep?._id}
+                stepName={selectedStep?.stepName}
                 handleClose={() => {
                   setCommentsDialog(false);
                 }}
