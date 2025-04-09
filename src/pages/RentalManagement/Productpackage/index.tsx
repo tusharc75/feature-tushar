@@ -66,6 +66,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const Productpackage = ({
   rentalManagementData,
+  rentalManagementFields,
   setNextStep,
   setNextStepToolTip,
   renderedFrom,
@@ -332,7 +333,7 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachments">
+            {/* <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
                 aria-label="Attachment"
@@ -342,7 +343,7 @@ const Productpackage = ({
               >
                 <AttachFileIcon fontSize="small" color='primary' />
               </IconButton>
-            </HtmlTooltip>
+            </HtmlTooltip> */}
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -1087,6 +1088,7 @@ const Productpackage = ({
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={rentalManagementFields}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
           dataRows={flattenArray(dataRows)}

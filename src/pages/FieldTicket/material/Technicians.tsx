@@ -18,10 +18,9 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import StartStopLogsDialog, { formatDurationInHrs } from './StartStopLogsDialog';
-import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import StartStopDateDialog from './StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { Edit } from '@mui/icons-material';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
 

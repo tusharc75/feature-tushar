@@ -27,6 +27,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   serviceOrderData: any;
+  serviceOrderFields: any;
   rowData?: object | any;
   material: any[];
   selectedServices: any[];
@@ -43,6 +44,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   onClose,
   handleSaveData,
   serviceOrderData,
+  serviceOrderFields,
   rowData,
   material,
   selectedServices,
@@ -218,19 +220,12 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
-
-    if (
-      (serviceOrderData?.taxCode ||
-        (serviceOrderData?.billingAddress &&
-          (serviceOrderData?.billingAddress?.zipCode || serviceOrderData?.billingAddress?.state || serviceOrderData?.billingAddress?.county)))
-    ) {
-      const taxCodeOptions = await getTaxList(user, serviceOrderData?.billingAddress, isBulkedit ? rowData[0]?.type : rowData?.type);
-      fields?.forEach((e: any) => {
-        if (e?.fieldName === 'taxCode') {
-          e.option = taxCodeOptions;
-        }
-      });
-    }
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, serviceOrderFields, isBulkedit ? rowData[0]?.type : rowData?.type);
+    fields?.forEach((e: any) => {
+      if (e?.fieldName === 'taxCode') {
+        e.option = taxCodeOptions;
+      }
+    });
     setFields(customData);
   };
 

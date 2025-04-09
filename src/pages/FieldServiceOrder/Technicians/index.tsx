@@ -26,6 +26,7 @@ import TechnicianDialog from 'src/pages/FieldServiceOrder/Technicians/Technician
 const Technicians = ({
   allowedToEdit,
   serviceOrderData,
+  serviceOrderFields,
   fetchData: fetchserviceOrderData,
   resourcePolicy,
   stepFullScreen,
@@ -438,6 +439,7 @@ const Technicians = ({
           <Consumables
             allowedToEdit={allowedToEdit}
             serviceOrderData={serviceOrderData}
+            serviceOrderFields={serviceOrderFields}
             stepFullScreen={stepFullScreen}
             fetchData={fetchserviceOrderData}
             technicians={dataRows}

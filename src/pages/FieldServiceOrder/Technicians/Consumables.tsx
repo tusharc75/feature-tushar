@@ -39,6 +39,7 @@ import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationD
 const Consumables = ({
   allowedToEdit,
   serviceOrderData,
+  serviceOrderFields,
   stepFullScreen,
   fetchData: fetchserviceOrderData,
   technicians,
@@ -245,7 +246,7 @@ const Consumables = ({
   const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, serviceOrderFields, MATERIAL_TYPE.product);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -531,6 +532,7 @@ const Consumables = ({
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           serviceOrderData={serviceOrderData}
+          serviceOrderFields={serviceOrderFields}
           rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
           material={dataRows}
           selectedServices={selectedRecords}

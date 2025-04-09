@@ -28,6 +28,7 @@ interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
   rentalManagementData: any;
+  rentalManagementFields: any
   rowData?: object | any;
   material: any[];
   selectedProducts: any[];
@@ -45,6 +46,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   onClose,
   handleSaveData,
   rentalManagementData,
+  rentalManagementFields,
   rowData,
   material,
   selectedProducts,
@@ -184,7 +186,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       ? fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn)
       : 'billingAddress';
 
-    const taxCodeOptions = await getTaxList(user, rentalManagementData, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
+    const taxCodeOptions = await getTaxList(user, rentalManagementData, rentalManagementFields, isBulkedit ? rowData[0]?.type : rowData?.type, taxApplicableField);
     fields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

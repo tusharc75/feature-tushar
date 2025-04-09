@@ -405,6 +405,7 @@ const InvoiceDetails = () => {
                   {currentStep === 0 && invoiceData && (
                     <Material
                       invoiceData={invoiceData}
+                      invoiceFields={invoiceFields}
                       fetchInvoiceData={fetchInvoiceData}
                       setNextStep={setNextStep}
                       stepFullScreen={stepFullScreen}

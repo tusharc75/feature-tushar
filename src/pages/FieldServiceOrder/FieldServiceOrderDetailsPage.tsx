@@ -137,14 +137,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
@@ -321,6 +321,7 @@ const ServiceOrderDetailsPage = () => {
               (resourceData?.policy?.addServices ? (
                 <Services
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   handleChangeStatus={handleChangeStatus}
                   stepFullScreen={stepFullScreen}
@@ -330,6 +331,7 @@ const ServiceOrderDetailsPage = () => {
               ) : (
                 <Technicians
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}
@@ -343,6 +345,7 @@ const ServiceOrderDetailsPage = () => {
               (resourceData?.policy?.addServices ? (
                 <Technicians
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}

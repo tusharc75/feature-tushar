@@ -1,10 +1,10 @@
-import React from 'react';
-import { RenderFileProps, RenderSingleFileProps } from 'src/components/DesktopDM/File/FilePreview';
-import Carousel from 'react-material-ui-carousel';
-import { handleDownload, useResolveFileUrl } from 'src/components/DesktopDM/utils';
-import { Dialog, DialogContent, DialogTitle, IconButton } from '@mui/material';
-import { Close, Delete, Download } from '@mui/icons-material';
+import { Delete, Download } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import React, { useCallback, useMemo } from 'react';
+import CarouselDialog from 'src/components/CarouselDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { RenderFileProps } from 'src/components/DesktopDM/File/FilePreview';
+import { handleDownload, resolveFileUrl } from 'src/components/DesktopDM/utils';
 
 const ImageSlider = ({
   files,
@@ -22,96 +22,51 @@ const ImageSlider = ({
       setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
     }
   };
+  const images = useMemo(() => files.map((f) => f.url), [files]);
+
+  const resolveUrl = useCallback(
+    async (src) => {
+      try {
+        return await resolveFileUrl({ hasToDownload, shouldDownload: true, url: src });
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [hasToDownload]
+  );
 
   return (
-    <Dialog
-      open={true}
-      onClose={onCLose}
-      fullWidth
-      fullScreen
-      slotProps={{ paper: { sx: { backgroundColor: 'transparent', boxShadow: 'none', padding: 0 } } }}
-    >
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1 }}>
-        {typeof onDelete === 'function' && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              color="error"
-              sx={{
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
-              }}
-              size="small"
-              onClick={() => handleDelete()}
-            >
-              <Delete />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-
-        {showDownloadButton && (
-          <HtmlTooltip title="Download">
-            <IconButton
-              size="small"
-              sx={{
-                color: 'white',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
-              }}
-              onClick={() => handleDownload(files[activeIndex], hasToDownload)}
-            >
-              <Download />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        <HtmlTooltip title="Close">
-          <IconButton
-            onClick={onCLose}
-            size="small"
-            sx={{
-              color: 'white',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
-            }}
-          >
-            <Close />
-          </IconButton>
-        </HtmlTooltip>
-      </DialogTitle>
-      <DialogContent
-        sx={{
-          backgroundColor: 'transparent',
-          padding: 0,
-          boxShadow: 'none',
-          position: 'relative'
+    <>
+      <CarouselDialog
+        images={images}
+        close={onCLose}
+        resolveUrl={resolveUrl}
+        carouselProps={{
+          onChange: (i) => setActiveIndex(i),
+          index: activeIndex,
+          animation: 'fade'
         }}
-      >
-        <Carousel
-          onChange={(i) => setActiveIndex(i)}
-          index={activeIndex}
-          autoPlay={false}
-          swipe={true}
-          animation="fade"
-          duration={300}
-          indicators={false}
-          navButtonsAlwaysVisible={true}
-          navButtonsProps={{ style: { backgroundColor: 'rgba(0,0,0,0.5)', color: 'white' } }}
-        >
-          {files.map((image, index) => (
-            <SingleImage file={image} hasToDownload={hasToDownload} key={image._id} onDelete={onDelete} showDownloadButton={showDownloadButton} />
-          ))}
-        </Carousel>
-      </DialogContent>
-    </Dialog>
+        headerComponent={
+          <div className="flex items-center justify-end gap-1">
+            {typeof onDelete === 'function' && (
+              <HtmlTooltip title="Delete">
+                <IconButton color="error" size="small" onClick={() => handleDelete()}>
+                  <Delete />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {showDownloadButton && (
+              <HtmlTooltip title="Download">
+                <IconButton size="small" color="primary" onClick={() => handleDownload(files[activeIndex], hasToDownload)}>
+                  <Download />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+        }
+      />
+    </>
   );
 };
 
 export default ImageSlider;
-
-const SingleImage = ({ file, hasToDownload, onDelete, showDownloadButton }: RenderSingleFileProps) => {
-  const src = useResolveFileUrl({ url: file.url, hasToDownload, shouldDownload: true });
-  return (
-    <div className="relative mx-auto flex h-[calc(100vh-80px)] max-h-fit w-[calc(100vw-60px)] max-w-fit items-center justify-center">
-      {src && <img draggable={false} src={src} alt={file.fileName} className="h-full w-full object-contain" />}
-    </div>
-  );
-};

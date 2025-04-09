@@ -53,7 +53,6 @@ const FieldTicket = () => {
 
   const [fieldTicketId, setFieldTicketId] = useState(null);
   const [open, setOpen] = useState({ open: false, isClone: false });
-  const history = useHistory();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldTicket));
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);

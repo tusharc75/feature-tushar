@@ -27,6 +27,7 @@ import { handlePdfPreview, queryStringPlanned } from 'src/pages/WorkOrderSupervi
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 type Props = {
   filterQuery: any;
@@ -156,14 +157,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-                <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
-                  <IconButton
-                    size="small"
-                    onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}
-                  >
-                    <Info fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
               </div>
             ) : (
               <NoDataCell />
@@ -182,9 +175,30 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             ) : (
               <NoDataCell />
             )
+        },
+        {
+          accessor: 'action',
+          Header: 'Actions',
+          minWidth: 100,
+          width: 100,
+          sticky: 'right',
+          disableFilters: true,
+          disableSortBy: true,
+          canDrag: false,
+          Cell: ({ row }) => (
+            <>
+              <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
+                <IconButton
+                  size="small"
+                  onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}
+                >
+                  <PictureAsPdfIcon fontSize={'small'} color='primary' />
+                </IconButton>
+              </HtmlTooltip>
+            </>
+          )
         }
       ];
-
       setWorkOrderColumns([...fixedInitialColumns, ...newColumns]);
     };
 

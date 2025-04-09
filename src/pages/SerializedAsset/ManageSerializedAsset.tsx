@@ -117,13 +117,19 @@ const ManageSerializedAsset = ({
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
-                oldValues.assetNumber =
-                  data.assetNumberType === ASSET_NUMBER_TYPE.manual
-                    ? ''
-                    : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
+                oldValues.assetNumber = data.assetNumberType === ASSET_NUMBER_TYPE.manual ? ''
+                  : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
+
+                let createValues = getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user);
+                const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
+                keyClear?.forEach((key) => {
+                  if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
+                    createValues[key] = '';
+                  }
+                });
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
+                  values: createValues
                 });
               } else {
                 fieldsDataForUpdate?.forEach((e: any) => {
