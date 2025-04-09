@@ -516,7 +516,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
           </MenuItem>
         </HtmlTooltip>
         <MenuItem
-          disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
+          disabled={selectedRecords?.every((r) => (r?.endDate || (!r?.startDate && !r?.endDate) && r?.type === 'technician')) ? false : true}
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
@@ -540,7 +540,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
           Start
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
+          disabled={selectedRecords?.every((r) => (r?.startDate && !r?.endDate) && r?.type === 'technician') ? false : true}
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
@@ -561,7 +561,7 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
           Stop
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.every((r) => (r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) ? false : true}
+          disabled={selectedRecords?.every((r) => ((r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) && r?.type === 'technician') ? false : true}
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
