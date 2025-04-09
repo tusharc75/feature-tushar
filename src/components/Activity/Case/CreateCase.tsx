@@ -306,6 +306,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                           />
                         </Box>
+                        
                         <Box pt={1}>
                           <CustomDatePicker
                             label="Due Date"
