@@ -19,7 +19,7 @@ const ImageSlider = ({
   const handleDelete = () => {
     if (typeof onDelete === 'function') {
       onDelete(files[activeIndex]);
-      setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
+      if (!hasToDownload) setActiveIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : 0));
     }
   };
   const images = useMemo(() => files.map((f) => f.url), [files]);
