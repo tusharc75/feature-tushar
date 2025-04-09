@@ -55,7 +55,7 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
           />
         </CustomDialogContent>
       </>
-    </Dialog >
+    </Dialog>
   );
 };
 export default TechnicianDialog;
