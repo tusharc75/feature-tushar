@@ -78,7 +78,7 @@ export const RenderContent = memo(
       <>
         <div
           className={cn(
-            'leading-1.5 relative flex w-fit max-w-[320px] flex-col',
+            'leading-1.5 relative flex w-fit max-w-[280px] flex-col',
             isReplying
               ? ''
               : `
@@ -104,7 +104,10 @@ export const RenderContent = memo(
           </div>
           {message.message && (
             <div
-              className={cn('my-2.5 text-sm font-normal text-gray-900 dark:text-white', isReplying ? 'line-clamp-2 overflow-hidden' : '')}
+              className={cn(
+                'my-2.5 text-sm font-normal text-gray-900 dark:text-white [&_*]:break-words',
+                isReplying ? 'line-clamp-2 overflow-hidden' : ''
+              )}
               dangerouslySetInnerHTML={{ __html: message.message }}
             />
           )}

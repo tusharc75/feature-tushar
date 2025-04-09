@@ -154,7 +154,7 @@ export default function ArrangeView({ columns, setColumns }) {
           />
           <CustomDialogContent>
             <DndContext onDragEnd={moveCard} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-              <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
+              <div className="sticky -top-[12px] z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
                   Drag and drop to arrange, enter the width as a percentage, custom label for change table header, alignment for text position and

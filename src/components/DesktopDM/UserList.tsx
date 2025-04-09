@@ -15,7 +15,7 @@ type UserListProps = {
 
 const UserList = memo(
   ({ state }: UserListProps) => {
-    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources } = state;
+    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources, permissions } = state;
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const [inputValue, setInputValue] = useState('');
 
@@ -114,13 +114,15 @@ const UserList = memo(
         <div className="search border-b p-2">
           <div className="flex gap-2">
             <SearchBox value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-            <Link to={routes.workSpace.path} onClick={() => toggleMainWindow()}>
-              <HtmlTooltip title={resources?.workSpace?.titlePlural}>
-                <IconButton size="small" color="primary">
-                  <Groups fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            </Link>
+            {permissions?.['workSpace']?.isRead && (
+              <Link to={routes.workSpace.path} onClick={() => toggleMainWindow()}>
+                <HtmlTooltip title={resources?.workSpace?.titlePlural}>
+                  <IconButton size="small" color="primary">
+                    <Groups fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </Link>
+            )}
           </div>
         </div>
         <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
