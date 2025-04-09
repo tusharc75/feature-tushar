@@ -1,5 +1,5 @@
 import { ChatBubbleOutlineOutlined } from '@mui/icons-material';
-import { Badge, IconButton, useMediaQuery } from '@mui/material';
+import { Badge, Box, IconButton, MenuItem, useMediaQuery } from '@mui/material';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { useStore } from 'src/StateProvider/fastContext';
 
@@ -7,11 +7,17 @@ import { useStore } from 'src/StateProvider/fastContext';
 export const tabOptions: ['all', 'unread', 'chats'] = ['all', 'unread', 'chats'];
 export type TabOptions = (typeof tabOptions)[number];
 
-const ChatNotification = () => {
-  const isMobile = useMediaQuery('(max-width:960px)');
+const ChatNotification = ({ isMobile = false }: { isMobile?: boolean }) => {
   const [handleOpenChat] = useStore((state) => state.handleOpenChat);
 
-  if (isMobile) return null;
+  if (isMobile)
+    return (
+      <MenuItem onClick={handleOpenChat}>
+        <ChatBubbleOutlineOutlined />
+        <Box component="span" mx={1} />
+        <p>BeConnected</p>
+      </MenuItem>
+    );
   return (
     <>
       <HtmlTooltip title={'BeConnected'}>

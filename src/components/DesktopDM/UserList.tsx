@@ -15,7 +15,8 @@ type UserListProps = {
 
 const UserList = memo(
   ({ state }: UserListProps) => {
-    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources, permissions } = state;
+    const { mainWindow, toggleMainWindow, user, closeMainWindow, users, chats, handleChatOpen, checkIsUser, resources, permissions, isMobile } =
+      state;
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const [inputValue, setInputValue] = useState('');
 
@@ -60,8 +61,9 @@ const UserList = memo(
     return (
       <div
         className={cn(
-          'mr-[--user-list-right-space] flex w-[--user-list-container-w] flex-[0_0_var(--user-list-container-w)] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
-          mainWindow && mainWindow === 'partial' ? 'h-[--partially-openned-container-h]' : 'h-[calc(100vh-100px)]'
+          'mr-[--user-list-right-space] flex w-[--user-list-container-w] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
+          mainWindow && mainWindow === 'partial' ? 'h-[--partially-openned-container-h]' : 'h-[calc(100vh-100px)]',
+          isMobile ? `w-auto ${permissions?.equiptAi?.isRead ? 'mr-[60px]' : ''}` : 'flex-[0_0_var(--user-list-container-w)]'
         )}
       >
         <header
