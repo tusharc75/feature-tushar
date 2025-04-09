@@ -142,7 +142,6 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
           <FilePreview hasToDownload={false} files={files} onDelete={handleDeleteFile} />
         </div>
       )}
-
       {state.replyingToMessage && (
         <div className="flex gap-2 rounded-t-md bg-gray-100 p-2 dark:bg-gray-700">
           <div className="w-1 rounded-md bg-new-theme-color" />
@@ -159,7 +158,6 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
           </span>
         </div>
       )}
-
       <Editor
         onKeyDown={handleKeyDown}
         key={`${themeColor}`}
@@ -180,18 +178,30 @@ const SendMessage = memo(({ state, data: panelData, parentMessageId, disabled, o
           content_css: themeColor === 'dark' ? 'dark' : 'default',
           height: 100,
           menubar: false,
-          paste_as_text: true,
-          plugins: ['paste', 'autolink', 'link', 'anchor', 'code', 'wordcount', 'emoticons'],
+          paste_as_text: false,
+          plugins: 'paste autolink link anchor code wordcount emoticons',
+          link_default_target: '_blank',
           toolbar: `emoticons`,
           toolbar_location: 'bottom',
           toolbar_drawer: 'floating',
-          // content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:12px }; p {margin-block-start: 0; margin-block-end:8px}',
+          link_default_protocol: 'https',
           content_style: editorCss,
           setup: (editor) => {
             editor.on('BeforeSetContent', (e) => {
               // Adding 'link' class to <a> tags
               if (e?.content) {
                 e.content = e.content.replace(/<a(?![^>]*\bclass\b)([^>]*)>/g, '<a class="link"$1>');
+              }
+            });
+            editor.on('Paste', (event) => {
+              const content = event.clipboardData.getData('text/plain');
+              const urlRegex = /https?:\/\/[^\s]+/g;
+              if (urlRegex.test(content)) {
+                event.preventDefault(); // Prevent default paste action
+                const linkedContent = content.replace(urlRegex, '<a href="$&" class="link" target="_blank">$&</a>');
+                editor.insertContent(linkedContent); // Insert link directly
+              } else {
+                editor.insertContent(content); // Default paste action if not a URL
               }
             });
           }
