@@ -24,7 +24,6 @@ export const queryStringPlanned = (queryString) => {
   return filterByIds;
 };
 
-
 const fetchViewColumns = async () => {
   const res = await axiosInstance().get(`pdf/view?resource=${sidebarResource.workOrder}`);
   const data = res?.data?.data;
@@ -39,19 +38,14 @@ const fetchViewColumns = async () => {
   return [];
 }
 
-
 export const handlePdfPreview = async (workOrder, user, toastConfig) => {
-
   toastConfig.setToastConfig({
     message: "Previewing PDF",
     open: true,
     type: "info"
   });
-
   const viewColumns = await fetchViewColumns();
-
   let pdfCols = [];
-
   if (viewColumns?.length > 0) {
     pdfCols = viewColumns?.filter((e) => columns?.some((c) => c?.accessor === e?.accessor));
   } else {
@@ -59,11 +53,9 @@ export const handlePdfPreview = async (workOrder, user, toastConfig) => {
       return { name: e?.accessor }
     })
   }
-
   if (!user?.brandPolicy?.servicePrePost) {
     pdfCols = pdfCols?.filter((e) => e?.name !== 'serviceType');
   }
-
   await axiosInstance()
     .get(`/pdf/${workOrder}?resource=${sidebarResource.workOrder}&columns=${JSON.stringify(pdfCols)}`, { responseType: 'blob' })
     .then((response) => {
@@ -74,6 +66,7 @@ export const handlePdfPreview = async (workOrder, user, toastConfig) => {
       link.target = '_blank';
       link.style.display = 'none';
       link.click();
+      toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewing Successfully' });
     }).catch((err) => {
       toastConfig.setToastConfig(err);
     });

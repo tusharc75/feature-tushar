@@ -28,6 +28,24 @@ export const useResolveFileUrl = ({ url, hasToDownload, shouldDownload }: { url:
   return src;
 };
 
+export const resolveFileUrl = async ({ url, hasToDownload, shouldDownload }: { url: string; hasToDownload: boolean; shouldDownload: boolean }) => {
+  if (!shouldDownload && !url) return;
+  if (fileUrlCache.has(url)) {
+    const src = fileUrlCache.get(url) || '';
+    return src;
+  } else {
+    if (hasToDownload) {
+      const resolvedUrl = await getFileUrl(url);
+      const src = resolvedUrl;
+      fileUrlCache.set(resolvedUrl, src);
+      return src;
+    } else {
+      fileUrlCache.set(url, url);
+      return url;
+    }
+  }
+};
+
 export const getFileUrl = async (fileUrl: string, onSuccess?: (url: string) => void) => {
   try {
     if (fileUrlCache.has(fileUrl)) {

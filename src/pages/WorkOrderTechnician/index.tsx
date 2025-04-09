@@ -41,6 +41,7 @@ import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
 import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -91,10 +92,28 @@ const WorkOrderTechnician = () => {
   const [filterQuery, setFilterQuery] = useState([]);
   const [showServiceCompleteConfirmBox, setShowServiceCompleteConfirmBox] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const resetSelectedRecords = () => {
     cardState.resetSelection();
     tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
+
+  useEffect(() => {
+    fetchPolicy()
+  }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.workOrderTechnician}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchSingleColumnData = useCallback(
@@ -185,20 +204,22 @@ const WorkOrderTechnician = () => {
                       </HtmlTooltip>
                     </Box>
                   ) : null}
-                  <Box ml={1}>
-                    <HtmlTooltip title="Preview PDF">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
-                        }}
-                      >
-                        <Info fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
+                  {resourceData?.policy?.showWorkOrderPdfPreviewInTile &&
+                    <Box ml={1}>
+                      <HtmlTooltip title="Preview PDF">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
+                          }}
+                        >
+                          <PictureAsPdfIcon fontSize={'small'} color='primary' />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
+                  }
                 </div>
               ) : (
                 <NoDataCell />
@@ -494,7 +515,7 @@ const WorkOrderTechnician = () => {
     const cancelToken = axios.CancelToken.source();
     fetchGridColumns(cancelToken.token);
     return () => cancelToken.cancel();
-  }, []);
+  }, [resourceData]);
 
   return (
     <Box className="main-container-v1">
