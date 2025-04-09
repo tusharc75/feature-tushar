@@ -37,13 +37,12 @@ const DesktopDM = () => {
     >
       <aside className="pointer-events-auto flex h-0 w-screen flex-1 flex-row-reverse items-end overflow-visible">
         <UserList state={state} />
-        {openedChats.map((o) => (
-          <ChatBox openedChat={o} state={state} key={o.id} />
-        ))}
-        {isMobile && openedChats.length > 0 && (
+        {isMobile && openedChats.length > 0 ? (
           <Dialog open={true} slots={{ transition: CustomDialogTransition }} fullScreen fullWidth>
             <ChatBox openedChat={openedChats[openedChats.length - 1]} state={state} key={openedChats[openedChats.length - 1]['id']} />
           </Dialog>
+        ) : (
+          openedChats.map((o) => <ChatBox openedChat={o} state={state} key={o.id} />)
         )}
       </aside>
     </div>

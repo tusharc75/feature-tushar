@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -13,9 +13,9 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isEqual } from 'lodash';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getTaxList } from 'src/components/PricingCondition';
+import { useData } from 'src/StateProvider/Provider';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -26,6 +26,7 @@ interface AdditionalCostDialogProps {
   loadingEdit?: Boolean;
   showSaveAndNext?: Boolean;
   quotationData: object | any;
+  quotationFields: any;
 }
 
 const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
@@ -36,14 +37,18 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
   costData,
   showSaveAndNext,
   loadingEdit,
-  quotationData
+  quotationData,
+  quotationFields
 }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
   const [saveAndNext, setSaveAndNext] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -53,7 +58,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
     setInitialData({ fields: [], values: {} });
     var poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
     poFields = poFields?.filter((f) => f?.isRead);
-    const taxCodeOptions = await getTaxList(quotationData, MATERIAL_TYPE.manualEntry);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationData, MATERIAL_TYPE.manualEntry);
     poFields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

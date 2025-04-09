@@ -13,15 +13,25 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import {
+  ASSET_APPROVAL_STATUS,
+  DOA_STATUS,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource
+} from '../../../constants/helpers';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Autocomplete from '@mui/material/Autocomplete';
+import { FiExternalLink } from 'react-icons/fi';
+import { useHistory } from 'react-router-dom';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
 const SerializedAssetStatusChangeRequest = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -51,7 +61,31 @@ const SerializedAssetStatusChangeRequest = () => {
       .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data);
-        setColumns([...newColumns, ActionsRenderer]);
+        const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
+        assetColumn.cell = ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p
+              className="text-truncate link"
+              title={row?.original?.asset}
+              onClick={() => {
+                history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
+              }}
+            >
+              {row?.original?.asset}
+            </p>
+            {row?.original?.assetId && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            )}
+          </div>
+        );
+        setColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset'), ActionsRenderer]);
       });
   };
 
@@ -71,16 +105,13 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Approve"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
+              disabled={!row?.original?.canPerform}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
                 setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
               }}
             >
-              <CheckCircleIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'primary'}
-              />
+              <CheckCircleIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'primary'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -89,16 +120,13 @@ const SerializedAssetStatusChangeRequest = () => {
             <IconButton
               size="small"
               aria-label="Reject"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
+              disabled={!row?.original?.canPerform}
               onClick={() => {
                 setApproveRejectRecord(row?.original);
                 setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
               }}
             >
-              <CancelIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'error'}
-              />
+              <CancelIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'error'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -116,6 +144,15 @@ const SerializedAssetStatusChangeRequest = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['canPerform'] = permissions?.serializedAsset?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          if (finalObject['doa_status']) {
+            finalObject['canPerform'] = [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
+            const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
+            if (users?.length > 0) {
+              finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
+            }
+          }
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -207,7 +244,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }
@@ -220,7 +257,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                  permissions?.serializedAsset?.isUpdate
                     ? false
                     : true
                 }

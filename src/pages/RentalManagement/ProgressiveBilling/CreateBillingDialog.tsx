@@ -1076,6 +1076,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={[]}
           rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}

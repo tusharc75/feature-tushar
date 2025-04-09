@@ -12,6 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
   displayDate,
+  displayDateTime,
   FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
   fieldServiceOrder,
   MATERIAL_TYPE,
@@ -24,9 +25,10 @@ import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { Link } from 'react-router-dom';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { Send } from '@mui/icons-material';
-import ReplayIcon from '@mui/icons-material/Replay';
+import { Send, Visibility, Replay } from '@mui/icons-material';
 import ReturnQtyDialog from './ReturnQtyDialog';
+import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 
 const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScreen, setNextStep, isReturn = false }) => {
 
@@ -44,6 +46,13 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
+  const [startEndDateConfermationDialog, setStartEndDateConfermationDialog] = useState({
+    open: false,
+    type: null,
+    minDateTime: null,
+    notes: ''
+  });
+  const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
 
   useEffect(() => {
     fetchColumns();
@@ -158,6 +167,59 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
         accessorFn: (original) => AccessorFunction(original, 'competencies')
       }] : []),
       {
+        accessor: 'startDate',
+        Header: 'Start Date',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 250,
+        Cell: ({ row }) => (row.original?.startDate ? <p>{displayDateTime(row.original?.startDate)}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'endDate',
+        Header: 'End Date',
+        disableFilters: true,
+        disableSortBy: true,
+        width: 250,
+        Cell: ({ row }) => (row.original?.endDate ? <p>{displayDateTime(row.original?.endDate)}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'duration',
+        Header: 'Duration',
+        disableFilters: true,
+        disableSortBy: true,
+        disabled: true,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original?.duration ? (
+                <>
+                  <h5 className="text-truncate">{formatDurationInHrs(row?.original?.duration)}</h5>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          );
+        }
+      },
+      {
+        accessor: 'notes',
+        Header: 'Notes',
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original?.notes ? (
+                <div>
+                  <p className="text-truncate">{row.original?.notes}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          );
+        }
+      },
+      {
         accessor: 'dispatchedDate',
         Header: 'Dispatched Date',
         disableFilters: true,
@@ -228,39 +290,51 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
       Cell: ({ row }) => {
         const isDisabled = (isReturn && !row?.original?.startDate) || row?.original?.endDate || (!isReturn && row?.original?.startDate);
         return allowedToEdit ? (
-          <HtmlTooltip
-            title={
-              isDisabled
-                ? isReturn
-                  ? !row?.original?.startDate
-                    ? 'Not Dispatched Yet'
-                    : 'Already Returned'
-                  : 'Already Dispatched'
-                : isReturn
-                  ? 'Return'
-                  : 'Dispatch'
-            }
-          >
-            <span>
+          <>
+            <HtmlTooltip title={'View Logs'}>
               <IconButton
                 size="small"
-                disabled={isDisabled}
                 onClick={() => {
-                  if (row?.original?.type === MATERIAL_TYPE.product && isReturn) {
-                    setProductQtyToReturnDialog({ open: true, data: [row?.original] });
-                  } else {
-                    setConfirmationDialog({ open: true, data: [row?.original] });
-                  }
+                  setViewStartStopLog({ open: true, technicianId: row?.original?.technicianId });
                 }}
               >
-                {isReturn ? (
-                  <ReplayIcon fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
-                ) : (
-                  <Send fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
-                )}
+                <Visibility fontSize="small" color="primary" />
               </IconButton>
-            </span>
-          </HtmlTooltip>
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                isDisabled
+                  ? isReturn
+                    ? !row?.original?.startDate
+                      ? 'Not Dispatched Yet'
+                      : 'Already Returned'
+                    : 'Already Dispatched'
+                  : isReturn
+                    ? 'Return'
+                    : 'Dispatch'
+              }
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={isDisabled}
+                  onClick={() => {
+                    if (row?.original?.type === MATERIAL_TYPE.product && isReturn) {
+                      setProductQtyToReturnDialog({ open: true, data: [row?.original] });
+                    } else {
+                      setConfirmationDialog({ open: true, data: [row?.original] });
+                    }
+                  }}
+                >
+                  {isReturn ? (
+                    <Replay fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
+                  ) : (
+                    <Send fontSize="small" color={isDisabled ? 'disabled' : 'primary'} />
+                  )}
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
         ) : null;
       }
     });
@@ -382,6 +456,39 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
     });
   };
 
+  const handleUpdateStartEndDate = (values, type) => {
+    let value: any = {
+      type: type,
+      referenceId: serviceOrderId,
+      _id: selectedRecords?.map((r) => r?._id)
+    };
+    if (type !== 'stop') {
+      value.startDate = values?.startDate;
+      if (values?.notes) value.notes = values?.notes;
+    }
+    if (type === 'stop' || type === 'startStop') {
+      value.endDate = values?.endDate;
+      if (values?.notes) value.notes = values?.notes;
+    }
+    setSubmitting(true)
+    axiosInstance()
+      .put(`${fieldServiceOrder.api}/technician/start-end-date`, value)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, notes: '' });
+        setSubmitting(false)
+        fetchData();
+      })
+      .catch((error) => {
+        setSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -408,6 +515,70 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
             {isReturn ? 'Return' : 'Dispatch'}
           </MenuItem>
         </HtmlTooltip>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => (r?.endDate || (!r?.startDate && !r?.endDate) && r?.type === 'technician')) ? false : true}
+          onClick={() => {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              if (d?.endDate) {
+                dates.push(new Date(d?.endDate));
+              }
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+              date.setMinutes(date.getMinutes() + 1);
+            }
+            setStartEndDateConfermationDialog({
+              open: true,
+              type: 'start',
+              minDateTime: date,
+              notes: ''
+            });
+          }}
+        >
+          Start
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => (r?.startDate && !r?.endDate) && r?.type === 'technician') ? false : true}
+          onClick={() => {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              dates.push(new Date(d?.maxStartDate));
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+            }
+            setStartEndDateConfermationDialog({
+              open: true,
+              type: 'stop',
+              minDateTime: date,
+              notes: selectedRecords?.length === 1 ? selectedRecords[0]?.notes : ''
+            });
+          }}
+        >
+          Stop
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((r) => ((r?.startDate && r?.endDate) || (!r?.startDate && !r?.endDate)) && r?.type === 'technician') ? false : true}
+          onClick={() => {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              if (d?.endDate) {
+                dates.push(new Date(d?.endDate));
+              }
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+              date.setMinutes(date.getMinutes() + 1);
+            }
+            setStartEndDateConfermationDialog({ open: true, type: 'startStop', minDateTime: date, notes: '' });
+          }}
+        >
+          Start/Stop
+        </MenuItem>
       </>
     );
   };
@@ -470,6 +641,32 @@ const TechnicianDispatchReturn = ({ allowedToEdit, serviceOrderId, stepFullScree
           loading={submitting}
           handleClose={() => setProductQtyToReturnDialog({ open: false, data: null })}
           handleSuccess={(products) => handleReturn(productQtyToReturnDialog.data, products)}
+        />
+      )}
+      {startEndDateConfermationDialog.open && (
+        <StartStopDateDialog
+          type={startEndDateConfermationDialog.type}
+          onClose={() => {
+            setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, notes: '' });
+          }}
+          handleSubmit={(value) => {
+            handleUpdateStartEndDate(value, startEndDateConfermationDialog.type);
+          }}
+          loading={submitting}
+          minStartDateTime={startEndDateConfermationDialog.minDateTime}
+          notes={startEndDateConfermationDialog.notes}
+        />
+      )}
+      {viewStartStopLog?.open && (
+        <StartStopLogsDialog
+          onClose={() => {
+            setViewStartStopLog({ open: false, technicianId: null });
+          }}
+          referenceId={serviceOrderId}
+          service={null}
+          technician={viewStartStopLog?.technicianId}
+          fetchRecords={fetchData}
+          reference={'fieldServiceOrder'}
         />
       )}
     </>

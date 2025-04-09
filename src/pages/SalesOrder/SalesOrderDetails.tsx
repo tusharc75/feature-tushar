@@ -260,6 +260,7 @@ const SalesOrderDetails = () => {
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[0].name && salesOrderData && (
               <Material
                 salesOrderData={salesOrderData}
+                salesOrderFields={salesOrderFields}
                 setNextStep={setNextStep}
                 stepFullScreen={stepFullScreen}
                 fetchSalesOrderData={fetchSalesOrderData}

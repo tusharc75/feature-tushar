@@ -1,5 +1,4 @@
 import { Box, Menu, MenuItem } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -269,7 +268,12 @@ const CreditMemoDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <Box>
-            <Material creditMemoData={creditMemoData} allowedToEdit={permissions?.creditMemo?.isUpdate} fetchCreditMemoData={fetchData} />
+            <Material
+              creditMemoData={creditMemoData}
+              creditMemoFields={fields}
+              allowedToEdit={permissions?.creditMemo?.isUpdate}
+              fetchCreditMemoData={fetchData}
+            />
           </Box>
         </TabPanel>
         {resourceData &&
