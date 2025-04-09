@@ -1,6 +1,5 @@
 import { useMediaQuery } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { isMobile as isMobileDevice } from 'react-device-detect';
 import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
 import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
@@ -59,45 +58,51 @@ const useUIDesktopDm = () => {
   }, [permissions?.equiptAi?.isRead]);
 
   const [uiState, setUiState] = useState<UIState>(initialState);
-  const isMobile = useMediaQuery('(max-width:768px)');
+  const isMobile = useMediaQuery('(max-width:800px)');
 
-  const handleChatOpen = useCallback((id: string, type: OpenedChat['type']) => {
-    setUiState((prev) => {
-      const chatBoxOpenedState: OpenedChat = prev.openedChats.find((d) => d.id === id);
-      if (prev.openedChats.length === 0) {
-        return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
-      } else if (chatBoxOpenedState) {
-        const newPayload: UIState = { ...prev };
-        newPayload.openedChats = prev.openedChats.map((d) => {
-          if (d.id === id) {
-            return { ...d, open: 'fullyOpen' };
-          }
-          return { ...d, open: 'partial' };
-        });
-        return newPayload;
-      } else {
-        const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(prev.openedChats);
-        if (canAddNewChatWithoutChangingState) {
-          const newPayload: UIState = { ...prev };
-          newPayload.openedChats = [...prev.openedChats, { id, open: 'fullyOpen', type }];
-          return newPayload;
+  const handleChatOpen = useCallback(
+    (id: string, type: OpenedChat['type']) => {
+      setUiState((prev) => {
+        if (isMobile) {
+          return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
         }
-        const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(prev.openedChats.map((d) => ({ ...d, open: 'partial' })));
-        if (canAddNewChatIfChatsArePartiallyOpen) {
+        const chatBoxOpenedState: OpenedChat = prev.openedChats.find((d) => d.id === id);
+        if (prev.openedChats.length === 0) {
+          return { ...prev, openedChats: [{ id, open: 'fullyOpen', type }] };
+        } else if (chatBoxOpenedState) {
           const newPayload: UIState = { ...prev };
-          const prevOpenedChats = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
+          newPayload.openedChats = prev.openedChats.map((d) => {
+            if (d.id === id) {
+              return { ...d, open: 'fullyOpen' };
+            }
+            return { ...d, open: 'partial' };
+          });
+          return newPayload;
+        } else {
+          const canAddNewChatWithoutChangingState = checkCanAddNewChatBox(prev.openedChats);
+          if (canAddNewChatWithoutChangingState) {
+            const newPayload: UIState = { ...prev };
+            newPayload.openedChats = [...prev.openedChats, { id, open: 'fullyOpen', type }];
+            return newPayload;
+          }
+          const canAddNewChatIfChatsArePartiallyOpen = checkCanAddNewChatBox(prev.openedChats.map((d) => ({ ...d, open: 'partial' })));
+          if (canAddNewChatIfChatsArePartiallyOpen) {
+            const newPayload: UIState = { ...prev };
+            const prevOpenedChats = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
+            newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
+            return newPayload;
+          }
+          // Remove oldest chat from list and make rest of the chats partial
+          const newPayload: UIState = { ...prev };
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const [_first, ...prevOpenedChats] = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
           newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
           return newPayload;
         }
-        // Remove oldest chat from list and make rest of the chats partial
-        const newPayload: UIState = { ...prev };
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [_first, ...prevOpenedChats] = prev.openedChats.map((d) => ({ ...d, open: 'partial' })) as UIState['openedChats'];
-        newPayload.openedChats = [...prevOpenedChats, { id, open: 'fullyOpen', type }];
-        return newPayload;
-      }
-    });
-  }, []);
+      });
+    },
+    [isMobile]
+  );
 
   const handleToggleChatWindow = useCallback(
     (id: string) => {
@@ -110,7 +115,6 @@ const useUIDesktopDm = () => {
           index = i;
         }
       }
-
       if (!chatBoxOpenedState) return;
       if (chatBoxOpenedState.open === 'fullyOpen') {
         setUiState((prev) => {
@@ -204,12 +208,17 @@ const useUIDesktopDm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toggleMainWindow]);
 
+  useEffect(() => {
+    if (isMobile && uiState.openedChats.length > 1) {
+      setUiState((prev) => ({ ...prev, openedChats: [{ ...prev.openedChats[prev.openedChats.length - 1], open: 'fullyOpen' }] }));
+    }
+  }, [isMobile, uiState.openedChats.length]);
+
   return {
     ...uiState,
     user,
     resources,
     permissions,
-    isMobileDevice,
     isMobile,
     CHATBOX_GAP,
     USER_LIST_CONTAINER_WIDTH,
