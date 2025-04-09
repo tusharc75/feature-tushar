@@ -1,5 +1,5 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
-import { Info, MoreVert } from '@mui/icons-material';
+import { MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -20,7 +20,6 @@ import {
   MATERIAL_SUB_TYPE,
   REPAIR_ORDER_TYPE,
   WORKORDER_SERVICE_STATUS,
-  cn,
   dateFormatToSend,
   sidebarResource,
   workOrder,
@@ -50,7 +49,7 @@ import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import { FiExternalLink } from 'react-icons/fi';
-import { FaInfoCircle } from "react-icons/fa";
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 const LIMIT = 25;
 
@@ -309,7 +308,7 @@ const WorkOrderSupervisor = () => {
                   handlePdfPreview(data?.workOrder, user, toastConfig);
                 }}
               >
-                <FaInfoCircle size={16} className="-mt-[2px] text-gray-600" />
+                <PictureAsPdfIcon fontSize={'small'} color='primary' />
               </IconButton>
             </HtmlTooltip>
           </div>
