@@ -35,7 +35,7 @@ const Unavailability = ({ id }) => {
       accessor: 'title',
       Header: 'Title',
       minWidth: 150,
-      width: 150,
+      width: 100,
       primaryField: true,
       disableFilters: true,
       disableSortBy: true,
@@ -56,14 +56,14 @@ const Unavailability = ({ id }) => {
       accessor: 'startDate',
       Header: 'Start Date',
       minWidth: 150,
-      width: 150,
+      width: 100,
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.startDate ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
+            <h5 className="text-truncate" title={displayDate(row?.original?.startDate)}>
               {displayDate(row?.original?.startDate)}
             </h5>
           ) : (
@@ -76,14 +76,14 @@ const Unavailability = ({ id }) => {
       accessor: 'endDate',
       Header: 'End Date',
       minWidth: 150,
-      width: 150,
+      width: 100,
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.endDate ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
+            <h5 className="text-truncate" title={displayDate(row?.original?.endDate)}>
               {displayDate(row?.original?.endDate)}
             </h5>
           ) : (
@@ -96,7 +96,7 @@ const Unavailability = ({ id }) => {
       accessor: 'reason',
       Header: 'Reason',
       minWidth: 150,
-      width: 150,
+      width: 250,
       primaryField: true,
       disableFilters: true,
       disableSortBy: true,
@@ -117,7 +117,7 @@ const Unavailability = ({ id }) => {
       accessor: 'action',
       Header: 'Actions',
       minWidth: 100,
-      width: 110,
+      width: 100,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -180,7 +180,7 @@ const Unavailability = ({ id }) => {
       });
   };
 
-  const handleDeleteExpenses = async () => {
+  const handleDelete = async () => {
     let recordsToDelete = [];
     recordsToDelete.push(deleteRecord?._id);
 
@@ -196,7 +196,6 @@ const Unavailability = ({ id }) => {
             type: 'success',
             message: data.message
           });
-          dispatch({ type: 'selection', selectedRecords: [] });
           setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
           if (deleteRecord) setDeleteRecord({});
@@ -245,12 +244,12 @@ const Unavailability = ({ id }) => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ?`}
+          message={`Are you sure you want to delete the record ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
-          onOk={handleDeleteExpenses}
+          onOk={handleDelete}
           okBtnLoading={deleteLoading}
         />
       ) : null}

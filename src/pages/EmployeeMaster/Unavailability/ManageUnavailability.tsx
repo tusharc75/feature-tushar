@@ -49,10 +49,10 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
         const { data: fetchedData } = response.data;
 
         const editData = {
-          title: fetchedData.title || '',
-          reasons: fetchedData.reasons || '',
-          startDate: fetchedData.startDate ? new Date(fetchedData.startDate) : new Date(),
-          endDate: fetchedData.endDate ? new Date(fetchedData.endDate) : new Date()
+          title: fetchedData?.title || '',
+          reasons: fetchedData?.reasons || '',
+          startDate: fetchedData?.startDate ? new Date(fetchedData.startDate) : new Date(),
+          endDate: fetchedData?.endDate ? new Date(fetchedData.endDate) : new Date()
         };
 
         setInitialData(editData);
@@ -135,7 +135,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                       size="small"
                       label="Title"
                       name="title"
-                      value={values.title}
+                      value={values?.title}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       variant="outlined"
@@ -148,7 +148,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                       label="Start Date"
                       name="startDate"
                       required
-                      value={values.startDate}
+                      value={values?.startDate}
                       fullWidth
                       margin="dense"
                       size="small"
@@ -163,11 +163,11 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                       label="End Date"
                       name="endDate"
                       required
-                      value={values.endDate}
+                      value={values?.endDate}
                       fullWidth
                       margin="dense"
                       size="small"
-                      minDate={values.startDate}
+                      minDate={values?.startDate}
                       onChange={(value) => setFieldValue('endDate', value)}
                       onBlur={handleBlur}
                       error={touched.endDate && Boolean(errors.endDate)}
@@ -183,7 +183,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                       name="reasons"
                       multiline
                       rows={4}
-                      value={values.reasons}
+                      value={values?.reasons}
                       onChange={handleChange}
                       onBlur={handleBlur}
                       variant="outlined"
