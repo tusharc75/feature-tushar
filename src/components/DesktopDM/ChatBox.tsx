@@ -15,8 +15,8 @@ type ChatBoxProps = {
   openedChat: OpenedChat;
 };
 
-const initialClass = `h-[--partially-openned-container-h] w-[--partially-openned-chatbox-w] flex-[0_0_var(--partially-openned-chatbox-w)]`;
-const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbox-w] flex-[0_0_var(--fully-openned-chatbox-w)]`;
+export const initialClass = `h-[--partially-openned-container-h] w-[--partially-openned-chatbox-w] flex-[0_0_var(--partially-openned-chatbox-w)]`;
+export const delayedClass = `h-[min(600px,calc(100vh-100px))] w-[--fully-openned-chatbox-w] flex-[0_0_var(--fully-openned-chatbox-w)]`;
 
 const ChatBox = memo(({ state, openedChat }: ChatBoxProps) => {
   const { users, chats, handleToggleChatWindow, closeChatBox, isMobile } = state;

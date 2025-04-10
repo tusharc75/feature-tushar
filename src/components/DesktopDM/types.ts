@@ -1,7 +1,7 @@
 import useDesktopDM from 'src/components/DesktopDM/useDesktopDM';
 
 export type WindowOpenState = 'fullyOpen' | 'partial' | null | undefined;
-export type OpenedChat = { open: WindowOpenState; id: string; type: 'user' | 'chat' };
+export type OpenedChat = { open: WindowOpenState; id: string; type: 'user' | 'chat' | 'genie' };
 
 export type UIState = {
   mainWindow: WindowOpenState;
