@@ -6,7 +6,6 @@ import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ShowPdf from './ShowPdf';
-
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -252,7 +251,7 @@ const Diagram = ({
             {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
               <Autocomplete
                 fullWidth
-                className="max-w-[300px]"
+                className="max-w-[250px]"
                 options={serviceOption}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                 isOptionEqualToValue={(option: any, val) => option.uniqueId === val}
@@ -275,9 +274,9 @@ const Diagram = ({
                 )}
               />
             )}
-            <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-              <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
+            <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
               <ThemeButton
+                buttonType='theme'
                 onClick={() => {
                   setAttachemntDialog({ open: true, id: null, isClone: false });
                 }}
@@ -297,11 +296,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
