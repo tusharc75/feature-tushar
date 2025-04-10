@@ -2,6 +2,7 @@ import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -21,15 +22,16 @@ import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, pricingCondition, sidebarResource } from '../../../constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
-const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -50,6 +52,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addCostDialog, setAddCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState(null);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -188,8 +191,8 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -208,6 +211,19 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
+          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           {allowedToEdit && (
             <IconButton
               size="small"
@@ -330,7 +346,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
     setIsAdding(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, invoiceData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, invoiceData, invoiceFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -690,6 +706,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           material={material}
           selectedProducts={selectedRecords}
           invoiceData={invoiceData}
+          invoiceFields={invoiceFields}
           loadingEdit={isUpdating}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
@@ -812,6 +829,17 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
           costData={addCostDialog.data}
           loadingEdit={isUpdating}
           showSaveAndNext={addCostDialog.showSaveAndNext}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={invoiceData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.invoice}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

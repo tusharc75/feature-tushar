@@ -1,6 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -16,7 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 import {
@@ -26,6 +27,7 @@ import {
   editSubcontract
 } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Material`;
 
@@ -46,6 +48,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
   const [openMaterialDialog, setOpenMaterialDialog] = useState({ open: false, data: null });
   const [material, setMaterial] = useState([]);
   const [productFields, setProductFields] = useState(null);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -140,8 +143,8 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 100,
-        width: 100,
+        minWidth: 120,
+        width: 120,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -159,6 +162,17 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
                   }}
                 >
                   <EditIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
               <HtmlTooltip title={'Delete'}>
@@ -374,6 +388,17 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
           allFields={allFields}
           handleSaveData={handleSaveData}
           loading={isSubmitting}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={subcontractAssemblyData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.subcontractAssembly}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </>

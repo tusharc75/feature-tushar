@@ -75,7 +75,7 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
   return row;
 };
 
-export const getTaxList = async (user: any, referenceData: any, materialType: any, taxApplicableField = 'billingAddress') => {
+export const getTaxList = async (user: any, referenceData: any, fields: any, materialType: any, taxApplicableField = 'billingAddress') => {
   let data = []
   let taxApplicableOnCustomer = true;
   if (user?.user?.brandPolicy?.customerWiseTaxApplicable) {
@@ -87,19 +87,21 @@ export const getTaxList = async (user: any, referenceData: any, materialType: an
     }
   }
   if (taxApplicableOnCustomer) {
-    const zipCode = referenceData?.[taxApplicableField]?.zipCode;
-    const state = referenceData?.[taxApplicableField]?.state;
-    const county = referenceData?.[taxApplicableField]?.county;
-    let taxCode = null;
-    if (referenceData?.taxCode?.optionValue) {
-      taxCode = referenceData?.taxCode?.optionValue;
+    if (fields?.find((e) => e.fieldData?.fieldName === 'taxCode')) {
+      if (referenceData?.taxCode?.optionValue) {
+        let api = `${routes?.taxMaster.path}/by-zipcode?taxCode=${referenceData?.taxCode?.optionValue}&materialType=${materialType}`
+        const response = await axiosInstance().get(api);
+        data = response?.data?.data || [];
+      }
     }
-    let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
-    if (taxCode) {
-      api += `&taxCode=${taxCode}`
+    else {
+      const zipCode = referenceData?.[taxApplicableField]?.zipCode;
+      const state = referenceData?.[taxApplicableField]?.state;
+      const county = referenceData?.[taxApplicableField]?.county;
+      let api = `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
+      const response = await axiosInstance().get(api);
+      data = response?.data?.data || [];
     }
-    const response = await axiosInstance().get(api);
-    data = response?.data?.data || [];
   }
   return data;
 };

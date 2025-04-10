@@ -273,6 +273,7 @@ const FieldTicketDetail = () => {
             {currentStep === 0 && fieldTicketData && (
               <Material
                 fieldTicketData={fieldTicketData}
+                fieldTicketFields={fields}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
