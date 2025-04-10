@@ -22,6 +22,9 @@ import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
 import Step from '../DynamicForm/Step';
 import Grid from '@mui/material/Grid2';
+import { isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { mobileNotSupported } from 'src/constants/messageHelpers';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -117,15 +120,17 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.serviceMaster?.isUpdate && !isMobile && (
-                  <ThemeButton
-                    onClick={() => {
-                      setOpenConfigureFields(true);
-                    }}
-                    mobileTooltip={'Configure Fields'}
-                  >
-                    {'Configure Fields'}
-                  </ThemeButton>
+                {permissions?.serviceMaster?.isUpdate && (
+                  <HtmlTooltip title={isMobile && !isTablet ? mobileNotSupported : ''}>
+                    <ThemeButton
+                      onClick={() => {
+                        setOpenConfigureFields(true);
+                      }}
+                      disabled={isMobile && !isTablet}
+                    >
+                      Configure Fields
+                    </ThemeButton>
+                  </HtmlTooltip>
                 )}
                 {permissions?.serviceMaster?.isUpdate && (
                   <ThemeButton
