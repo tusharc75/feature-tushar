@@ -1,6 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -16,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -24,6 +25,8 @@ import RequestButton from 'src/pages/DoaSetupNew/RequestButton';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const Material = ({
   allowedToEdit,
@@ -51,6 +54,7 @@ const Material = ({
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const [isSubmitting, setSubmitting] = useState(false);
 
@@ -161,8 +165,8 @@ const Material = ({
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -179,6 +183,19 @@ const Material = ({
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
           </IconButton>
+          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           <IconButton
             size="small"
             aria-label="Details"
@@ -604,6 +621,17 @@ const Material = ({
           bulkEdit={isBulkEdit}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           loadingEdit={loadingEdit}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={purchaseRequisitionData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.purchaseRequisition}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>
