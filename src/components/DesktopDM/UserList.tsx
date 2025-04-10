@@ -8,6 +8,10 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
 import { useStore } from 'src/StateProvider/fastContext';
 import { Link } from 'react-router-dom';
+import { SVG } from 'src/assets';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
+import GenieText from 'src/assets/svg/GenieText';
 
 type UserListProps = {
   state: UseDesktopDM;
@@ -58,12 +62,17 @@ const UserList = memo(
       [handleChatOpen]
     );
 
+    const openGenie = useCallback(() => {
+      handleChatOpen(GENIE_WINDOW_ID, 'genie');
+    }, [handleChatOpen]);
+
     return (
       <div
         className={cn(
-          'mr-[--user-list-right-space] flex w-[--user-list-container-w] flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all',
-          mainWindow && mainWindow === 'partial' ? 'h-[--partially-openned-container-h]' : 'h-[calc(100vh-100px)]',
-          isMobile ? `w-auto ${permissions?.equiptAi?.isRead ? 'mr-[60px]' : 'mr-2'}` : 'flex-[0_0_var(--user-list-container-w)]'
+          'mr-[--user-list-right-space] flex w-[--user-list-container-w] origin-bottom flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all [--max-h:calc(100vh-100px)]',
+          'h-[--max-h]',
+          mainWindow && mainWindow === 'partial' ? ' [transform:translateY(calc(var(--max-h)-var(--partially-openned-container-h)))]' : '',
+          isMobile ? `w-auto ` : 'flex-[0_0_var(--user-list-container-w)]'
         )}
       >
         <header
@@ -128,6 +137,7 @@ const UserList = memo(
           </div>
         </div>
         <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
+          {permissions?.equiptAi?.isRead && <RenderGenie openGenie={openGenie} />}
           {filteredData?.length > 0 ? (
             filteredData?.map((c) => {
               const isUser = checkIsUser(c);
@@ -165,10 +175,44 @@ const UserList = memo(
 
 export default UserList;
 
+const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
+  return (
+    <div>
+      <button
+        className="flex w-full cursor-pointer list-none items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-gray-100 focus-visible:outline-theme dark:text-white dark:hover:bg-[--dark-secondary]"
+        role="listitem"
+        onClick={() => openGenie()}
+      >
+        <Badge
+          overlap="circular"
+          sx={(theme) => ({
+            '& .MuiBadge-badge': {
+              boxShadow: `0 0 0 2px ${theme.palette.background.paper}`
+            }
+          })}
+          className={cn('[&_.MuiBadge-badge]:!bg-green-500')}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          variant={'dot'}
+        >
+          <Avatar
+            src={genieImage}
+            alt="eGenie"
+            sx={{ width: '35px', height: '35px', '& img': { maxWidth: '80%', maxHeight: '90%' } }}
+            className="border p-[1px]"
+          >
+            <Person fontSize="small" />
+          </Avatar>
+        </Badge>
+        <GenieText className="max-h-[14px]" />
+      </button>
+    </div>
+  );
+});
+
 const RenderChatUser = memo(({ chat, onClick, onlineUsers }: { onClick: (d: Chat) => void; chat: Chat; onlineUsers: string[] }) => {
   return (
     <button
-      className="flex w-full cursor-pointer list-none items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-gray-100 dark:text-white dark:hover:bg-[--dark-secondary]"
+      className="flex w-full cursor-pointer list-none items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-gray-100 focus-visible:outline-theme dark:text-white dark:hover:bg-[--dark-secondary]"
       role="listitem"
       onClick={() => onClick(chat)}
     >
@@ -206,7 +250,7 @@ const RenderChatUser = memo(({ chat, onClick, onlineUsers }: { onClick: (d: Chat
 const RenderUser = memo(({ user, onClick, onlineUsers }: { onClick: (d: User) => void; user: User; onlineUsers: string[] }) => {
   return (
     <button
-      className="flex w-full cursor-pointer list-none items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-gray-100 dark:text-white dark:hover:bg-[--dark-secondary]"
+      className="flex w-full cursor-pointer list-none items-center gap-2 rounded-md bg-transparent px-2 py-2 text-left hover:bg-gray-100 focus-visible:outline-theme dark:text-white dark:hover:bg-[--dark-secondary]"
       role="listitem"
       onClick={() => onClick(user)}
     >

@@ -100,7 +100,7 @@ const WorkOrderTechnician = () => {
   };
 
   useEffect(() => {
-    fetchPolicy()
+    fetchPolicy();
   }, []);
 
   const fetchPolicy = async () => {
@@ -204,7 +204,7 @@ const WorkOrderTechnician = () => {
                       </HtmlTooltip>
                     </Box>
                   ) : null}
-                  {resourceData?.policy?.showWorkOrderPdfPreviewInTile &&
+                  {resourceData?.policy?.showWorkOrderPdfPreviewInTile && (
                     <Box ml={1}>
                       <HtmlTooltip title="Preview PDF">
                         <IconButton
@@ -215,11 +215,11 @@ const WorkOrderTechnician = () => {
                             handlePdfPreview(row?.original?.workOrderId, user, toastConfig);
                           }}
                         >
-                          <PictureAsPdfIcon fontSize={'small'} color='primary' />
+                          <PictureAsPdfIcon fontSize={'small'} color="primary" />
                         </IconButton>
                       </HtmlTooltip>
                     </Box>
-                  }
+                  )}
                 </div>
               ) : (
                 <NoDataCell />
@@ -469,7 +469,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
@@ -608,41 +608,43 @@ const WorkOrderTechnician = () => {
               renderedFrom={renderedFrom}
               state={tableState}
               tableHead={
-                <DetailsPageHeader
-                  isAddButtonVisible={false}
-                  className="flex-grow"
-                  isActionButtonVisible={false}
-                  isNewActionButtonVisible={selectedRecords.length > 0}
-                  newActionButtonProps={newActionButtonProps}
-                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-                  leftSideContents={
-                    <>
-                      <ThemeButton
-                        mobileTooltip="Apply Filters"
-                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                        iconForMobile={<BiFilterAlt />}
-                        onClick={() => {
-                          setShowFilter(true);
-                        }}
-                      >
-                        Show Filters
-                      </ThemeButton>
-                      <DisplayFilterChip
-                        filterTerm={filterTerm}
-                        resourceColumns={FIELD_TO_FILTER}
-                        deepFilters={[]}
-                        filterByIds={filterByIds}
-                        fetchResourceData={(deepFilter, filterById) => {
-                          handleApplyFilter(filterById);
-                        }}
-                        setDeepFilters={null}
-                        setFilterByIds={setFilterByIds}
-                      />
-                    </>
-                  }
-                  hasXpadding={false}
-                  hasYpadding={false}
-                />
+                <div className="max-md:w-full">
+                  <DetailsPageHeader
+                    isAddButtonVisible={false}
+                    className="flex-grow"
+                    isActionButtonVisible={false}
+                    isNewActionButtonVisible={selectedRecords.length > 0}
+                    newActionButtonProps={newActionButtonProps}
+                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    leftSideContents={
+                      <>
+                        <ThemeButton
+                          mobileTooltip="Apply Filters"
+                          startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                          iconForMobile={<BiFilterAlt />}
+                          onClick={() => {
+                            setShowFilter(true);
+                          }}
+                        >
+                          Show Filters
+                        </ThemeButton>
+                        <DisplayFilterChip
+                          filterTerm={filterTerm}
+                          resourceColumns={FIELD_TO_FILTER}
+                          deepFilters={[]}
+                          filterByIds={filterByIds}
+                          fetchResourceData={(deepFilter, filterById) => {
+                            handleApplyFilter(filterById);
+                          }}
+                          setDeepFilters={null}
+                          setFilterByIds={setFilterByIds}
+                        />
+                      </>
+                    }
+                    hasXpadding={false}
+                    hasYpadding={false}
+                  />
+                </div>
               }
               ref={gridViewRef}
               dispatch={tableDispatch}

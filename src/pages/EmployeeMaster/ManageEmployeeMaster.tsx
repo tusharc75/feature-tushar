@@ -30,8 +30,6 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
   const [submitting, setSubmitting] = useState(false);
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
-  const location = useLocation();
   const history = useHistory();
 
   useEffect(() => {
@@ -98,30 +96,22 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance()
-        .post(`${routes?.employeeMaster?.path}`, values)
-        .then(({ data }) => {
-          const newId = data.data[0]._id;
-          const userId = data.data[0].userId;
-          history.push({
-            pathname: `${routes.employeeMasterDetail.path}/${newId}`,
-            search: permissions?.employeeMaster?.isUpdate && !userId ? '?portalAccess=true' : '',
-            state: { location: location }
-          });
-          setLoading(false);
-          onSuccess(data.data);
-          setSubmitting(true);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setLoading(false);
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().post(`${routes?.employeeMaster?.path}`, values).then(({ data }) => {
+        const newId = data.data[0]._id;
+        history.push({ pathname: `${routes.employeeMasterDetail.path}/${newId}` });
+        setLoading(false);
+        onSuccess(data.data);
+        setSubmitting(true);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setLoading(false);
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -188,7 +178,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
                 </ThemeButton>
                 <ThemeButton
                   onClick={submitForm}
-                  disabled={loading || submitting || uploadingImageOrFileProgress > 0}
+                  disabled={loading || submitting}
                   isLoading={submitting}
                   buttonType='theme'
                 >
