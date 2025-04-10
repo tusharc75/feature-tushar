@@ -68,7 +68,7 @@ const Technicians = ({
 
   useEffect(() => {
     fetchColumns();
-  }, []);
+  }, [allConsumables]);
 
   useEffect(() => {
     if (resourcePolicy?.addServices) {
@@ -250,8 +250,7 @@ const Technicians = ({
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 170,
-      width: 170,
+      width: 150,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -259,20 +258,73 @@ const Technicians = ({
       Cell: ({ row }) => {
         return (
           <>
-            {data?.length ? (
-              <HtmlTooltip title={!allowedToEdit ? '' : 'Edit'}>
+            {data?.length && allowedToEdit ? (
+              <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
                   aria-label="Details"
-                  disabled={!allowedToEdit ? true : false}
                   onClick={() => {
                     setOpenTechnicianEditDialog({ open: true, data: row?.original });
                   }}
                 >
-                  <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
+                  <EditIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             ) : null}
+            {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) &&
+              <HtmlTooltip title={'Dispatch'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    let date = null;
+                    if (row?.original?.endDate) {
+                      date = new Date(row?.original?.endDate);
+                      date.setMinutes(date.getMinutes() + 1);
+                    }
+                    if (allConsumables?.length) {
+                      setConsumablesDialog({ open: true, consumables: allConsumables });
+                      setStartEndDateConfermationDialog({
+                        open: false,
+                        type: 'start',
+                        minDateTime: date,
+                        notes: '',
+                        products: [],
+                        _id: row?.original?._id
+                      });
+                    } else {
+                      setStartEndDateConfermationDialog({
+                        open: true,
+                        type: 'start',
+                        minDateTime: date,
+                        notes: '',
+                        products: [],
+                        _id: row?.original?._id
+                      });
+                    }
+                  }}
+                >
+                  <Send fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>}
+            {(row?.original?.startDate && !row?.original?.endDate) &&
+              <HtmlTooltip title={'Return'}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setStartEndDateConfermationDialog({
+                      open: true,
+                      type: 'stop',
+                      minDateTime: new Date(row?.original?.maxStartDate),
+                      notes: row?.original?.notes,
+                      products: [],
+                      _id: row?.original?._id
+                    });
+                  }}
+                >
+                  <Replay fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            }
             <HtmlTooltip title={'View Logs'}>
               <IconButton
                 size="small"
@@ -281,60 +333,6 @@ const Technicians = ({
                 }}
               >
                 <Visibility fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-            <HtmlTooltip title={'Dispatch'}>
-              <IconButton
-                size="small"
-                disabled={row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate) ? false : true}
-                onClick={() => {
-                  let technicianProducts = allConsumables?.filter((d) => d?.technicianId === row?.original?.technicianId);
-                  let date = null;
-                  if (row?.original?.endDate) {
-                    date = new Date(row?.original?.endDate);
-                    date.setMinutes(date.getMinutes() + 1);
-                  }
-                  if (technicianProducts?.length) {
-                    setConsumablesDialog({ open: true, consumables: technicianProducts });
-                    setStartEndDateConfermationDialog({
-                      open: false,
-                      type: 'start',
-                      minDateTime: date,
-                      notes: '',
-                      products: [],
-                      _id: row?.original?._id
-                    });
-                  } else {
-                    setStartEndDateConfermationDialog({
-                      open: true,
-                      type: 'start',
-                      minDateTime: date,
-                      notes: '',
-                      products: [],
-                      _id: row?.original?._id
-                    });
-                  }
-                }}
-              >
-                <Send fontSize="small" color={row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate) ? 'primary' : 'disabled'} />
-              </IconButton>
-            </HtmlTooltip>
-            <HtmlTooltip title={'Return'}>
-              <IconButton
-                size="small"
-                disabled={row?.original?.startDate && !row?.original?.endDate ? false : true}
-                onClick={() => {
-                  setStartEndDateConfermationDialog({
-                    open: true,
-                    type: 'stop',
-                    minDateTime: new Date(row?.original?.maxStartDate),
-                    notes: row?.original?.notes,
-                    products: [],
-                    _id: row?.original?._id
-                  });
-                }}
-              >
-                <Replay fontSize="small" color={row?.original?.startDate && !row?.original?.endDate ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
             {allowedToEdit ? (
@@ -510,14 +508,6 @@ const Technicians = ({
     return (
       <>
         <MenuItem
-          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
-          onClick={() => {
-            setDeleteData(selectedRecords?.map((d) => d?._id));
-          }}
-        >
-          Delete
-        </MenuItem>
-        <MenuItem
           disabled={selectedRecords?.every((r) => r?.endDate || (!r?.startDate && !r?.endDate)) ? false : true}
           onClick={() => {
             const dates = [];
@@ -531,9 +521,8 @@ const Technicians = ({
               date = new Date(Math.max(...dates));
               date.setMinutes(date.getMinutes() + 1);
             }
-            const technicianProducts = allConsumables?.filter((d) => selectedRecords?.map((r) => r?.technicianId).includes(d?.technicianId));
-            if (technicianProducts?.length) {
-              setConsumablesDialog({ open: true, consumables: technicianProducts });
+            if (allConsumables?.length) {
+              setConsumablesDialog({ open: true, consumables: allConsumables });
               setStartEndDateConfermationDialog({
                 open: false,
                 type: 'start',
@@ -578,6 +567,14 @@ const Technicians = ({
           }}
         >
           Return
+        </MenuItem>
+        <MenuItem
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
+          onClick={() => {
+            setDeleteData(selectedRecords?.map((d) => d?._id));
+          }}
+        >
+          Delete
         </MenuItem>
       </>
     );

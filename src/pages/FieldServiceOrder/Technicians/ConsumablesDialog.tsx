@@ -8,12 +8,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Consumables from './Consumables';
 
-const ConsumablesDialog = ({
-  onClose,
-  serviceOrderData,
-  consumables,
-  onSubmit
-}) => {
+const ConsumablesDialog = ({ onClose, serviceOrderData, consumables, onSubmit }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedRecords, setSelectedRecords] = useState(null);
@@ -29,7 +24,7 @@ const ConsumablesDialog = ({
     >
       <>
         <CustomDialogHeader
-          title={`Select Product(s)/Consumable(s)`}
+          title={`Select Products/Consumables`}
           onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -44,9 +39,9 @@ const ConsumablesDialog = ({
             serviceOrderData={serviceOrderData}
             serviceOrderFields={null}
             stepFullScreen={fullScreen}
-            fetchData={() => {}}
+            fetchData={() => { }}
             technicians={null}
-            fetchConsumablesData={() => {}}
+            fetchConsumablesData={() => { }}
             setSelectedRecords={setSelectedRecords}
             allConsumables={consumables}
           />
