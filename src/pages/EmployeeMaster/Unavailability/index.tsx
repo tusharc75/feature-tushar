@@ -3,10 +3,9 @@ import { Box, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from '../../../components/Helpers/NoDataCell';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
-import { displayDate, displayDateTime, employeeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { employeeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -109,35 +108,11 @@ const Unavailability = ({ id }) => {
     return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
-
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    }
-
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-
-    if (filterByIds?.length || deepFilters?.length) {
-      deepFilter = `${deepFilter}&filterType=and`;
-    }
-
-    if (search) {
-      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
-    }
-    return deepFilter;
-  };
-
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
     try {
       let data: any = [];
-      const response: any = await axiosInstance().get(`${employeeMaster.api}/unavailability/${id}${queryString}`, {
+      const response: any = await axiosInstance().get(`${employeeMaster.api}/unavailability/${id}`, {
         cancelToken: cancelTokenSource?.token
       });
       data = response?.data?.data;
@@ -200,6 +175,7 @@ const Unavailability = ({ id }) => {
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
+          isClientSideGrid={true}
         />
       ) : (
         <Box p={2} height={500}>
