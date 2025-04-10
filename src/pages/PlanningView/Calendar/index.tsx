@@ -737,11 +737,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   useEffect(() => {
     setFields([]);
-    axiosInstance()
-      .get(`/field?resource=${selectedResource?.resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      });
+    if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
+      axiosInstance()
+        .get(`/field?resource=${selectedResource?.resource}`)
+        .then(({ data }) => {
+          setFields(data.data);
+        });
+    }
   }, [selectedResource]);
 
   return (
