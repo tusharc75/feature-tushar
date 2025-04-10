@@ -11,7 +11,7 @@ import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { AI_AGENT } from 'src/config';
-import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { SIDEBAR_OPENED_BY_BUTTON, useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
@@ -283,6 +283,7 @@ const CustomIntro = () => {
 export default CustomIntro;
 
 const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void }) => {
+  const [isSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
   const isMobile = useMediaQuery('(max-width:768px)');
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
@@ -312,7 +313,12 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   return (
     <>
-      <div className={cn('floating-card fixed bottom-2  z-[50]', AI_AGENT ? 'right-[60px]' : 'right-3')}>
+      <div
+        className={cn(
+          'floating-card fixed bottom-2 left-3 z-[50] transition-all duration-300',
+          isSidebarOpenedByButton ? 'min-[960px]:left-[calc(300px+16px)]' : 'min-[960px]:left-[calc(84px+16px)]'
+        )}
+      >
         <HtmlTooltip className="block" title={'Walk me'}>
           <button
             type="button"

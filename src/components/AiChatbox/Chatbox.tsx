@@ -1,5 +1,5 @@
-import { CircularProgress, IconButton, Typography } from '@mui/material';
-import { Close } from '@mui/icons-material';
+import { Avatar, Badge, CircularProgress, IconButton, Typography } from '@mui/material';
+import { Close, Person } from '@mui/icons-material';
 import { Dispatch, useCallback, useContext, useEffect, useRef } from 'react';
 import { BsStars } from 'react-icons/bs';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
@@ -18,12 +18,16 @@ import { cn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { io, Socket } from 'socket.io-client';
 import { backendApi } from 'src/config';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 
 type ChatboxPopupProps = {
   mode?: 'popup';
   handleClose: () => void;
   state: TInitialChatboxState;
   setState: Dispatch<TChatboxActions>;
+  handleToggleChatWindow?: () => void;
+  toggleGenieFullScreen: () => void;
+  isMobile?: boolean;
 };
 
 type ChatboxDefaultProps = {
@@ -82,24 +86,22 @@ const Chatbox = (props: ChatboxProps) => {
               {
                 primary: false,
                 field: 'User Input',
-                label: "Input",
+                label: 'Input',
                 type: 'singleLine',
                 order: 1
               }
             ];
-            d.reply.content = d.ask_user_input
+            d.reply.content = d.ask_user_input;
           }
-
 
           setState({ type: 'setMessage', payload: d });
         });
 
-        socket.current.on('end',(d) => {
+        socket.current.on('end', (d) => {
           setState({ type: 'setMessage', payload: d });
-          socket.current.disconnect()
-          socket.current = null
-        })
-
+          socket.current.disconnect();
+          socket.current = null;
+        });
       } catch (error) {
         toastConfig.setToastConfig(error);
         setState({ type: 'setError', error: error.message || '' });
@@ -117,7 +119,6 @@ const Chatbox = (props: ChatboxProps) => {
         };
 
         socket.current.emit('message', payload);
-
       } catch (error) {
         toastConfig.setToastConfig(error);
         setState({ type: 'setError', error: error.message || '' });
@@ -141,7 +142,7 @@ const Chatbox = (props: ChatboxProps) => {
     (obj: FormValueStateObj) => {
       let query = '';
       for (let i = 0; i < Object.keys(obj).length; i++) {
-        const value = `${(Object.values(obj)[i] || "")}`.replace("_cur","")
+        const value = `${Object.values(obj)[i] || ''}`.replace('_cur', '');
         query += `${Object.keys(obj)[i]}: ${value}\n`;
       }
       submitForm(query);
@@ -159,42 +160,80 @@ const Chatbox = (props: ChatboxProps) => {
         ' flex items-end justify-end gap-2',
         isDefaultMode
           ? 'flex-grow'
-          : `absolute bottom-[calc(100%+10px)] right-0 z-10 w-[min(var(--chatbox-width),calc(100vw-24px))] max-w-[min(var(--chatbox-width),calc(100vw-24px))] 
-          ${fullScreen ? '[--chat-container-h:100vh] [--chatbox-width:100vw]' : '[--chat-container-h:600px] [--chatbox-width:500px]'}`
+          : `z-14000 w-[min(var(--chatbox-width),calc(100vw-24px))] max-w-[min(var(--chatbox-width),calc(100vw-24px))]
+          ${fullScreen ? '[--chat-container-h:100vh] [--chatbox-width:100vw]' : '[--chat-container-h:600px] [--chatbox-width:var(--gennie-openned-chatbox-w)]'}`
       )}
     >
-      {mode === 'popup' && (
-        <HtmlTooltip title={'New Chat'}>
-          <IconButton
-            onClick={resetChat}
-            style={{ background: 'var(--dark-primary, white)', borderRadius: '999px', border: '1px solid var(--common-border-color)' }}
-          >
-            <RiChatNewLine />
-          </IconButton>
-        </HtmlTooltip>
-      )}
-
       <div
         className={cn(
           'flex h-[var(--chat-container-h)] max-h-[var(--chat-container-h)] flex-grow  flex-col',
-          isDefaultMode
-            ? 'mt-auto [--chat-container-h:calc(100vh-250px)]'
-            : '  rounded-md bg-[var(--dark-secondary,white)]  shadow-md [border:1px_solid_var(--common-border-color)]',
+          isDefaultMode ? 'mt-auto [--chat-container-h:calc(100vh-250px)]' : '  rounded-md bg-[var(--dark-secondary,white)]',
           fullScreen && !isDefaultMode && 'fixed inset-0 '
         )}
       >
         {mode === 'popup' && (
-          <div className="head flex items-center justify-between p-3 [border-bottom:1px_solid_var(--common-border-color)]">
-            <h5 className="text-[16px] font-semibold">Equipt Genie</h5>
-            <div className="flex gap-2">
-              <IconButton size="small" onClick={() => setState({ type: 'setFullScreen', payload: !fullScreen })}>
-                {fullScreen ? <FiMinimize2 /> : <FiMaximize2 />}
-              </IconButton>
-              <IconButton size="small" onClick={() => (props as ChatboxPopupProps).handleClose()}>
-                <Close />
-              </IconButton>
+          <header
+            className="flex h-[--partially-openned-container-h] cursor-pointer items-center justify-between border-b p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
+            onClick={() => (props as ChatboxPopupProps).handleToggleChatWindow?.()}
+          >
+            <div className="flex items-center gap-2">
+              <Badge
+                overlap="circular"
+                sx={(theme) => ({
+                  '& .MuiBadge-badge': {
+                    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`
+                  }
+                })}
+                className={cn('[&_.MuiBadge-badge]:!bg-green-500')}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                variant={'dot'}
+              >
+                <Avatar
+                  src={genieImage}
+                  alt="eGenie"
+                  sx={{ width: '35px', height: '35px', '& img': { maxWidth: '80%', maxHeight: '90%' } }}
+                  className="bg-[#bdbdbd] dark:bg-[#757575]"
+                >
+                  <Person fontSize="small" />
+                </Avatar>
+              </Badge>
+              <div className="relative">
+                <h6 className="line-clamp-1 text-sm font-semibold" title={`Equipt Genie`}>
+                  Equipt Genie
+                </h6>
+                <p className="text-[11px] tracking-wide">{'Online'}</p>
+              </div>
             </div>
-          </div>
+
+            <div className="flex gap-1">
+              {!(props as ChatboxPopupProps).isMobile && (
+                <HtmlTooltip title={fullScreen ? 'Minimize' : 'Make genie full screen'}>
+                  <IconButton
+                    color="primary"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      (props as ChatboxPopupProps).toggleGenieFullScreen();
+                    }}
+                  >
+                    {fullScreen ? <FiMinimize2 fontSize={'small'} /> : <FiMaximize2 fontSize={'small'} />}
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+              <HtmlTooltip title={'Close genie'}>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    (props as ChatboxPopupProps).handleClose();
+                  }}
+                >
+                  <Close fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
+          </header>
         )}
         <div ref={scrollContainer} className={cn('body relative flex-grow overflow-y-auto overscroll-contain scroll-smooth p-3')}>
           <div className={cn('container', fullScreen ? '' : '!w-full')}>
@@ -234,10 +273,23 @@ const Chatbox = (props: ChatboxProps) => {
             'footer  ',
             isDefaultMode
               ? 'rounded-[20px] py-2 pl-3 pr-4 [border:1px_solid_var(--common-border-color)]'
-              : 'p-3 [border-top:1px_solid_var(--common-border-color)]'
+              : 'flex items-center gap-1 p-3 [border-top:1px_solid_var(--common-border-color)]'
           )}
         >
-          <SendMessageForm sendMessage={sendMessage} loading={loading} disabled={isSendButtonDisabled} />
+          {mode === 'popup' && (
+            <HtmlTooltip title={'New Chat'}>
+              <IconButton
+                size="small"
+                onClick={resetChat}
+                style={{ background: 'var(--dark-primary, white)', borderRadius: '999px', border: '1px solid var(--common-border-color)' }}
+              >
+                <RiChatNewLine />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          <div className="flex-grow">
+            <SendMessageForm sendMessage={sendMessage} loading={loading} disabled={isSendButtonDisabled} />
+          </div>
         </div>
       </div>
     </div>

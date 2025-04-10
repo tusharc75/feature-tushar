@@ -1,6 +1,7 @@
 import { Dialog } from '@mui/material';
 import React from 'react';
 import ChatBox from 'src/components/DesktopDM/ChatBox';
+import GenieWindow from 'src/components/DesktopDM/GenieWindow';
 import useDesktopDM from 'src/components/DesktopDM/useDesktopDM';
 import UserList from 'src/components/DesktopDM/UserList';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -39,10 +40,21 @@ const DesktopDM = () => {
         <UserList state={state} />
         {isMobile && openedChats.length > 0 ? (
           <Dialog open={true} slots={{ transition: CustomDialogTransition }} fullScreen fullWidth>
-            <ChatBox openedChat={openedChats[openedChats.length - 1]} state={state} key={openedChats[openedChats.length - 1]['id']} />
+            {openedChats[openedChats.length - 1].type === 'genie' ? (
+              <>
+                <GenieWindow state={state} openedChat={openedChats[openedChats.length - 1]} key={openedChats[openedChats.length - 1]['id']} />
+              </>
+            ) : (
+              <>
+                <ChatBox openedChat={openedChats[openedChats.length - 1]} state={state} key={openedChats[openedChats.length - 1]['id']} />
+              </>
+            )}
           </Dialog>
         ) : (
-          openedChats.map((o) => <ChatBox openedChat={o} state={state} key={o.id} />)
+          openedChats.map((o) => {
+            if (o.type === 'genie') return <GenieWindow state={state} openedChat={o} key={o.id} />;
+            return <ChatBox openedChat={o} state={state} key={o.id} />;
+          })
         )}
       </aside>
     </div>
