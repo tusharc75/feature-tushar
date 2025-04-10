@@ -3,7 +3,7 @@ import { Typography, TextField, Box } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
-import { isObject } from 'lodash';
+import { isArray, isObject } from 'lodash';
 
 const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched = {}, errors = {} }) => {
   const {
@@ -15,13 +15,16 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched
   useEffect(() => {
     let selectedUsers = [];
     let fieldValue = [];
-    const userIds = values[name]?.map((ele) => (isObject(ele?.user) ? ele?.user?._id : ele?.user));
-    fieldValue = values[name]?.map((ele) => {
-      return {
-        ...ele,
-        user: isObject(ele?.user) ? ele?.user?._id : ele?.user
-      };
-    });
+    let userIds = []
+    if (isArray(values[name])) {
+      userIds = values[name]?.map((ele) => (isObject(ele?.user) ? ele?.user?._id : ele?.user));
+      fieldValue = values[name]?.map((ele) => {
+        return {
+          ...ele,
+          user: isObject(ele?.user) ? ele?.user?._id : ele?.user
+        };
+      });
+    }
     selectedUsers = fieldData?.option?.filter((user) => [...userIds].includes(user.optionValue));
     setSelectedSignatureUsers(selectedUsers);
     setFieldValue(name, fieldValue);
