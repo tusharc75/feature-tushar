@@ -204,7 +204,7 @@ const Chatbox = (props: ChatboxProps) => {
               </div>
             </div>
 
-            <div className="flex gap-1">
+            <div className="flex items-center gap-1">
               {!(props as ChatboxPopupProps).isMobile && (
                 <HtmlTooltip title={fullScreen ? 'Minimize' : 'Make genie full screen'}>
                   <IconButton
