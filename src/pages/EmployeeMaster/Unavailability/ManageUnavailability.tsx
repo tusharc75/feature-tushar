@@ -1,73 +1,65 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Box, Dialog, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import { Box, Dialog } from '@mui/material';
 import { Formik, Form } from 'formik';
-import { object, string, date, ref } from 'yup';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomDatePicker from 'src/components/CustomDatePicker';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import InputField from 'src/components/Helpers/InputField';
 
-const validationSchema = object().shape({
-  title: string().required('Title is required'),
-  startDate: date().required('Start Date is required'),
-  endDate: date().required('End Date is required').min(ref('startDate'), 'End Date must be after Start Date'),
-  reasons: string().required('Reasons are required')
-});
-
-function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
+function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
   const toastConfig = useContext(CustomToastContext);
   const ref = useRef(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialData, setInitialData] = useState<any>(null);
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [title, setTitle] = useState('');
 
   useEffect(() => {
-    fetchData();
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.technicianUnavailability}`)
+      .then(({ data: { data } }) => {
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        if (id) {
+          axiosInstance()
+            .get(`${routes?.employeeMaster?.path}/unavailability/one/${id}`)
+            .then(({ data: { data } }) => {
+              setTitle(`Edit - ${data?.title}`);
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+              });
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
+            });
+        } else {
+          setTitle(`Create - Unavailability`);
+          let initialData = getObjKeys('', fieldsDataForCreate);
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: initialData
+          });
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   }, []);
 
-  const fetchData = async () => {
-    const initialValues = {
-      title: '',
-      startDate: null,
-      endDate: null,
-      reasons: ''
-    };
-
-    try {
-      if (dataId) {
-        const response = await axiosInstance().get(`${routes?.employeeMaster?.path}/unavailability/update/${dataId}`);
-        const { data: fetchedData } = response.data;
-
-        const editData = {
-          title: fetchedData?.title || '',
-          reasons: fetchedData?.reasons || '',
-          startDate: fetchedData?.startDate ? new Date(fetchedData.startDate) : new Date(),
-          endDate: fetchedData?.endDate ? new Date(fetchedData.endDate) : new Date()
-        };
-
-        setInitialData(editData);
-      } else {
-        setInitialData(initialValues);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   const handleSave = (values: any) => {
-    if (dataId) {
-      values._id = dataId;
-      values.technician = id;
+    if (id) {
+      values._id = id;
+      values.technician = masterId;
       axiosInstance()
         .put(`${routes?.employeeMaster?.path}/unavailability`, values)
         .then(({ data }) => {
@@ -82,7 +74,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
           toastConfig.setToastConfig(error);
         });
     } else {
-      values.technician = id;
+      values.technician = masterId;
       axiosInstance()
         .post(`${routes?.employeeMaster?.path}/unavailability`, values)
         .then(({ data }) => {
@@ -109,89 +101,41 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
         }
       }}
     >
-      {initialData ? (
-        <Formik innerRef={ref} initialValues={initialData} validateOnMount validationSchema={validationSchema} onSubmit={(values) => handleSave(values)}>
-          {({ values, errors, touched, handleChange, handleBlur, setFieldValue, submitForm }) => (
-            <Form>
+      {initialData && initialData?.fields?.length ? (
+        <Formik
+          innerRef={ref}
+          initialValues={initialData.values}
+          validateOnMount
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSave}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData)) {
+                  if (!isEqual(ref.current.values, initialData.values)) {
                     setShowConfirmDialog(true);
                   } else {
                     onClose();
                   }
                 }}
-                title="Unavailability"
+                title={title}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => setFullScreen((prev) => !prev)}
                 showManimizeMaximize={true}
               />
               <CustomDialogContent>
-                <Grid container spacing={2} sx={{ alignItems: 'center', marginBottom: 2 }}>
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      required
-                      fullWidth
-                      size="small"
-                      label="Title"
-                      name="title"
-                      value={values?.title}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      variant="outlined"
-                      error={touched.title && Boolean(errors.title)}
-                      helperText={touched.title && errors.title}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <CustomDatePicker
-                      label="Start Date"
-                      name="startDate"
-                      required
-                      value={values?.startDate}
-                      fullWidth
-                      margin="dense"
-                      size="small"
-                      onChange={(value) => setFieldValue('startDate', value)}
-                      onBlur={handleBlur}
-                      error={touched.startDate && Boolean(errors.startDate)}
-                      helperText={touched.startDate && errors.startDate}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <CustomDatePicker
-                      label="End Date"
-                      name="endDate"
-                      required
-                      value={values?.endDate}
-                      fullWidth
-                      margin="dense"
-                      size="small"
-                      minDate={values?.startDate}
-                      onChange={(value) => setFieldValue('endDate', value)}
-                      onBlur={handleBlur}
-                      error={touched.endDate && Boolean(errors.endDate)}
-                      helperText={touched.endDate && errors.endDate}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12 }}>
-                    <TextField
-                      required
-                      fullWidth
-                      size="small"
-                      label="Reasons"
-                      name="reasons"
-                      multiline
-                      rows={4}
-                      value={values?.reasons}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      variant="outlined"
-                      error={touched.reasons && Boolean(errors.reasons)}
-                      helperText={touched.reasons && errors.reasons}
-                    />
-                  </Grid>
-                </Grid>
+                <Form>
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
+                </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
@@ -204,7 +148,13 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton buttonType="theme" id="dialog-save-button" onClick={submitForm}>
+                <ThemeButton
+                  buttonType="theme"
+                  id="dialog-save-button"
+                  onClick={(e) => {
+                    submitForm();
+                  }}
+                >
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -221,7 +171,7 @@ function ManageUnavailability({ onClose, onSuccess, id, dataId }) {
                   }}
                 />
               ) : null}
-            </Form>
+            </>
           )}
         </Formik>
       ) : (
