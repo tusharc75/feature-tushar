@@ -420,9 +420,6 @@ function App() {
         redirectToAnotherScreen = parsedParams.redirect;
       }
     }
-    if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = sidebarResource?.pos;
-    }
 
     return !user ? (
       <Comp />
