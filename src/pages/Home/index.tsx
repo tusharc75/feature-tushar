@@ -15,6 +15,7 @@ import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 import { SVG } from 'src/assets';
+import GenieText from 'src/assets/svg/GenieText';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -63,7 +64,7 @@ function Dashboard() {
                 <SideCard
                   heading={
                     <>
-                      <img src={SVG('genieWord')} alt="E" className="max-h-[16px]" />
+                      <GenieText className="h-[16px]" />
                     </>
                   }
                   href={routes.equiptAi.path}
