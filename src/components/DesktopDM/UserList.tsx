@@ -11,6 +11,7 @@ import { Link } from 'react-router-dom';
 import { SVG } from 'src/assets';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
+import GenieText from 'src/assets/svg/GenieText';
 
 type UserListProps = {
   state: UseDesktopDM;
@@ -197,12 +198,12 @@ const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
             src={genieImage}
             alt="eGenie"
             sx={{ width: '35px', height: '35px', '& img': { maxWidth: '80%', maxHeight: '90%' } }}
-            className="bg-[#bdbdbd] dark:bg-[#757575]"
+            className="border p-[1px]"
           >
             <Person fontSize="small" />
           </Avatar>
         </Badge>
-        <img src={SVG('genieWord')} alt="E" className="max-h-[14px]" />
+        <GenieText className="max-h-[14px]" />
       </button>
     </div>
   );

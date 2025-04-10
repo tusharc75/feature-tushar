@@ -19,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { io, Socket } from 'socket.io-client';
 import { backendApi } from 'src/config';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import GenieText from 'src/assets/svg/GenieText';
 
 type ChatboxPopupProps = {
   mode?: 'popup';
@@ -192,15 +193,13 @@ const Chatbox = (props: ChatboxProps) => {
                   src={genieImage}
                   alt="eGenie"
                   sx={{ width: '35px', height: '35px', '& img': { maxWidth: '80%', maxHeight: '90%' } }}
-                  className="bg-[#bdbdbd] dark:bg-[#757575]"
+                  className="border p-[1px]"
                 >
                   <Person fontSize="small" />
                 </Avatar>
               </Badge>
               <div className="relative">
-                <h6 className="line-clamp-1 text-sm font-semibold" title={`Equipt Genie`}>
-                  Equipt Genie
-                </h6>
+                <GenieText className="h-[14px]" />
                 <p className="text-[11px] tracking-wide">{'Online'}</p>
               </div>
             </div>
