@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
 import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
+import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -11,11 +12,13 @@ const initialState: UIState = {
 };
 
 const CHATBOX_GAP = 16;
-let USER_LIST_RIGHT_SPACE = CHATBOX_GAP;
+const USER_LIST_RIGHT_SPACE = CHATBOX_GAP;
 const USER_LIST_CONTAINER_WIDTH = 288;
 const FULLY_OPENNED_CHATBOX_WIDTH = 400;
 const PARTIALLY_OPENNED_CHATBOX_WIDTH = 216;
 const PARTIALLY_OPENNED_CONTAINER_HEIGHT = 48;
+
+const WALKME_BUTTOM_RIGHT_END = 150;
 
 const getTotalOccupiedWidth = (openedChats: OpenedChat[]) => {
   let totalSize = USER_LIST_CONTAINER_WIDTH + USER_LIST_RIGHT_SPACE;
@@ -32,12 +35,12 @@ const getTotalOccupiedWidth = (openedChats: OpenedChat[]) => {
 const checkCanExpandChatBox = (openedChats: OpenedChat[]) => {
   const totalSize =
     getTotalOccupiedWidth(openedChats) - (PARTIALLY_OPENNED_CHATBOX_WIDTH + CHATBOX_GAP) + (FULLY_OPENNED_CHATBOX_WIDTH + CHATBOX_GAP);
-  return totalSize < windowWidth;
+  return totalSize < windowWidth - WALKME_BUTTOM_RIGHT_END;
 };
 
 const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
   const totalSize = getTotalOccupiedWidth(openedChats) + FULLY_OPENNED_CHATBOX_WIDTH + CHATBOX_GAP;
-  return totalSize < windowWidth;
+  return totalSize < windowWidth - WALKME_BUTTOM_RIGHT_END;
 };
 
 const useUIDesktopDm = () => {
@@ -51,14 +54,16 @@ const useUIDesktopDm = () => {
     }
   }: any = useData();
 
-  useEffect(() => {
-    if (permissions?.equiptAi?.isRead) {
-      USER_LIST_RIGHT_SPACE = CHATBOX_GAP + 100;
-    }
-  }, [permissions?.equiptAi?.isRead]);
-
   const [uiState, setUiState] = useState<UIState>(initialState);
   const isMobile = useMediaQuery('(max-width:800px)');
+
+  const onGenieFullScreen = useCallback(() => {
+    setUiState((prev) => ({
+      ...prev,
+      mainWindow: 'partial',
+      openedChats: prev.openedChats.filter((c) => c.id === GENIE_WINDOW_ID)
+    }));
+  }, []);
 
   const handleChatOpen = useCallback(
     (id: string, type: OpenedChat['type']) => {
@@ -175,8 +180,8 @@ const useUIDesktopDm = () => {
     [uiState.openedChats]
   );
 
-  const closeChatBox = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => {
-    e.stopPropagation();
+  const closeChatBox = useCallback((e?: React.MouseEvent<HTMLButtonElement, MouseEvent>, id: string) => {
+    e?.stopPropagation();
     setUiState((prev) => ({ ...prev, openedChats: prev.openedChats.filter((d) => d.id !== id) }));
   }, []);
 
@@ -216,6 +221,7 @@ const useUIDesktopDm = () => {
 
   return {
     ...uiState,
+    onGenieFullScreen,
     user,
     resources,
     permissions,
