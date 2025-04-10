@@ -13,9 +13,8 @@ import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEmpty, isEqual, startCase, toLower } from 'lodash';
-import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
-import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
+import { RiCloseCircleFill } from 'react-icons/ri';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import History from './History';
@@ -220,7 +219,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
