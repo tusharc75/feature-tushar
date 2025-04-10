@@ -155,57 +155,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
         : [])
     ],
     [
@@ -276,12 +276,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
+          {
+            label: resources?.padMaster?.titlePlural,
+            value: 'Pad Master',
+            key: 'padMaster'
+          }
+        ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -317,13 +317,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
+
   const colorCodeMap = new Map();
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
       .then(({ data: { data } }) => {
-        data['Customer Account'].forEach((ele, i) => {
+        data[sidebarResource.customerAccount].forEach((ele, i) => {
           colorCodeMap.set(ele?.optionValue, COLOR_CODE[i]);
         });
       })
@@ -538,6 +539,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
               }
+              extraData.customerAccount = d?.customerAccount?.optionValue;
             } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
               extraData.customerAccount = d?.customerAccount?.optionValue;
@@ -785,7 +787,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const setEventStyle = useCallback(
     (obj) => {
-      console.log('obj', obj?.customerAccount, obj?.resource, colorCodeMap);
       let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
       let color = '#000';
 
@@ -817,11 +818,17 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
-      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product]?.includes(obj?.resource)) {
+      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
         const _c = colorCodeMap.get(obj?.customerAccount);
         if (_c) {
           backgroundColor = _c?.background;
           color = _c?.color;
+        }
+      }
+      if (obj?.resource === sidebarResource.rentalManagement) {
+        if (obj?.fulfillStatus === 'ERROR') {
+          backgroundColor = 'rgb(220, 53, 69)';
+          color = 'white';
         }
       }
 
