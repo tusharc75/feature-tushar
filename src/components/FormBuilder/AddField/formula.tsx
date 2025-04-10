@@ -15,7 +15,6 @@ import { IconButton } from '@mui/material';
 import { FiMaximize2 } from 'react-icons/fi';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { isEmpty } from 'lodash';
 
 export const Formula = ({ fields, values, setFieldValue, _id, touched, errors }) => {
   const [formulaError, setFormulaError] = useState(null);
@@ -33,7 +32,6 @@ export const Formula = ({ fields, values, setFieldValue, _id, touched, errors })
       }
     });
     setCounterSubFieldInputFields(counterFields);
-    if (isEmpty(values['inputFields'])) setFieldValue('counterFieldInputFields', []);
   }, [values['inputFields'], fields]);
 
 

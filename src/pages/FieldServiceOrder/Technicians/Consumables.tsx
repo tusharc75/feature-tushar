@@ -45,7 +45,7 @@ const Consumables = ({
   technicians,
   fetchConsumablesData,
   allConsumables,
-  setSelectedRecords= null
+  setSelectedRecords = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
