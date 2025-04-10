@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getObjKeys, gridSize, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import FormTypes from '../../FormTypes';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
+import { isArray } from 'lodash';
 
 let timeout: NodeJS.Timeout;
 
@@ -11,12 +12,29 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
   const [error, setError] = useState({});
   const [touch, setTouch] = useState({});
   const [formsData, setFormsData] = useState([]);
-  const [count, setCount] = useState(() => (isNaN(+defaultValue) || !defaultValue ? '0' : defaultValue));
+  const [count, setCount] = useState('0');
+
+  const handelSetDefault = useCallback(() => {
+    const tempData = [];
+    for (let i = 0; i < (+defaultValue) - length; i++) {
+      tempData.push(getObjKeys('', fieldData?.subFields || []));
+    }
+    setCount(`${defaultValue}`)
+    setFieldValue(name, [...tempData]);
+  }, []);
+
+  useEffect(() => {
+    if (defaultValue && !isNaN(+defaultValue)) {
+      if ((isArray(values[name]) && values[name]?.length == 0) || !values[name]) {
+        handelSetDefault()
+      }
+    }
+  }, [setFieldValue, name]);
 
   const handleAddRemoveMulti = useCallback(
     (count: number) => {
-      let newData: any[] = values[name] ? [...values[name]] : [];
-      const length = values[name]?.length || 0;
+      let newData: any[] = isArray(values[name]) && values[name]?.length ? [...values[name]] : [];
+      const length = newData?.length;
       if (length < count && fieldData?.subFields?.length > 0) {
         const tempData = [];
         for (let i = 0; i < count - length; i++) {
@@ -28,7 +46,6 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         newData = [...newData].splice(0, count);
       }
       setFieldValue(name, newData);
-
       // for updating fields which are dependent on counter sub fields for their values
       const result = handleAutoCalculation(
         fieldData,
@@ -39,7 +56,6 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         '',
         newData,
       );
-  
       for (var x in result) {
         setFieldValue(x, result[x]);
       }
@@ -105,13 +121,6 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       setFieldValue(x, result2[x]);
     }
   };
-
-
-  useEffect(() => {
-    if (defaultValue && !isNaN(+defaultValue)) {
-      handleAddRemoveMulti(+defaultValue);
-    }
-  }, [defaultValue]);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldData?.subFields));
@@ -180,13 +189,13 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
             </IconButton>
           </div>
         </div>
-        {values[name].length > 0 && (
+        {values[name]?.length > 0 && (
           <div className="mt-3 space-y-3">
             {values[name]?.map((value, index) => {
               return (
-                <div className={`${values[name].length - 1 === index ? '' : 'pb-3 [border-bottom:2px_dashed_var(--common-border-color)]'} `}>
+                <div className={`${values[name]?.length - 1 === index ? '' : 'pb-3 [border-bottom:2px_dashed_var(--common-border-color)]'} `}>
                   <Grid container spacing={1}>
-                    {formsData.length > 0 &&
+                    {formsData?.length > 0 &&
                       formsData?.map((form, index1) => {
                         return form?.name ? (
                           <Grid key={index1} size={{ xs: 12, sm: 12, md: 12, lg: 12, xl: 12 }}>
