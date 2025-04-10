@@ -49,52 +49,6 @@ const Unavailability = ({ id }) => {
     setColumns([...newColumns, ActionsRenderer]);
   };
 
-  // const ActionsRenderer = {
-  //     accessor: 'action',
-  //     Header: 'Actions',
-  //     minWidth: 100,
-  //     width: 100,
-  //     sticky: 'right',
-  //     disableFilters: true,
-  //     disableSortBy: true,
-  //     canDrag: false,
-  //     Cell: ({ row }) => (
-  //       <>
-  //         {permissions?.employeeMaster?.isUpdate && (
-  //           <HtmlTooltip title="Edit">
-  //             <IconButton
-  //               size="small"
-  //               aria-label="Details"
-  //               disabled={permissions?.employeeMaster?.isCreate ? false : true}
-  //               onClick={() => {
-  //                 setShowUnavailibilityDialog({ open: true, id: row.original._id });
-  //               }}
-  //             >
-  //               <EditIcon fontSize="small" color={permissions?.employeeMaster?.isCreate ? 'primary' : 'disabled'} />
-  //             </IconButton>
-  //           </HtmlTooltip>
-  //         )}
-  //         {permissions?.employeeMaster?.isDelete && (
-  //           <HtmlTooltip title="Delete">
-  //             <span>
-  //               <IconButton
-  //                 size="small"
-  //                 aria-label="Delete"
-  //                 disabled={permissions?.employeeMaster?.isDelete ? false : true}
-  //                 onClick={() => {
-  //                   setDeleteRecord(row.original);
-  //                   setShowDeleteConfirmBox(true);
-  //                 }}
-  //               >
-  //                 <DeleteIcon fontSize="small" color={permissions?.employeeMaster?.isDelete ? 'primary' : 'disabled'} />
-  //               </IconButton>
-  //             </span>
-  //           </HtmlTooltip>
-  //         )}
-  //       </>
-  //     )
-  //   };
-
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -163,7 +117,7 @@ const Unavailability = ({ id }) => {
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    
+
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
