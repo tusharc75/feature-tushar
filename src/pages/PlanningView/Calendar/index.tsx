@@ -1,18 +1,5 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Checkbox,
-  CircularProgress,
-  IconButton,
-  Popover,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField
-} from '@mui/material';
+import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import { FiExternalLink } from 'react-icons/fi';
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
@@ -38,11 +25,112 @@ import axios, { CancelToken } from 'axios';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 
+const COLOR_CODE = [
+  {
+    background: 'rgb(242,222,149)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(115,18,127)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(255,165,82)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(56,145,255)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(120,94,195)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(242,222,149)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(115,18,127)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(255,165,82)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(56,145,255)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(120,94,195)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(242,222,149)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(115,18,127)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(255,165,82)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(56,145,255)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(120,94,195)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(242,222,149)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(115,18,127)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(255,165,82)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(56,145,255)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(120,94,195)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(242,222,149)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(115,18,127)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(255,165,82)',
+    color: '#FFFFFF'
+  },
+  {
+    background: 'rgb(56,145,255)',
+    color: '#000'
+  },
+  {
+    background: 'rgb(120,94,195)',
+    color: '#000'
+  }
+];
+
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
-
-const BACKGROUND_COLORS = ['rgb(234, 239, 254)', 'rgb(220, 53, 69)', 'rgb(238, 240, 128)', 'rgb(170, 128, 241)', 'rgb(147, 179, 7)'];
 
 const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
   const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
@@ -67,57 +155,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
         : [])
     ],
     [
@@ -188,12 +276,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
+          {
+            label: resources?.padMaster?.titlePlural,
+            value: 'Pad Master',
+            key: 'padMaster'
+          }
+        ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -229,6 +317,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
+
+  const colorCodeMap = new Map();
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
+      .then(({ data: { data } }) => {
+        data[sidebarResource.customerAccount].forEach((ele, i) => {
+          colorCodeMap.set(ele?.optionValue, COLOR_CODE[i]);
+        });
+      })
+      .catch((err) => toastConfig.setToastConfig(err));
+  }, []);
 
   useEffect(() => {
     const lookupResource = [
@@ -438,8 +539,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
               }
+              extraData.customerAccount = d?.customerAccount?.optionValue;
             } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
+              extraData.customerAccount = d?.customerAccount?.optionValue;
             }
             if (selectedResource.resource === sidebarResource.employeeMaster) {
               title = `${d?.reference?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
@@ -684,9 +787,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const setEventStyle = useCallback(
     (obj) => {
-      const index = Math.floor(Math.random() * 5) + 1;
-
-      let backgroundColor = BACKGROUND_COLORS[index];
+      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
       let color = '#000';
 
       if (obj?.resource === sidebarResource.planning) {
@@ -717,6 +818,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
+      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
+        const _c = colorCodeMap.get(obj?.customerAccount);
+        if (_c) {
+          backgroundColor = _c?.background;
+          color = _c?.color;
+        }
+      }
       if (obj?.resource === sidebarResource.rentalManagement) {
         if (obj?.fulfillStatus === 'ERROR') {
           backgroundColor = 'rgb(220, 53, 69)';
@@ -734,7 +842,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode]
+    [themeMode, COLOR_CODE?.filter((c: any) => c?.customerAccount)?.length]
   );
 
   useEffect(() => {

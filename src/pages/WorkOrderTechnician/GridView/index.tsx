@@ -134,7 +134,7 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
             height={'calc(100vh - 270px)'}
             columns={columns}
             topLeftSlot={
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <ButtonMenu
                   showChevron={true}
                   items={statusMenuItems}
