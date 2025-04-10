@@ -228,6 +228,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [fields, setFields] = useState([]);
+  const [resourceDatas, setResourceDatas] = useState([]);
 
   useEffect(() => {
     const lookupResource = [
@@ -322,6 +323,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       axiosInstance()
         .get(`/planning-view${queryString}`, { cancelToken })
         .then(({ data: { data } }) => {
+          setResourceDatas(data);
           const otherData = [];
           const rows = data?.map((d: any) => {
             if (selectedResource.resource === sidebarResource.serializedAsset) {
@@ -948,7 +950,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   </IconButton>
                 </HtmlTooltip>
               </div>
-              <RenderDetail fields={fields} data={showDetail?.data} selectedResource={selectedResource} />
+              <RenderDetail fields={fields} data={resourceDatas?.find((r) => r?._id === showDetail?.data?.id)} />
             </Box>
           </Popover>
         )}
@@ -1024,56 +1026,15 @@ const RenderTable = ({ data, resources }) => {
   );
 };
 
-const RenderDetail = ({ fields, data, selectedResource }) => {
-  const resource = data?.resource || selectedResource?.resource;
-  const [resourceData, setResourceData] = useState(null);
-
-  useEffect(() => {
-    if (data?.id) {
-      const api =
-        resource === sidebarResource?.rentalManagement
-          ? routes.rentalManagement.path
-          : resource === sidebarResource?.planning
-            ? routes.planning.path
-            : resource === sidebarResource?.demandOrder
-              ? routes?.demandOrder?.path
-              : resource === sidebarResource?.productionOrder
-                ? routes?.productionOrder?.path
-                : resource === sidebarResource?.purchaseRequisition
-                  ? routes?.purchaseRequisition?.path
-                  : resource === sidebarResource?.purchaseOrder
-                    ? routes?.purchaseOrder?.path
-                    : resource === sidebarResource?.repairJob
-                      ? routes?.repairJob?.path
-                      : resource === sidebarResource?.sublease
-                        ? routes?.sublease?.path
-                        : resource === sidebarResource?.projectSales
-                          ? routes?.projectSales?.path
-                          : resource === sidebarResource?.fieldServiceOrder
-                            ? routes?.fieldServiceOrder?.path
-                            : resource === sidebarResource?.quotation
-                              ? routes?.quotation?.path
-                              : resource === sidebarResource?.serializedAsset
-                                ? routes?.serializedAsset?.path
-                                : resource === sidebarResource?.assemblyOrder
-                                  ? routes?.assemblyOrder?.path
-                                  : '';
-      axiosInstance()
-        .get(`${api}/${data?.id}`)
-        .then(({ data: { data } }) => {
-          setResourceData(data);
-        });
-    }
-  }, [data?.id]);
-
+const RenderDetail = ({ fields, data }) => {
   return (
     <div className="min-w-[430px]">
-      {!resourceData || !fields?.length ? (
+      {!data || !fields?.length ? (
         <div className="max-w-[430px] p-2">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
       ) : (
-        <DetailsPage data={resourceData} fields={fields} />
+        <DetailsPage data={data} fields={fields} />
       )}
     </div>
   );
