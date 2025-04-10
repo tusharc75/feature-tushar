@@ -29,7 +29,7 @@ function Roadmap({
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
   const [expanded, setExpanded] = React.useState([]);
-  const [selected, setSelected] = React.useState<string[] | []>([]);
+  const [selected, setSelected] = React.useState<string[] | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 

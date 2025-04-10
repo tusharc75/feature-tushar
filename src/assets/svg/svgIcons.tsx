@@ -1,16 +1,20 @@
 import { FC } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import GenieText from './GenieText';
 
 const getHash = () => {
   return uuidv4();
 };
 
-interface svgInterface extends React.SVGAttributes<SVGElement> { }
-interface svgInterfaceWithSize extends svgInterface {
-  size?: number;
-}
+export type SvgInterface = React.SVGAttributes<SVGElement>;
 
-export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 22, width = 22, height = 22, ...others }) => {
+export { GenieText };
+
+export type SvgPropsWithSize = {
+  size?: number;
+} & SvgInterface;
+
+export const DOAApproved: React.FC<SvgPropsWithSize> = ({ size = 22, width = 22, height = 22, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
       <path stroke="currentcolor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.143" d="M2.5 7.643l3 3 6-6.429"></path>
@@ -18,7 +22,7 @@ export const DOAApproved: React.FC<svgInterfaceWithSize> = ({ size = 22, width =
   );
 };
 
-export const IOTIcon: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+export const IOTIcon: React.FC<SvgPropsWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="currentcolor" viewBox="0 0 100 100" {...others}>
       <path
@@ -29,7 +33,7 @@ export const IOTIcon: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14,
   );
 };
 
-export const CancelInvoiceIcon: React.FC<svgInterfaceWithSize> = ({ size = 20, width = 20, height = 20, ...others }) => {
+export const CancelInvoiceIcon: React.FC<SvgPropsWithSize> = ({ size = 20, width = 20, height = 20, ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} version="1" viewBox="0 0 100 100" {...others}>
       <path
@@ -41,14 +45,14 @@ export const CancelInvoiceIcon: React.FC<svgInterfaceWithSize> = ({ size = 20, w
   );
 };
 
-export const DOARejected: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+export const DOARejected: React.FC<SvgPropsWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
       <path stroke="currentcolor" strokeLinecap="round" strokeWidth="1.714" d="M11.429 10.857L2.857 2.286m8.572 0l-8.572 8.571"></path>
     </svg>
   );
 };
-export const DOAPending: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
+export const DOAPending: React.FC<SvgPropsWithSize> = ({ size = 14, width = 14, height = 14, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 14 14">
       <path fill="currentcolor" d="M7.571 3.571H6.428v.572a.571.571 0 101.143 0V3.57z"></path>
@@ -62,7 +66,7 @@ export const DOAPending: React.FC<svgInterfaceWithSize> = ({ size = 14, width = 
   );
 };
 
-export const WorkStations: React.FC<svgInterfaceWithSize> = ({ size = 16, width = 15, height = 15, ...others }) => {
+export const WorkStations: React.FC<SvgPropsWithSize> = ({ size = 16, width = 15, height = 15, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={size ?? width} height={size ?? height} fill="none" viewBox="0 0 512 512">
       <g fill="currentcolor" clipPath="url(#clip0_5472_23693)">
@@ -147,7 +151,7 @@ export const PostWorkIcon = ({
 
 type TIconWithColors = {
   colors: string[];
-} & svgInterfaceWithSize;
+} & SvgPropsWithSize;
 
 export const ReportIcon: React.FC<TIconWithColors> = ({ width = 43, height = 49, colors = ['#577BFC', '#1608BD'], ...other }) => {
   return (
@@ -244,7 +248,7 @@ export const DataPointsIcon: React.FC<TIconWithColors> = ({ width = 54, size = 5
   );
 };
 
-export const AccountHierarchyIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const AccountHierarchyIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 44" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.0959473" y="0.570312" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33026)" />
@@ -270,7 +274,7 @@ export const AccountHierarchyIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const ProjectsIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const ProjectsIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.090332" y="0.109375" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33027)" />
@@ -297,7 +301,7 @@ export const ProjectsIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const SendIcon: React.FC<svgInterfaceWithSize> = ({ height, width, size = 24, ...other }) => {
+export const SendIcon: React.FC<SvgPropsWithSize> = ({ height, width, size = 24, ...other }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -314,7 +318,7 @@ export const SendIcon: React.FC<svgInterfaceWithSize> = ({ height, width, size =
     </svg>
   );
 };
-export const CollaborateIcon: React.FC<svgInterfaceWithSize> = ({ height, width, size = 24, ...other }) => {
+export const CollaborateIcon: React.FC<SvgPropsWithSize> = ({ height, width, size = 24, ...other }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -342,8 +346,7 @@ export const CollaborateIcon: React.FC<svgInterfaceWithSize> = ({ height, width,
   );
 };
 
-
-export const OpportunityIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const OpportunityIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.0847168" y="0.109375" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33035)" />
@@ -366,7 +369,7 @@ export const OpportunityIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const QuoteIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const QuoteIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.0789795" y="0.109375" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33043)" />
@@ -389,7 +392,7 @@ export const QuoteIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const AccountsTeamsIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const AccountsTeamsIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.0733643" y="0.109375" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33051)" />
@@ -424,7 +427,7 @@ export const AccountsTeamsIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const ContactsIcon: React.FC<svgInterface> = ({ ...other }) => {
+export const ContactsIcon: React.FC<SvgInterface> = ({ ...other }) => {
   return (
     <svg {...other} viewBox="0 0 43 43" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="0.067749" y="0.109375" width="42.8364" height="42.8364" rx="9.73554" fill="url(#paint0_linear_3041_33059)" />
@@ -451,7 +454,7 @@ export const ContactsIcon: React.FC<svgInterface> = ({ ...other }) => {
   );
 };
 
-export const ImportIcon: React.FC<svgInterface> = ({ width = 15, height = 15, ...other }) => {
+export const ImportIcon: React.FC<SvgInterface> = ({ width = 15, height = 15, ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...other} width={width} height={height} viewBox="0 0 15 14" fill="none">
       <path
@@ -462,7 +465,7 @@ export const ImportIcon: React.FC<svgInterface> = ({ width = 15, height = 15, ..
   );
 };
 
-export const ExportIcon: React.FC<svgInterface> = ({ width = 17, height = 14, ...other }) => {
+export const ExportIcon: React.FC<SvgInterface> = ({ width = 17, height = 14, ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...other} width={width} height={height} viewBox="0 0 17 14" fill="none">
       <path
@@ -473,7 +476,7 @@ export const ExportIcon: React.FC<svgInterface> = ({ width = 17, height = 14, ..
   );
 };
 
-export const DownloadIcon: React.FC<svgInterface> = ({ width = 18, height = 18, ...other }) => {
+export const DownloadIcon: React.FC<SvgInterface> = ({ width = 18, height = 18, ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" {...other} width={width} height={height} viewBox="0 0 18 18" fill="none">
       <path
@@ -494,7 +497,7 @@ export const DownloadIcon: React.FC<svgInterface> = ({ width = 18, height = 18, 
   );
 };
 
-export const PassIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...other }) => {
+export const PassIcon: React.FC<SvgInterface> = ({ width = 24, height = 24, ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} fill="none" viewBox="0 0 20 20" {...other}>
       <path
@@ -511,7 +514,7 @@ export const PassIcon: React.FC<svgInterface> = ({ width = 24, height = 24, ...o
   );
 };
 
-export const FailIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
+export const FailIcon: React.FC<SvgPropsWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 22 22" {...other}>
       <path
@@ -526,7 +529,7 @@ export const FailIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 
   );
 };
 
-export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 20, height = 20, size = 20, ...other }) => {
+export const MoonIcon: React.FC<SvgPropsWithSize> = ({ width = 20, height = 20, size = 20, ...other }) => {
   return (
     <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 18 19">
       <path
@@ -539,7 +542,7 @@ export const MoonIcon: React.FC<svgInterfaceWithSize> = ({ width = 20, height = 
   );
 };
 
-export const SunIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
+export const SunIcon: React.FC<SvgPropsWithSize> = ({ width = 24, height = 24, size = 24, ...other }) => {
   return (
     <svg {...other} xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 20">
       <path
@@ -550,7 +553,7 @@ export const SunIcon: React.FC<svgInterfaceWithSize> = ({ width = 24, height = 2
   );
 };
 
-export const TemperatureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
+export const TemperatureIcon: React.FC<SvgPropsWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
       <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50376)" rx="8"></rect>
@@ -565,7 +568,7 @@ export const TemperatureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, he
   );
 };
 
-export const PressureIcon: React.FC<svgInterfaceWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
+export const PressureIcon: React.FC<SvgPropsWithSize> = ({ width = 39, height = 39, size = 39, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 39 39" {...rest}>
       <rect width="38" height="38" x="0.289" y="0.133" fill="url(#paint0_linear_4216_50384)" rx="8"></rect>
@@ -607,7 +610,7 @@ export const VolumeIcon: React.FC<TIconWithColors> = ({ width = 39, height = 39,
   );
 };
 
-export const AiIcon: React.FC<svgInterfaceWithSize> = ({ width = 37, height = 37, size = 37, ...rest }) => {
+export const AiIcon: React.FC<SvgPropsWithSize> = ({ width = 37, height = 37, size = 37, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 37 37" {...rest}>
       <g clipPath="url(#clip0_4397_52762)">
@@ -640,7 +643,7 @@ export const AiIcon: React.FC<svgInterfaceWithSize> = ({ width = 37, height = 37
   );
 };
 
-export const LightIcon: React.FC<svgInterfaceWithSize> = ({ width = 19, height = 19, size = 19, ...rest }) => {
+export const LightIcon: React.FC<SvgPropsWithSize> = ({ width = 19, height = 19, size = 19, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} fill="none" viewBox="0 0 19 19" {...rest}>
       <path
@@ -676,7 +679,7 @@ export const LightIcon: React.FC<svgInterfaceWithSize> = ({ width = 19, height =
   );
 };
 
-export const BellIcon: React.FC<svgInterfaceWithSize> = ({ width = 26, height = 26, size = 26, ...rest }) => {
+export const BellIcon: React.FC<SvgPropsWithSize> = ({ width = 26, height = 26, size = 26, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} {...rest} fill="none" viewBox="0 0 26 27">
       <g clipPath="url(#clip0_4675_52876)">
@@ -696,7 +699,7 @@ export const BellIcon: React.FC<svgInterfaceWithSize> = ({ width = 26, height = 
   );
 };
 
-export const AssetAvailabilityIcon: React.FC<svgInterfaceWithSize> = ({ width = 0, height = 0, size = 24, ...rest }) => {
+export const AssetAvailabilityIcon: React.FC<SvgPropsWithSize> = ({ width = 0, height = 0, size = 24, ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size ? size : width} height={size ? size : height} {...rest} fill="none" viewBox="0 0 104 104">
       <g fill="currentcolor" clipPath="url(#clip0_4465_51908)">
@@ -713,7 +716,7 @@ export const AssetAvailabilityIcon: React.FC<svgInterfaceWithSize> = ({ width = 
   );
 };
 
-export const SerializedAssetAvailableIllustration: React.FC<svgInterface> = ({ width = 155, height = 119, ...rest }) => {
+export const SerializedAssetAvailableIllustration: React.FC<SvgInterface> = ({ width = 155, height = 119, ...rest }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -741,7 +744,7 @@ export const SerializedAssetAvailableIllustration: React.FC<svgInterface> = ({ w
   );
 };
 
-export const MobileDownloadIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
+export const MobileDownloadIcon: React.FC<SvgPropsWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size || width} height={size || height} {...rest} fill="none" viewBox="0 0 17 17">
       <path
@@ -752,7 +755,7 @@ export const MobileDownloadIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, 
   );
 };
 
-export const MobileImportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
+export const MobileImportIcon: React.FC<SvgPropsWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size || width} height={size || height} {...rest} fill="none" viewBox="0 0 17 17">
       <path
@@ -773,7 +776,7 @@ export const MobileImportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, wi
   );
 };
 
-export const MobileExportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
+export const MobileExportIcon: React.FC<SvgPropsWithSize> = ({ size = 18, width = 18, height = 18, color = 'currentcolor', ...rest }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size || width} height={size || height} {...rest} fill="none" viewBox="0 0 17 17">
       <path
@@ -783,7 +786,7 @@ export const MobileExportIcon: React.FC<svgInterfaceWithSize> = ({ size = 18, wi
     </svg>
   );
 };
-export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+export const FileCopyIcon: FC<SvgPropsWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
   return (
     <svg {...others} xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} fill="none" viewBox="0 0 18 18">
       <path fill="transparent" d="M0 0H18V18H0z"></path>
@@ -795,7 +798,7 @@ export const FileCopyIcon: FC<svgInterfaceWithSize> = ({ width = null, height = 
   );
 };
 
-export const ResetPasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+export const ResetPasswordIcon: FC<SvgPropsWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 100 100">
       <path
@@ -817,7 +820,7 @@ export const ResetPasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, heig
   );
 };
 
-export const GeneratePasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+export const GeneratePasswordIcon: FC<SvgPropsWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={width ?? size} height={height ?? size} {...others} version="1" viewBox="0 0 96 96">
       <path
@@ -834,7 +837,7 @@ export const GeneratePasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, h
   );
 };
 
-export const AutoCompleteWorkOrder: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+export const AutoCompleteWorkOrder: FC<SvgPropsWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentcolor" width={width ?? size} height={height ?? size} {...others}>
       <path d="M16.7 3.1c-.4-.7-1.1-1.1-1.9-1.1H9.2c-.8 0-1.5.4-1.9 1.1C5.4 3.4 4 5 4 7v11c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4V7c0-2-1.4-3.6-3.3-3.9zM9 4.1s.1-.1.2-.1h5.7l.1.1v.7c0 .1-.1.2-.2.2H9.2c-.1 0-.2-.1-.2-.2v-.7zM18 18c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V7c0-.8.4-1.4 1-1.8v.1c0 .1.1.2.1.3 0 0 0 .1.1.1 0 .1.1.2.1.2l.1.1c0 .1.1.1.2.2l.1.1.2.2.1.1c.1 0 .1.1.2.1 0 0 .1 0 .1.1.1 0 .2.1.3.1h.1c.2.1.3.1.5.1h6.2c.1 0 .2 0 .3-.1 0 0 .1 0 .1-.1.1 0 .1-.1.2-.1l.1-.1c.1 0 .1-.1.2-.2l.1-.1.2-.2.1-.1c0-.1.1-.1.1-.2 0 0 0-.1.1-.1 0-.1.1-.2.1-.3v-.1c.6.3 1 1 1 1.8V18z"></path>
