@@ -227,6 +227,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
+  const [fields, setFields] = useState([]);
 
   useEffect(() => {
     const lookupResource = [
@@ -734,6 +735,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [themeMode]
   );
 
+  useEffect(() => {
+    setFields([]);
+    axiosInstance()
+      .get(`/field?resource=${selectedResource?.resource}`)
+      .then(({ data }) => {
+        setFields(data.data);
+      });
+  }, [selectedResource]);
+
   return (
     <>
       <div>
@@ -936,7 +946,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   </IconButton>
                 </HtmlTooltip>
               </div>
-              <RenderDetail data={showDetail?.data} selectedResource={selectedResource} />
+              <RenderDetail fields={fields} data={showDetail?.data} selectedResource={selectedResource} />
             </Box>
           </Popover>
         )}
@@ -1012,18 +1022,9 @@ const RenderTable = ({ data, resources }) => {
   );
 };
 
-const RenderDetail = ({ data, selectedResource }) => {
+const RenderDetail = ({ fields, data, selectedResource }) => {
   const resource = data?.resource || selectedResource?.resource;
-  const [fields, setFields] = useState([]);
   const [resourceData, setResourceData] = useState(null);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      });
-  }, [data]);
 
   useEffect(() => {
     if (data?.id) {
@@ -1065,7 +1066,7 @@ const RenderDetail = ({ data, selectedResource }) => {
 
   return (
     <div className="min-w-[430px]">
-      {!fields?.length ? (
+      {!resourceData || !fields?.length ? (
         <div className="max-w-[430px] p-2">
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </div>
