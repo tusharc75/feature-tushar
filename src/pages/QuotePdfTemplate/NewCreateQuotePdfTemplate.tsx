@@ -335,15 +335,12 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const fetchUser = () => {
-    axiosInstance()
-      .get(`/user`)
-      .then(({ data: { data } }) => {
-        setOwnerCollaboratorData(data);
-        setOwnerCollaboratorDataConst(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().get(`/user`).then(({ data: { data } }) => {
+      setOwnerCollaboratorData(data);
+      setOwnerCollaboratorDataConst(data);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleExport = () => {
@@ -729,10 +726,10 @@ export default function NewCreateQuotePdfTemplate() {
                           }
                           onChange={(e, val) => {
                             setFieldValue('entity', val && val?.map((d) => d._id));
+                            setFieldValue('owner', '');
+                            setFieldValue('collaborator', []);
                             val && val.length !== 0
-                              ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))))
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -763,11 +760,7 @@ export default function NewCreateQuotePdfTemplate() {
                           }}
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
-                              ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                )
-                              )
+                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))))
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -800,11 +793,7 @@ export default function NewCreateQuotePdfTemplate() {
                           }}
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
-                              ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
-                                )
-                              )
+                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))))
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
