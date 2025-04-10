@@ -2,6 +2,7 @@ import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import { default as Add } from '@mui/icons-material/Add';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -21,6 +22,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
@@ -36,6 +38,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const renderedFrom = `${camelCase(sidebarResource.salesOrder)}_Material`;
 
@@ -64,6 +67,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const { generateColumns } = useColumns();
 
   const [isSubmitting, setSubmitting] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   useEffect(() => {
     fetchFields();
@@ -178,25 +182,28 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           );
         }
       },
-      ...(user?.user?.brandPolicy?.leadTime ?
-        [{
-          accessor: 'leadTime',
-          Header: 'Lead Time (Days)',
-          Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-          Footer: (info) => {
-            let rows = info.table.getExpandedRowModel().rows;
-            const total = rows
-              ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-              .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-            return <>{total}</>;
-          }
-        }] : [])
+      ...(user?.user?.brandPolicy?.leadTime
+        ? [
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
+            }
+          ]
+        : [])
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      width: user?.user?.brandPolicy?.leadTime ? 140 : 100,
+      width: user?.user?.brandPolicy?.leadTime ? 160 : 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -214,6 +221,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
+          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           {user?.user?.brandPolicy?.leadTime && row.original.type !== MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
               <IconButton
@@ -265,14 +285,15 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.detail || ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail || ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -301,12 +322,13 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -355,18 +377,21 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Object.assign(element, calValues);
       });
     }
-    axiosInstance().post(`${salesOrder.api}/material/${salesOrderData._id}`, { material }).then(() => {
-      setAddDialog({ open: false, type: '', parentId: null });
-      fetchData();
-      fetchSalesOrderData();
-      setSubmitting(false);
-      if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
-        updateJobStatus(SALES_ORDER_STATUS.inProgress);
-      }
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setSubmitting(false);
-    });
+    axiosInstance()
+      .post(`${salesOrder.api}/material/${salesOrderData._id}`, { material })
+      .then(() => {
+        setAddDialog({ open: false, type: '', parentId: null });
+        fetchData();
+        fetchSalesOrderData();
+        setSubmitting(false);
+        if (salesOrderData?.status === SALES_ORDER_STATUS.new) {
+          updateJobStatus(SALES_ORDER_STATUS.inProgress);
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
+      });
   };
 
   const handleAddCost = (rows) => {
@@ -819,6 +844,17 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           costData={recordToUpdate}
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={salesOrderData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.salesOrder}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

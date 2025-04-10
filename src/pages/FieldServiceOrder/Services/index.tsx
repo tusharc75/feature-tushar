@@ -1,6 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -18,6 +19,7 @@ import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManag
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
@@ -25,7 +27,7 @@ import {
   SERVICE_TYPE,
   fieldServiceOrder,
   getObjKeysWithValues,
-  sidebarResource,
+  sidebarResource
 } from 'src/constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
@@ -35,10 +37,9 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialQtyDialog from 'src/pages/FieldServiceOrder/Technicians/MaterialQtyDialog';
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
-
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowedToEdit, handleChangeStatus, fetchData, setNextStep }) => {
-
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Services`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -53,6 +54,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshChild, setRefreshChild] = useState(false);
   const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const {
     state: { permissions, user, resources }
@@ -72,11 +74,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
   }, [columns]);
 
   const fetchFields = async () => {
-    let data = await fetch_child_resource_fields_perm(
-      CHILD_RESOURCE.fieldServiceOrderDetails,
-      serviceOrderData?.currency,
-      allowedToEdit
-    );
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
@@ -89,7 +87,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         }
       ]
     });
-    const serviceFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.serviceMaster)?.fieldNames || []
+    const serviceFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.serviceMaster)?.fieldNames || [];
     let column: any = [
       {
         accessor: 'index',
@@ -152,44 +150,55 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
         }
       },
-      ...(serviceFields?.find((e) => e.fieldName === 'competencyType') ? [{
-        accessor: 'competencyType',
-        Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => <DropdownCell
-          permissions={permissions}
-          permissionForLinks={{}}
-          field={{
-            fieldName: 'competencyType',
-            lookupResource: sidebarResource.competencyType
-          }}
-          original={row?.original}
-        />,
-        accessorFn: (original) => AccessorFunction(original, 'competencyType')
-      }] : []),
-      ...(serviceFields?.find((e) => e.fieldName === 'competencies') ? [{
-        accessor: 'competencies',
-        Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) =>
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencies',
-              lookupResource: sidebarResource.competencies
-            }}
-            original={row?.original}
-          />,
-        accessorFn: (original) => AccessorFunction(original, 'competencies')
-      }] : [])
+      ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
+        ? [
+            {
+              accessor: 'competencyType',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
+        : []),
+      ...(serviceFields?.find((e) => e.fieldName === 'competencies')
+        ? [
+            {
+              accessor: 'competencies',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
+        : [])
     ];
     column = [...column, ...newColumns];
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -208,6 +217,17 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
                 id={`edit-${row?.original?.type}-button-${row.index || 0}`}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={'Delete'}>
@@ -282,8 +302,22 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || '' : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription : '';
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow?.productDetail?.productName
+              : '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceDescription
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow?.productDetail?.productDescription
+              : '';
       _subRow.competencyType = _subRow?.serviceDetail?.competencyType;
       _subRow.competencies = _subRow?.serviceDetail?.competencies;
       _subRow.qty = _subRow.qty * parent.qty;
@@ -320,8 +354,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         material.push(element);
       });
       AddMaterial(material, null);
-    }
-    else {
+    } else {
       rows.forEach((d) => {
         const element: any = {};
         element.materialId = d._id;
@@ -359,19 +392,22 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         }
       });
     }
-    await axiosInstance().post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: tempMaterial }).then(() => {
-      if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-        handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
-      }
-      fetchMaterial();
-      fetchData();
-      setAddQuotationDataDialog(false)
-      setMaterialDialog(false);
-      setIsSubmitting(false);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      setIsSubmitting(false);
-    });
+    await axiosInstance()
+      .post(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: tempMaterial })
+      .then(() => {
+        if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+          handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+        }
+        fetchMaterial();
+        fetchData();
+        setAddQuotationDataDialog(false);
+        setMaterialDialog(false);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   const handleDelete = async (rows) => {
@@ -585,6 +621,17 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
           isSubmitting={isSubmitting}
           materialType={MATERIAL_TYPE.service}
           ids={dataRows?.map((row) => row?.materialId)}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={serviceOrderData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </>
