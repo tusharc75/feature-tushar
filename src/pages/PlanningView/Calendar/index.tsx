@@ -13,6 +13,7 @@ import {
   TableRow,
   TextField
 } from '@mui/material';
+import { FiExternalLink } from 'react-icons/fi';
 import Autocomplete from '@mui/material/Autocomplete';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
@@ -34,10 +35,14 @@ import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import axios, { CancelToken } from 'axios';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
+
+const BACKGROUND_COLORS = ['rgb(234, 239, 254)', 'rgb(220, 53, 69)', 'rgb(238, 240, 128)', 'rgb(170, 128, 241)', 'rgb(147, 179, 7)'];
 
 const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
   const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
@@ -62,57 +67,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
         : [])
     ],
     [
@@ -183,12 +188,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-          {
-            label: resources?.padMaster?.titlePlural,
-            value: 'Pad Master',
-            key: 'padMaster'
-          }
-        ]
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -221,6 +226,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
+  const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
 
   useEffect(() => {
     const lookupResource = [
@@ -295,11 +301,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     if (selectedLookUpResourceData) {
       Object.keys(selectedLookUpResourceData).forEach((d) => {
-        let data = []
+        let data = [];
         if (d === 'technician') {
           data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-        }
-        else {
+        } else {
           data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
         }
         query = `${query}&${d}=${data}`;
@@ -430,8 +435,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
               }
-            }
-            else if (d?.customerAccount?.optionLabel) {
+            } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
             }
             if (selectedResource.resource === sidebarResource.employeeMaster) {
@@ -567,16 +571,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
       }
     } else {
-      if (data.resource) {
-        const resource = resourceList?.find((r) => r.resource === data.resource);
-        window.open(`${resource.path}/${data.id}`);
-      } else {
-        let path = selectedResource.path;
-        if (selectedResource.resource === sidebarResource.serializedAsset) {
-          path = routes[`${camelCase(data.resource)}Detail`]?.path;
-        }
-        window.open(`${path}/${data.id}`);
-      }
+      setShowDetail({ open: true, data: data, anchor: target });
     }
   };
 
@@ -686,7 +681,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const setEventStyle = useCallback(
     (obj) => {
-      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+      const index = Math.floor(Math.random() * 5) + 1;
+
+      let backgroundColor = BACKGROUND_COLORS[index];
       let color = '#000';
 
       if (obj?.resource === sidebarResource.planning) {
@@ -838,8 +835,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}
-                onSelectEvent={(event: any) => {
-                  window.open(`${selectedResource.path}/${event.id}`);
+                onSelectEvent={(data: any, event: any) => {
+                  setShowDetail({ open: true, data: data, anchor: event });
                 }}
               />
             </>
@@ -898,6 +895,48 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   </AccordionDetails>
                 </Accordion>
               ))}
+            </Box>
+          </Popover>
+        )}
+        {showDetail.open && (
+          <Popover
+            open={showDetail.open}
+            anchorEl={showDetail.anchor}
+            onClose={() => {
+              setShowDetail({ open: false, data: null, anchor: null });
+            }}
+            style={{ minWidth: '300px' }}
+          >
+            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
+              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
+                <div className="flex items-center justify-between gap-2">
+                  <h5 className="text-sm">{`${showDetail?.data?.title}`}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (showDetail?.data?.resource) {
+                        const resource = resourceList?.find((r) => r.resource === showDetail?.data?.resource);
+                        window.open(`${resource.path}/${showDetail?.data?.id}`);
+                      } else {
+                        let path = selectedResource.path;
+                        if (selectedResource.resource === sidebarResource.serializedAsset) {
+                          path = routes[`${camelCase(showDetail?.data?.resource)}Detail`]?.path;
+                        }
+                        window.open(`${path}/${showDetail?.data?.id}`);
+                      }
+                    }}
+                    className="close-icon-v1"
+                  >
+                    <FiExternalLink fontSize="medium" />
+                  </IconButton>
+                </div>
+                <HtmlTooltip title="Close">
+                  <IconButton size="small" onClick={() => setShowDetail({ open: false, data: null, anchor: null })} className="close-icon-v1">
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
+              <RenderDetail data={showDetail?.data} selectedResource={selectedResource} />
             </Box>
           </Popover>
         )}
@@ -970,5 +1009,69 @@ const RenderTable = ({ data, resources }) => {
         </TableBody>
       </Table>
     </TableContainer>
+  );
+};
+
+const RenderDetail = ({ data, selectedResource }) => {
+  const resource = data?.resource || selectedResource?.resource;
+  const [fields, setFields] = useState([]);
+  const [resourceData, setResourceData] = useState(null);
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/field?resource=${resource}`)
+      .then(({ data }) => {
+        setFields(data.data);
+      });
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.id) {
+      const api =
+        resource === sidebarResource?.rentalManagement
+          ? routes.rentalManagement.path
+          : resource === sidebarResource?.planning
+            ? routes.planning.path
+            : resource === sidebarResource?.demandOrder
+              ? routes?.demandOrder?.path
+              : resource === sidebarResource?.productionOrder
+                ? routes?.productionOrder?.path
+                : resource === sidebarResource?.purchaseRequisition
+                  ? routes?.purchaseRequisition?.path
+                  : resource === sidebarResource?.purchaseOrder
+                    ? routes?.purchaseOrder?.path
+                    : resource === sidebarResource?.repairJob
+                      ? routes?.repairJob?.path
+                      : resource === sidebarResource?.sublease
+                        ? routes?.sublease?.path
+                        : resource === sidebarResource?.projectSales
+                          ? routes?.projectSales?.path
+                          : resource === sidebarResource?.fieldServiceOrder
+                            ? routes?.fieldServiceOrder?.path
+                            : resource === sidebarResource?.quotation
+                              ? routes?.quotation?.path
+                              : resource === sidebarResource?.serializedAsset
+                                ? routes?.serializedAsset?.path
+                                : resource === sidebarResource?.assemblyOrder
+                                  ? routes?.assemblyOrder?.path
+                                  : '';
+      axiosInstance()
+        .get(`${api}/${data?.id}`)
+        .then(({ data: { data } }) => {
+          setResourceData(data);
+        });
+    }
+  }, [data?.id]);
+
+  return (
+    <div className="min-w-[430px]">
+      {!fields?.length ? (
+        <div className="max-w-[430px] p-2">
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </div>
+      ) : (
+        <DetailsPage data={resourceData} fields={fields} />
+      )}
+    </div>
   );
 };
