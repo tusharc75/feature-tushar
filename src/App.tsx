@@ -1266,7 +1266,6 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          {permissions?.equiptAi?.isRead && <AgentChat />}
           <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
         </ErrorBoundaryComponent>
       </AnimatePresence>
