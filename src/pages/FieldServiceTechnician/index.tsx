@@ -16,7 +16,8 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource,
-  restoreObjKeysWithValues
+  restoreObjKeysWithValues,
+  fieldTicket
 } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
@@ -36,6 +37,7 @@ import { useHistory } from 'react-router-dom';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
+import FieldTicketDetailView from 'src/pages/FieldServiceTechnician/FieldTicketDetailView';
 
 type Views = 'card' | 'table';
 
@@ -117,6 +119,7 @@ const FieldServiceTechnician = () => {
 
   const [selectedData, setSelectedData] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
   const history = useHistory();
 
   const isOfflineRef = useRef(isOffline);
@@ -127,22 +130,53 @@ const FieldServiceTechnician = () => {
     isOfflineRef.current = isOffline;
   }, [isOffline]);
 
+  useEffect(() => {
+    fetchData();
+    if (resourceData?.policy?.showOnlyAssignedTickets) {
+      setView('card');
+    }
+  }, [resourceData?.policy]);
+
+  const fetchPolicy = async () => {
+    if (isOffline) return;
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceTechnician}`);
+      if (data) {
+        setResourceData(data);
+        return data?.policy;
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchColumns = async () => {
-    let data;
+    let data, policy;
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+      policy = await fetchPolicy();
+      let api = `/field?resource=${sidebarResource?.fieldServiceOrder}`;
+      if (policy?.showOnlyAssignedTickets) {
+        api = `/field?resource=${sidebarResource?.fieldTicket}`;
+      }
+      const response = await axiosInstance().get(api);
       data = response?.data?.data;
-      try {
-        insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
-      } catch (e) {
-        console.error(`Field Service Order : ${e.message}`);
+      if (!policy?.showOnlyAssignedTickets) {
+        try {
+          insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
+        } catch (e) {
+          console.error(`Field Service Order : ${e.message}`);
+        }
       }
     }
     setColData(data);
-    const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
-    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
+    const newColumns = [...generateColumns(renderedFrom, data, policy?.showOnlyAssignedTickets ? routes.fieldTicketDetail.path : routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    if (!policy?.showOnlyAssignedTickets) {
+      newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
+    }
     setColumns(newColumns);
   };
 
@@ -239,7 +273,11 @@ const FieldServiceTechnician = () => {
         count = data?.length || 0;
       } else {
         const queryString = getQueryString();
-        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelToken?.token });
+        let api = `${fieldServiceOrder.api}${queryString}`;
+        if (resourceData?.policy?.showOnlyAssignedTickets) {
+          api = `${fieldTicket.api}/assigned${queryString}`;
+        }
+        const response = await axiosInstance().get(api, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       }
@@ -360,7 +398,7 @@ const FieldServiceTechnician = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           isAddButtonVisible={false}
-          rightSideContents={isMobileView ? null : <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />}
+          rightSideContents={isMobileView || resourceData?.policy?.showOnlyAssignedTickets ? null : <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />}
           actionMenuItems={<ActionMenuItems />}
         />
         {columns ? (
@@ -388,20 +426,23 @@ const FieldServiceTechnician = () => {
                 />
               </div>
               <div className="container-with-border p-[20px]">
-                {selectedData ? (
-                  <FieldTicket
-                    serviceOrderData={selectedData?.orignalData}
-                    allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
-                    resource={sidebarResource.fieldServiceTechnician}
-                    enableGlobalSearch={false}
-                    fetchServiceOrderData={() => { }}
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <h6 className="text-xl text-gray-400">Please select a record</h6>
-                  </div>
-                )}
+                {selectedData ?
+                  resourceData?.policy?.showOnlyAssignedTickets ? (
+                    <FieldTicketDetailView id={selectedData?._id} />
+                  ) : (
+                    <FieldTicket
+                      serviceOrderData={selectedData?.orignalData}
+                      allowedToEdit={allowedToEdit}
+                      handleChangeStatus={() => { }}
+                      resource={sidebarResource.fieldServiceTechnician}
+                      enableGlobalSearch={false}
+                      fetchServiceOrderData={() => { }}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <h6 className="text-xl text-gray-400">Please select a record</h6>
+                    </div>
+                  )}
               </div>
             </div>
           ) : (

@@ -387,5 +387,16 @@ export const resourcePolicy = [
         defaultValue: false,
       }
     ]
+  },
+  {
+    resource: sidebarResource.fieldServiceTechnician,
+    policy: [
+      {
+        fieldName: 'showOnlyAssignedTickets',
+        fieldLabel: 'Show only Assigned Tickets',
+        type: 'checkBox',
+        defaultValue: false,
+      }
+    ]
   }
 ];
