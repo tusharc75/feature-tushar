@@ -43,8 +43,8 @@ function PlanningView() {
       title: resources?.rentalManagement?.titlePlural,
       path: routes.rentalManagementDetail.path,
       fieldName: 'rentalJobName',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
+      start: 'startDate',
+      end: 'endDate'
     },
     {
       key: 'planning',
@@ -209,8 +209,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
