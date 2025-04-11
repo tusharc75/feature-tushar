@@ -17,6 +17,11 @@ import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
 import { SVG } from 'src/assets';
 import GenieText from 'src/assets/svg/GenieText';
 
+export const userManual = {
+  description: 'View our user manual in just a click.',
+  link: '/user-manual'
+};
+
 function Dashboard() {
   const {
     state: { user, selectedEntity, permissions }
