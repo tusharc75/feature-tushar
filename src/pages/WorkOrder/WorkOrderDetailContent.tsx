@@ -47,6 +47,7 @@ import WorkOrderCostDialog from './WorkOrderCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -122,6 +123,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState(false);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -396,12 +398,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -424,14 +426,20 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          !workOrderData?.currentRepairJob &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
-      onClick: () => setShowConfirmBoxScrap(true)
+      onClick: () => {
+        if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+          setStatusChangeRequestDialog(true);
+        } else {
+          setShowConfirmBoxScrap(true);
+        }
+      }
     },
     {
       id: 'In-Progress',
@@ -497,9 +505,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -512,9 +520,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -587,10 +595,18 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           resource={ACTIVITY_RESOURCE.workOrder}
           resourceLabel={workOrderData?.workOrderNumber}
           extraRelatedTo={{
-            referenceId: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? workOrderData?.repairOrder?.optionValue :
-              workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? workOrderData?.productionOrder?.optionValue : workOrderData?.assemblyOrder?.optionValue,
-            resource: workOrderData?.type === WORK_ORDER_TYPE.repairOrder ? ACTIVITY_RESOURCE.repairOrder :
-              workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? ACTIVITY_RESOURCE.productionOrder : ACTIVITY_RESOURCE.assemblyOrder
+            referenceId:
+              workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+                ? workOrderData?.repairOrder?.optionValue
+                : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
+                  ? workOrderData?.productionOrder?.optionValue
+                  : workOrderData?.assemblyOrder?.optionValue,
+            resource:
+              workOrderData?.type === WORK_ORDER_TYPE.repairOrder
+                ? ACTIVITY_RESOURCE.repairOrder
+                : workOrderData?.type === WORK_ORDER_TYPE.productionOrder
+                  ? ACTIVITY_RESOURCE.productionOrder
+                  : ACTIVITY_RESOURCE.assemblyOrder
           }}
         />
       </Box>
@@ -924,6 +940,26 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             updateStatus(WORK_ORDER_STATUS.completed, null, null, null, _data);
           }}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={[
+            {
+              _id: workOrderData?.serializedAsset?.optionValue,
+              assetNumber: workOrderData?.serializedAsset?.optionLabel,
+              status: workOrderData?.serializedAsset?.status
+            }
+          ]}
+          workOrderId={workOrderData?._id}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchWorkOrderData();
+          }}
         />
       )}
     </Box>

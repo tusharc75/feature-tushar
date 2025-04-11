@@ -311,3 +311,8 @@ export const handleRoutes = (item) => {
       return `/${kebabCase(item.name)}`;
   }
 };
+
+export const userManual = {
+  description: 'View our user manual in just a click.',
+  link: '/user-manual'
+};
