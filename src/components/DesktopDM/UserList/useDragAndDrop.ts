@@ -97,7 +97,7 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
   }, [enabled]);
 
   useEffect(() => {
-    const container = containerRef.current;
+    const container = <HTMLElement>containerRef.current;
     if (!container) return;
     if (!enabled) {
       container.style.transform = '';
