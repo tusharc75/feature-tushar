@@ -275,7 +275,7 @@ const FieldServiceTechnician = () => {
         const queryString = getQueryString();
         let api = `${fieldServiceOrder.api}${queryString}`;
         if (resourceData?.policy?.showOnlyAssignedTickets) {
-          api = `${fieldTicket.api}/assigned${queryString}`;
+          api = `field-service-technician/assigned-tickets${queryString}`;
         }
         const response = await axiosInstance().get(api, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
