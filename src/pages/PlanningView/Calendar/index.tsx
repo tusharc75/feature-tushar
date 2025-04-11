@@ -215,16 +215,18 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
-
-  const colorCodeMap = new Map<string, SingleColor>();
+  
+  const [colorCodeMap, setColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
       .then(({ data: { data } }) => {
+        const newMap = new Map<string, SingleColor>();
         data[sidebarResource.customerAccount].forEach((ele, i) => {
-          colorCodeMap.set(ele?.optionValue, getColorByIndex(i));
+          newMap.set(ele?.optionValue, getColorByIndex(i));
         });
+        setColorCodeMap(newMap);
       })
       .catch((err) => toastConfig.setToastConfig(err));
   }, []);
@@ -742,7 +744,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode]
+    [themeMode, colorCodeMap]
   );
 
   useEffect(() => {
