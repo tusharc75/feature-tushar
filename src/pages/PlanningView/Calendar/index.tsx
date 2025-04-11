@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { FiExternalLink } from 'react-icons/fi';
 import Autocomplete from '@mui/material/Autocomplete';
+import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -14,120 +14,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
+import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
-import axios, { CancelToken } from 'axios';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
-
-const COLOR_CODE = [
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  }
-];
+import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -319,14 +216,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
-  const colorCodeMap = new Map();
+  const colorCodeMap = new Map<string, SingleColor>();
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
       .then(({ data: { data } }) => {
         data[sidebarResource.customerAccount].forEach((ele, i) => {
-          colorCodeMap.set(ele?.optionValue, COLOR_CODE[i]);
+          colorCodeMap.set(ele?.optionValue, getColorByIndex(i));
         });
       })
       .catch((err) => toastConfig.setToastConfig(err));
@@ -820,10 +717,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
 
       if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
-        const _c = colorCodeMap.get(obj?.customerAccount);
-        if (_c) {
-          backgroundColor = _c?.background;
-          color = _c?.color;
+        const assignedColor = colorCodeMap.get(obj?.customerAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
         }
       }
       if (obj?.resource === sidebarResource.rentalManagement) {
@@ -843,7 +740,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode, COLOR_CODE?.filter((c: any) => c?.customerAccount)?.length]
+    [themeMode]
   );
 
   useEffect(() => {
