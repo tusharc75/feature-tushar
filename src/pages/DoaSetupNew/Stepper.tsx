@@ -71,65 +71,65 @@ const DoaStepper = ({ data }) => {
             <Stepper activeStep={-1} connector={<QontoConnector />} alternativeLabel>
               {data?.approveType === DoaApproveType.user
                 ? data?.users?.map((user, i) => {
-                    return (
-                      <Step key={i}>
-                        <StepLabel StepIconComponent={QontoStepIcon}>
-                          <>
-                            {user?.user
-                              ?.filter((u) => u?._id && u?.name)
-                              ?.map((u) => {
-                                return (
-                                  <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                    <Link title={u?.name} target="_blank" className="link" to={`${routes.userDetail.path}/${u?._id}`}>
-                                      {u?.name}
-                                    </Link>
-                                  </div>
-                                );
-                              })}
-                            {user?.user?.length > 4 && `+ ${user?.user.length - 4} more`}
-                            {data?.currency && (
-                              <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                {getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency).length
-                                  ? getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency)[0].symbolNative
-                                  : null}
-                                {user?.amount}
-                              </div>
-                            )}
-                          </>
-                        </StepLabel>
-                      </Step>
-                    );
-                  })
+                  return (
+                    <Step key={i}>
+                      <StepLabel StepIconComponent={QontoStepIcon}>
+                        <>
+                          {user?.user
+                            ?.filter((u) => u?._id && u?.name)
+                            ?.map((u) => {
+                              return (
+                                <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                                  <Link title={u?.name} target="_blank" className="link" to={`${routes.userDetail.path}/${u?._id}`}>
+                                    {u?.name}
+                                  </Link>
+                                </div>
+                              );
+                            })}
+                          {user?.user?.length > 4 && `+ ${user?.user.length - 4} more`}
+                          {data?.currency && (
+                            <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                              {getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency).length
+                                ? getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency)[0].symbolNative
+                                : null}
+                              {user?.amount}
+                            </div>
+                          )}
+                        </>
+                      </StepLabel>
+                    </Step>
+                  );
+                })
                 : data?.roles?.map((role, i) => {
-                    return (
-                      <Step key={i}>
-                        <StepLabel StepIconComponent={QontoStepIcon}>
-                          <>
-                            {role?.role
-                              ?.filter((r) => r?._id && r?.name)
-                              ?.map((r) => {
-                                return (
-                                  <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                    <Link title={r?.name} target="_blank" className="link" to={`${routes.roleDetail.path}/${r?._id}`}>
-                                      {r?.name}
-                                    </Link>
-                                  </div>
-                                );
-                              })}
-                            {role?.role?.length > 4 && `+ ${role?.role?.length - 4} more`}
-                            {data?.currency && (
-                              <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
-                                {getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency).length
-                                  ? getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency)[0].symbolNative
-                                  : null}
-                                {role?.amount}
-                              </div>
-                            )}
-                          </>
-                        </StepLabel>
-                      </Step>
-                    );
-                  })}
+                  return (
+                    <Step key={i}>
+                      <StepLabel StepIconComponent={QontoStepIcon}>
+                        <>
+                          {role?.role
+                            ?.filter((r) => r?._id && r?.name)
+                            ?.map((r) => {
+                              return (
+                                <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                                  <Link title={r?.name} target="_blank" className="link" to={`${routes.roleDetail.path}/${r?._id}`}>
+                                    {r?.name}
+                                  </Link>
+                                </div>
+                              );
+                            })}
+                          {role?.role?.length > 4 && `+ ${role?.role?.length - 4} more`}
+                          {data?.currency && (
+                            <div style={{ color: 'var(--dark-secondary-text, #09445A)' }}>
+                              {getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency).length
+                                ? getUniqueCurrencies().filter((d) => d?.currencyCode === data?.currency)[0].symbolNative
+                                : null}
+                              {role?.amount}
+                            </div>
+                          )}
+                        </>
+                      </StepLabel>
+                    </Step>
+                  );
+                })}
             </Stepper>
           </Grid2>
         </Grid2>
