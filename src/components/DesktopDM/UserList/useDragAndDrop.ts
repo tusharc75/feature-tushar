@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-function useDragAndDrop() {
+const PADDING = 25;
+
+const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent => {
+  return 'touches' in event;
+};
+
+const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
+  const { clampToWindow = true } = props || {};
   const handleRef = useRef(null);
   const containerRef = useRef(null);
   const currentTranslate = useRef(0);
@@ -27,15 +34,28 @@ function useDragAndDrop() {
       startX = event.clientX;
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
-      document.body.style.cursor = 'grabbing';
+      document.addEventListener('touchmove', (e) => onMouseMove);
+      document.addEventListener('touchend', onMouseUp);
       handleElement.style.cursor = 'grabbing';
     };
 
-    const onMouseMove = (event: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
-      event.preventDefault();
+      e.preventDefault();
+      const event = isTouchEvent(e) ? e.touches[0] : e;
+      console.log(event);
       const dx = event.clientX - startX;
-      const newTranslate = currentTranslate.current + dx;
+      let newTranslate = currentTranslate.current + dx;
+
+      if (clampToWindow) {
+        // Prevent movement outside the window
+        const containerWidth = containerElement.offsetWidth;
+        const windowWidth = window.innerWidth;
+        const minTranslate = -(windowWidth - containerWidth - PADDING); // Left boundary
+        const maxTranslate = 0; // Right boundary
+
+        newTranslate = Math.max(minTranslate, Math.min(maxTranslate, newTranslate));
+      }
 
       // Smooth drag using requestAnimationFrame
       if (animationFrameId.current === null) {
@@ -56,19 +76,21 @@ function useDragAndDrop() {
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('touchend', onMouseUp);
 
       if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
         animationFrameId.current = null;
       }
       handleElement.style.cursor = 'grab';
-      document.body.style.cursor = '';
     };
 
     handleElement.addEventListener('mousedown', onMouseDown);
-
+    (handleElement as HTMLButtonElement).addEventListener('touchstart', onMouseDown);
     return () => {
       handleElement.removeEventListener('mousedown', onMouseDown);
+      (handleElement as HTMLButtonElement).removeEventListener('touchstart', onMouseDown);
     };
   }, [enabled]);
 
@@ -83,6 +105,6 @@ function useDragAndDrop() {
   }, [enabled]);
 
   return { handleRef, containerRef, enableDisableDraggable };
-}
+};
 
 export default useDragAndDrop;
