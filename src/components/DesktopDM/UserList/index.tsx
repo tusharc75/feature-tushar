@@ -66,10 +66,10 @@ const UserList = memo(
     }, [handleChatOpen]);
 
     return (
-      <div ref={containerRef}>
+      <div ref={containerRef} className={cn('pointer-events-none')}>
         <div
           className={cn(
-            'mr-[--user-list-right-space] flex w-[--user-list-container-w] origin-bottom flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all [--max-h:calc(100vh-100px)]',
+            'pointer-events-auto mr-[--user-list-right-space] flex w-[--user-list-container-w] origin-bottom flex-col overflow-hidden rounded-t-md border bg-[--dark-primary,white] shadow-md transition-all [--max-h:calc(100vh-100px)]',
             'h-[--max-h]',
             mainWindow && mainWindow === 'partial' ? ' [transform:translateY(calc(var(--max-h)-var(--partially-openned-container-h)))]' : '',
             isMobile ? `w-auto ` : 'flex-[0_0_var(--user-list-container-w)]'
