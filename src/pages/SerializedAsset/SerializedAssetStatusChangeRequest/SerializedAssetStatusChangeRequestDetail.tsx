@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset, sidebarResource } from 'src/constants/helpers';
