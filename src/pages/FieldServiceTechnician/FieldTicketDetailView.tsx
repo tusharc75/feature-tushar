@@ -7,8 +7,8 @@ import ContentFullScreen from 'src/components/ContentFullScreen';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import {
+  ACTIVITY_RESOURCE,
   FIELD_TICKET_STATUS,
-  checkIsAllowedToEdit,
   fieldTicket,
   fieldTicketSteps,
   sidebarResource
@@ -16,6 +16,7 @@ import {
 import Submit from 'src/pages/FieldTicket/Submit';
 import Material from 'src/pages/FieldTicket/material';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const FieldTicketDetailView = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -60,8 +61,7 @@ const FieldTicketDetailView = ({ id }) => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
-
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
+      setAllowedToEdit(true);
       setFieldTicketData(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -96,48 +96,58 @@ const FieldTicketDetailView = ({ id }) => {
       });
   };
 
-  return (
-    <Box className="main-container-v1">
-      <Box className="detail-container-v1">
-        <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-          <Steps
-            isNextStep={false}
-            nextStep={nextStep}
-            isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={fieldTicketSteps}
-            currentStep={currentStep}
-            setCurrentStep={setCurrentStep}
-            isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
+  return (<Box className="main-container-v1">
+    <Box className="detail-container-v1">
+      <div className='flex justify-end'>
+        <ActivityButton
+          referenceId={fieldTicketData?._id}
+          resource={ACTIVITY_RESOURCE.fieldTicket}
+          resourceLabel={fieldTicketData?.fieldTicketNumber}
+          extraRelatedTo={{
+            referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
+            resource: ACTIVITY_RESOURCE.fieldServiceOrder
+          }}
+        />
+      </div>
+      <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+        <Steps
+          isNextStep={false}
+          nextStep={nextStep}
+          isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
+          steps={fieldTicketSteps}
+          currentStep={currentStep}
+          setCurrentStep={setCurrentStep}
+          isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
+          stepFullScreen={stepFullScreen}
+          setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+          updateStatus={(step: number) => {
+            dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
+          }}
+        />
+        {currentStep === 0 && fieldTicketData && (
+          <Material
+            fieldTicketData={fieldTicketData}
+            fieldTicketFields={fields}
+            allowedToEdit={allowedToEdit}
+            setNextStep={setNextStep}
+            handleChangeStatus={handleChangeStatus}
+            resourcePolicy={resourceData?.policy}
             stepFullScreen={stepFullScreen}
-            setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
-            updateStatus={(step: number) => {
-              dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
-            }}
+            fetchData={fetchData}
           />
-          {currentStep === 0 && fieldTicketData && (
-            <Material
-              fieldTicketData={fieldTicketData}
-              fieldTicketFields={fields}
-              allowedToEdit={allowedToEdit}
-              setNextStep={setNextStep}
-              handleChangeStatus={handleChangeStatus}
-              resourcePolicy={resourceData?.policy}
-              stepFullScreen={stepFullScreen}
-              fetchData={fetchData}
-            />
-          )}
-          {currentStep === 1 && fieldTicketData && (
-            <Submit
-              stepFullScreen={stepFullScreen}
-              fieldTicketData={fieldTicketData}
-              allowedToEdit={allowedToEdit}
-              fetchData={fetchData}
-              resourcePolicy={resourceData?.policy}
-            />
-          )}
-        </ContentFullScreen>
-      </Box>
+        )}
+        {currentStep === 1 && fieldTicketData && (
+          <Submit
+            stepFullScreen={stepFullScreen}
+            fieldTicketData={fieldTicketData}
+            allowedToEdit={allowedToEdit}
+            fetchData={fetchData}
+            resourcePolicy={resourceData?.policy}
+          />
+        )}
+      </ContentFullScreen>
     </Box>
+  </Box>
   );
 };
 
