@@ -22,8 +22,7 @@ import {
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const StatusChangeRequestDialog = ({ onClose, assetData, status, onSuccess }) => {
-
+const StatusChangeRequestDialog = ({ onClose, assetData, workOrderId = null, status, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -37,7 +36,11 @@ const StatusChangeRequestDialog = ({ onClose, assetData, status, onSuccess }) =>
     axiosInstance()
       .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
-        data = data.filter((d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName))?.map((d) => d?.fieldData);
+        data = data
+          .filter(
+            (d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName)
+          )
+          ?.map((d) => d?.fieldData);
         setInitialData({
           fields: setFieldsInAscendingOrder(data),
           values: getObjKeys('', data)
@@ -50,22 +53,28 @@ const StatusChangeRequestDialog = ({ onClose, assetData, status, onSuccess }) =>
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    axiosInstance().post(`${serializedAsset.api}/status-approval-process`, {
-      ...values,
-      assetStatus: ASSET_STATUS.scrap,
-      assets: assetData?.map((e) => { return { _id: e._id, currentStatus: e.status } })
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      onSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .post(`${serializedAsset.api}/status-approval-process`, {
+        ...values,
+        assetStatus: ASSET_STATUS.scrap,
+        ...(workOrderId ? { workOrder: workOrderId } : {}),
+        assets: assetData?.map((e) => {
+          return { _id: e._id, currentStatus: e.status };
+        })
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
