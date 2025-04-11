@@ -572,13 +572,8 @@ const AddSerializedAsset = ({
                       </ThemeButton>
                     )}
                     <ThemeButton
-                      iconForMobile={
-                        <>
-                          <Add fontSize="small" />
-                          {selectedRecords?.length > 0 && <span className="-ml-1 text-xs">({selectedRecords?.length})</span>}
-                        </>
-                      }
-                      sx={{ '@media (max-width:768px)': { width: selectedRecords?.length ? 'auto' : '32px' } }}
+                      iconForMobile={<Add fontSize="small" />}
+                      iconTextForMobile={selectedRecords?.length > 0 && `(${selectedRecords?.length})`}
                       buttonType="theme"
                       tooltip={
                         selectedRecords?.length !== 0 && !checkUniqWarehouse()
