@@ -426,7 +426,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         .then(({ data: { data } }) => {
           setResourceDatas(data);
           const otherData = [];
-          const rows = data?.map((d: any) => {
+          let rows = data?.map((d: any) => {
             if (selectedResource.resource === sidebarResource.serializedAsset) {
               return {
                 id: d._id,
@@ -511,6 +511,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   });
                 }
               }
+              return null
             }
             let title = d[selectedResource.fieldName];
             let start = dayjs.tz(d[selectedResource.start]).toDate();
@@ -562,6 +563,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               endDraggable: endDraggable
             };
           });
+          rows = rows?.filter((e) => e)
           setEvents([...rows, ...otherData]);
           setStaticEvents([...rows, ...otherData]);
           setIsDataFetching(false);
