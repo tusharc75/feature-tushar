@@ -42,6 +42,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Steps from 'src/components/Steps';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -61,7 +62,6 @@ function OpportunityDetailsPage() {
     state: { user, selectedEntity, permissions, resources }
   }: any = useData();
   const { state } = useTableReducer();
-  const { selectedRecords } = state;
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [copyOfOpportunityData, setCopyOfOpportunityData] = useState(null);
@@ -453,8 +453,6 @@ function OpportunityDetailsPage() {
 
   const handleSave = (data) => {
     setOpenAdditionalDialog(false);
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-
     let processFieldName = '';
     const opportunityFieldData = opportunityFields.map((f) => {
       if (f.fieldData.type == 'process') {
@@ -462,35 +460,22 @@ function OpportunityDetailsPage() {
       }
       return f.fieldData;
     });
-    const updatedOpportunityData = {
-      ...opportunityData,
-      ...data
-    };
-
+    const updatedOpportunityData = { ...opportunityData, ...data };
     const updatedOpportunityFields = [...opportunityFieldData, ...sectionFields.map((item) => item.fieldData)];
-    const updatedData = {
-      ...getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields),
-      [processFieldName]: steps[tempActiveStep].text,
-      _id: opportunityData._id
-    };
-
-    axiosInstance()
-      .put(`/opportunity?entity=${selectedEntity}`, updatedData)
-      .then(() => {
-        fetchData();
-      })
+    let updatedData: any = getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields);
+    const calValues = autoCalculateSpecificFields({ [processFieldName]: steps[steps?.length - 1].text }, updatedData, opportunityFieldData);
+    Object.assign(updatedData, calValues);
+    updatedData._id = opportunityData._id
+    axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+      fetchData();
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const handleMarkAsCompleted = (data = null) => {
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
-    if (data?.isSetBackStep && data?.isStepBackIdx !== null) {
-      if (data?.isStepBackIdx === -1) return;
-      tempActiveStep = data?.isStepBackIdx;
-    }
-
+  const handleUpdateSteps = (backStep = false) => {
+    let tempActiveStep = backStep ? (activeStep - 1) : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
@@ -501,19 +486,15 @@ function OpportunityDetailsPage() {
         }
         return f.fieldData;
       });
-      const updatedData = {
-        ...getObjKeysWithValues(opportunityData, opportunityFieldData),
-        [processFieldName]: steps[tempActiveStep].text,
-        _id: opportunityData._id
-      };
-      axiosInstance()
-        .put(`/opportunity?entity=${selectedEntity}`, updatedData)
-        .then(() => {
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+      let updatedData: any = getObjKeysWithValues(opportunityData, opportunityFieldData);
+      const calValues = autoCalculateSpecificFields({ [processFieldName]: steps[tempActiveStep].text }, updatedData, opportunityFieldData);
+      Object.assign(updatedData, calValues);
+      updatedData._id = opportunityData._id
+      axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -579,15 +560,14 @@ function OpportunityDetailsPage() {
                 nextStep={steps[activeStep + 1]?.text}
                 setCurrentStep={setActiveStep}
                 steps={steps}
-                handleNext={() => handleMarkAsCompleted()}
-                handlePrev={() => handleMarkAsCompleted({ isSetBackStep: true })}
+                handleNext={() => handleUpdateSteps()}
+                handlePrev={() => handleUpdateSteps(true)}
                 stepFullScreen={stepFullScreen}
                 setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
                 showExtraStep={true}
                 updateStatus={(currIdx) => {
                   if (currIdx <= activeStep) {
                     setActiveStep(currIdx - 1);
-                    handleMarkAsCompleted({ isSetBackStep: true, isStepBackIdx: currIdx - 1 });
                   }
                 }}
               />
