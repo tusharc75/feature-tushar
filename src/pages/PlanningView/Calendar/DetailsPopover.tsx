@@ -11,7 +11,6 @@ import { sidebarResource } from 'src/constants/helpers';
 import './calendarView.scss';
 
 const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResource, fields, resourceDatas }) => {
-  console.log(showDetail.anchor);
   return (
     <Popover
       open={true}
