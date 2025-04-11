@@ -2,6 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const PADDING = 25;
 
+const isTouchEvent = (event: MouseEvent | TouchEvent): event is TouchEvent => {
+  return 'touches' in event;
+};
+
 const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
   const { clampToWindow = true } = props || {};
   const handleRef = useRef(null);
@@ -30,13 +34,16 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
       startX = event.clientX;
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
-      document.body.style.cursor = 'grabbing';
+      document.addEventListener('touchmove', (e) => onMouseMove);
+      document.addEventListener('touchend', onMouseUp);
       handleElement.style.cursor = 'grabbing';
     };
 
-    const onMouseMove = (event: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
-      event.preventDefault();
+      e.preventDefault();
+      const event = isTouchEvent(e) ? e.touches[0] : e;
+      console.log(event);
       const dx = event.clientX - startX;
       let newTranslate = currentTranslate.current + dx;
 
@@ -69,19 +76,21 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('touchend', onMouseUp);
 
       if (animationFrameId.current !== null) {
         cancelAnimationFrame(animationFrameId.current);
         animationFrameId.current = null;
       }
       handleElement.style.cursor = 'grab';
-      document.body.style.cursor = '';
     };
 
     handleElement.addEventListener('mousedown', onMouseDown);
-
+    (handleElement as HTMLButtonElement).addEventListener('touchstart', onMouseDown);
     return () => {
       handleElement.removeEventListener('mousedown', onMouseDown);
+      (handleElement as HTMLButtonElement).removeEventListener('touchstart', onMouseDown);
     };
   }, [enabled]);
 
