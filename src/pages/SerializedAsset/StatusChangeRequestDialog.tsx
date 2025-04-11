@@ -38,9 +38,13 @@ const StatusChangeRequestDialog = ({ onClose, assetData, status, onSuccess }) =>
       .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
         data = data.filter((d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName))?.map((d) => d?.fieldData);
+        let initialData = getObjKeys('', data);
+        if (data?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: setFieldsInAscendingOrder(data),
-          values: getObjKeys('', data)
+          values: initialData
         });
       })
       .catch((error) => {

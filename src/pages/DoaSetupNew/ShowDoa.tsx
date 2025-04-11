@@ -95,6 +95,8 @@ const ShowDoa = ({ status, data }) => {
             data?.doaUsers?.map((users, index) => (
               <div key={index} className={classes.doaUserContainer}>
                 {users?.status === DOA_STATUS.pending && <BsFillClockFill size={18} style={{ color: '#F25F54' }} />}
+                {users?.status === DOA_STATUS.approved && <BsFillCheckCircleFill size={18} style={{ color: '#4BAE4F' }} />}
+
                 <div>
                   {users?.users?.slice(0, 3).map((user) => (
                     <div style={{ color: '#09445A' }}>
