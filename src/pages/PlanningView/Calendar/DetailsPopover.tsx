@@ -11,17 +11,18 @@ import { sidebarResource } from 'src/constants/helpers';
 import './calendarView.scss';
 
 const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResource, fields, resourceDatas }) => {
+  console.log(showDetail.anchor);
   return (
     <Popover
       open={true}
       anchorEl={showDetail.anchor.target}
       anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center'
+        vertical: 'center',
+        horizontal: 'right'
       }}
       transformOrigin={{
-        vertical: 'top',
-        horizontal: 'center'
+        vertical: 'center',
+        horizontal: 'left'
       }}
       onClose={() => {
         setShowDetail({ open: false, data: null, anchor: null });
@@ -56,7 +57,7 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
             </IconButton>
           </HtmlTooltip>
         </div>
-        <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
+        <div className="h-[300px] overflow-y-auto overflow-x-hidden">
           <RenderDetail fields={fields} data={resourceDatas?.find((r) => r?._id === showDetail?.data?.id)} />
         </div>
       </Box>
