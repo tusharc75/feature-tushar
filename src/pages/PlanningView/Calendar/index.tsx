@@ -1,7 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
 import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
-import { FiExternalLink } from 'react-icons/fi';
 import Autocomplete from '@mui/material/Autocomplete';
+import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -14,119 +14,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
+import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
-import axios, { CancelToken } from 'axios';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-
-const COLOR_CODE = [
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(242,222,149)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(115,18,127)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(255,165,82)',
-    color: '#FFFFFF'
-  },
-  {
-    background: 'rgb(56,145,255)',
-    color: '#000'
-  },
-  {
-    background: 'rgb(120,94,195)',
-    color: '#000'
-  }
-];
+import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -155,57 +53,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
         : [])
     ],
     [
@@ -276,12 +174,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-          {
-            label: resources?.padMaster?.titlePlural,
-            value: 'Pad Master',
-            key: 'padMaster'
-          }
-        ]
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -318,14 +216,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
-  const colorCodeMap = new Map();
+  const colorCodeMap = new Map<string, SingleColor>();
 
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
       .then(({ data: { data } }) => {
         data[sidebarResource.customerAccount].forEach((ele, i) => {
-          colorCodeMap.set(ele?.optionValue, COLOR_CODE[i]);
+          colorCodeMap.set(ele?.optionValue, getColorByIndex(i));
         });
       })
       .catch((err) => toastConfig.setToastConfig(err));
@@ -821,10 +719,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
 
       if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
-        const _c = colorCodeMap.get(obj?.customerAccount);
-        if (_c) {
-          backgroundColor = _c?.background;
-          color = _c?.color;
+        const assignedColor = colorCodeMap.get(obj?.customerAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
         }
       }
       if (obj?.resource === sidebarResource.rentalManagement) {
@@ -844,7 +742,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode, COLOR_CODE?.filter((c: any) => c?.customerAccount)?.length]
+    [themeMode]
   );
 
   useEffect(() => {
@@ -1023,46 +921,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           </Popover>
         )}
         {showDetail.open && (
-          <Popover
-            open={showDetail.open}
-            anchorEl={showDetail.anchor}
-            onClose={() => {
-              setShowDetail({ open: false, data: null, anchor: null });
-            }}
-            style={{ minWidth: '300px' }}
-          >
-            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
-              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h5 className="text-sm">{`${showDetail?.data?.title}`}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (showDetail?.data?.resource) {
-                        const resource = resourceList?.find((r) => r.resource === showDetail?.data?.resource);
-                        window.open(`${resource.path}/${showDetail?.data?.id}`);
-                      } else {
-                        let path = selectedResource.path;
-                        if (selectedResource.resource === sidebarResource.serializedAsset) {
-                          path = routes[`${camelCase(showDetail?.data?.resource)}Detail`]?.path;
-                        }
-                        window.open(`${path}/${showDetail?.data?.id}`);
-                      }
-                    }}
-                    className="close-icon-v1"
-                  >
-                    <FiExternalLink fontSize="medium" />
-                  </IconButton>
-                </div>
-                <HtmlTooltip title="Close">
-                  <IconButton size="small" onClick={() => setShowDetail({ open: false, data: null, anchor: null })} className="close-icon-v1">
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-              <RenderDetail fields={fields} data={resourceDatas?.find((r) => r?._id === showDetail?.data?.id)} />
-            </Box>
-          </Popover>
+          <DetailsPopover
+            fields={fields}
+            resourceDatas={resourceDatas}
+            resourceList={resourceList}
+            selectedResource={selectedResource}
+            setShowDetail={setShowDetail}
+            showDetail={showDetail}
+          />
         )}
       </div>
     </>
