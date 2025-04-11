@@ -12,6 +12,7 @@ export type ButtonType = {
   isLoading?: boolean;
   visible?: boolean;
   iconForMobile?: ReactNode;
+  iconTextForMobile?: ReactNode;
 } & Partial<GetButtonStyle> &
   MButtonProps;
 
@@ -23,6 +24,7 @@ export type BorderedButtonType = {
   visible?: boolean;
   iconForMobile?: ReactNode;
   mode?: 'dark' | 'light';
+  iconTextForMobile?: ReactNode;
 } & Partial<GetButtonStyle> &
   MButtonProps;
 
@@ -34,9 +36,17 @@ type GetButtonStyle = {
   isMobile: boolean;
   mode?: 'dark' | 'light';
   sx: ButtonProps['sx'];
+  iconTextForMobile?: ReactNode;
 };
 
-const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile = false, isMobile, sx = {} }: GetButtonStyle): ButtonProps => {
+const getButtonStyle = ({
+  buttonType = 'default',
+  mode = 'dark',
+  iconForMobile = false,
+  isMobile,
+  sx = {},
+  iconTextForMobile = false
+}: GetButtonStyle): ButtonProps => {
   const buttonProps: ButtonProps = {
     sx: {
       height: '32px',
@@ -148,7 +158,7 @@ const getButtonStyle = ({ buttonType = 'default', mode = 'dark', iconForMobile =
   if (isMobile && iconForMobile) {
     buttonProps.sx = {
       ...buttonProps.sx,
-      width: '34px',
+      width: iconTextForMobile ? 'auto' : '34px',
       height: '32px',
       padding: '3px',
       minWidth: 'unset',
@@ -164,19 +174,29 @@ const getChildren = ({
   children,
   iconForMobile,
   loader,
-  isLoading
+  isLoading,
+  iconTextForMobile
 }: {
   isMobile: boolean;
   children: React.ReactNode;
   iconForMobile: React.ReactNode;
   loader: React.ReactNode;
   isLoading: boolean;
+  iconTextForMobile: ReactNode;
 }) => {
   if (isMobile && iconForMobile && isLoading) {
-    return loader;
+    return (
+      <>
+        {loader} <span className="-ml-1 text-xs">{iconTextForMobile}</span>
+      </>
+    );
   }
   if (isMobile && iconForMobile) {
-    return iconForMobile;
+    return (
+      <>
+        {iconForMobile} <span className="-ml-1 text-xs">{iconTextForMobile}</span>
+      </>
+    );
   }
   if (isLoading) {
     return (
@@ -204,6 +224,7 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ThemeButtonProps>(
       buttonType = 'default',
       disabled,
       sx,
+      iconTextForMobile,
       ...rest
     },
     ref
@@ -212,10 +233,13 @@ const ThemeButton = React.forwardRef<HTMLButtonElement, ThemeButtonProps>(
     const loader = useMemo(() => (isLoading ? <CircularProgress size={18} color="inherit" className="ml-1" /> : null), [isLoading]);
     const shouldRenderIcons = (isMobile && !Boolean(iconForMobile)) || !isMobile;
     const updatedChildren = useMemo(
-      () => getChildren({ isMobile, children, iconForMobile, loader, isLoading }),
-      [children, iconForMobile, isLoading, isMobile, loader]
+      () => getChildren({ isMobile, children, iconForMobile, loader, isLoading, iconTextForMobile }),
+      [children, iconForMobile, isLoading, isMobile, loader, iconTextForMobile]
     );
-    const buttonStyles = useMemo(() => getButtonStyle({ buttonType, mode, iconForMobile, isMobile, sx }), [mode, iconForMobile, isMobile, sx]);
+    const buttonStyles = useMemo(
+      () => getButtonStyle({ buttonType, mode, iconForMobile, isMobile, sx, iconTextForMobile }),
+      [mode, iconForMobile, buttonType, isMobile, sx, iconTextForMobile]
+    );
 
     return (
       <HtmlTooltip title={tooltip ? tooltip : mobileTooltip && isMobile ? mobileTooltip : ''}>

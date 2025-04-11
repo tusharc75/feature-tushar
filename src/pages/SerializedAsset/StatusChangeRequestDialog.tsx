@@ -22,7 +22,8 @@ import {
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
+const StatusChangeRequestDialog = ({ onClose, assetData, status, onSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -36,11 +37,7 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
       .then(({ data: { data } }) => {
-        data = data
-          .filter(
-            (d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName)
-          )
-          ?.map((d) => d?.fieldData);
+        data = data.filter((d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName))?.map((d) => d?.fieldData);
         setInitialData({
           fields: setFieldsInAscendingOrder(data),
           values: getObjKeys('', data)
@@ -53,26 +50,24 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
-    axiosInstance()
-      .put(`${serializedAsset.api}/status-approval-process/status`, {
-        ...values,
-        assetStatus: ASSET_STATUS.scrap,
-        assets: [{ _id: assetData?._id, currentStatus: assetData?.status }]
-      })
-      .then(({ data }) => {
-        setIsSubmitting(false);
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().post(`${serializedAsset.api}/status-approval-process`, {
+      ...values,
+      assetStatus: ASSET_STATUS.scrap,
+      assets: assetData?.map((e) => { return { _id: e._id, currentStatus: e.status } })
+    }).then(({ data }) => {
+      setIsSubmitting(false);
+      onSuccess();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data?.message
       });
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
+
   return (
     <Dialog
       maxWidth="md"
@@ -87,7 +82,7 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader
-                title={`${resources?.serializedAssetStatusChangeRequest?.titleSingular}`}
+                title={`Status Change Request - ${status} ${assetData?.length === 1 ? `(${assetData[0].assetNumber})` : ''}`}
                 onClose={onClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

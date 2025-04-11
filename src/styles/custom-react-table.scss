@@ -10,44 +10,44 @@ $isAppliedBillDark: #234623;
 
 .td-color {
   &.isAppliedBill {
-    background: $isAppliedBill;
+    background: $isAppliedBill !important;
     [data-mode='dark'] & {
-      background-color: $isAppliedBillDark;
+      background-color: $isAppliedBillDark !important;
     }
   }
 
   &.isPurchaseOrder {
-    background: $isPurchaseOrder;
+    background: $isPurchaseOrder !important;
     [data-mode='dark'] & {
-      background-color: $isPurchaseOrderDark;
+      background-color: $isPurchaseOrderDark !important;
     }
   }
 
   &.isSublease {
-    background: $isSublease;
+    background: $isSublease !important;
     [data-mode='dark'] & {
-      background: $isSubleaseDark;
+      background: $isSubleaseDark !important;
     }
   }
 
   &.isTransferAsset {
-    background: $isTransferAsset;
+    background: $isTransferAsset !important;
     [data-mode='dark'] & {
-      background-color: $isTransferAssetDark;
+      background-color: $isTransferAssetDark !important;
     }
   }
 
   &.isTransferAsset {
-    background: $isTransferAsset;
+    background: $isTransferAsset !important;
     [data-mode='dark'] & {
-      background-color: $isTransferAssetDark;
+      background-color: $isTransferAssetDark !important;
     }
   }
 
   &.isService {
-    background: #fffaef;
+    background: #fffaef !important;
     [data-mode='dark'] & {
-      background-color: #23233d;
+      background-color: #23233d !important;
     }
   }
 
@@ -59,7 +59,7 @@ $isAppliedBillDark: #234623;
   }
 
   &.error {
-    background: var(--error-bg);
+    background: var(--error-bg) !important;
   }
 }
 

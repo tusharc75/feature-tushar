@@ -14,7 +14,6 @@ import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 const SerializedAssetStatusChangeRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
-  const history = useHistory();
 
   const {
     state: { user, resources }
