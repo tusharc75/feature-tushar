@@ -87,7 +87,7 @@ const RenderHeader = memo(
               horizontal: 'right'
             }}
           >
-            <MenuItem onClick={closeMainWindow}>Close Main Window</MenuItem>
+            <MenuItem onClick={closeMainWindow}>Close</MenuItem>
           </Menu>
         </div>
       </header>
