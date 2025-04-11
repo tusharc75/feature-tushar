@@ -17,7 +17,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import { deleteDatabase } from 'src/constants/indexdbhelper';
 import { useScrollDirection } from 'src/hooks/useScroll';
-import { userManual } from 'src/pages/Home';
+import { userManual } from 'src/pages/Home/helpers';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';

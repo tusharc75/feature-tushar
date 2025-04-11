@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { camelCase } from 'lodash';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import { useData } from '../StateProvider/Provider';
 import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
-import NotFound from 'src/pages/NotFound';
-import UserManual from '../pages/UserManual';
+const NotFound = lazy(() => import('src/pages/NotFound'));
+const UserManual = lazy(() => import('../pages/UserManual'));
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -90,11 +90,17 @@ const ProtectedRoute = ({ children, ...rest }) => {
               <p>Checking Credentials...</p>
             </div>
           ) : access && rest?.userManual ? (
-            <UserManual />
+            <Suspense fallback={null}>
+              <UserManual />
+            </Suspense>
           ) : access ? (
-            <Layout>{children}</Layout>
+            <Layout>
+              <Suspense fallback={null}>{children}</Suspense>
+            </Layout>
           ) : error ? (
-            <NotFound />
+            <Suspense fallback={null}>
+              <NotFound />
+            </Suspense>
           ) : (
             <Unauthorized />
           )
