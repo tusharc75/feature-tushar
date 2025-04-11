@@ -14,7 +14,11 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
   return (
     <Popover
       open={true}
-      anchorEl={showDetail.anchor.target}
+      anchorPosition={{
+        top: showDetail.anchor.clientY,
+        left: showDetail.anchor.clientX
+      }}
+      anchorReference="anchorPosition"
       anchorOrigin={{
         vertical: 'center',
         horizontal: 'right'
@@ -27,7 +31,7 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
         setShowDetail({ open: false, data: null, anchor: null });
       }}
     >
-      <Box className=" max-w-[600px] space-y-2 p-2">
+      <Box className=" w-[min(600px,100%)] space-y-2 p-2">
         <div className="flex items-center justify-between gap-1 border-b p-2">
           <div className="flex items-center gap-1">
             <h5 className="text-sm">{`${showDetail?.data?.title}`}</h5>
