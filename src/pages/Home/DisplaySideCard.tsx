@@ -7,7 +7,7 @@ import workspaceImage from 'src/assets/dashboard_images/sidebar/workspace.png';
 import styles from './Dashboard.module.scss';
 
 import DashboardModal from 'src/components/DashboardModal';
-import { userManual } from 'src/pages/Home';
+import { userManual } from 'src/pages/Home/helpers';
 import SideCard, { SideCardProps } from 'src/pages/Home/SideCard';
 
 interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
