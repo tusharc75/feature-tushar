@@ -389,36 +389,36 @@ export default function NewCreateQuotePdfTemplate() {
           try {
             const importedData = JSON.parse(fileContent);
             const newInitialValues = {
-              landscape: importedData?.landscape,
-              hideAmountTotalSection: importedData?.hideAmountTotalSection,
-              tableTotalAtBottom: importedData?.tableTotalAtBottom,
-              tableFontSize: importedData?.tableFontSize,
-              belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
-              pdfFontSize: importedData?.pdfFontSize,
-              tableHeaderBackgroundColor: importedData?.tableHeaderBackgroundColor,
-              tableHeaderFontColor: importedData?.tableHeaderFontColor,
-              tableHeaderFontWeight: importedData?.tableHeaderFontWeight,
-              productColumns: importedData?.productColumns ? importedData?.productColumns : defaultProductColumns,
-              pageNumberInFooter: importedData?.pageNumberInFooter,
-              name: initialValues.name ? initialValues.name : "New",
-              header: importedData?.header,
-              footer: importedData?.footer,
-              aboveTable: importedData?.aboveTable,
-              belowTable: importedData?.belowTable,
-              type: importedData?.type,
-              owner: initialValues.owner,
+              landscape: importedData?.initialValues?.landscape,
+              hideAmountTotalSection: importedData?.initialValues?.hideAmountTotalSection,
+              tableTotalAtBottom: importedData?.initialValues?.tableTotalAtBottom,
+              tableFontSize: importedData?.initialValues?.tableFontSize,
+              belowTableTotalFontSize: importedData?.initialValues?.belowTableTotalFontSize,
+              pdfFontSize: importedData?.initialValues?.pdfFontSize,
+              tableHeaderBackgroundColor: importedData?.initialValues?.tableHeaderBackgroundColor,
+              tableHeaderFontColor: importedData?.initialValues?.tableHeaderFontColor,
+              tableHeaderFontWeight: importedData?.initialValues?.tableHeaderFontWeight,
+              productColumns: importedData?.initialValues?.productColumns ? importedData?.initialValues?.productColumns : defaultProductColumns,
+              pageNumberInFooter: importedData?.initialValues?.pageNumberInFooter,
+              name: initialValues?.initialValues?.name ? initialValues?.initialValues?.name : "New",
+              header: importedData?.initialValues?.header,
+              footer: importedData?.initialValues?.footer,
+              aboveTable: importedData?.initialValues?.aboveTable,
+              belowTable: importedData?.initialValues?.belowTable,
+              type: importedData??initialValues?.type,
+              owner: initialValues?.owner,
               collaborator: initialValues?.collaborator,
               entity: initialValues?.entity,
-              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide,
+              tabelSummaryLeftSide: importedData?.initialValues?.tabelSummaryLeftSide,
             };
             setInitialValues(newInitialValues);
-            setIsLandscapChecked(importedData?.landscape);
+            setIsLandscapChecked(importedData?.initialValues?.landscape);
             setDetails({
-              header: importedData?.header,
-              footer: importedData?.footer,
-              aboveTable: importedData?.aboveTable,
-              belowTable: importedData?.belowTable,
-              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
+              header: importedData?.details?.header,
+              footer: importedData?.details?.footer,
+              aboveTable: importedData?.details?.aboveTable,
+              belowTable: importedData?.details?.belowTable,
+              tabelSummaryLeftSide: importedData?.details?.tabelSummaryLeftSide
             });
             if (importedData?.table) {
               setTable(importedData?.table);
