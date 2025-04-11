@@ -37,6 +37,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchange2Line } from 'react-icons/ri';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 
 const SerializedAssetInspection = () => {
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
@@ -48,7 +49,7 @@ const SerializedAssetInspection = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -62,9 +63,12 @@ const SerializedAssetInspection = () => {
   const [resourceData, setResourceData] = useState(null);
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
+  const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
+    fetchFieldSerializedAssetStatusChangeRequest();
   }, []);
 
   useEffect(() => {
@@ -183,6 +187,14 @@ const SerializedAssetInspection = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
         fetchPolicy();
+      });
+  };
+
+  const fetchFieldSerializedAssetStatusChangeRequest = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetStatusChangeRequestFields([...data]);
       });
   };
 
@@ -356,7 +368,21 @@ const SerializedAssetInspection = () => {
             {Object.entries(statusOptions).map(([key, status]: any) => {
               const isDisabled = selectedRecords.some((record) => record.status === status?.optionLabel);
               return (
-                <MenuItem key={key} onClick={() => handleStatusChange(status?.optionLabel)} disabled={isDisabled}>
+                <MenuItem
+                  key={key}
+                  onClick={() => {
+                    if (
+                      status?.optionValue === ASSET_STATUS.scrap &&
+                      user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                      serializedAssetStatusChangeRequestFields?.length > 0
+                    ) {
+                      setStatusChangeRequestDialog(true);
+                    } else {
+                      handleStatusChange(status?.optionLabel);
+                    }
+                  }}
+                  disabled={isDisabled}
+                >
                   {status?.optionLabel}
                 </MenuItem>
               );
@@ -463,6 +489,19 @@ const SerializedAssetInspection = () => {
             handleAddAssetsToRepairJob(obj?._id);
           }}
           isClone={false}
+        />
+      )}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={selectedRecords?.map((s) => ({ _id: s?._id, assetNumber: s?.assetNumber, status: s?.status }))}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchData();
+          }}
         />
       )}
     </section>
