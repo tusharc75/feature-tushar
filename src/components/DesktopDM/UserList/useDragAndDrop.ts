@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-function useDragAndDrop() {
+const PADDING = 25;
+
+const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
+  const { clampToWindow = true } = props || {};
   const handleRef = useRef(null);
   const containerRef = useRef(null);
   const currentTranslate = useRef(0);
@@ -35,7 +38,17 @@ function useDragAndDrop() {
       if (!isDragging) return;
       event.preventDefault();
       const dx = event.clientX - startX;
-      const newTranslate = currentTranslate.current + dx;
+      let newTranslate = currentTranslate.current + dx;
+
+      if (clampToWindow) {
+        // Prevent movement outside the window
+        const containerWidth = containerElement.offsetWidth;
+        const windowWidth = window.innerWidth;
+        const minTranslate = -(windowWidth - containerWidth - PADDING); // Left boundary
+        const maxTranslate = 0; // Right boundary
+
+        newTranslate = Math.max(minTranslate, Math.min(maxTranslate, newTranslate));
+      }
 
       // Smooth drag using requestAnimationFrame
       if (animationFrameId.current === null) {
@@ -83,6 +96,6 @@ function useDragAndDrop() {
   }, [enabled]);
 
   return { handleRef, containerRef, enableDisableDraggable };
-}
+};
 
 export default useDragAndDrop;
