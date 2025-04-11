@@ -33,7 +33,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
       ?.filter((e) => e.type === MATERIAL_TYPE.package && e?.packageDetail?.packageType === PACKAGE_TYPE.product)
       ?.map((e) => {
         return {
-          optionLabel: e?.packageDetail?.packageName,
+          optionLabel: `${e?.packageDetail?.packageName}${e?.longDescription ? ` (${e?.longDescription})` : ``}`,
           optionValue: e?._id
         };
       });
