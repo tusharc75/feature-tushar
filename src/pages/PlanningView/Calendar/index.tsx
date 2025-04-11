@@ -59,7 +59,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             key: 'warehouse'
           }
         ]
-      : []),
+        : []),
       ...(permissions?.product?.isRead
         ? [
           {
@@ -68,7 +68,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             key: 'product'
           }
         ]
-      : []),
+        : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
           {
@@ -77,7 +77,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             key: 'asset'
           }
         ]
-      : []),
+        : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
           {
@@ -86,7 +86,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             key: 'service'
           }
         ]
-      : []),
+        : []),
       ...(permissions?.customerAccount?.isRead
         ? [
           {
@@ -95,7 +95,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             key: 'customerAccount'
           }
         ]
-      : []),
+        : []),
       ...(permissions?.competencies?.isRead
         ? [
           {
