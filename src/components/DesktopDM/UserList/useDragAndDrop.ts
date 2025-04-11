@@ -27,14 +27,16 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
     let isDragging = false;
     let startX;
 
-    const onMouseDown = (event: MouseEvent) => {
+    const onMouseDown = (e: MouseEvent) => {
+      e.preventDefault();
+      const event = isTouchEvent(e) ? (e.touches[0] ? e.touches[0] : e) : e;
       if (!enabled || isDragging) return;
-      event.preventDefault();
+
       isDragging = true;
       startX = event.clientX;
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
-      document.addEventListener('touchmove', (e) => onMouseMove);
+      document.addEventListener('touchmove', onMouseMove);
       document.addEventListener('touchend', onMouseUp);
       handleElement.style.cursor = 'grabbing';
     };
@@ -42,8 +44,8 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
     const onMouseMove = (e: MouseEvent | TouchEvent) => {
       if (!isDragging) return;
       e.preventDefault();
+
       const event = isTouchEvent(e) ? e.touches[0] : e;
-      console.log(event);
       const dx = event.clientX - startX;
       let newTranslate = currentTranslate.current + dx;
 
@@ -87,10 +89,10 @@ const useDragAndDrop = (props?: { clampToWindow: boolean }) => {
     };
 
     handleElement.addEventListener('mousedown', onMouseDown);
-    (handleElement as HTMLButtonElement).addEventListener('touchstart', onMouseDown);
+    handleElement.addEventListener('touchstart', onMouseDown);
     return () => {
       handleElement.removeEventListener('mousedown', onMouseDown);
-      (handleElement as HTMLButtonElement).removeEventListener('touchstart', onMouseDown);
+      handleElement.removeEventListener('touchstart', onMouseDown);
     };
   }, [enabled]);
 
