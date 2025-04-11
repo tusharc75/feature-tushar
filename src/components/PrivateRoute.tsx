@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { camelCase } from 'lodash';
 import { Redirect, Route, useLocation } from 'react-router-dom';
 import { useData } from '../StateProvider/Provider';
@@ -92,7 +92,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
           ) : access && rest?.userManual ? (
             <UserManual />
           ) : access ? (
-            <Layout>{children}</Layout>
+            <Layout>
+              <Suspense fallback={null}>{children}</Suspense>
+            </Layout>
           ) : error ? (
             <NotFound />
           ) : (
