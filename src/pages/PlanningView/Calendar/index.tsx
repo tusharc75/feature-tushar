@@ -24,6 +24,7 @@ import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import axios, { CancelToken } from 'axios';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DetailsPage from 'src/components/Shared/DetailsPage';
+import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 
 const COLOR_CODE = [
   {
@@ -155,57 +156,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
         : [])
     ],
     [
@@ -276,12 +277,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-          {
-            label: resources?.padMaster?.titlePlural,
-            value: 'Pad Master',
-            key: 'padMaster'
-          }
-        ]
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -1021,46 +1022,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           </Popover>
         )}
         {showDetail.open && (
-          <Popover
-            open={showDetail.open}
-            anchorEl={showDetail.anchor}
-            onClose={() => {
-              setShowDetail({ open: false, data: null, anchor: null });
-            }}
-            style={{ minWidth: '300px' }}
-          >
-            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
-              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <div className="flex items-center justify-between gap-2">
-                  <h5 className="text-sm">{`${showDetail?.data?.title}`}</h5>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (showDetail?.data?.resource) {
-                        const resource = resourceList?.find((r) => r.resource === showDetail?.data?.resource);
-                        window.open(`${resource.path}/${showDetail?.data?.id}`);
-                      } else {
-                        let path = selectedResource.path;
-                        if (selectedResource.resource === sidebarResource.serializedAsset) {
-                          path = routes[`${camelCase(showDetail?.data?.resource)}Detail`]?.path;
-                        }
-                        window.open(`${path}/${showDetail?.data?.id}`);
-                      }
-                    }}
-                    className="close-icon-v1"
-                  >
-                    <FiExternalLink fontSize="medium" />
-                  </IconButton>
-                </div>
-                <HtmlTooltip title="Close">
-                  <IconButton size="small" onClick={() => setShowDetail({ open: false, data: null, anchor: null })} className="close-icon-v1">
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-              <RenderDetail fields={fields} data={resourceDatas?.find((r) => r?._id === showDetail?.data?.id)} />
-            </Box>
-          </Popover>
+          <DetailsPopover
+            fields={fields}
+            resourceDatas={resourceDatas}
+            resourceList={resourceList}
+            selectedResource={selectedResource}
+            setShowDetail={setShowDetail}
+            showDetail={showDetail}
+          />
         )}
       </div>
     </>
