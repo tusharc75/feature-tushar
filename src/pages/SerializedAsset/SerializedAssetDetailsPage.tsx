@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import BuildIcon from '@mui/icons-material/Build';
@@ -299,7 +298,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -707,10 +706,11 @@ const SerializedAssetDetailsPage = () => {
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
       {openStatusChangeRequestDialog && (
         <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
           onClose={() => {
             setStatusChangeRequestDialog(false);
           }}
-          assetData={assetDetails}
+          assetData={[{ _id: assetDetails?._id, assetNumber: assetDetails?.assetNumber, status: assetDetails?.status }]}
           onSuccess={() => {
             setStatusChangeRequestDialog(false);
             fetchData();
