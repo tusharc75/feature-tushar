@@ -215,7 +215,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
-  
+
   const [colorCodeMap, setColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
 
   useEffect(() => {
@@ -351,7 +351,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       resource: selectedResource.resource,
                       type: 'debit',
                       data: d?.debit
-                      //isRedAlert: debitQty > d?.availableByPlanning ? true : false
                     });
                   }
                 } else if (property === 'credit') {
@@ -421,7 +420,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             let endDraggable = true;
 
             const extraData: any = {};
-
             if (selectedResource.resource === sidebarResource.rentalManagement) {
               if (d?.parentAccount?.optionLabel) {
                 title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
@@ -430,11 +428,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 title = `${title}(Pad-${d?.padName?.optionLabel})`;
               }
               if (d?.actualStartDate) {
-                start = dayjs.tz(d?.actualStartDate).toDate();
                 startDraggable = false;
               }
               if (d?.actualEndDate) {
-                end = dayjs.tz(d?.actualEndDate).endOf('day').toDate();
                 endDraggable = false;
               }
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
@@ -598,25 +594,22 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance()
-      .put(`/planning-view/change-date`, {
-        _id: event.id,
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-        resource: event.resource
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        fetchData();
+    axiosInstance().put(`/planning-view/change-date`, {
+      _id: event.id,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      resource: event.resource
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      fetchData();
+    });
   };
 
   const resize = (event, start, end) => {
@@ -640,13 +633,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const resizeEvent = ({ event, start, end }) => {
     if (event?.resource === sidebarResource?.rentalManagement) {
-      if (!event?.startDraggable && !dayjs(event?.start).isSame(dayjs(start))) {
+      if (!event?.startDraggable) {
         toastConfig.setToastConfig({
           open: true,
           type: 'warning',
           message: `can't change start date`
         });
-      } else if (!event?.endDraggable && !dayjs(event?.end).isSame(dayjs(end))) {
+      } else if (!event?.endDraggable) {
         toastConfig.setToastConfig({
           open: true,
           type: 'warning',
@@ -835,7 +828,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           </Box>
         </Box>
         <div className={cn('relative')}>
-          {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
+          {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
             <>
               <CustomCalendar
                 dragAndDrop={true}
