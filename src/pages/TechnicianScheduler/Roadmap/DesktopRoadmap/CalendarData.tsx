@@ -1,6 +1,6 @@
 import { useDroppable } from '@dnd-kit/core';
-import { CalendarMonth } from '@mui/icons-material';
-import { Popover } from '@mui/material';
+import { CalendarMonth, DeleteOutline, Refresh, Send } from '@mui/icons-material';
+import { IconButton, Popover } from '@mui/material';
 import dayjs from 'dayjs';
 import { memo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -97,9 +97,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
         <HtmlTooltip
           title={
             <div>
-              <p>
-                {service?.reference?.optionLabel}
-              </p>
+              <p>{service?.reference?.optionLabel}</p>
               <p className="text-[12px]">
                 {displayDate(service?.startDate)} - {displayDate(service?.endDate)}
               </p>
@@ -109,12 +107,58 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           className="block min-w-0 max-w-full flex-grow p-2"
         >
           <>
-            <p className="mb-2 break-all text-[13px] font-semibold leading-[16px]">
-              {service?.reference?.optionLabel}
+            <p className="mb-1 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
+            <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+              <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+              <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
-            <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">
-              {service?.serviceDetail?.serviceName}
-            </p>
+            <div className="-ml-[2px] flex">
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
+                <HtmlTooltip title="Dispatch">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelect(null, service, 'dispatch');
+                      handleClosePopup();
+                    }}
+                    size="small"
+                    color="primary"
+                  >
+                    <Send fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
+                <HtmlTooltip title="Return">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelect(null, service, 'return');
+                      handleClosePopup();
+                    }}
+                    size="small"
+                    color="primary"
+                  >
+                    <Refresh fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+              {service?.status === TECHNICIAN_STATUS.reserved && (
+                <HtmlTooltip title="Un-Assign">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelect(null, { _id: service?._id }, 'un-assign');
+                      handleClosePopup();
+                    }}
+                    size="small"
+                    color="error"
+                  >
+                    <DeleteOutline fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
           </>
         </HtmlTooltip>
       </RippleButton>
@@ -137,10 +181,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
         }}
       >
         <div>
-          <div className="w-[250px] rounded-md bg-[--dark-primary,white] p-3 shadow-md">
-            <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-              {service?.reference?.optionLabel}
-            </p>
+          <div className="w-[260px] rounded-md bg-[--dark-primary,white] p-3 shadow-md">
+            <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
             <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">
               {service?.serviceDetail?.serviceName}
             </p>
@@ -149,36 +191,41 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved &&
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
                 <ThemeButton
-                  buttonType='theme'
+                  buttonType="theme"
                   onClick={() => {
                     handleSelect(null, service, 'dispatch');
-                    handleClosePopup()
+                    handleClosePopup();
                   }}
+                  startIcon={<Send fontSize="small" />}
                 >
                   Dispatch
                 </ThemeButton>
-              }
-              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched &&
+              )}
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
                 <ThemeButton
-                  buttonType='theme'
+                  buttonType="theme"
                   onClick={() => {
                     handleSelect(null, service, 'return');
-                    handleClosePopup()
+                    handleClosePopup();
                   }}
+                  startIcon={<Refresh fontSize="small" />}
                 >
                   Return
                 </ThemeButton>
-              }
-              {service?.status === TECHNICIAN_STATUS.reserved &&
+              )}
+              {service?.status === TECHNICIAN_STATUS.reserved && (
                 <ThemeButton
                   onClick={() => {
                     handleSelect(null, { _id: service?._id }, 'un-assign');
-                    handleClosePopup()
+                    handleClosePopup();
                   }}
-                >Un-Assign</ThemeButton>
-              }
+                  startIcon={<DeleteOutline fontSize="small" />}
+                >
+                  Un-Assign
+                </ThemeButton>
+              )}
             </div>
           </div>
         </div>

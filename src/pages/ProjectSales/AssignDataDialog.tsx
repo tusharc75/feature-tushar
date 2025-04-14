@@ -12,7 +12,6 @@ import {
 import Grid from '@mui/material/Grid2';
 import { camelCase, kebabCase, lowerCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -109,14 +108,11 @@ const AssignDataDialog = (props) => {
   const handleSave = () => {
     if (selectedData.length) {
       setAssigning(true);
-
       const dataObj = {
         [camelCase(type)]: [...selectedData, ...existingData()],
         _id: projectID
       };
-
-      axiosInstance()
-        .put(`/project-sales/add-${kebabCase(changeType(type))}`, dataObj)
+      axiosInstance().put(`/project-sales/add-${kebabCase(changeType(type))}`, dataObj)
         .then(() => {
           setAssigning(false);
           toastConfig.setToastConfig({
@@ -124,7 +120,6 @@ const AssignDataDialog = (props) => {
             type: 'success',
             open: true
           });
-
           onSuccess();
         })
         .catch((error) => {
@@ -148,6 +143,8 @@ const AssignDataDialog = (props) => {
         return `${data.accountName}`;
       case 'customer-contact':
         return `${data?.concatedName ?? ''}`;
+      case 'quotation':
+        return `${data?.quotationNumber ?? ''}`;
       default:
         break;
     }
@@ -157,16 +154,6 @@ const AssignDataDialog = (props) => {
     switch (type) {
       case 'user':
         return data.email;
-      case 'lead':
-        return '';
-      case 'opportunity':
-        return '';
-      case 'quote-builder':
-        return '';
-      case 'customer-account':
-        return '';
-      case 'customer-contact':
-        return '';
       default:
         return '';
     }
@@ -195,6 +182,8 @@ const AssignDataDialog = (props) => {
           return data.opportunityName.toLowerCase().search(value.toLowerCase()) !== -1;
         case 'quote-builder':
           return data.quoteName.toLowerCase().search(value.toLowerCase()) !== -1;
+        case 'quotation':
+          return data.quotationNumber.toLowerCase().search(value.toLowerCase()) !== -1;
         case 'customer-account':
           return data.accountName.toLowerCase().search(value.toLowerCase()) !== -1;
         case 'customer-contact':
@@ -220,13 +209,12 @@ const AssignDataDialog = (props) => {
         ) : dataConst.length ? (
           <>
             <Grid container>
-              <Grid size={{xs:12, md:6, sm:6}} className="d-flex align-items-center gap-2">
+              <Grid size={{ xs: 12, md: 6, sm: 6 }} className="d-flex align-items-center gap-2">
                 <FormControl component="fieldset">
                   <FormControlLabel
                     value="top"
                     control={
                       <Checkbox
-                        // edge="start"
                         onChange={(e) => {
                           data.forEach((data) => (data.isChecked = e.target.checked));
                           setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
@@ -241,11 +229,10 @@ const AssignDataDialog = (props) => {
                   />
                 </FormControl>
               </Grid>
-              <Grid size={{xs:12, md:6, sm:6}} container justifyContent="flex-end">
+              <Grid size={{ xs: 12, md: 6, sm: 6 }} container justifyContent="flex-end">
                 <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
               </Grid>
             </Grid>
-
             <List style={{ padding: 0 }}>
               {data.map((_d) => (
                 <ListItem divider key={_d._id}>
