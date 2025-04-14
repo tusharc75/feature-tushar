@@ -53,57 +53,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
         : [])
     ],
     [
@@ -174,12 +174,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-          {
-            label: resources?.padMaster?.titlePlural,
-            value: 'Pad Master',
-            key: 'padMaster'
-          }
-        ]
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -410,7 +410,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   });
                 }
               }
-              return null
+              return null;
             }
             let title = d[selectedResource.fieldName];
             let start = dayjs.tz(d[selectedResource.start]).toDate();
@@ -459,7 +459,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               endDraggable: endDraggable
             };
           });
-          rows = rows?.filter((e) => e)
+          rows = rows?.filter((e) => e);
           setEvents([...rows, ...otherData]);
           setStaticEvents([...rows, ...otherData]);
           setIsDataFetching(false);
@@ -594,22 +594,25 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance().put(`/planning-view/change-date`, {
-      _id: event.id,
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      resource: event.resource
-    }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`/planning-view/change-date`, {
+        _id: event.id,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        resource: event.resource
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        fetchData();
       });
-      fetchData();
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      fetchData();
-    });
   };
 
   const resize = (event, start, end) => {
@@ -994,19 +997,5 @@ const RenderTable = ({ data, resources }) => {
         </TableBody>
       </Table>
     </TableContainer>
-  );
-};
-
-const RenderDetail = ({ fields, data }) => {
-  return (
-    <div className="min-w-[430px]">
-      {!data || !fields?.length ? (
-        <div className="max-w-[430px] p-2">
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </div>
-      ) : (
-        <DetailsPage data={data} fields={fields} />
-      )}
-    </div>
   );
 };

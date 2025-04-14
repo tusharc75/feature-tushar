@@ -19,7 +19,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 
-const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const {
     state: { user, resources }
   }: any = useData();
@@ -111,7 +111,10 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null }) => {
         .then(({ data }) => {
           setLoading(false);
           setSubmitting(true);
-          history.push(`${routes.planningDetail.path}/${data?.data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.planningDetail.path}/${data?.data?._id}`);
+          }
+          onSuccess();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',

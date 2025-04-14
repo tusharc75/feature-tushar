@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useImperativeHandle, forwardRef } from 'react';
 import { TextField, Box } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -9,7 +9,7 @@ import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString }) {
+function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity }
@@ -46,6 +46,10 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
       fetchData();
     }
   }, [selectedResource, page, filters, limit, sorting, search]);
+
+  useImperativeHandle(ref, () => ({
+    fetchData
+  }));
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -141,4 +145,5 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
   );
 }
 
-export default ListView;
+// export default ListView;
+export default forwardRef(ListView);
