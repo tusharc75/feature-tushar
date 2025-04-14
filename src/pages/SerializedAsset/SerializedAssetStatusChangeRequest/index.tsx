@@ -41,6 +41,7 @@ const SerializedAssetStatusChangeRequest = () => {
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
+  const [allColumns, setAllColumns] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
   const [renderCount, setRenderCount] = useState(0);
   const [approveRejectRecord, setApproveRejectRecord] = useState(null);
@@ -85,9 +86,18 @@ const SerializedAssetStatusChangeRequest = () => {
             )}
           </div>
         );
-        setColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset'), ActionsRenderer]);
+        setAllColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset')]);
       });
   };
+
+  useEffect(() => {
+    setColumns(null);
+    if (selectedStatus === ASSET_APPROVAL_STATUS.pending) {
+      setColumns([...allColumns, ActionsRenderer]);
+    } else {
+      setColumns([...allColumns]);
+    }
+  }, [selectedStatus, allColumns]);
 
   const ActionsRenderer = {
     accessor: 'action',
@@ -146,11 +156,15 @@ const SerializedAssetStatusChangeRequest = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canPerform'] = permissions?.serializedAsset?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
           if (finalObject['doa_status']) {
-            finalObject['canPerform'] = [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['canPerform'] =
+              finalObject['status'] === ASSET_APPROVAL_STATUS.pending &&
+              [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
             finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
-            const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
-            if (users?.length > 0) {
-              finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
+            if (u?.status === DOA_STATUS.pending) {
+              const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
+              if (users?.length > 0) {
+                finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
+              }
             }
           }
           return finalObject;
@@ -233,7 +247,7 @@ const SerializedAssetStatusChangeRequest = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          isActionButtonVisible={true}
+          isActionButtonVisible={selectedStatus === ASSET_APPROVAL_STATUS.pending}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           isAddButtonVisible={false}
           actionMenuItems={
@@ -294,6 +308,7 @@ const SerializedAssetStatusChangeRequest = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             resource={sidebarResource.serializedAssetStatusChangeRequest}
+            hideAction={selectedStatus != ASSET_APPROVAL_STATUS.pending}
           />
         ) : (
           <Box p={2} height={500}>
