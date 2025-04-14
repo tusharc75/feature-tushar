@@ -79,7 +79,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
   const [addRentalJobDataDialog, setAddRentalJobDataDialog] = useState({ open: false, type: '' });
-  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
+  const [addQuotationDataDialog, setAddQuotationDataDialog] = useState({ open: false, type: '' });
   const [addFieldServiceOrderDataDialog, setAddFieldServiceOrderDataDialog] = useState(false);
   const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
@@ -254,45 +254,45 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -488,7 +488,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         fetchMaterial();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAddRentalJobDataDialog({ open: false, type: '' });
-        setAddQuotationDataDialog(false);
+        setAddQuotationDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
       }
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) {
@@ -511,9 +511,9 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         taxCodeData = taxCodeOptions[0];
       }
       const material: any = [];
-      if (addRentalJobDataDialog.open || addQuotationDataDialog || addFieldServiceOrderDataDialog) {
+      if (addRentalJobDataDialog.open || addQuotationDataDialog.open || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
-          const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(e, allFields) };
+          const element: any = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(e, allFields) };
           const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber');
           if (wellNumberField && e?.wellNumber) {
             if (wellNumberField?.type === 'multiSelect') {
@@ -533,7 +533,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           if (addRentalJobDataDialog.open) {
             element.isRental = true;
           }
-          if (addQuotationDataDialog) {
+          if (addQuotationDataDialog.open) {
             element.isQuotation = true;
           }
           if (addFieldServiceOrderDataDialog) {
@@ -553,7 +553,6 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
           element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-          element.isRental = false;
           if (taxCodeData && allFields?.find((e) => e?.fieldName === 'taxCode')) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
@@ -593,7 +592,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         fetchData();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAddRentalJobDataDialog({ open: false, type: '' });
-        setAddQuotationDataDialog(false);
+        setAddQuotationDataDialog({ open: false, type: '' });
         setAddFieldServiceOrderDataDialog(false);
         setIsSubmitting(false);
       })
@@ -931,7 +930,14 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
             <>
               <MenuItem
                 onClick={() => {
-                  setAddQuotationDataDialog(true);
+                  setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.package });
+                }}
+              >
+                {`Add ${resources?.packages?.titlePlural} From ${resources?.quotation?.titleSingular}`}
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  setAddQuotationDataDialog({ open: true, type: MATERIAL_TYPE.service });
                 }}
               >
                 {`Add Services From ${resources?.quotation?.titleSingular}`}
@@ -1063,7 +1069,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           handleClose={() => {
             setMaterialDialog({ open: false, type: '', parentId: null });
           }}
-          ids={treeToFlatArray(dataRows, 'subRows')?.map((e) => e.materialId)}
+          ids={[]}
           isSubmitting={isSubmitting}
         />
       )}
@@ -1139,18 +1145,18 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           isSubmitting={isSubmitting}
         />
       )}
-      {addQuotationDataDialog && (
+      {addQuotationDataDialog.open && (
         <AddQuotationDataDialog
           onClose={() => {
-            setAddQuotationDataDialog(false);
+            setAddQuotationDataDialog({ open: false, type: '' });
           }}
           onSuccess={(rows) => {
             handleAdd(rows, null);
           }}
           referenceData={fieldTicketData}
           isSubmitting={isSubmitting}
-          materialType={MATERIAL_TYPE.service}
-          ids={dataRows?.map((row) => row?.materialId)}
+          materialType={addQuotationDataDialog.type}
+          ids={[]}
         />
       )}
       {addFieldServiceOrderDataDialog && (
