@@ -11,7 +11,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddOutlined, Edit, Delete } from '@mui/icons-material';
 
-export default function VariablesDialog({ fields, handleClose, id }) {
+export default function VariablesDialog({ isDisable, fields, handleClose, id }) {
   const [manageVariable, setManageVariable] = useState({ open: false, data: null });
   const [variables, setVariables] = useState([]);
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +25,9 @@ export default function VariablesDialog({ fields, handleClose, id }) {
     try {
       setIsFetching(true);
       const res = await axiosInstance().get(`/quote-pdf-template/${id}/variables`);
-      const { data: { data } } = res;
+      const {
+        data: { data }
+      } = res;
       setVariables(data);
       setIsFetching(false);
     } catch (e) {
@@ -37,7 +39,9 @@ export default function VariablesDialog({ fields, handleClose, id }) {
   const handleDelete = async (variableId) => {
     try {
       const res = await axiosInstance().delete(`/quote-pdf-template/${id}/variables/${variableId}`);
-      const { data: { message } } = res;
+      const {
+        data: { message }
+      } = res;
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
@@ -69,6 +73,7 @@ export default function VariablesDialog({ fields, handleClose, id }) {
               <HtmlTooltip title={'Add'} placement="top" arrow enterTouchDelay={0}>
                 <ThemeButton
                   buttonType="theme"
+                  disabled={isDisable}
                   onClick={() => setManageVariable({ open: true, data: null })}
                   startIcon={<AddOutlined />}
                 >
@@ -105,19 +110,12 @@ export default function VariablesDialog({ fields, handleClose, id }) {
                           <TableCell>{variable.fieldName}</TableCell>
                           <TableCell align="right">
                             <HtmlTooltip title="Edit">
-                              <IconButton
-                                size="small"
-                                onClick={() => setManageVariable({ open: true, data: variable })}
-                              >
+                              <IconButton size="small" disabled={isDisable} onClick={() => setManageVariable({ open: true, data: variable })}>
                                 <Edit fontSize="small" />
                               </IconButton>
                             </HtmlTooltip>
                             <HtmlTooltip title="Delete">
-                              <IconButton
-                                size="small"
-                                onClick={() => handleDelete(variable._id)}
-                                color="error"
-                              >
+                              <IconButton size="small" disabled={isDisable} onClick={() => handleDelete(variable._id)} color="error">
                                 <Delete fontSize="small" />
                               </IconButton>
                             </HtmlTooltip>
