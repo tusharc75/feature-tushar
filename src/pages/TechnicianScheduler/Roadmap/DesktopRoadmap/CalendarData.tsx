@@ -6,7 +6,7 @@ import { memo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import RippleButton from 'src/components/RippleButton';
-import { cn, CustomDialogTransition, displayDate } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, displayDate, sidebarResource, TECHNICIAN_STATUS } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import { getColorFromPriority, getPositionOfDate, getPriority } from '../helperFunctions';
@@ -28,7 +28,7 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
             index={index}
             item={item}
             key={item._id}
-            services={item?.fieldTicket || []}
+            services={item?.technicianHistory || []}
             handleSelect={handleSelect}
             startDate={startDate}
             dayPixel={dayPixel}
@@ -66,10 +66,6 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
 const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any) => {
   const [anchorPosition, setAnchorPosition] = useState<{ top: number; left: number } | null>(null);
 
-  const handleUnAssign = () => {
-    handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '');
-  };
-
   const priority = getPriority(service.status);
   const bgColor = getColorFromPriority(priority);
   service.startDate = service.startDate || service.estimateStartDate;
@@ -102,9 +98,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           title={
             <div>
               <p>
-                {service?.fieldTicket[0]?.fieldTicketNumber ||
-                  service?.rentalJob[0]?.rentalJobName ||
-                  service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}
+                {service?.reference?.optionLabel}
               </p>
               <p className="text-[12px]">
                 {displayDate(service?.startDate)} - {displayDate(service?.endDate)}
@@ -116,9 +110,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
         >
           <>
             <p className="mb-2 break-all text-[13px] font-semibold leading-[16px]">
-              {service?.fieldTicket[0]?.fieldTicketNumber ||
-                service?.rentalJob[0]?.rentalJobName ||
-                service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}
+              {service?.reference?.optionLabel}
             </p>
             <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">
               {service?.serviceDetail?.serviceName}
@@ -126,7 +118,6 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           </>
         </HtmlTooltip>
       </RippleButton>
-
       <Popover
         disableScrollLock
         open={Boolean(anchorPosition)}
@@ -148,11 +139,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
         <div>
           <div className="w-[250px] rounded-md bg-[--dark-primary,white] p-3 shadow-md">
             <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-              {service?.fieldTicket[0]?.fieldTicketNumber ||
-                service?.rentalJob[0]?.rentalJobName ||
-                service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}
+              {service?.reference?.optionLabel}
             </p>
-
             <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">
               {service?.serviceDetail?.serviceName}
             </p>
@@ -161,9 +149,36 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <ThemeButton>Dispach</ThemeButton>
-              <ThemeButton>Return</ThemeButton>
-              <ThemeButton onClick={() => handleUnAssign()}>Un-assign</ThemeButton>
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved &&
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={() => {
+                    handleSelect(null, service, 'dispatch');
+                    handleClosePopup()
+                  }}
+                >
+                  Dispatch
+                </ThemeButton>
+              }
+              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched &&
+                <ThemeButton
+                  buttonType='theme'
+                  onClick={() => {
+                    handleSelect(null, service, 'return');
+                    handleClosePopup()
+                  }}
+                >
+                  Return
+                </ThemeButton>
+              }
+              {service?.status === TECHNICIAN_STATUS.reserved &&
+                <ThemeButton
+                  onClick={() => {
+                    handleSelect(null, { _id: service?._id }, 'un-assign');
+                    handleClosePopup()
+                  }}
+                >Un-Assign</ThemeButton>
+              }
             </div>
           </div>
         </div>
