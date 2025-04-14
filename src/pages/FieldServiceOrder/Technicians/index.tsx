@@ -619,7 +619,9 @@ const Technicians = ({
     } else {
       value.endDate = values?.endDate;
     }
-    if (products?.length) value.products = products;
+    if (products?.length) {
+      value.materialIds = products;
+    }
     setIsSubmitting(true);
     axiosInstance()
       .put(`${fieldServiceOrder.api}/technician/start-end-date`, value)
