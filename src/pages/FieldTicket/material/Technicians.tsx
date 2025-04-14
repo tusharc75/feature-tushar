@@ -521,6 +521,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       {startEndDateConfermationDialog.open && (
         <StartStopDateDialog
           type={startEndDateConfermationDialog.type}
+          resource={sidebarResource.fieldTicket}
           onClose={() => {
             setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, data: null, notes: '' });
           }}
@@ -546,6 +547,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           service={selectedService}
           technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
+          resource={sidebarResource.fieldTicket}
         />
       )}
     </>
