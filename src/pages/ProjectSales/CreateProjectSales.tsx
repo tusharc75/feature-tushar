@@ -38,7 +38,8 @@ const CreateProjectSales = ({
   fields = null,
   onSuccess = null,
   accountId = null,
-  resource = null
+  resource = null,
+  isRedirectTodetailPage = true
 }) => {
   const {
     state: {
@@ -163,11 +164,13 @@ const CreateProjectSales = ({
           fetchData();
           if (type) {
             close();
-          } else {
+          } else if (isRedirectTodetailPage) {
             history.push(`${routes.projectSalesDetail.path}/${newId}`, {
               managerId: data.data?.projectManager
             });
             close();
+          } else {
+            onSuccess();
           }
           toastConfig.setToastConfig({
             open: true,

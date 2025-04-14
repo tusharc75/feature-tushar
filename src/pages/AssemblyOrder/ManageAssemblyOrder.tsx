@@ -24,7 +24,14 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose, onSuccess, referenceData = null }) => {
+const ManageAssemblyOrder = ({
+  isClone = false,
+  assemblyOrderId = null,
+  onClose,
+  onSuccess,
+  referenceData = null,
+  isRedirectTodetailPage = true
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -134,7 +141,9 @@ const ManageAssemblyOrder = ({ isClone = false, assemblyOrderId = null, onClose,
             type: 'success',
             message: message
           });
-          history.push(`${routes.assemblyOrderDetail.path}/${data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.assemblyOrderDetail.path}/${data?._id}`);
+          }
           onSuccess(data);
           setLoading(false);
         })
