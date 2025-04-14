@@ -614,7 +614,7 @@ export default function NewCreateQuotePdfTemplate() {
                 <div className="flex flex-wrap gap-2">
                   {isEdit && (
                     <ThemeButton
-                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate) || !isEdit}
+                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
                       onClick={handleImport}
                       isLoading={isUpdating}
                     >
@@ -626,7 +626,7 @@ export default function NewCreateQuotePdfTemplate() {
                   </ThemeButton>
                   {isEdit && (
                     <ThemeButton
-                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate) || !isEdit}
+                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
                       onClick={submitForm}
                       buttonType="theme"
                       isLoading={isUpdating}
@@ -642,7 +642,7 @@ export default function NewCreateQuotePdfTemplate() {
 
                   {!quoteData && isEdit && (
                     <ThemeButton
-                      disabled={(!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)) || !isEdit}
+                      disabled={(!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate))}
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
