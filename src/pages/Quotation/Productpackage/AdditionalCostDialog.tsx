@@ -58,7 +58,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
     setInitialData({ fields: [], values: {} });
     var poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
     poFields = poFields?.filter((f) => f?.isRead);
-    const taxCodeOptions = await getTaxList(user, quotationData, quotationData, MATERIAL_TYPE.manualEntry);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationFields, MATERIAL_TYPE.manualEntry);
     poFields?.forEach((e: any) => {
       if (e?.fieldName === 'taxCode') {
         e.option = taxCodeOptions;

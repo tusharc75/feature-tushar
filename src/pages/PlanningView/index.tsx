@@ -48,7 +48,7 @@ function PlanningView() {
   const [queryString, setQueryString] = useState(null);
 
   const [view, setView] = useState('calendar');
-  const [open, setOpen] = useState({ open: false, resource: null });
+  const [createDialog, setCreateDialog] = useState(false);
   const ref: any = useRef();
 
   const PLANNING_RESOURCE = [
@@ -209,6 +209,7 @@ function PlanningView() {
   const onClickRefreshIcon = () => {
     if (ref?.current) {
       ref?.current?.fetchData();
+      setCreateDialog(false);
     }
   };
 
@@ -224,8 +225,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -233,15 +234,14 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource &&
+            {selectedResource && permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
                   className="mr-2"
                   buttonType="theme"
                   id={'add-button'}
-                  disabled={false}
                   onClick={(e) => {
-                    setOpen({ open: true, resource: selectedResource?.resource });
+                    setCreateDialog(true);
                   }}
                   startIcon={<AddOutlined />}
                 >
@@ -293,153 +293,141 @@ function PlanningView() {
           )}
         </Box>
       </Box>
-      {open.open && open.resource === sidebarResource?.rentalManagement && (
+      {createDialog && selectedResource?.resource === sidebarResource?.rentalManagement && (
         <ManageRentalManagementDialog
           isClone={false}
-          open={open.open}
+          open={createDialog}
           rentalManagementId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isAutomated={true}
         />
       )}
-      {open.open && open.resource === sidebarResource?.planning && (
+      {createDialog && selectedResource?.resource === sidebarResource?.planning && (
         <ManagePlanning
           isClone={false}
           id={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.demandOrder && (
+      {createDialog && selectedResource?.resource === sidebarResource?.demandOrder && (
         <ManageDemandOrderDialog
           isClone={false}
-          open={open.open}
+          open={createDialog}
           demandOrderId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.productionOrder && (
+      {createDialog && selectedResource?.resource === sidebarResource?.productionOrder && (
         <ManageProductionOrder
           isClone={false}
           productionOrderId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.purchaseRequisition && (
+      {createDialog && selectedResource?.resource === sidebarResource?.purchaseRequisition && (
         <ManagePurchaseRequisition
           isClone={false}
           id={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.purchaseOrder && (
+      {createDialog && selectedResource?.resource === sidebarResource?.purchaseOrder && (
         <ManagePurchaseOrder
           isClone={false}
           purchaseOrderId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           currency={user?.entity?.find((d) => d._id === selectedEntity)?.currency}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.repairJob && (
+      {createDialog && selectedResource?.resource === sidebarResource?.repairJob && (
         <ManageRepairJob
           isClone={false}
           repairJobId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           referenceType={sidebarResource.planningView}
         />
       )}
-      {open.open && open.resource === sidebarResource?.sublease && (
+      {createDialog && selectedResource?.resource === sidebarResource?.sublease && (
         <ManageSublease
           isClone={false}
           subleaseId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.projectSales && (
+      {createDialog && selectedResource?.resource === sidebarResource?.projectSales && (
         <CreateProjectSales
-          open={open?.open}
+          open={createDialog}
           isClone={false}
           projectSalesId={false}
-          close={() => setOpen({ open: false, resource: null })}
-          fetchData={() => {}}
+          close={() => setCreateDialog(false)}
+          fetchData={() => { }}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.fieldServiceOrder && (
+      {createDialog && selectedResource?.resource === sidebarResource?.fieldServiceOrder && (
         <ManageServiceOrderDialog
           isClone={false}
           serviceOrderId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
-          open={open.open}
+          open={createDialog}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.quotation && (
+      {createDialog && selectedResource?.resource === sidebarResource?.quotation && (
         <ManageQuotationDialog
           isClone={false}
-          open={open.open}
+          open={createDialog}
           quotationId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
       )}
-      {open.open && open.resource === sidebarResource?.assemblyOrder && (
+      {createDialog && selectedResource?.resource === sidebarResource?.assemblyOrder && (
         <ManageAssemblyOrder
           isClone={false}
           assemblyOrderId={null}
-          onClose={() => setOpen({ open: false, resource: null })}
+          onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
-            setOpen({ open: false, resource: null });
           }}
           isRedirectTodetailPage={false}
         />
