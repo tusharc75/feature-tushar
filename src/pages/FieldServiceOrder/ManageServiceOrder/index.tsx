@@ -28,7 +28,7 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
 
-const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open }) => {
+const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open, isRedirectTodetailPage = true }) => {
   const {
     state: { user, resources }
   }: any = useData();
@@ -142,7 +142,10 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
             type: 'success',
             message: message
           });
-          history.push(`${routes?.fieldServiceOrderDetail?.path}/${data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes?.fieldServiceOrderDetail?.path}/${data?._id}`);
+          }
+          onSuccess();
           setLoading(false);
         })
         .catch((error) => {
@@ -173,7 +176,6 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
     }
     return errors;
   }
-
 
   return (
     <>
