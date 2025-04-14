@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   CHILD_RESOURCE,
-  FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
+  TECHNICIAN_STATUS,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   fieldServiceOrder,
@@ -502,7 +502,7 @@ const Consumables = ({
               isAddButtonVisible={
                 isEmpty(selectedTechnician) ||
                 selectedTechnician?.technicianId === 'All' ||
-                selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved
+                selectedTechnician?.status === TECHNICIAN_STATUS.reserved
               }
               addButtonMenuItems={<AddButtonMenuItems />}
               isActionButtonVisible={true}
