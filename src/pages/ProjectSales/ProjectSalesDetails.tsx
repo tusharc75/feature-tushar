@@ -18,7 +18,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { checkSuperAdminAccess, displayCardDate, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
+import { checkSuperAdminAccess, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
@@ -29,7 +29,6 @@ const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -44,7 +43,6 @@ const ProjectSalesDetails = () => {
   const [quotes, setQuotes] = useState([]);
   const [quotations, setQuotations] = useState([]);
   const [currentAccountId, setCurrentAccountId] = useState('');
-  const [mainPoints, setMainPoints] = useState(null);
   const [deleteRec, setDeleteRec] = useState(null);
   const [removeUserRec, setRemoveUserRec] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -98,9 +96,6 @@ const ProjectSalesDetails = () => {
     }
   };
 
-  /**
-   * Get sales strategy data for paticular ID
-   */
   const getSalesData = async () => {
     setLoading(true);
     try {
@@ -121,8 +116,6 @@ const ProjectSalesDetails = () => {
       setCopyOfProjectSalesData(modifiedData);
       setProjectSalesData(data);
       currentTabIndex === 0 && setCurrentTabIndex(0);
-      handleMainPoints(data);
-      const name = data.projectName;
       setCustomizedRoutes([{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }, { title: data.projectName }]);
       setTeamUsers(data.staticData?.user);
       setCustomerAccounts(data.staticData?.customerAccount);
@@ -167,20 +160,6 @@ const ProjectSalesDetails = () => {
       });
   };
 
-  const handleMainPoints = (data) => {
-    let tempMp = {
-      'Project Name': data.projectName || '',
-      Amount: formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount || '',
-      'End Date': data.endDate ? displayCardDate(data.endDate) : '',
-      'Project Probability': data?.projectProbability ? `${data.projectProbability}%` : '',
-      'Opportunity Owner': data.opportunityOwner?.optionLabel || ''
-    };
-    setMainPoints(tempMp);
-  };
-
-  /**
-   * Update Dialog For Sales Data
-   */
   const handleOpenUpdateDialog = () => {
     setOpenUpdateDialog(true);
   };
@@ -189,10 +168,6 @@ const ProjectSalesDetails = () => {
     setOpenUpdateDialog(false);
   };
 
-  /**
-   * Handle Delete Sales Data
-   * @param id
-   */
   const handleDeleteProject = (id) => {
     setDeleteRec(id);
     setShowConfirmBox(true);
@@ -217,9 +192,6 @@ const ProjectSalesDetails = () => {
     }
   };
 
-  /**
-   * Handle Remove Users
-   */
   const handleRemoveUser = (rec) => {
     setRemoveUserRec(rec);
     setShowConfirmBox(true);
@@ -247,9 +219,6 @@ const ProjectSalesDetails = () => {
     }
   };
 
-  /**
-   * Handle Open Users Dialog For Teams
-   */
   const handleOpenDialog = (type: string, id: string = '') => {
     setOpenDialog(true);
     setDialogType(type);
@@ -275,7 +244,6 @@ const ProjectSalesDetails = () => {
         return quotes.length ? quotes.map((t) => t._id) : [];
       case 'quotation':
         return quotations.length ? quotations.map((t) => t._id) : [];
-
       default:
         return [];
     }
@@ -283,7 +251,6 @@ const ProjectSalesDetails = () => {
 
   const isTeamMember = Boolean(teamUsers.find((u) => u._id === user.user._id));
   const isManager = user.user._id === projectSalesData?.projectManager?.optionValue;
-  const fiteredFieldForUpdate = projectSalesFields.filter((obj) => obj.isUpdate);
   const fiteredFieldToShow = projectSalesFields.filter((obj) => obj.isRead);
 
   return (
@@ -518,17 +485,6 @@ const ProjectSalesDetails = () => {
           }}
           projectSalesId={projectSalesData._id}
         />
-
-        // <UpdateDetailsDialog
-        //   title={`Update ${projectSalesData?.projectName}`}
-        //   openDialog={openUpdateDialog}
-        //   onClose={closeUpdateDIalog}
-        //   data={projectSalesData}
-        //   fields={fiteredFieldForUpdate}
-        //   isUpdating={isUpdating}
-        //   handleUpdate={handleUpdateProject}
-        //   isProjectSales={true}
-        // />
       )}
       {openDialog && (
         <AssignDataDialog

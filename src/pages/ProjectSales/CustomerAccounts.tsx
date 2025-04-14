@@ -530,7 +530,7 @@ const CustomerAccounts = (props) => {
                   {customerAccounts.map((c, i) => (
                     <Box hidden={currentTabIndex !== i} key={c._id}>
                       <Box mb={2}>
-                        <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
+                        <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact((prev) => !prev)}>
                           <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
                             <div className="flex items-center justify-between">
                               <Typography variant="subtitle2">
