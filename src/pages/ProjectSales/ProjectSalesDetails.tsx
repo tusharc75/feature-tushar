@@ -1,11 +1,10 @@
-import { Box, IconButton, Paper, Typography } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { ControlPoint } from '@mui/icons-material';
-import { Skeleton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { Box, IconButton, Paper, Skeleton, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
-import queryString from 'query-string';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
@@ -205,15 +204,18 @@ const ProjectSalesDetails = () => {
         _id: id
       };
       setDeleting(true);
-      axiosInstance().put(`${projectSales.projectSalesApi}/add-user`, dataObj).then(() => {
-        getSalesData();
-        setDeleting(false);
-        setShowConfirmBox(false);
-      }).catch((error) => {
-        setDeleting(false);
-        setShowConfirmBox(false);
-        toastConfig.setToastConfig(error);
-      });
+      axiosInstance()
+        .put(`${projectSales.projectSalesApi}/add-user`, dataObj)
+        .then(() => {
+          getSalesData();
+          setDeleting(false);
+          setShowConfirmBox(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          setShowConfirmBox(false);
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
