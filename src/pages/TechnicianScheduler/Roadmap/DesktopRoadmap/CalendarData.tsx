@@ -94,18 +94,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           anchorPosition ? 'border-2 border-theme' : ''
         )}
       >
-        <HtmlTooltip
-          title={
-            <div>
-              <p>{service?.reference?.optionLabel}</p>
-              <p className="text-[12px]">
-                {displayDate(service?.startDate)} - {displayDate(service?.endDate)}
-              </p>
-            </div>
-          }
-          placement="top"
-          className="block min-w-0 max-w-full flex-grow p-2"
-        >
+        <div className="block min-w-0 max-w-full flex-grow p-2">
           <>
             <p className="mb-1 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
             <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
@@ -160,7 +149,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               )}
             </div>
           </>
-        </HtmlTooltip>
+        </div>
       </RippleButton>
       <Popover
         disableScrollLock
