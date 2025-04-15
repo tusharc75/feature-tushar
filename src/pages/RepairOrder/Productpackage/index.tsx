@@ -358,7 +358,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           ? material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
           : 0;
       parent.isValid = true;
-      parent.canDelete = parent.workOrder ? false : true;
+      parent.canDelete = parent.workOrder || !allowedToEdit ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = parent?.serializedAssetDetail?.status || null;
     });
@@ -384,7 +384,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
   const generateNestedData = (material, parent) => {
     let subRows: any = material.filter((e) => e.parentId === parent._id);
-    let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
+    let canDelete = subRows?.find((e) => e.workOrder) || !allowedToEdit ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${
@@ -411,7 +411,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           : 0;
       _subRow.isValid = true;
       _subRow.status = _subRow?.serializedAssetDetail?.status || null;
-      _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ? (_subRow.workOrder ? false : true) : canDelete;
+      _subRow.canDelete = _subRow.type === MATERIAL_TYPE.serializedAsset ? (_subRow.workOrder || !allowedToEdit ? false : true) : canDelete;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === 'package') {
@@ -615,7 +615,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           </MenuItem>
         )}
         <MenuItem
-          disabled={allowedToEdit && selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
+          disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
           onClick={() => {
             handleDeleteMultiple();
           }}
@@ -650,7 +650,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             refreshGrid={fetchData}
             hideSelection={repairOrderData?.otherBrandRepairJob ? true : false}
-            hideAction={repairOrderData?.otherBrandRepairJob ? true : !allowedToEdit}
+            hideAction={repairOrderData?.otherBrandRepairJob ? true : false}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={user?.user?.brandPolicy?.repairOrderAddProductPackage ? true : false}
