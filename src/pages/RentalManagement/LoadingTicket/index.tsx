@@ -10,7 +10,7 @@ import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodas
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -136,6 +136,8 @@ const LoadingTicket = ({
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
 
+  const { generateColumns } = useColumns();
+
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
@@ -204,7 +206,13 @@ const LoadingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    const longDescription = rentalJobProductFields?.find((r) => r?.fieldName === 'longDescription');
+    const newColumns = generateColumns(
+      renderedFrom,
+      rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
 
     const column: any = [
       {
@@ -330,17 +338,7 @@ const LoadingTicket = ({
             }
           ]
         : []),
-      ...(longDescription
-        ? [
-            {
-              accessor: 'longDescription',
-              Header: longDescription?.fieldLabel,
-              disabled: true,
-              Cell: ({ row }) =>
-                row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
-            }
-          ]
-        : []),
+      ...newColumns,
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',

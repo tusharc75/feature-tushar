@@ -11,7 +11,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
@@ -177,6 +177,8 @@ const ReceivingTicket = ({
   const {
     state: { user, permissions, resources }
   }: any = useData();
+
+  const { generateColumns } = useColumns();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -1271,7 +1273,13 @@ const ReceivingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
-    const longDescription = rentalJobProductFields?.find((r) => r?.fieldName === 'longDescription');
+    const newColumns = generateColumns(
+      renderedFrom,
+      rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
 
     const column: any = [
       {
@@ -1428,17 +1436,7 @@ const ReceivingTicket = ({
             }
           ]
         : []),
-      ...(longDescription
-        ? [
-            {
-              accessor: 'longDescription',
-              Header: longDescription?.fieldLabel,
-              disabled: true,
-              Cell: ({ row }) =>
-                row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
-            }
-          ]
-        : []),
+      ...newColumns,
       {
         accessor: 'qty',
         Header: 'Qty',
