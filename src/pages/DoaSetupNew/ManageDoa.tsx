@@ -402,7 +402,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     limitTags={2}
                                     value={currency}
                                     size="small"
-                                    placeholder="Currency1"
+                                    placeholder="Currency"
                                     label="Currency"
                                     name={'currency'}
                                     fullWidth={true}
