@@ -29,7 +29,7 @@ const SerializedAssetStatusChangeRequestDetail = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
       .then(({ data: { data } }) => {
         setFields([...data]);
       });

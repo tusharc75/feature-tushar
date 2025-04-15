@@ -34,7 +34,7 @@ const ResourceDoaRequestDetail = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${resource}`)
+      .get(`/field?resource=${resource}&view=true`)
       .then(({ data: { data } }) => {
         setFields([...data]);
       });
