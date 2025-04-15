@@ -54,7 +54,7 @@ import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets } from '.
 import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
-import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import { checkProductInside, fetch_rental_product_fields, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
@@ -202,6 +202,10 @@ const LoadingTicket = ({
     setColumns(null);
     const productFields = fieldLabels?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
+
+    const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    const longDescription = rentalJobProductFields?.find((r) => r?.fieldName === 'longDescription');
+
     const column: any = [
       {
         accessor: 'index',
@@ -323,6 +327,17 @@ const LoadingTicket = ({
               Header: 'Parent',
               disabled: true,
               Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+            }
+          ]
+        : []),
+      ...(longDescription
+        ? [
+            {
+              accessor: 'longDescription',
+              Header: longDescription?.fieldLabel,
+              disabled: true,
+              Cell: ({ row }) =>
+                row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />
             }
           ]
         : []),
@@ -659,6 +674,7 @@ const LoadingTicket = ({
               const parent = material?.find((e) => e._id === parentId);
               if (parent) {
                 ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+                ele['longDescription'] = parent?.longDescription || '';
               }
             }
           } else if (ele?.parentId) {
