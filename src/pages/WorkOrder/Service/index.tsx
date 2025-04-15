@@ -47,6 +47,7 @@ import { TabPanel } from 'src/components/CustomTabs';
 import Consumables from 'src/pages/WorkOrder/Consumables';
 import Diagram from 'src/pages/WorkOrder/Diagram';
 import { ConnectedTab, ConnectedTabs } from 'src/components/CustomTabs/ConnectedTabs';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
 
@@ -549,7 +550,7 @@ const Service = ({
         <>
           <div
             className={cn(
-              '-mt-4 grid min-h-[calc(100vh-300px)] transition-all  max-md:mb-[100px] max-md:grid-cols-1',
+              'grid min-h-[calc(100vh-300px)] transition-all max-md:mb-[100px] max-md:grid-cols-1',
               isColapsed ? 'grid-cols-[100px_1fr]' : 'md:grid-cols-[300px_1fr] lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr]'
             )}
           >
@@ -581,21 +582,18 @@ const Service = ({
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
             <div className="max-w-full border transition-all md:border-l-0">
-              <ConnectedTabs onChange={(_, value) => setInnerTabs(value)} value={innerTabs} className="my-4 pl-4">
-                <ConnectedTab<InnerTabs> value={'steps'}>Steps</ConnectedTab>
-                {!user?.user?.brandPolicy?.workOrderConsumableHide && <ConnectedTab value={'productsConsumables'}>Products/Consumables</ConnectedTab>}
-                <ConnectedTab<InnerTabs> value={'drawing'}>Drawing</ConnectedTab>
-              </ConnectedTabs>
-
               <div
                 style={{
                   overflow: 'hidden',
                   minHeight: 'calc(100% - 53px)'
                 }}
-                className="px-4"
+                className="space-y-4 p-4"
               >
-                <>
-                  <TabPanel<InnerTabs> value={innerTabs} index={'steps'} className="-mt-2">
+                <Accordion defaultExpanded>
+                  <AccordionSummary aria-controls="panel1-content" id="panel1-header">
+                    Steps
+                  </AccordionSummary>
+                  <AccordionDetails>
                     {selectedService ? (
                       <>
                         {selectedService?.type === 'service' ? (
@@ -606,10 +604,12 @@ const Service = ({
                             allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                             fetchService={fetchServiceData}
                             resource={resource}
+                            resourceData={resourceData}
                             stepSubmitedData={stepSubmitedData}
                             minHeightClass={minHeightClass}
                             isMobile={mobScreen}
                             fetchWorkOrderData={fetchWorkOrderData}
+                            defaultSelectedService={defaultSelectedService}
                           />
                         ) : (
                           <Quotation />
@@ -624,9 +624,14 @@ const Service = ({
                         <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
                       </div>
                     )}
-                  </TabPanel>
-                  {!user?.user?.brandPolicy?.workOrderConsumableHide && resourceData && (
-                    <TabPanel<InnerTabs> value={innerTabs} index={'productsConsumables'} className="-mt-2">
+                  </AccordionDetails>
+                </Accordion>
+                {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+                  <Accordion>
+                    <AccordionSummary aria-controls="panel2-content" id="panel2-header">
+                      Products/Consumables
+                    </AccordionSummary>
+                    <AccordionDetails>
                       <Consumables
                         hideServiceFilter={true}
                         allowedToEdit={
@@ -658,9 +663,14 @@ const Service = ({
                         defaultServiceUniqueId={defaultSelectedService}
                         serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
                       />
-                    </TabPanel>
-                  )}
-                  <TabPanel<InnerTabs> value={innerTabs} index={'drawing'}>
+                    </AccordionDetails>
+                  </Accordion>
+                )}
+                <Accordion>
+                  <AccordionSummary aria-controls="panel3-content" id="panel3-header">
+                    Drawing
+                  </AccordionSummary>
+                  <AccordionDetails>
                     <Diagram
                       showContainer={false}
                       resource={ACTIVITY_RESOURCE.workOrder}
@@ -671,8 +681,8 @@ const Service = ({
                       showMaterialFilter={false}
                       defaultSelectedUniqueId={defaultSelectedService}
                     />
-                  </TabPanel>
-                </>
+                  </AccordionDetails>
+                </Accordion>
               </div>
             </div>
           </div>
