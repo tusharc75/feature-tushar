@@ -106,7 +106,8 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
   };
 
   const fetchEntityUser = () => {
-    axiosInstance().get(`/user?filterById=[{"field": "entities.entity", "term": "${entity}"}]`)
+    axiosInstance()
+      .get(`/user?filterById=[{"field": "entities.entity", "term": "${entity}"}]`)
       .then(({ data: { data } }) => {
         setUserList(data.length ? data.map((e: any) => ({ id: e._id, name: `${e.firstName} ${e.lastName}` })) : []);
       })
@@ -238,7 +239,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
               </Grid>
             )}
             <Grid size={{ md: 2, lg: 2 }} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
-              <HtmlTooltip title='Add'>
+              <HtmlTooltip title="Add">
                 <IconButton
                   size="small"
                   aria-label="add"
@@ -250,7 +251,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                   <Add fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title='Remove'>
+              <HtmlTooltip title="Remove">
                 <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(i)}>
                   <Delete fontSize="small" color="error" />
                 </IconButton>
@@ -262,7 +263,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     ) : (
       <Grid size={{ md: 12, lg: 12 }} className="d-flex align-items-center justify-content-center">
         <ThemeButton
-          buttonType='theme'
+          buttonType="theme"
           onClick={() => {
             arrayHelpers.push({ _id: [], amount: 0 });
           }}
@@ -332,7 +333,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     >
       <>
         <CustomDialogHeader
-          title={data ? 'Edit DOA' : 'Add DOA'}
+          title={`${data ? 'Edit DOA' : 'Add DOA'} (${resource})`}
           onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -403,12 +404,14 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     size="small"
                                     placeholder="Currency"
                                     label="Currency"
-                                    name={currency}
+                                    name={'currency'}
                                     fullWidth={true}
                                     onChange={(e, val) => {
                                       setCurrency(val?.currencyCode ? val?.currencyCode : '');
                                       setCurrencySymbol(val?.symbolNative);
                                     }}
+                                    error={validation()?.currency}
+                                    helperText={validation()?.currency}
                                   />
                                 </Grid>
                               </Grid>
@@ -424,17 +427,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                             {values?.data && values?.data?.length > 0 && (
                               <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
                                 <Grid container spacing={2}>
-                                  <Grid size={{ md: 1, lg: 1 }}>
-                                    Index
-                                  </Grid>
-                                  <Grid size={{ md: 5, lg: 5 }}>
-                                    {approveType}
-                                  </Grid>
-                                  {checkType === DOAType.amount && (
-                                    <Grid size={{ md: 4, lg: 4 }}>
-                                      Amount
-                                    </Grid>
-                                  )}
+                                  <Grid size={{ md: 1, lg: 1 }}>Index</Grid>
+                                  <Grid size={{ md: 5, lg: 5 }}>{approveType}</Grid>
+                                  {checkType === DOAType.amount && <Grid size={{ md: 4, lg: 4 }}>Amount</Grid>}
                                   <Grid size={{ md: 2, lg: 2 }}></Grid>
                                 </Grid>
                               </Box>
@@ -480,7 +475,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                     </CustomDialogContent>
                   </div>
                   <CustomDialogFooter>
-                    <ThemeButton buttonType='transparent' onClick={onClose}>
+                    <ThemeButton buttonType="transparent" onClick={onClose}>
                       Cancel
                     </ThemeButton>
                     <ThemeButton buttonType="theme" onClick={submitForm}>
