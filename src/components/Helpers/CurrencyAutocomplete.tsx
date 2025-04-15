@@ -15,6 +15,7 @@ const CurrencyAutocomplete = (prop) => {
     limitTags,
     placeholder,
     onChange,
+    required,
     ...rest
   } = prop;
 
@@ -46,6 +47,7 @@ const CurrencyAutocomplete = (prop) => {
           name={name}
           label={label}
           error={error}
+          required={required}
           helperText={helperText}
         />
       )}
