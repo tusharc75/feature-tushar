@@ -2755,7 +2755,7 @@ const ReceivingTicket = ({
               : getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
           }
           products={
-            showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return
+            [DELIVERY_TICKET_TYPE.return, DELIVERY_TICKET_TYPE.receiving]?.includes(showTicketDialog.ticketType)
               ? showQtyDialog?.data && showQtyDialog?.data?.length > 0
                 ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
                 : []
@@ -3383,7 +3383,12 @@ const ActionButtonMenuItems = ({
                 id={'create-receiving-ticket-chargaeble-menu-item'}
                 onClick={() => {
                   if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                    if (getFilterSelectedRecords()?.every((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                    } else {
+                      setShowQtyDialog({ open: true, data: null });
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant, false);
+                    }
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isCreate}
