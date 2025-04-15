@@ -10,7 +10,7 @@ import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodas
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -54,7 +54,7 @@ import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets } from '.
 import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
-import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import { checkProductInside, fetch_rental_product_fields, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
@@ -136,6 +136,8 @@ const LoadingTicket = ({
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
 
+  const { generateColumns } = useColumns();
+
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
@@ -202,6 +204,16 @@ const LoadingTicket = ({
     setColumns(null);
     const productFields = fieldLabels?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
+
+    const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    const newColumns = generateColumns(
+      renderedFrom,
+      rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
+
     const column: any = [
       {
         accessor: 'index',
@@ -326,6 +338,7 @@ const LoadingTicket = ({
             }
           ]
         : []),
+      ...newColumns,
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -659,6 +672,7 @@ const LoadingTicket = ({
               const parent = material?.find((e) => e._id === parentId);
               if (parent) {
                 ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+                ele['longDescription'] = parent?.longDescription || '';
               }
             }
           } else if (ele?.parentId) {

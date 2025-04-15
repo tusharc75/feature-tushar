@@ -11,7 +11,7 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { MdHandyman, MdHomeRepairService } from 'react-icons/md';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
@@ -68,7 +68,7 @@ import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
-import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import { checkProductInside, fetch_rental_product_fields, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import ReceivingServices from './ReceivingServices';
@@ -177,6 +177,8 @@ const ReceivingTicket = ({
   const {
     state: { user, permissions, resources }
   }: any = useData();
+
+  const { generateColumns } = useColumns();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -747,6 +749,7 @@ const ReceivingTicket = ({
               const parent = material?.find((e) => e._id === parentId);
               if (parent) {
                 ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+                ele['longDescription'] = parent?.longDescription || '';
               }
             }
           } else if (ele?.parentId) {
@@ -1268,6 +1271,16 @@ const ReceivingTicket = ({
     setColumns(null);
     const productFields = fieldLabels?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
+
+    const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    const newColumns = generateColumns(
+      renderedFrom,
+      rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
+
     const column: any = [
       {
         accessor: 'index',
@@ -1423,6 +1436,7 @@ const ReceivingTicket = ({
             }
           ]
         : []),
+      ...newColumns,
       {
         accessor: 'qty',
         Header: 'Qty',
