@@ -241,7 +241,7 @@ const SerializedAssetDetailsPage = () => {
 
   const fetchFieldSerializedAssetStatusChangeRequest = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
       .then(({ data: { data } }) => {
         setSerializedAssetStatusChangeRequestFields([...data]);
       });
