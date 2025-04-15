@@ -389,6 +389,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     name="minAmount"
                                     placeholder="Minimum DOA Amount"
                                     label="Minimum DOA Amount"
+                                    required
                                     value={minAmount}
                                     onChange={(e) => {
                                       setMinAmount(Number(e.target.value.replace(/[^0-9]/g, '')));
@@ -405,6 +406,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     placeholder="Currency"
                                     label="Currency"
                                     name={'currency'}
+                                    required
                                     fullWidth={true}
                                     onChange={(e, val) => {
                                       setCurrency(val?.currencyCode ? val?.currencyCode : '');
