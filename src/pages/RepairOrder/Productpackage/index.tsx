@@ -615,7 +615,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           </MenuItem>
         )}
         <MenuItem
-          disabled={selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
+          disabled={allowedToEdit && selectedRecords?.filter((e) => e.canDelete)?.length === selectedRecords?.length ? false : true}
           onClick={() => {
             handleDeleteMultiple();
           }}
@@ -628,7 +628,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
   return (
     <Fragment>
-      {allowedToEdit && !repairOrderData?.otherBrandRepairJob && (
+      {!repairOrderData?.otherBrandRepairJob && (
         <>
           <DetailsPageHeader
             isAddButtonVisible={allowedToEdit}
@@ -649,7 +649,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             refreshGrid={fetchData}
-            hideSelection={repairOrderData?.otherBrandRepairJob ? true : !allowedToEdit}
+            hideSelection={repairOrderData?.otherBrandRepairJob ? true : false}
             hideAction={repairOrderData?.otherBrandRepairJob ? true : !allowedToEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
