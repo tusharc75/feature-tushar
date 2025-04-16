@@ -77,7 +77,7 @@ const CustomCollapsible = ({
       <button
         {...restHeadProps}
         className={cn(
-          'flex w-full cursor-pointer items-center justify-between bg-transparent px-4 py-[10px] text-left transition-colors dark:text-white',
+          'flex w-full cursor-pointer items-center justify-between bg-transparent px-4 py-[10px] text-left outline-none transition-colors  focus-visible:shadow-[inset_0px_0px_0px_1px_var(--new-theme-color)] dark:text-white',
           stateExpanded ? 'bg-[--accordion-expanded-summary-bg,#f1f5ff]' : '',
           headClassname
         )}
