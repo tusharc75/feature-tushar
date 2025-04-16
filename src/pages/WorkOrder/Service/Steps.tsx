@@ -1512,7 +1512,7 @@ const Steps = ({
                       }
                     >
                       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-                        <CustomCollapsible head={<h6 className="text-base font-semibold">Products/Consumables</h6>} className="border-b-0 border-t">
+                        <CustomCollapsible head={<h6 className="text-base font-normal">Products/Consumables</h6>} className="border-b-0 border-t">
                           <div className="p-4">
                             <Consumables
                               hideServiceFilter={true}
@@ -1549,7 +1549,7 @@ const Steps = ({
                           </div>
                         </CustomCollapsible>
                       )}
-                      <CustomCollapsible head={<h6 className="text-base font-semibold">Drawing</h6>} element="li" className="border-b-0 border-t">
+                      <CustomCollapsible head={<h6 className="text-base font-normal">Drawing</h6>} element="li" className="border-b-0 border-t">
                         <div className="p-4">
                           <Diagram
                             fullHeight={false}
