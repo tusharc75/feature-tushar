@@ -16,6 +16,8 @@ import { useData } from 'src/StateProvider/Provider';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { IconButton } from '@mui/material';
+import { FiExternalLink } from 'react-icons/fi';
 
 const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueId }) => {
   const renderedFrom = `${camelCase(sidebarResource?.productInventory)}_history`;
@@ -127,9 +129,19 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disabled: true,
         Cell: ({ row }) => {
           return row.original?.warehouse ? (
-            <Link className="link text-truncate" title={row.original?.warehouse} to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}>
-              {row.original?.warehouse}
-            </Link>
+            <div>
+              <Link className="link text-truncate" title={row.original?.warehouse} to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}>
+                {row.original?.warehouse}
+              </Link>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.warehouseDetail.path}/${row.original?.warehouseId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           );
@@ -143,13 +155,23 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
               width: 200,
               Cell: ({ row }) => {
                 return row?.original?.storageLocation ? (
-                  <Link
-                    className="link"
-                    title={row?.original?.storageLocation}
-                    to={`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`}
-                  >
-                    {row?.original?.storageLocation}
-                  </Link>
+                  <div>
+                    <Link
+                      className="link"
+                      title={row?.original?.storageLocation}
+                      to={`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`}
+                    >
+                      {row?.original?.storageLocation}
+                    </Link>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
                 ) : (
                   <NoDataCell />
                 );
@@ -196,9 +218,19 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         width: 200,
         Cell: ({ row }) => {
           return row?.original?.user ? (
-            <Link className="link text-truncate" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
-              {row?.original?.user}
-            </Link>
+            <div>
+              <Link className="link text-truncate" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
+                {row?.original?.user}
+              </Link>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.userDetail.path}/${row?.original?.userId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           );
@@ -211,11 +243,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.transactionDate ? (
-            <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p>
-          ) : (
-            <NoDataCell />
-          );
+          return row.original?.transactionDate ? <p className="text-truncate">{displayDateTime(row?.original?.transactionDate)}</p> : <NoDataCell />;
         }
       }
     ];
@@ -249,7 +277,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
-          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+          <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 150px)'}
