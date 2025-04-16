@@ -27,7 +27,7 @@ const Chatter = (props: any) => {
   const [chatterId, setChatterId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSending, setSending] = useState(false);
-  const chatSocket = useSocket({ namespace: "/chatter" })
+  const chatSocket = useSocket({ namespace: '/chatter' });
 
   const getChatter = () => {
     setLoading(true);
@@ -55,14 +55,18 @@ const Chatter = (props: any) => {
     return () => clearTimeout(timeout);
   }, [relatedTo]);
 
+  console.log({ connected: chatSocket?.connected, chatSocket });
+
   useEffect(() => {
-    if (!chatterId || isOffline || !chatSocket?.connected) return;
+    if (!chatterId || isOffline || !chatSocket) return;
     chatSocket.emit('join', chatterId);
     chatSocket.on('data', (data) => {
       setMessages(data.Messages.reverse());
     });
-    return () => { chatSocket.off("connection") }
-  }, [chatterId, isOffline, chatSocket, chatSocket?.connected]);
+    return () => {
+      chatSocket?.off('connection');
+    };
+  }, [chatterId, isOffline, chatSocket]);
 
   const createChatter = () => {
     axiosInstance()
