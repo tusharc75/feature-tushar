@@ -34,7 +34,12 @@ export const groupByDate = (messages: Message[]) => {
 };
 
 const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state }: MessagesProps) => {
-  const { socket, newChatToUser } = state;
+  const { socket } = state;
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastMessageSeen, setLastMessageSeen] = useState(null);
@@ -44,7 +49,8 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async (messageId: string = null, updateMessage: Boolean = false) => {
+  const fetchMessages = async (props?: { messageId?: string; updateMessage?: Boolean }) => {
+    const { messageId = null, updateMessage = false } = props || {};
     try {
       let api = `/work-space/channel/message/${channelId}`;
       if (updateMessage && messageId) {
@@ -53,7 +59,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
         api += `?after=${messageId}${type === 'pins' ? '&type=pins' : ''}`;
       } else {
         api += `${type === 'pins' ? '?type=pins' : ''}`;
-        setIsLoading(true);
+        // setIsLoading(true);
       }
 
       const { data } = await axiosInstance().get(api);
@@ -93,7 +99,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   useEffect(() => {
     if (socket) {
       socket.on('fetchUpdatedMessage', (messageId) => {
-        fetchMessages(messageId, true);
+        fetchMessages({ messageId, updateMessage: true });
       });
       socket.on('fetchMessages', (messageId) => {
         fetchMessages(messageId);
@@ -139,13 +145,9 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   }, [socket, channelId, type]);
 
   useEffect(() => {
-    if (newChatToUser) {
-      setMessages({});
-      setIsLoading(false);
-    } else {
-      fetchMessages();
-    }
-  }, [channelId, newChatToUser, type]);
+    setIsLoading(true);
+    fetchMessages();
+  }, [channelId, type]);
 
   const handleMenuClick = (event, message: Message) => {
     setAnchorEl(event.currentTarget);
@@ -210,9 +212,9 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
         channelId={channelId}
         socket={socket}
         channelData={channelData}
-        disabled={isLoading || type === 'pins'}
         messageId={lastMessageSeen}
         state={state}
+        disabled={!channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
       />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
@@ -343,6 +345,8 @@ export const DisplaySingleMessage = ({
 
   const isSelf = user?._id === message?.user?.optionValue;
 
+  console.log(!channelData?.members.some((d) => d.optionValue === user?._id));
+
   return (
     <>
       <li
@@ -385,6 +389,7 @@ export const DisplaySingleMessage = ({
                 onEditComplete={handleEditComplete}
                 editorId={`sone`}
                 channelData={channelData}
+                disabled={!channelData?.members.some((d) => d.optionValue === user?._id)}
               />
             ) : (
               <>
