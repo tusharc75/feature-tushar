@@ -2858,7 +2858,7 @@ const ReceivingTicket = ({
               ? user?.user?.brandPolicy?.rentalReceivingStatus
               : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
-            if (statusPolicy && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length) {
+            if (statusPolicy && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length && !onReceiveAssetDataCapture) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
             } else {
               setShowTicketDialog((ps: any) => ({ ...ps, open: true }));

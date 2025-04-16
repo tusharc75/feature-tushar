@@ -246,6 +246,8 @@ const Diagram = ({
       });
   };
 
+  const isSelectedAttachmentImage = checkImageType(selectedAttachment?.url?.split('.')[1]);
+
   return (
     <Box>
       <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
@@ -299,10 +301,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -428,23 +431,28 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          <CustomDialogHeader
-            title={selectedAttachment?.name}
-            showManimizeMaximize={false}
-            showRequiredLabel={false}
-            onClose={() => {
-              setSelectedAttachment(null);
-            }}
-          />
-          <CustomDialogContent isFooterPresent={false}>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+          {!isSelectedAttachmentImage && disableEdit && (
+            <CustomDialogHeader
+              title={selectedAttachment?.name}
+              showManimizeMaximize={false}
+              showRequiredLabel={false}
+              onClose={() => {
+                setSelectedAttachment(null);
+              }}
+            />
+          )}
+          <CustomDialogContent isFooterPresent={false} className={cn(isSelectedAttachmentImage && !disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
+            {isSelectedAttachmentImage ? (
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <ImageEditor
+                  fileName={selectedAttachment?.name}
                   data={selectedAttachment}
                   fetchData={fetchData}
-                  setSelectedAttachment={setSelectedAttachment} />
+                  setSelectedAttachment={setSelectedAttachment}
+                  handleClose={() => setSelectedAttachment(null)}
+                />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
               disableEdit ? (
