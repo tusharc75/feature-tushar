@@ -27,7 +27,9 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket => {
         if (!s.connected) {
           s.connect();
         }
-        setSocket(s);
+        s.on('connect', () => {
+          setSocket(s);
+        });
       } else {
         s = io(fullNamespace, {
           path,
