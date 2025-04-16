@@ -9,7 +9,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { flatMapDeep, isEqual, maxBy } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -72,15 +72,16 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
     const errors = {};
 
     if (rowData) {
+      const maxAssetQtyRow: any = maxBy(rowData.subRows, 'assetQty');
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.subRows?.length) {
+          if (values.qty * _package[0].qty < maxAssetQtyRow?.assetQty) {
             errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
       } else {
-        if (values.qty < rowData.subRows?.length) {
+        if (values.qty < maxAssetQtyRow?.assetQty) {
           errors['qty'] = 'The quantity is less than what was assigned.';
         }
       }
@@ -151,11 +152,7 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
                 >
                   {'Close'}
                 </ThemeButton>
-                <ThemeButton
-                  isLoading={loading}
-                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}  
-                  onClick={submitForm}
-                >
+                <ThemeButton isLoading={loading} disabled={loading || isEqual(ref?.current?.values, initialData.values)} onClick={submitForm}>
                   {' '}
                   Save
                 </ThemeButton>
