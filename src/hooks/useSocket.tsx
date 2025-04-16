@@ -24,6 +24,9 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket => {
       // Check if a socket for this namespace already exists
       if (allConnections[fullNamespace]) {
         s = allConnections[fullNamespace];
+        if (!s.connected) {
+          s.connect();
+        }
         setSocket(s);
       } else {
         s = io(fullNamespace, {
