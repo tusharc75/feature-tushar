@@ -1,13 +1,14 @@
 import { useRef, useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ImageEditor from '@toast-ui/react-image-editor';
 import 'tui-image-editor/dist/tui-image-editor.css';
 import axiosInstance from 'src/axios/axiosInstance';
 import { b64toBlob } from 'src/constants/helpers';
-import "./hide-watermark.css";
+import './hide-watermark.css';
+import { Close } from '@mui/icons-material';
 
-const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
+const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null, fileName = '' }) => {
   const editorRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -72,28 +73,26 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
 
   return (
     <Box>
-      <div className="my-2 flex min-h-[40px] flex-wrap items-center justify-end gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <ThemeButton
-            disabled={isSubmitting || loading}
-            isLoading={isSubmitting}
-            buttonType="theme"
-            onClick={handleSave}
-          >
+      <head className="flex items-center justify-between gap-2 border-b px-4 py-3">
+        {fileName && <h6 className="line-clamp-1 text-base font-semibold">{fileName}</h6>}
+        <div className="flex items-center gap-2">
+          <ThemeButton disabled={isSubmitting || loading} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
-          <ThemeButton
-            disabled={loading}
-            onClick={handleDownload}
-            buttonType="theme"
-          >
+          <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">
             Download
           </ThemeButton>
+          {typeof handleClose === 'function' && (
+            <IconButton size="small" color="primary" onClick={handleClose}>
+              <Close />
+            </IconButton>
+          )}
         </div>
-      </div>
-      <Box height={'calc(100vh - 140px)'} width={'calc(100vw - 20px)'} style={{ overflow: 'auto' }}>
+      </head>
+      <Box height={'calc(100vh - 59px)'} width={'calc(100vw)'} style={{ overflow: 'auto' }}>
         {loading ? (
-          <Box className="loading"
+          <Box
+            className="loading"
             sx={{
               height: '100%',
               display: 'flex',
@@ -120,25 +119,15 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
                   'common.backgroundColor': '#000000',
                   'common.border': '1px solid #ddd'
                 },
-                menu: [
-                  'crop',
-                  'flip',
-                  'rotate',
-                  'draw',
-                  'shape',
-                  'icon',
-                  'text',
-                  'mask',
-                  'filter'
-                ],
+                menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
                 uiSize: {
                   width: '98%',
                   height: '98%'
                 },
-                menuBarPosition: 'left',
+                menuBarPosition: 'left'
               }}
-              cssMaxHeight={window.innerHeight - 240}
-              cssMaxWidth={window.innerWidth - 20}
+              cssMaxHeight={window.innerHeight - 59}
+              cssMaxWidth={window.innerWidth}
               selectionStyle={{
                 cornerSize: 20,
                 rotatingPointOffset: 70
