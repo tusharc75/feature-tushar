@@ -6,7 +6,9 @@ type TabContextType<D> = {
   value: D;
   onChange: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, value: D) => void;
 };
+
 const TabContext = React.createContext<TabContextType<any> | null>(null);
+
 const ContainedTabs = <D,>({
   value,
   onChange,
@@ -34,8 +36,8 @@ export const ContainedTab = <D,>({
   className,
   children,
   ...rest
-}: { value: D; label?: React.ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
-  const context = React.useContext(TabContext);
+}: { value: NoInfer<D>; label?: React.ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) => {
+  const context = React.useContext(TabContext) as TabContextType<D> | null;
   if (!context) {
     throw new Error('ContainedTab must be used within a ContainedTabs component.');
   }

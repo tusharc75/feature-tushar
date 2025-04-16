@@ -88,7 +88,7 @@ const RenderService = ({
 
   return (
     <>
-      <div className={`${isMobile ? 'p-3' : 'container-with-border p-[20px]'} relative isolate`}>
+      <div className={`${isMobile ? 'p-3' : 'min-h-full border p-[20px]'} relative isolate`}>
         {isMobile ? (
           <>
             {isAnyButtonVisible && (
@@ -101,8 +101,9 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                        }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                      }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -229,8 +230,9 @@ const RenderServices = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-              } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={`transition-all duration-300 ${
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
             style={{
               ...style
             }}
@@ -282,12 +284,12 @@ const RenderServices = ({
                 )}
                 {data?.type === 'service' && data?.assignedUsers?.length > 0 && (
                   <HtmlTooltip title={data?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                    <People fontSize='small' />
+                    <People fontSize="small" />
                   </HtmlTooltip>
                 )}
                 {data?.type === 'service' && data?.assignedWorkStations?.length > 0 && (
-                  <HtmlTooltip title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}  >
-                    <ApartmentIcon fontSize='small' />
+                  <HtmlTooltip title={`Work Stations-${data?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}>
+                    <ApartmentIcon fontSize="small" />
                   </HtmlTooltip>
                 )}
                 {data?.comment && (
