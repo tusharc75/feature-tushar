@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { FieldArray, Form, Formik, FormikProps } from 'formik';
-import { isEmpty } from 'lodash';
+import { isEmpty, startCase } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -16,6 +16,8 @@ import { CustomDialogTransition, DOAType, DoaApproveType, getUniqueCurrencies } 
 import { makeStyles } from '@mui/styles';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -39,13 +41,17 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
 
+  const {
+    state: { user }
+  }: any = useData();
+
   const formikRef = useRef<FormikProps<{ data: any[] }>>();
 
   const [initialValues, setInitialValues] = useState({ users: [], roles: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [checkType, setCheckType] = useState(data?.checkType || DOAType.sequence);
   const [approveType, setApproveType] = useState(data?.approveType || DoaApproveType.user);
-  const [currency, setCurrency] = useState(data?.currency || '');
+  const [currency, setCurrency] = useState(data?.currency || user.user?.brandCurrency);
   const [currencySymbol, setCurrencySymbol] = useState(
     getUniqueCurrencies().some((data) => data?.currencyCode === currency)
       ? getUniqueCurrencies().find((data) => data?.currencyCode === currency).symbolNative
@@ -103,14 +109,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     axiosInstance()
       .get(`/user?filterById=[{"field": "entities.entity", "term": "${entity}"}]`)
       .then(({ data: { data } }) => {
-        setUserList(
-          data.length
-            ? data.map((user: any) => ({
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`
-            }))
-            : []
-        );
+        setUserList(data.length ? data.map((e: any) => ({ id: e._id, name: `${e.firstName} ${e.lastName}` })) : []);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -121,14 +120,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     axiosInstance()
       .get(`/role`)
       .then(({ data: { data } }) => {
-        setRoleList(
-          data.length
-            ? data.map((role: any) => ({
-              id: role._id,
-              name: role.name
-            }))
-            : []
-        );
+        setRoleList(data.length ? data.map((e: any) => ({ id: e._id, name: e.name })) : []);
       });
   };
 
@@ -178,94 +170,100 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
   const RenderField = ({ data, options, arrayHelpers, approveType, touched, errors, name }) => {
     return data && data?.length > 0 ? (
       data?.map((_data, i) => (
-        <Grid container spacing={1} key={i} alignItems="center">
-          <Grid className="!flex-shrink-0">
-            <span className="block min-w-[26px] px-2">{i + 1}.</span>
-          </Grid>
-          <Grid size={{ xs: 4, md: 5, lg: 5 }}>
-            <Autocomplete
-              fullWidth
-              limitTags={1}
-              multiple
-              size="small"
-              options={options?.filter((user) => !data?.some((e) => e?._id?.some((d) => d === user?.id)))}
-              getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
-              value={options?.filter((element) => _data?._id?.some((d) => d === element?.id))}
-              onChange={(event, newValue) => {
-                arrayHelpers.replace(i, {
-                  ...data[i],
-                  ['_id']: newValue?.map((d) => d.id)
-                });
-              }}
-              renderOption={(props, option) => {
-                const { key, ...optionProps } = props;
-                return (
-                  <Box key={key} component="li" {...optionProps}>
-                    {option?.name}
-                  </Box>
-                );
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="outlined"
-                  name="_id"
-                  required
-                  error={touched[name] && touched[name][i]?._id && errors && Boolean(errors[i]?._id)}
-                  helperText={touched[name] && touched[name][i]?._id && errors && errors[i]?._id}
-                />
-              )}
-            />
-          </Grid>
-          {checkType === DOAType.amount && (
-            <Grid size={{ xs: 3, md: 4, lg: 4 }}>
-              <TextField
+        <Box mb={2}>
+          <Grid container spacing={1} key={i} alignItems="center">
+            <Grid className="!flex-shrink-0">
+              <span className="block min-w-[30px] px-2">{i + 1}</span>
+            </Grid>
+            <Grid size={{ xs: 5, md: 7, lg: 7 }}>
+              <Autocomplete
                 fullWidth
-                slotProps={{
-                  input: {
-                    startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                  }
-                }}
-                variant="outlined"
-                type="text"
+                limitTags={1}
+                multiple
                 size="small"
-                name="amount"
-                value={_data?.amount}
-                onChange={(e) => {
+                options={options?.filter((user) => !data?.some((e) => e?._id?.some((d) => d === user?.id)))}
+                getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
+                value={options?.filter((element) => _data?._id?.some((d) => d === element?.id))}
+                onChange={(event, newValue) => {
                   arrayHelpers.replace(i, {
                     ...data[i],
-                    ['amount']: e.target.value ? parseInt(e.target.value) : 0
+                    ['_id']: newValue?.map((d) => d.id)
                   });
                 }}
-                required
-                error={touched[name] && touched[name][i]?.amount && errors && Boolean(errors[i]?.amount)}
-                helperText={touched[name] && touched[name][i]?.amount && errors && errors[i]?.amount}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box key={key} component="li" {...optionProps}>
+                      {option?.name}
+                    </Box>
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="outlined"
+                    label={startCase(name)}
+                    name="_id"
+                    required
+                    error={touched[name] && touched[name][i]?._id && errors && Boolean(errors[i]?._id)}
+                    helperText={touched[name] && touched[name][i]?._id && errors && errors[i]?._id}
+                  />
+                )}
               />
             </Grid>
-          )}
-          <Grid size={{ md: 2, lg: 2 }} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
-            <Box mt={0.7}>
-              <IconButton
-                size="small"
-                aria-label="add"
-                disabled={options?.length === data?.length || options?.length === data?.reduce((len, curr) => len + curr?._id?.length, 0)}
-                onClick={() => {
-                  arrayHelpers.insert(i + 1, { _id: [], amount: 0 });
-                }}
-              >
-                <Add fontSize="small" />
-              </IconButton>
-              <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(i)}>
-                <Delete fontSize="small" color="error" />
-              </IconButton>
-            </Box>
+            {checkType === DOAType.amount && (
+              <Grid size={{ xs: 5, md: 2, lg: 2 }}>
+                <TextField
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                    }
+                  }}
+                  variant="outlined"
+                  type="text"
+                  size="small"
+                  name="amount"
+                  label="Amount"
+                  value={_data?.amount}
+                  onChange={(e) => {
+                    arrayHelpers.replace(i, {
+                      ...data[i],
+                      ['amount']: e.target.value ? parseInt(e.target.value) : 0
+                    });
+                  }}
+                  required
+                  error={touched[name] && touched[name][i]?.amount && errors && Boolean(errors[i]?.amount)}
+                  helperText={touched[name] && touched[name][i]?.amount && errors && errors[i]?.amount}
+                />
+              </Grid>
+            )}
+            <Grid size={{ md: 2, lg: 2 }} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
+              <HtmlTooltip title="Add">
+                <IconButton
+                  size="small"
+                  aria-label="add"
+                  disabled={options?.length === data?.length || options?.length === data?.reduce((len, curr) => len + curr?._id?.length, 0)}
+                  onClick={() => {
+                    arrayHelpers.insert(i + 1, { _id: [], amount: 0 });
+                  }}
+                >
+                  <Add fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title="Remove">
+                <IconButton size="small" aria-label="delete" onClick={() => arrayHelpers.remove(i)}>
+                  <Delete fontSize="small" color="error" />
+                </IconButton>
+              </HtmlTooltip>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       ))
     ) : (
       <Grid size={{ md: 12, lg: 12 }} className="d-flex align-items-center justify-content-center">
         <ThemeButton
-          buttonType='theme'
+          buttonType="theme"
           onClick={() => {
             arrayHelpers.push({ _id: [], amount: 0 });
           }}
@@ -335,7 +333,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     >
       <>
         <CustomDialogHeader
-          title={data ? 'Edit DOA' : 'Add DOA'}
+          title={`${data ? 'Edit DOA' : 'Add DOA'} (${resource})`}
           onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -389,8 +387,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                     size="small"
                                     fullWidth
                                     name="minAmount"
-                                    placeholder="Enter minimum DOA amount"
-                                    label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
+                                    placeholder="Minimum DOA Amount"
+                                    label="Minimum DOA Amount"
+                                    required
                                     value={minAmount}
                                     onChange={(e) => {
                                       setMinAmount(Number(e.target.value.replace(/[^0-9]/g, '')));
@@ -403,12 +402,18 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                                   <CurrencyAutocomplete
                                     limitTags={2}
                                     value={currency}
-                                    name={currency}
+                                    size="small"
+                                    placeholder="Currency"
+                                    label="Currency"
+                                    name={'currency'}
+                                    required
                                     fullWidth={true}
                                     onChange={(e, val) => {
                                       setCurrency(val?.currencyCode ? val?.currencyCode : '');
                                       setCurrencySymbol(val?.symbolNative);
                                     }}
+                                    error={validation()?.currency}
+                                    helperText={validation()?.currency}
                                   />
                                 </Grid>
                               </Grid>
@@ -424,17 +429,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                             {values?.data && values?.data?.length > 0 && (
                               <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
                                 <Grid container spacing={2}>
-                                  <Grid size={{ md: 1, lg: 1 }}>
-                                    Index
-                                  </Grid>
-                                  <Grid size={{ md: 5, lg: 5 }}>
-                                    {approveType}
-                                  </Grid>
-                                  {checkType === DOAType.amount && (
-                                    <Grid size={{ md: 4, lg: 4 }}>
-                                      Amount
-                                    </Grid>
-                                  )}
+                                  <Grid size={{ md: 1, lg: 1 }}>Index</Grid>
+                                  <Grid size={{ md: 5, lg: 5 }}>{approveType}</Grid>
+                                  {checkType === DOAType.amount && <Grid size={{ md: 4, lg: 4 }}>Amount</Grid>}
                                   <Grid size={{ md: 2, lg: 2 }}></Grid>
                                 </Grid>
                               </Box>
@@ -480,7 +477,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
                     </CustomDialogContent>
                   </div>
                   <CustomDialogFooter>
-                    <ThemeButton buttonType='transparent' onClick={onClose}>
+                    <ThemeButton buttonType="transparent" onClick={onClose}>
                       Cancel
                     </ThemeButton>
                     <ThemeButton buttonType="theme" onClick={submitForm}>

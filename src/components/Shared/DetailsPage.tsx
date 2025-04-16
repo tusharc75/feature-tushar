@@ -101,6 +101,7 @@ interface DetailProps {
   fullHeight?: boolean;
   resource?: string;
   referenceId?: string;
+  defaultColumnCount?: 2 | 4;
 }
 
 const Details = (props: DetailProps) => {
@@ -108,7 +109,7 @@ const Details = (props: DetailProps) => {
   const {
     state: { permissions, user }
   }: any = useData();
-  const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null } = props;
+  const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null, defaultColumnCount = 4 } = props;
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [formDataWithFollowUps, setFormDataWithFollowUps] = useState([]);
@@ -587,7 +588,8 @@ const Details = (props: DetailProps) => {
                             className={cn(
                               '-mb-[1px] -mr-[1px] border-b md:border-r',
                               `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                              'col-span-12'
+                              'col-span-12',
+                              defaultColumnCount === 2 ? 'md:col-span-12' : ''
                             )}
                             key={i}
                           >

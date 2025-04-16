@@ -15,10 +15,11 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ToastImageEditor from './ToastImageEditor/ToastImageEditor';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
@@ -34,7 +35,9 @@ const Diagram = ({
   attachmentType = null,
   referenceLabel = '',
   showMaterialFilter = false,
-  defaultSelectedUniqueId = null
+  defaultSelectedUniqueId = null,
+  showContainer = true,
+  fullHeight = true
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -246,7 +249,7 @@ const Diagram = ({
 
   return (
     <Box>
-      <Box className="container-with-border" p={'20px'}>
+      <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
         {!disableEdit && (
           <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter ? 'justify-between' : 'justify-end'}`}>
             {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
@@ -277,7 +280,7 @@ const Diagram = ({
             )}
             <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
               <ThemeButton
-                buttonType='theme'
+                buttonType="theme"
                 onClick={() => {
                   setAttachemntDialog({ open: true, id: null, isClone: false });
                 }}
@@ -290,17 +293,18 @@ const Diagram = ({
           </div>
         )}
         <Box pt={2} pb={2}>
-          <Box className="h-[calc(100vh-300px)] overflow-auto">
+          <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
-              {rowData &&
+              {rowData && rowData.length > 0 ? (
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -401,7 +405,12 @@ const Diagram = ({
                       </Collapse>
                     </div>
                   );
-                })}
+                })
+              ) : (
+                <>
+                  <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 w-[250px] opacity-60" loading="lazy" />
+                </>
+              )}
             </div>
           </Box>
         </Box>

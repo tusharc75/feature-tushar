@@ -17,7 +17,6 @@ import {
   prepareDataForGrid,
   sidebarResource,
   restoreObjKeysWithValues,
-  fieldTicket
 } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';

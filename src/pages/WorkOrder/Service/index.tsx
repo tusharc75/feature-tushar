@@ -8,17 +8,21 @@ import { useData } from 'src/StateProvider/Provider';
 import { FailIcon, PassIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomCollapsible from 'src/components/CustomCollapsible';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import {
   ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
+  MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_SERVICE_STEP_STATUS,
   WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
   cn,
   sidebarResource,
   workOrder
@@ -27,6 +31,9 @@ import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import ConfigureFields from 'src/pages/ServiceMaster/Fields';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import Consumables from 'src/pages/WorkOrder/Consumables';
+import Diagram from 'src/pages/WorkOrder/Diagram';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignTechniciansDialog';
@@ -38,7 +45,8 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+
+type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
 
 const Service = ({
   workOrderId,
@@ -49,7 +57,8 @@ const Service = ({
   resource,
   defaultSelectedService,
   setDefaultSelectedService,
-  minHeightClass = null
+  minHeightClass = null,
+  resourceData = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -81,6 +90,7 @@ const Service = ({
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
+  const [innerTabs, setInnerTabs] = useState<InnerTabs>('steps');
 
   const prevOrder = useRef(0);
 
@@ -94,7 +104,7 @@ const Service = ({
 
   useEffect(() => {
     if (setDefaultSelectedService && selectedService) {
-      setDefaultSelectedService(selectedService?.uniqueId)
+      setDefaultSelectedService(selectedService?.uniqueId);
     }
   }, [selectedService]);
 
@@ -537,7 +547,7 @@ const Service = ({
         <>
           <div
             className={cn(
-              'grid min-h-[calc(100vh-300px)] gap-4 transition-all max-md:grid-cols-1',
+              'grid min-h-[calc(100vh-300px)] transition-all max-md:mb-[100px] max-md:grid-cols-1',
               isColapsed ? 'grid-cols-[100px_1fr]' : 'md:grid-cols-[300px_1fr] lg:grid-cols-[360px_1fr] xl:grid-cols-[380px_1fr]'
             )}
           >
@@ -568,42 +578,109 @@ const Service = ({
             )}
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
-            <div className="transition-all">
-              <Box
-                className="container-with-border"
-                style={{
-                  overflow: 'hidden',
-                  minHeight: '100%'
-                }}
-              >
-                {selectedService ? (
-                  <>
-                    {selectedService?.type === 'service' ? (
-                      <Steps
-                        workOrderData={workOrderData}
-                        selectedService={selectedService}
-                        allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
-                        fetchService={fetchServiceData}
-                        resource={resource}
-                        stepSubmitedData={stepSubmitedData}
-                        minHeightClass={minHeightClass}
-                        isMobile={mobScreen}
-                        fetchWorkOrderData={fetchWorkOrderData}
-                      />
+            <div className="max-w-full border transition-all md:border-l-0">
+              <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
+                <CustomCollapsible
+                  head={<h6 className="text-base font-semibold">Steps</h6>}
+                  headProps={{ className: 'sticky top-0 z-10' }}
+                  element="li"
+                  defaultExpanded
+                >
+                  <div className="p-4">
+                    {selectedService ? (
+                      <>
+                        {selectedService?.type === 'service' ? (
+                          <Steps
+                            headerPadding={false}
+                            workOrderData={workOrderData}
+                            selectedService={selectedService}
+                            allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
+                            fetchService={fetchServiceData}
+                            resource={resource}
+                            resourceData={resourceData}
+                            stepSubmitedData={stepSubmitedData}
+                            minHeightClass={' '}
+                            isMobile={mobScreen}
+                            fetchWorkOrderData={fetchWorkOrderData}
+                            defaultSelectedService={defaultSelectedService}
+                          />
+                        ) : (
+                          <Quotation />
+                        )}
+                      </>
                     ) : (
-                      <Quotation />
+                      <div
+                        className={cn(
+                          'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
+                        )}
+                      >
+                        <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
+                      </div>
                     )}
-                  </>
-                ) : (
-                  <div
-                    className={cn(
-                      'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
-                    )}
-                  >
-                    <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
                   </div>
+                </CustomCollapsible>
+                {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+                  <CustomCollapsible
+                    head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
+                    headProps={{ className: 'sticky top-0 z-10' }}
+                    element="li"
+                  >
+                    <div className="p-4">
+                      <Consumables
+                        tableHeight={'300px'}
+                        hideServiceFilter={true}
+                        allowedToEdit={
+                          workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                            ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                              ? resource === sidebarResource?.workOrderTechnician
+                                ? true
+                                : allowedToEdit
+                              : false
+                            : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
+                              ? false
+                              : resource === sidebarResource?.workOrderTechnician
+                                ? true
+                                : allowedToEdit
+                        }
+                        isCreate={
+                          workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                            ? allowedToEdit
+                            : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+                              ? false
+                              : allowedToEdit
+                        }
+                        service={null}
+                        uniqueId={null}
+                        stepId={null}
+                        serviceName={null}
+                        materialSubType={MATERIAL_SUB_TYPE.consumable}
+                        workOrderData={workOrderData}
+                        defaultServiceUniqueId={defaultSelectedService}
+                        serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+                      />
+                    </div>
+                  </CustomCollapsible>
                 )}
-              </Box>
+                <CustomCollapsible
+                  head={<h6 className="text-base font-semibold">Drawing</h6>}
+                  headProps={{ className: 'sticky top-0 z-10' }}
+                  element="li"
+                >
+                  <div className="p-4">
+                    <Diagram
+                      fullHeight={false}
+                      showContainer={false}
+                      resource={ACTIVITY_RESOURCE.workOrder}
+                      referenceId={workOrderId}
+                      currentVersion={workOrderData?.versions?.length + 1 || 1}
+                      resourceData={workOrderData}
+                      attachmentType={ATTACHMENT_TYPE.drawing}
+                      showMaterialFilter={false}
+                      defaultSelectedUniqueId={defaultSelectedService}
+                    />
+                  </div>
+                </CustomCollapsible>
+              </ul>
             </div>
           </div>
           {mobScreen && (
@@ -709,8 +786,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                       ? false
                       : true
                   }
@@ -726,8 +803,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                      !completed
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                       ? false
                       : true
                   }
@@ -762,8 +839,9 @@ const Service = ({
               >
                 Upload Documents
               </MenuItem>
-              {!user?.brandPolicy?.workOrderConsumableHide && (resource === sidebarResource.workOrder
-                || (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
+              {!user?.brandPolicy?.workOrderConsumableHide &&
+                (resource === sidebarResource.workOrder ||
+                  (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
                   <MenuItem
                     disabled={!isAllowedToServiceEdit}
                     onClick={() => {
@@ -783,8 +861,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -798,8 +876,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }

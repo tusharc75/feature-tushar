@@ -34,7 +34,7 @@ const ResourceDoaRequestDetail = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${resource}`)
+      .get(`/field?resource=${resource}&view=true`)
       .then(({ data: { data } }) => {
         setFields([...data]);
       });
@@ -44,12 +44,10 @@ const ResourceDoaRequestDetail = () => {
     const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource=${resource}`);
     if (doaResponse?.data?.data) {
       const _data = doaResponse?.data?.data;
-      const title =
-        resource === sidebarResource.serializedAssetStatusChangeRequest
-          ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel
-          : resource === sidebarResource?.purchaseRequisition
-            ? _data?.purchaseRequisition?.optionLabel
-            : '';
+      const title = resource === sidebarResource.serializedAssetStatusChangeRequest
+        ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel : resource === sidebarResource?.purchaseRequisition
+          ? _data?.purchaseRequisition?.optionLabel
+          : '';
       setTitle(title);
       const resourceData =
         resource === sidebarResource.serializedAssetStatusChangeRequest
@@ -62,6 +60,7 @@ const ResourceDoaRequestDetail = () => {
         _id: _data?._id,
         resource: _data?.resource,
         doaStatus: _data?.status,
+        userDOAstatus: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.status,
         canPerform: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.isUpdate ? true : false,
         referenceId: _data?.referenceId,
         entity: _data?.entity
@@ -70,20 +69,22 @@ const ResourceDoaRequestDetail = () => {
   };
 
   const handleApproveReject = (status) => {
-    axiosInstance()
-      .put(`${routes.resourceDoaRequest.path}`, {
-        _id: doaData._id,
-        status: status,
-        entity: doaData?.entity,
-        referenceId: doaData?.referenceId,
-        resource: doaData?.resource
-      })
-      .then((res) => {
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`${routes.resourceDoaRequest.path}`, {
+      _id: doaData._id,
+      status: status,
+      entity: doaData?.entity,
+      referenceId: doaData?.referenceId,
+      resource: doaData?.resource
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        message: data.message,
+        open: true,
+        type: 'success'
       });
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (
@@ -93,30 +94,29 @@ const ResourceDoaRequestDetail = () => {
           <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titleSingular }, { title: title }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            <ThemeButton
-              onClick={() => {
-                handleApproveReject(DOA_STATUS.approved);
-              }}
-              disabled={!doaData?.canPerform}
-              startIcon={<ThumbUpIcon />}
-              mobileTooltip="Accept"
-              iconForMobile={<ThumbUpIcon />}
-            >
-              {'Accept'}
-            </ThemeButton>
-            <ThemeButton
-              onClick={() => {
-                handleApproveReject(DOA_STATUS.rejected);
-              }}
-              disabled={!doaData?.canPerform}
-              startIcon={<ThumbDownIcon />}
-              mobileTooltip="Reject"
-              iconForMobile={<ThumbDownIcon />}
-            >
-              {'Reject'}
-            </ThemeButton>
-          </Box>
+          {doaData?.userDOAstatus === DOA_STATUS.pending &&
+            <Box className="control-buttons-v1">
+              <ThemeButton
+                onClick={() => {
+                  handleApproveReject(DOA_STATUS.approved);
+                }}
+                disabled={!doaData?.canPerform}
+                startIcon={<ThumbUpIcon />}
+                buttonType='themeBorder'
+              >
+                {'Accept'}
+              </ThemeButton>
+              <ThemeButton
+                onClick={() => {
+                  handleApproveReject(DOA_STATUS.rejected);
+                }}
+                disabled={!doaData?.canPerform}
+                startIcon={<ThumbDownIcon />}
+                buttonType='red'
+              >
+                {'Reject'}
+              </ThemeButton>
+            </Box>}
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

@@ -114,20 +114,37 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, referenceData, materialTyp
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${referenceData?.quotation?.optionValue}/${referenceData?.quotationVersion?.optionValue}`);
     data = response?.data?.data?.material;
-    let rows = data?.filter((d: any) => d?.type === materialType && !d.parentId && !ids?.includes(d?._id));
+    let rows = data?.filter((d: any) => d?.type === materialType && !d.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.type = parent.type;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName :
         parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName : parent?.packageDetail?.packageName;
       parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription :
         parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceDescription : parent?.packageDetail?.pacakgeDescription;
-      parent.qty = parent.qty;
-      parent.materialId = parent.materialId;
-      parent._id = parent._id;
+      parent.subRows = generateNestedData(data, parent);
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+  };
+
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, index) => {
+      _subRow.index = parent.index + '.' + `${index + 1}`;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName;
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
   };
 
   const handleSearch = (e) => {
@@ -178,6 +195,7 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, referenceData, materialTyp
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               isClientSideGrid={true}
+              expander={materialType === MATERIAL_TYPE.package ? true : false}
             />
           ) : (
             <Box p={2} height={500}>

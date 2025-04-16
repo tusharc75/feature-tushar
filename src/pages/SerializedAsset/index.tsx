@@ -38,6 +38,7 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -58,7 +59,7 @@ const SerializedAsset = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -79,10 +80,13 @@ const SerializedAsset = () => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [otherStatusOptions, setOtherStatusOptions] = useState(null);
   const [status, setStatus] = useState('');
+  const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
       await fetchGridColumns();
+      await fetchFieldSerializedAssetStatusChangeRequest();
     };
     fetch();
   }, [permissions, selectedEntity]);
@@ -140,7 +144,7 @@ const SerializedAsset = () => {
         }
         if (jobCount) {
           if (isObject(JSON.parse(jobCount))) {
-            filterVal['jobCount'] = { filter: ((JSON.parse(jobCount))?.optionValue)?.toString() };
+            filterVal['jobCount'] = { filter: JSON.parse(jobCount)?.optionValue?.toString() };
           }
         }
         dispatch({ type: 'filter', filters: filterVal });
@@ -177,6 +181,14 @@ const SerializedAsset = () => {
         });
     }
   }, [selectedEntity]);
+
+  const fetchFieldSerializedAssetStatusChangeRequest = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetStatusChangeRequestFields([...data]);
+      });
+  };
 
   useEffect(() => {
     axiosInstance()
@@ -581,7 +593,11 @@ const SerializedAsset = () => {
             </MenuItem>
             <MenuItem
               onClick={() => {
-                handleStatusChange(ASSET_STATUS.scrap);
+                if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                  setStatusChangeRequestDialog(true);
+                } else {
+                  handleStatusChange(ASSET_STATUS.scrap);
+                }
               }}
               disabled={
                 selectedRecords?.filter((o) =>
@@ -810,6 +826,19 @@ const SerializedAsset = () => {
           onAddReason={(reason) => {
             handleStatusUpdate({ status: status, reason: reason });
             setShowReasonDialog(false);
+          }}
+        />
+      )}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={selectedRecords?.map((s) => ({ _id: s?._id, assetNumber: s?.assetNumber, status: s?.status }))}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchData();
           }}
         />
       )}

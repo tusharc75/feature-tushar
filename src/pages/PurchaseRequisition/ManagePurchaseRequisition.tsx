@@ -18,7 +18,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
   const {
     state: { user, resources }
@@ -108,7 +108,9 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
         .post(`${routes.purchaseRequisition?.path}`, values)
         .then(({ data: { data, message } }) => {
           setLoading(false);
-          history.push(`${routes.purchaseRequisitionDetail.path}/${data._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.purchaseRequisitionDetail.path}/${data._id}`);
+          }
           onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
@@ -191,16 +193,11 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                       setShowConfirmDialog(true);
                     }
                   }}
-                  buttonType='transparent'
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>
-                <ThemeButton
-                  onClick={submitForm}
-                  disabled={loading || submitting}
-                  buttonType='theme'
-                  isLoading={submitting}
-                >
+                <ThemeButton onClick={submitForm} disabled={loading || submitting} buttonType="theme" isLoading={submitting}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

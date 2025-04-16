@@ -116,8 +116,7 @@ const ServiceOrderSidebarImpl = ({
 
   const handleUnAssign = () => {
     setIsSubmitting(true);
-    axiosInstance()
-      .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
+    axiosInstance().put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?._id }] })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();

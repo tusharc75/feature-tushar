@@ -59,7 +59,10 @@ const SerializedAsset = ({
     showSaveAndNext: false
   });
 
-  const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
+  const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState<{
+    open: boolean;
+    data: { _id: string; assetNumber: string }[];
+  }>({ open: false, data: [] });
   const [isRateRequired, setIsRateRequired] = useState(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -248,7 +251,7 @@ const SerializedAsset = ({
                 size="small"
                 aria-label="Delete"
                 onClick={() => {
-                  setShowAssetRemoveConfirmationDialog({ open: true, id: row?.original?._id, ids: [] });
+                  setShowAssetRemoveConfirmationDialog({ open: true, data: [{ _id: row?.original?._id, assetNumber: row?.original?.assetNumber }] });
                 }}
               >
                 <DeleteIcon color="error" fontSize="small" />
@@ -291,13 +294,14 @@ const SerializedAsset = ({
 
   const deleteRepairJobAssets = () => {
     setOkBtnLoading(true);
+    const payload = {
+      ids: showAssetRemoveConfirmationDialog.data.map((d) => d._id)
+    };
     axiosInstance()
-      .put(`${repairJob.api}/${repairJobData._id}/assets/remove`, {
-        ids: showAssetRemoveConfirmationDialog.id ? [showAssetRemoveConfirmationDialog.id] : showAssetRemoveConfirmationDialog.ids
-      })
+      .put(`${repairJob.api}/${repairJobData._id}/assets/remove`, payload)
       .then(({ data }) => {
         setOkBtnLoading(false);
-        setShowAssetRemoveConfirmationDialog({ open: false, id: null, ids: [] });
+        setShowAssetRemoveConfirmationDialog({ open: false, data: [] });
         fetchRecords();
         fetchRepairJobData();
         toastConfig.setToastConfig({
@@ -423,7 +427,7 @@ const SerializedAsset = ({
         <MenuItem
           disabled={selectedRecords.length === 0 || selectedRecords.some((s) => s.status !== ASSET_STATUS.reserved)}
           onClick={() => {
-            setShowAssetRemoveConfirmationDialog({ open: true, id: null, ids: selectedRecords.map((m) => m._id) });
+            setShowAssetRemoveConfirmationDialog({ open: true, data: selectedRecords.map((m) => ({ _id: m._id, assetNumber: m.assetNumber })) });
           }}
         >
           {'Delete'}
@@ -498,7 +502,7 @@ const SerializedAsset = ({
       {showAssetRemoveConfirmationDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to delete ${showAssetRemoveConfirmationDialog.id ? 'asset' : 'selected assets'} ?`}
+          message={`Are you sure you want to delete ${showAssetRemoveConfirmationDialog.data.length === 1 ? showAssetRemoveConfirmationDialog.data[0]['assetNumber'] : 'selected assets'} ?`}
           onClose={() => {
             setShowAssetRemoveConfirmationDialog((prevState) => ({ ...prevState, open: false }));
           }}

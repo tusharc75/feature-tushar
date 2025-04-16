@@ -13,7 +13,7 @@ import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, displayDateTime, FIELD_SERVICE_ORDER_TECHNICIAN_STATUS, fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, displayDateTime, TECHNICIAN_STATUS, fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -407,7 +407,7 @@ const Technicians = ({
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.technicianId = parent?.technician?.optionValue;
         parent.technician = parent?.technician?.optionLabel || '';
-        parent.canDelete = parent?.status ? parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved : true;
+        parent.canDelete = parent?.status ? parent?.status === TECHNICIAN_STATUS.reserved : true;
       });
       setAllConsumables(consumables || []);
     } catch (error) {
@@ -619,7 +619,9 @@ const Technicians = ({
     } else {
       value.endDate = values?.endDate;
     }
-    if (products?.length) value.products = products;
+    if (products?.length) {
+      value.materialIds = products;
+    }
     setIsSubmitting(true);
     axiosInstance()
       .put(`${fieldServiceOrder.api}/technician/start-end-date`, value)
@@ -740,6 +742,7 @@ const Technicians = ({
       {startEndDateConfermationDialog.open && (
         <StartStopDateDialog
           type={startEndDateConfermationDialog.type}
+          resource={sidebarResource.fieldServiceOrder}
           onClose={() => {
             setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, notes: '', products: [], _id: null });
           }}
@@ -760,7 +763,7 @@ const Technicians = ({
           service={null}
           technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
-          reference={'fieldServiceOrder'}
+          resource={sidebarResource.fieldServiceOrder}
         />
       )}
     </>

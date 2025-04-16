@@ -5,7 +5,7 @@ import routes from 'src/components/Helpers/Routes';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset, sidebarResource } from 'src/constants/helpers';
@@ -14,7 +14,6 @@ import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 const SerializedAssetStatusChangeRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
-  const history = useHistory();
 
   const {
     state: { user, resources }
@@ -30,7 +29,7 @@ const SerializedAssetStatusChangeRequestDetail = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
       .then(({ data: { data } }) => {
         setFields([...data]);
       });

@@ -16,7 +16,7 @@ export interface TActivity {
   updatedBy?: CreatedBy;
   competencies?: Address[];
   competencyType?: Address;
-  fieldTicket?: PokedexFieldTicket[];
+  technicianHistory?: PokedexFieldTicket[];
   child?: TActivity[];
   user?: {
     optionValue?: string;

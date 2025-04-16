@@ -40,7 +40,7 @@ const CalendarImpl = ({ dayPixel, endDate, startDate, activity, handleSelect, se
       <CalendarData activity={activity} handleSelect={handleSelect} selected={selected} dayPixel={dayPixel} startDate={startDate} />
       <div
         ref={lineRef}
-        className="absolute bottom-0 top-0 "
+        className=" pointer-events-none absolute bottom-0 top-0 [transform:translateX(calc(-50%+2px))]"
         style={{
           left: (100 * dayjs().diff(startDate, 'day')) / totalDay + '%',
           width: dayPixel

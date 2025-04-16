@@ -7,13 +7,14 @@ import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import type { TActivity } from './types';
 import { useDroppable } from '@dnd-kit/core';
+import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 
 type TProps = {
   activity: TActivity[];
   expanded: any;
   selected: string[] | [];
   handleToggle: any;
-  handleSelect: any;
+  handleSelect: HandleSelect;
   loading: boolean;
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   leftSidebar: (isMobile: Boolean) => React.ReactNode;
@@ -40,7 +41,7 @@ const MobileRoadmap: React.FC<TProps> = ({ activity, expanded, selected, handleT
   const handleMapClick = useCallback(
     (index: number, item: any) => {
       const newIndex = `${index}${COLLAPSIBLE_UNIQUE_NAME}`;
-      handleSelect('', item, 'map');
+      handleSelect(null, item, 'map');
       setOpen(newIndex);
     },
     [handleSelect]
@@ -165,7 +166,11 @@ const SingleMobileTechnician = ({ handleMapClick, item, index, setSelected, sele
       </ListItemButton>
 
       <Collapse in={compareCollapse(index)}>
-        <CalendarData services={item?.fieldTicket || []} handleSelect={handleSelect} selected={selected} setSelected={setSelected} />
+        <CalendarData
+          services={item?.technicianHistory || []}
+          handleSelect={handleSelect}
+          selected={selected}
+          setSelected={setSelected} />
       </Collapse>
     </li>
   );
@@ -205,7 +210,7 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
               <HtmlTooltip
                 title={
                   <div>
-                    <p> {service?.fieldTicket[0]?.fieldTicketNumber || service?.rentalJob[0]?.rentalJobName || service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}</p>
+                    <p>{service?.reference?.optionLabel}</p>
                     <p className="text-[12px]">
                       {displayDate(service?.startDate)} - {displayDate(service?.endDate)}
                     </p>
@@ -216,12 +221,12 @@ const CalendarData = ({ services, handleSelect, selected, setSelected }) => {
               >
                 <div
                   onClick={() => {
-                    handleSelect(null, { _id: service?.technician, technicianHistoryId: service?._id }, '');
+                    handleSelect(null, { _id: service?._id }, 'un-assign');
                   }}
                   className="flex h-[--data-h] flex-col justify-center p-[14px]"
                 >
                   <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">
-                    {service?.fieldTicket[0]?.fieldTicketNumber || service?.rentalJob[0]?.rentalJobName || service?.fieldServiceOrder[0]?.fieldServiceOrderNumber}
+                    {service?.reference?.optionLabel}
                   </p>
                   <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
                     <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-

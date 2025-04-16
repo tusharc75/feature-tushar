@@ -22,7 +22,7 @@ import {
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
+const StatusChangeRequestDialog = ({ onClose, assetData, workOrderId = null, status, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -41,9 +41,13 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
             (d) => !['asset', 'assetStatus', 'status', 'requestedBy', 'requestedDate', 'responsedBy', 'responsedDate'].includes(d.fieldData.fieldName)
           )
           ?.map((d) => d?.fieldData);
+        let initialData = getObjKeys('', data);
+        if (data?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: setFieldsInAscendingOrder(data),
-          values: getObjKeys('', data)
+          values: initialData
         });
       })
       .catch((error) => {
@@ -54,10 +58,13 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
   const handleSubmit = (values) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${serializedAsset.api}/status-approval-process/status`, {
+      .post(`${serializedAsset.api}/status-approval-process`, {
         ...values,
         assetStatus: ASSET_STATUS.scrap,
-        assets: [{ _id: assetData?._id, currentStatus: assetData?.status }]
+        ...(workOrderId ? { workOrder: workOrderId } : {}),
+        assets: assetData?.map((e) => {
+          return { _id: e._id, currentStatus: e.status };
+        })
       })
       .then(({ data }) => {
         setIsSubmitting(false);
@@ -73,6 +80,7 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   return (
     <Dialog
       maxWidth="md"
@@ -87,7 +95,7 @@ const StatusChangeRequestDialog = ({ onClose, assetData, onSuccess }) => {
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader
-                title={`${resources?.serializedAssetStatusChangeRequest?.titleSingular}`}
+                title={`Status Change Request - ${status} ${assetData?.length === 1 ? `(${assetData[0].assetNumber})` : ''}`}
                 onClose={onClose}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {

@@ -189,7 +189,7 @@ const useUIDesktopDm = () => {
     setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' }));
   }, []);
 
-  const closeMainWindow = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const closeMainWindow = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation();
     setUiState({ ...initialState, mainWindow: null });
   }, []);
