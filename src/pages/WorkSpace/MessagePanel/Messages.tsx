@@ -345,8 +345,6 @@ export const DisplaySingleMessage = ({
 
   const isSelf = user?._id === message?.user?.optionValue;
 
-  console.log(!channelData?.members.some((d) => d.optionValue === user?._id));
-
   return (
     <>
       <li
