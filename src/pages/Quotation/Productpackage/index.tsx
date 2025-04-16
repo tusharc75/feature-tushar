@@ -726,7 +726,8 @@ const Productpackage = ({
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
-        quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
+        quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
+        quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
@@ -735,7 +736,7 @@ const Productpackage = ({
             Add Existing Services
           </MenuItem>
         )}
-        {costFields?.length > 0 && (
+        {costFields?.length > 0 && quotationData?.type != QUOTATION_TYPE.repairOrder && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
@@ -974,6 +975,7 @@ const Productpackage = ({
           }}
           serialized={quotationData?.type === QUOTATION_TYPE.fieldJob ? false : null}
           isSubmitting={isSubmitting}
+          extraDeepFilter={quotationData?.type === QUOTATION_TYPE.repairOrder ? [{ field: 'serializedProduct', term: 'Yes' }] : []}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
