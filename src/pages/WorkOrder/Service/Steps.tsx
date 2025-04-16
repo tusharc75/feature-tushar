@@ -191,8 +191,7 @@ const Steps = ({
   handelClose = null,
   minHeightClass = null,
   isMobile,
-  fetchWorkOrderData = null,
-  headerPadding = true
+  fetchWorkOrderData = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -304,9 +303,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                  ?.filter((_f) => _f?.required)
-                  ?.map((f) => f?.fieldName)
-                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                ?.filter((_f) => _f?.required)
+                ?.map((f) => f?.fieldName)
+                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -528,7 +527,8 @@ const Steps = ({
         if (status && !nextStep) {
           if (status === WORKORDER_SERVICE_STEP_STATUS.skipped) {
             handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), step);
-          } else {
+          }
+          else {
             handlePassFail(status, step);
           }
           setSelectedStep(null);
@@ -537,7 +537,8 @@ const Steps = ({
           if (status) {
             if (status === WORKORDER_SERVICE_STEP_STATUS.skipped) {
               handleStartEnd(WORKORDER_SERVICE_STEP_STATUS.skipped?.toLowerCase(), step);
-            } else {
+            }
+            else {
               handlePassFail(status, step);
             }
           }
@@ -973,9 +974,9 @@ const Steps = ({
               <ThemeButton
                 disabled={
                   allowedToEdit &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                    selectedService?.status
-                  )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                     ? false
                     : true
                 }
@@ -995,9 +996,9 @@ const Steps = ({
           <ThemeButton
             disabled={
               allowedToEdit &&
-              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                selectedService?.status
-              )
+                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                  selectedService?.status
+                )
                 ? false
                 : true
             }
@@ -1026,7 +1027,7 @@ const Steps = ({
         <MenuItem
           disabled={
             (allowedToEdit &&
-            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true) || selectedSteps.length === 0
           }
@@ -1049,9 +1050,9 @@ const Steps = ({
       {serviceDetails ? (
         serviceDetails?.steps?.length ? (
           <Box className={`relative overflow-hidden max-[768px]:mb-[70px]`}>
-            <div className={cn(`flex flex-wrap items-center justify-between `, headerPadding ? 'p-[8px]' : 'pb-2')}>
-              {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
-                <div className="flex flex-wrap items-center gap-[8px] pl-2">
+            <div className={`flex flex-wrap items-center justify-between p-[8px]`}>
+              <div className="flex flex-wrap items-center gap-[8px] pl-2">
+                {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
@@ -1072,9 +1073,9 @@ const Steps = ({
                       </>
                     )}
                   </>
-                </div>
-              ) : null}
-              {/* {isMobile ? null : <h6 className="ml-2 mr-auto text-[16px]">Steps</h6>} */}
+                ) : null}
+              </div>
+              {isMobile ? null : <h6 className="ml-2 mr-auto text-[16px]">Steps</h6>}
               <div className={`d-flex align-center ml-auto flex-wrap justify-end gap-[8px] ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
                 <DetailsPageHeader
                   isAddButtonVisible={resource === sidebarResource.workOrder}
@@ -1085,9 +1086,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        )
                         ? false
                         : true,
                     placement: 'right'
@@ -1103,9 +1104,8 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${
-                minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
-              } overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
+              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
+                } overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1118,9 +1118,8 @@ const Steps = ({
                     key={step._id}
                     border={1}
                     borderColor={'var(--common-border-color)'}
-                    className={`${classes.accordionHeading}  ${classes.white} ${
-                      !stepData?.status ? '' : 'cursor-pointer'
-                    } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                    className={`${classes.accordionHeading}  ${classes.white} ${!stepData?.status ? '' : 'cursor-pointer'
+                      } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <div className="flex gap-2">
                       {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
@@ -1223,12 +1222,12 @@ const Steps = ({
                                     <DeleteOutline
                                       color={
                                         allowedToEdit &&
-                                        ![
-                                          WORKORDER_SERVICE_STEP_STATUS.passed,
-                                          WORKORDER_SERVICE_STEP_STATUS.failed,
-                                          WORKORDER_SERVICE_STEP_STATUS.completed,
-                                          WORKORDER_SERVICE_STEP_STATUS.skipped
-                                        ].includes(stepData?.passFailStatus)
+                                          ![
+                                            WORKORDER_SERVICE_STEP_STATUS.passed,
+                                            WORKORDER_SERVICE_STEP_STATUS.failed,
+                                            WORKORDER_SERVICE_STEP_STATUS.completed,
+                                            WORKORDER_SERVICE_STEP_STATUS.skipped
+                                          ].includes(stepData?.passFailStatus)
                                           ? 'error'
                                           : 'disabled'
                                       }
@@ -1359,10 +1358,10 @@ const Steps = ({
                               ) : null
                             ) : null}
                             {stepData?.status &&
-                            step?.isAllowToPerform &&
-                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                            // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                            isStepsAllowToPerform ? (
+                              step?.isAllowToPerform &&
+                              ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                              // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                              isStepsAllowToPerform ? (
                               [
                                 WORKORDER_SERVICE_STEP_STATUS.passed,
                                 WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1475,12 +1474,12 @@ const Steps = ({
                               <DeleteOutline
                                 color={
                                   allowedToEdit &&
-                                  ![
-                                    WORKORDER_SERVICE_STEP_STATUS.passed,
-                                    WORKORDER_SERVICE_STEP_STATUS.failed,
-                                    WORKORDER_SERVICE_STEP_STATUS.completed,
-                                    WORKORDER_SERVICE_STEP_STATUS.skipped
-                                  ].includes(stepData?.passFailStatus)
+                                    ![
+                                      WORKORDER_SERVICE_STEP_STATUS.passed,
+                                      WORKORDER_SERVICE_STEP_STATUS.failed,
+                                      WORKORDER_SERVICE_STEP_STATUS.completed,
+                                      WORKORDER_SERVICE_STEP_STATUS.skipped
+                                    ].includes(stepData?.passFailStatus)
                                     ? 'error'
                                     : 'disabled'
                                 }
@@ -1571,16 +1570,16 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                      isStepsAllowToPerform &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      ) &&
-                      ![
-                        WORKORDER_SERVICE_STEP_STATUS.skipped,
-                        WORKORDER_SERVICE_STEP_STATUS.completed,
-                        WORKORDER_SERVICE_STEP_STATUS.end,
-                        WORKORDER_SERVICE_STEP_STATUS.passed
-                      ]?.includes(getFields(selectedStep)?.stepData?.status)
+                        isStepsAllowToPerform &&
+                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                          selectedService?.status
+                        ) &&
+                        ![
+                          WORKORDER_SERVICE_STEP_STATUS.skipped,
+                          WORKORDER_SERVICE_STEP_STATUS.completed,
+                          WORKORDER_SERVICE_STEP_STATUS.end,
+                          WORKORDER_SERVICE_STEP_STATUS.passed
+                        ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
@@ -1869,9 +1868,9 @@ const Steps = ({
                 <ThemeButton
                   disabled={
                     allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                       ? false
                       : true
                   }
