@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Box, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ImageEditor from '@toast-ui/react-image-editor';
@@ -16,7 +16,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
   useEffect(() => {
     loadImage();
   }, [data]);
-  
+
   const loadImage = async () => {
     try {
       const response = await axiosInstance().get('/user/download?fileName=' + encodeURIComponent(data?.url), {
@@ -34,7 +34,6 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
 
   const handleSave = async () => {
     if (!editorRef.current) return;
-    
     setSubmitting(true);
     try {
       const instance = editorRef.current.getInstance();
@@ -42,19 +41,15 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
       const blob: any = b64toBlob(imageData);
       const type = `image/${data?.url?.split('.')[1]}`;
       const file: any = new File([blob], data?.name, { type });
-      
       let formData = new FormData();
       formData.append('file', file);
-      
       const res = await axiosInstance().post('/user/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
-      await axiosInstance().put(`/attachment/replace/${data?.attachmentId}`, { 
-        oldUrl: data?.url, 
-        url: res?.data?.fileName 
+      await axiosInstance().put(`/attachment/replace/${data?.attachmentId}`, {
+        oldUrl: data?.url,
+        url: res?.data?.fileName
       });
-      
       setSelectedAttachment(null);
       fetchData();
     } catch (err) {
@@ -85,7 +80,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
             buttonType="theme"
             onClick={handleSave}
           >
-            Save Changes
+            Save
           </ThemeButton>
           <ThemeButton
             disabled={loading}
@@ -136,7 +131,6 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment }) => {
                   'mask',
                   'filter'
                 ],
-                initMenu: 'filter',
                 uiSize: {
                   width: '98%',
                   height: '98%'
