@@ -393,8 +393,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
@@ -427,7 +427,7 @@ const ManageRentalManagementDialog = ({
                   id="dialog-save-button"
                   buttonType="theme"
                   isLoading={loading}
-                  disabled={uploadingImageOrFileProgress > 0 || loading || (!isClone && isEqual(rentalData.initialValues, values))}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || (rentalManagementId && !isClone && isEqual(rentalData.initialValues, values))}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
