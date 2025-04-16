@@ -16,7 +16,7 @@ import TinyMce from './../../components/TinyMCE/index';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -35,32 +35,12 @@ const PdfTemplateSchema = object().shape({
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
-  mainContainer: {
-    overflowY: 'scroll'
-  },
-  root: {
-    flexGrow: 1
-  },
-  paper: {
-    width: '100%',
-    textAlign: 'center',
-    color: theme.palette.text.secondary
-  },
-  saveButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'end'
-  },
   tinyMCEContainer: {
     width: '725px',
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '10px'
   },
-  headingLabel: {
-    marginBottom: '7px',
-    textAlign: 'center'
-  }
 }));
 
 export default function NewCreateQuotePdfTemplate() {
@@ -89,7 +69,6 @@ export default function NewCreateQuotePdfTemplate() {
   }: any = useData();
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-  const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isLandscapChecked, setIsLandscapChecked] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
@@ -101,10 +80,12 @@ export default function NewCreateQuotePdfTemplate() {
 
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
   const [variableDialog, setVariableDialog] = useState(false);
+
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
+  const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
 
   const onBackButtonEvent = (e) => {
-    if (hasPermissionToUpdate) {
+    if (allowedToEdit) {
       e.preventDefault();
       window.history.pushState(null, null, window.location.pathname);
       setShowConfirmDialog(true);
@@ -201,7 +182,7 @@ export default function NewCreateQuotePdfTemplate() {
           setQuoteData(data);
           setVersion(queryParams.version);
           if (data?._id) {
-            setHasPermissionToUpdate(true);
+            setAllowedToEdit(true);
           }
           tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           tempQuoteData = data;
@@ -218,7 +199,7 @@ export default function NewCreateQuotePdfTemplate() {
           setQuoteData(data);
           setVersion(queryParams.version);
           if (data?._id) {
-            setHasPermissionToUpdate(true);
+            setAllowedToEdit(true);
           }
           tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           tempQuoteData = data;
@@ -226,6 +207,7 @@ export default function NewCreateQuotePdfTemplate() {
           toastConfig.setToastConfig(e);
         }
       }
+
       if (tempPdfTemplate) {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
         initialValues.landscape = tempPdfTemplate?.landscape;
@@ -291,15 +273,18 @@ export default function NewCreateQuotePdfTemplate() {
             tabelSummaryLeftSide: data?.tabelSummaryLeftSide
           });
           if (tempQuoteData?._id) {
-            setHasPermissionToUpdate(true);
-          } else if (
-            data?.owner &&
-            data?.owner !== undefined &&
-            user.user._id !== data?.owner &&
-            !data?.collaborator?.some((d) => d === user.user._id) &&
-            !checkSuperAdminAccess(user, sidebarResource.quotePdfTemplate)
-          ) {
-            setHasPermissionToUpdate(false);
+            setIsEdit(true)
+            setAllowedToEdit(true);
+          } else {
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotePdfTemplate, {
+              owner: {
+                optionValue: initialValues.owner,
+              },
+              collaborator: initialValues.collaborator?.map((e) => { return { optionValue: e } })
+            }));
+            if (isClone) {
+              setIsEdit(true)
+            }
           }
         } catch (e) {
           toastConfig.setToastConfig(e);
@@ -457,51 +442,48 @@ export default function NewCreateQuotePdfTemplate() {
     }
 
     if (id === '0' || isClone === true) {
-      axiosInstance()
-        .post('/quote-pdf-template', {
-          ...details,
-          name: trimmedName,
-          pageNumberInFooter: values.pageNumberInFooter,
-          entity: values?.entity,
-          type: values?.type,
-          owner: values?.owner,
-          collaborator: values?.collaborator,
-          landscape: values?.landscape,
-          hideAmountTotalSection: values?.hideAmountTotalSection,
-          tableTotalAtBottom: values?.tableTotalAtBottom,
-          tableFontSize: parseInt(values?.tableFontSize),
-          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
-          pdfFontSize: parseInt(values?.pdfFontSize),
-          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
-          tableHeaderFontColor: values?.tableHeaderFontColor,
-          tableHeaderFontWeight: values?.tableHeaderFontWeight
-        })
-        .then(({ data: { data, message } }) => {
-          if (isPreview === true) {
-            previewPdfTemplate(data._id);
-            setIsUpdatingAndPreview(false);
-            history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
-          } else {
-            if (isBreakCrumbPath) {
-              history.push({ pathname: isBreakCrumbPath });
-            } else {
-              history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
-            }
-            setIsUpdating(false);
-            setIsEdit(false);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: message
-            });
-          }
-        })
-        .catch((error) => {
-          setIsUpdating(false);
+      axiosInstance().post('/quote-pdf-template', {
+        ...details,
+        name: trimmedName,
+        pageNumberInFooter: values.pageNumberInFooter,
+        entity: values?.entity,
+        type: values?.type,
+        owner: values?.owner,
+        collaborator: values?.collaborator,
+        landscape: values?.landscape,
+        hideAmountTotalSection: values?.hideAmountTotalSection,
+        tableTotalAtBottom: values?.tableTotalAtBottom,
+        tableFontSize: parseInt(values?.tableFontSize),
+        belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+        pdfFontSize: parseInt(values?.pdfFontSize),
+        tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+        tableHeaderFontColor: values?.tableHeaderFontColor,
+        tableHeaderFontWeight: values?.tableHeaderFontWeight
+      }).then(({ data: { data, message } }) => {
+        if (isPreview === true) {
+          previewPdfTemplate(data._id);
           setIsUpdatingAndPreview(false);
+          history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+        } else {
+          if (isBreakCrumbPath) {
+            history.push({ pathname: isBreakCrumbPath });
+          } else {
+            history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+          }
+          setIsUpdating(false);
           setIsEdit(false);
-          toastConfig.setToastConfig(error);
-        });
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        }
+      }).catch((error) => {
+        setIsUpdating(false);
+        setIsUpdatingAndPreview(false);
+        setIsEdit(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
       let api = quoteData
         ? `${queryParams.quotation ? quotation.api : '/quote-builder'}/pdf-template/${quoteData._id}/${version}`
@@ -598,10 +580,10 @@ export default function NewCreateQuotePdfTemplate() {
                         title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
                       }
                     ]}
-                    isConfirmBeforeClick={hasPermissionToUpdate}
+                    isConfirmBeforeClick={allowedToEdit}
                     onBreadCrumbClick={(path) => {
                       setIsBreakCrumbPath(path);
-                      if (hasPermissionToUpdate) {
+                      if (allowedToEdit) {
                         if (!isEqual({ ...values, ...details }, initialValues)) {
                           setShowConfirmDialog(true);
                         } else {
@@ -614,19 +596,22 @@ export default function NewCreateQuotePdfTemplate() {
                 <div className="flex flex-wrap gap-2">
                   {isEdit && (
                     <ThemeButton
-                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
+                      disabled={isUpdating || !allowedToEdit}
                       onClick={handleImport}
                       isLoading={isUpdating}
                     >
                       Import
                     </ThemeButton>
                   )}
-                  <ThemeButton disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} onClick={handleExport} isLoading={isUpdating}>
+                  <ThemeButton
+                    disabled={isUpdating}
+                    onClick={handleExport}
+                    isLoading={isUpdating}>
                     Export
                   </ThemeButton>
                   {isEdit && (
                     <ThemeButton
-                      disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
+                      disabled={isUpdating || !allowedToEdit}
                       onClick={submitForm}
                       buttonType="theme"
                       isLoading={isUpdating}
@@ -634,15 +619,14 @@ export default function NewCreateQuotePdfTemplate() {
                       Save
                     </ThemeButton>
                   )}
-                  {!isEdit && (
+                  {!isEdit && allowedToEdit && (
                     <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
                       Edit
                     </ThemeButton>
                   )}
-
                   {!quoteData && isEdit && (
                     <ThemeButton
-                      disabled={(!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate))}
+                      disabled={(!isClone && (isUpdatingAndPreview || !allowedToEdit))}
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
@@ -653,10 +637,9 @@ export default function NewCreateQuotePdfTemplate() {
                       Save & Preview
                     </ThemeButton>
                   )}
-
                   <ThemeButton
                     onClick={() => {
-                      if (hasPermissionToUpdate && !isEqual({ ...values, ...details }, initialValues)) {
+                      if (allowedToEdit && !isEqual({ ...values, ...details }, initialValues)) {
                         setShowConfirmDialog(true);
                       } else {
                         handleClose();
@@ -676,7 +659,7 @@ export default function NewCreateQuotePdfTemplate() {
                           <Grid container spacing={2}>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <TextField
-                                disabled={(!isClone && (!hasPermissionToUpdate || Boolean(quoteData?._id))) || !isEdit}
+                                disabled={((!allowedToEdit || Boolean(quoteData?._id))) || !isEdit}
                                 variant="outlined"
                                 type="text"
                                 label="PDF Template Name"
@@ -693,7 +676,7 @@ export default function NewCreateQuotePdfTemplate() {
                             </Grid>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <Autocomplete
-                                disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                disabled={!allowedToEdit || !isEdit}
                                 getOptionLabel={(option) => option.title}
                                 isOptionEqualToValue={(option, value) => option.value === value.value}
                                 value={
@@ -727,7 +710,7 @@ export default function NewCreateQuotePdfTemplate() {
                           <Grid container spacing={2}>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <Autocomplete
-                                disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                disabled={!allowedToEdit || !isEdit}
                                 multiple
                                 options={user?.entity}
                                 getOptionLabel={(option: any) => (option ? option?.entityName : '')}
@@ -742,10 +725,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -765,7 +748,7 @@ export default function NewCreateQuotePdfTemplate() {
                             </Grid>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <Autocomplete
-                                disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                disabled={!allowedToEdit || !isEdit}
                                 getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
                                 value={
                                   ownerCollaboratorData.filter((data) => data._id === values['owner']).length
@@ -779,10 +762,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -803,7 +786,7 @@ export default function NewCreateQuotePdfTemplate() {
                             </Grid>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <Autocomplete
-                                disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                disabled={!allowedToEdit || !isEdit}
                                 multiple
                                 options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
                                 getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
@@ -818,10 +801,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -849,7 +832,7 @@ export default function NewCreateQuotePdfTemplate() {
                           <div className="flex flex-col rounded-sm border border-gray-300 p-2">
                             <Typography variant="body2">PDF Property</Typography>
                             <FormControlLabel
-                              disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                              disabled={!allowedToEdit || !isEdit}
                               value={values['pageNumberInFooter']}
                               control={
                                 <Checkbox
@@ -864,7 +847,7 @@ export default function NewCreateQuotePdfTemplate() {
                               label="Show page number in footer"
                             />
                             <FormControlLabel
-                              disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                              disabled={!allowedToEdit || !isEdit}
                               value={values['landscape']}
                               control={
                                 <Checkbox
@@ -909,7 +892,7 @@ export default function NewCreateQuotePdfTemplate() {
                               <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
                                 <div className="flex flex-col">
                                   <FormControlLabel
-                                    disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                    disabled={!allowedToEdit || !isEdit}
                                     value={values['hideAmountTotalSection']}
                                     control={
                                       <Checkbox
@@ -924,7 +907,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     label="Hide Amount Total Section"
                                   />
                                   <FormControlLabel
-                                    disabled={(!isClone && !hasPermissionToUpdate) || !isEdit}
+                                    disabled={!allowedToEdit || !isEdit}
                                     value={values['tableTotalAtBottom']}
                                     control={
                                       <Checkbox
@@ -938,36 +921,33 @@ export default function NewCreateQuotePdfTemplate() {
                                     }
                                     label="Show Table Total At Bottom"
                                   />
-                                  {isEdit && (
-                                    <FormTypes
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={'Table Header Background Color'}
-                                      name={'tableHeaderBackgroundColor'}
-                                      type={'colorPicker'}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      isTooltip={false}
-                                    />
-                                  )}
+                                  <FormTypes
+                                    disabled={!allowedToEdit || !isEdit}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={'Table Header Background Color'}
+                                    name={'tableHeaderBackgroundColor'}
+                                    type={'colorPicker'}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    isTooltip={false}
+                                  />
                                   <Box mt={1}></Box>
-                                  {isEdit && (
-                                    <FormTypes
-                                      canEdit={!isEdit ? true : false}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={'Table Header Font Color'}
-                                      name={'tableHeaderFontColor'}
-                                      type={'colorPicker'}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      isTooltip={false}
-                                    />
-                                  )}
+                                  <FormTypes
+                                    disabled={!allowedToEdit || !isEdit}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={'Table Header Font Color'}
+                                    name={'tableHeaderFontColor'}
+                                    type={'colorPicker'}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    isTooltip={false}
+                                  />
                                 </div>
                               </Grid>
                               <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
@@ -977,7 +957,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     label={'Table Font Size'}
                                     name="tableFontSize"
                                     type="number"
-                                    disabled={!isEdit}
+                                    disabled={!allowedToEdit || !isEdit}
                                     margin="dense"
                                     size={'small'}
                                     value={values['tableFontSize']}
@@ -998,7 +978,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     label={'Table Total Font Size'}
                                     name="belowTableTotalFontSize"
                                     type="number"
-                                    disabled={!isEdit}
+                                    disabled={!allowedToEdit || !isEdit}
                                     margin="dense"
                                     size={'small'}
                                     sx={{ width: 300 }}
@@ -1018,7 +998,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     style={{ maxWidth: '300px' }}
                                     size="small"
                                     fullWidth
-                                    disabled={!isEdit}
+                                    disabled={!allowedToEdit || !isEdit}
                                     options={['normal']}
                                     getOptionLabel={(option) => startCase(option)}
                                     isOptionEqualToValue={(option: any, val) => option === val}
@@ -1029,7 +1009,6 @@ export default function NewCreateQuotePdfTemplate() {
                                         placeholder="Table Header Font Weight"
                                         variant="outlined"
                                         margin="dense"
-                                        disabled={!isEdit}
                                         label="Table Header Font Weight"
                                       />
                                     )}
@@ -1045,18 +1024,16 @@ export default function NewCreateQuotePdfTemplate() {
                       </Grid>
                     </Grid>
                   </Grid>
-                  {allFields?.length && id && id !== '0' && !isClone && (
+                  {allFields?.length && id && id !== '0' && (
                     <div className="flex justify-end mt-2">
                       <ThemeButton onClick={() => setVariableDialog(true)}>Variables</ThemeButton>
                     </div>
                   )}
                   <div className="mt-2 flex flex-col gap-2">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Header
-                      </Typography>
+                      <Typography variant='h6'>Header</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate || !isEdit}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="header"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1075,11 +1052,9 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Above Table
-                      </Typography>
+                      <Typography variant='h6'>Above Table</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate || !isEdit}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="aboveTable"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1096,11 +1071,9 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Below Table
-                      </Typography>
+                      <Typography variant='h6'>Below Table</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate || !isEdit}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="belowTable"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1117,11 +1090,9 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Footer
-                      </Typography>
+                      <Typography variant='h6'>Footer </Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate || !isEdit}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="footer"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1139,11 +1110,11 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
+                      <Typography variant='h6'>
                         Tabel Summary Left Side
                       </Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate || !isEdit}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="tabelSummaryLeftSide"
                         onChange={(value) => {
                           setDetails((prevState) => ({
