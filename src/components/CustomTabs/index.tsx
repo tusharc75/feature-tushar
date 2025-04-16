@@ -4,13 +4,13 @@ import Tab, { TabProps } from '@mui/material/Tab';
 import Tabs, { TabsProps } from '@mui/material/Tabs';
 import { cn } from 'src/constants/helpers';
 
-type TabPanelProps = {
+type TabPanelProps<D> = {
   children?: React.ReactNode;
-  index: number;
-  value: number;
+  index: D;
+  value: D;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-const TabPanel = (props: TabPanelProps) => {
+const TabPanel = <D,>(props: TabPanelProps<D>) => {
   const { children, value, index, ...other } = props;
   return (
     <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
