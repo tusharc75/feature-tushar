@@ -25,10 +25,11 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket | null => {
       if (allConnections[fullNamespace]) {
         s = allConnections[fullNamespace];
         if (!s.connected) {
-          s.connect();
           s.on('connect', () => {
             setSocket(s);
           });
+          s.connect();
+          allConnections[fullNamespace] = s;
         } else {
           setSocket(s);
         }

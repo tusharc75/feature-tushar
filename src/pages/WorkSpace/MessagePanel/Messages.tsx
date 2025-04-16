@@ -44,7 +44,8 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async (messageId: string = null, updateMessage: Boolean = false) => {
+  const fetchMessages = async (props?: { messageId?: string; updateMessage?: Boolean }) => {
+    const { messageId = null, updateMessage = false } = props || {};
     try {
       let api = `/work-space/channel/message/${channelId}`;
       if (updateMessage && messageId) {
@@ -53,7 +54,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
         api += `?after=${messageId}${type === 'pins' ? '&type=pins' : ''}`;
       } else {
         api += `${type === 'pins' ? '?type=pins' : ''}`;
-        setIsLoading(true);
+        // setIsLoading(true);
       }
 
       const { data } = await axiosInstance().get(api);
@@ -93,7 +94,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   useEffect(() => {
     if (socket) {
       socket.on('fetchUpdatedMessage', (messageId) => {
-        fetchMessages(messageId, true);
+        fetchMessages({ messageId, updateMessage: true });
       });
       socket.on('fetchMessages', (messageId) => {
         fetchMessages(messageId);
@@ -143,6 +144,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
       setMessages({});
       setIsLoading(false);
     } else {
+      setIsLoading(true);
       fetchMessages();
     }
   }, [channelId, newChatToUser, type]);
