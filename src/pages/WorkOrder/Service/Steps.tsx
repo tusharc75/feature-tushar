@@ -1058,7 +1058,7 @@ const Steps = ({
           <Box className={`relative overflow-hidden max-[768px]:mb-[70px]`}>
             <div className={cn(`flex flex-wrap items-center justify-between `, headerPadding ? 'p-[8px]' : 'pb-2')}>
               {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
-                <div className="flex flex-wrap items-center gap-[8px] pl-2">
+                <div className="ml-2 flex flex-wrap items-center gap-[8px] pl-2">
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
@@ -1081,6 +1081,7 @@ const Steps = ({
                   </>
                 </div>
               ) : null}
+
               {/* {isMobile ? null : <h6 className="ml-2 mr-auto text-[16px]">Steps</h6>} */}
               <div className={`d-flex align-center ml-auto flex-wrap justify-end gap-[8px] ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
                 <DetailsPageHeader
@@ -1549,7 +1550,7 @@ const Steps = ({
                           </div>
                         </CustomCollapsible>
                       )}
-                      <CustomCollapsible head={<h6 className="text-base font-normal">Drawing</h6>} element="li" className="border-b-0 border-t">
+                      <CustomCollapsible head={<h6 className="text-base font-normal">Drawings</h6>} element="li" className="border-b-0 border-t">
                         <div className="p-4">
                           <Diagram
                             fullHeight={false}
