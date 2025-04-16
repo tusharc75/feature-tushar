@@ -133,7 +133,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               <p
                 onClick={() => {
                   setIsProductEdit({ open: true, isBulkedit: false });
-                  setRecordToUpdate(row.original);
+                  setRecordToUpdate({ ...row?.original, qty: row?.original?.qtyDisplay });
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -146,19 +146,19 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 title={
                   row.original.type === 'package'
                     ? `Add Existing Product`
-                    : row.subRows?.length !== row.original.qty
+                    : row.subRows?.length !== row.original.qtyDisplay
                       ? `Add`
                       : `Can't add more asset!`
                 }
               >
                 <IconButton
                   onClick={(event) => {
-                    if (row.original.qty !== row.subRows?.length && row.original.type === 'product') {
+                    if (row.original.qtyDisplay !== row.subRows?.length && row.original.type === 'product') {
                       setProducts([
                         {
                           parentId: row.original._id,
                           product: row.original.materialId,
-                          qty: row.original.qty - (row.subRows?.length || 0),
+                          qty: row.original.qtyDisplay - (row.subRows?.length || 0),
                           productName: row.original?.detail
                         }
                       ]);
@@ -508,7 +508,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         parentId: m._id,
         product: m.materialId,
         productName: m?.detail,
-        qty: m.qty - (alreadyAssets?.length || 0)
+        qty: m.qtyDisplay - (alreadyAssets?.length || 0)
       };
     });
     setProducts([...products?.filter((e) => e.qty > 0)]);
@@ -598,7 +598,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const actionButtonMenuItems = () => {
     return (
       <>
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qty)?.length > 0 && (
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && e?.assetQty < e?.qtyDisplay)?.length > 0 && (
           <MenuItem
             onClick={() => {
               setAddExistingProductDialog({
