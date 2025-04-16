@@ -5,7 +5,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { RenderAvatar, RenderButton, RenderContent } from 'src/components/DesktopDM/ShowMessage/helperComponents';
 import PinnedMessages from 'src/components/DesktopDM/ShowMessage/PinnedMessages';
 import { Chat, Message, OpenedChat, UseDesktopDM, User } from 'src/components/DesktopDM/types';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn, displayDate } from 'src/constants/helpers';
 
 type ShowMessagesProps = {

@@ -296,6 +296,7 @@ const SendMessage = ({
             </div>
           ))}
         </div>
+
         <div className="editor" key={themeColor}>
           <Editor
             key={themeColor}
@@ -314,7 +315,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={!(channelId || newChatToUser) || disabled}
+            disabled={disabled || !(channelId || newChatToUser)}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -387,7 +388,7 @@ const SendMessage = ({
               </HtmlTooltip>
               <IconButton
                 style={{ padding: 5 }}
-                disabled={!message || isLoading}
+                disabled={disabled || !message || isLoading}
                 size="small"
                 className="send-button !ml-auto !block"
                 onClick={postMessage}
