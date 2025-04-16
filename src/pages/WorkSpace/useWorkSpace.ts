@@ -40,7 +40,7 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
     case 'setSelectedChannel':
       return { ...state, selectedChannel: action.payload };
     case 'setEditCreateChannelDialogData':
-      return { ...state, currentEditingChannelId: action.payload };
+      return { ...state, editCreateChannelDialogData: action.payload };
     case 'setCurrentDeletingChannelId':
       return { ...state, currentDeletingChannelId: action.payload };
     case 'setNewDirectMessageChannelId':

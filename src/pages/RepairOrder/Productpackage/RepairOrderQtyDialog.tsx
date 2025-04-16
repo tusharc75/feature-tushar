@@ -152,8 +152,11 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
                 >
                   {'Close'}
                 </ThemeButton>
-                <ThemeButton isLoading={loading} disabled={loading || isEqual(ref?.current?.values, initialData.values)} onClick={submitForm}>
-                  {' '}
+                <ThemeButton
+                  isLoading={loading}
+                  buttonType='theme'
+                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                  onClick={submitForm}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
