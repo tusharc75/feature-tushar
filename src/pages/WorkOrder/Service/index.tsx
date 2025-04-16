@@ -582,7 +582,7 @@ const Service = ({
               <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
                 <CustomCollapsible
                   head={<h6 className="text-base font-semibold">Steps</h6>}
-                  headProps={{ className: 'sticky top-0 z-10' }}
+                  headProps={{ className: 'sticky top-0 z-[1]' }}
                   element="li"
                   defaultExpanded
                 >
@@ -622,7 +622,7 @@ const Service = ({
                 {!user?.user?.brandPolicy?.workOrderConsumableHide && (
                   <CustomCollapsible
                     head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
-                    headProps={{ className: 'sticky top-0 z-10' }}
+                    headProps={{ className: 'sticky top-0 z-[1]' }}
                     element="li"
                   >
                     <div className="p-4">
@@ -663,7 +663,7 @@ const Service = ({
                 )}
                 <CustomCollapsible
                   head={<h6 className="text-base font-semibold">Drawings</h6>}
-                  headProps={{ className: 'sticky top-0 z-10' }}
+                  headProps={{ className: 'sticky top-0 z-[1]' }}
                   element="li"
                 >
                   <div className="p-4">
