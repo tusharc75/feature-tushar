@@ -8,6 +8,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { FailIcon, PassIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import CustomCollapsible from 'src/components/CustomCollapsible';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -30,6 +31,9 @@ import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
 import ConfigureFields from 'src/pages/ServiceMaster/Fields';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import StepDialog from 'src/pages/ServiceMaster/Steps/StepDialog';
+import Consumables from 'src/pages/WorkOrder/Consumables';
+import Diagram from 'src/pages/WorkOrder/Diagram';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import ConsumablesDialog from '../Consumables/ConsumablesDialog';
 import Quotation from '../Quotation';
 import AssignUserDialog from './AssignTechniciansDialog';
@@ -41,13 +45,6 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
-import { TabPanel } from 'src/components/CustomTabs';
-import Consumables from 'src/pages/WorkOrder/Consumables';
-import Diagram from 'src/pages/WorkOrder/Diagram';
-import { ConnectedTab, ConnectedTabs } from 'src/components/CustomTabs/ConnectedTabs';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 
 type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
 
@@ -582,18 +579,14 @@ const Service = ({
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
             <div className="max-w-full border transition-all md:border-l-0">
-              <div
-                style={{
-                  overflow: 'hidden',
-                  minHeight: 'calc(100% - 53px)'
-                }}
-                className="space-y-4 p-4"
-              >
-                <Accordion defaultExpanded>
-                  <AccordionSummary aria-controls="panel1-content" id="panel1-header">
-                    Steps
-                  </AccordionSummary>
-                  <AccordionDetails>
+              <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
+                <CustomCollapsible
+                  head={<h6 className="text-base font-semibold">Steps</h6>}
+                  headProps={{ className: 'sticky top-0 z-10' }}
+                  element="li"
+                  defaultExpanded
+                >
+                  <div className="p-4">
                     {selectedService ? (
                       <>
                         {selectedService?.type === 'service' ? (
@@ -606,7 +599,7 @@ const Service = ({
                             resource={resource}
                             resourceData={resourceData}
                             stepSubmitedData={stepSubmitedData}
-                            minHeightClass={minHeightClass}
+                            minHeightClass={' '}
                             isMobile={mobScreen}
                             fetchWorkOrderData={fetchWorkOrderData}
                             defaultSelectedService={defaultSelectedService}
@@ -624,15 +617,17 @@ const Service = ({
                         <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
                       </div>
                     )}
-                  </AccordionDetails>
-                </Accordion>
+                  </div>
+                </CustomCollapsible>
                 {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-                  <Accordion>
-                    <AccordionSummary aria-controls="panel2-content" id="panel2-header">
-                      Products/Consumables
-                    </AccordionSummary>
-                    <AccordionDetails>
+                  <CustomCollapsible
+                    head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
+                    headProps={{ className: 'sticky top-0 z-10' }}
+                    element="li"
+                  >
+                    <div className="p-4">
                       <Consumables
+                        tableHeight={'300px'}
                         hideServiceFilter={true}
                         allowedToEdit={
                           workOrderData.type === WORK_ORDER_TYPE.repairOrder
@@ -663,15 +658,17 @@ const Service = ({
                         defaultServiceUniqueId={defaultSelectedService}
                         serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
                       />
-                    </AccordionDetails>
-                  </Accordion>
+                    </div>
+                  </CustomCollapsible>
                 )}
-                <Accordion>
-                  <AccordionSummary aria-controls="panel3-content" id="panel3-header">
-                    Drawing
-                  </AccordionSummary>
-                  <AccordionDetails>
+                <CustomCollapsible
+                  head={<h6 className="text-base font-semibold">Drawings</h6>}
+                  headProps={{ className: 'sticky top-0 z-10' }}
+                  element="li"
+                >
+                  <div className="p-4">
                     <Diagram
+                      fullHeight={false}
                       showContainer={false}
                       resource={ACTIVITY_RESOURCE.workOrder}
                       referenceId={workOrderId}
@@ -681,9 +678,9 @@ const Service = ({
                       showMaterialFilter={false}
                       defaultSelectedUniqueId={defaultSelectedService}
                     />
-                  </AccordionDetails>
-                </Accordion>
-              </div>
+                  </div>
+                </CustomCollapsible>
+              </ul>
             </div>
           </div>
           {mobScreen && (
