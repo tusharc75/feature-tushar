@@ -34,7 +34,12 @@ export const groupByDate = (messages: Message[]) => {
 };
 
 const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state }: MessagesProps) => {
-  const { socket, newChatToUser } = state;
+  const { socket } = state;
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastMessageSeen, setLastMessageSeen] = useState(null);
@@ -140,14 +145,9 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   }, [socket, channelId, type]);
 
   useEffect(() => {
-    if (newChatToUser) {
-      setMessages({});
-      setIsLoading(false);
-    } else {
-      setIsLoading(true);
-      fetchMessages();
-    }
-  }, [channelId, newChatToUser, type]);
+    setIsLoading(true);
+    fetchMessages();
+  }, [channelId, type]);
 
   const handleMenuClick = (event, message: Message) => {
     setAnchorEl(event.currentTarget);
@@ -212,9 +212,9 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
         channelId={channelId}
         socket={socket}
         channelData={channelData}
-        disabled={isLoading || type === 'pins'}
         messageId={lastMessageSeen}
         state={state}
+        disabled={!channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
       />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
@@ -345,6 +345,8 @@ export const DisplaySingleMessage = ({
 
   const isSelf = user?._id === message?.user?.optionValue;
 
+  console.log(!channelData?.members.some((d) => d.optionValue === user?._id));
+
   return (
     <>
       <li
@@ -387,6 +389,7 @@ export const DisplaySingleMessage = ({
                 onEditComplete={handleEditComplete}
                 editorId={`sone`}
                 channelData={channelData}
+                disabled={!channelData?.members.some((d) => d.optionValue === user?._id)}
               />
             ) : (
               <>
