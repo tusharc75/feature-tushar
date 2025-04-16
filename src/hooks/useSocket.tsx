@@ -9,7 +9,7 @@ interface UseSocketProps {
   namespace: string;
 }
 
-export const useSocket = ({ namespace }: UseSocketProps): Socket => {
+export const useSocket = ({ namespace }: UseSocketProps): Socket | null => {
   const token = localStorage.getItem('token');
 
   const [socket, setSocket] = useState<Socket>(null);
@@ -26,10 +26,12 @@ export const useSocket = ({ namespace }: UseSocketProps): Socket => {
         s = allConnections[fullNamespace];
         if (!s.connected) {
           s.connect();
-        }
-        s.on('connect', () => {
+          s.on('connect', () => {
+            setSocket(s);
+          });
+        } else {
           setSocket(s);
-        });
+        }
       } else {
         s = io(fullNamespace, {
           path,
