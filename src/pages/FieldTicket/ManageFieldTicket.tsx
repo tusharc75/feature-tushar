@@ -54,6 +54,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const isStepDataSet = useRef(false);
 
   const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
+  const [allFields, setAllFields] = useState([]);
 
 
   useEffect(() => {
@@ -99,12 +100,10 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         data = response?.data?.data;
       }
       const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-
-      const fieldsDataForCreate = data
-        .filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+      setAllFields(allFields)
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
         .map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data
-        .filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
         .map((d: any) => d.fieldData);
 
       if (id) {
@@ -262,7 +261,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
 
     const referenceData: any = cloneResourceData(
       fieldServiceOrderFields?.map((e) => e?.fieldData),
-      initialData?.fields,
+      allFields,
       data,
       user.user?.brandCurrency
     );

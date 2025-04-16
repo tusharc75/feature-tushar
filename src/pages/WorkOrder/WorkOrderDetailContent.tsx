@@ -697,6 +697,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={1}>
           {workOrderData && (
             <Service
+              resourceData={resourceData}
               workOrderData={workOrderData}
               workOrderId={id}
               allowedToEdit={allowedToEdit}
