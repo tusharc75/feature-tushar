@@ -133,7 +133,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               <p
                 onClick={() => {
                   setIsProductEdit({ open: true, isBulkedit: false });
-                  setRecordToUpdate({ ...row?.original, qty: row?.original?.qtyDisplay });
+                  setRecordToUpdate({ ...row?.original });
                 }}
                 className="link text-truncate"
                 title={row.original.detail}
@@ -241,11 +241,11 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         )
       },
       {
-        accessor: 'qtyDisplay',
+        accessor: 'qty',
         Header: 'Qty',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['qtyDisplay'] ? <p className="text-truncate">{row.original.qtyDisplay}</p> : <NoDataCell />;
+          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         }
       },
       {
