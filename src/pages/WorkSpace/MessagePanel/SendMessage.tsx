@@ -1,19 +1,18 @@
+import { AttachFile, Cancel, Close, Mic, MicOff, Send } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import { AttachFile, Send, Mic, MicOff, Cancel, Close } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, getFileIconSrc } from 'src/constants/helpers';
 import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
 import { ChannelData } from 'src/pages/WorkSpace/types';
-import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { useSearchParams } from 'react-router-dom';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 
 type SendMessageProps = {
   channelId: string;
