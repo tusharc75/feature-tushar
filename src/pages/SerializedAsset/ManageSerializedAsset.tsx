@@ -630,13 +630,12 @@ const ManageSerializedAsset = ({
                     Cancel
                   </ThemeButton>
                   <ThemeButton
-                    disabled={isSubmitting || (!isClone && isEqual(initialData.values, values))}
+                    disabled={isSubmitting || (productInventoryId && !isClone && isEqual(initialData.values, values))}
                     isLoading={isSubmitting}
                     buttonType="theme"
                     onClick={submitForm}
                     id="dialog-save-button"
                   >
-                    {' '}
                     Save
                   </ThemeButton>
                 </CustomDialogFooter>

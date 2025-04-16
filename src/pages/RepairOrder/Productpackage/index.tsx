@@ -333,15 +333,14 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.assetNumber
-              : ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.package
+        ? parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -387,15 +386,14 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     let canDelete = subRows?.find((e) => e.workOrder) || !allowedToEdit ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow.serializedAssetDetail.assetNumber
-              : ''
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
+        ? _subRow.packageDetail?.packageName
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow.serializedAssetDetail.assetNumber
+            : ''
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
@@ -519,6 +517,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       <>
         <MenuItem
           onClick={() => {
+            dispatch({ type: 'selection', selectedRecords: [] });
             setAddExistingProductDialog({
               open: true,
               type: MATERIAL_TYPE.serializedAsset,
