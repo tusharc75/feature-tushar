@@ -55,8 +55,6 @@ const Chatter = (props: any) => {
     return () => clearTimeout(timeout);
   }, [relatedTo]);
 
-  console.log({ connected: chatSocket?.connected, chatSocket });
-
   useEffect(() => {
     if (!chatterId || isOffline || !chatSocket) return;
     chatSocket.emit('join', chatterId);
