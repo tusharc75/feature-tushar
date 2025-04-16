@@ -19,6 +19,7 @@ import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder }
 import PdfPreview from './ShowPdf/PdfPreview';
 import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import ToastImageEditor from './ToastImageEditor/ToastImageEditor';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -418,6 +419,7 @@ const Diagram = ({
             }
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           <CustomDialogHeader
             title={selectedAttachment?.name}
@@ -432,7 +434,7 @@ const Diagram = ({
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+                <ToastImageEditor data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
               disableEdit ? (
