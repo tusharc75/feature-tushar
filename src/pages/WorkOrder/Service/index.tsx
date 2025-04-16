@@ -584,6 +584,7 @@ const Service = ({
                   head={<h6 className="text-base font-semibold">Steps</h6>}
                   headProps={{ className: 'sticky top-0 z-10' }}
                   element="li"
+                  defaultExpanded
                 >
                   <div className="p-4">
                     {selectedService ? (
