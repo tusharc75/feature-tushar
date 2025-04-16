@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
-import { CalendarMonth, DeleteOutline, Refresh, Send } from '@mui/icons-material';
+import { CalendarMonth, DeleteOutline, Replay, Send } from '@mui/icons-material';
 import { IconButton, Popover } from '@mui/material';
 import dayjs from 'dayjs';
 import { memo, useState } from 'react';
@@ -130,7 +130,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <Refresh fontSize="small" />
+                    <Replay fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
               )}
@@ -192,14 +192,14 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               </IconButton>
             </div>
             {service?.serviceDetail?.serviceName && (
-              <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">
+              <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
                 Service : {service?.serviceDetail?.serviceName}
               </p>
             )}
-            <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+            <p className="flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
               Customer : {service?.reference?.customerAccount?.optionLabel}
             </p>
-            <p className="mt-1 flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+            <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
               <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
               <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
@@ -211,7 +211,6 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     handleSelect(null, service, 'dispatch');
                     handleClosePopup();
                   }}
-                  startIcon={<Send fontSize="small" />}
                 >
                   Dispatch
                 </ThemeButton>
@@ -223,7 +222,6 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     handleSelect(null, service, 'return');
                     handleClosePopup();
                   }}
-                  startIcon={<Refresh fontSize="small" />}
                 >
                   Return
                 </ThemeButton>
@@ -234,7 +232,6 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     handleSelect(null, { _id: service?._id }, 'un-assign');
                     handleClosePopup();
                   }}
-                  startIcon={<DeleteOutline fontSize="small" />}
                 >
                   Un-Assign
                 </ThemeButton>

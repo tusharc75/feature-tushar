@@ -662,7 +662,7 @@ const Service = ({
                   </CustomCollapsible>
                 )}
                 <CustomCollapsible
-                  head={<h6 className="text-base font-semibold">Drawing</h6>}
+                  head={<h6 className="text-base font-semibold">Drawings</h6>}
                   headProps={{ className: 'sticky top-0 z-10' }}
                   element="li"
                 >

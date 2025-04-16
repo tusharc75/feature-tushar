@@ -17,9 +17,9 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
-import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import emptyIllustration from 'src/assets/emptyIllustration.webp';
+import ImageEditor from './ImageEditor';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -299,11 +299,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -427,6 +426,7 @@ const Diagram = ({
             }
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
           <CustomDialogHeader
             title={selectedAttachment?.name}
@@ -441,7 +441,10 @@ const Diagram = ({
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+                <ImageEditor
+                  data={selectedAttachment}
+                  fetchData={fetchData}
+                  setSelectedAttachment={setSelectedAttachment} />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
               disableEdit ? (
