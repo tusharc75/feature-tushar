@@ -129,10 +129,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disabled: true,
         Cell: ({ row }) => {
           return row.original?.warehouse ? (
-            <div>
-              <Link className="link text-truncate" title={row.original?.warehouse} to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}>
-                {row.original?.warehouse}
-              </Link>
+            <div className="flex items-center gap-2">
+              <p className="text-truncate">{row.original?.warehouse}</p>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -155,14 +153,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
               width: 200,
               Cell: ({ row }) => {
                 return row?.original?.storageLocation ? (
-                  <div>
-                    <Link
-                      className="link"
-                      title={row?.original?.storageLocation}
-                      to={`${routes?.storageLocationDetail?.path}/${row?.original?.storageLocationId}`}
-                    >
-                      {row?.original?.storageLocation}
-                    </Link>
+                  <div className="flex items-center gap-2">
+                    <p className="text-truncate">{row?.original?.storageLocation}</p>
                     <IconButton
                       size="small"
                       onClick={() => {
@@ -218,10 +210,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         width: 200,
         Cell: ({ row }) => {
           return row?.original?.user ? (
-            <div>
-              <Link className="link text-truncate" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
-                {row?.original?.user}
-              </Link>
+            <div className="flex items-center gap-2">
+              <p className="text-truncate">{row?.original?.user}</p>
               <IconButton
                 size="small"
                 onClick={() => {
