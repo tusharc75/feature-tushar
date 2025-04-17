@@ -11,7 +11,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, getEmailsFromContacts, invoice, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
@@ -197,6 +197,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
     referenceId: invoiceData?._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(invoiceData),
     defaultColumns: [
       'type',
       'detail',
@@ -217,7 +218,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
   return (
     <Fragment>
       <DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
-      <Grid size={{xs:12, md:12, sm:12}}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <Box zIndex={5}>
             <CustomReactTable

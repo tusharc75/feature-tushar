@@ -11,7 +11,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
@@ -202,7 +202,8 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     resource: sidebarResource.salesOrder,
     referenceId: salesOrderData._id,
     columns: columns,
-    isSendEmail: true
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(salesOrderData),
   };
 
   return (
