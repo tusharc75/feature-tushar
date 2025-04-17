@@ -12,6 +12,7 @@ import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import { getColorFromPriority, getPositionOfDate, getPriority } from '../helperFunctions';
 import { FiExternalLink } from 'react-icons/fi';
 import routes from 'src/components/Helpers/Routes';
+import { DispatchUser, ReceiveUser } from 'src/assets/svg/SvgElements';
 
 type CalnedarDataProps = {
   activity: TActivity[];
@@ -115,7 +116,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <Send fontSize="small" />
+                    <DispatchUser />
                   </IconButton>
                 </HtmlTooltip>
               )}
@@ -130,7 +131,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <Replay fontSize="small" />
+                    <ReceiveUser />
                   </IconButton>
                 </HtmlTooltip>
               )}
