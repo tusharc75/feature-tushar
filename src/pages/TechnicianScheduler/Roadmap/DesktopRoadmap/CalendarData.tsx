@@ -104,7 +104,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
             <div className="-ml-[2px] flex">
-              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
+              {service?.referenceType === sidebarResource.fieldServiceOrder && [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(service?.status) && (
                 <HtmlTooltip title="Dispatch">
                   <IconButton
                     onClick={(e) => {
