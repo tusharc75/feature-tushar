@@ -256,6 +256,7 @@
 }
 
 body {
+  scrollbar-gutter: stable;
   .tox-tinymce {
     border: 1px solid var(--common-border-color);
     margin-left: -1px;

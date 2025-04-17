@@ -12,6 +12,7 @@ import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import { getColorFromPriority, getPositionOfDate, getPriority } from '../helperFunctions';
 import { FiExternalLink } from 'react-icons/fi';
 import routes from 'src/components/Helpers/Routes';
+import { DispatchUser, ReceiveUser } from 'src/assets/svg/SvgElements';
 
 type CalnedarDataProps = {
   activity: TActivity[];
@@ -104,7 +105,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
             </p>
             <div className="-ml-[2px] flex">
-              {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
+              {service?.referenceType === sidebarResource.fieldServiceOrder && [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(service?.status) && (
                 <HtmlTooltip title="Dispatch">
                   <IconButton
                     onClick={(e) => {
@@ -115,7 +116,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <Send fontSize="small" />
+                    <DispatchUser />
                   </IconButton>
                 </HtmlTooltip>
               )}
@@ -130,7 +131,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <Replay fontSize="small" />
+                    <ReceiveUser />
                   </IconButton>
                 </HtmlTooltip>
               )}
