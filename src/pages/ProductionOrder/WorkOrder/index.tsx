@@ -70,7 +70,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
-  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
 
@@ -899,7 +898,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setConsumablesDialog,
               setAutoCompleteData,
               setCompleteConfirmBox,
-              setAttachmentsDialog,
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
               setDeleteData,
@@ -1086,32 +1084,6 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           isSubmitting={isSubmitting}
         />
       )}
-      {attachmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={attachmentsDialog.workOrderId}
-          uniqueServiceId={attachmentsDialog.uniqueServiceId}
-          stepId={null}
-          stepName={attachmentsDialog.serviceName}
-          serviceName={attachmentsDialog.serviceName}
-          handleClose={() => {
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-          handleSuccess={() => {
-            fetchData();
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-        />
-      )}
       {openUploadDrawingDialog && (
         <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
       )}
@@ -1148,7 +1120,6 @@ const ActionButtonMenuItems = ({
   setConsumablesDialog,
   setAutoCompleteData,
   setCompleteConfirmBox,
-  setAttachmentsDialog,
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
   setDeleteData,
