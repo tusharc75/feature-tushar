@@ -3471,7 +3471,8 @@ export const fieldLabelToFieldName = (fieldLabel) => {
 export const ATTACHMENT_TYPE = {
   drawing: 'Drawing',
   certificate: 'Certificate',
-  mtr: 'MTR'
+  mtr: 'MTR',
+  testChart: 'Test Chart'
 };
 
 export const FILE_PROCESS_STATUS = {
