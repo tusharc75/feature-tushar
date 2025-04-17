@@ -294,6 +294,9 @@ import SerializedAssetStatusChangeRequestDetail from 'src/pages/SerializedAsset/
 const DesktopDM = lazy(() => import('src/components/DesktopDM'));
 
 var notificationInterval: any = null;
+let watchIdRef: number | null = null;
+let oldLogitude: number | null = null;
+let oldLatitude: number | null = null;
 
 function App() {
   useEffect(() => {
@@ -400,6 +403,7 @@ function App() {
     }
   };
 
+
   const getChatNotification = async () => {
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
@@ -411,6 +415,56 @@ function App() {
         });
     }
   };
+
+  useEffect(() => {
+    if (!user || isOffline || !localStorage.getItem("token")) return;
+
+    const startTracking = () => {
+      if (!navigator.geolocation || watchIdRef !== null) return;
+      watchIdRef = navigator.geolocation.watchPosition(
+        ({ coords: { latitude, longitude } }) => {
+          if (oldLatitude !== latitude && oldLogitude !== longitude) {
+            axiosInstance().post("user/live-location", { longitude, latitude });
+            oldLatitude = latitude;
+            oldLogitude = longitude;
+          }
+        },
+        (e) => {
+          console.log(e);
+        },
+        { enableHighAccuracy: false }
+      );
+    };
+    const stopTracking = () => {
+      if (watchIdRef !== null) {
+        navigator.geolocation.clearWatch(watchIdRef);
+        watchIdRef = null;
+      }
+    };
+    if (oldLatitude === null && oldLatitude === null) {
+      (async () => {
+        try {
+          const status = await navigator.permissions.query({ name: "geolocation" });
+          if (status.state === "prompt") {
+            navigator.geolocation.getCurrentPosition(
+              () => startTracking(),
+              () => stopTracking()
+            );
+          } else if (status.state === "granted") {
+            startTracking();
+          } else {
+            stopTracking();
+          }
+        } catch (error) {
+          console.error("Error checking location permission:", error);
+        }
+      })();
+    }
+
+    return () => {
+      stopTracking();
+    };
+  }, [user, isOffline]);
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
