@@ -1,8 +1,8 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Box, Dialog } from '@mui/material';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { arrayToDropwdownOption, CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { arrayToDropwdownOption, CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, MATERIAL_TYPE, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -13,8 +13,9 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
-const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext, material }) => {
+const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loadingEdit, isBulkedit, showSaveAndNext, material, dataRows }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [saveAndNext, setSaveAndNext] = useState(false);
@@ -28,7 +29,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.planningMaterial, planningData?.currency, true);
-    if (bulkEdit) {
+    if (isBulkedit) {
       let unitArray: any = [];
       materialData?.forEach((element) => {
         if (element?.[`${element.type}Detail`]?.unit) {
@@ -74,7 +75,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
 
   const handleSubmit = async (values) => {
     let returnData = [];
-    if (bulkEdit) {
+    if (isBulkedit) {
       for (const x in values) {
         if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
           delete values[x];
@@ -93,10 +94,48 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
         const rows = await calculateRowsField(material, values, allFields, materialData, planningData?.currency);
         handleUpdate(rows, saveAndNext);
         setShowConfirmationDialog(false);
-
       }
     }
   };
+
+  function validate(values) {
+    const errors = {};
+    if (isBulkedit) {
+      if (materialData?.find((e) => e?.assetQty || e?.nonSerializedQty) && values?.qty) {
+        errors['qty'] = `Bulk quantity update is restricted when an asset is assigned `;
+      }
+    }
+    else {
+      let isValid = true;
+      if (materialData?.type === MATERIAL_TYPE.product && !materialData?.parentId) {
+        if (values?.qty < materialData?.assetQty) {
+          isValid = false;
+        }
+      }
+      else {
+        const child: any = dataRows?.filter((e) => e.parentId === materialData?._id);
+        if (child?.length) {
+          child?.forEach((e) => {
+            let qty = values.qty * e?.qty
+            if (qty < e?.assetQty) {
+              isValid = false;
+              return;
+            }
+          })
+        }
+        else {
+          const qty = getParentMultiplier(material, materialData) * values.qty
+          if ((qty < materialData?.assetQty)) {
+            isValid = false;
+          }
+        }
+      }
+      if (!isValid) {
+        errors['qty'] = 'The quantity is less than what was assigned.';
+      }
+    }
+    return errors;
+  }
 
   return (
     <Dialog
@@ -113,12 +152,13 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={bulkEdit ? 'Bulk Edit' : `Edit - ${materialData?.index} (${materialData?.detail || ''})`}
+                title={isBulkedit ? 'Bulk Edit' : `Edit - ${materialData?.index} (${materialData?.detail || ''})`}
                 onClose={() => {
                   onClose();
                 }}
@@ -150,7 +190,7 @@ const MaterialDialog = ({ onClose, materialData, planningData, handleUpdate, loa
                 >
                   {'Close'}
                 </ThemeButton>
-                {bulkEdit === false && showSaveAndNext && (
+                {isBulkedit === false && showSaveAndNext && (
                   <ThemeButton
                     isLoading={loadingEdit}
                     disabled={loadingEdit}
