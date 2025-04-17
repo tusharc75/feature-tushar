@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material';
 import HistoryIcon from '@mui/icons-material/History';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, getEmailsFromContacts, sidebarResource } from 'src/constants/helpers';
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
@@ -239,11 +239,11 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const previewDownloadProps = {
     fileName: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
-    // hideDetailButton: true,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(fieldTicketData),
     defaultColumns: [
       'type',
       'detail',
