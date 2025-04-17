@@ -19,7 +19,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import { ATTACHMENT_TYPE, getObjKeys, sidebarResource } from 'src/constants/helpers';
+import { ATTACHMENT_TYPE } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -48,7 +48,7 @@ export default function ManageAttachment({
   attachmentType = null,
   customhandleAdd = null
 }) {
-  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [initialValues, setInitialValues] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const toastConfig = useContext(CustomToastContext);
@@ -69,53 +69,45 @@ export default function ManageAttachment({
 
   const fetchAttachmentDetail = async () => {
     setIsFetching(true);
-    await axiosInstance()
-      .get(`/field?resource=${sidebarResource.attachment}`)
-      .then(({ data: { data } }) => {
-        const createFields = data.filter((f) => f.isCreate).map((f) => f.fieldData);
-        const updateFields = data.filter((f) => f.isUpdate).map((f) => f.fieldData);
-        if (attachmentId && type === 'file') {
-          axiosInstance()
-            .get(`/attachment/${attachmentId}`)
-            .then(({ data: { data } }) => {
-              setCanEdit(data?.canEdit);
-              if (data.file && data.file.length) {
-                data?.file?.sort((a: any, b: any) => {
-                  return new Date(b?.date).getTime() - new Date(a?.date).getTime();
-                });
-                setOtherAttachments(data.file);
-              }
-              setIsFetching(false);
-              setInitialData({
-                fields: updateFields,
-                values: { ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' }
-              });
-            })
-            .catch((error) => {
-              setIsFetching(false);
-              toastConfig.setToastConfig(error);
+    if (attachmentId && type === 'file') {
+      axiosInstance()
+        .get(`/attachment/${attachmentId}`)
+        .then(({ data: { data } }) => {
+          setCanEdit(data?.canEdit);
+          if (data.file && data.file.length) {
+            data?.file?.sort((a: any, b: any) => {
+              return new Date(b?.date).getTime() - new Date(a?.date).getTime();
             });
-        } else if (attachmentId && type === 'folder') {
-          axiosInstance()
-            .get(`/attachment/folder/${attachmentId}`)
-            .then(({ data: { data } }) => {
-              setCanEdit(data?.canEdit);
-              setInitialData({ fields: updateFields, values: data });
-              parentFolder = data?.parentFolder;
-              setIsFetching(false);
-            })
-            .catch((error) => {
-              setIsFetching(false);
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setInitialData({ fields: createFields, values: getObjKeys('', createFields) });
+            setOtherAttachments(data.file);
+          }
           setIsFetching(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+          setInitialValues({ ...data, fileUrl: data.file && data.file.length && data.file ? data.file[0]?.url : '' });
+        })
+        .catch((error) => {
+          setIsFetching(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else if (attachmentId && type === 'folder') {
+      axiosInstance()
+        .get(`/attachment/folder/${attachmentId}`)
+        .then(({ data: { data } }) => {
+          setCanEdit(data?.canEdit);
+          setInitialValues(data);
+          parentFolder = data?.parentFolder;
+          setIsFetching(false);
+        })
+        .catch((error) => {
+          setIsFetching(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      if (type === 'file') {
+        setInitialValues({ name: '', fileUrl: '', attachmentType: attachmentType || '' });
+      } else {
+        setInitialValues({ name: '' });
+      }
+      setIsFetching(false);
+    }
   };
 
   const handleSave = (values) => {
@@ -123,7 +115,6 @@ export default function ManageAttachment({
     if (type === 'file') {
       request = {
         name: values.name,
-        comment: values.comment,
         file: otherAttachments,
         relatedTo: relatedTo,
         attachmentType: values?.attachmentType || ''
@@ -228,13 +219,13 @@ export default function ManageAttachment({
   };
 
   return !isFetching ? (
-    initialData && initialData?.fields?.length ? (
-      <Formik initialValues={initialData?.values} validationSchema={type === 'file' ? AttachmentSchema : FolderSchema} onSubmit={handleSave}>
+    initialValues ? (
+      <Formik initialValues={initialValues} validationSchema={type === 'file' ? AttachmentSchema : FolderSchema} onSubmit={handleSave}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
               onClose={() => {
-                if (isEqual(initialData?.values, values)) handleClose();
+                if (isEqual(initialValues, values)) handleClose();
                 else setShowConfirmDialog(true);
               }}
               title={`${isClone ? 'Clone' : attachmentId ? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
@@ -265,47 +256,23 @@ export default function ManageAttachment({
                         }}
                       />
                     </Grid>
-                    {type === 'file' &&
-                      (initialData.fields && initialData.fields.length > 0 ? (
-                        initialData.fields.map((field) => (
-                          <Grid size={{ xs: 12, md: 6 }}>
-                            <FormTypes
-                              {...field}
-                              size="small"
-                              fields={initialData.fields}
-                              fieldData={field}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              required={field.required}
-                              fullWidth
-                            />
-                          </Grid>
-                        ))
-                      ) : (
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <Autocomplete
-                            id="attachmentType"
-                            size="small"
-                            options={Object.values(ATTACHMENT_TYPE)}
-                            renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
-                            disabled={attachmentType ? true : !canEdit}
-                            getOptionLabel={(option) => option || ''}
-                            isOptionEqualToValue={(option: any, value: any) => option === value}
-                            onChange={(e, val) => {
-                              setFieldValue('attachmentType', val);
-                            }}
-                            value={values['attachmentType']}
-                          />
-                        </Grid>
-                      ))}
+                    {type === 'file' && (
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <Autocomplete
+                          id="attachmentType"
+                          size="small"
+                          options={Object.values(ATTACHMENT_TYPE)}
+                          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
+                          disabled={attachmentType ? true : !canEdit}
+                          getOptionLabel={(option) => option || ''}
+                          isOptionEqualToValue={(option: any, value: any) => option === value}
+                          onChange={(e, val) => {
+                            setFieldValue('attachmentType', val);
+                          }}
+                          value={values['attachmentType']}
+                        />
+                      </Grid>
+                    )}
                     {type === 'file' && (
                       <Grid container size={{ xs: 12 }}>
                         <Grid size={{ xs: 12 }}>
@@ -355,7 +322,7 @@ export default function ManageAttachment({
               <ThemeButton
                 buttonType="transparent"
                 onClick={() => {
-                  if (isEqual(initialData?.values, values)) handleClose();
+                  if (isEqual(initialValues, values)) handleClose();
                   else setShowConfirmDialog(true);
                 }}
               >
