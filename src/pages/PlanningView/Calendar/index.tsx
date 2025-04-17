@@ -530,7 +530,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
       element[i].onclick = (clickEvent) => {
         const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent?.target);
+        handleClick(data, clickEvent);
       };
     }
   };
@@ -560,7 +560,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         window.open(`${routes.serializedAsset.path}${query}`);
       } else if (data?.type === 'availableByPlanning') {
       } else if (data?.type) {
-        setAnchor(target);
+        setAnchor(target.target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
       }
@@ -881,7 +881,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   onNavigate(date);
                 }}
                 onSelectEvent={(data: any, event: any) => {
-                  handleClick(data, event.nativeEvent.target);
+                  handleClick(data, event);
                 }}
               />
             </div>
