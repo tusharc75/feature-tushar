@@ -24,10 +24,10 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import SendIcon from '@mui/icons-material/Send';
 import PreviewIcon from '@mui/icons-material/Visibility';
 import axios, { CancelTokenSource } from 'axios';
-import _ from 'lodash';
+import _, { camelCase } from 'lodash';
 import mime from 'mime';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, {gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -37,6 +37,8 @@ import { FiExternalLink } from 'react-icons/fi';
 const renderedFrom = 'attachment_render';
 
 export default function Attachment() {
+  const renderedFrom = camelCase(sidebarResource?.attachment);
+
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { referenceType, referenceId } = parsed;
@@ -65,204 +67,208 @@ export default function Attachment() {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, data: null, top: null, bottom: null });
+  const [columns, setColumns] = useState(null);
+  const { generateColumns } = useColumns();
 
-  const column: any = [
-    {
-      accessor: 'type',
-      id: 'type',
-      Header: 'Type',
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) => (
-        <p style={{ display: 'flex', alignItems: 'center', color: 'var(--dark-primary-text, #3B4F60)' }}>
-          {row.original?.type === 'folder' ? (
-            <>
-              <FolderIcon style={{ paddingRight: 5 }} />
-              Folder
-            </>
-          ) : (
-            <>
-              <InsertDriveFileOutlinedIcon style={{ paddingRight: 5 }} />
-              File
-            </>
-          )}
-        </p>
-      )
-    },
-    {
-      id: 'name',
-      accessor: 'name',
-      Header: 'Name',
-      width: 300,
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
-            {row.original.name || ''}
-          </p>
-          {row.original?.type === 'folder' && (
-            <Box pl={1}>
-              <HtmlTooltip title={'Add Folder/File'}>
-                <IconButton
-                  size="small"
-                  onClick={(e) => {
-                    setAddchildDialog({ open: true, data: row.original, top: e.clientY, bottom: e.clientX });
-                  }}
-                >
-                  <AddOutlined fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          )}
-        </div>
-      )
-    },
-    {
-      id: 'relatedTo',
-      accessor: 'relatedTo',
-      Header: 'Related To',
-      width: 300,
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) => (
-        <>
-          {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
-            row.original.relatedTo.map((d) => {
-              return (
-                <div className="flex items-center gap-2" key={d.name}>
-                  <p>{`${d.name}${d?.index ? ` (${d?.index})` : ''}`}</p>
-                  <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                  <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
-                </div>
-              );
-            })
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
-    },
-    {
-      id: 'attachmentType',
-      accessor: 'attachmentType',
-      Header: 'Attachment Type',
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) => {
-        return row.original?.attachmentType ? <p>{row.original.attachmentType}</p> : <NoDataCell />;
-      }
-    },
-    {
-      id: 'createdBy',
-      accessor: 'createdBy',
-      Header: 'Created By',
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) =>
-        row.original?.createdBy ? (
-          <p>
-            {row.original?.createdBy?.user?.concatedName}
-            <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row.original?.createdBy?.date)}</span>
-          </p>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
-      id: 'updatedBy',
-      accessor: 'updatedBy',
-      Header: 'Updated By',
-      canDrag: false,
-      disableFilters: true,
-      Cell: ({ row }) =>
-        row.original?.updatedBy ? (
-          <p>
-            {row.original?.updatedBy?.user?.concatedName}
-            <span className="hidden">&nbsp;-&nbsp;</span>
-            <span className="createdAtTime badge-date">{displayDate(row.original?.updatedBy?.date)}</span>
-          </p>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
-      id: 'action',
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 120,
-      width: 120,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
-        return (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <HtmlTooltip title="Send Email">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setSendMail(true);
-                  if (row.original.type === 'folder') {
-                    handleMailForFolder(row.original?._id, row.original?.name);
-                  } else {
-                    handleMail(row.original);
-                  }
-                }}
-              >
-                <SendIcon color="primary" style={{ maxWidth: '18px' }} />
-              </IconButton>
-            </HtmlTooltip>
-            <HtmlTooltip title="Download">
-              <IconButton
-                size="small"
-                aria-label="Download"
-                onClick={() => {
-                  if (row.original.type === 'folder') {
-                    downloadFolder(row.original?._id, row.original?.name);
-                  } else {
-                    downloadFile(row.original);
-                  }
-                }}
-              >
-                <GetAppIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-            {allPdf && row.original.type === 'file' && (
-              <HtmlTooltip
-                title="Preview"
-                onClick={(e) => {
-                  viewPdf(e, row.original);
-                }}
-              >
-                <IconButton size="small">
-                  <PreviewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-            {row.original.canEdit ? (
-              <HtmlTooltip title="Delete">
-                <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </HtmlTooltip>
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  const fetchGridColumns = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
+    data = response?.data?.data;
+    const newColumns = generateColumns(renderedFrom, data, routes?.attachment?.path, true);
+    const extracolumns: any = [
+      {
+        accessor: 'type',
+        id: 'type',
+        Header: 'Type',
+        canDrag: false,
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <p style={{ display: 'flex', alignItems: 'center', color: 'var(--dark-primary-text, #3B4F60)' }}>
+            {row.original?.type === 'folder' ? (
+              <>
+                <FolderIcon style={{ paddingRight: 5 }} />
+                Folder
+              </>
             ) : (
-              <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
-                <IconButton size="small" aria-label="Delete">
-                  <DeleteIcon fontSize="small" color="disabled" />
-                </IconButton>
-              </HtmlTooltip>
+              <>
+                <InsertDriveFileOutlinedIcon style={{ paddingRight: 5 }} />
+                File
+              </>
+            )}
+          </p>
+        )
+      },
+      {
+        id: 'name',
+        accessor: 'name',
+        Header: 'Name',
+        width: 300,
+        canDrag: false,
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
+              {row.original.name || ''}
+            </p>
+            {row.original?.type === 'folder' && (
+              <Box pl={1}>
+                <HtmlTooltip title={'Add Folder/File'}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      setAddchildDialog({ open: true, data: row.original, top: e.clientY, bottom: e.clientX });
+                    }}
+                  >
+                    <AddOutlined fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
             )}
           </div>
-        );
-      }
-    }
-  ];
+        )
+      },
+      {
+        id: 'relatedTo',
+        accessor: 'relatedTo',
+        Header: 'Related To',
+        width: 300,
+        canDrag: false,
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <>
+            {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
+              row.original.relatedTo.map((d) => {
+                return (
+                  <div className="flex items-center gap-2" key={d.name}>
+                    <p>{`${d.name}${d?.index ? ` (${d?.index})` : ''}`}</p>
+                    <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                    <Chip color="primary" label={`${resources[d?.type]?.titleSingular}`} />
+                  </div>
+                );
+              })
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      },
+      ...newColumns, 
+      {
+        id: 'createdBy',
+        accessor: 'createdBy',
+        Header: 'Created By',
+        canDrag: false,
+        disableFilters: true,
+        Cell: ({ row }) =>
+          row.original?.createdBy ? (
+            <p>
+              {row.original?.createdBy?.user?.concatedName}
+              <span className="hidden">&nbsp;-&nbsp;</span>
+              <span className="createdAtTime badge-date">{displayDate(row.original?.createdBy?.date)}</span>
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        id: 'updatedBy',
+        accessor: 'updatedBy',
+        Header: 'Updated By',
+        canDrag: false,
+        disableFilters: true,
+        Cell: ({ row }) =>
+          row.original?.updatedBy ? (
+            <p>
+              {row.original?.updatedBy?.user?.concatedName}
+              <span className="hidden">&nbsp;-&nbsp;</span>
+              <span className="createdAtTime badge-date">{displayDate(row.original?.updatedBy?.date)}</span>
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        id: 'action',
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 120,
+        width: 120,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => {
+          const allPdf = _.every(row.original?.file, (d) => _.endsWith(d?.url, '.pdf'));
+          return (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <HtmlTooltip title="Send Email">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setSendMail(true);
+                    if (row.original.type === 'folder') {
+                      handleMailForFolder(row.original?._id, row.original?.name);
+                    } else {
+                      handleMail(row.original);
+                    }
+                  }}
+                >
+                  <SendIcon color="primary" style={{ maxWidth: '18px' }} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title="Download">
+                <IconButton
+                  size="small"
+                  aria-label="Download"
+                  onClick={() => {
+                    if (row.original.type === 'folder') {
+                      downloadFolder(row.original?._id, row.original?.name);
+                    } else {
+                      downloadFile(row.original);
+                    }
+                  }}
+                >
+                  <GetAppIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+              {allPdf && row.original.type === 'file' && (
+                <HtmlTooltip
+                  title="Preview"
+                  onClick={(e) => {
+                    viewPdf(e, row.original);
+                  }}
+                >
+                  <IconButton size="small">
+                    <PreviewIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+              {row.original.canEdit ? (
+                <HtmlTooltip title="Delete">
+                  <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                    <DeleteIcon fontSize="small" color="error" />
+                  </IconButton>
+                </HtmlTooltip>
+              ) : (
+                <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
+                  <IconButton size="small" aria-label="Delete">
+                    <DeleteIcon fontSize="small" color="disabled" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+            </div>
+          );
+        }
+      },
+    ];
+    setColumns([...extracolumns]);
+  };
 
   const downloadFolder = (_id, name) => {
     axiosInstance()
@@ -357,20 +363,23 @@ export default function Attachment() {
           setIsDownloading(false);
         });
     } else {
-      axiosInstance().get(`attachment/zip/file/${data1?._id}`, {
-        responseType: 'blob'
-      }).then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => setIsDownloading(false), 2000);
-      }).catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
+      axiosInstance()
+        .get(`attachment/zip/file/${data1?._id}`, {
+          responseType: 'blob'
+        })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => setIsDownloading(false), 2000);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+          setIsDownloading(false);
+        });
     }
   };
 
@@ -637,7 +646,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -671,10 +680,10 @@ export default function Attachment() {
         )}
 
         <Box zIndex={5} width={'100%'}>
-          {column ? (
+          {columns ? (
             <CustomReactTable
               height={'calc(100vh - 300px)'}
-              columns={column}
+              columns={columns}
               onSelect={(newSelectedRecords) => {
                 dispatch({ type: 'selection', selectedRecords: newSelectedRecords });
               }}
