@@ -156,6 +156,16 @@ export default function Attachment() {
       }
     },
     {
+      id: 'comment',
+      accessor: 'comment',
+      Header: 'Comment',
+      canDrag: false,
+      disableFilters: true,
+      Cell: ({ row }) => {
+        return row.original?.comment ? <p>{row.original.comment}</p> : <NoDataCell />;
+      }
+    },
+    {
       id: 'createdBy',
       accessor: 'createdBy',
       Header: 'Created By',
