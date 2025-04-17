@@ -15,7 +15,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PURCHASE_ORDER_STATUS, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PURCHASE_ORDER_STATUS, getEmailsFromContacts, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import History from 'src/pages/ProductInventory/LedgerHistory';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import AssetQtyDialog from './AssetQtyDialog';
@@ -86,7 +86,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
 
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount','revenueCode','costCode'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount', 'revenueCode', 'costCode'].includes(e?.fieldData?.fieldName)
     );
     column.push({
       accessor: 'index',
@@ -219,10 +219,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-              row?.original?.type === MATERIAL_TYPE.product &&
-              allowedToEdit &&
-              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+                row?.original?.type === MATERIAL_TYPE.product &&
+                allowedToEdit &&
+                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -312,8 +312,8 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           serializedProduct: item?.productDetail?.serializedProduct,
           productCategory: item.productDetail?.productCategory,
           chartOfAccount: item.productDetail?.chartOfAccount,
-          revenueCode :  item.productDetail?.revenueCode,
-          costCode : item.productDetail?.costCode
+          revenueCode: item.productDetail?.revenueCode,
+          costCode: item.productDetail?.costCode
         };
         const subRows = [];
         serializedAsset
@@ -426,6 +426,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       referenceId: purchaseOrderData?._id,
       columns: columns,
       isSendEmail: true,
+      toEmails: getEmailsFromContacts(purchaseOrderData, 'supplierContact'),
       button1Title: 'Ordered',
       button2Title: 'Received',
       defaultColumns: [

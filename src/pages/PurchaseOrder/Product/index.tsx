@@ -18,7 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, getEmailsFromContacts, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
@@ -678,12 +678,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-            uniq(
-              map(
-                selectedRecords?.filter((e) => !e.hideSelection),
-                'type'
-              )
-            )?.length === 1
+              uniq(
+                map(
+                  selectedRecords?.filter((e) => !e.hideSelection),
+                  'type'
+                )
+              )?.length === 1
               ? false
               : true
           }
@@ -728,6 +728,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     isSendEmail: true,
     button1Title: 'Ordered',
     button2Title: 'Received',
+    toEmails: getEmailsFromContacts(purchaseOrderData, 'supplierContact'),
     defaultColumns: [
       'index',
       'type',
@@ -785,21 +786,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                  {
-                    field: 'expenseItem',
-                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                  }
-                ]
+                {
+                  field: 'expenseItem',
+                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                }
+              ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -860,11 +861,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
         />

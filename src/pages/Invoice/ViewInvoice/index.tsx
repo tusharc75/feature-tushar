@@ -23,6 +23,7 @@ import {
   MATERIAL_TYPE,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  getEmailsFromContacts,
   invoice,
   sidebarResource
 } from 'src/constants/helpers';
@@ -300,6 +301,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     columns: columns,
     hideDetailButton: resource === sidebarResource.fieldTicket ? true : false,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(invoiceData),
     defaultColumns: [
       'type',
       'detail',

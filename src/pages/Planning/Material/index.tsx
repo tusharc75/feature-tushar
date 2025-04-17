@@ -21,7 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ASSET_STATUS, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -468,7 +468,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     resource: sidebarResource.planning,
     referenceId: planningData._id,
     columns: columns,
-    isSendEmail: true
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(planningData),
   };
 
   const actionButtonMenuItems = () => {
