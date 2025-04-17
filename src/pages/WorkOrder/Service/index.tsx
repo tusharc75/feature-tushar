@@ -541,6 +541,8 @@ const Service = ({
     }
   ];
 
+  console.log(selectedService)
+
   return (
     <Box>
       {serviceSteps ? (
@@ -578,110 +580,111 @@ const Service = ({
             )}
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
-            <div className="max-w-full border transition-all md:border-l-0">
-              <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
-                <CustomCollapsible
-                  head={<h6 className="text-base font-semibold">Steps</h6>}
-                  headProps={{ className: 'sticky top-0 z-[1]' }}
-                  element="li"
-                  defaultExpanded
-                >
-                  <div className="p-4">
-                    {selectedService ? (
-                      <>
-                        {selectedService?.type === 'service' ? (
-                          <Steps
-                            headerPadding={false}
-                            workOrderData={workOrderData}
-                            selectedService={selectedService}
-                            allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
-                            fetchService={fetchServiceData}
-                            resource={resource}
-                            resourceData={resourceData}
-                            stepSubmitedData={stepSubmitedData}
-                            minHeightClass={' '}
-                            isMobile={mobScreen}
-                            fetchWorkOrderData={fetchWorkOrderData}
-                            defaultSelectedService={defaultSelectedService}
-                          />
-                        ) : (
-                          <Quotation />
-                        )}
-                      </>
-                    ) : (
-                      <div
-                        className={cn(
-                          'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
-                        )}
-                      >
-                        <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
-                      </div>
-                    )}
-                  </div>
-                </CustomCollapsible>
-                {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+            {selectedService &&
+              <div className="max-w-full border transition-all md:border-l-0">
+                <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
                   <CustomCollapsible
-                    head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
+                    head={<h6 className="text-base font-semibold">Steps</h6>}
+                    headProps={{ className: 'sticky top-0 z-[1]' }}
+                    element="li"
+                    defaultExpanded
+                  >
+                    <div className="p-4">
+                      {selectedService ? (
+                        <>
+                          {selectedService?.type === 'service' ? (
+                            <Steps
+                              headerPadding={false}
+                              workOrderData={workOrderData}
+                              selectedService={selectedService}
+                              allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
+                              fetchService={fetchServiceData}
+                              resource={resource}
+                              resourceData={resourceData}
+                              stepSubmitedData={stepSubmitedData}
+                              minHeightClass={' '}
+                              isMobile={mobScreen}
+                              fetchWorkOrderData={fetchWorkOrderData}
+                            />
+                          ) : (
+                            <Quotation />
+                          )}
+                        </>
+                      ) : (
+                        <div
+                          className={cn(
+                            'flex items-center justify-center max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] md:h-[calc(100vh-150px)]'
+                          )}
+                        >
+                          <p className="select-none text-[18px] text-gray-500">No steps added yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </CustomCollapsible>
+                  {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+                    <CustomCollapsible
+                      head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
+                      headProps={{ className: 'sticky top-0 z-[1]' }}
+                      element="li"
+                    >
+                      <div className="p-4">
+                        <Consumables
+                          tableHeight={'300px'}
+                          hideServiceFilter={true}
+                          allowedToEdit={
+                            workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                              ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
+                                ? resource === sidebarResource?.workOrderTechnician
+                                  ? true
+                                  : allowedToEdit
+                                : false
+                              : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
+                                ? false
+                                : resource === sidebarResource?.workOrderTechnician
+                                  ? true
+                                  : allowedToEdit
+                          }
+                          isCreate={
+                            workOrderData.type === WORK_ORDER_TYPE.repairOrder
+                              ? allowedToEdit
+                              : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+                                ? false
+                                : allowedToEdit
+                          }
+                          service={selectedService?._id}
+                          uniqueId={selectedService.uniqueId}
+                          stepId={null}
+                          serviceName={selectedService?.serviceName}
+                          materialSubType={MATERIAL_SUB_TYPE.consumable}
+                          workOrderData={workOrderData}
+                          serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+                        />
+                      </div>
+                    </CustomCollapsible>
+                  )}
+                  <CustomCollapsible
+                    head={<h6 className="text-base font-semibold">Drawings</h6>}
                     headProps={{ className: 'sticky top-0 z-[1]' }}
                     element="li"
                   >
                     <div className="p-4">
-                      <Consumables
-                        tableHeight={'300px'}
-                        hideServiceFilter={true}
-                        allowedToEdit={
-                          workOrderData.type === WORK_ORDER_TYPE.repairOrder
-                            ? workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted
-                              ? resource === sidebarResource?.workOrderTechnician
-                                ? true
-                                : allowedToEdit
-                              : false
-                            : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) && !workOrderData?.deleted
-                              ? false
-                              : resource === sidebarResource?.workOrderTechnician
-                                ? true
-                                : allowedToEdit
-                        }
-                        isCreate={
-                          workOrderData.type === WORK_ORDER_TYPE.repairOrder
-                            ? allowedToEdit
-                            : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
-                              ? false
-                              : allowedToEdit
-                        }
-                        service={null}
-                        uniqueId={null}
+                      <Diagram
+                        fullHeight={false}
+                        showContainer={false}
+                        resource={ACTIVITY_RESOURCE.workOrder}
+                        referenceId={workOrderId}
+                        currentVersion={workOrderData?.versions?.length + 1 || 1}
+                        resourceData={workOrderData}
+                        attachmentType={ATTACHMENT_TYPE.drawing}
+                        showMaterialFilter={false}
+                        uniqueId={selectedService.uniqueId}
                         stepId={null}
-                        serviceName={null}
-                        materialSubType={MATERIAL_SUB_TYPE.consumable}
-                        workOrderData={workOrderData}
-                        defaultServiceUniqueId={defaultSelectedService}
-                        serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
                       />
                     </div>
                   </CustomCollapsible>
-                )}
-                <CustomCollapsible
-                  head={<h6 className="text-base font-semibold">Drawings</h6>}
-                  headProps={{ className: 'sticky top-0 z-[1]' }}
-                  element="li"
-                >
-                  <div className="p-4">
-                    <Diagram
-                      fullHeight={false}
-                      showContainer={false}
-                      resource={ACTIVITY_RESOURCE.workOrder}
-                      referenceId={workOrderId}
-                      currentVersion={workOrderData?.versions?.length + 1 || 1}
-                      resourceData={workOrderData}
-                      attachmentType={ATTACHMENT_TYPE.drawing}
-                      showMaterialFilter={false}
-                      defaultSelectedUniqueId={defaultSelectedService}
-                    />
-                  </div>
-                </CustomCollapsible>
-              </ul>
-            </div>
+                </ul>
+              </div>
+            }
           </div>
           {mobScreen && (
             <div
@@ -786,8 +789,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                      isAllowedToServiceEdit &&
+                      selectedService?.clickable
                       ? false
                       : true
                   }
@@ -803,8 +806,8 @@ const Service = ({
                 <MenuItem
                   disabled={
                     allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                      !completed
                       ? false
                       : true
                   }
@@ -861,8 +864,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -876,8 +879,8 @@ const Service = ({
               <MenuItem
                 disabled={
                   isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }

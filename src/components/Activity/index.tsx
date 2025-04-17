@@ -285,7 +285,7 @@ const Activity = (props) => {
                   ) : null}
                 </Fragment>
               ))}
-
+              {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}
               {resourceId && resource ? (
                 <button
                   className="flex w-full cursor-pointer items-center gap-[10px] rounded-[10px] bg-transparent px-[20px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
@@ -297,8 +297,6 @@ const Activity = (props) => {
                   <span className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">History</span>
                 </button>
               ) : null}
-
-              {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}
             </div>
           </>
         </Box>

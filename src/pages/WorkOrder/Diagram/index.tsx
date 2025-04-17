@@ -58,7 +58,7 @@ const Diagram = ({
 
   useEffect(() => {
     fetchData();
-  }, [resource, referenceId, currentVersion, selectedService]);
+  }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
   const fetchData = async () => {
     let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
@@ -301,11 +301,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,

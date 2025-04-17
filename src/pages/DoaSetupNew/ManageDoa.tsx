@@ -277,7 +277,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
   const validation = () => {
     const error: any = {};
     if (checkType === DOAType.amount) {
-      if (!minAmount) {
+      if (isNaN(minAmount)) {
         error['minAmount'] = 'Required field';
       }
       if (!currency) {

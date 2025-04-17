@@ -185,6 +185,7 @@ const LoadingTicket = ({
               'serialNumber',
               'position',
               'wellNumber',
+              'padName',
               'mtrAttached',
               'warehouse',
               'jobCount',
@@ -412,6 +413,30 @@ const LoadingTicket = ({
               accessor: 'currentGpsWellNames',
               Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
               cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+            }
+          ]
+        : []),
+      ...(assetFields?.find((f) => f?.fieldName === 'padName')
+        ? [
+            {
+              accessor: 'padName',
+              Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+              Cell: ({ row }) =>
+                row?.original?.padName ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.padName}</h5>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
             }
           ]
         : []),
@@ -874,6 +899,8 @@ const LoadingTicket = ({
       obj.rentalAssetStatus = _subRow?.status;
       obj.startDate = _subRow?.startDate;
       obj.wellNumber = _subRow?.inventory?.wellNumber;
+      obj.padName = _subRow?.inventory?.padName?.optionLabel;
+      obj.padId = _subRow?.inventory?.padName?.optionValue;
       obj.position = _subRow?.inventory?.position;
       obj.currentGpsLocation = _subRow?.inventory?.currentGpsLocation;
       obj.currentGpsWellNames = _subRow?.inventory?.currentGpsWellNames?.toString();
