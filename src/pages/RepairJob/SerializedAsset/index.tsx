@@ -29,6 +29,7 @@ import {
   INVENTORY_OWNER_TYPE,
   REPAIR_JOB_STATUS,
   deliveryTicket,
+  getEmailsFromContacts,
   repairJob,
   serializedAsset,
   sidebarResource
@@ -521,7 +522,8 @@ const SerializedAsset = ({
     referenceId: repairJobData?._id,
     columns: columns,
     hideDetailButton: true,
-    isSendEmail: true
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(repairJobData, 'supplierContact'),
   };
 
   return (
@@ -619,9 +621,8 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${
-            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-          } ? `}
+          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+            } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

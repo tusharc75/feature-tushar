@@ -349,7 +349,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -418,7 +418,6 @@ function App() {
 
   useEffect(() => {
     if (!user || isOffline || !localStorage.getItem("token")) return;
-
     const startTracking = () => {
       if (!navigator.geolocation || watchIdRef !== null) return;
       watchIdRef = navigator.geolocation.watchPosition(
@@ -429,9 +428,7 @@ function App() {
             oldLogitude = longitude;
           }
         },
-        (e) => {
-          console.log(e);
-        },
+        (e) => { },
         { enableHighAccuracy: false }
       );
     };
@@ -460,7 +457,6 @@ function App() {
         }
       })();
     }
-
     return () => {
       stopTracking();
     };

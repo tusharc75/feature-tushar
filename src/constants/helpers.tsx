@@ -4168,3 +4168,19 @@ export const ASSEMBLY_ORDER_STATUS = {
   partiallyConverted: 'Partially Converted',
   converted: 'Converted'
 };
+
+export const getEmailsFromContacts = (data, field = 'customerContact') => {
+  const emails = []
+  if (isArray(data?.[field])) {
+    data?.[field]?.forEach((e) => {
+      if (e?.email) {
+        emails.push(e?.email)
+      }
+    })
+  }
+  else if (data?.[field]?.email) {
+    emails.push(data?.[field]?.email)
+
+  }
+  return emails;
+}
