@@ -4670,3 +4670,10 @@ td.google-visualization-orgchart-node {
     display: none !important;
   }
 }
+.tui-image-editor-container .tui-image-editor-help-menu {
+  height: auto !important;
+  @apply bg-[--dark-primary,white] shadow-md;
+}
+.tui-image-editor-menu {
+  border-top-width: 1px;
+}

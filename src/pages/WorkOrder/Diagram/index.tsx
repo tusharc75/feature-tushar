@@ -447,7 +447,6 @@ const Diagram = ({
                 <ShowPdf data={selectedAttachment} />
               ) : (
                 <ImageEditor
-                  fileName={selectedAttachment?.name}
                   data={selectedAttachment}
                   fetchData={fetchData}
                   setSelectedAttachment={setSelectedAttachment}
