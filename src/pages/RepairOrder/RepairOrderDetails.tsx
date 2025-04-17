@@ -171,7 +171,6 @@ const RepairOrderDetails = () => {
       .get(`${routes?.repairOrder?.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
-
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairOrder, data));
         var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
         if (data?.type === REPAIR_ORDER_TYPE.internal) {

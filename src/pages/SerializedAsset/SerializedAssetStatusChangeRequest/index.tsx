@@ -100,7 +100,7 @@ const SerializedAssetStatusChangeRequest = () => {
       <>
         {row?.original?.originalStatus === ASSET_APPROVAL_STATUS.pending &&
           <>
-            <HtmlTooltip title={'Approve'}>
+            <HtmlTooltip title={row?.original?.canPerform ? 'Approve' : 'Sent for DOA Approval'}>
               <span>
                 <IconButton
                   size="small"
@@ -115,7 +115,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 </IconButton>
               </span>
             </HtmlTooltip>
-            <HtmlTooltip title={'Reject'}>
+            <HtmlTooltip title={row?.original?.canPerform ? 'Reject' : 'Sent for DOA Approval'}>
               <span>
                 <IconButton
                   size="small"
@@ -148,8 +148,7 @@ const SerializedAssetStatusChangeRequest = () => {
           finalObject['originalStatus'] = finalObject['status'];
           finalObject['canPerform'] = permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
           if (finalObject['doa_status']) {
-            finalObject['canPerform'] = finalObject['status'] === ASSET_APPROVAL_STATUS.pending &&
-              [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['canPerform'] = finalObject['status'] === ASSET_APPROVAL_STATUS.pending && [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
             finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
             if (u?.status === DOA_STATUS.pending) {
               const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
