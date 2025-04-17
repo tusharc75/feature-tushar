@@ -5,7 +5,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SUBLEASE_STATUS, getEmailsFromContacts, sidebarResource, sublease } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -112,13 +112,12 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
       let rows = data.material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${
-          parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageName
-              : ''
-        }`;
+        parent.detail = `${parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent?.packageDetail?.packageName
+            : ''
+          }`;
         parent.description =
           parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
@@ -170,6 +169,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
     referenceId: subleaseData._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(subleaseData, 'supplierContact'),
     defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
   };
 

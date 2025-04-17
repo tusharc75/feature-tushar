@@ -1,13 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
-import {
-  CustomDialogTransition,
-  getObjKeysWithValues,
-  sidebarResource,
-  serializedAsset,
-  getObjKeys,
-} from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, sidebarResource, serializedAsset, getObjKeys } from '../../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -397,12 +391,12 @@ export default function AssetDetailsChangeDialog({
                                         ...field,
                                         isWarningTooltip:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? true
                                             : field?.isWarningTooltip,
                                         warningTooltipMessage:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? `Auto Increment (Previous Value ${autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0})`
                                             : field?.warningTooltipMessage
                                       }}
@@ -437,7 +431,7 @@ export default function AssetDetailsChangeDialog({
               </CustomDialogContent>
               <CustomDialogFooter>
                 <ThemeButton
-                  buttonType='transparent'
+                  buttonType="transparent"
                   id={'asset-details-change-dialog-cancel-button'}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -448,14 +442,13 @@ export default function AssetDetailsChangeDialog({
                 </ThemeButton>
                 <ThemeButton
                   id={'asset-details-change-dialog-save-button'}
-                  buttonType='theme'
+                  buttonType="theme"
                   disabled={submitting}
                   onClick={submitForm}
                   isLoading={submitting}
                 >
                   Save
                 </ThemeButton>
-
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmationCancelDialog

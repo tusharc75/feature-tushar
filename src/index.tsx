@@ -19,6 +19,7 @@ import './styles/rbc-calender.scss';
 import './styles/vis-network/vis-network.min.css';
 import './styles/safari.scss';
 import './styles/colors.scss';
+import './styles/image-editor.scss';
 import { Integrations } from '@sentry/tracing';
 import { CustomNotificationCountProvider } from './StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import './components/Chatter/style.scss';
