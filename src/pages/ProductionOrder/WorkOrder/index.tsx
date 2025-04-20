@@ -70,11 +70,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
-  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
 
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
 
   const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
@@ -346,7 +345,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     size="small"
                     aria-label="Details"
                     onClick={() => {
-                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
+                      setShowDrawingDialog({ open: true, data: row.original?.workOrder?._id });
                     }}
                   >
                     <DescriptionIcon fontSize="small" color={'primary'} />
@@ -899,12 +898,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setConsumablesDialog,
               setAutoCompleteData,
               setCompleteConfirmBox,
-              setAttachmentsDialog,
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
               setDeleteData,
               setShowConfirmBox,
-              setShowCloseReopenConfirmation
+              setShowCloseReopenConfirmation,
+              setShowDrawingDialog,
             }}
           />
         }
@@ -1085,43 +1084,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           isSubmitting={isSubmitting}
         />
       )}
-      {attachmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={attachmentsDialog.workOrderId}
-          uniqueServiceId={attachmentsDialog.uniqueServiceId}
-          stepId={null}
-          stepName={attachmentsDialog.serviceName}
-          serviceName={attachmentsDialog.serviceName}
-          handleClose={() => {
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-          handleSuccess={() => {
-            fetchData();
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-        />
-      )}
       {openUploadDrawingDialog && (
         <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
       )}
       {showDrawingDialog.open && (
         <DiagramDialog
-          referenceId={showDrawingDialog.workOrder}
+          referenceId={showDrawingDialog?.data?.workOrder?._id}
           handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null });
+            setShowDrawingDialog({ open: false, data: null });
           }}
+          referenceLabel={showDrawingDialog?.data?.detail}
+          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?.uniqueId : null}
           resource={ACTIVITY_RESOURCE.workOrder}
-          attachmentType={ATTACHMENT_TYPE.drawing}
+          attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
+          showMaterialFilter={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? false : true}
         />
       )}
     </Fragment>
@@ -1144,12 +1120,12 @@ const ActionButtonMenuItems = ({
   setConsumablesDialog,
   setAutoCompleteData,
   setCompleteConfirmBox,
-  setAttachmentsDialog,
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
   setDeleteData,
   setShowConfirmBox,
-  setShowCloseReopenConfirmation
+  setShowCloseReopenConfirmation,
+  setShowDrawingDialog,
 }) => {
   return (
     <>
@@ -1265,20 +1241,10 @@ const ActionButtonMenuItems = ({
         onClick={() => {
           const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
           if (parentProduct) {
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: parentProduct?.workOrder?._id,
-              uniqueServiceId: null,
-              serviceName: parentProduct?.workOrder?.workOrderNumber
-            });
+            setShowDrawingDialog({ open: true, data: parentProduct });
           } else {
             const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: service?.workOrder?._id,
-              uniqueServiceId: service?.uniqueId,
-              serviceName: service?.serviceDetail?.serviceName
-            });
+            setShowDrawingDialog({ open: true, data: service });
           }
         }}
       >
