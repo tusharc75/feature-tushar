@@ -140,9 +140,10 @@ export default function ManageAttachment({
 
   const handleSave = (values) => {
     let request: any = {};
+    const {fileUrl, ...rest} = values
     if (type === 'file') {
       request = {
-        ...values,
+        ...rest,
         file: allAttachments,
         relatedTo: relatedTo,
       };
