@@ -533,7 +533,7 @@ const ReceivingTicket = ({
           },
           {
             resource: sidebarResource.serializedAsset,
-            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames']
+            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber']
           }
         ]
       });
@@ -1305,7 +1305,7 @@ const ReceivingTicket = ({
         minWidth: 100,
         width: 100,
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div
             className="d-flex align-items-center gap-2"
             style={{
@@ -1361,7 +1361,7 @@ const ReceivingTicket = ({
         accessor: 'type',
         Header: 'Type',
         disabled: true,
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row.original['type'] ? (
             <p>
               {row.original?.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original?.type)} `}
@@ -1375,7 +1375,7 @@ const ReceivingTicket = ({
         accessor: 'detail',
         Header: 'Details',
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <p className="text-truncate">{row?.original?.detail}</p>
             <IconButton
@@ -1449,7 +1449,7 @@ const ReceivingTicket = ({
             accessor: 'parentName',
             Header: 'Parent',
             disabled: true,
-            Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -1458,14 +1458,14 @@ const ReceivingTicket = ({
         accessor: 'qty',
         Header: 'Qty',
         disabled: true,
-        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+        cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
           {
             accessor: 'serialNumber',
             Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -1474,7 +1474,7 @@ const ReceivingTicket = ({
           {
             accessor: 'position',
             Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -1483,12 +1483,21 @@ const ReceivingTicket = ({
           {
             accessor: 'jobCount',
             Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.jobCount || row?.original?.jobCount === 0 ? (
                 <h5 className="text-truncate">{row?.original?.jobCount}</h5>
               ) : (
                 <NoDataCell />
               )
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
+        ? [
+          {
+            accessor: 'gpsNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+            cell: ({ row }) => (row?.original?.gpsNumber ? <div><p className="text-truncate">{row?.original?.gpsNumber}</p></div> : <NoDataCell />)
           }
         ]
         : []),
@@ -1515,7 +1524,7 @@ const ReceivingTicket = ({
           {
             accessor: 'productName',
             Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.productName ? (
                 <div className="flex items-center gap-2">
                   <h5 className="text-truncate">{row?.original?.productName}</h5>
@@ -1537,12 +1546,12 @@ const ReceivingTicket = ({
       {
         accessor: 'description',
         Header: 'Description',
-        Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
       {
         accessor: 'warehouse',
         Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
@@ -1562,7 +1571,7 @@ const ReceivingTicket = ({
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.loadingTicket ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
@@ -1582,7 +1591,7 @@ const ReceivingTicket = ({
       {
         accessor: 'receivingTicket',
         Header: 'Receiving Ticket',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.receivingTicket ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.receivingTicket}</h5>
@@ -1602,7 +1611,7 @@ const ReceivingTicket = ({
       {
         accessor: 'returnTicket',
         Header: 'Return Ticket',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.returnTicket ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.returnTicket}</h5>
@@ -1622,19 +1631,19 @@ const ReceivingTicket = ({
       {
         accessor: 'returnQty',
         Header: 'Returned Qty',
-        Cell: ({ row }) => (row?.original?.returnQty ? <h5 className="text-truncate">{row?.original?.returnQty}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.returnQty ? <h5 className="text-truncate">{row?.original?.returnQty}</h5> : <NoDataCell />)
       },
       {
         accessor: 'status',
         Header: 'Asset Status',
-        Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       },
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
           {
             accessor: 'padName',
             Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.padName ? (
                 <div className="flex items-center gap-2">
                   <h5 className="text-truncate">{row?.original?.padName}</h5>
@@ -1665,7 +1674,7 @@ const ReceivingTicket = ({
                   ? original?.wellNumber?.optionLabel
                   : original?.wellNumber;
             },
-            Cell: ({ row }) => (
+            cell: ({ row }) => (
               <DropdownCell
                 permissions={permissions}
                 permissionForLinks={{}}
@@ -1682,7 +1691,7 @@ const ReceivingTicket = ({
       {
         accessor: 'manualStartDate',
         Header: 'Actual Start Date',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.manualStartDate ? (
             <h5 className="text-truncate" title={`${displayDate(row?.original?.manualStartDate)}`}>
               {displayDate(row?.original?.manualStartDate)}
@@ -1694,7 +1703,7 @@ const ReceivingTicket = ({
       {
         accessor: 'manualEndDate',
         Header: 'Actual End Date',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.manualEndDate ? (
             <h5 className="text-truncate" title={`${displayDate(row?.original?.manualEndDate)}`}>
               {displayDate(row?.original?.manualEndDate)}
@@ -1707,7 +1716,7 @@ const ReceivingTicket = ({
         accessor: 'startDate',
         Header: 'System Start Date',
         show: false,
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.startDate ? (
             <h5 className="text-truncate" title={`${displayDate(row?.original?.startDate)}`}>
               {displayDate(row?.original?.startDate)}
@@ -1720,7 +1729,7 @@ const ReceivingTicket = ({
         accessor: 'endDate',
         Header: 'System End Date',
         show: false,
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.endDate ? (
             <h5 className="text-truncate" title={`${displayDate(row?.original?.endDate)}`}>
               {displayDate(row?.original?.endDate)}
@@ -1732,14 +1741,14 @@ const ReceivingTicket = ({
       {
         accessor: 'rentalAssetStatus',
         Header: 'Rental Asset Status',
-        Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       }
     ];
     if (user?.user?.brandPolicy?.rentalReceivingStepConsume) {
       column.push({
         accessor: 'consumeQty',
         Header: 'Consumed Qty',
-        Cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
       });
     }
     column.push({
@@ -1751,7 +1760,7 @@ const ReceivingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) => {
+      cell: ({ row }) => {
         return (
           <>
             {allowedToEdit ? (
