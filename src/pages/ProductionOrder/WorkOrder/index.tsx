@@ -20,7 +20,6 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -73,7 +72,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
 
   const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
 
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null, label: '', uniqueId: null });
 
   const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
@@ -340,19 +339,25 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     )}
                   </IconButton>
                 </HtmlTooltip>
-                <HtmlTooltip title="Drawings">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setShowDrawingDialog({ open: true, data: row.original?.workOrder?._id });
-                    }}
-                  >
-                    <DescriptionIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
               </>
             )}
+            {((row?.original?.type === MATERIAL_TYPE.product && !row?.original?.parentId) || row?.original?.type === MATERIAL_TYPE.service) && (
+              <HtmlTooltip title="Drawings">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setShowDrawingDialog({
+                      open: true,
+                      workOrder: row.original?.workOrder?._id,
+                      label: row?.original?.type === MATERIAL_TYPE.service ? row?.original?.detail : row.original?.workOrder?.workOrderNumber,
+                      uniqueId: row?.original?.type === MATERIAL_TYPE.service ? row?.original?._id : null
+                    });
+                  }}
+                >
+                  <DescriptionIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>)}
             <HtmlTooltip title="Delete">
               <span>
                 <IconButton
@@ -1089,15 +1094,15 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       )}
       {showDrawingDialog.open && (
         <DiagramDialog
-          referenceId={showDrawingDialog?.data?.workOrder?._id}
-          handleClose={() => {
-            setShowDrawingDialog({ open: false, data: null });
-          }}
-          referenceLabel={showDrawingDialog?.data?.detail}
-          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?.uniqueId : null}
+          referenceId={showDrawingDialog?.workOrder}
           resource={ACTIVITY_RESOURCE.workOrder}
-          attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
-          showMaterialFilter={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? false : true}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null, label: '', uniqueId: null });
+          }}
+          referenceLabel={showDrawingDialog?.label}
+          attachmentType={ATTACHMENT_TYPE.drawing}
+          uniqueId={showDrawingDialog?.uniqueId}
+          showMaterialFilter={showDrawingDialog?.uniqueId ? false : true}
         />
       )}
     </Fragment>
@@ -1240,16 +1245,16 @@ const ActionButtonMenuItems = ({
         }
         onClick={() => {
           const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
+          const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
           if (parentProduct) {
-            setShowDrawingDialog({ open: true, data: parentProduct });
-          } else {
-            const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
-            setShowDrawingDialog({ open: true, data: service });
+            setShowDrawingDialog({ open: true, workOrder: parentProduct?.workOrder?._id, label: parentProduct?.workOrder?.workOrderNumber, uniqueId: null });
+          } else if (service) {
+            setShowDrawingDialog({ open: true, workOrder: service?.workOrder?._id, label: service?.detail, uniqueId: service?._id });
           }
         }}
       >
         Upload Documents
-      </MenuItem>
+      </MenuItem >
       <MenuItem
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
@@ -1278,16 +1283,18 @@ const ActionButtonMenuItems = ({
       >
         Revert Service
       </MenuItem>
-      {selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
-        <MenuItem
-          onClick={() => {
-            setShowCloseReopenConfirmation({ open: true, type: 'Close' });
-          }}
-          id="close-work-order"
-        >
-          Close Work Order(s)
-        </MenuItem>
-      )}
+      {
+        selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
+          <MenuItem
+            onClick={() => {
+              setShowCloseReopenConfirmation({ open: true, type: 'Close' });
+            }}
+            id="close-work-order"
+          >
+            Close Work Order(s)
+          </MenuItem>
+        )
+      }
       <MenuItem
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
