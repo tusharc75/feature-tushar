@@ -105,7 +105,7 @@ const LeftSidebar = ({ imageEditor }: LeftSidebarPorps) => {
           activeButton ? 'w-[300px]' : 'w-0'
         )}
       >
-        <div className="dark:bg-darkPrimary/60 absolute inset-0 flex w-[300px] flex-col border bg-white/70 [backdrop-filter:blur(4px)] ">
+        <div className="dark:bg-darkPrimary/60 absolute inset-0 flex w-[300px] flex-col border bg-white/80 [backdrop-filter:blur(4px)] ">
           {activeButton && (
             <>
               <nav className="flex items-center justify-between border-b px-1 py-2">
