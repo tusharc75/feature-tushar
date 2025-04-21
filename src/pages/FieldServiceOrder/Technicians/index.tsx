@@ -34,8 +34,10 @@ import TechnicianDialog from './TechnicianDialog';
 import ConsumablesDialog from './ConsumablesDialog';
 import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
-import { Replay, Send, Visibility } from '@mui/icons-material';
-import { DispatchUser, ReceiveUser } from 'src/assets/svg/SvgElements';
+import { Visibility } from '@mui/icons-material';
+import { RiUserShared2Fill } from "react-icons/ri";
+import { RiUserReceived2Fill } from "react-icons/ri";
+
 
 const Technicians = ({
   allowedToEdit,
@@ -142,72 +144,72 @@ const Technicians = ({
       },
       ...(resourcePolicy?.addServices
         ? [
-            {
-              accessor: 'service',
-              Header: 'Service',
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original?.serviceId ? (
-                  <div className="flex items-center gap-2">
-                    <p className="text-truncate" title={row.original.service}>
-                      {row.original.service}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'service',
+            Header: 'Service',
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original?.serviceId ? (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row.original.service}>
+                    {row.original.service}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : []),
       {
         accessor: 'startDate',
@@ -322,7 +324,7 @@ const Technicians = ({
                   }}
                   color={'primary'}
                 >
-                  <DispatchUser />
+                  <RiUserShared2Fill fontSize={18} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -342,7 +344,7 @@ const Technicians = ({
                   }}
                   color={'primary'}
                 >
-                  <ReceiveUser />
+                  <RiUserReceived2Fill fontSize={18} />
                 </IconButton>
               </HtmlTooltip>
             )}
