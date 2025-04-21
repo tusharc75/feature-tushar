@@ -1,17 +1,19 @@
 import createFastContext from 'src/StateProvider/createFastContext';
 
 type InitialState = {
-  activeObject: number | null;
+  activeObjectId: number | null;
   undoStackLength: number;
   redoStackLength: number;
-  currentSelectedShapeType: null | 'rect' | 'circle' | 'triangle' | 'icon' | 'text';
+  currentSelectedShapeType: null | 'rect' | 'circle' | 'triangle' | 'icon' | 'i-text';
+  newTextPosition: { x: number; y: number } | null;
 };
 
 const initialState: InitialState = {
-  activeObject: null,
+  activeObjectId: null,
   undoStackLength: 0,
   redoStackLength: 0,
-  currentSelectedShapeType: null
+  currentSelectedShapeType: null,
+  newTextPosition: null
 };
 
 const { Provider, useStore } = createFastContext<InitialState>(initialState);

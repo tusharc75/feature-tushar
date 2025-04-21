@@ -2,26 +2,49 @@ import { SingleButtonOption } from 'src/pages/WorkOrder/Diagram/ImageEditor/Left
 import TUIImageEditor from 'tui-image-editor';
 
 export const handleSetImageEditorMode = (option: SingleButtonOption, imageEditor: TUIImageEditor) => {
+  imageEditor.discardSelection();
   switch (option.type) {
-    case 'flip':
+    case 'flip': {
       imageEditor.stopDrawingMode();
-      break;
-    case 'crop':
-      imageEditor.startDrawingMode('CROPPER');
-      break;
-    case 'rotate':
-      imageEditor.stopDrawingMode();
-      break;
-    case 'drawLine':
-      imageEditor.stopDrawingMode();
-      break;
-    case 'shape': {
-      imageEditor.stopDrawingMode();
-
       break;
     }
-
+    case 'crop': {
+      imageEditor.startDrawingMode('CROPPER');
+      break;
+    }
+    case 'rotate': {
+      imageEditor.stopDrawingMode();
+      break;
+    }
+    case 'drawLine': {
+      imageEditor.stopDrawingMode();
+      break;
+    }
+    case 'shape': {
+      imageEditor.stopDrawingMode();
+      if (imageEditor.getDrawingMode() !== 'SHAPE') {
+        imageEditor.stopDrawingMode();
+        imageEditor.startDrawingMode('SHAPE');
+      }
+      break;
+    }
+    case 'text': {
+      if (imageEditor.getDrawingMode() !== 'TEXT') {
+        imageEditor.stopDrawingMode();
+        imageEditor.startDrawingMode('TEXT');
+      }
+      break;
+    }
+    case 'filter': {
+      imageEditor.stopDrawingMode();
+      break;
+    }
+    case 'mask': {
+      imageEditor.stopDrawingMode();
+      break;
+    }
     default:
+      imageEditor.stopDrawingMode();
       break;
   }
 };

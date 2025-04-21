@@ -1,6 +1,7 @@
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { useEditorStore } from 'src/pages/WorkOrder/Diagram/ImageEditor/EditorStore';
+import { EditorProvider, useEditorStore } from 'src/pages/WorkOrder/Diagram/ImageEditor/EditorStore';
 import LeftSidebar from 'src/pages/WorkOrder/Diagram/ImageEditor/LeftSidebar';
+import RightSidebar from 'src/pages/WorkOrder/Diagram/ImageEditor/RightSidebar';
 import TUIImageEditor from 'tui-image-editor';
 
 type EditorProps = {
@@ -14,12 +15,13 @@ export type EditorRef = {
   getInstance: () => TUIImageEditor;
 };
 
-const validShapes = ['rect', 'circle', 'triangle', 'icon', 'text'];
+export const validShapes = ['rect', 'circle', 'triangle'];
 
-const Editor = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, maxHeight, maxWidth }, ref) => {
+const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, maxHeight, maxWidth }, ref) => {
   const rootEl = useRef<HTMLDivElement>(null);
   const [editorInst, setInstance] = useState<TUIImageEditor | null>(null);
-  const [_, setStore] = useEditorStore((state) => state.undoStackLength);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_shape, setStore] = useEditorStore((state) => state.currentSelectedShapeType);
 
   useEffect(() => {
     let imageEditor: TUIImageEditor;
@@ -43,17 +45,21 @@ const Editor = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, maxHei
       imageEditor.on('redoStackChanged', (redoStackLength) => {
         setStore({ redoStackLength });
       });
-      imageEditor.on('addText', (pos) => {
-        imageEditor.addText('Double Click', {
-          position: pos.originPosition
-        });
+      imageEditor.on('addText', (pos, ...rest) => {
+        setStore({ newTextPosition: pos.originPosition });
       });
       imageEditor.on('objectActivated', (obj) => {
-        setStore({ activeObject: obj.id });
-        if (validShapes.includes(obj.type)) {
-          setStore({ currentSelectedShapeType: obj.type });
+        if (!obj) {
+          setStore({ activeObjectId: null, currentSelectedShapeType: null, newTextPosition: null });
         } else {
-          setStore({ currentSelectedShapeType: null });
+          setStore({ activeObjectId: obj.id });
+          if (validShapes.includes(obj.type)) {
+            setStore({ currentSelectedShapeType: obj.type, newTextPosition: null });
+          } else if (obj.type && obj.type === 'i-text') {
+            setStore({ currentSelectedShapeType: obj.type, newTextPosition: null });
+          } else {
+            setStore({ currentSelectedShapeType: null, newTextPosition: null });
+          }
         }
       });
     }
@@ -75,8 +81,15 @@ const Editor = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, maxHei
     <div style={{ width: maxWidth, height: maxHeight }} className="relative">
       <div ref={rootEl} style={{ width: maxWidth, height: maxHeight }} className="tui-image-editor flex items-center justify-center"></div>
       {editorInst && <LeftSidebar imageEditor={editorInst} />}
+      {editorInst && <RightSidebar imageEditor={editorInst} />}
     </div>
   );
 });
+
+const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => (
+  <EditorProvider>
+    <EditorImpl {...props} ref={ref} />
+  </EditorProvider>
+));
 
 export default Editor;

@@ -1,28 +1,13 @@
-import {
-  BorderColor,
-  BorderColorOutlined,
-  Check,
-  Close,
-  Crop,
-  Flip,
-  Grade,
-  GradeOutlined,
-  History,
-  Loop,
-  RotateLeft,
-  RotateRight,
-  TextFields,
-  Tune
-} from '@mui/icons-material';
+import { BorderColorOutlined, Close, Crop, Flip, GradeOutlined, Loop, Tune } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import React, { memo, useState } from 'react';
-import { CgEditFlipH, CgEditFlipV } from 'react-icons/cg';
+import { memo, useEffect, useState } from 'react';
+import { LuShapes } from 'react-icons/lu';
 import { PiTextAa } from 'react-icons/pi';
-import { RxMaskOff, RxMaskOn } from 'react-icons/rx';
+import { RxMaskOff } from 'react-icons/rx';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
+import { useEditorStore } from 'src/pages/WorkOrder/Diagram/ImageEditor/EditorStore';
 import Submenu from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
 import { handleSetImageEditorMode } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
 import TUIImageEditor from 'tui-image-editor';
@@ -54,9 +39,15 @@ const buttonMaps = [
   },
   {
     type: 'shape',
-    icon: <GradeOutlined />,
+    icon: <LuShapes size={24} />,
     text: 'Shape'
   },
+  //! Need to implement
+  // {
+  //   type: 'icon',
+  //   icon: <GradeOutlined />,
+  //   text: 'Icon'
+  // },
   {
     type: 'text',
     icon: <PiTextAa size={22} />,
@@ -65,19 +56,21 @@ const buttonMaps = [
   {
     type: 'mask',
     icon: <RxMaskOff size={20} />,
-    text: 'Crop'
-  },
-  {
-    type: 'filter',
-    icon: <Tune />,
-    text: 'Filter'
+    text: 'Mask'
   }
+  //! Need to implement
+  // {
+  //   type: 'filter',
+  //   icon: <Tune />,
+  //   text: 'Filter'
+  // }
 ] as const;
 
 export type SingleButtonOption = (typeof buttonMaps)[number];
 
 const LeftSidebar = ({ imageEditor }: LeftSidebarPorps) => {
   const [activeButton, setActiveButton] = useState<SingleButtonOption | null>(null);
+  const [currentSelectedShapeType] = useEditorStore((state) => state.currentSelectedShapeType);
 
   const showMenu = (type: SingleButtonOption) => {
     handleSetImageEditorMode(type, imageEditor);
@@ -87,6 +80,18 @@ const LeftSidebar = ({ imageEditor }: LeftSidebarPorps) => {
     imageEditor.stopDrawingMode();
     setActiveButton(null);
   };
+
+  useEffect(() => {
+    if (currentSelectedShapeType === 'i-text') {
+      imageEditor.stopDrawingMode();
+      setActiveButton(buttonMaps.find((d) => d.type === 'text'));
+    }
+    if (['rect', 'circle', 'triangle'].includes(currentSelectedShapeType)) {
+      imageEditor.stopDrawingMode();
+      setActiveButton(buttonMaps.find((d) => d.type === 'shape'));
+    }
+  }, [currentSelectedShapeType]);
+
   return (
     <div className="absolute bottom-0 left-0 top-0 flex items-center border-r border-t bg-[--dark-primary,white] px-2 text-center">
       <ul className="flex-grow list-none space-y-2 overflow-y-auto overflow-x-hidden ">
@@ -100,7 +105,7 @@ const LeftSidebar = ({ imageEditor }: LeftSidebarPorps) => {
           activeButton ? 'w-[300px]' : 'w-0'
         )}
       >
-        <div className="absolute inset-0 flex w-[300px] flex-col border bg-[--dark-primary,white] ">
+        <div className="absolute inset-0 flex w-[300px] flex-col border bg-[--dark-secondary,white] ">
           {activeButton && (
             <>
               <nav className="flex items-center justify-between border-b px-1 py-2">

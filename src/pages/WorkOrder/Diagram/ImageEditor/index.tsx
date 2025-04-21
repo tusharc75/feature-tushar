@@ -5,7 +5,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { b64toBlob, cn } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
-import { EditorProvider } from 'src/pages/WorkOrder/Diagram/ImageEditor/EditorStore';
 
 type ThemeConfig = {
   'common.bi.image'?: string;
@@ -158,9 +157,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose 
           </Box>
         ) : (
           imageUrl && (
-            <EditorProvider>
-              <Editor ref={editorRef} imageName={data?.name} imageUrl={imageUrl} maxHeight={window.innerHeight - 60} maxWidth={window.innerWidth} />
-            </EditorProvider>
+            <Editor ref={editorRef} imageName={data?.name} imageUrl={imageUrl} maxHeight={window.innerHeight - 60} maxWidth={window.innerWidth} />
           )
         )}
       </main>

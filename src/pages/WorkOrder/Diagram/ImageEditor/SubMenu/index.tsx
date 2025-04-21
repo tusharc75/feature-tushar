@@ -1,10 +1,13 @@
 import { memo } from 'react';
+import { useEditorStore } from 'src/pages/WorkOrder/Diagram/ImageEditor/EditorStore';
 import { SingleButtonOption } from 'src/pages/WorkOrder/Diagram/ImageEditor/LeftSidebar';
 import Crop from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Crop';
 import DrawLine from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/DrawLine';
 import Flip from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Flip';
+import Mask from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Mask';
 import Rotate from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Rotate';
 import Shape from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Shape';
+import Text from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Text';
 import TUIImageEditor from 'tui-image-editor';
 
 export const subMenuHelperTextClassName = '!text-xs !font-light';
@@ -33,6 +36,10 @@ const Submenu = memo(({ activeMenu, imageEditor, hideMenu }: SubMenuPorps) => {
       return <DrawLine imageEditor={imageEditor} hideMenu={hideMenu} />;
     case 'shape':
       return <Shape imageEditor={imageEditor} hideMenu={hideMenu} />;
+    case 'text':
+      return <Text imageEditor={imageEditor} hideMenu={hideMenu} />;
+    case 'mask':
+      return <Mask imageEditor={imageEditor} hideMenu={hideMenu} />;
     default:
       return null;
   }

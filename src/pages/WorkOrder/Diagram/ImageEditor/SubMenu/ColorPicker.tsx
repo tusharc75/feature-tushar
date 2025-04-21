@@ -1,5 +1,5 @@
 import { Menu } from '@mui/material';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { MdBlock } from 'react-icons/md';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
@@ -40,6 +40,7 @@ const ColorPicker = memo(
   }) => {
     const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
     const [stateColor, setStateColor] = useState(color);
+    const iniitialRender = useRef(true);
 
     const handleClose = () => {
       setAnchor(null);
@@ -47,6 +48,10 @@ const ColorPicker = memo(
 
     // debounce setter
     useEffect(() => {
+      if (iniitialRender.current) {
+        iniitialRender.current = false;
+        return () => clearTimeout(timeout);
+      }
       timeout = setTimeout(() => {
         setColor(stateColor);
       }, 100);
