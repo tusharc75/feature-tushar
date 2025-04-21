@@ -18,6 +18,9 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
         top: showDetail.anchor.clientY,
         left: showDetail.anchor.clientX
       }}
+      slotProps={{
+        paper: { sx: { width: 'min(600px, 100%)' } }
+      }}
       anchorEl={showDetail.anchor}
       anchorReference={showDetail.anchor.clientY ? 'anchorPosition' : 'anchorEl'}
       anchorOrigin={{
