@@ -541,8 +541,6 @@ const Service = ({
     }
   ];
 
-  console.log(selectedService)
-
   return (
     <Box>
       {serviceSteps ? (

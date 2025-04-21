@@ -120,7 +120,7 @@ export const CreateEmail = ({
   const [emailUsersOptions, setEmailUsersOptions] = useState([]);
 
   useEffect(() => {
-    options.length ? setEmailUsersOptions(options) : fetchUsersEmails();
+    fetchUsersEmails();
   }, []);
 
   useEffect(() => {
@@ -218,8 +218,8 @@ export const CreateEmail = ({
         subject: subject ?? '',
         file: '',
         content: content ?? RichTextEditor.createEmptyValue(),
-        to: isQuoteBuilder ? [...options] : [],
-        cc: isQuoteBuilder ? [...cc] : []
+        to: options?.length ? [...options] : [],
+        cc: cc?.length ? [...cc] : []
       };
       setInitialValues(initialData);
     }
@@ -551,11 +551,6 @@ export const CreateEmail = ({
                               }
                             }}
                             onChange={(e, value) => {
-                              // if (isQuoteBuilder) {
-                              //   if (value && value.length) {
-                              //     value = [value.slice(-1)[0]];
-                              //   }
-                              // }
                               let emails = [];
                               for (var email of value) {
                                 if (validations.email.test(email)) {
@@ -568,7 +563,7 @@ export const CreateEmail = ({
                           <Autocomplete
                             multiple
                             disableCloseOnSelect={true}
-                            options={isQuoteBuilder ? cc : emailUsersOptions.filter((option) => values.to.indexOf(option) < 0)}
+                            options={emailUsersOptions.filter((option) => values.to.indexOf(option) < 0)}
                             freeSolo
                             id={'send-email-dialog-cc-input'}
                             renderTags={(value, getTagProps) =>

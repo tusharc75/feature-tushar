@@ -190,7 +190,8 @@ const LoadingTicket = ({
               'warehouse',
               'jobCount',
               'currentGpsLocation',
-              'currentGpsWellNames'
+              'currentGpsWellNames',
+              'gpsNumber',
             ]
           }
         ]
@@ -222,7 +223,7 @@ const LoadingTicket = ({
         minWidth: 100,
         width: 100,
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div
             className={cn(
               'd-flex align-items-center gap-2',
@@ -269,7 +270,7 @@ const LoadingTicket = ({
         accessor: 'type',
         Header: 'Type',
         disabled: true,
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row.original['type'] ? (
             <p>
               {row.original?.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original?.type)} `}
@@ -283,7 +284,7 @@ const LoadingTicket = ({
         accessor: 'detail',
         Header: 'Details',
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate" title={row?.original?.detail}>
               {row?.original?.detail}
@@ -306,44 +307,44 @@ const LoadingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-              <Box>
-                <HtmlTooltip title={`Serial Numbers`}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setShowInfo({
-                        open: true,
-                        data: {
-                          productName: row?.original?.productName,
-                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                        },
-                        type: `Serial Numbers`
-                      });
-                    }}
-                  >
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
+                <Box>
+                  <HtmlTooltip title={`Serial Numbers`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowInfo({
+                          open: true,
+                          data: {
+                            productName: row?.original?.productName,
+                            data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                          },
+                          type: `Serial Numbers`
+                        });
+                      }}
+                    >
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              )}
           </div>
         )
       },
       ...(view === 'flat'
         ? [
-            {
-              accessor: 'parentName',
-              Header: 'Parent',
-              disabled: true,
-              Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'parentName',
+            Header: 'Parent',
+            disabled: true,
+            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...newColumns,
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.loadingTicket ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
@@ -364,141 +365,150 @@ const LoadingTicket = ({
         accessor: 'qty',
         Header: 'Qty',
         disabled: true,
-        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+        cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-            {
-              accessor: 'serialNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-              Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'serialNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-              Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'position',
+            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-            {
-              accessor: 'jobCount',
-              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
-              Cell: ({ row }) =>
-                row?.original?.jobCount || row?.original?.jobCount === 0 ? (
-                  <h5 className="text-truncate">{row?.original?.jobCount}</h5>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'jobCount',
+            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
+            cell: ({ row }) =>
+              row?.original?.jobCount || row?.original?.jobCount === 0 ? (
+                <h5 className="text-truncate">{row?.original?.jobCount}</h5>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
+        ? [
+          {
+            accessor: 'gpsNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+            cell: ({ row }) => (row?.original?.gpsNumber ? <div><p className="text-truncate">{row?.original?.gpsNumber}</p></div> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
         ? [
-            {
-              accessor: 'currentGpsLocation',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
-              cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
-            }
-          ]
+          {
+            accessor: 'currentGpsLocation',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
         ? [
-            {
-              accessor: 'currentGpsWellNames',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
-              cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
-            }
-          ]
+          {
+            accessor: 'currentGpsWellNames',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
-            {
-              accessor: 'padName',
-              Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
-              Cell: ({ row }) =>
-                row?.original?.padName ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate">{row?.original?.padName}</h5>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'padName',
+            Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+            cell: ({ row }) =>
+              row?.original?.padName ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.padName}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-            {
-              accessor: 'wellNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel || 'Well Number',
-              accessorFn: (original) => {
-                return isArray(original?.wellNumber)
-                  ? original?.wellNumber[0]?.optionLabel
-                  : isObject(original?.wellNumber)
-                    ? original?.wellNumber?.optionLabel
-                    : original?.wellNumber;
-              },
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'wellNumber',
-                    lookupResource: sidebarResource.wellNumber
-                  }}
-                  original={row?.original}
-                />
-              )
-            }
-          ]
+          {
+            accessor: 'wellNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel || 'Well Number',
+            accessorFn: (original) => {
+              return isArray(original?.wellNumber)
+                ? original?.wellNumber[0]?.optionLabel
+                : isObject(original?.wellNumber)
+                  ? original?.wellNumber?.optionLabel
+                  : original?.wellNumber;
+            },
+            cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'wellNumber',
+                  lookupResource: sidebarResource.wellNumber
+                }}
+                original={row?.original}
+              />
+            )
+          }
+        ]
         : []),
       ...(view === 'flat'
         ? [
-            {
-              accessor: 'productName',
-              Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-              Cell: ({ row }) =>
-                row?.original?.productName ? (
-                  <div className="flex items-center gap-2">
-                    <h5 className="text-truncate">{row?.original?.productName}</h5>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'productName',
+            Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
+            cell: ({ row }) =>
+              row?.original?.productName ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.productName}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         accessor: 'description',
         Header: 'Description',
-        Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
       {
         accessor: 'warehouse',
         Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
@@ -518,19 +528,19 @@ const LoadingTicket = ({
       {
         accessor: 'rentalAssetStatus',
         Header: 'Rental Asset Status',
-        Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       },
       {
         accessor: 'status',
         Header: 'Asset Status',
-        Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       }
     ];
     if (assetFields?.find((f) => f.fieldName === 'mtrAttached')) {
       column.push({
         accessor: 'mtrAttachedView',
         Header: 'MTR Attached',
-        Cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
       });
     }
     column.push({
@@ -542,12 +552,12 @@ const LoadingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      cell: ({ row }) =>
         user?.user?.brandPolicy?.assetDeliveredStatus &&
-        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-          row?.original?.rentalAssetStatus
-        ) &&
-        row?.original?.type === MATERIAL_TYPE.serializedAsset ? (
+          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+            row?.original?.rentalAssetStatus
+          ) &&
+          row?.original?.type === MATERIAL_TYPE.serializedAsset ? (
           <HtmlTooltip title={`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}>
             <IconButton
               size="small"
@@ -1518,8 +1528,8 @@ const LoadingTicket = ({
         {(allowedToEdit || isProcessor) && (
           <>
             {getFilterSelectedRecords().length &&
-            getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
-              ?.length === getFilterSelectedRecords()?.length ? (
+              getFilterSelectedRecords()?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)
+                ?.length === getFilterSelectedRecords()?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
                 <ThemeButton
                   onClick={() => {

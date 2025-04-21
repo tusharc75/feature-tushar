@@ -68,7 +68,7 @@ function Roadmap({
     } else if (type === 'un-assign') {
       handleUnAssignTechnician(data);
     } else if (type === 'dispatch') {
-      setStartEndDateConfermationDialog({ open: true, type: 'start', referenceId: data?.referenceId, minDateTime: null, notes: '', _id: data?._id });
+      setStartEndDateConfermationDialog({ open: true, type: 'start', referenceId: data?.referenceId, minDateTime: data?.endDate || null, notes: '', _id: data?._id });
     } else if (type === 'return') {
       setStartEndDateConfermationDialog({ open: true, type: 'stop', referenceId: data?.referenceId, minDateTime: data?.startDate, notes: data?.notes, _id: data?._id });
     }

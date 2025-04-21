@@ -18,7 +18,8 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
         top: showDetail.anchor.clientY,
         left: showDetail.anchor.clientX
       }}
-      anchorReference="anchorPosition"
+      anchorEl={showDetail.anchor}
+      anchorReference={showDetail.anchor.clientY ? 'anchorPosition' : 'anchorEl'}
       anchorOrigin={{
         vertical: 'center',
         horizontal: 'right'

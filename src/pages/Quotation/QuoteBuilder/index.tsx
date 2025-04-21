@@ -18,6 +18,7 @@ import {
   QUOTATION_TYPE,
   fieldServiceOrder,
   fieldTicket,
+  getEmailsFromContacts,
   prepareDataForGrid,
   quotation,
   sidebarResource
@@ -416,6 +417,7 @@ const QuoteBuilder = ({
     referenceId: quotationData?._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(quotationData),
     isExcelDownload: true,
     subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     extraQueryParams: { uniqueId: versionData?._id },

@@ -13,7 +13,16 @@ import CustomReactTable, { AccessorFunction, useColumns, useTableReducer } from 
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CHILD_RESOURCE, displayDateTime, TECHNICIAN_STATUS, fieldServiceOrder, MATERIAL_TYPE, prepareDataForGrid, SERVICE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  displayDateTime,
+  TECHNICIAN_STATUS,
+  fieldServiceOrder,
+  MATERIAL_TYPE,
+  prepareDataForGrid,
+  SERVICE_ORDER_STATUS,
+  sidebarResource
+} from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -25,7 +34,10 @@ import TechnicianDialog from './TechnicianDialog';
 import ConsumablesDialog from './ConsumablesDialog';
 import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
-import { Replay, Send, Visibility } from '@mui/icons-material';
+import { Visibility } from '@mui/icons-material';
+import { RiUserShared2Fill } from "react-icons/ri";
+import { RiUserReceived2Fill } from "react-icons/ri";
+
 
 const Technicians = ({
   allowedToEdit,
@@ -91,7 +103,7 @@ const Technicians = ({
         }
       ]
     });
-    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || [];
     let column: any = [
       {
         accessor: 'index',
@@ -157,40 +169,48 @@ const Technicians = ({
           }
         ]
         : []),
-      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
-        accessor: 'competencyType',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencyType',
-              lookupResource: sidebarResource.competencyType
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencyType')
-      }] : []),
-      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
-        accessor: 'competencies',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencies',
-              lookupResource: sidebarResource.competencies
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencies')
-      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
+        ? [
+          {
+            accessor: 'competencyType',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
+        : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies')
+        ? [
+          {
+            accessor: 'competencies',
+            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
+        : []),
       {
         accessor: 'startDate',
         Header: 'Dispatched Date',
@@ -243,7 +263,7 @@ const Technicians = ({
             </>
           );
         }
-      },
+      }
     ];
     const newColumns = generateColumns(renderedFrom, data, null, false, serviceOrderData?.currency);
     column = [...column, ...newColumns];
@@ -271,7 +291,7 @@ const Technicians = ({
                 </IconButton>
               </HtmlTooltip>
             ) : null}
-            {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) &&
+            {(row?.original?.endDate || (!row?.original?.startDate && !row?.original?.endDate)) && (
               <HtmlTooltip title={'Dispatch'}>
                 <IconButton
                   size="small"
@@ -302,11 +322,13 @@ const Technicians = ({
                       });
                     }
                   }}
+                  color={'primary'}
                 >
-                  <Send fontSize="small" color={'primary'} />
+                  <RiUserShared2Fill fontSize={18} />
                 </IconButton>
-              </HtmlTooltip>}
-            {(row?.original?.startDate && !row?.original?.endDate) &&
+              </HtmlTooltip>
+            )}
+            {row?.original?.startDate && !row?.original?.endDate && (
               <HtmlTooltip title={'Return'}>
                 <IconButton
                   size="small"
@@ -320,11 +342,12 @@ const Technicians = ({
                       _id: row?.original?._id
                     });
                   }}
+                  color={'primary'}
                 >
-                  <Replay fontSize="small" color={'primary'} />
+                  <RiUserReceived2Fill fontSize={18} />
                 </IconButton>
               </HtmlTooltip>
-            }
+            )}
             <HtmlTooltip title={'View Logs'}>
               <IconButton
                 size="small"
@@ -546,7 +569,7 @@ const Technicians = ({
           Dispatch
         </MenuItem>
         <MenuItem
-          disabled={selectedRecords?.every((r) => (r?.startDate && !r?.endDate)) ? false : true}
+          disabled={selectedRecords?.every((r) => r?.startDate && !r?.endDate) ? false : true}
           onClick={() => {
             const dates = [];
             selectedRecords?.forEach((d: any) => {
@@ -633,11 +656,11 @@ const Technicians = ({
         });
         setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, notes: '', products: [], _id: null });
         setConsumablesDialog({ open: false, consumables: [] });
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         fetchData();
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -704,9 +727,15 @@ const Technicians = ({
           isSubmitting={isSubmitting}
           warehouse={serviceOrderData?.warehouse?.optionValue}
           ids={dataRows?.map((d) => d?.technicianId)}
-          defaultCompetencyType={selectedService?.competencyType ?
-            isObject(selectedService?.competencyType) ? [selectedService?.competencyType] :
-              isArray(selectedService?.competencyType) ? selectedService?.competencyType : [] : []}
+          defaultCompetencyType={
+            selectedService?.competencyType
+              ? isObject(selectedService?.competencyType)
+                ? [selectedService?.competencyType]
+                : isArray(selectedService?.competencyType)
+                  ? selectedService?.competencyType
+                  : []
+              : []
+          }
         />
       )}
       {deleteData && (
@@ -747,7 +776,12 @@ const Technicians = ({
             setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, notes: '', products: [], _id: null });
           }}
           handleSubmit={(value) => {
-            handleUpdateStartEndDate(value, startEndDateConfermationDialog.type, startEndDateConfermationDialog.products, startEndDateConfermationDialog._id);
+            handleUpdateStartEndDate(
+              value,
+              startEndDateConfermationDialog.type,
+              startEndDateConfermationDialog.products,
+              startEndDateConfermationDialog._id
+            );
           }}
           loading={isSubmitting}
           minStartDateTime={startEndDateConfermationDialog.minDateTime}

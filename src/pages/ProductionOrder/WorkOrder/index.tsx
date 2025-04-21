@@ -20,7 +20,6 @@ import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import AttachmentDialog from 'src/pages/WorkOrder/Service/AttachmentDialog';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -70,11 +69,10 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
   const [isDeleting, setDeleting] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, ids: [], data: null });
-  const [attachmentsDialog, setAttachmentsDialog] = useState({ open: false, workOrderId: null, uniqueServiceId: null, serviceName: null });
 
   const [openUploadDrawingDialog, setOpenUploadDrawingDialog] = useState(false);
 
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null, label: '', uniqueId: null });
 
   const [isAutoCreating, setIsAutoCreating] = useState({ open: false, total: 0, done: 0 });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
@@ -341,19 +339,25 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     )}
                   </IconButton>
                 </HtmlTooltip>
-                <HtmlTooltip title="Drawings">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      setShowDrawingDialog({ open: true, workOrder: row.original?.workOrder?._id });
-                    }}
-                  >
-                    <DescriptionIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
               </>
             )}
+            {((row?.original?.type === MATERIAL_TYPE.product && !row?.original?.parentId) || row?.original?.type === MATERIAL_TYPE.service) && (
+              <HtmlTooltip title="Drawings">
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    setShowDrawingDialog({
+                      open: true,
+                      workOrder: row.original?.workOrder?._id,
+                      label: row?.original?.type === MATERIAL_TYPE.service ? row?.original?.detail : row.original?.workOrder?.workOrderNumber,
+                      uniqueId: row?.original?.type === MATERIAL_TYPE.service ? row?.original?._id : null
+                    });
+                  }}
+                >
+                  <DescriptionIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>)}
             <HtmlTooltip title="Delete">
               <span>
                 <IconButton
@@ -899,12 +903,12 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
               setConsumablesDialog,
               setAutoCompleteData,
               setCompleteConfirmBox,
-              setAttachmentsDialog,
               setShowServiceActionConfirmBox,
               isDisabledCompleteService,
               setDeleteData,
               setShowConfirmBox,
-              setShowCloseReopenConfirmation
+              setShowCloseReopenConfirmation,
+              setShowDrawingDialog,
             }}
           />
         }
@@ -1085,43 +1089,20 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
           isSubmitting={isSubmitting}
         />
       )}
-      {attachmentsDialog.open && (
-        <AttachmentDialog
-          workOrderId={attachmentsDialog.workOrderId}
-          uniqueServiceId={attachmentsDialog.uniqueServiceId}
-          stepId={null}
-          stepName={attachmentsDialog.serviceName}
-          serviceName={attachmentsDialog.serviceName}
-          handleClose={() => {
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-          handleSuccess={() => {
-            fetchData();
-            setAttachmentsDialog({
-              open: false,
-              workOrderId: null,
-              uniqueServiceId: null,
-              serviceName: null
-            });
-          }}
-        />
-      )}
       {openUploadDrawingDialog && (
         <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
       )}
       {showDrawingDialog.open && (
         <DiagramDialog
-          referenceId={showDrawingDialog.workOrder}
-          handleClose={() => {
-            setShowDrawingDialog({ open: false, workOrder: null });
-          }}
+          referenceId={showDrawingDialog?.workOrder}
           resource={ACTIVITY_RESOURCE.workOrder}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, workOrder: null, label: '', uniqueId: null });
+          }}
+          referenceLabel={showDrawingDialog?.label}
           attachmentType={ATTACHMENT_TYPE.drawing}
+          uniqueId={showDrawingDialog?.uniqueId}
+          showMaterialFilter={showDrawingDialog?.uniqueId ? false : true}
         />
       )}
     </Fragment>
@@ -1144,12 +1125,12 @@ const ActionButtonMenuItems = ({
   setConsumablesDialog,
   setAutoCompleteData,
   setCompleteConfirmBox,
-  setAttachmentsDialog,
   setShowServiceActionConfirmBox,
   isDisabledCompleteService,
   setDeleteData,
   setShowConfirmBox,
-  setShowCloseReopenConfirmation
+  setShowCloseReopenConfirmation,
+  setShowDrawingDialog,
 }) => {
   return (
     <>
@@ -1264,26 +1245,16 @@ const ActionButtonMenuItems = ({
         }
         onClick={() => {
           const parentProduct = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.product && !e?.parentId);
+          const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
           if (parentProduct) {
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: parentProduct?.workOrder?._id,
-              uniqueServiceId: null,
-              serviceName: parentProduct?.workOrder?.workOrderNumber
-            });
-          } else {
-            const service = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.service);
-            setAttachmentsDialog({
-              open: true,
-              workOrderId: service?.workOrder?._id,
-              uniqueServiceId: service?.uniqueId,
-              serviceName: service?.serviceDetail?.serviceName
-            });
+            setShowDrawingDialog({ open: true, workOrder: parentProduct?.workOrder?._id, label: parentProduct?.workOrder?.workOrderNumber, uniqueId: null });
+          } else if (service) {
+            setShowDrawingDialog({ open: true, workOrder: service?.workOrder?._id, label: service?.detail, uniqueId: service?._id });
           }
         }}
       >
         Upload Documents
-      </MenuItem>
+      </MenuItem >
       <MenuItem
         onClick={() => {
           setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
@@ -1312,16 +1283,18 @@ const ActionButtonMenuItems = ({
       >
         Revert Service
       </MenuItem>
-      {selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
-        <MenuItem
-          onClick={() => {
-            setShowCloseReopenConfirmation({ open: true, type: 'Close' });
-          }}
-          id="close-work-order"
-        >
-          Close Work Order(s)
-        </MenuItem>
-      )}
+      {
+        selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
+          <MenuItem
+            onClick={() => {
+              setShowCloseReopenConfirmation({ open: true, type: 'Close' });
+            }}
+            id="close-work-order"
+          >
+            Close Work Order(s)
+          </MenuItem>
+        )
+      }
       <MenuItem
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
