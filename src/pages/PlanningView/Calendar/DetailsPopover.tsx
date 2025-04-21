@@ -64,7 +64,7 @@ const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResou
             </IconButton>
           </HtmlTooltip>
         </div>
-        <div className="h-[300px] overflow-y-auto overflow-x-hidden">
+        <div className="h-[300px] overflow-x-auto overflow-y-auto">
           <RenderDetail fields={fields} data={resourceDatas?.find((r) => r?._id === showDetail?.data?.id)} />
         </div>
       </Box>
