@@ -1,14 +1,14 @@
-import { Box, Typography } from '@mui/material';
-import { useState } from 'react';
-import ActivityLoader from 'src/components/Helpers/ActivityLoader';
+import { Box } from '@mui/material';
 import MessagePanel from 'src/pages/WorkSpace/MessagePanel';
 import { useWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
-const Collaborate = ({ resource }) => {
-  const state = useWorkSpace();
-
-  const [loading, setLoading] = useState(false);
-  return <Box className="activityDetailBox">{loading ? <ActivityLoader /> : <MessagePanel state={state} resource={resource} />}</Box>;
+const Collaborate = ({ resource, resourceLabel, resourceData }) => {
+  const state = useWorkSpace({ title: resourceLabel });
+  return (
+    <Box className="activityDetailBox overflow-x-hidden">
+      <MessagePanel state={state} resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
+    </Box>
+  );
 };
 
 export default Collaborate;

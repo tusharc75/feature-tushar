@@ -40,6 +40,7 @@ const Activity = (props) => {
     restrictedAddActivities = [],
     resourceId = '',
     resourceLabel = '',
+    resourceData = null,
     resource = '',
     close = () => {}
   } = props;
@@ -287,7 +288,9 @@ const Activity = (props) => {
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <Attachments relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {type === 'Collaborate' && data === 'Collaborate' ? <Collaborate resource={resource} /> : null}
+                  {type === 'Collaborate' && data === 'Collaborate' ? (
+                    <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
+                  ) : null}
                 </Fragment>
               ))}
               {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}

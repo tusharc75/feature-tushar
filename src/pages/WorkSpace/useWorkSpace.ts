@@ -50,7 +50,11 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
   }
 };
 
-export const useWorkSpace = () => {
+type WorkSpaceProps = {
+  title?: string | null;
+};
+
+export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
   const {
     state: {
       user: { user },
@@ -112,7 +116,10 @@ export const useWorkSpace = () => {
     } = await axiosInstance().get('/work-space/channel');
 
     setAllChannels(data);
-    if (setActiveChannel) {
+    if (title) {
+      const channel = data?.find((channel) => channel?.title === title);
+      setSelectedChannel(channel, data);
+    } else if (setActiveChannel) {
       const queryParam = new URLSearchParams(window.location.search);
       const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');
       if (channelId) {
