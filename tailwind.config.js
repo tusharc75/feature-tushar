@@ -10,7 +10,8 @@ module.exports = {
         theme: 'hsl(var(--new-theme-color-hsl))'
       },
       backgroundColor: {
-        theme: 'hsl(var(--new-theme-color-hsl))'
+        theme: 'hsl(var(--new-theme-color-hsl))',
+        darkPrimary: 'hsl(var(--dark-primary-hsl))'
       },
       typography: {
         DEFAULT: {
