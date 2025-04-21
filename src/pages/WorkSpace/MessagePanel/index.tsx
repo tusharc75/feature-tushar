@@ -7,21 +7,23 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
-import { ChannelData, Message } from 'src/pages/WorkSpace/types';
+import { ChannelData, Member, Message } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
-  const { selectedChannel, isSidebarCollapsed, newChatToUser, toggleSidebar } = state;
+const MessagePanel = ({ state, resource = null }: { state: UseWorkSpace; resource: string | null }) => {
+  const { selectedChannel, isSidebarCollapsed, toggleSidebar } = state;
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
   const [themeColor] = useAppTheme();
+  const [newChatToUser, setNewChatToUser] = useState<Member>(null);
   const [msgType, setMsgType] = useState<'messages' | 'pins'>('messages');
 
   const fetchChannelData = useCallback(async () => {
+    setNewChatToUser(null);
     try {
       const { data } = await axiosInstance().get(`work-space/channel/${selectedChannel._id}`);
       setChannelData(data?.data);
@@ -33,6 +35,8 @@ const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
   useEffect(() => {
     if (selectedChannel) {
       fetchChannelData();
+    } else if (resource) {
+      setNewChatToUser({ optionValue: 'string', optionLabel: 'string', avatar: 'string' });
     }
     return () => setChannelData(null);
   }, [selectedChannel, fetchChannelData]);
@@ -60,7 +64,7 @@ const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
-                  {newChatToUser ? newChatToUser.concatedName : selectedChannel?.title}
+                  {newChatToUser ? newChatToUser.optionLabel : selectedChannel?.title}
                 </h5>
                 {!newChatToUser && (
                   <HtmlTooltip title={'View all members'}>

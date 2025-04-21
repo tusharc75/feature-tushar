@@ -29,6 +29,7 @@ import { isEmpty, isObject } from 'lodash';
 import { CollaborateIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { HistoryIcon, IconEventMap } from 'src/assets/svg/CollaborateSidebar';
+import Collaborate from 'src/components/Activity/Collaborate';
 
 const Activity = (props) => {
   const {
@@ -40,7 +41,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => { }
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -68,25 +69,26 @@ const Activity = (props) => {
   const [addRelatedTo, setAddRelatedTo] = useState([]);
 
   useEffect(() => {
-    let addTemprelated = [...relatedTo]
-    let addViewrelated = [...relatedTo]
+    let addTemprelated = [...relatedTo];
+    let addViewrelated = [...relatedTo];
     if (extraRelatedTo && isObject(extraRelatedTo)) {
-      addTemprelated = [...addTemprelated, extraRelatedTo]
+      addTemprelated = [...addTemprelated, extraRelatedTo];
     }
     if ([ACTIVITY_RESOURCE.fieldTicket]?.includes(resource)) {
       if (extraRelatedTo && isObject(extraRelatedTo)) {
-        addViewrelated = [...addViewrelated, extraRelatedTo]
+        addViewrelated = [...addViewrelated, extraRelatedTo];
       }
     }
-    setViewRelatedTo(addViewrelated)
-    setAddRelatedTo(addTemprelated)
+    setViewRelatedTo(addViewrelated);
+    setAddRelatedTo(addTemprelated);
   }, [relatedTo]);
 
   useEffect(() => {
     const options: any = [];
-    ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment']?.forEach((item) => {
+    ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment', 'Collaborate']?.forEach((item) => {
       if (
         (item === 'Event' && permissions?.task?.isRead) ||
+        (item === 'Collaborate' && permissions?.workSpace?.isRead) ||
         (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true)
       ) {
         options.push(item);
@@ -118,7 +120,8 @@ const Activity = (props) => {
   }, [emails]);
 
   const fetchTotalCounts = () => {
-    axiosInstance().get(`/activity/resource/count?relatedTo=${JSON.stringify(viewRelatedTo)}`)
+    axiosInstance()
+      .get(`/activity/resource/count?relatedTo=${JSON.stringify(viewRelatedTo)}`)
       .then(({ data: { data } }) => {
         setTotalCount(data);
         setCountFetched(true);
@@ -220,7 +223,7 @@ const Activity = (props) => {
                     <div className="text-container flex flex-grow">
                       <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
                         {data}
-                        <span className="ml-[2px] text-[12px] text-gray-500">({totalCount[data]})</span>
+                        {data != 'Collaborate' && <span className="ml-[2px] text-[12px] text-gray-500">({totalCount[data]})</span>}
                         <span className="cursor-pointer">
                           {type === data ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                         </span>
@@ -231,7 +234,7 @@ const Activity = (props) => {
                           <div className="flex items-center">
                             {data === 'Attachment' && (
                               <Box mr={1}>
-                                <HtmlTooltip title={'Add Folder'} >
+                                <HtmlTooltip title={'Add Folder'}>
                                   <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
                                     <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                   </IconButton>
@@ -240,7 +243,8 @@ const Activity = (props) => {
                             )}
                             {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                               <Box mr={1}>
-                                <HtmlTooltip title={`support+${viewRelatedTo[0].type}_${viewRelatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
+                                <HtmlTooltip
+                                  title={`support+${viewRelatedTo[0].type}_${viewRelatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
                                 >
                                   <IconButton
                                     size="small"
@@ -283,6 +287,7 @@ const Activity = (props) => {
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
                     <Attachments relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
+                  {type === 'Collaborate' && data === 'Collaborate' ? <Collaborate resource={resource} /> : null}
                 </Fragment>
               ))}
               {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}
