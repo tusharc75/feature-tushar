@@ -1,10 +1,10 @@
-import { Box, IconButton, Typography } from '@mui/material';
-import ImageEditor from '@toast-ui/react-image-editor';
-import { useEffect, useRef, useState } from 'react';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Close } from '@mui/icons-material';
+import { Box, IconButton, Typography } from '@mui/material';
+import { useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { b64toBlob, cn } from 'src/constants/helpers';
+import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
 
 type ThemeConfig = {
   'common.bi.image'?: string;
@@ -61,7 +61,7 @@ type ThemeConfig = {
 };
 
 const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
-  const editorRef = useRef(null);
+  const editorRef = useRef<EditorRef>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
@@ -157,30 +157,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose 
           </Box>
         ) : (
           imageUrl && (
-            <ImageEditor
-              ref={editorRef}
-              includeUI={{
-                loadImage: {
-                  path: imageUrl,
-                  name: data?.name
-                },
-                // theme,
-                menu: ['crop', 'flip', 'rotate', 'draw', 'shape', 'icon', 'text', 'mask', 'filter'],
-                uiSize: {
-                  width: '100%',
-                  height: '100%'
-                },
-
-                menuBarPosition: 'left'
-              }}
-              cssMaxHeight={window.innerHeight - 59}
-              cssMaxWidth={window.innerWidth}
-              selectionStyle={{
-                cornerSize: 20,
-                rotatingPointOffset: 70
-              }}
-              usageStatistics={false}
-            />
+            <Editor ref={editorRef} imageName={data?.name} imageUrl={imageUrl} maxHeight={window.innerHeight - 60} maxWidth={window.innerWidth} />
           )
         )}
       </main>
