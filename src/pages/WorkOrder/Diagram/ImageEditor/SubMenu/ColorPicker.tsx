@@ -104,7 +104,7 @@ const ColorPicker = memo(
 
     return (
       <div>
-        <RippleButton onClick={(e) => setAnchor(e.currentTarget)} className="inline-block max-w-fit cursor-pointer rounded-full text-center">
+        <RippleButton onClick={(e) => setAnchor(e.currentTarget)} className="inline-block max-w-fit cursor-pointer rounded-full border text-center">
           <div
             className="circle relative mx-auto size-10 cursor-pointer overflow-hidden rounded-full border"
             style={{ background: stateColor ? stateColor : 'transparent', opacity: `${typeof setOpacity === 'function' ? stateOpacity / 100 : 1}` }}
@@ -228,7 +228,7 @@ const Picker = memo(
         >
           {!color && <MdBlock size={22} className="absolute bottom-[-2px] left-[-2px] right-[-2px] top-[-2px] text-gray-500" />}
           <input
-            className="sr-only border-none outline-none focus-visible:outline-1 focus-visible:outline-theme"
+            className="sr-only border-none outline-none focus-visible:outline-1 focus-visible:outline-theme "
             type={'color'}
             value={color}
             onChange={(e) => setColorValue(e.target.value)}
@@ -240,7 +240,7 @@ const Picker = memo(
         <input
           onBlur={(e) => handleBlur(e.target.value)}
           onChange={(e) => setColorValue(e.target.value)}
-          className="flex-grow border-none bg-transparent text-sm outline-none"
+          className="flex-grow border-none bg-transparent text-sm outline-none dark:text-white"
           value={colorValue}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
