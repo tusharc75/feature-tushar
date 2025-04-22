@@ -142,7 +142,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
         checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-        data.canDelete &&
+        data?.canDelete &&
         ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
