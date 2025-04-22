@@ -13,12 +13,9 @@ let timeout: NodeJS.Timeout;
 const minBrushSize = 5;
 const maxBrushSize = 50;
 
-const minOpacity = 30;
-const maxOpacity = 100;
-
 const DrawLine = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
   const [mode, setMode] = useState<Mode>('FREE_DRAWING');
-  const [brushSetting, setBrushSetting] = useState({ width: 10, color: '#000000', opacity: 90 });
+  const [brushSetting, setBrushSetting] = useState({ width: 10, color: '#000000', opacity: 85 });
 
   useEffect(() => {
     timeout = setTimeout(() => {
@@ -32,7 +29,7 @@ const DrawLine = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
   }, [brushSetting, mode, imageEditor]);
 
   return (
-    <div>
+    <>
       <ul className=" mb-3 flex list-none justify-center gap-3 border-b pb-3">
         <li>
           <RippleButton onClick={() => setMode('FREE_DRAWING')} className={subMenuButtonClassname} data-active={mode === 'FREE_DRAWING'}>
@@ -48,63 +45,25 @@ const DrawLine = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
         </li>
       </ul>
       <div className="mb-3 border-b pb-3">
-        <ColorPicker label={'Brush color'} color={brushSetting.color} setColor={(color) => setBrushSetting((prev) => ({ ...prev, color }))} />
-      </div>
-      <div className="mb-3 border-b pb-3">
-        <RangeInput
-          min={minOpacity}
-          max={maxOpacity}
-          label="Brush Opacity"
-          onChange={(opacity) => setBrushSetting((prev) => ({ ...prev, opacity }))}
-          value={brushSetting.opacity}
-          inputProps={{
-            onChange: (e) => {
-              const newValue = e.target.value === '' ? minOpacity : Number(e.target.value);
-              setBrushSetting((prev) => ({ ...prev, opacity: newValue }));
-            },
-            onBlur: () => {
-              setBrushSetting((prev) => {
-                let newVal = { ...prev };
-                if (prev.opacity > maxOpacity) {
-                  newVal.opacity = maxOpacity;
-                }
-                if (prev.opacity < minOpacity) {
-                  newVal.opacity = minOpacity;
-                }
-                return newVal;
-              });
-            }
-          }}
+        <ColorPicker
+          label={'Brush color'}
+          setOpacity={(opacity) => setBrushSetting((prev) => ({ ...prev, opacity }))}
+          opacity={brushSetting.opacity}
+          color={brushSetting.color}
+          setColor={(color) => setBrushSetting((prev) => ({ ...prev, color }))}
         />
       </div>
-      <div className="mb-3 border-b pb-3">
+
+      <div className="mb-3 pb-3">
         <RangeInput
           min={minBrushSize}
           max={maxBrushSize}
           label="Brush Size"
           onChange={(width) => setBrushSetting((prev) => ({ ...prev, width }))}
           value={brushSetting.width}
-          inputProps={{
-            onChange: (e) => {
-              const newValue = e.target.value === '' ? minBrushSize : Number(e.target.value);
-              setBrushSetting((prev) => ({ ...prev, width: newValue }));
-            },
-            onBlur: () => {
-              setBrushSetting((prev) => {
-                let newVal = { ...prev };
-                if (prev.width > maxBrushSize) {
-                  newVal.width = maxBrushSize;
-                }
-                if (prev.width < minBrushSize) {
-                  newVal.width = minBrushSize;
-                }
-                return newVal;
-              });
-            }
-          }}
         />
       </div>
-    </div>
+    </>
   );
 });
 

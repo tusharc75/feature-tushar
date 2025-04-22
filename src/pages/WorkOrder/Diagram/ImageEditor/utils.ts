@@ -49,11 +49,11 @@ export const handleSetImageEditorMode = (option: SingleButtonOption, imageEditor
   }
 };
 
-export function hexToRGBa(hex: string, alpha: number) {
-  var r = parseInt(hex.slice(1, 3), 16);
-  var g = parseInt(hex.slice(3, 5), 16);
-  var b = parseInt(hex.slice(5, 7), 16);
-  var a = alpha || 1;
+export function hexToRGBa(hex: string, alpha?: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const a = typeof alpha === 'number' ? alpha : 1;
   return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
 }
 
