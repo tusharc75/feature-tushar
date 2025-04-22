@@ -139,27 +139,6 @@ const Shape = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
             })
           }
           value={data.strokeWidth}
-          inputProps={{
-            onChange: (e) => {
-              const newValue = e.target.value === '' ? minStrokeWidth : Number(e.target.value);
-              setData((prev) => {
-                return { ...prev, strokeWidth: newValue };
-              });
-            },
-            onBlur: () => {
-              setData((prev) => {
-                let newVal = { ...prev };
-                if (prev.strokeWidth > maxStrokeWidth) {
-                  newVal.strokeWidth = maxStrokeWidth;
-                }
-                if (prev.strokeWidth < minStrokeWidth) {
-                  newVal.strokeWidth = minStrokeWidth;
-                }
-                hangleChangeShapeStyle({ strokeWidth: newVal.strokeWidth });
-                return newVal;
-              });
-            }
-          }}
         />
       </div>
     </>

@@ -5,7 +5,7 @@ import { subMenuButtonClassname, subMenuHelperTextClassName, SubmenuItemProps } 
 
 const Flip = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
   return (
-    <div>
+    <>
       <ul className=" mb-3 flex list-none justify-center gap-3 border-b pb-3">
         <li>
           <RippleButton onClick={() => imageEditor.flipX()} className={subMenuButtonClassname}>
@@ -24,7 +24,7 @@ const Flip = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
         <History />
         <p className={subMenuHelperTextClassName}>Reset</p>
       </RippleButton>
-    </div>
+    </>
   );
 };
 

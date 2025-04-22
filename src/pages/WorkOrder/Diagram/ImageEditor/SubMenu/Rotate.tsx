@@ -48,25 +48,6 @@ const Rotate = memo(({ imageEditor }: SubmenuItemProps) => {
           imageEditor.setAngle(val);
         }}
         value={angle}
-        inputProps={{
-          onChange: (e) => {
-            const newValue = e.target.value === '' ? min : Number(e.target.value);
-            setAngle(newValue);
-          },
-          onBlur: () => {
-            setAngle((prev) => {
-              let newVal = prev;
-              if (prev > max) {
-                newVal = max;
-              }
-              if (prev < min) {
-                newVal = min;
-              }
-              imageEditor.setAngle(newVal);
-              return newVal;
-            });
-          }
-        }}
       />
     </div>
   );

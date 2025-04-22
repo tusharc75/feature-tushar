@@ -4,7 +4,11 @@ import { MdBlock } from 'react-icons/md';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 import { subMenuHelperTextClassName } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
+import RangeInput, { RangeInputProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/RangeInput';
 import { isValidHexColor } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
+
+const minOpacity = 0;
+const maxOpacity = 100;
 
 const colors = [
   '#000000',
@@ -24,58 +28,105 @@ const colors = [
   '#ff5583'
 ] as const;
 
-let timeout: NodeJS.Timeout;
+let colorTimeout: NodeJS.Timeout;
+let opacityTimeout: NodeJS.Timeout;
 
 const ColorPicker = memo(
   ({
     color,
     setColor,
     label,
-    canColorBeEmpty
+    canColorBeEmpty,
+    setOpacity,
+    opacity = minOpacity,
+    defaultColor,
+    rangeInputProps = {}
   }: {
-    color: string | null;
-    setColor: (color: string | null) => void;
+    defaultColor?: string;
+    color?: string | null;
+    setColor?: (color: string | null) => void;
     label?: string;
     canColorBeEmpty?: boolean;
+    opacity?: number;
+    setOpacity?: (opacity: number) => void;
+    rangeInputProps?: Partial<Omit<RangeInputProps, 'label' | 'onChange' | 'value'>>;
   }) => {
     const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-    const [stateColor, setStateColor] = useState(color);
-    const iniitialRender = useRef(true);
+    const [stateOpacity, setStateOpacity] = useState(opacity);
+    const [stateColor, setStateColor] = useState(defaultColor ? defaultColor : color);
+    const iniitialRender = useRef({ opacity: true, color: true });
 
     const handleClose = () => {
       setAnchor(null);
     };
 
-    // debounce setter
+    // debounce color setter
     useEffect(() => {
-      if (iniitialRender.current) {
-        iniitialRender.current = false;
-        return () => clearTimeout(timeout);
+      if (iniitialRender.current.color) {
+        iniitialRender.current.color = false;
+        return () => clearTimeout(colorTimeout);
       }
-      timeout = setTimeout(() => {
-        setColor(stateColor);
+      colorTimeout = setTimeout(() => {
+        setColor?.(stateColor);
       }, 100);
       return () => {
-        clearTimeout(timeout);
+        clearTimeout(colorTimeout);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stateColor]);
+
+    // debounce opacity setter
+    useEffect(() => {
+      if (typeof setOpacity !== 'function') return;
+      if (iniitialRender.current.opacity) {
+        iniitialRender.current.opacity = false;
+        return () => clearTimeout(opacityTimeout);
+      }
+      opacityTimeout = setTimeout(() => {
+        let opacity = stateOpacity;
+        if (opacity > maxOpacity) {
+          opacity = maxOpacity;
+        }
+        if (opacity < minOpacity) {
+          opacity = minOpacity;
+        }
+        setOpacity(opacity);
+      }, 100);
+      return () => {
+        clearTimeout(opacityTimeout);
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [stateOpacity]);
 
     return (
       <div>
         <RippleButton onClick={(e) => setAnchor(e.currentTarget)} className="inline-block max-w-fit cursor-pointer rounded-full text-center">
           <div
             className="circle relative mx-auto size-10 cursor-pointer overflow-hidden rounded-full border"
-            style={{ background: color ? color : 'transparent' }}
+            style={{ background: stateColor ? stateColor : 'transparent' }}
           >
-            {!color && <MdBlock size={45} className="absolute bottom-[-3.5px] left-[-3.5px] right-[-3.5px] top-[-3.5px] text-gray-500" />}
+            {!stateColor && <MdBlock size={45} className="absolute bottom-[-3.5px] left-[-3.5px] right-[-3.5px] top-[-3.5px] text-gray-500" />}
           </div>
         </RippleButton>
+
         {label && <p className={cn(subMenuHelperTextClassName, 'mx-auto max-w-fit')}>{label}</p>}
         <Menu disableScrollLock open={Boolean(anchor)} anchorEl={anchor} onClose={() => setAnchor(null)}>
           <div className="w-[200px] p-3">
             <ColorList setColor={setStateColor} canColorBeEmpty={canColorBeEmpty} handleClose={handleClose} />
             <Picker color={stateColor} setColor={setStateColor} canColorBeEmpty={canColorBeEmpty} handleClose={handleClose} />
+            {typeof setOpacity === 'function' && (
+              <div className="mt-2 ">
+                <RangeInput
+                  labelClass="text-center"
+                  min={minOpacity}
+                  max={maxOpacity}
+                  label="Opacity"
+                  onChange={(opacity) => setStateOpacity(opacity)}
+                  value={stateOpacity}
+                  {...rangeInputProps}
+                />
+              </div>
+            )}
           </div>
         </Menu>
       </div>
