@@ -19,7 +19,7 @@ const minFontSize = 10,
   maxFontSize = 100;
 
 const Text = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
-  const [data, setData] = useState<Data>({ color: '#000000', bold: false, italic: false, textAlign: 'left', underline: false, fontSize: 10 });
+  const [data, setData] = useState<Data>({ color: '#000000', bold: false, italic: false, textAlign: 'left', underline: false, fontSize: 60 });
   const [activeObjectId] = useEditorStore((state) => state.activeObjectId);
   const [newTextPosition] = useEditorStore((state) => state.newTextPosition);
   const initialRender = useRef(true);
@@ -169,25 +169,6 @@ const Text = memo(({ hideMenu, imageEditor }: SubmenuItemProps) => {
             })
           }
           value={data.fontSize}
-          inputProps={{
-            onChange: (e) => {
-              const newValue = e.target.value === '' ? minFontSize : Number(e.target.value);
-              setData((prev) => ({ ...prev, fontSize: newValue }));
-            },
-            onBlur: () => {
-              setData((prev) => {
-                let newVal = { ...prev };
-                if (prev.fontSize > maxFontSize) {
-                  newVal.fontSize = maxFontSize;
-                }
-                if (prev.fontSize < minFontSize) {
-                  newVal.fontSize = minFontSize;
-                }
-                changeCurrentTextStyle({ fontSize: newVal.fontSize });
-                return newVal;
-              });
-            }
-          }}
         />
       </div>
     </>
