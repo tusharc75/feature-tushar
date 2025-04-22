@@ -12,8 +12,7 @@ import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import { getColorFromPriority, getPositionOfDate, getPriority } from '../helperFunctions';
 import { FiExternalLink } from 'react-icons/fi';
 import routes from 'src/components/Helpers/Routes';
-import { RiUserShared2Fill } from "react-icons/ri";
-import { RiUserReceived2Fill } from "react-icons/ri";
+import { RiUserShared2Fill, RiArrowGoBackFill } from "react-icons/ri";
 
 
 type CalnedarDataProps = {
@@ -133,7 +132,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                     size="small"
                     color="primary"
                   >
-                    <RiUserReceived2Fill size={18} />
+                    <RiArrowGoBackFill size={18} />
                   </IconButton>
                 </HtmlTooltip>
               )}
