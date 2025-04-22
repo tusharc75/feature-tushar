@@ -2448,7 +2448,8 @@ export const REPORT_SECTIONS = {
   deals: 'Deals',
   user: 'User',
   integration: 'Integration',
-  iot: 'Iot'
+  iot: 'Iot',
+  technician:"Technician"
 };
 
 export const REPORT_LIST = [
@@ -2747,6 +2748,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'sytelineInvoiceIntegration',
     section: REPORT_SECTIONS.integration
+  },
+  {
+    title: 'Technician Schedule Report',
+    permission: "employeeMaster",
+    key: 'standardReport',
+    type: 'technicianSchedule',
+    section: REPORT_SECTIONS.technician
   }
 ];
 
