@@ -7,7 +7,7 @@ import { subMenuHelperTextClassName } from 'src/pages/WorkOrder/Diagram/ImageEdi
 import RangeInput, { RangeInputProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/RangeInput';
 import { isValidHexColor } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
 
-const minOpacity = 0;
+const minOpacity = 2;
 const maxOpacity = 100;
 
 const colors = [
@@ -40,7 +40,9 @@ const ColorPicker = memo(
     setOpacity,
     opacity = minOpacity,
     defaultColor,
-    rangeInputProps = {}
+    rangeInputProps = {},
+    children = null,
+    autoHidePopup = true
   }: {
     defaultColor?: string;
     color?: string | null;
@@ -50,9 +52,11 @@ const ColorPicker = memo(
     opacity?: number;
     setOpacity?: (opacity: number) => void;
     rangeInputProps?: Partial<Omit<RangeInputProps, 'label' | 'onChange' | 'value'>>;
+    children?: React.ReactNode | Element[];
+    autoHidePopup?: boolean;
   }) => {
     const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
-    const [stateOpacity, setStateOpacity] = useState(opacity);
+    const [stateOpacity, setStateOpacity] = useState(rangeInputProps.defaultValue ? rangeInputProps.defaultValue : opacity);
     const [stateColor, setStateColor] = useState(defaultColor ? defaultColor : color);
     const iniitialRender = useRef({ opacity: true, color: true });
 
@@ -100,20 +104,25 @@ const ColorPicker = memo(
 
     return (
       <div>
-        <RippleButton onClick={(e) => setAnchor(e.currentTarget)} className="inline-block max-w-fit cursor-pointer rounded-full text-center">
+        <RippleButton onClick={(e) => setAnchor(e.currentTarget)} className="inline-block max-w-fit cursor-pointer rounded-full border text-center">
           <div
             className="circle relative mx-auto size-10 cursor-pointer overflow-hidden rounded-full border"
-            style={{ background: stateColor ? stateColor : 'transparent' }}
+            style={{ background: stateColor ? stateColor : 'transparent', opacity: `${typeof setOpacity === 'function' ? stateOpacity / 100 : 1}` }}
           >
             {!stateColor && <MdBlock size={45} className="absolute bottom-[-3.5px] left-[-3.5px] right-[-3.5px] top-[-3.5px] text-gray-500" />}
           </div>
         </RippleButton>
 
         {label && <p className={cn(subMenuHelperTextClassName, 'mx-auto max-w-fit')}>{label}</p>}
-        <Menu disableScrollLock open={Boolean(anchor)} anchorEl={anchor} onClose={() => setAnchor(null)}>
+        <Menu disableScrollLock open={Boolean(anchor)} anchorEl={anchor} onClose={handleClose}>
           <div className="w-[200px] p-3">
-            <ColorList setColor={setStateColor} canColorBeEmpty={canColorBeEmpty} handleClose={handleClose} />
-            <Picker color={stateColor} setColor={setStateColor} canColorBeEmpty={canColorBeEmpty} handleClose={handleClose} />
+            <ColorList setColor={setStateColor} canColorBeEmpty={canColorBeEmpty} handleClose={() => (autoHidePopup ? handleClose : () => {})} />
+            <Picker
+              color={stateColor}
+              setColor={setStateColor}
+              canColorBeEmpty={canColorBeEmpty}
+              handleClose={() => (autoHidePopup ? handleClose : () => {})}
+            />
             {typeof setOpacity === 'function' && (
               <div className="mt-2 ">
                 <RangeInput
@@ -127,6 +136,7 @@ const ColorPicker = memo(
                 />
               </div>
             )}
+            {children}
           </div>
         </Menu>
       </div>
@@ -206,6 +216,7 @@ const Picker = memo(
           setColorValue(color);
         }
       }
+
       handleClose();
     };
 
@@ -217,7 +228,7 @@ const Picker = memo(
         >
           {!color && <MdBlock size={22} className="absolute bottom-[-2px] left-[-2px] right-[-2px] top-[-2px] text-gray-500" />}
           <input
-            className="sr-only border-none outline-none focus-visible:outline-1 focus-visible:outline-theme"
+            className="sr-only border-none outline-none focus-visible:outline-1 focus-visible:outline-theme "
             type={'color'}
             value={color}
             onChange={(e) => setColorValue(e.target.value)}
@@ -229,7 +240,7 @@ const Picker = memo(
         <input
           onBlur={(e) => handleBlur(e.target.value)}
           onChange={(e) => setColorValue(e.target.value)}
-          className="flex-grow border-none bg-transparent text-sm outline-none"
+          className="flex-grow border-none bg-transparent text-sm outline-none dark:text-white"
           value={colorValue}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {

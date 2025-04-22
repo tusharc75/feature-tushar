@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { useRef, useState } from 'react';
+
 import { subMenuHelperTextClassName, SubmenuItemProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
 import ColorPicker from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/ColorPicker';
 import RangeInput from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/RangeInput';
@@ -79,8 +81,19 @@ const initialCheckboxState = rangeFilters.reduce(
 );
 type CheckboxStateType = typeof initialCheckboxState;
 
+const blendModes = [
+  { label: 'Add', mode: 'add' },
+  // { label: 'Diff', mode: 'diff' },
+  { label: 'Subtract', mode: 'diff' },
+  { label: 'Multiply', mode: 'multiply' },
+  { label: 'Screen', mode: 'screen' },
+  { label: 'Lighten', mode: 'lighten' },
+  { label: 'Darken', mode: 'darken' }
+] as const;
+
 const Filter = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
   const [checkboxState, setCheckboxState] = useState<CheckboxStateType>(initialCheckboxState);
+  const blendColor = useRef('#00FF00');
 
   function applyOrRemoveFilter(applying: boolean, type: string, options: any) {
     if (applying) {
@@ -131,8 +144,8 @@ const Filter = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
           </li>
         ))}
       </ul>
-      <ul className=" mb-3 flex list-none justify-center gap-3">
-        <li>
+      <ul className=" mb-3 list-none gap-3 space-y-2">
+        <li className="grid grid-cols-2">
           <label className="switch-checkbox mb-2 flex items-center gap-2">
             <input
               type="checkbox"
@@ -143,7 +156,7 @@ const Filter = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
                   applyOrRemoveFilter(newData['Tint'], 'blendColor', {
                     mode: 'tint',
                     color: '#000000',
-                    alpha: 100 / 100
+                    alpha: 70 / 100
                   });
                   return newData;
                 });
@@ -154,7 +167,7 @@ const Filter = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
           <ColorPicker
             key={`tint-picker-${checkboxState['Tint']}`}
             defaultColor="#000000"
-            label="Tint"
+            label=""
             setColor={(color) => {
               applyOrRemoveFilter(checkboxState['Tint'], 'blendColor', {
                 color
@@ -166,9 +179,92 @@ const Filter = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
               });
             }}
             rangeInputProps={{
+              defaultValue: 70
+            }}
+          />
+        </li>
+        <li className="grid grid-cols-2">
+          <label className="switch-checkbox mb-2 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={checkboxState['Multiply']}
+              onClick={(e) => {
+                setCheckboxState((prev) => {
+                  const newData = { ...prev, Multiply: !prev['Multiply'] };
+                  applyOrRemoveFilter(newData['Multiply'], 'blendColor', {
+                    color: '#808080'
+                  });
+                  return newData;
+                });
+              }}
+            />
+            <p className={subMenuHelperTextClassName}>{'Multiply'}</p>
+          </label>
+          <ColorPicker
+            key={`tint-picker-${checkboxState['Multiply']}`}
+            defaultColor="#808080"
+            label=""
+            setColor={(color) => {
+              applyOrRemoveFilter(checkboxState['Multiply'], 'blendColor', {
+                color
+              });
+            }}
+            rangeInputProps={{
               defaultValue: 100
             }}
           />
+        </li>
+        <li className="grid grid-cols-2">
+          <label className="switch-checkbox mb-2 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={checkboxState['Blend']}
+              onClick={(e) => {
+                setCheckboxState((prev) => {
+                  const newData = { ...prev, Blend: !prev['Blend'] };
+                  applyOrRemoveFilter(newData['Blend'], 'blendColor', {
+                    color: blendColor.current
+                  });
+                  return newData;
+                });
+              }}
+            />
+            <p className={subMenuHelperTextClassName}>{'Blend'}</p>
+          </label>
+          <ColorPicker
+            key={`tint-picker-${checkboxState['Blend']}`}
+            defaultColor={blendColor.current}
+            label=""
+            setColor={(color) => {
+              blendColor.current = color;
+              applyOrRemoveFilter(checkboxState['Blend'], 'blendColor', {
+                color
+              });
+            }}
+            rangeInputProps={{
+              defaultValue: 100
+            }}
+            autoHidePopup={false}
+          >
+            <FormControl sx={{ mt: 2 }} fullWidth size="small">
+              <InputLabel id="select-blend-mode">Age</InputLabel>
+              <Select
+                labelId="select-blend-mode"
+                id="select-blend-mode"
+                label="Age"
+                defaultValue={blendModes[0].mode}
+                onChange={(e) => {
+                  applyOrRemoveFilter(checkboxState['Blend'], 'blendColor', {
+                    mode: e.target.value
+                  });
+                }}
+              >
+                {blendModes.map((b) => (
+                  <MenuItem value={b.mode}>{b.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </ColorPicker>
         </li>
       </ul>
     </>
