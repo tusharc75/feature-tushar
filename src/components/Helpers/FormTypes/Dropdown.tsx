@@ -415,7 +415,7 @@ function Dropdown({
                 ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
                 value={
                   values[name]
-                    ? [...dropdownOptions(option, values, fields, fieldData)].filter((data: any) => values[name].includes(data.optionValue))
+                    ? [...dropdownOptions(option, values, fields, fieldData)]?.filter((data: any) => values[name]?.includes(data.optionValue))
                     : []
                 }
                 isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
