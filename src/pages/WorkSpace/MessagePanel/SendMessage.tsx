@@ -114,6 +114,7 @@ const SendMessage = ({
                 await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 
                 setSelectedChannel(data);
+                socket.emit('joinChannel', data?._id);
               }
             })
             .catch((error) => {});
