@@ -37,7 +37,7 @@ const RippleButton = React.forwardRef<HTMLButtonElement, { children: React.React
         }}
         ref={ref}
         className={cn(
-          'relative cursor-pointer overflow-hidden bg-transparent outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[--new-theme-color] dark:text-[white]',
+          'relative cursor-pointer overflow-hidden bg-transparent outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[--new-theme-color] dark:text-[white] dark:disabled:text-gray-500',
           className
         )}
         {...rest}
