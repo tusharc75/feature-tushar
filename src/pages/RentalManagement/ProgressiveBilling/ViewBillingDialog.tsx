@@ -362,7 +362,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const handleDeleteData = async (rows) => {
     const data = {
       invoiceId: invoiceData?._id,
-      materialIds: rows?.map((e) => e.materialId) || []
+      _id: rows?.map((e) => e._id) || []
     };
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
