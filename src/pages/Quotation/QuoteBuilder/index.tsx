@@ -204,27 +204,27 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
         ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : '';
       parent.leadTime = Array.isArray(parent?.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
-      parent.hideSelection = parent?.fieldTicketCreated ? true : false;
       parent.subRows = generateNestedData(data.material, parent);
+      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
     });
 
     let cost = [];
@@ -282,20 +282,20 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
