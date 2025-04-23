@@ -237,7 +237,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     columns.push({
       accessor: 'action',
       Header: 'Actions',
-      width: permissions?.irtTicket?.isCreate ? 150 : 100,
+      width: permissions?.irtTicket?.isCreate ? 150 : 130,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -678,12 +678,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-              uniq(
-                map(
-                  selectedRecords?.filter((e) => !e.hideSelection),
-                  'type'
-                )
-              )?.length === 1
+            uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            )?.length === 1
               ? false
               : true
           }
@@ -786,21 +786,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                {
-                  field: 'expenseItem',
-                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                }
-              ]
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -861,11 +861,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
         />

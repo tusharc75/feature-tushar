@@ -57,13 +57,12 @@ const buttonMaps = [
     type: 'mask',
     icon: <RxMaskOff size={20} />,
     text: 'Mask'
+  },
+  {
+    type: 'filter',
+    icon: <Tune />,
+    text: 'Filter'
   }
-  //! Need to implement
-  // {
-  //   type: 'filter',
-  //   icon: <Tune />,
-  //   text: 'Filter'
-  // }
 ] as const;
 
 export type SingleButtonOption = (typeof buttonMaps)[number];
@@ -105,7 +104,7 @@ const LeftSidebar = ({ imageEditor }: LeftSidebarPorps) => {
           activeButton ? 'w-[300px]' : 'w-0'
         )}
       >
-        <div className="dark:bg-darkPrimary/60 absolute inset-0 flex w-[300px] flex-col border bg-white/80 [backdrop-filter:blur(4px)] ">
+        <div className="absolute inset-0 flex w-[300px] flex-col border bg-white/95 [backdrop-filter:blur(4px)] dark:bg-darkPrimary/80 ">
           {activeButton && (
             <>
               <nav className="flex items-center justify-between border-b px-1 py-2">
