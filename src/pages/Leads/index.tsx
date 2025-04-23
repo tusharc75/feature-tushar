@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { SiConvertio } from 'react-icons/si';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -419,7 +419,7 @@ const Leads = () => {
     }
   };
 
-  const ActionMenuItems = () => {
+  const ActionMenuItems = useMemo(() => {
     return (
       <>
         <MenuItem
@@ -481,7 +481,7 @@ const Leads = () => {
         )}
       </>
     );
-  };
+  }, [permissions, selectedRecords, user?.user?._id]);
 
   return (
     <section className="main-container-v1">
@@ -514,7 +514,7 @@ const Leads = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-          actionMenuItems={<ActionMenuItems />}
+          actionMenuItems={ActionMenuItems}
           addButtonOnclick={() => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
