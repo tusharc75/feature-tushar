@@ -20,6 +20,7 @@ import PdfPreview from './ShowPdf/PdfPreview';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ImageEditor from './ImageEditor';
+import { useData } from 'src/StateProvider/Provider';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -39,6 +40,12 @@ const Diagram = ({
   fullHeight = true
 }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: {
+      user: { user }
+    }
+  }: any = useData();
 
   const [rowData, setRowData] = useState(null);
   const [expended, setExpended] = useState({});
@@ -301,10 +308,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -316,7 +324,7 @@ const Diagram = ({
                           <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
                           <Box ml={2}>
                             <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
-                              {file?.name}
+                              {file?.name} {`(${file?.createdBy?.user?.concatedName})`}
                             </Typography>
                           </Box>
                         </div>
@@ -327,13 +335,13 @@ const Diagram = ({
                                 size="small"
                                 color="inherit"
                                 aria-label="edit"
-                                disabled={!file?.canEdit}
+                                disabled={file?.canEdit}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setAttachemntDialog({ open: true, id: file?._id, isClone: false });
                                 }}
                               >
-                                <EditIcon style={{ fontSize: '18px' }} />
+                                <EditIcon style={{ fontSize: '18px' }} color={'primary'} />
                               </IconButton>
                             </HtmlTooltip>
                             <HtmlTooltip title="Clone" placement="top" arrow>
@@ -355,13 +363,14 @@ const Diagram = ({
                                 color="inherit"
                                 style={{ color: 'red' }}
                                 aria-label="delete"
+                                disabled={user?._id === file?.createdBy?.user?._id ? false : true}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedFile(file);
                                   setShowConfirmBox(true);
                                 }}
                               >
-                                <Delete style={{ fontSize: '18px' }} />
+                                <Delete style={{ fontSize: '18px' }} color={user?._id === file?.createdBy?.user?._id ? 'error' : 'disabled'} />
                               </IconButton>
                             </HtmlTooltip>
                           </div>
