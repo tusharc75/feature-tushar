@@ -132,7 +132,11 @@ const MessagePanel = ({
               resourceData={
                 selectedChannel
                   ? null
-                  : { members: [resourceData?.owner?.optionValue, ...resourceData?.collaborator?.map((c) => c?.optionValue)], title: resourceLabel }
+                  : {
+                      members: [resourceData?.owner?.optionValue, ...resourceData?.collaborator?.map((c) => c?.optionValue)],
+                      title: resourceLabel,
+                      resource: resource
+                    }
               }
             />
           </div>
