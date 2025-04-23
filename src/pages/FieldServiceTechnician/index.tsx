@@ -62,7 +62,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
                 onClick={() => {
                   handleCreateFieldTicket(
                     row?.original?.orignalData,
-                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                    data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData)
                   );
                 }}
               >
