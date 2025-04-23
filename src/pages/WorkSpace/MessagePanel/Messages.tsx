@@ -27,13 +27,14 @@ type MessagesProps = {
   channelData: ChannelData;
   type: 'messages' | 'pins';
   state: UseWorkSpace;
+  resourceData?: any | null;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state }: MessagesProps) => {
+const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state, resourceData = null }: MessagesProps) => {
   const { socket } = state;
   const {
     state: {
@@ -145,8 +146,10 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
   }, [socket, channelId, type]);
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchMessages();
+    if (channelId) {
+      setIsLoading(true);
+      fetchMessages();
+    }
   }, [channelId, type]);
 
   const handleMenuClick = (event, message: Message) => {
@@ -191,6 +194,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
                         editingMessage={editingMessage}
                         channelId={channelId}
                         socket={socket}
+                        state={state}
                         handleEditComplete={handleEditComplete}
                         setThreadDialogOpen={setThreadDialogOpen}
                         handleMenuClick={handleMenuClick}
@@ -202,6 +206,8 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
               </li>
             ))}
           </ul>
+        ) : !channelId ? (
+          <div className="flex justify-center">Start Conversession</div>
         ) : (
           <div className="p-3">
             <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
@@ -214,7 +220,8 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
         channelData={channelData}
         messageId={lastMessageSeen}
         state={state}
-        disabled={!channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
+        disabled={resourceData ? false : !channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
+        resourceData={resourceData}
       />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
@@ -245,6 +252,7 @@ type DisplaySingleMessageProps = {
   editingMessage: Message;
   channelId: string;
   socket: Socket;
+  state: UseWorkSpace;
   handleEditComplete: () => void;
   setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
@@ -259,6 +267,7 @@ export const DisplaySingleMessage = ({
   editingMessage,
   channelId,
   socket,
+  state,
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
@@ -382,6 +391,7 @@ export const DisplaySingleMessage = ({
               <SendMessage
                 channelId={channelId}
                 socket={socket}
+                state={state}
                 messageId={message._id}
                 initialMessage={message.message}
                 onEditComplete={handleEditComplete}

@@ -8,7 +8,7 @@ export const IconEventMap = {
   Email: <EmailIcon />,
   Attachment: <AttachmentIcon />,
   Calendar: <CalendarIcon />,
-  'Work Space': <WorkSpaceIcon />,
+  Collaborate: <WorkSpaceIcon />,
   Reminder: <ReminderIcon />
 } as const;
 
