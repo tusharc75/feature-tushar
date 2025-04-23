@@ -398,8 +398,8 @@ const Technicians = ({
             ...prepareDataForGrid(u)
           };
           res.index = i + 1;
-          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-          res.technicianId = u?.technician['_id'];
+          res.technicianName = u?.technician?.['firstName'] + ' ' + u?.technician?.['lastName'];
+          res.technicianId = u?.technician?.['_id'];
           res.competencyType = u?.technician?.competencyType;
           res.competencies = u?.technician?.competencies;
           return res;
@@ -467,6 +467,7 @@ const Technicians = ({
         });
         setIsDeleting(false);
         fetchData();
+        fetchserviceOrderData();
         setDeleteData(null);
       })
       .catch((error) => {
