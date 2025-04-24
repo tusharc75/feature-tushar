@@ -366,7 +366,7 @@ export default function NewCreateQuotePdfTemplate() {
               tableHeaderFontColor: importedData?.tableHeaderFontColor,
               tableHeaderFontWeight: importedData?.tableHeaderFontWeight,
               pageNumberInFooter: importedData?.pageNumberInFooter,
-              name: initialValues?.name,
+              name: initialValues?.name ? initialValues?.name : 'New',
               header: importedData?.header,
               footer: importedData?.footer,
               aboveTable: importedData?.aboveTable,
