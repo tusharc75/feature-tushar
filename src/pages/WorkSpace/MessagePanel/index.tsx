@@ -7,13 +7,23 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
-import { ChannelData, Message } from 'src/pages/WorkSpace/types';
+import { ChannelData, Member, Message } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
-  const { selectedChannel, isSidebarCollapsed, newChatToUser, toggleSidebar } = state;
+const MessagePanel = ({
+  state,
+  resource = null,
+  resourceLabel = null,
+  resourceData = null
+}: {
+  state: UseWorkSpace;
+  resource: string | null;
+  resourceLabel: string | null;
+  resourceData: any | null;
+}) => {
+  const { selectedChannel, isSidebarCollapsed, toggleSidebar } = state;
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
@@ -55,14 +65,14 @@ const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
             </HtmlTooltip>
           </div>
         )}
-        {selectedChannel || newChatToUser ? (
+        {selectedChannel || resource ? (
           <div className="flex h-[var(--h)] flex-col">
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
-                  {newChatToUser ? newChatToUser.concatedName : selectedChannel?.title}
+                  {resource && resourceLabel ? resourceLabel : selectedChannel?.title}
                 </h5>
-                {!newChatToUser && (
+                {selectedChannel && (
                   <HtmlTooltip title={'View all members'}>
                     <IconButton
                       size={'small'}
@@ -112,14 +122,22 @@ const MessagePanel = ({ state }: { state: UseWorkSpace }) => {
                 <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
               </div>
             </div>
-
             <Messages
               state={state}
-              channelId={selectedChannel?._id}
+              channelId={selectedChannel ? selectedChannel?._id : null}
               threadDialogOpen={threadDialogOpen}
               setThreadDialogOpen={setThreadDialogOpen}
               channelData={channelData}
               type={msgType}
+              resourceData={
+                selectedChannel
+                  ? null
+                  : {
+                      members: [resourceData?.owner?.optionValue, ...resourceData?.collaborator?.map((c) => c?.optionValue)],
+                      title: resourceLabel,
+                      resource: resource
+                    }
+              }
             />
           </div>
         ) : (
