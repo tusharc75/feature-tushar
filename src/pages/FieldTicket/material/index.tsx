@@ -513,7 +513,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       const material: any = [];
       if (addRentalJobDataDialog.open || addQuotationDataDialog.open || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
-          const element: any = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(e, allFields) };
+          let element: any = e;
           const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber');
           if (wellNumberField && e?.wellNumber) {
             if (wellNumberField?.type === 'multiSelect') {
@@ -530,6 +530,10 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
               }
             }
           }
+          const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
+          const calValues = autoCalculateSpecificFields(values, element, allFields);
+          Object.assign(element, calValues);
+          element = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(element, allFields) };
           if (addRentalJobDataDialog.open) {
             element.isRental = true;
           }
@@ -539,16 +543,13 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           if (addFieldServiceOrderDataDialog) {
             element.isFieldServiceOrder = true;
           }
-          element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-          element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
           material.push(element);
         });
         AddMaterial(material, null);
       } else {
         rows.forEach((d) => {
-          const element: any = {};
-          element.materialId = d._id;
-          element.type = type;
+          let element: any = {};
+          
           element.parentId = materialDialog.parentId;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -561,6 +562,9 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           }
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
           Object.assign(element, calValues);
+          element = getObjKeysWithValues(element, allFields);
+          element.materialId = d._id;
+          element.type = type;
           material.push(element);
         });
         let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
@@ -573,15 +577,16 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
+        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
-          Object.assign(element, calValues);
+          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
         } else {
-          const calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
-          Object.assign(element, calValues);
+          calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
         }
+        calValues = getObjKeysWithValues(calValues, allFields);
+        Object.assign(element, calValues);
       });
     }
     await axiosInstance()
