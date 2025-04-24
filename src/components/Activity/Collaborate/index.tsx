@@ -6,7 +6,7 @@ const Collaborate = ({ resource, resourceLabel, resourceData }) => {
   const state = useWorkSpace({ title: resourceLabel });
   return (
     <Box className="activityDetailBox overflow-x-hidden">
-      <MessagePanel state={state} resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
+      <MessagePanel state={state} resource={resource} fromSidebar={true} resourceLabel={resourceLabel} resourceData={resourceData} />
     </Box>
   );
 };

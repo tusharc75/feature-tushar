@@ -7,12 +7,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 function AssignTechnicianDialog({ technicianData, selectedResource, selectedServiceOrder, handleClose, handleSucess }) {
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
 
-  const handleAssign = () => {
+  const handleAssign = (skipDateValidation = false) => {
     const data = selectedServiceOrder?.map((ele) => {
       return {
         uniqueId: ele?.service?.uniqueId,
@@ -21,19 +23,25 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
         warehouse: ele?.warehouse,
         referenceId: ele?.resourceId,
         estimateStartDate: ele?.service?.estimateStartDate || ele?.estimateStartDate,
-        estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
+        estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate,
       };
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${selectedResource.api}/technician`, { technician: data })
+      .post(`${selectedResource.api}/technician`, { technician: data, skipDateValidation })
       .then(() => {
         handleSucess();
         setIsSubmitting(false);
+        setShowConfirmBox(false)
       })
       .catch((error) => {
+        if (skipDateValidation) {
+          toastConfig.setToastConfig(error);
+        }
+        else {
+          setShowConfirmBox(true)
+        }
         setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
       });
   };
 
@@ -53,10 +61,28 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
         <ThemeButton buttonType="transparent" onClick={handleClose}>
           Close
         </ThemeButton>
-        <ThemeButton isLoading={isSubmitting} buttonType="theme" onClick={handleAssign} disabled={isSubmitting}>
+        <ThemeButton
+          isLoading={isSubmitting}
+          buttonType="theme"
+          onClick={() => {
+            handleAssign()
+          }}
+          disabled={isSubmitting}>
           Assign
         </ThemeButton>
       </CustomDialogFooter>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={() => {
+            handleAssign(true)
+          }}
+        />
+      )}
     </Dialog>
   );
 }
