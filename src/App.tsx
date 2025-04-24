@@ -281,8 +281,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
-
-const DesktopDM = lazy(() => import('src/components/DesktopDM'));
+import DesktopDM from 'src/components/DesktopDM';
 
 var notificationInterval: any = null;
 let watchIdRef: number | null = null;
@@ -1306,7 +1305,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
+          {user && <DesktopDM />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
 

@@ -10,20 +10,19 @@ export const getPriority = (status: string = ''): TPriority => {
   if (status) {
     return priority[priorityMap[status]] as TPriority;
   }
-
   return priority[Math.floor(Math.random() * priority.length)];
 };
 
 export const getColorFromPriority = (priority): string => {
-  let color = '[border-left:5px_solid_#0273FF] dark:[border-left:5px_solid_#0273FF]';
+  let color = '[border-top:5px_solid_#0273FF] dark:[border-top:5px_solid_#0273FF]';
   if (priority === 'low') {
-    color = '[border-left:5px_solid_#0273FF] dark:[border-left:5px_solid_#0273FF]';
+    color = '[border-top:5px_solid_#0273FF] dark:[border-top:5px_solid_#0273FF]';
   }
   if (priority === 'medium') {
-    color = '[border-left:5px_solid_orange] dark:[border-left:5px_solid_orange]';
+    color = '[border-top:5px_solid_orange] dark:[border-top:5px_solid_orange]';
   }
   if (priority === 'high') {
-    color = '[border-left:5px_solid_#B66A11] dark:[border-left:5px_solid_#B66A11]';
+    color = '[border-top:5px_solid_#B66A11] dark:[border-top:5px_solid_#B66A11]';
   }
   return `${color} ${priority}`;
 };
