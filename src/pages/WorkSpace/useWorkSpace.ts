@@ -4,6 +4,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useSocket } from 'src/hooks/useSocket';
 import { TChannel, TChat } from 'src/pages/WorkSpace/types';
 import { useData } from 'src/StateProvider/Provider';
+import { useLocation, useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 
 type UseWorkSpaceActions =
   | { action: 'setIsSidebarCollapsed'; payload: UseWorkSpaceState['isSidebarCollapsed'] }
@@ -60,9 +62,13 @@ type WorkSpaceProps = {
 };
 
 export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
+  const location = useLocation();
+  const parsedParams = queryString.parse(location.search);
+  const history = useHistory();
   const {
     state: {
       user: { user },
+      permissions,
       resources
     }
   } = useData();
@@ -87,8 +93,10 @@ export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
             return d;
           }
         });
+
         setState({ action: 'setAllChannels', payload: newAllChannels });
       }
+      history.push(`?channel=${payload.title}`);
       setState({ action: 'setSelectedChannel', payload });
     },
     [state.allChannels]
@@ -203,6 +211,15 @@ export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
     };
   }, [socket, state.newDirectMessageChannelId]);
 
+  useEffect(() => {
+    if (parsedParams.channel && !state.selectedChannel) {
+      const channelData = state.allChannels?.find((c) => c.title === parsedParams.channel);
+      if (channelData) {
+        initChat(channelData);
+      }
+    }
+  }, [parsedParams.channel, state.allChannels, state.selectedChannel]);
+
   const handleDeleteChannels = useCallback(async (channelIds: string[]) => {
     await axiosInstance().delete('/work-space/channel', { data: { _ids: channelIds } });
     fetchChannelsAndChats();
@@ -225,7 +242,8 @@ export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
     setEditCreateChannelDialogData,
     setCurrentDeletingChannelId,
     setState,
-    setSelectedResource
+    setSelectedResource,
+    permissions
   };
 };
 
