@@ -42,43 +42,35 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
   );
 }
 
-type DataObject = {
-  _id: string;
-  startDate: string;
-  endDate: string;
-  overlapCount?: number;
-};
-
-function addOverlapCount(dataList: DataObject[]): DataObject[] {
-  // Clone the dataList to ensure no mutations to the original array
+function addOverlapCount(dataList) {
   const newDataList = dataList ? [...dataList] : [];
 
   for (let i = 0; i < newDataList.length; i++) {
-    newDataList[i]['overlapCount'] = 0; // Ensure default is set
-  }
+    newDataList[i]['overlapCount'] = 0;
+    newDataList[i]['overlapIndex'] = 0;
 
-  // Calculate overlaps
-  for (let i = 0; i < newDataList.length; i++) {
     const obj1 = newDataList[i];
-    const start1 = dayjs(obj1.startDate);
-    const end1 = dayjs(obj1.endDate);
-
+    const start1 = dayjs(obj1.startDate || obj1.reference?.estimateStartDate);
+    const end1 = dayjs(obj1.endDate || obj1.reference?.estimateEndDate);
+    let index = -1;
     for (let j = 0; j < newDataList.length; j++) {
-      if (i !== j) {
-        const obj2 = newDataList[j];
-        const start2 = dayjs(obj2.startDate);
-        const end2 = dayjs(obj2.endDate);
-
-        console.log('Parsed Date 1:', new Date(obj1.startDate), obj1.startDate);
-        console.log('Parsed Date 2:', new Date(obj2.startDate), obj2.startDate);
-        // Check for overlaps in both directions
-        if (start1.isBefore(end2) && end1.isAfter(start2)) {
-          newDataList[i].overlapCount++; // Increment overlapCount for obj1
-        }
+      let intersecting = false;
+      const obj2 = newDataList[j];
+      const start2 = dayjs(obj2.startDate || obj2.reference?.estimateStartDate);
+      const end2 = dayjs(obj2.endDate || obj2.reference?.estimateEndDate);
+      // Check for overlaps in both directions
+      if (start1.isBefore(end2) && end1.isAfter(start2)) {
+        intersecting = true;
+        index++;
+      }
+      if (i !== j && intersecting) {
+        newDataList[i].overlapCount++;
+        newDataList[i].overlapIndex = index;
+        console.log(index);
       }
     }
   }
-
+  console.log(newDataList);
   return newDataList; // Return the updated list with overlap counts
 }
 
@@ -91,14 +83,7 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
       accepts: ['sidebar']
     }
   });
-  const [newServices, setNewServices] = useState(null);
-
-  useEffect(() => {
-    if (services && services.length > 0) {
-      // const newData = addOverlapCount(services); // Process services
-      setNewServices(services); // Update state
-    }
-  }, [services]);
+  const newServices = addOverlapCount(services);
 
   return (
     <>
@@ -202,6 +187,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
     }
   };
 
+  const height = 79 / ((service.overlapCount || 0) + 1);
+
   return (
     <>
       <div style={{ ...pos }} className="absolute" onMouseLeave={handleMouseLeve}>
@@ -220,9 +207,9 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               onMouseEnter={handleMouseEnter}
               onMouseMove={handleMouseMove}
               // onMouseLeave={handleMouseLeve}
-              style={{ height: `${80 / ((service.overlapCount || 0) + 1)}px` }}
+              style={{ height: `${height}px`, marginTop: service.overlapIndex > 0 ? `${(height + 1) * (service.overlapIndex || 0) + 5}px` : 5 }}
               className={cn(
-                `singlePriority mt-[5px] flex w-full cursor-pointer rounded-md border bg-gray-100/60 text-left dark:bg-gray-900/60`,
+                `singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100/60 text-left dark:bg-gray-900/60`,
                 bgColor,
                 isPopupOpened ? 'outline-2 outline-offset-0 outline-theme' : ''
               )}
@@ -230,58 +217,62 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               <div className="block min-w-0 max-w-full flex-grow overflow-hidden p-2">
                 <>
                   <p className="mb-1 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
-                  <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
-                    <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
-                  </p>
-                  <div className="-ml-[2px] flex">
-                    {service?.referenceType === sidebarResource.fieldServiceOrder &&
-                      [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(service?.status) && (
-                        <HtmlTooltip title="Dispatch">
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelect(null, service, 'dispatch');
-                              handleClosePopup();
-                            }}
-                            size="small"
-                            color="primary"
-                          >
-                            <RiUserShared2Fill size={18} />
-                          </IconButton>
-                        </HtmlTooltip>
-                      )}
-                    {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
-                      <HtmlTooltip title="Return">
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelect(null, service, 'return');
-                            handleClosePopup();
-                          }}
-                          size="small"
-                          color="primary"
-                        >
-                          <RiArrowGoBackFill size={18} />
-                        </IconButton>
-                      </HtmlTooltip>
-                    )}
-                    {service?.status === TECHNICIAN_STATUS.reserved && (
-                      <HtmlTooltip title="Un-Assign">
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelect(null, { _id: service?._id }, 'un-assign');
-                            handleClosePopup();
-                          }}
-                          size="small"
-                          color="error"
-                        >
-                          <DeleteOutline fontSize="small" />
-                        </IconButton>
-                      </HtmlTooltip>
-                    )}
-                  </div>
+                  {service.overlapCount === 0 && (
+                    <>
+                      <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                        <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+                        <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
+                      </p>
+                      <div className="-ml-[2px] flex">
+                        {service?.referenceType === sidebarResource.fieldServiceOrder &&
+                          [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(service?.status) && (
+                            <HtmlTooltip title="Dispatch">
+                              <IconButton
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelect(null, service, 'dispatch');
+                                  handleClosePopup();
+                                }}
+                                size="small"
+                                color="primary"
+                              >
+                                <RiUserShared2Fill size={18} />
+                              </IconButton>
+                            </HtmlTooltip>
+                          )}
+                        {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
+                          <HtmlTooltip title="Return">
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelect(null, service, 'return');
+                                handleClosePopup();
+                              }}
+                              size="small"
+                              color="primary"
+                            >
+                              <RiArrowGoBackFill size={18} />
+                            </IconButton>
+                          </HtmlTooltip>
+                        )}
+                        {service?.status === TECHNICIAN_STATUS.reserved && (
+                          <HtmlTooltip title="Un-Assign">
+                            <IconButton
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelect(null, { _id: service?._id }, 'un-assign');
+                                handleClosePopup();
+                              }}
+                              size="small"
+                              color="error"
+                            >
+                              <DeleteOutline fontSize="small" />
+                            </IconButton>
+                          </HtmlTooltip>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </>
               </div>
             </RippleButton>

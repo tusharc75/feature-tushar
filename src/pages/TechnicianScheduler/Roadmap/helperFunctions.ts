@@ -14,15 +14,15 @@ export const getPriority = (status: string = ''): TPriority => {
 };
 
 export const getColorFromPriority = (priority): string => {
-  let color = '[border-top:5px_solid_#0273FF] dark:[border-top:5px_solid_#0273FF]';
+  let color = '[border-left:5px_solid_#0273FF] dark:[border-left:5px_solid_#0273FF]';
   if (priority === 'low') {
-    color = '[border-top:5px_solid_#0273FF] dark:[border-top:5px_solid_#0273FF]';
+    color = '[border-left:5px_solid_#0273FF] dark:[border-left:5px_solid_#0273FF]';
   }
   if (priority === 'medium') {
-    color = '[border-top:5px_solid_orange] dark:[border-top:5px_solid_orange]';
+    color = '[border-left:5px_solid_orange] dark:[border-left:5px_solid_orange]';
   }
   if (priority === 'high') {
-    color = '[border-top:5px_solid_#B66A11] dark:[border-top:5px_solid_#B66A11]';
+    color = '[border-left:5px_solid_#B66A11] dark:[border-left:5px_solid_#B66A11]';
   }
   return `${color} ${priority}`;
 };
