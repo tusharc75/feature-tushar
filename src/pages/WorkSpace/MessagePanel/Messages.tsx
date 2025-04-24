@@ -215,6 +215,7 @@ const Messages = ({
                         setThreadDialogOpen={setThreadDialogOpen}
                         handleMenuClick={handleMenuClick}
                         channelData={channelData}
+                        fromSidebar={fromSidebar}
                       />
                     );
                   })}
@@ -236,7 +237,7 @@ const Messages = ({
         channelData={channelData}
         messageId={lastMessageSeen}
         state={state}
-        disabled={resourceData ? false : !channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
+        disabled={fromSidebar ? false : !channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
         resourceData={resourceData}
       />
       <MoreMenuAndDeleteConfirmDialog
@@ -275,6 +276,7 @@ type DisplaySingleMessageProps = {
   messageTimeFormatter?: (string) => string;
   channelData: ChannelData;
   type?: 'messages' | 'pins';
+  fromSidebar?: boolean;
 };
 
 export const DisplaySingleMessage = ({
@@ -289,7 +291,8 @@ export const DisplaySingleMessage = ({
   handleMenuClick,
   messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
   channelData,
-  type = 'messages'
+  type = 'messages',
+  fromSidebar = false
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
@@ -413,7 +416,7 @@ export const DisplaySingleMessage = ({
                 onEditComplete={handleEditComplete}
                 editorId={`sone`}
                 channelData={channelData}
-                disabled={!channelData?.members.some((d) => d.optionValue === user?._id)}
+                disabled={fromSidebar ? false : !channelData?.members.some((d) => d.optionValue === user?._id)}
               />
             ) : (
               <>
