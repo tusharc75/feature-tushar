@@ -89,6 +89,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
   const isHoverPaused = useRef(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
+  const scrollContainer = useRef<HTMLElement>(null);
 
   const priority = getPriority(service.status);
   const bgColor = getColorFromPriority(priority);
@@ -110,8 +111,10 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
       const rect = target?.getBoundingClientRect();
       const x = e.clientX;
       const relativeX = x - rect.left;
-
-      const isTopColliding = isCollidingOnTop(popupRef.current, getScrollContainer(e.currentTarget));
+      if (!scrollContainer.current) {
+        scrollContainer.current = getScrollContainer(e.currentTarget);
+      }
+      const isTopColliding = isCollidingOnTop(popupRef.current, scrollContainer.current);
 
       requestAnimationFrame(() => {
         if (popupRef.current && !popupRef.current.contains(e.target as HTMLElement)) {
