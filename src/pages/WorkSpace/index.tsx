@@ -24,7 +24,7 @@ const Workspace = ({ fromSidebar = false }: { fromSidebar?: boolean }) => {
             )}
           >
             <Sidebar state={state} />
-            <MessagePanel state={state} fromSidebar={fromSidebar} fromSidebar={fromSidebar} />
+            <MessagePanel state={state} fromSidebar={fromSidebar} />
           </div>
         </CustomContainer>
         {state.editCreateChannelDialogData.open && (

@@ -66,6 +66,24 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
   );
 });
 
+function getScrollContainer(element: HTMLElement) {
+  let parent = element.parentElement;
+  while (parent) {
+    const style = window.getComputedStyle(parent);
+    const overflowY = style.overflowY;
+    if (overflowY === 'scroll' || overflowY === 'auto') {
+      return parent;
+    }
+    parent = parent.parentElement;
+  }
+  return document.documentElement;
+}
+function isCollidingOnTop(element: HTMLElement, container: HTMLElement) {
+  const elementRect = element.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+
+  return elementRect.top <= containerRect.top && elementRect.bottom > containerRect.top;
+}
 const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any) => {
   const [isPopupOpened, setIsPopupOpened] = useState(false);
   const isHoverPaused = useRef(false);
@@ -93,12 +111,17 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
       const x = e.clientX;
       const relativeX = x - rect.left;
 
+      const isTopColliding = isCollidingOnTop(popupRef.current, getScrollContainer(e.currentTarget));
+
       requestAnimationFrame(() => {
         if (popupRef.current && !popupRef.current.contains(e.target as HTMLElement)) {
           const div = popupRef.current;
-
           const divRect = div.getBoundingClientRect();
           div.style.left = `${relativeX - divRect.width * 0.5}px`;
+          if (isTopColliding) {
+            div.style.bottom = '';
+            div.style.top = '100%';
+          }
         }
       });
       // setAnchorPosition({ left: x, top: rect.top + rect.height });
@@ -108,6 +131,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
   );
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    handleMouseEnter();
     handleMouseMove(e);
     isHoverPaused.current = true;
   };
@@ -204,7 +228,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               </div>
             </RippleButton>
             {isPopupOpened && (
-              <div className="pointer-events-auto absolute bottom-full" ref={popupRef}>
+              <div className="pointer-events-auto absolute bottom-full z-50" ref={popupRef}>
                 <div className="w-[260px] rounded-md bg-[--dark-primary,white] p-3 shadow-md ">
                   <div className="mb-1 flex items-center gap-1">
                     <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
