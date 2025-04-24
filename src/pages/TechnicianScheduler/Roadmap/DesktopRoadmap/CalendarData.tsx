@@ -164,7 +164,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               // onMouseLeave={handleMouseLeve}
               style={{ height: `${height}px` }}
               className={cn(
-                `singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100/50 text-left dark:bg-gray-900`,
+                `singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100 text-left dark:bg-gray-900`,
                 bgColor,
                 isHoverPaused && isPopupOpened ? 'outline-2 outline-offset-0 outline-theme' : ''
               )}
