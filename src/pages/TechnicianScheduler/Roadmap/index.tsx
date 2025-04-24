@@ -50,7 +50,8 @@ function Roadmap({
   }, [filter.view, refreshRoadMap, selectedResource]);
 
   const fetchRoadmap = async () => {
-    await axiosInstance().get(`/technician-scheduler/get-schedule?resource=${selectedResource.resource}`)
+    await axiosInstance()
+      .get(`/technician-scheduler/get-schedule?resource=${selectedResource.resource}`)
       .then(({ data: { data } }) => {
         setActivity(data);
       });
@@ -68,9 +69,23 @@ function Roadmap({
     } else if (type === 'un-assign') {
       handleUnAssignTechnician(data);
     } else if (type === 'dispatch') {
-      setStartEndDateConfermationDialog({ open: true, type: 'start', referenceId: data?.referenceId, minDateTime: data?.endDate || null, notes: '', _id: data?._id });
+      setStartEndDateConfermationDialog({
+        open: true,
+        type: 'start',
+        referenceId: data?.referenceId,
+        minDateTime: data?.endDate || null,
+        notes: '',
+        _id: data?._id
+      });
     } else if (type === 'return') {
-      setStartEndDateConfermationDialog({ open: true, type: 'stop', referenceId: data?.referenceId, minDateTime: data?.startDate, notes: data?.notes, _id: data?._id });
+      setStartEndDateConfermationDialog({
+        open: true,
+        type: 'stop',
+        referenceId: data?.referenceId,
+        minDateTime: data?.startDate,
+        notes: data?.notes,
+        _id: data?._id
+      });
     }
   };
 
@@ -87,19 +102,22 @@ function Roadmap({
     }
     if (values?.notes) value.notes = values?.notes;
     setIsSubmitting(true);
-    axiosInstance().put(`${selectedResource.api}/technician/start-end-date`, value).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .put(`${selectedResource.api}/technician/start-end-date`, value)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setStartEndDateConfermationDialog({ open: false, type: null, referenceId: null, minDateTime: null, notes: '', _id: null });
+        fetchRoadmap();
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-      setStartEndDateConfermationDialog({ open: false, type: null, referenceId: null, minDateTime: null, notes: '', _id: null });
-      fetchRoadmap()
-      setIsSubmitting(false)
-    }).catch((error) => {
-      setIsSubmitting(false)
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
