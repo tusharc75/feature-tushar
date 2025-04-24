@@ -351,6 +351,8 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     if (addQuotationDataDialog) {
       rows?.forEach((e: any) => {
         const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(e, allFields) };
+        element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
+        element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
         material.push(element);
       });
       AddMaterial(material, null);
