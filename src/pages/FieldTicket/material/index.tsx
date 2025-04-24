@@ -549,8 +549,6 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       } else {
         rows.forEach((d) => {
           let element: any = {};
-          
-          element.parentId = materialDialog.parentId;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -565,6 +563,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           element = getObjKeysWithValues(element, allFields);
           element.materialId = d._id;
           element.type = type;
+          element.parentId = materialDialog.parentId;
           material.push(element);
         });
         let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
