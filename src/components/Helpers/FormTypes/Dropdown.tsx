@@ -177,7 +177,7 @@ const bindPricingConditionOptions = (field, values) => {
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
 
-  if (fieldData?.fieldName === 'pricingCondition') {
+  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse'].every((name) => fields?.some((f) => f?.fieldName === name))) {
     return bindPricingConditionOptions(fieldData, values);
   }
   const lookupDependentOn = fieldData?.lookupDependentOn;
