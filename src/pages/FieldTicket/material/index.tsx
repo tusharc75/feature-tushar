@@ -539,6 +539,8 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           if (addFieldServiceOrderDataDialog) {
             element.isFieldServiceOrder = true;
           }
+          element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+          element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
           material.push(element);
         });
         AddMaterial(material, null);
