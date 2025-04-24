@@ -1,17 +1,31 @@
 import { ArrowDropDown, ArrowDropUp, MoreVert } from '@mui/icons-material';
-import { Collapse, IconButton, List, ListItemButton, ListItemText, Menu, MenuItem } from '@mui/material';
+import { Autocomplete, Collapse, IconButton, List, ListItemButton, ListItemText, Menu, MenuItem, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { cn } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, cn } from 'src/constants/helpers';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { useData } from 'src/StateProvider/Provider';
 
 const Channels = ({ state }: { state: UseWorkSpace }) => {
-  const { channels, mobScreen, initChat, handleDeleteChannels, selectedChannel, setEditCreateChannelDialogData } = state;
+  const {
+    channels,
+    mobScreen,
+    initChat,
+    handleDeleteChannels,
+    selectedChannel,
+    setEditCreateChannelDialogData,
+    selectedResource,
+    setSelectedResource
+  } = state;
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const [filteredChannels, setFilteredChannels] = useState(channels);
   const [searchValue, setSearchValue] = useState('');
@@ -21,6 +35,13 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
   useEffect(() => {
     setFilteredChannels(channels);
   }, [channels]);
+
+  const resourceOptions = [
+    {
+      optionValue: ACTIVITY_RESOURCE.rentalManagement,
+      optionLabel: resources?.rentalManagement?.titlePlural
+    }
+  ];
 
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
@@ -44,6 +65,21 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
 
   return (
     <>
+      <Autocomplete
+        fullWidth
+        className="max-w-[300px]"
+        options={resourceOptions}
+        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+        onChange={(e, val: any) => {
+          setSelectedResource(val?.optionValue);
+        }}
+        size={'small'}
+        value={resourceOptions?.find((r: any) => r?.optionValue === selectedResource)}
+        filterSelectedOptions={true}
+        renderInput={(params) => (
+          <TextField {...params} margin="none" size={'small'} name="resource" label="Select Resource" variant="outlined" fullWidth />
+        )}
+      />
       <SearchBox value={searchValue} onChange={handleFilter} />
       <div className=" relative">
         <ThemeButton

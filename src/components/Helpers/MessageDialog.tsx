@@ -36,12 +36,15 @@ export default function MessageDialog({ onClose, open, message, header = 'Messag
       id="confirmation-dialog"
       keepMounted
     >
-      <DialogTitle id="confirmation-dialog-title" className="text-white">
+      <DialogTitle
+        id="confirmation-dialog-title "
+        className="flex min-h-[54px] items-center justify-between bg-[#1c1c31] px-4 py-2 text-white dark:bg-[#1a1a26]"
+      >
         {header}
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>
-        <ThemeButton buttonType='transparent' onClick={onClose}>
+        <ThemeButton buttonType="transparent" onClick={onClose}>
           Close
         </ThemeButton>
       </DialogActions>

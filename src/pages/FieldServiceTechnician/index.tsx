@@ -37,6 +37,7 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import FieldTicketDetailView from 'src/pages/FieldServiceTechnician/FieldTicketDetailView';
+import { isMobile } from 'react-device-detect';
 
 type Views = 'card' | 'table';
 
@@ -62,7 +63,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
                 onClick={() => {
                   handleCreateFieldTicket(
                     row?.original?.orignalData,
-                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                    data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData)
                   );
                 }}
               >
@@ -240,7 +241,11 @@ const FieldServiceTechnician = () => {
             if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
               handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress);
             }
-            window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+            if (isMobile) {
+              window.location.href = `${routes.fieldTicketDetail.path}/${data?.data?._id}`;
+            } else {
+              window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+            }
             toastConfig.setToastConfig({
               open: true,
               type: 'success',

@@ -15,7 +15,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
 type ViewMembersProps = {
-  selectedChannel: TChannel | null;
+  selectedChannel: Partial<TChannel> | null;
   fetchChannelData: () => void;
   channelData: ChannelData | null;
   handleClose: () => void;
@@ -55,111 +55,110 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
     setMembers(newMembers);
   };
 
-
-
-  return (<>
-    <Dialog
-      maxWidth="sm"
-      fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-      fullWidth
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          handleClose()
-        }
-      }}
-    >
-      <CustomDialogHeader
-        onClose={handleClose}
-        title={channelData?.title}
-        isMinimized={!fullScreen}
-        onMinimizeMaximize={() => {
-          setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-        showRequiredLabel={false}
-      />
-      <CustomDialogContent isFooterPresent={false}>
-        <div className="sticky -top-[16px] mt-1 z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
-          <TextField
-            size="small"
-            id="search-member"
-            type="search"
-            label="Search.."
-            variant="outlined"
-            value={searchTerm}
-            onChange={handleSearch}
-            fullWidth
-            autoFocus
-          />
-          {selectedChannel?.isOwner && (
-            <HtmlTooltip title={`Add Members`}>
-              <IconButton
-                size="small"
-                style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
-                onClick={() => setIsAddMemberDialogOpen(true)}
-              >
-                <Add />
-              </IconButton>
-            </HtmlTooltip>
-          )}
-        </div>
-        <ul className={'mt-4  space-y-2 overflow-y-auto'}>
-          {members?.map((member) => (
-            <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
-              <div className="flex items-center gap-2">
-                <Avatar
-                  style={{
-                    width: 25,
-                    height: 25,
-                    borderRadius: '999px',
-                    fontSize: 12,
-                    ...getAvatarColor(member?.optionLabel, themeColor)
-                  }}
-                  variant="rounded"
-                  className="my-[2px] uppercase "
-                  src={member.avatar}
-                >
-                  {member?.optionLabel.match(/(\b\S)?/g).join('')}
-                </Avatar>
-                <span>{member.optionLabel}</span>
-              </div>
-              {selectedChannel?.isOwner && selectedChannel?.createdBy?.user !== member?.optionValue && (
-                <HtmlTooltip title={'Remove'}>
-                  <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
-                    <RemoveCircleOutline color="error" />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
-            </ListItem>
-          ))}
-        </ul>
-      </CustomDialogContent>
-    </Dialog>
-    {isAddMemberDialogOpen && (
-      <AddMemberDialog
-        channelId={selectedChannel._id}
-        ignoreIds={channelData?.members?.map((member) => member.optionValue)}
-        onClose={() => setIsAddMemberDialogOpen(false)}
-        onSuccess={fetchChannelData}
-      />
-    )}
-    {confirmDialog.open && (
-      <ConfirmationDialog
+  return (
+    <>
+      <Dialog
+        maxWidth="sm"
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
         open={true}
-        message={`Are you sure you want to remove ${confirmDialog.data?.optionLabel}?`}
-        onClose={() => {
-          setConfirmDialog({ open: false, data: null });
+        fullWidth
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+            handleClose();
+          }
         }}
-        onOk={() => {
-          handleRemoveMember(confirmDialog.data?.optionValue);
-          setConfirmDialog({ open: false, data: null });
-        }}
-      />
-    )}
-  </>
+      >
+        <CustomDialogHeader
+          onClose={handleClose}
+          title={channelData?.title}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+          showRequiredLabel={false}
+        />
+        <CustomDialogContent isFooterPresent={false}>
+          <div className="sticky -top-[16px] z-10 mt-1 flex items-center gap-2 bg-[var(--dark-primary,white)]">
+            <TextField
+              size="small"
+              id="search-member"
+              type="search"
+              label="Search.."
+              variant="outlined"
+              value={searchTerm}
+              onChange={handleSearch}
+              fullWidth
+              autoFocus
+            />
+            {selectedChannel?.isOwner && (
+              <HtmlTooltip title={`Add Members`}>
+                <IconButton
+                  size="small"
+                  style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
+                  onClick={() => setIsAddMemberDialogOpen(true)}
+                >
+                  <Add />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          </div>
+          <ul className={'mt-4  space-y-2 overflow-y-auto'}>
+            {members?.map((member) => (
+              <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    style={{
+                      width: 25,
+                      height: 25,
+                      borderRadius: '999px',
+                      fontSize: 12,
+                      ...getAvatarColor(member?.optionLabel, themeColor)
+                    }}
+                    variant="rounded"
+                    className="my-[2px] uppercase "
+                    src={member.avatar}
+                  >
+                    {member?.optionLabel.match(/(\b\S)?/g).join('')}
+                  </Avatar>
+                  <span>{member.optionLabel}</span>
+                </div>
+                {selectedChannel?.isOwner && selectedChannel?.createdBy?.user !== member?.optionValue && (
+                  <HtmlTooltip title={'Remove'}>
+                    <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
+                      <RemoveCircleOutline color="error" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </ListItem>
+            ))}
+          </ul>
+        </CustomDialogContent>
+      </Dialog>
+      {isAddMemberDialogOpen && (
+        <AddMemberDialog
+          channelId={selectedChannel._id}
+          ignoreIds={channelData?.members?.map((member) => member.optionValue)}
+          onClose={() => setIsAddMemberDialogOpen(false)}
+          onSuccess={fetchChannelData}
+        />
+      )}
+      {confirmDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message={`Are you sure you want to remove ${confirmDialog.data?.optionLabel}?`}
+          onClose={() => {
+            setConfirmDialog({ open: false, data: null });
+          }}
+          onOk={() => {
+            handleRemoveMember(confirmDialog.data?.optionValue);
+            setConfirmDialog({ open: false, data: null });
+          }}
+        />
+      )}
+    </>
   );
 };
 
