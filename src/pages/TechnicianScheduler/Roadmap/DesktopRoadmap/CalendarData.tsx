@@ -78,11 +78,11 @@ function getScrollContainer(element: HTMLElement) {
   }
   return document.documentElement;
 }
-function isCollidingOnTop(element: HTMLElement, container: HTMLElement) {
+function isCollidingOnTop(element: HTMLElement, container: HTMLElement, topOffset = 0) {
   const elementRect = element.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
 
-  return elementRect.top <= containerRect.top && elementRect.bottom > containerRect.top;
+  return elementRect.top <= containerRect.top + topOffset && elementRect.bottom > containerRect.top;
 }
 const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any) => {
   const [isPopupOpened, setIsPopupOpened] = useState(false);
@@ -114,7 +114,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
       if (!scrollContainer.current) {
         scrollContainer.current = getScrollContainer(e.currentTarget);
       }
-      const isTopColliding = isCollidingOnTop(popupRef.current, scrollContainer.current);
+      const isTopColliding = isCollidingOnTop(popupRef.current, scrollContainer.current, 50);
 
       requestAnimationFrame(() => {
         if (popupRef.current && !popupRef.current.contains(e.target as HTMLElement)) {
@@ -231,8 +231,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               </div>
             </RippleButton>
             {isPopupOpened && (
-              <div className="pointer-events-auto absolute bottom-full z-50" ref={popupRef}>
-                <div className="w-[260px] rounded-md bg-[--dark-primary,white] p-3 shadow-md ">
+              <div className="pointer-events-auto absolute bottom-full z-10" ref={popupRef}>
+                <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
                   <div className="mb-1 flex items-center gap-1">
                     <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
                     <IconButton
