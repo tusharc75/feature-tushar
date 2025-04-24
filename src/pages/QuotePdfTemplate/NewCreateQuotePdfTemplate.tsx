@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '10px'
-  },
+  }
 }));
 
 export default function NewCreateQuotePdfTemplate() {
@@ -273,17 +273,21 @@ export default function NewCreateQuotePdfTemplate() {
             tabelSummaryLeftSide: data?.tabelSummaryLeftSide
           });
           if (tempQuoteData?._id) {
-            setIsEdit(true)
+            setIsEdit(true);
             setAllowedToEdit(true);
           } else {
-            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotePdfTemplate, {
-              owner: {
-                optionValue: initialValues.owner,
-              },
-              collaborator: initialValues.collaborator?.map((e) => { return { optionValue: e } })
-            }));
+            setAllowedToEdit(
+              checkIsAllowedToEdit(user, sidebarResource.quotePdfTemplate, {
+                owner: {
+                  optionValue: initialValues.owner
+                },
+                collaborator: initialValues.collaborator?.map((e) => {
+                  return { optionValue: e };
+                })
+              })
+            );
             if (isClone) {
-              setIsEdit(true)
+              setIsEdit(true);
             }
           }
         } catch (e) {
@@ -362,7 +366,7 @@ export default function NewCreateQuotePdfTemplate() {
               tableHeaderFontColor: importedData?.tableHeaderFontColor,
               tableHeaderFontWeight: importedData?.tableHeaderFontWeight,
               pageNumberInFooter: importedData?.pageNumberInFooter,
-              name: initialValues?.name ? initialValues?.initialValues?.name : 'New',
+              name: initialValues?.name ? initialValues?.name : 'New',
               header: importedData?.header,
               footer: importedData?.footer,
               aboveTable: importedData?.aboveTable,
@@ -442,48 +446,51 @@ export default function NewCreateQuotePdfTemplate() {
     }
 
     if (id === '0' || isClone === true) {
-      axiosInstance().post('/quote-pdf-template', {
-        ...details,
-        name: trimmedName,
-        pageNumberInFooter: values.pageNumberInFooter,
-        entity: values?.entity,
-        type: values?.type,
-        owner: values?.owner,
-        collaborator: values?.collaborator,
-        landscape: values?.landscape,
-        hideAmountTotalSection: values?.hideAmountTotalSection,
-        tableTotalAtBottom: values?.tableTotalAtBottom,
-        tableFontSize: parseInt(values?.tableFontSize),
-        belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
-        pdfFontSize: parseInt(values?.pdfFontSize),
-        tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
-        tableHeaderFontColor: values?.tableHeaderFontColor,
-        tableHeaderFontWeight: values?.tableHeaderFontWeight
-      }).then(({ data: { data, message } }) => {
-        if (isPreview === true) {
-          previewPdfTemplate(data._id);
-          setIsUpdatingAndPreview(false);
-          history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
-        } else {
-          if (isBreakCrumbPath) {
-            history.push({ pathname: isBreakCrumbPath });
-          } else {
+      axiosInstance()
+        .post('/quote-pdf-template', {
+          ...details,
+          name: trimmedName,
+          pageNumberInFooter: values.pageNumberInFooter,
+          entity: values?.entity,
+          type: values?.type,
+          owner: values?.owner,
+          collaborator: values?.collaborator,
+          landscape: values?.landscape,
+          hideAmountTotalSection: values?.hideAmountTotalSection,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
+          tableFontSize: parseInt(values?.tableFontSize),
+          belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
+          pdfFontSize: parseInt(values?.pdfFontSize),
+          tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
+          tableHeaderFontColor: values?.tableHeaderFontColor,
+          tableHeaderFontWeight: values?.tableHeaderFontWeight
+        })
+        .then(({ data: { data, message } }) => {
+          if (isPreview === true) {
+            previewPdfTemplate(data._id);
+            setIsUpdatingAndPreview(false);
             history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+          } else {
+            if (isBreakCrumbPath) {
+              history.push({ pathname: isBreakCrumbPath });
+            } else {
+              history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
+            }
+            setIsUpdating(false);
+            setIsEdit(false);
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: message
+            });
           }
+        })
+        .catch((error) => {
           setIsUpdating(false);
+          setIsUpdatingAndPreview(false);
           setIsEdit(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        }
-      }).catch((error) => {
-        setIsUpdating(false);
-        setIsUpdatingAndPreview(false);
-        setIsEdit(false);
-        toastConfig.setToastConfig(error);
-      });
+          toastConfig.setToastConfig(error);
+        });
     } else {
       let api = quoteData
         ? `${queryParams.quotation ? quotation.api : '/quote-builder'}/pdf-template/${quoteData._id}/${version}`
@@ -595,27 +602,15 @@ export default function NewCreateQuotePdfTemplate() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {isEdit && (
-                    <ThemeButton
-                      disabled={isUpdating || !allowedToEdit}
-                      onClick={handleImport}
-                      isLoading={isUpdating}
-                    >
+                    <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={handleImport} isLoading={isUpdating}>
                       Import
                     </ThemeButton>
                   )}
-                  <ThemeButton
-                    disabled={isUpdating}
-                    onClick={handleExport}
-                    isLoading={isUpdating}>
+                  <ThemeButton disabled={isUpdating} onClick={handleExport} isLoading={isUpdating}>
                     Export
                   </ThemeButton>
                   {isEdit && (
-                    <ThemeButton
-                      disabled={isUpdating || !allowedToEdit}
-                      onClick={submitForm}
-                      buttonType="theme"
-                      isLoading={isUpdating}
-                    >
+                    <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={submitForm} buttonType="theme" isLoading={isUpdating}>
                       Save
                     </ThemeButton>
                   )}
@@ -626,7 +621,7 @@ export default function NewCreateQuotePdfTemplate() {
                   )}
                   {!quoteData && isEdit && (
                     <ThemeButton
-                      disabled={(!isClone && (isUpdatingAndPreview || !allowedToEdit))}
+                      disabled={!isClone && (isUpdatingAndPreview || !allowedToEdit)}
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
@@ -659,7 +654,7 @@ export default function NewCreateQuotePdfTemplate() {
                           <Grid container spacing={2}>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                               <TextField
-                                disabled={((!allowedToEdit || Boolean(quoteData?._id))) || !isEdit}
+                                disabled={!allowedToEdit || Boolean(quoteData?._id) || !isEdit}
                                 variant="outlined"
                                 type="text"
                                 label="PDF Template Name"
@@ -725,10 +720,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -762,10 +757,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -801,10 +796,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -1025,13 +1020,13 @@ export default function NewCreateQuotePdfTemplate() {
                     </Grid>
                   </Grid>
                   {allFields?.length && id && id !== '0' && (
-                    <div className="flex justify-end mt-2">
+                    <div className="mt-2 flex justify-end">
                       <ThemeButton onClick={() => setVariableDialog(true)}>Variables</ThemeButton>
                     </div>
                   )}
                   <div className="mt-2 flex flex-col gap-2">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography variant='h6'>Header</Typography>
+                      <Typography variant="h6">Header</Typography>
                       <TinyMce
                         disabledEditor={!allowedToEdit || !isEdit}
                         id="header"
@@ -1052,7 +1047,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography variant='h6'>Above Table</Typography>
+                      <Typography variant="h6">Above Table</Typography>
                       <TinyMce
                         disabledEditor={!allowedToEdit || !isEdit}
                         id="aboveTable"
@@ -1071,7 +1066,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography variant='h6'>Below Table</Typography>
+                      <Typography variant="h6">Below Table</Typography>
                       <TinyMce
                         disabledEditor={!allowedToEdit || !isEdit}
                         id="belowTable"
@@ -1090,7 +1085,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography variant='h6'>Footer </Typography>
+                      <Typography variant="h6">Footer </Typography>
                       <TinyMce
                         disabledEditor={!allowedToEdit || !isEdit}
                         id="footer"
@@ -1110,9 +1105,7 @@ export default function NewCreateQuotePdfTemplate() {
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography variant='h6'>
-                        Tabel Summary Left Side
-                      </Typography>
+                      <Typography variant="h6">Tabel Summary Left Side</Typography>
                       <TinyMce
                         disabledEditor={!allowedToEdit || !isEdit}
                         id="tabelSummaryLeftSide"

@@ -28,13 +28,23 @@ type MessagesProps = {
   type: 'messages' | 'pins';
   state: UseWorkSpace;
   resourceData?: any | null;
+  fromSidebar?: boolean;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => displayDate(message.date));
 };
 
-const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelData, type, state, resourceData = null }: MessagesProps) => {
+const Messages = ({
+  channelId,
+  threadDialogOpen,
+  setThreadDialogOpen,
+  channelData,
+  type,
+  state,
+  resourceData = null,
+  fromSidebar = false
+}: MessagesProps) => {
   const { socket } = state;
   const {
     state: {
@@ -171,7 +181,13 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
 
   return (
     <>
-      <div ref={containerRef} className={cn('messages-container my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth')}>
+      <div
+        ref={containerRef}
+        className={cn(
+          'messages-container relative my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth',
+          fromSidebar ? 'h-[300px] overflow-y-auto' : ''
+        )}
+      >
         {messages && !isLoading ? (
           <ul className="mt-8 list-none">
             {Object.keys(messages).map((date) => (
@@ -207,7 +223,7 @@ const Messages = ({ channelId, threadDialogOpen, setThreadDialogOpen, channelDat
             ))}
           </ul>
         ) : !channelId ? (
-          <div className="flex justify-center">Start Conversession</div>
+          <div className={'absolute inset-2 flex select-none items-center justify-center text-gray-500'}>Start Conversession</div>
         ) : (
           <div className="p-3">
             <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
