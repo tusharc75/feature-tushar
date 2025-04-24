@@ -246,16 +246,17 @@ const Consumables = ({
     const material: any = [];
     if (addQuotationDataDialog) {
       rows?.forEach((e: any) => {
-        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+        let element: any = e;
+        const values = { estimateStartDate: serviceOrderData?.estimateStartDate || new Date(), estimateEndDate: serviceOrderData?.estimateEndDate || new Date() };
+        const calValues = autoCalculateSpecificFields(values, element, allFields);
+        Object.assign(element, calValues);
+        element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
         material.push(element);
       });
       AddMaterial(material, null);
     } else {
       rows.forEach((d) => {
-        const element: any = {};
-        element.materialId = d._id;
-        element.type = MATERIAL_TYPE.product;
-        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        let element: any = {};
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -267,6 +268,10 @@ const Consumables = ({
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;
         }
+        element = { ...getObjKeysWithValues(element, allFields) };
+        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;;
         material.push(element);
       });
       if (serviceOrderData?.pricingCondition?.optionValue) {
@@ -280,7 +285,7 @@ const Consumables = ({
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
         if (element.listPrice) {
           const priceFieldName = `price_${serviceOrderData?.currency?.toLowerCase()}`;

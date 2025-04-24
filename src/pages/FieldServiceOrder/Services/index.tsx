@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -372,7 +372,7 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         }
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
         Object.assign(element, calValues);
-        element = getObjKeysWithValues(element, allFields);
+        element = { ...getObjKeysWithValues(element, allFields) };
         element.materialId = d._id;
         element.type = type;
         material.push(element);
@@ -384,18 +384,17 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
-        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${serviceOrderData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
         } else {
-          calValues = getPricingValue(element, priceData, serviceOrderData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, serviceOrderData?.currency, allFields);
+          Object.assign(element, calValues);
         }
-        calValues = getObjKeysWithValues(calValues, allFields)
-        if (!isEmpty(calValues)) Object.assign(element, calValues);
       });
     }
     await axiosInstance()

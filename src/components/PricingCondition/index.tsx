@@ -93,7 +93,8 @@ export const getTaxList = async (user: any, referenceData: any, fields: any, mat
         const response = await axiosInstance().get(api);
         data = response?.data?.data || [];
       }
-    } else {
+    }
+    else {
       const zipCode = referenceData?.[taxApplicableField]?.zipCode;
       const state = referenceData?.[taxApplicableField]?.state;
       const county = referenceData?.[taxApplicableField]?.county;
