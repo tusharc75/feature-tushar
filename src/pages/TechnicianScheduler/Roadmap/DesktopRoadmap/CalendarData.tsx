@@ -66,7 +66,6 @@ function addOverlapCount(dataList) {
       if (i !== j && intersecting) {
         newDataList[i].overlapCount++;
         newDataList[i].overlapIndex = index;
-        console.log(index);
       }
     }
   }
