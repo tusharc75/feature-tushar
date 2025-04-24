@@ -392,11 +392,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
       if (addQuotationDataDialog || addFieldServiceOrderDataDialog) {
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
-            let obj: any = e;
-            const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
-            const calValues = autoCalculateSpecificFields(values, obj, allFields);
-            Object.assign(obj, calValues);
-            obj = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(obj, allFields) };
+            const obj: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
             if (addQuotationDataDialog) {
               obj.isQuotation = true;
             }
@@ -415,7 +411,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
           taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
-          let element: any = {};
+          const element: any = {};
+          element.materialId = d._id;
+          element.type = MATERIAL_TYPE.product;
+          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -427,11 +427,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
-          element = getObjKeysWithValues(element, allFields);
-          element.materialId = d._id;
-          element.type = MATERIAL_TYPE.product;
-          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
           material.push(element);
         });
         if (fieldTicketData?.pricingCondition?.optionValue) {
@@ -448,16 +443,15 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
         } else {
-          calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          Object.assign(element, calValues);
         }
-        calValues = getObjKeysWithValues(calValues, allFields);
-        Object.assign(element, calValues);
       });
     }
     axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
