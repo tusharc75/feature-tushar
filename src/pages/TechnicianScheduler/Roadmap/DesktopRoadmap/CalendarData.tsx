@@ -42,6 +42,46 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
   );
 }
 
+type DataObject = {
+  _id: string;
+  startDate: string;
+  endDate: string;
+  overlapCount?: number;
+};
+
+function addOverlapCount(dataList: DataObject[]): DataObject[] {
+  // Clone the dataList to ensure no mutations to the original array
+  const newDataList = dataList ? [...dataList] : [];
+
+  for (let i = 0; i < newDataList.length; i++) {
+    newDataList[i]['overlapCount'] = 0; // Ensure default is set
+  }
+
+  // Calculate overlaps
+  for (let i = 0; i < newDataList.length; i++) {
+    const obj1 = newDataList[i];
+    const start1 = dayjs(obj1.startDate);
+    const end1 = dayjs(obj1.endDate);
+
+    for (let j = 0; j < newDataList.length; j++) {
+      if (i !== j) {
+        const obj2 = newDataList[j];
+        const start2 = dayjs(obj2.startDate);
+        const end2 = dayjs(obj2.endDate);
+
+        console.log('Parsed Date 1:', new Date(obj1.startDate), obj1.startDate);
+        console.log('Parsed Date 2:', new Date(obj2.startDate), obj2.startDate);
+        // Check for overlaps in both directions
+        if (start1.isBefore(end2) && end1.isAfter(start2)) {
+          newDataList[i].overlapCount++; // Increment overlapCount for obj1
+        }
+      }
+    }
+  }
+
+  return newDataList; // Return the updated list with overlap counts
+}
+
 const Services = memo(({ startDate, services, handleSelect, dayPixel, item, index }: any) => {
   const { setNodeRef, isOver, active } = useDroppable({
     id: item._id,
@@ -51,6 +91,14 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
       accepts: ['sidebar']
     }
   });
+  const [newServices, setNewServices] = useState(null);
+
+  useEffect(() => {
+    if (services && services.length > 0) {
+      // const newData = addOverlapCount(services); // Process services
+      setNewServices(services); // Update state
+    }
+  }, [services]);
 
   return (
     <>
@@ -58,8 +106,14 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
         ref={setNodeRef}
         className={cn('relative h-[--data-h] border-b', isOver && active.data.current?.type === 'sidebar' ? 'bg-gray-100 dark:bg-gray-800' : '')}
       >
-        {services?.map((service) => (
-          <SingleService service={service} handleSelect={handleSelect} key={service._id} startDate={startDate} dayPixel={dayPixel} />
+        {newServices?.map((service) => (
+          <SingleService
+            service={service}
+            handleSelect={handleSelect}
+            key={`${service._id}-${service.overlapCount}`}
+            startDate={startDate}
+            dayPixel={dayPixel}
+          />
         ))}
       </div>
     </>
@@ -78,11 +132,11 @@ function getScrollContainer(element: HTMLElement) {
   }
   return document.documentElement;
 }
-function isCollidingOnTop(element: HTMLElement, container: HTMLElement) {
+function isCollidingOnTop(element: HTMLElement, container: HTMLElement, topOffset = 0) {
   const elementRect = element.getBoundingClientRect();
   const containerRect = container.getBoundingClientRect();
 
-  return elementRect.top <= containerRect.top && elementRect.bottom > containerRect.top;
+  return elementRect.top <= containerRect.top + topOffset && elementRect.bottom > containerRect.top;
 }
 const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any) => {
   const [isPopupOpened, setIsPopupOpened] = useState(false);
@@ -114,7 +168,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
       if (!scrollContainer.current) {
         scrollContainer.current = getScrollContainer(e.currentTarget);
       }
-      const isTopColliding = isCollidingOnTop(popupRef.current, scrollContainer.current);
+      const isTopColliding = isCollidingOnTop(popupRef.current, scrollContainer.current, 50);
 
       requestAnimationFrame(() => {
         if (popupRef.current && !popupRef.current.contains(e.target as HTMLElement)) {
@@ -166,10 +220,11 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               onMouseEnter={handleMouseEnter}
               onMouseMove={handleMouseMove}
               // onMouseLeave={handleMouseLeve}
+              style={{ height: `${80 / ((service.overlapCount || 0) + 1)}px` }}
               className={cn(
-                `singlePriority mt-[5px] flex h-[calc(var(--data-h)-10px)] w-full cursor-pointer  rounded-md border bg-gray-100/60 text-left dark:bg-gray-900/60`,
+                `singlePriority mt-[5px] flex w-full cursor-pointer rounded-md border bg-gray-100/60 text-left dark:bg-gray-900/60`,
                 bgColor,
-                isPopupOpened ? 'border-2 border-theme' : ''
+                isPopupOpened ? 'outline-2 outline-offset-0 outline-theme' : ''
               )}
             >
               <div className="block min-w-0 max-w-full flex-grow overflow-hidden p-2">
@@ -231,8 +286,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               </div>
             </RippleButton>
             {isPopupOpened && (
-              <div className="pointer-events-auto absolute bottom-full z-50" ref={popupRef}>
-                <div className="w-[260px] rounded-md bg-[--dark-primary,white] p-3 shadow-md ">
+              <div className="pointer-events-auto absolute bottom-full z-10" ref={popupRef}>
+                <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
                   <div className="mb-1 flex items-center gap-1">
                     <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
                     <IconButton
