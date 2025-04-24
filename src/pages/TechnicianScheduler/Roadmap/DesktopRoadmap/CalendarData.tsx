@@ -108,6 +108,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
   );
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    handleMouseEnter();
     handleMouseMove(e);
     isHoverPaused.current = true;
   };
