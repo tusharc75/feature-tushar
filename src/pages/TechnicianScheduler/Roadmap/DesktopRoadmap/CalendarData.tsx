@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { CalendarMonth, DeleteOutline } from '@mui/icons-material';
 import { ClickAwayListener, IconButton } from '@mui/material';
 import dayjs from 'dayjs';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { RiArrowGoBackFill, RiUserShared2Fill } from 'react-icons/ri';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -12,6 +12,7 @@ import RippleButton from 'src/components/RippleButton';
 import { cn, displayDate, sidebarResource, TECHNICIAN_STATUS } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
+import { addOverlapCount, getScrollContainer, isCollidingOnTop } from 'src/pages/TechnicianScheduler/Roadmap/utils';
 import { getColorFromPriority, getPositionOfDate, getPriority } from '../helperFunctions';
 
 type CalnedarDataProps = {
@@ -40,36 +41,6 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
       })}
     </>
   );
-}
-
-function addOverlapCount(dataList) {
-  const newDataList = dataList ? [...dataList] : [];
-
-  for (let i = 0; i < newDataList.length; i++) {
-    newDataList[i]['overlapCount'] = 0;
-    newDataList[i]['overlapIndex'] = 0;
-
-    const obj1 = newDataList[i];
-    const start1 = dayjs(obj1.startDate || obj1.reference?.estimateStartDate);
-    const end1 = dayjs(obj1.endDate || obj1.reference?.estimateEndDate);
-    let index = -1;
-    for (let j = 0; j < newDataList.length; j++) {
-      let intersecting = false;
-      const obj2 = newDataList[j];
-      const start2 = dayjs(obj2.startDate || obj2.reference?.estimateStartDate);
-      const end2 = dayjs(obj2.endDate || obj2.reference?.estimateEndDate);
-      // Check for overlaps in both directions
-      if (start1.isBefore(end2) && end1.isAfter(start2)) {
-        intersecting = true;
-        index++;
-      }
-      if (i !== j && intersecting) {
-        newDataList[i].overlapCount++;
-        newDataList[i].overlapIndex = index;
-      }
-    }
-  }
-  return newDataList; // Return the updated list with overlap counts
 }
 
 const Services = memo(({ startDate, services, handleSelect, dayPixel, item, index }: any) => {
@@ -103,27 +74,9 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
   );
 });
 
-function getScrollContainer(element: HTMLElement) {
-  let parent = element.parentElement;
-  while (parent) {
-    const style = window.getComputedStyle(parent);
-    const overflowY = style.overflowY;
-    if (overflowY === 'scroll' || overflowY === 'auto') {
-      return parent;
-    }
-    parent = parent.parentElement;
-  }
-  return document.documentElement;
-}
-function isCollidingOnTop(element: HTMLElement, container: HTMLElement, topOffset = 0) {
-  const elementRect = element.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-
-  return elementRect.top <= containerRect.top + topOffset && elementRect.bottom > containerRect.top;
-}
 const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any) => {
   const [isPopupOpened, setIsPopupOpened] = useState(false);
-  const isHoverPaused = useRef(false);
+  const [isHoverPaused, setIsHoverPaused] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
   const scrollContainer = useRef<HTMLElement>(null);
@@ -142,7 +95,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-      if (isHoverPaused.current || !isPopupOpened) return;
+      if (isHoverPaused || !isPopupOpened) return;
       const target = e.currentTarget;
       if (!target) return;
       const rect = target?.getBoundingClientRect();
@@ -167,20 +120,20 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
       // setAnchorPosition({ left: x, top: rect.top + rect.height });
       // setAnchorPosition({ left: x, top: rect.top });
     },
-    [isPopupOpened]
+    [isPopupOpened, isHoverPaused]
   );
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     handleMouseEnter();
     handleMouseMove(e);
-    isHoverPaused.current = true;
+    setIsHoverPaused(true);
   };
   const handleClosePopup = () => {
     setIsPopupOpened(false);
-    isHoverPaused.current = false;
+    setIsHoverPaused(false);
   };
   const handleMouseLeve = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!isHoverPaused.current) {
+    if (!isHoverPaused) {
       setIsPopupOpened(false);
     }
   };
@@ -189,7 +142,11 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
 
   return (
     <>
-      <div style={{ ...pos }} className="absolute" onMouseLeave={handleMouseLeve}>
+      <div
+        style={{ ...pos, height: `${height}px`, marginTop: service.overlapIndex > 0 ? `${(height + 1) * (service.overlapIndex || 0) + 5}px` : 5 }}
+        className="absolute"
+        onMouseLeave={handleMouseLeve}
+      >
         <ClickAwayListener
           onClickAway={(e) => {
             if (!buttonRef.current.contains(e.target as HTMLElement)) {
@@ -205,16 +162,21 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               onMouseEnter={handleMouseEnter}
               onMouseMove={handleMouseMove}
               // onMouseLeave={handleMouseLeve}
-              style={{ height: `${height}px`, marginTop: service.overlapIndex > 0 ? `${(height + 1) * (service.overlapIndex || 0) + 5}px` : 5 }}
+              style={{ height: `${height}px` }}
               className={cn(
-                `singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100/60 text-left dark:bg-gray-900/60`,
+                `singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100 text-left dark:bg-gray-900`,
                 bgColor,
-                isPopupOpened ? 'outline-2 outline-offset-0 outline-theme' : ''
+                isHoverPaused && isPopupOpened ? 'outline-2 outline-offset-0 outline-theme' : ''
               )}
             >
-              <div className="block min-w-0 max-w-full flex-grow overflow-hidden p-2">
+              <div
+                className={cn('block min-w-0 max-w-full flex-grow overflow-hidden', service.overlapCount > 0 ? 'flex items-center pl-2' : 'p-2')}
+                style={{ height }}
+              >
                 <>
-                  <p className="mb-1 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
+                  <p className={cn('line-clamp-1 text-[13px] font-semibold leading-[16px]', service.overlapCount > 0 ? '' : 'mb-1')}>
+                    {service?.reference?.optionLabel}
+                  </p>
                   {service.overlapCount === 0 && (
                     <>
                       <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
