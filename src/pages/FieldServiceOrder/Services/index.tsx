@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isEmpty } from 'lodash';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -152,45 +152,45 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -350,17 +350,17 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     const material: any = [];
     if (addQuotationDataDialog) {
       rows?.forEach((e: any) => {
-        let element: any = e;
-        const values = { estimateStartDate: serviceOrderData?.estimateStartDate || new Date(), estimateEndDate: serviceOrderData?.estimateEndDate || new Date() };
-        const calValues = autoCalculateSpecificFields(values, element, allFields);
-        Object.assign(element, calValues);
-        element = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(element, allFields) };
+        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.service, ...getObjKeysWithValues(e, allFields) };
+        element.estimateStartDate = serviceOrderData ? serviceOrderData?.estimateStartDate : new Date();
+        element.estimateEndDate = serviceOrderData ? serviceOrderData?.estimateEndDate : new Date();
         material.push(element);
       });
       AddMaterial(material, null);
     } else {
       rows.forEach((d) => {
-        let element: any = {};
+        const element: any = {};
+        element.materialId = d._id;
+        element.type = type;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
@@ -372,9 +372,6 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
         }
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
         Object.assign(element, calValues);
-        element = getObjKeysWithValues(element, allFields);
-        element.materialId = d._id;
-        element.type = type;
         material.push(element);
       });
       let priceData: any = await getPricingConditions(sidebarResource.fieldServiceOrder, serviceOrderData, material, PRICING_SETUP_TYPE.rent);
@@ -386,16 +383,15 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
     const tempMaterial = [...material];
     if (priceData) {
       tempMaterial.forEach((element) => {
-        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${serviceOrderData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
         } else {
-          calValues = getPricingValue(element, priceData, serviceOrderData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, serviceOrderData?.currency, allFields);
+          Object.assign(element, calValues);
         }
-        calValues = getObjKeysWithValues(calValues, allFields)
-        if (!isEmpty(calValues)) Object.assign(element, calValues);
       });
     }
     await axiosInstance()
