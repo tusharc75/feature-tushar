@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { CalendarMonth, DeleteOutline } from '@mui/icons-material';
 import { ClickAwayListener, IconButton } from '@mui/material';
 import dayjs from 'dayjs';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { RiArrowGoBackFill, RiUserShared2Fill } from 'react-icons/ri';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -70,7 +70,6 @@ function addOverlapCount(dataList) {
       }
     }
   }
-  console.log(newDataList);
   return newDataList; // Return the updated list with overlap counts
 }
 
@@ -83,7 +82,7 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
       accepts: ['sidebar']
     }
   });
-  const newServices = addOverlapCount(services);
+  const newServices = useMemo(() => addOverlapCount(services), [services]);
 
   return (
     <>
