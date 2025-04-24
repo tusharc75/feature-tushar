@@ -175,7 +175,7 @@ export const serviceOrderSteps: stepInterface[] = [
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Technicians', title: 'Technicians', icon: 'add' },
-  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
+  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' }
 ];
 
 export const TECHNICIAN_STATUS = {
@@ -2449,7 +2449,7 @@ export const REPORT_SECTIONS = {
   user: 'User',
   integration: 'Integration',
   iot: 'Iot',
-  technician:"Technician"
+  technician: 'Technician'
 };
 
 export const REPORT_LIST = [
@@ -2751,7 +2751,7 @@ export const REPORT_LIST = [
   },
   {
     title: 'Technician Schedule Report',
-    permission: "employeeMaster",
+    permission: 'employeeMaster',
     key: 'standardReport',
     type: 'technicianSchedule',
     section: REPORT_SECTIONS.technician
@@ -3571,6 +3571,7 @@ export const cloneResourceData = (fromFields, toFields, data, currency) => {
   );
   const result: any = {};
   overlappingFields?.forEach((e) => {
+    const toField = toFields?.find((f) => f?.fieldName === e?.fieldName);
     let fieldName = e?.fieldName;
     if (e.type === 'currencyAmount') {
       fieldName = `${e?.fieldName}_${currency?.toLowerCase()}`;
@@ -3578,9 +3579,17 @@ export const cloneResourceData = (fromFields, toFields, data, currency) => {
     if (data[fieldName]) {
       if (e?.lookup) {
         if (e?.type === 'dropDown') {
-          result[fieldName] = data[fieldName]?.optionValue || '';
+          if (toField?.type === 'multiSelect') {
+            result[fieldName] = data[fieldName]?.optionValue ? [data[fieldName]?.optionValue] : [];
+          } else {
+            result[fieldName] = data[fieldName]?.optionValue || '';
+          }
         } else {
-          result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
+          if (toField?.type === 'dropDown') {
+            result[fieldName] = isArray(data[fieldName]) && data?.fieldName?.length > 0 ? data[fieldName][0]['optionValue'] : '';
+          } else {
+            result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
+          }
         }
       } else {
         result[fieldName] = data[fieldName];
@@ -4179,17 +4188,15 @@ export const ASSEMBLY_ORDER_STATUS = {
 };
 
 export const getEmailsFromContacts = (data, field = 'customerContact') => {
-  const emails = []
+  const emails = [];
   if (isArray(data?.[field])) {
     data?.[field]?.forEach((e) => {
       if (e?.email) {
-        emails.push(e?.email)
+        emails.push(e?.email);
       }
-    })
-  }
-  else if (data?.[field]?.email) {
-    emails.push(data?.[field]?.email)
-
+    });
+  } else if (data?.[field]?.email) {
+    emails.push(data?.[field]?.email);
   }
   return emails;
-}
+};
