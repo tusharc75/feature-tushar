@@ -153,7 +153,33 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
   );
 });
 
+const bindPricingConditionOptions = (field, values) => {
+  let options = field?.option || [];
+  const customerAccount = values?.customerAccount;
+  const warehouse = values?.warehouse;
+  if (Array.isArray(customerAccount) && customerAccount?.length > 0) {
+    options = options?.filter((o) => o?.customerAccount?.some((ele: any) => customerAccount?.includes(ele)) || !o?.customerAccount || !o?.customerAccount?.length);
+  } else if (customerAccount) {
+    options = options?.filter((o) => o?.customerAccount?.includes(customerAccount) || !o?.customerAccount || !o?.customerAccount?.length);
+  } else {
+    options = options?.filter((o) => !o?.customerAccount || !o?.customerAccount?.length);
+  }
+
+  if (Array.isArray(warehouse) && warehouse?.length > 0) {
+    options = options?.filter((o) => o?.warehouse?.some((ele: any) => warehouse?.includes(ele)) || !o?.warehouse || !o?.warehouse?.length);
+  } else if (warehouse) {
+    options = options?.filter((o) => o?.warehouse?.includes(warehouse) || !o?.warehouse || !o?.warehouse?.length);
+  } else {
+    options = options?.filter((o) => !o?.warehouse || !o?.warehouse?.length);
+  }
+  return options || [];
+}
+
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
+
+  if (fieldData?.fieldName === 'pricingCondition') {
+    return bindPricingConditionOptions(fieldData, values);
+  }
   const lookupDependentOn = fieldData?.lookupDependentOn;
   const lookupDependentOnField = fieldData?.lookupDependentOnField;
 
