@@ -41,6 +41,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   const {
     state: { permissions }
@@ -306,7 +307,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
-  const handleAssign = (rows) => {
+  const handleAssign = (rows, skipDateValidation = false) => {
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -320,7 +321,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldTicket.api}/technician`, { technician })
+      .post(`${fieldTicket.api}/technician`, { technician, skipDateValidation })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -328,10 +329,15 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           message: data?.message
         });
         setTechnicianDialog(false);
+        setShowConfirmBox({ open: false, rows: [] })
         fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      }).catch((error) => {
+        if (skipDateValidation) {
+          toastConfig.setToastConfig(error);
+        }
+        else {
+          setShowConfirmBox({ open: true, rows: rows })
+        }
       });
   };
 
@@ -548,6 +554,19 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
           resource={sidebarResource.fieldTicket}
+        />
+      )}
+
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={showConfirmBox.open}
+          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          onClose={() => {
+            setShowConfirmBox({ open: false, rows: [] });
+          }}
+          onOk={() => {
+            handleAssign(showConfirmBox.rows, true)
+          }}
         />
       )}
     </>

@@ -30,7 +30,6 @@ import {
   getObjKeysWithValues,
   restoreObjKeysWithValues,
   sidebarResource,
-  treeToFlatArray
 } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -249,7 +248,9 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <div>
+            <p className="text-truncate">{row.original.description}</p>
+          </div> : <NoDataCell />;
         }
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
@@ -513,7 +514,11 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       const material: any = [];
       if (addRentalJobDataDialog.open || addQuotationDataDialog.open || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
-          let element: any = e;
+          let element: any = {};
+          const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
+          const calValues = autoCalculateSpecificFields(values, element, allFields);
+          Object.assign(element, calValues);
+          element = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(element, allFields) };
           const wellNumberField = allFields?.find((e) => e?.fieldName === 'wellNumber');
           if (wellNumberField && e?.wellNumber) {
             if (wellNumberField?.type === 'multiSelect') {
@@ -530,10 +535,6 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
               }
             }
           }
-          const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
-          const calValues = autoCalculateSpecificFields(values, element, allFields);
-          Object.assign(element, calValues);
-          element = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(element, allFields) };
           if (addRentalJobDataDialog.open) {
             element.isRental = true;
           }
@@ -554,13 +555,13 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
           element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-          if (taxCodeData && allFields?.find((e) => e?.fieldName === 'taxCode')) {
+          if (taxCodeData) {
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
           const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
           Object.assign(element, calValues);
-          element = getObjKeysWithValues(element, allFields);
+          element = { ...getObjKeysWithValues(element, allFields) };
           element.materialId = d._id;
           element.type = type;
           element.parentId = materialDialog.parentId;
@@ -574,18 +575,17 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
-        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
         } else {
-          calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          Object.assign(element, calValues);
         }
-        calValues = getObjKeysWithValues(calValues, allFields);
-        Object.assign(element, calValues);
       });
     }
     await axiosInstance()

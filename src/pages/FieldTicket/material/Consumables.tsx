@@ -392,18 +392,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
       if (addQuotationDataDialog || addFieldServiceOrderDataDialog) {
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
-            let obj: any = e;
+            let element: any = {};
             const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
-            const calValues = autoCalculateSpecificFields(values, obj, allFields);
-            Object.assign(obj, calValues);
-            obj = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(obj, allFields) };
+            const calValues = autoCalculateSpecificFields(values, element, allFields);
+            Object.assign(element, calValues);
+            element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
             if (addQuotationDataDialog) {
-              obj.isQuotation = true;
+              element.isQuotation = true;
             }
             if (addFieldServiceOrderDataDialog) {
-              obj.isFieldServiceOrder = true;
+              element.isFieldServiceOrder = true;
             }
-            material.push(obj);
+            material.push(element);
           })
         });
         AddMaterial(material, null);
@@ -427,7 +427,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
-          element = getObjKeysWithValues(element, allFields);
+          element = { ...getObjKeysWithValues(element, allFields) };
           element.materialId = d._id;
           element.type = MATERIAL_TYPE.product;
           element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
@@ -446,18 +446,17 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
-        let calValues: any;
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
           element[priceFieldName] = element.listPrice;
-          calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
+          Object.assign(element, calValues);
         } else {
-          calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, fieldTicketData?.currency, allFields);
+          Object.assign(element, calValues);
         }
-        calValues = getObjKeysWithValues(calValues, allFields);
-        Object.assign(element, calValues);
       });
     }
     axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
