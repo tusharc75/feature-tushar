@@ -7,7 +7,7 @@ import ManageChannel from './ManageChannelDialog';
 
 import { useWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
-const Workspace = () => {
+const Workspace = ({ fromSidebar = false }: { fromSidebar?: boolean }) => {
   const state = useWorkSpace();
 
   return (
@@ -24,7 +24,7 @@ const Workspace = () => {
             )}
           >
             <Sidebar state={state} />
-            <MessagePanel state={state} />
+            <MessagePanel state={state} fromSidebar={fromSidebar} fromSidebar={fromSidebar} />
           </div>
         </CustomContainer>
         {state.editCreateChannelDialogData.open && (
