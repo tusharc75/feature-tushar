@@ -170,7 +170,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               size="small"
               color="primary"
             >
-              <AddCircleOutline fontSize="small" />
+              <AddCircleOutline fontSize="small" className={cn(textColorClass)} />
             </IconButton>
           </HtmlTooltip>
           <IconButton
@@ -183,7 +183,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               }
             }}
           >
-            <Map fontSize="small" />
+            <Map fontSize="small" className={cn(textColorClass)} />
           </IconButton>
         </div>
       </ListItem>
