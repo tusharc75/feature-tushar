@@ -15,13 +15,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import {
-  ACTIVITY_RESOURCE,
-  bulkAssetCreation,
-  bulkAssetCreationSteps,
-  checkIsAllowedToEdit,
-  sidebarResource
-} from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, checkIsAllowedToEdit, sidebarResource } from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
@@ -96,10 +90,9 @@ const BulkAssetCreationDetailsPage = () => {
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
-      if (data?.status === "Completed") {
+      if (data?.status === 'Completed') {
         setCurrentStep(bulkAssetCreationSteps?.length - 1);
-      }
-      else {
+      } else {
         setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       }
       setBulkAssetCreationData(data);
@@ -160,6 +153,7 @@ const BulkAssetCreationDetailsPage = () => {
                 referenceId={bulkAssetCreationData?._id}
                 resource={ACTIVITY_RESOURCE.bulkAssetCreation}
                 resourceLabel={bulkAssetCreationData?.baNumber}
+                resourceData={bulkAssetCreationData}
               />
             </>
           </Box>

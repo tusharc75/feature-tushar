@@ -210,7 +210,12 @@ const SubleaseDetailsPage = () => {
                 {'Edit'}
               </ThemeButton>
             )}
-            <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />
+            <ActivityButton
+              referenceId={subleaseData?._id}
+              resource={ACTIVITY_RESOURCE.sublease}
+              resourceLabel={subleaseData?.subleaseName}
+              resourceData={subleaseData}
+            />
           </Box>
         </Box>
       </Box>

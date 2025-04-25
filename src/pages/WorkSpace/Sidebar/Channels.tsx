@@ -1,12 +1,14 @@
 import { ArrowDropDown, ArrowDropUp, MoreVert } from '@mui/icons-material';
 import { Autocomplete, Collapse, IconButton, List, ListItemButton, ListItemText, Menu, MenuItem, TextField } from '@mui/material';
+import { camelCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { get_activity_resource, get_dynamic_resource } from 'src/components/Activity/Helpers/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { ACTIVITY_RESOURCE, cn } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, cn, opportunity, projectSales, sidebarResource } from 'src/constants/helpers';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { useData } from 'src/StateProvider/Provider';
@@ -24,24 +26,37 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
   } = state;
 
   const {
-    state: { resources }
+    state: { permissions, resources }
   }: any = useData();
 
   const [filteredChannels, setFilteredChannels] = useState(channels);
   const [searchValue, setSearchValue] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedChannelAction, setSelectedChannelAction] = useState<TChannel>(null);
+  const [resourceOptions, setResourceOptions] = useState([]);
 
   useEffect(() => {
     setFilteredChannels(channels);
   }, [channels]);
 
-  const resourceOptions = [
-    {
-      optionValue: ACTIVITY_RESOURCE.rentalManagement,
-      optionLabel: resources?.rentalManagement?.titlePlural
-    }
-  ];
+  const getResourceOptions = async () => {
+    const resource: any = [];
+    const dynamicResource = await get_dynamic_resource(true);
+    dynamicResource?.data?.forEach((_r) => {
+      if (permissions[camelCase(_r.resource)]?.isRead) {
+        resource.push({
+          optionLabel: _r.resource,
+          optionValue: camelCase(_r.resource)
+        });
+      }
+    });
+
+    setResourceOptions([...get_activity_resource(permissions, resources), ...resource]);
+  };
+
+  useEffect(() => {
+    getResourceOptions();
+  }, []);
 
   const handleFilter = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;

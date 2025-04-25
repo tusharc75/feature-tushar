@@ -219,6 +219,7 @@ const PurchaseRequisitionDetail = () => {
                 referenceId={purchaseRequisitionData?._id}
                 resource={ACTIVITY_RESOURCE.purchaseRequisition}
                 resourceLabel={purchaseRequisitionData?.purchaseRequisitionNumber}
+                resourceData={purchaseRequisitionData}
               />
             </>
           </Box>

@@ -81,8 +81,12 @@ const DemandOrderDetails = () => {
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data) && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
-      setAllowedToDelete(permissions?.demandOrder?.isDelete
-        && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) && data?.canDelete && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
+      setAllowedToDelete(
+        permissions?.demandOrder?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status)
+      );
       setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -140,11 +144,11 @@ const DemandOrderDetails = () => {
       .then(() => {
         fetchData();
         if (convertDialog.type === sidebarResource.purchaseOrder) {
-          window.open(`${routes.purchaseOrderDetail.path}/${data?._id}`)
+          window.open(`${routes.purchaseOrderDetail.path}/${data?._id}`);
         } else {
-          window.open(`${routes.productionOrder.path}/${data?._id}`)
+          window.open(`${routes.productionOrder.path}/${data?._id}`);
         }
-        setConvertDialog({ open: false, type: '' })
+        setConvertDialog({ open: false, type: '' });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -220,6 +224,7 @@ const DemandOrderDetails = () => {
               referenceId={demandOrderData?._id}
               resource={ACTIVITY_RESOURCE.demandOrder}
               resourceLabel={demandOrderData?.demandOrderNumber}
+              resourceData={demandOrderData}
             />
           </Box>
         </Box>
@@ -244,13 +249,7 @@ const DemandOrderDetails = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          {demandOrderData && (
-            <Material
-              demandOrderData={demandOrderData}
-              fetchDemadOrderData={fetchData}
-              allowedToEdit={allowedToEdit}
-            />
-          )}
+          {demandOrderData && <Material demandOrderData={demandOrderData} fetchDemadOrderData={fetchData} allowedToEdit={allowedToEdit} />}
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&

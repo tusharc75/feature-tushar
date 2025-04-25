@@ -107,7 +107,12 @@ const MarketSegmentDetail = () => {
               )}
               {permissions?.marketSegment?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton referenceId={marketSegmentData?._id} resource={ACTIVITY_RESOURCE.marketSegment} resourceLabel={marketSegmentData?.name} />
+            <ActivityButton
+              referenceId={marketSegmentData?._id}
+              resource={ACTIVITY_RESOURCE.marketSegment}
+              resourceLabel={marketSegmentData?.name}
+              resourceData={marketSegmentData}
+            />
           </Box>
         </Box>
       </Box>

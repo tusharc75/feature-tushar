@@ -625,7 +625,12 @@ export default function AccountDetailPage(props) {
                 }}
               />
             )}
-            <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
+            <ActivityButton
+              referenceId={accountData?._id}
+              resource={accountResource}
+              resourceLabel={accountData?.accountName}
+              resourceData={accountData}
+            />
           </Box>
         </Box>
       </Box>
@@ -947,7 +952,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => { }}
+          handleAddressDataSource={() => {}}
         />
       ) : null}
 

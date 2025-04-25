@@ -311,7 +311,9 @@ const RepairOrderDetails = () => {
                   permissions?.transferAsset?.isCreate &&
                   resourceData?.policy?.showTransferAssets &&
                   repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
-                  repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) && (
+                  repairOrderData?.material
+                    ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+                    ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
                     <ThemeButton
                       onClick={() => {
                         setShowTransferAssetDialog(true);
@@ -322,24 +324,30 @@ const RepairOrderDetails = () => {
                       {`Create ${resources?.transferAsset?.titleSingular}`}
                     </ThemeButton>
                   )}
-                {permissions?.repairOrder?.isUpdate && !repairOrderData?.deleted && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
-                  <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
-                    <ThemeButton
-                      onClick={() =>
-                        updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
-                      }
-                      disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
-                      iconForMobile={false}
-                    >
-                      {'Re-Open'}
-                    </ThemeButton>
-                  </HtmlTooltip>
-                )}
-                {permissions?.repairOrder?.isUpdate && allowedToEdit && !repairOrderData?.deleted && repairOrderData?.canComplete && stepNames[currentStep] === 'Slip' && (
-                  <ButtonWithPulse onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)} id={'header-button-complete'}>
-                    Complete
-                  </ButtonWithPulse>
-                )}
+                {permissions?.repairOrder?.isUpdate &&
+                  !repairOrderData?.deleted &&
+                  [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
+                    <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${resources?.repairOrder?.titleSingular}`}>
+                      <ThemeButton
+                        onClick={() =>
+                          updateOrderStatus(repairOrderData?.invoice?.optionValue ? REPAIR_ORDER_STATUS.invoiced : REPAIR_ORDER_STATUS.readyToInvoice)
+                        }
+                        disabled={permissions?.repairOrder?.isUpdate && allowedToEdit ? false : true}
+                        iconForMobile={false}
+                      >
+                        {'Re-Open'}
+                      </ThemeButton>
+                    </HtmlTooltip>
+                  )}
+                {permissions?.repairOrder?.isUpdate &&
+                  allowedToEdit &&
+                  !repairOrderData?.deleted &&
+                  repairOrderData?.canComplete &&
+                  stepNames[currentStep] === 'Slip' && (
+                    <ButtonWithPulse onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)} id={'header-button-complete'}>
+                      Complete
+                    </ButtonWithPulse>
+                  )}
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   !repairOrderData?.deleted &&
@@ -379,6 +387,7 @@ const RepairOrderDetails = () => {
               referenceId={repairOrderData?._id}
               resource={ACTIVITY_RESOURCE.repairOrder}
               resourceLabel={repairOrderData?.repairOrderNumber}
+              resourceData={repairOrderData}
             />
           </Box>
         </Box>
@@ -416,13 +425,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status
-                  )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                   ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                      setShowQuotationConfirmBox(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {
@@ -460,8 +469,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }

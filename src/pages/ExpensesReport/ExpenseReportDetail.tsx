@@ -86,7 +86,10 @@ const ExpenseReportDetail = () => {
       .get(`${expenseReport.api}/${id}`)
       .then(({ data: { data } }) => {
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
-        setAllowedToEdit(permissions?.expenseReport?.isUpdate && ![EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved, EXPENSE_STATUS.reimbursed]?.includes(data?.status));
+        setAllowedToEdit(
+          permissions?.expenseReport?.isUpdate &&
+            ![EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved, EXPENSE_STATUS.reimbursed]?.includes(data?.status)
+        );
         setExpenseReportData(data);
       })
       .catch((err) => {
@@ -121,7 +124,8 @@ const ExpenseReportDetail = () => {
   };
 
   const handleStatusChange = (status) => {
-    axiosInstance().patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status })
+    axiosInstance()
+      .patch(`${expenseReport.api}/status/${expenseReportData._id}`, { status })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -151,16 +155,18 @@ const ExpenseReportDetail = () => {
             <Fragment>
               {expenseReportData?.status !== EXPENSE_STATUS.approved && expenseReportData?.status !== EXPENSE_STATUS.reimbursed && (
                 <>
-                  {expenseReportData?.expenses?.length > 0 &&
+                  {expenseReportData?.expenses?.length > 0 && (
                     <ThemeButton
                       buttonType="themeBorder"
                       onClick={() => {
-                        handleStatusChange(expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval);
+                        handleStatusChange(
+                          expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? EXPENSE_STATUS.recalled : EXPENSE_STATUS.awaitingApproval
+                        );
                       }}
                     >
                       {expenseReportData?.status === EXPENSE_STATUS.awaitingApproval ? 'Recall' : 'Send For Approval'}
                     </ThemeButton>
-                  }
+                  )}
                   {allowedToEdit && (
                     <ThemeButton
                       iconForMobile={<Edit />}
@@ -181,6 +187,7 @@ const ExpenseReportDetail = () => {
               referenceId={expenseReportData?._id}
               resource={ACTIVITY_RESOURCE.expenseReport}
               resourceLabel={expenseReportData?.reportTitle}
+              resourceData={expenseReportData}
             />
           </Box>
         </Box>

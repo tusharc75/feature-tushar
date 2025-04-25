@@ -112,7 +112,12 @@ const UnitDetail = () => {
               </ThemeButton>
             )}
             {permissions?.units?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={unitData?._id} resource={camelCase(sidebarResource.units)} resourceLabel={unitData?.unitNumber} />
+            <ActivityButton
+              referenceId={unitData?._id}
+              resource={camelCase(sidebarResource.units)}
+              resourceLabel={unitData?.unitNumber}
+              resourceData={unitData}
+            />
           </Box>
         </Box>
       </Box>
