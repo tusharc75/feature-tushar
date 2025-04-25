@@ -53,57 +53,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
         : [])
     ],
     [
@@ -174,12 +174,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
+          {
+            label: resources?.padMaster?.titlePlural,
+            value: 'Pad Master',
+            key: 'padMaster'
+          }
+        ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -416,8 +416,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             let start = dayjs.tz(d[selectedResource.start]).toDate();
             let end = dayjs.tz(d[selectedResource.end]).toDate();
             let fulfillStatus = d?.fulfillStatus;
-            let startDraggable = true;
-            let endDraggable = true;
 
             const extraData: any = {};
             if (selectedResource.resource === sidebarResource.rentalManagement) {
@@ -426,12 +424,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               }
               if (d?.padName?.optionLabel) {
                 title = `${title}(Pad-${d?.padName?.optionLabel})`;
-              }
-              if (d?.actualStartDate) {
-                startDraggable = false;
-              }
-              if (d?.actualEndDate) {
-                endDraggable = false;
               }
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
@@ -455,8 +447,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               allDay: true,
               resource: selectedResource.resource,
               fulfillStatus: fulfillStatus,
-              startDraggable: startDraggable,
-              endDraggable: endDraggable
             };
           });
           rows = rows?.filter((e) => e);
@@ -594,13 +584,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance()
-      .put(`/planning-view/change-date`, {
-        _id: event.id,
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-        resource: event.resource
-      })
+    axiosInstance().put(`/planning-view/change-date`, {
+      _id: event.id,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      resource: event.resource
+    })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -623,37 +612,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   };
 
   const moveEvent = ({ event, start, end }) => {
-    if (event?.resource === sidebarResource?.rentalManagement && !(event?.startDraggable && event?.endDraggable)) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'warning',
-        message: `can't change start date or end date`
-      });
-    } else {
-      resize(event, start, end);
-    }
+    resize(event, start, end);
   };
 
   const resizeEvent = ({ event, start, end }) => {
-    if (event?.resource === sidebarResource?.rentalManagement) {
-      if (!event?.startDraggable) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'warning',
-          message: `can't change start date`
-        });
-      } else if (!event?.endDraggable) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'warning',
-          message: `can't change end date`
-        });
-      } else {
-        resize(event, start, end);
-      }
-    } else {
-      resize(event, start, end);
-    }
+    resize(event, start, end);
   };
 
   const onNavigate = useCallback(
