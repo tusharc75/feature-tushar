@@ -46,6 +46,7 @@ const CustomDatePicker = (props) => {
       onChange={(date) => onChange(date)}
       onError={onError ? onError : console.error}
       slotProps={{
+        field: { clearable: true },
         textField: {
           id: id,
           helperText: helperText,
@@ -57,7 +58,7 @@ const CustomDatePicker = (props) => {
           ...(size ? { size: size } : {}),
           ...(placeholder ? { placeholder: placeholder } : {}),
           ...(!isEmpty(InputProps) ? InputProps : {}),
-          ...(onInput ? { onInput: onInput } : {})
+          ...(onInput ? { onInput: onInput } : {}),
         }
       }}
       format={inputFormat ? inputFormat : dateFormatForInputControl}

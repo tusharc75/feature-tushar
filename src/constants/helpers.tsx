@@ -1040,12 +1040,16 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else {
+        obj[key.fieldName] = '';
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else {
+        obj[key.fieldName] = '';
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
