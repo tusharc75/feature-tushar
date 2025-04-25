@@ -1302,8 +1302,7 @@ const ReceivingTicket = ({
       {
         accessor: 'index',
         Header: 'Index',
-        minWidth: 100,
-        width: 100,
+        width: view === 'flat' ? 100 : 150,
         disabled: true,
         cell: ({ row }) => (
           <div
