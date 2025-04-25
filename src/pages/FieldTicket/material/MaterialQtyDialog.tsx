@@ -406,7 +406,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      console.log(value)
                                       setFieldValue(name, value);
                                     }}
                                     required={field.required}
