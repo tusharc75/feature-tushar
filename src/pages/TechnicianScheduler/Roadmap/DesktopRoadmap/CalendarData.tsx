@@ -117,6 +117,8 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           }
         }
       });
+      // setAnchorPosition({ left: x, top: rect.top + rect.height });
+      // setAnchorPosition({ left: x, top: rect.top });
     },
     [isPopupOpened, isHoverPaused]
   );
@@ -307,6 +309,105 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
           </div>
         </ClickAwayListener>
       </div>
+      {/* <Popover
+        disableScrollLock
+        open={Boolean(anchorPosition)}
+        anchorReference="anchorPosition"
+        anchorPosition={anchorPosition}
+        onClose={handleClosePopup}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center'
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center'
+        }}
+        className="pointer-events-none"
+        slotProps={{
+          transition: CustomDialogTransition,
+          backdrop: {
+            className: 'pointer-events-none'
+          }
+        }}
+      >
+        <ClickAwayListener
+          onClickAway={(e) => {
+            if (!buttonRef.current.contains(e.target as HTMLElement)) {
+              handleClosePopup();
+            }
+          }}
+        >
+          <div className="pointer-events-auto">
+            <div className="w-[260px] rounded-md bg-[--dark-primary,white] p-3 shadow-md ">
+              <div className="mb-1 flex items-center gap-1">
+                <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    if (service?.referenceType === sidebarResource?.fieldServiceOrder) {
+                      window.open(`${routes.fieldServiceOrderDetail.path}/${service?.reference?.optionValue}`);
+                    } else if (service?.referenceType === sidebarResource?.fieldTicket) {
+                      window.open(`${routes.fieldTicketDetail.path}/${service?.reference?.optionValue}`);
+                    } else if (service?.referenceType === sidebarResource?.rentalManagement) {
+                      window.open(`${routes.rentalManagementDetail.path}/${service?.reference?.optionValue}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+              {service?.serviceDetail?.serviceName && (
+                <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
+                  Service : {service?.serviceDetail?.serviceName}
+                </p>
+              )}
+              <p className="flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                Customer : {service?.reference?.customerAccount?.optionLabel}
+              </p>
+              <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+                <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
+                  <ThemeButton
+                    buttonType="theme"
+                    onClick={() => {
+                      handleSelect(null, service, 'dispatch');
+                      handleClosePopup();
+                    }}
+                  >
+                    Dispatch
+                  </ThemeButton>
+                )}
+                {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
+                  <ThemeButton
+                    buttonType="theme"
+                    onClick={() => {
+                      handleSelect(null, service, 'return');
+                      handleClosePopup();
+                    }}
+                  >
+                    Return
+                  </ThemeButton>
+                )}
+                {service?.status === TECHNICIAN_STATUS.reserved && (
+                  <ThemeButton
+                    onClick={() => {
+                      handleSelect(null, { _id: service?._id }, 'un-assign');
+                      handleClosePopup();
+                    }}
+                  >
+                    Un-Assign
+                  </ThemeButton>
+                )}
+              </div>
+            </div>
+          </div>
+        </ClickAwayListener>
+      </Popover> */}
     </>
   );
 });
