@@ -16,7 +16,7 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource,
-  restoreObjKeysWithValues,
+  restoreObjKeysWithValues
 } from 'src/constants/helpers';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
@@ -104,7 +104,7 @@ const FieldServiceTechnician = () => {
     state: { user, permissions, resources }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows, initialDataLoaded } = state;
   const { dispatch: tableDispatch } = useTableReducer();
   const resetSelectedRecords = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -173,7 +173,10 @@ const FieldServiceTechnician = () => {
       }
     }
     setColData(data);
-    const newColumns = [...generateColumns(renderedFrom, data, policy?.showOnlyAssignedTickets ? routes.fieldTicketDetail.path : routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    const newColumns = [
+      ...generateColumns(renderedFrom, data, policy?.showOnlyAssignedTickets ? routes.fieldTicketDetail.path : routes.fieldServiceOrderDetail.path),
+      ...getStaticFields()
+    ];
     if (!policy?.showOnlyAssignedTickets) {
       newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
     }
@@ -185,7 +188,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -329,7 +332,7 @@ const FieldServiceTechnician = () => {
 
   const handleSearch = (e) => {
     setSelectedData(null);
-    setAllowedToEdit(false)
+    setAllowedToEdit(false);
     dispatch({ type: 'search', search: e.target.value });
   };
 
@@ -366,8 +369,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -390,64 +393,80 @@ const FieldServiceTechnician = () => {
     }
   }, [isMobileView, view, handleViewChange]);
 
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.fieldServiceTechnician?.titlePlural }]} />
       </div>
       <CustomContainer>
-        <ListingPageHeader
-          searchValue={search}
-          onSearch={handleSearch}
-          isActionButtonVisible={true}
-          isAddButtonVisible={false}
-          rightSideContents={isMobileView || resourceData?.policy?.showOnlyAssignedTickets ? null : <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />}
-          actionMenuItems={<ActionMenuItems />}
-        />
+        {initialDataLoaded && dataRows.length > 0 && (
+          <ListingPageHeader
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={true}
+            isAddButtonVisible={false}
+            rightSideContents={
+              isMobileView || resourceData?.policy?.showOnlyAssignedTickets ? null : (
+                <ViewButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />
+              )
+            }
+            actionMenuItems={<ActionMenuItems />}
+          />
+        )}
         {columns ? (
           view === 'card' ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-[400px_1fr]">
-              <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
-                <CustomReactTable
-                  showOnlyMobileView={true}
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={renderedFrom}
-                  refreshGrid={fetchData}
-                  resource={sidebarResource.fieldServiceOrder}
-                  showOnlyShowFilteredRecordSwitch={false}
-                  hideSelection={true}
-                  setWholeRowsCellColor={(row) =>
-                    row._id === selectedData?._id
-                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
-                      : ' transition-bg duration-300'
-                  }
-                  onRowClick={onRowClick}
-                  showFilters={!isOffline}
-                />
-              </div>
-              <div className="container-with-border p-[20px]">
-                {selectedData ?
-                  resourceData?.policy?.showOnlyAssignedTickets ? (
-                    <FieldTicketDetailView id={selectedData?._id} />
-                  ) : (
-                    <FieldTicket
-                      serviceOrderData={selectedData?.orignalData}
-                      allowedToEdit={allowedToEdit}
-                      handleChangeStatus={() => { }}
-                      resource={sidebarResource.fieldServiceTechnician}
-                      enableGlobalSearch={false}
-                      fetchServiceOrderData={() => { }}
+            <div className="relative grid grid-cols-1 gap-4 md:min-h-[calc(100vh-200px)] md:grid-cols-[400px_1fr]">
+              {initialDataLoaded && dataRows.length > 0 ? (
+                <>
+                  <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
+                    <CustomReactTable
+                      showOnlyMobileView={true}
+                      height={'calc(100vh - 200px)'}
+                      columns={columns}
+                      state={state}
+                      dispatch={dispatch}
+                      renderedFrom={renderedFrom}
+                      refreshGrid={fetchData}
+                      resource={sidebarResource.fieldServiceOrder}
+                      showOnlyShowFilteredRecordSwitch={false}
+                      hideSelection={true}
+                      setWholeRowsCellColor={(row) =>
+                        row._id === selectedData?._id
+                          ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
+                          : ' transition-bg duration-300'
+                      }
+                      onRowClick={onRowClick}
+                      showFilters={!isOffline}
                     />
-                  ) : (
-                    <div className="flex h-full items-center justify-center">
-                      <h6 className="text-xl text-gray-400">Please select a record</h6>
-                    </div>
-                  )}
-              </div>
+                  </div>
+                  <div className="container-with-border p-[20px]">
+                    {selectedData ? (
+                      resourceData?.policy?.showOnlyAssignedTickets ? (
+                        <FieldTicketDetailView id={selectedData?._id} />
+                      ) : (
+                        <FieldTicket
+                          serviceOrderData={selectedData?.orignalData}
+                          allowedToEdit={allowedToEdit}
+                          handleChangeStatus={() => {}}
+                          resource={sidebarResource.fieldServiceTechnician}
+                          enableGlobalSearch={false}
+                          fetchServiceOrderData={() => {}}
+                        />
+                      )
+                    ) : (
+                      <div className="flex h-full items-center justify-center">
+                        <h6 className="text-xl text-gray-400">Please select a record</h6>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="container-with-border absolute inset-0 flex min-h-[calc(100vh-200px)] items-center justify-center">
+                    <p className="select-none text-center text-base text-gray-400 dark:text-gray-500">You have no lined up tasks</p>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             <>
