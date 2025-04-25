@@ -514,7 +514,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       const material: any = [];
       if (addRentalJobDataDialog.open || addQuotationDataDialog.open || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
-          let element: any = {};
+          let element: any = e;
           const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
           const calValues = autoCalculateSpecificFields(values, element, allFields);
           Object.assign(element, calValues);
