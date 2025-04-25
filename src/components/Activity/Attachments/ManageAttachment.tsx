@@ -18,13 +18,13 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isEqual } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import { ATTACHMENT_TYPE, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
+import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
-  attachmentType: string().nullable(),
+  attachmentType: string().nullable()
 });
 
 const FolderSchema = object().shape({
@@ -44,9 +44,9 @@ export default function ManageAttachment({
   parentFolder = null,
   type = 'file',
   attachmentType = null,
-  customhandleAdd = null
+  customhandleAdd = null,
+  isOwner = true
 }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState({ fields: [], values: null });
@@ -71,12 +71,12 @@ export default function ManageAttachment({
     try {
       setIsFetching(true);
       if (type === 'file') {
-        const fieldsResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`)
+        const fieldsResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
         const createFields = fieldsResponce?.data?.data?.filter((f) => f.isCreate).map((f) => f.fieldData);
         const updateFields = fieldsResponce?.data?.data?.filter((f) => f.isUpdate).map((f) => f.fieldData);
         if (attachmentId) {
-          const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`)
-          const data = attachmentResponce?.data?.data
+          const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
+          const data = attachmentResponce?.data?.data;
           setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
             data?.file?.sort((a: any, b: any) => {
@@ -85,7 +85,7 @@ export default function ManageAttachment({
             setAllAttachments(data.file);
           }
           setIsFetching(false);
-          let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType }
+          let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType };
           if (createFields?.length) {
             initialValue = { ...initialValue, ...getObjKeysWithValues(data, updateFields) };
           }
@@ -93,14 +93,13 @@ export default function ManageAttachment({
             fields: updateFields,
             values: initialValue
           });
-        }
-        else {
-          let initialValue: any = { name: '', attachmentType: '' }
+        } else {
+          let initialValue: any = { name: '', attachmentType: '' };
           if (createFields?.length) {
             initialValue = { ...initialValue, ...getObjKeys('', createFields) };
           }
           if (attachmentType) {
-            initialValue.attachmentType = attachmentType
+            initialValue.attachmentType = attachmentType;
           }
           setInitialData({
             fields: createFields,
@@ -108,23 +107,24 @@ export default function ManageAttachment({
           });
           setIsFetching(false);
         }
-      }
-      else if (type === 'folder') {
+      } else if (type === 'folder') {
         if (attachmentId) {
-          axiosInstance().get(`/attachment/folder/${attachmentId}`).then(({ data: { data } }) => {
-            setCanEdit(data?.canEdit);
-            setInitialData({
-              fields: [],
-              values: data
+          axiosInstance()
+            .get(`/attachment/folder/${attachmentId}`)
+            .then(({ data: { data } }) => {
+              setCanEdit(data?.canEdit);
+              setInitialData({
+                fields: [],
+                values: data
+              });
+              parentFolder = data?.parentFolder;
+              setIsFetching(false);
+            })
+            .catch((error) => {
+              setIsFetching(false);
+              toastConfig.setToastConfig(error);
             });
-            parentFolder = data?.parentFolder;
-            setIsFetching(false);
-          }).catch((error) => {
-            setIsFetching(false);
-            toastConfig.setToastConfig(error);
-          });
-        }
-        else {
+        } else {
           setInitialData({
             fields: [],
             values: { name: '' }
@@ -132,20 +132,19 @@ export default function ManageAttachment({
           setIsFetching(false);
         }
       }
-    }
-    catch (error) {
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
   const handleSave = (values) => {
     let request: any = {};
-    delete values?.fileUrl
+    delete values?.fileUrl;
     if (type === 'file') {
       request = {
         ...values,
         file: allAttachments,
-        relatedTo: relatedTo,
+        relatedTo: relatedTo
       };
     } else {
       request = {
@@ -373,9 +372,21 @@ export default function ManageAttachment({
                           <AttachmentThumbnail
                             attachments={allAttachments}
                             handleDeleteAttachment={handleDeleteAttachment}
-                            canEdit={canEdit || isClone}
+                            canEdit={!isOwner ? false : canEdit || isClone}
                           />
                         </Grid>
+                        {attachmentId && attachmentData && (
+                          <Grid size={{ xs: 12 }}>
+                            <div className="flex flex-col p-2">
+                              <p>
+                                Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
+                              </p>
+                              <p>
+                                Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
+                              </p>
+                            </div>
+                          </Grid>
+                        )}
                       </Grid>
                     )}
                   </Grid>
@@ -395,7 +406,7 @@ export default function ManageAttachment({
               {(canEdit || isClone) && (
                 <ThemeButton
                   buttonType="theme"
-                  disabled={loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
+                  disabled={!isOwner ? true : loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
                   isLoading={loading}
                   onClick={submitForm}
                 >
