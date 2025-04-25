@@ -49,7 +49,8 @@ const Services = memo(({ startDate, services, handleSelect, dayPixel, item, inde
     data: {
       index: index,
       item,
-      accepts: ['sidebar']
+      accepts: ['sidebar'],
+      services
     }
   });
   const newServices = useMemo(() => addOverlapCount(services), [services]);
