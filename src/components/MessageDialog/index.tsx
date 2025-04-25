@@ -72,7 +72,7 @@ export default function CustomMessageDialog({
             <ThemeButton buttonType="transparent" onClick={onClose}>
               Cancel
             </ThemeButton>
-            <ThemeButton buttonType="transparent" onClick={onConfirm}>
+            <ThemeButton buttonType="theme" onClick={onConfirm}>
               Confirm
             </ThemeButton>
           </>
