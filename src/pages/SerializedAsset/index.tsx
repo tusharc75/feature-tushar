@@ -39,6 +39,7 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -284,8 +285,7 @@ const SerializedAsset = () => {
         newColumns.push({
           accessor: 'ownerType',
           Header: 'Actual Owner Type',
-          minWidth: 150,
-          width: 150,
+          width: 200,
           Cell: ({ row }) => (
             <>
               {row?.original?.ownerType ? (
@@ -302,8 +302,7 @@ const SerializedAsset = () => {
         newColumns.push({
           accessor: 'owner',
           Header: 'Actual Owner',
-          minWidth: 150,
-          width: 150,
+          width: 200,
           Cell: ({ row }) => (
             <>
               {row?.original?.owner ? (
@@ -314,6 +313,44 @@ const SerializedAsset = () => {
                 <NoDataCell />
               )}
             </>
+          )
+        });
+
+        newColumns.push({
+          accessor: 'rentalJob',
+          Header: resources?.rentalManagement?.titleSingular,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'rentalJob',
+                lookupResource: sidebarResource.rentalManagement
+              }}
+              original={row?.original}
+            />
+          )
+        });
+
+        newColumns.push({
+          accessor: 'repairOrder',
+          Header: resources?.repairOrder?.titleSingular,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'repairOrder',
+                lookupResource: sidebarResource.repairOrder
+              }}
+              original={row?.original}
+            />
           )
         });
 

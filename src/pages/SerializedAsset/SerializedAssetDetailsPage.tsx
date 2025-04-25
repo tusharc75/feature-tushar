@@ -93,6 +93,37 @@ const SerializedAssetDetailsPage = () => {
   const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
+  const extraFields = [
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b3',
+        fieldName: 'rentalJob',
+        fieldLabel: resources?.rentalManagement?.titleSingular,
+        lookup: true,
+        lookupResource: sidebarResource.rentalManagement,
+        resource: sidebarResource.serializedAsset,
+        type: 'dropDown',
+        sectionName: 'Other Information',
+      },
+      isRead: true,
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b5',
+        fieldName: 'repairOrder',
+        fieldLabel: resources?.repairOrder?.titleSingular,
+        lookup: true,
+        lookupResource: sidebarResource.repairOrder,
+        resource: sidebarResource.serializedAsset,
+        type: 'dropDown',
+        sectionName: 'Other Information',
+      },
+      isRead: true,
+    }
+
+  ]
+
+
   useEffect(() => {
     if (id) {
       fetchAllData();
@@ -298,7 +329,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -576,8 +607,8 @@ const SerializedAssetDetailsPage = () => {
                   data={assetDetails}
                   fields={
                     assetDetails?.status && (assetDetails?.status === ASSET_STATUS.scrap || assetDetails?.status === ASSET_STATUS.lost)
-                      ? [...fields, customField]
-                      : fields
+                      ? [...fields, customField, ...extraFields]
+                      : [...fields, ...extraFields]
                   }
                 />
               </>
