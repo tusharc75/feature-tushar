@@ -379,18 +379,14 @@ const SerializedAsset = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] =
-            permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
-              ? false
-              : true;
+          finalObject['canDelete'] = ![
+            ASSET_STATUS.new,
+            ASSET_STATUS.available,
+            ASSET_STATUS.lost,
+            ASSET_STATUS.customerPossession,
+            ASSET_STATUS.onPO,
+            ASSET_STATUS.scrap
+          ]?.includes(u?.status) ? permissions?.serializedAsset?.isDelete : false;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

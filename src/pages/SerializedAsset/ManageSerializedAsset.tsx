@@ -84,9 +84,9 @@ const ManageSerializedAsset = ({
             d.fieldData.disableOnEdit = false;
           });
         }
-
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+        let allFields = data.map((d: any) => d.fieldData);
+        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
         const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData?.option || [];
         const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData?.option || [];
@@ -139,7 +139,7 @@ const ManageSerializedAsset = ({
                 });
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                  values: getObjKeysWithValues(data, allFields)
                 });
               }
             })
