@@ -1,10 +1,11 @@
 import { Error } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { isString } from 'lodash';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';
-import { Button, Collapse } from '@mui/material';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { isString } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 interface ErrorMessages {
   index?: number;
@@ -15,21 +16,21 @@ export default function CustomMessageDialog({
   open,
   errorMessages,
   onClose,
-  title
+  title,
+  onConfirm
 }: {
   open: boolean;
   errorMessages: ErrorMessages[];
   onClose: () => void;
   title?: string;
+  onConfirm?: () => void;
 }) {
-
   const getMessageList = (message) => {
     const errorMessages: any = [];
     message?.forEach((m) => {
       if (isString(m)) {
         errorMessages.push(m);
-      }
-      else {
+      } else {
         const { index, message } = m;
         const existingMessage = errorMessages.find((m) => m?.message === message);
         if (existingMessage) {
@@ -65,11 +66,27 @@ export default function CustomMessageDialog({
       aria-labelledby="confirmation-dialog-title"
       open={open}
       id="confirmation-dialog"
+      footer={
+        onConfirm ? (
+          <>
+            <ThemeButton buttonType="transparent" onClick={onClose}>
+              Cancel
+            </ThemeButton>
+            <ThemeButton buttonType="theme" onClick={onConfirm}>
+              Confirm
+            </ThemeButton>
+          </>
+        ) : undefined
+      }
     >
       <div className="grid gap-2">
         {getMessageList(errorMessages)?.map((d, index) =>
-          isString(d) ? < RenderStringMessage index={index} d={d} />
-            : < RenderSingleMessage key={`${d?.indexes?.toString()}${d.message}`} index={index} d={d} />)}
+          isString(d) ? (
+            <RenderStringMessage index={index} d={d} />
+          ) : (
+            <RenderSingleMessage key={`${d?.indexes?.toString()}${d.message}`} index={index} d={d} />
+          )
+        )}
       </div>
     </DashboardModal>
   );

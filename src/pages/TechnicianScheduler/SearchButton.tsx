@@ -1,6 +1,6 @@
-import { Close, Search, SearchOff } from '@mui/icons-material';
-import { Badge, IconButton } from '@mui/material';
-import React, { useState } from 'react';
+import { Close, Search } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SearchBox from 'src/components/Helpers/SearchBox';
 import { cn } from 'src/constants/helpers';
@@ -11,7 +11,7 @@ const SearchButton = ({
   onOpenToggle
 }: {
   value: string;
-  setValue: React.Dispatch<React.SetStateAction<string>>;
+  setValue: (value: string) => void;
   onOpenToggle?: (open: boolean) => void;
 }) => {
   const [open, setOpen] = useState(false);
