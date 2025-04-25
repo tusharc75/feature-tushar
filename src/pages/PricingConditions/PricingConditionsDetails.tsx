@@ -98,7 +98,12 @@ const PricingConditionsDetails = () => {
               )}
               {permissions?.pricingCondition?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
-            <ActivityButton referenceId={detailData?._id} resource={ACTIVITY_RESOURCE.pricingCondition} resourceLabel={detailData?.conditionName} />
+            <ActivityButton
+              referenceId={detailData?._id}
+              resource={ACTIVITY_RESOURCE.pricingCondition}
+              resourceLabel={detailData?.conditionName}
+              resourceData={detailData}
+            />
           </Box>
         </Box>
       </Box>

@@ -273,6 +273,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       updateRateChangeState(values, priceData, pricingMethodOptions);
     }
   }
+
   const updateRateChangeState = (values: any, priceData: any, pricingMethodOptions: any) => {
     var tempPriceCondition = [...priceData];
     if (values['unit'] && values['unit'] !== '') {
@@ -312,16 +313,18 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = dayjs(values?.estimateStartDate);
-    let estimateEndDate = dayjs(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
-      errors['estimateEndDate'] = 'Please enter valid estimate end date';
-    }
-    if (fieldTicketData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')) {
-      errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(fieldTicketData.estimateStartDate)}`;
-    }
-    if (fieldTicketData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(fieldTicketData.estimateEndDate).format('YYYY-MM-DD')) {
-      errors['estimateEndDate'] = `End date cannot be later than ${displayDate(fieldTicketData.estimateEndDate)}`;
+    if (values?.estimateStartDate && values?.estimateEndDate) {
+      let estimateStartDate = dayjs(values?.estimateStartDate);
+      let estimateEndDate = dayjs(values?.estimateEndDate);
+      if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
+        errors['estimateEndDate'] = 'Please enter valid estimate end date';
+      }
+      if (fieldTicketData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')) {
+        errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(fieldTicketData.estimateStartDate)}`;
+      }
+      if (fieldTicketData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(fieldTicketData.estimateEndDate).format('YYYY-MM-DD')) {
+        errors['estimateEndDate'] = `End date cannot be later than ${displayDate(fieldTicketData.estimateEndDate)}`;
+      }
     }
     if (referenceType === 'consumables') {
       if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty > 0) {
@@ -403,6 +406,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
+                                      console.log(value)
                                       setFieldValue(name, value);
                                     }}
                                     required={field.required}
@@ -491,35 +495,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                           isTooltip={field.isTooltip}
                                           tooltipMessage={field.tooltipMessage}
                                           size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                ) : ['estimateStartDate', 'estimateEndDate'].includes(field.fieldName) ? (
-                                  <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                          minDate={fieldTicketData?.estimateStartDate}
-                                          maxDate={fieldTicketData?.estimateEndDate}
                                         />
                                       </Box>
                                     </Box>

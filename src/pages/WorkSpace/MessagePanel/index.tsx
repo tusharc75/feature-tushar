@@ -54,8 +54,17 @@ const MessagePanel = ({
 
   const resourceDataMemo = useMemo(() => {
     if (!resourceData) return null;
+    const members: any = [];
+    if (resourceData?.owner?.optionValue) {
+      members.push(resourceData?.owner?.optionValue);
+    }
+    if (resourceData?.collaborator?.length) {
+      resourceData?.collaborator?.map((c) => {
+        members.push(c?.optionValue);
+      });
+    }
     return {
-      members: [resourceData?.owner?.optionValue, ...resourceData?.collaborator?.map((c) => c?.optionValue)],
+      members: members,
       title: resourceLabel,
       resource: resource
     };

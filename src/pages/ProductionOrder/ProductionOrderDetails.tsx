@@ -142,8 +142,8 @@ const ProductionOrderDetails = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(
           permissions?.productionOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
-          data?.canDelete
+            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+            data?.canDelete
         );
         setProductionOrderData({ ...data });
       })
@@ -230,6 +230,7 @@ const ProductionOrderDetails = () => {
               referenceId={productionOrderData?._id}
               resource={ACTIVITY_RESOURCE.productionOrder}
               resourceLabel={productionOrderData?.productionOrderNumber}
+              resourceData={productionOrderData}
             />
           </Box>
         </Box>
@@ -266,23 +267,23 @@ const ProductionOrderDetails = () => {
               handleNext={
                 productionOrderProcessStepsNames[currentStep] === 'Add'
                   ? () => {
-                    setNextStep(false);
-                    axiosInstance()
-                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                      .then(({ data: { data } }) => {
-                        if (data) {
-                          let newStep;
-                          setCurrentStep((prevStep) => {
-                            newStep = prevStep + 1;
-                            return newStep;
-                          });
-                          dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
-                        }
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                      });
-                  }
+                      setNextStep(false);
+                      axiosInstance()
+                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                        .then(({ data: { data } }) => {
+                          if (data) {
+                            let newStep;
+                            setCurrentStep((prevStep) => {
+                              newStep = prevStep + 1;
+                              return newStep;
+                            });
+                            dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
+                          }
+                        })
+                        .catch((err) => {
+                          toastConfig.setToastConfig(err);
+                        });
+                    }
                   : null
               }
               updateStatus={(step: number) => {

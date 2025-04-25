@@ -248,10 +248,13 @@ const ProductDetailsPage = () => {
                 {'Edit'}
               </ThemeButton>
             )}
-            {permissions?.product?.isDelete && (
-              <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />
-            )}
-            <ActivityButton referenceId={productData?._id} resource={ACTIVITY_RESOURCE.product} resourceLabel={productData?.productName} />
+            {permissions?.product?.isDelete && <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />}
+            <ActivityButton
+              referenceId={productData?._id}
+              resource={ACTIVITY_RESOURCE.product}
+              resourceLabel={productData?.productName}
+              resourceData={productData}
+            />
           </Box>
         </Box>
       </Box>
@@ -527,11 +530,11 @@ const ProductDetailsPage = () => {
                           <CostDetails product={id} productData={productData} minHeight={minHeight} />
                         </Grid>
                       )}
-                      {user?.user?.brandPolicy?.leadTime &&
+                      {user?.user?.brandPolicy?.leadTime && (
                         <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
                           <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
                         </Grid>
-                      }
+                      )}
                     </Grid>
                   </Grid>
                 </Box>

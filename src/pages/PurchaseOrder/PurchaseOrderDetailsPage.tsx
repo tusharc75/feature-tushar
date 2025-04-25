@@ -251,6 +251,7 @@ const PurchaseOrderDetailsPage = () => {
               referenceId={purchaseOrderData?._id}
               resource={ACTIVITY_RESOURCE.purchaseOrder}
               resourceLabel={purchaseOrderData?.purchaseOrderNumber}
+              resourceData={purchaseOrderData}
             />
           </Box>
         </Box>

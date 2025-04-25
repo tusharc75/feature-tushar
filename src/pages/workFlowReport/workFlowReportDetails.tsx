@@ -126,6 +126,7 @@ const WorkFlowReportDetail = () => {
                 referenceId={workFlowReportData?.reference?.optionValue}
                 resource={camelCase(workFlowReportData?.resource)}
                 resourceLabel={workFlowReportData?.reference?.optionLabel[0]}
+                resourceData={workFlowReportData}
               />
             )}
           </Box>

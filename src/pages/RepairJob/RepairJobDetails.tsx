@@ -142,7 +142,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const fetchRepairJobData = () => {
@@ -190,7 +190,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -222,7 +222,12 @@ const RepairJobDetails = () => {
                 </ThemeButton>
               )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              <ActivityButton referenceId={repairJobData?._id} resource={ACTIVITY_RESOURCE.repairJob} resourceLabel={repairJobData?.repairJobName} />
+              <ActivityButton
+                referenceId={repairJobData?._id}
+                resource={ACTIVITY_RESOURCE.repairJob}
+                resourceLabel={repairJobData?.repairJobName}
+                resourceData={repairJobData}
+              />
             </>
           </Box>
         </Box>

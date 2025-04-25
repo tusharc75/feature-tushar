@@ -178,6 +178,7 @@ const DynamicFormDetail = () => {
                 referenceId={detailData?._id}
                 resource={camelCase(resource)}
                 resourceLabel={detailData[resourceData?.collaborateToolsField]}
+                resourceData={detailData}
               />
             )}
           </Box>
