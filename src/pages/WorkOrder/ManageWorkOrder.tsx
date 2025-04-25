@@ -59,6 +59,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         (e) => !['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName)
       );
 
+      let assetOption = []
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
         const deepFilter = [
@@ -80,9 +81,10 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         const {
           data: { data: lookupResource }
         } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`);
-        if (lookupResource['Serialized Asset']) {
-          data[serializedAssetFieldIndex].fieldData.option = lookupResource['Serialized Asset'];
-          setAssetOptionData(lookupResource['Serialized Asset']);
+        if (lookupResource[serializedAsset.resource]) {
+          data[serializedAssetFieldIndex].fieldData.option = lookupResource[serializedAsset.resource];
+          assetOption = lookupResource[serializedAsset.resource]
+          setAssetOptionData(lookupResource[serializedAsset.resource]);
         }
       }
 
@@ -93,7 +95,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
         let data;
         const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`);
         data = response?.data?.data;
-        setAssetOptions(assetOptionsData.filter((i) => i.warehouse === data?.warehouse?.optionValue));
+        assetOption = assetOption.filter((i) => i.warehouse === data?.warehouse?.optionValue);
         if (isClone) {
           const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
           rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
@@ -103,11 +105,16 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
             values: getObjKeysWithValues(rest, fieldsDataForUpdate, true, user)
           });
         } else {
+          if (data?.serializedAsset && !assetOption?.find((e) => e.optionValue === data?.serializedAsset?.optionValue)) {
+            assetOption.push(data?.serializedAsset)
+          }
           setInitialData({
             fields: fieldsDataForUpdate,
             values: getObjKeysWithValues(data, fieldsDataForUpdate)
           });
         }
+        setAssetOptions(assetOption);
+
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
