@@ -109,7 +109,12 @@ const BudgetDetail = () => {
                 </ThemeButton>
               )}
               {permissions?.budget?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
-              <ActivityButton referenceId={budgetData?._id} resource={ACTIVITY_RESOURCE.budget} resourceLabel={budgetData?.name} />
+              <ActivityButton
+                referenceId={budgetData?._id}
+                resource={ACTIVITY_RESOURCE.budget}
+                resourceLabel={budgetData?.name}
+                resourceData={budgetData}
+              />
             </>
           </Box>
         </Box>

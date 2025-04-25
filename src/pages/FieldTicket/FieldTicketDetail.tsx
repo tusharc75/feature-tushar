@@ -232,6 +232,7 @@ const FieldTicketDetail = () => {
                 referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
                 resource: ACTIVITY_RESOURCE.fieldServiceOrder
               }}
+              resourceData={fieldTicketData}
             />
           </Box>
         </Box>

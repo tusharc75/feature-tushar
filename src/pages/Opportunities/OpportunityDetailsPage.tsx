@@ -465,17 +465,19 @@ function OpportunityDetailsPage() {
     let updatedData: any = getObjKeysWithValues(updatedOpportunityData, updatedOpportunityFields);
     const calValues = autoCalculateSpecificFields({ [processFieldName]: steps[steps?.length - 1].text }, updatedData, opportunityFieldData);
     Object.assign(updatedData, calValues);
-    updatedData._id = opportunityData._id
-    axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-      fetchData();
-    })
+    updatedData._id = opportunityData._id;
+    axiosInstance()
+      .put(`/opportunity?entity=${selectedEntity}`, updatedData)
+      .then(() => {
+        fetchData();
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleUpdateSteps = (backStep = false) => {
-    let tempActiveStep = backStep ? (activeStep - 1) : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    let tempActiveStep = backStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
@@ -489,12 +491,15 @@ function OpportunityDetailsPage() {
       let updatedData: any = getObjKeysWithValues(opportunityData, opportunityFieldData);
       const calValues = autoCalculateSpecificFields({ [processFieldName]: steps[tempActiveStep].text }, updatedData, opportunityFieldData);
       Object.assign(updatedData, calValues);
-      updatedData._id = opportunityData._id
-      axiosInstance().put(`/opportunity?entity=${selectedEntity}`, updatedData).then(() => {
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      updatedData._id = opportunityData._id;
+      axiosInstance()
+        .put(`/opportunity?entity=${selectedEntity}`, updatedData)
+        .then(() => {
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
@@ -516,7 +521,7 @@ function OpportunityDetailsPage() {
             <Box className="control-buttons-v1">
               {opportunityData ? (
                 <>
-                  {allowedToEdit &&
+                  {allowedToEdit && (
                     <ThemeButton
                       iconForMobile={<EditIcon />}
                       onClick={() => {
@@ -526,12 +531,13 @@ function OpportunityDetailsPage() {
                     >
                       {'Edit'}
                     </ThemeButton>
-                  }
+                  )}
                   {allowedToDelete && <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />}
                   <ActivityButton
                     referenceId={opportunityData?._id}
                     resource={opportunityResource}
                     resourceLabel={opportunityData?.opportunityName}
+                    resourceData={opportunityData}
                   />
                 </>
               ) : (

@@ -170,7 +170,12 @@ const PlanningDetail = () => {
                 </ThemeButton>
               )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-              <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} resourceLabel={planningData?.planningNumber} />
+              <ActivityButton
+                referenceId={planningData?._id}
+                resource={ACTIVITY_RESOURCE.planning}
+                resourceLabel={planningData?.planningNumber}
+                resourceData={planningData}
+              />
             </>
           </Box>
         </Box>

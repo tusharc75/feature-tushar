@@ -527,6 +527,7 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 resource={ACTIVITY_RESOURCE.deliveryTicket}
                 resourceLabel={deliveryTicketData?.ticketName}
+                resourceData={deliveryTicketData}
               />
             </Box>
           </Box>

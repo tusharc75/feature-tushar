@@ -512,7 +512,8 @@ const ContactDetailsPage = (props) => {
                   disabled={contactData.relatedUser?.eCommerceAccess}
                   iconForMobile={<HiShoppingCart />}
                   onClick={handleEcommerceAccess}
-                  mobileTooltip={'E-Commerce Access'}>
+                  mobileTooltip={'E-Commerce Access'}
+                >
                   {'E-Commerce Access'}
                 </ThemeButton>
               )}
@@ -521,7 +522,8 @@ const ContactDetailsPage = (props) => {
                 disabled={contactData?.isUserExist}
                 iconForMobile={<RiLayoutFill />}
                 onClick={handlePortalAccess}
-                mobileTooltip={'Give Portal Access'}>
+                mobileTooltip={'Give Portal Access'}
+              >
                 {'Give Portal Access'}
               </ThemeButton>
             )}
@@ -530,13 +532,12 @@ const ContactDetailsPage = (props) => {
                 {'Edit'}
               </ThemeButton>
             )}
-            {contactPermissions?.isDelete && allowedToDelete && (
-              <DeleteButton text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />
-            )}
+            {contactPermissions?.isDelete && allowedToDelete && <DeleteButton text={'Delete'} onClick={() => setShowDeleteConfirmBox(true)} />}
             <ActivityButton
               referenceId={contactData?._id}
               resource={contactResource}
               resourceLabel={`${contactData?.firstName} ${contactData?.lastName}`}
+              resourceData={contactData}
             />
           </Box>
         </Box>
@@ -564,7 +565,9 @@ const ContactDetailsPage = (props) => {
               >
                 <CustomTab value={0} label={'Details'} />
                 <CustomTab value={1} label={'Org Charts'} />
-                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={resources?.warehouse?.titlePlural} />}
+                {contactResource === 'customerContact' && permissions?.productInventory && (
+                  <CustomTab value={2} label={resources?.warehouse?.titlePlural} />
+                )}
               </CustomTabs>
               <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (

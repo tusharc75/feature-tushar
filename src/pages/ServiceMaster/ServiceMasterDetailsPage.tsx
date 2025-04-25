@@ -150,6 +150,7 @@ const ServiceMasterDetailsPage = () => {
               referenceId={serviceMasterDetailData?._id}
               resource={ACTIVITY_RESOURCE.serviceMaster}
               resourceLabel={serviceMasterDetailData?.serviceName}
+              resourceData={serviceMasterDetailData}
             />
           </Box>
         </Box>
@@ -170,7 +171,7 @@ const ServiceMasterDetailsPage = () => {
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
-                {user?.user?.brandPolicy?.leadTime &&
+                {user?.user?.brandPolicy?.leadTime && (
                   <Box mb={2} mt={2}>
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
@@ -178,7 +179,7 @@ const ServiceMasterDetailsPage = () => {
                       </Grid>
                     </Grid>
                   </Box>
-                }
+                )}
               </>
             )}
           </Box>

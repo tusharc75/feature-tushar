@@ -94,10 +94,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            allowedToEdit &&
-            leadData[processFieldName] &&
-            currentStepToShow + 1 >= steps.length
+              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+              allowedToEdit &&
+              leadData[processFieldName] &&
+              currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -333,7 +333,10 @@ const LeadDetailsPage = () => {
     }
   };
 
-  const filteredLeadFields = useMemo(() => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName), [fields, additionalFieldName]);
+  const filteredLeadFields = useMemo(
+    () => fields?.filter((item) => item.fieldData.sectionName !== additionalFieldName),
+    [fields, additionalFieldName]
+  );
 
   return (
     <Box className="main-container-v1">
@@ -369,15 +372,13 @@ const LeadDetailsPage = () => {
               </ThemeButton>
             )}
             {allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
-              <DeleteButton
-                text={'Delete'}
-                onClick={() => setShowConfirmBox(true)}
-              />
+              <DeleteButton text={'Delete'} onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton
               referenceId={leadData?._id}
               resource={ACTIVITY_RESOURCE.lead}
               resourceLabel={`${leadData?.firstName} ${leadData?.lastName}`}
+              resourceData={leadData}
             />
           </Box>
         </Box>

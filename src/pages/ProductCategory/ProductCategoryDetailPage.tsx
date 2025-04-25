@@ -127,6 +127,7 @@ const ProductCategoryDetailPage = () => {
                 referenceId={productCategoryData?._id}
                 resource={ACTIVITY_RESOURCE.productCategory}
                 resourceLabel={productCategoryData?.name}
+                resourceData={productCategoryData}
               />
             </Box>
           </Box>

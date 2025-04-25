@@ -135,24 +135,27 @@ const ExpenseDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <Fragment>
-              {expensesData?.status !== EXPENSE_STATUS.approved && expensesData?.status !== EXPENSE_STATUS.awaitingApproval && expensesData?.status !== EXPENSE_STATUS.reimbursed && (
-                <ThemeButton
-                  iconForMobile={<Edit />}
-                  disabled={!allowedToEdit}
-                  onClick={() => {
-                    setOpenUpdateDialog(true);
-                  }}
-                  mobileTooltip={'Edit'}
-                >
-                  Edit
-                </ThemeButton>
-              )}
+              {expensesData?.status !== EXPENSE_STATUS.approved &&
+                expensesData?.status !== EXPENSE_STATUS.awaitingApproval &&
+                expensesData?.status !== EXPENSE_STATUS.reimbursed && (
+                  <ThemeButton
+                    iconForMobile={<Edit />}
+                    disabled={!allowedToEdit}
+                    onClick={() => {
+                      setOpenUpdateDialog(true);
+                    }}
+                    mobileTooltip={'Edit'}
+                  >
+                    Edit
+                  </ThemeButton>
+                )}
             </Fragment>
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton
               referenceId={expensesData?._id}
               resource={ACTIVITY_RESOURCE.expenses}
               resourceLabel={expensesData?.expenseNumber}
+              resourceData={expensesData}
             />
           </Box>
         </Box>
@@ -307,12 +310,18 @@ const ExpenseDetail = () => {
                       ))}
                       <Grid container direction="row">
                         <Grid size={{ xs: 6 }}>
-                          <Typography className={`table-head-v1 br-0 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
+                          <Typography
+                            className={`table-head-v1 br-0 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`}
+                            style={{ width: '100%' }}
+                          >
                             Total Amount
                           </Typography>
                         </Grid>
                         <Grid size={{ xs: 6 }} sx={{ textAlign: 'right' }}>
-                          <Typography className={`table-head-v1 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`} style={{ width: '100%' }}>
+                          <Typography
+                            className={`table-head-v1 text-truncate ${expensesData?.lineItems?.length > 0 ? 'bt-0' : ''}`}
+                            style={{ width: '100%' }}
+                          >
                             {formatAmountWithCurrency(expensesData?.currency, expensesData?.totalAmount)?.fullFormatAmountWithoutSpace || '-'}
                           </Typography>
                         </Grid>

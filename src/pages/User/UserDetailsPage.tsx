@@ -430,6 +430,7 @@ const UserDetailsPage = () => {
                 referenceId={userData?._id}
                 resource={ACTIVITY_RESOURCE.user}
                 resourceLabel={`${userData?.firstName} ${userData?.lastName}`}
+                resourceData={userData}
               />
             </Box>
           </Box>
