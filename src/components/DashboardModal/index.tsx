@@ -91,7 +91,7 @@ const DashboardModal: FC<ModalProps> = ({
       className={styles.dialogContainer}
     >
       {modalHead && (
-        <MuiDialogTitle disableTypography className={styles.modalHead}>
+        <MuiDialogTitle component="div" className={styles.modalHead}>
           <Box className={styles.modalIconAndName}>
             {modalHead?.icon && <Box className={styles.modalIcon}>{modalHead?.icon}</Box>}
             <div className="flex-grow">

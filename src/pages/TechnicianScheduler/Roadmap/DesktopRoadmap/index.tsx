@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { memo, useMemo, useState } from 'react';
 import { cn } from 'src/constants/helpers';
-import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import Calendar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Calendar';
 import LeftSidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/LeftSidebar';
@@ -37,7 +37,7 @@ const DesktopRoadmapImpl = ({
   setIsSidebarOpen,
   loading
 }: DesktopRoadmapProps) => {
-  const { technicianSearchValue } = useTechnicianContext();
+  const [technicianSearchValue] = useRoadMapStore((state) => state.technicianSearchValue);
   const filteredActivity = useMemo(() => {
     const searchFor = (technicianSearchValue || '').trim().toLowerCase();
     if (searchFor) {

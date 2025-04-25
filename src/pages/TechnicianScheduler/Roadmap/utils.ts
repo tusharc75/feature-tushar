@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 export function addOverlapCount(dataList) {
   const newDataList = dataList ? [...dataList] : [];
@@ -18,7 +18,6 @@ export function addOverlapCount(dataList) {
       const start2 = dayjs(obj2.startDate || obj2.reference?.estimateStartDate);
       const end2 = dayjs(obj2.endDate || obj2.reference?.estimateEndDate);
       // Check for overlaps in both directions
-
       if ((start1.isBefore(end2, 'day') || start1.isSame(end2, 'day')) && (end1.isAfter(start2, 'day') || end1.isSame(start2, 'day'))) {
         if (i !== j) {
           newDataList[i].overlapCount++;
@@ -53,3 +52,24 @@ export function isCollidingOnTop(element: HTMLElement, container: HTMLElement, t
 
   return elementRect.top <= containerRect.top + topOffset && elementRect.bottom > containerRect.top;
 }
+
+interface ScheduleItem {
+  _id: string;
+  startDate: string;
+  endDate: string;
+  estimateStartDate: string;
+  estimateEndDate: string;
+  reference: {
+    estimateStartDate: string;
+    estimateEndDate: string;
+    optionValue: string;
+    optionLabel: string;
+  };
+}
+export const hasDateOverlap = (schedules: ScheduleItem[], startDate: Dayjs, endDate: Dayjs): boolean => {
+  return schedules?.some((schedule) => {
+    const scheduleStart = dayjs(schedule.startDate || schedule.reference?.estimateStartDate);
+    const scheduleEnd = dayjs(schedule.endDate || schedule.reference?.estimateEndDate);
+    return startDate.isSameOrBefore(scheduleEnd) && endDate.isSameOrAfter(scheduleStart);
+  });
+};
