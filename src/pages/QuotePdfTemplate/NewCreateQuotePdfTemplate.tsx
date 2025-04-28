@@ -150,6 +150,7 @@ export default function NewCreateQuotePdfTemplate() {
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
+      hideTaxSection: false,
       tableTotalAtBottom: false,
       tableFontSize: '',
       belowTableTotalFontSize: '',
@@ -212,6 +213,7 @@ export default function NewCreateQuotePdfTemplate() {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
         initialValues.landscape = tempPdfTemplate?.landscape;
         initialValues.hideAmountTotalSection = tempPdfTemplate?.hideAmountTotalSection;
+        initialValues.hideTaxSection = tempPdfTemplate?.hideTaxSection;
         initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
         initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
@@ -247,6 +249,7 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           initialValues.landscape = data?.landscape;
           initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
+          initialValues.hideTaxSection = data?.hideTaxSection;
           initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
           initialValues.tableFontSize = data?.tableFontSize;
           initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
@@ -358,6 +361,7 @@ export default function NewCreateQuotePdfTemplate() {
             const newInitialValues = {
               landscape: importedData?.landscape,
               hideAmountTotalSection: importedData?.hideAmountTotalSection,
+              hideTaxSection: importedData?.hideTaxSection,
               tableTotalAtBottom: importedData?.tableTotalAtBottom,
               tableFontSize: importedData?.tableFontSize,
               belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
@@ -456,6 +460,7 @@ export default function NewCreateQuotePdfTemplate() {
           owner: values?.owner,
           collaborator: values?.collaborator,
           landscape: values?.landscape,
+          hideTaxSection: values?.hideTaxSection,
           hideAmountTotalSection: values?.hideAmountTotalSection,
           tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
@@ -506,6 +511,7 @@ export default function NewCreateQuotePdfTemplate() {
           owner: values?.owner,
           collaborator: values?.collaborator,
           landscape: values?.landscape,
+          hideTaxSection: values?.hideTaxSection,
           hideAmountTotalSection: values?.hideAmountTotalSection,
           tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
@@ -720,10 +726,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -757,10 +763,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -796,10 +802,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -900,6 +906,21 @@ export default function NewCreateQuotePdfTemplate() {
                                       />
                                     }
                                     label="Hide Amount Total Section"
+                                  />
+                                  <FormControlLabel
+                                    disabled={!allowedToEdit || !isEdit}
+                                    value={values['hideTaxSection']}
+                                    control={
+                                      <Checkbox
+                                        name="hideTaxSection"
+                                        checked={values['hideTaxSection']}
+                                        onChange={(e) => {
+                                          setFieldValue('hideTaxSection', e.target.checked);
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label="Hide Tax Section"
                                   />
                                   <FormControlLabel
                                     disabled={!allowedToEdit || !isEdit}
