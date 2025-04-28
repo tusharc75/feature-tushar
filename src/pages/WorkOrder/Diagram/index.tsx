@@ -2,7 +2,7 @@ import { Autocomplete, Box, Collapse, Dialog, Divider, IconButton, TextField, Ty
 import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import InfoIcon from '@mui/icons-material/Info';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,7 +17,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
-import PdfPreview from './ShowPdf/PdfPreview';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ImageEditor from './ImageEditor';
@@ -258,7 +257,6 @@ const Diagram = ({
       });
   };
 
-  const isSelectedAttachmentImage = checkImageType(selectedAttachment?.url?.split('.')[1]);
 
   const handleRequestReject = (id) => {
     axiosInstance()
@@ -329,11 +327,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                         onClick={() => {
                           setExpended((prev) => ({
                             ...prev,
@@ -398,7 +395,7 @@ const Diagram = ({
                             }
                           >
                             <IconButton size="small" color="inherit">
-                              <InfoOutlinedIcon style={{ fontSize: '18px' }} />
+                              <InfoIcon fontSize='small' color='primary' />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -414,7 +411,7 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: false });
                                   }}
                                 >
-                                  <EditIcon style={{ fontSize: '18px' }} color={'primary'} />
+                                  <EditIcon fontSize='small' color='primary' />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip title="Clone" placement="top" arrow>
@@ -427,7 +424,7 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: true });
                                   }}
                                 >
-                                  <FileCopyIcon style={{ fontSize: '18px' }} />
+                                  <FileCopyIcon fontSize='small' color='primary' />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip
@@ -446,7 +443,7 @@ const Diagram = ({
                                     setShowConfirmBox(true);
                                   }}
                                 >
-                                  <Delete style={{ fontSize: '18px' }} color={!isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
+                                  <Delete fontSize='small' color={!isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
                                 </IconButton>
                               </HtmlTooltip>
                             </>
@@ -516,7 +513,7 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          {!isSelectedAttachmentImage && disableEdit && (
+          {disableEdit && (
             <CustomDialogHeader
               title={selectedAttachment?.name}
               showManimizeMaximize={false}
@@ -526,27 +523,22 @@ const Diagram = ({
               }}
             />
           )}
-          <CustomDialogContent isFooterPresent={false} className={cn(isSelectedAttachmentImage && !disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
-            {isSelectedAttachmentImage ? (
-              disableEdit ? (
-                <ShowPdf data={selectedAttachment} />
-              ) : (
-                <ImageEditor
+          <CustomDialogContent isFooterPresent={false} className={cn(!disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ?
+              <ImageEditor
+                data={selectedAttachment}
+                fetchData={fetchData}
+                setSelectedAttachment={setSelectedAttachment}
+                handleClose={() => setSelectedAttachment(null)}
+              /> : checkpdfType(selectedAttachment?.url?.split('.')[1]) ?
+                <PdfEditor
                   data={selectedAttachment}
                   fetchData={fetchData}
                   setSelectedAttachment={setSelectedAttachment}
-                  handleClose={() => setSelectedAttachment(null)}
-                />
-              )
-            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
-              disableEdit ? (
-                <ShowPdf data={selectedAttachment} />
-              ) : (
-                <PdfEditor data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} handleClose={() => setSelectedAttachment(null)}/>
-              )
-            ) : (
-              <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
-            )}
+                  handleClose={() => setSelectedAttachment(null)} />
+                :
+                <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+            }
           </CustomDialogContent>
         </Dialog>
       )}
