@@ -105,6 +105,9 @@ export default function ImportExportLinks({
       let importApi = `${api}/import`;
 
       if (additionalParams) {
+        if (additionalParams?.includes('?')) {
+          additionalParams = additionalParams?.replace(`?`, `&`);
+        }
         importApi = `${importApi}?${additionalParams}`;
       }
 
