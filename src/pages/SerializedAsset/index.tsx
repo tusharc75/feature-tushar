@@ -315,45 +315,46 @@ const SerializedAsset = () => {
             </>
           )
         });
-
-        newColumns.push({
-          accessor: 'rentalJob',
-          Header: resources?.rentalManagement?.titleSingular,
-          width: 200,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <DropdownCell
-              permissions={permissions}
-              permissionForLinks={{}}
-              field={{
-                fieldName: 'rentalJob',
-                lookupResource: sidebarResource.rentalManagement
-              }}
-              original={row?.original}
-            />
-          )
-        });
-
-        newColumns.push({
-          accessor: 'repairOrder',
-          Header: resources?.repairOrder?.titleSingular,
-          width: 200,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <DropdownCell
-              permissions={permissions}
-              permissionForLinks={{}}
-              field={{
-                fieldName: 'repairOrder',
-                lookupResource: sidebarResource.repairOrder
-              }}
-              original={row?.original}
-            />
-          )
-        });
-
+        if (permissions?.rentalManagement?.isRead) {
+          newColumns.push({
+            accessor: 'rentalJob',
+            Header: resources?.rentalManagement?.titleSingular,
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'rentalJob',
+                  lookupResource: sidebarResource.rentalManagement
+                }}
+                original={row?.original}
+              />
+            )
+          });
+        }
+        if (permissions?.repairOrder?.isRead) {
+          newColumns.push({
+            accessor: 'repairOrder',
+            Header: resources?.repairOrder?.titleSingular,
+            width: 200,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'repairOrder',
+                  lookupResource: sidebarResource.repairOrder
+                }}
+                original={row?.original}
+              />
+            )
+          });
+        }
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
       });
   };
