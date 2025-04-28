@@ -30,12 +30,12 @@ const Chatter = (props: any) => {
   const [loading, setLoading] = useState(false);
   const [isSending, setSending] = useState(false);
   const chatSocket = useSocket({ namespace: '/chatter' });
-
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
   };
+
 
   const getChatter = () => {
     setLoading(true);
