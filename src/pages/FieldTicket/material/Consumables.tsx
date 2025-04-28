@@ -286,7 +286,7 @@ const Consumables = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {!isOffline && (
+            {!isOffline && !resourcePolicy?.hideInventoryConsume && (
               <HtmlTooltip title="History">
                 <IconButton
                   size="small"
