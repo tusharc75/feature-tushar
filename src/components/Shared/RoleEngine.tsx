@@ -744,24 +744,24 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
           <TableRow key={innerIndex}>
             <TableCell sx={{ py: 0 }}>
               <Typography variant="body1" style={{ fontWeight: '400' }}>
-                &emsp; {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
+                {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
               </Typography>
             </TableCell>
-            <TableCell align="center" sx={{ py: 0 }}>
+            <TableCell align="left" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isReadDisabled || _field.isReadDisabled}
                 checked={_field.isRead}
                 onChange={handleChange('field', _field.fieldData._id, 'isRead')}
               />
             </TableCell>
-            <TableCell align="center" sx={{ py: 0 }}>
+            <TableCell align="left" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isCreateDisabled || _field.isCreateDisabled}
                 checked={_field.isCreate}
                 onChange={handleChange('field', _field.fieldData._id, 'isCreate')}
               />
             </TableCell>
-            <TableCell align="center" sx={{ py: 0 }}>
+            <TableCell align="left" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isUpdateDisabled || _field.isUpdateDisabled}
                 checked={_field.isUpdate}
