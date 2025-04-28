@@ -248,7 +248,7 @@ const Services = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {/* <HtmlTooltip title="Attachments">
+            <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
                 aria-label="Attachment"
@@ -258,7 +258,7 @@ const Services = ({
               >
                 <AttachFileIcon fontSize="small" color='primary' />
               </IconButton>
-            </HtmlTooltip> */}
+            </HtmlTooltip>
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip

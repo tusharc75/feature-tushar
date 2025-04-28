@@ -99,20 +99,6 @@ const QuoteBuilders = () => {
     fetchGridColumns();
   }, []);
 
-  useEffect(() => {
-    if (columns) {
-      const filterVal = {};
-      filterVal['quoteDate'] = {
-        filter: {
-          from: dateFormatToSend(dayjs.tz().startOf('year').toDate()),
-          to: dateFormatToSend(dayjs.tz().endOf('year').toDate())
-        }
-      };
-      dispatch({ type: 'filter', filters: filterVal });
-    }
-  }, [columns]);
-
-
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.quoteBuilder}&entity=${selectedEntity}&view=true`);
 
