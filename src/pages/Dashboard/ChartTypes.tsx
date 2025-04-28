@@ -423,6 +423,18 @@ const ChartTypes = ({
                           }
                         })
                       },
+                      legend: {
+                        labels: {
+                          ...((chart.chartTitle === 'Bar Chart Of Customer In Rental' || chart.chartTitle === 'In Use By Category') && {
+                            boxWidth: 0,
+                            padding: 10
+                          }),
+                          ...(!(chart.chartTitle === 'Bar Chart Of Customer In Rental' || chart.chartTitle === 'In Use By Category') && {
+                            usePointStyle: false,
+                            boxWidth: 40
+                          })
+                        }
+                      },
                       onClick: (event, elements) => {
                         if (elements.length > 0 && chart?.kpi?.redirectField && chart?.kpi?.resource) {
                           const dataIndex = elements[0].index;
