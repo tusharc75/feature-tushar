@@ -6,7 +6,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, convertBlobToBase64 } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
 
-const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
+const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
   const editorRef = useRef<EditorRef>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -192,4 +192,4 @@ const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = nul
   );
 };
 
-export default PdfPreview1;
+export default PdfEditor;
