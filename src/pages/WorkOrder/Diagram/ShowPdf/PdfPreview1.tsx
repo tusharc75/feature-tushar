@@ -3,7 +3,7 @@ import { Box, IconButton, Typography } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { b64toBlob, cn, convertBlobToBase64 } from 'src/constants/helpers';
+import { cn, convertBlobToBase64 } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
 
 const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
@@ -48,11 +48,10 @@ const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = nul
       format: 'image/png',
       quality: 1.0
     });
-    // Return the promise from setState to ensure it completes
     return new Promise(resolve => {
       setEditedPages(prev => {
         const updated = { ...prev, [currentPageIndex]: editedDataUrl };
-        resolve(updated); // Resolve with the updated state
+        resolve(updated);
         return updated;
       });
     });
@@ -62,9 +61,7 @@ const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = nul
     if (!editorRef.current) return;
     setSubmitting(true);
     try {
-      // Wait for the current page edits to be saved AND get the updated editedPages
       const updatedEditedPages = await saveCurrentPageEdits();
-      
       const imageData = [];
       for (let index = 0; index < pageImages.length; index++) {
         if (updatedEditedPages[index]) {
@@ -75,18 +72,15 @@ const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = nul
           imageData.push(dataUrl);
         }
       }
-  
       await axiosInstance().post('/user/pdf', {
         images: imageData,
         fileName: data?.url,
         attachmentId: data?.attachmentId
       });
-  
       await axiosInstance().put(`/attachment/replace/${data?.attachmentId}`, {
         oldUrl: data?.url,
         url: data?.url
       });
-  
       setSelectedAttachment(null);
       fetchData();
     } catch (err) {
@@ -106,6 +100,8 @@ const PdfPreview1 = ({ data, fetchData, setSelectedAttachment, handleClose = nul
         link.href = url;
         link.setAttribute('download', `${data?.url}`);
         link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
       });
   };
 
