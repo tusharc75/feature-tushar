@@ -1,21 +1,20 @@
 import { kebabCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useData } from '../../StateProvider/Provider';
-import styles from './Dashboard.module.scss';
+import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
+import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import GenieText from 'src/assets/svg/GenieText';
 import routes from 'src/components/Helpers/Routes';
 import { cn } from 'src/constants/helpers';
 import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import DisplaySideCard from 'src/pages/Home/DisplaySideCard';
-import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
-import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import Chart from './Chart';
-import { assignIconAndText, getAllData, groupByKey } from './helpers';
 import SideCard from 'src/pages/Home/SideCard';
-import equiptGenieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
-import dynamicFormImage from 'src/assets/dashboard_images/sidebar/dynamic-form.png';
+import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
 import WorkspaceCard from 'src/pages/Home/WorkspaceCard';
-import { SVG } from 'src/assets';
-import GenieText from 'src/assets/svg/GenieText';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import Chart from './Chart';
+import styles from './Dashboard.module.scss';
+import { assignIconAndText, getAllData, groupByKey } from './helpers';
 
 export const userManual = {
   description: 'View our user manual in just a click.',

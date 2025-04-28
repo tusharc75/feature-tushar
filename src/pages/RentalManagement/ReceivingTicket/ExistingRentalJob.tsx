@@ -15,6 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import PackageDialog from 'src/pages/RentalManagement/ReceivingTicket/PackageDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 const renderedFrom = 'rental_management_existing';
 
@@ -35,6 +36,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns, checkStaticField } = useColumns();
+  const [showStatusChangeConfirmBox, setShowStatusChangeConfirmBox] = useState({
+    open: false, toRentalData: null, selectedPackage: null, underReviewAssetsData: null,
+    reserveAssetsData: null, assetDataError: []
+  });
 
   useEffect(() => {
     fetchGridColumns();
@@ -102,7 +107,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     return result;
   };
 
-  const handleMoveAsset = (toRentalData, selectedPackage = null, underReviewAssetsData = null, reserveAssetsData = null) => {
+  const handleMoveAsset = (toRentalData, selectedPackage = null, underReviewAssetsData = null, reserveAssetsData = null, skipTriggerAssetStatusChange = false) => {
     setIsSubmitting(true);
     const data: any = {
       fromRentalId: referenceData?._id,
@@ -140,13 +145,27 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     if (selectedPackage) {
       data['packageUniqueId'] = selectedPackage?.optionValue;
     }
+    data.skipTriggerAssetStatusChange = skipTriggerAssetStatusChange;
     axiosInstance()
       .post(`${rentalManagement.api}/move-asset-inter-rental`, data)
-      .then((res) => {
-        setIsSubmitting(false);
-        setUnderReviewAssetData(null);
-        setSelectedPackage(null);
-        onSuccess();
+      .then(({ data }) => {
+        if (data?.data?.errors?.length) {
+          const assetDataError = []
+          data?.data?.errors?.forEach((ele) => {
+            let message = ele.assetNumber;
+            ele?.fields?.forEach((e) => {
+              message += ` (${e?.fieldLabel}: ${e?.value})`
+            })
+            assetDataError.push(message)
+          })
+          setShowStatusChangeConfirmBox({ open: true, toRentalData, selectedPackage, underReviewAssetsData, reserveAssetsData, assetDataError })
+        }
+        else {
+          setIsSubmitting(false);
+          setUnderReviewAssetData(null);
+          setSelectedPackage(null);
+          onSuccess();
+        }
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -288,6 +307,24 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />
       )}
+      {showStatusChangeConfirmBox.open &&
+        <CustomMessageDialog
+          open={showStatusChangeConfirmBox.open}
+          errorMessages={showStatusChangeConfirmBox.assetDataError}
+          onClose={() => {
+            setShowStatusChangeConfirmBox({ open: false, toRentalData: null, selectedPackage: null, underReviewAssetsData: null, reserveAssetsData: null, assetDataError: [] })
+            onClose()
+          }}
+          onConfirm={() => {
+            handleMoveAsset(showStatusChangeConfirmBox.toRentalData,
+              showStatusChangeConfirmBox.selectedPackage,
+              showStatusChangeConfirmBox.underReviewAssetsData,
+              showStatusChangeConfirmBox.reserveAssetsData,
+              true
+            )
+          }}
+          title={"Status change will be triggered for the following assets. Do you want to continue without changing their status?"}
+        />}
     </Dialog>
   );
 };

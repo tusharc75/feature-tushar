@@ -171,8 +171,8 @@ const TransferInventoryDetailPage = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setAllowedToDelete(
           permissions?.transferInventory?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
-          data?.canEdit
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+            data?.canEdit
         );
         setTransferInventoryData(data);
       })
@@ -253,6 +253,7 @@ const TransferInventoryDetailPage = () => {
               referenceId={transferInventoryData?._id}
               resource={ACTIVITY_RESOURCE.transferInventory}
               resourceLabel={transferInventoryData?.transferNumber}
+              resourceData={transferInventoryData}
             />
           </Box>
         </Box>

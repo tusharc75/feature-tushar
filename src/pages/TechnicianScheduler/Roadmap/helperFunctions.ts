@@ -10,7 +10,6 @@ export const getPriority = (status: string = ''): TPriority => {
   if (status) {
     return priority[priorityMap[status]] as TPriority;
   }
-
   return priority[Math.floor(Math.random() * priority.length)];
 };
 

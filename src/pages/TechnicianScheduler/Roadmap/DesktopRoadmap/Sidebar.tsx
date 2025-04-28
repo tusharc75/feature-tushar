@@ -2,16 +2,18 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { AccountCircle, AddCircleOutline, Map } from '@mui/icons-material';
 import { Avatar, IconButton, ListItem, ListItemButton, Skeleton, Typography } from '@mui/material';
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn } from 'src/constants/helpers';
-import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
+import dayjs from 'dayjs';
+import { hasDateOverlap } from 'src/pages/TechnicianScheduler/Roadmap/utils';
 
 type SidebarProps = {
   activity: TActivity[];
@@ -21,14 +23,15 @@ type SidebarProps = {
 };
 
 const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
-  const { technicianSearchValue, setTechnicianSearchValue } = useTechnicianContext();
+  const [technicianSearchValue, setStore] = useRoadMapStore((state) => state.technicianSearchValue);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   return (
     <aside className="sticky right-0 z-[3] border-l bg-[white] dark:bg-[--dark-primary]">
       <div className="sticky top-0 z-[4] flex h-[--header-h] items-center justify-between gap-2 border-b bg-[--dark-primary,white] p-4">
         <h6 className="line-clamp-1 text-[1rem] font-semibold">Technicians</h6>
         <div className="flex">
-          <SearchButton value={technicianSearchValue} setValue={setTechnicianSearchValue} onOpenToggle={setIsSearchOpen} />
+          <SearchButton value={technicianSearchValue} setValue={(val) => setStore({ technicianSearchValue: val })} onOpenToggle={setIsSearchOpen} />
           <div className={cn('flex items-center overflow-hidden transition-all', isSearchOpen ? 'w-0' : 'w-[30px] ')}>
             <IconButton
               size="small"
@@ -90,7 +93,8 @@ const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: Sid
 export default Sidebar;
 
 export const SingleTechnician = memo(({ data, handleSelect, index, selectedResource, className = '' }: any) => {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const [activeItemData] = useRoadMapStore((state) => state.activeItemData);
+  const { attributes, listeners, setNodeRef, transform, isDragging, over } = useDraggable({
     id: data._id,
     data: {
       index: index,
@@ -100,19 +104,36 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
     }
   });
 
+  const { isBlocked, showColor } = useMemo(() => {
+    if (activeItemData?.type !== 'sidebar') return { showColor: false, isBlocked: false };
+    const { data: hoverdIemData } = activeItemData;
+    const dataStartDate = dayjs(hoverdIemData?.service?.estimateStartDate || hoverdIemData?.estimateStartDate);
+    const dataEndDate = dayjs(hoverdIemData?.service?.estimateEndDate || hoverdIemData?.estimateEndDate);
+    return { showColor: true, isBlocked: hasDateOverlap(data?.technicianHistory, dataStartDate, dataEndDate) };
+  }, [activeItemData, data]);
+
+  const textColorClass = showColor && over?.id === data._id ? (isBlocked ? 'text-white' : 'text-white') : '';
+  const bgColorClass = showColor && over?.id === data._id ? (isBlocked ? 'bg-red-500' : 'bg-green-500') : '';
+
   const styleDnd = {
     transform: CSS.Translate.toString(transform)
   };
 
   return (
     <li
-      className={cn('cursor-grab list-none border-b bg-[--dark-primary,white] p-0', isDragging ? 'h-[90px]' : '', className)}
+      className={cn(
+        'cursor-grab list-none border-b bg-[--dark-primary,white] p-0 transition-colors',
+        isDragging ? 'h-[90px]' : '',
+        textColorClass,
+        bgColorClass,
+        className
+      )}
       {...attributes}
       {...listeners}
       ref={setNodeRef}
       style={{ ...styleDnd }}
     >
-      <ListItem className="flex !h-[calc(var(--data-h)-1px)] items-center !justify-between  px-4">
+      <ListItem className="flex !h-[calc(var(--data-h)-1px)] items-center !justify-between px-4">
         <div className="flex min-w-0 items-center gap-4">
           <Avatar sizes="small" style={{ height: 45, width: 45 }} alt="Remy Sharp" src={data?.photo}>
             <AccountCircle style={{ fontSize: 28 }} />
@@ -124,14 +145,17 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
                 style={{ fontWeight: 'bolder', fontSize: '1rem' }}
                 className="line-clamp-1"
               >{`${data?.firstName} ${data?.lastName}`}</Typography>
-              <Link className="flex-shrink-0 ml-1" to={`${routes.employeeMasterDetail.path}/${data._id}`} target={'_blank'}>
-                <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+              <Link className="ml-1 flex-shrink-0" to={`${routes.employeeMasterDetail.path}/${data._id}`} target={'_blank'}>
+                <FiExternalLink size={16} className={cn('align-baseline text-gray-500 dark:text-gray-300', textColorClass)} />
               </Link>
             </div>
-            <p className="line-clamp-1 text-[0.8rem] text-gray-500" title={`${data?.competencyType?.optionLabel || ''}`}>
+            <p className={cn('line-clamp-1 text-[0.8rem] text-gray-500', textColorClass)} title={`${data?.competencyType?.optionLabel || ''}`}>
               {`${data?.competencyType?.optionLabel || ''}`}
             </p>
-            <p className="line-clamp-1 text-[0.6rem] text-gray-500" title={`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}>
+            <p
+              className={cn('line-clamp-1 text-[0.6rem] text-gray-500', textColorClass)}
+              title={`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
+            >
               {`${data?.competencies?.map((e) => e?.optionLabel)?.toString() || ''}`}
             </p>
           </div>
@@ -146,7 +170,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               size="small"
               color="primary"
             >
-              <AddCircleOutline fontSize="small" />
+              <AddCircleOutline fontSize="small" className={cn(textColorClass)} />
             </IconButton>
           </HtmlTooltip>
           <IconButton
@@ -159,7 +183,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               }
             }}
           >
-            <Map fontSize="small" />
+            <Map fontSize="small" className={cn(textColorClass)} />
           </IconButton>
         </div>
       </ListItem>

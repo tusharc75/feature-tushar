@@ -77,6 +77,7 @@ const Technicians = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   useEffect(() => {
     fetchColumns();
@@ -477,7 +478,7 @@ const Technicians = ({
       });
   };
 
-  const handleAssign = (rows) => {
+  const handleAssign = (rows, skipDateValidation = false) => {
     setIsSubmitting(true);
     const technician: any = [];
     rows.forEach((d) => {
@@ -492,7 +493,7 @@ const Technicians = ({
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician`, { technician })
+      .post(`${fieldServiceOrder.api}/technician`, { technician, skipDateValidation })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -506,9 +507,15 @@ const Technicians = ({
         fetchData();
         fetchserviceOrderData();
         setIsSubmitting(false);
+        setShowConfirmBox({ open: false, rows: [] })
       })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
+        if (skipDateValidation) {
+          toastConfig.setToastConfig(error);
+        }
+        else {
+          setShowConfirmBox({ open: true, rows: rows })
+        }
         setIsSubmitting(false);
       });
   };
@@ -799,6 +806,18 @@ const Technicians = ({
           technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
           resource={sidebarResource.fieldServiceOrder}
+        />
+      )}
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={showConfirmBox.open}
+          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          onClose={() => {
+            setShowConfirmBox({ open: false, rows: [] });
+          }}
+          onOk={() => {
+            handleAssign(showConfirmBox.rows, true)
+          }}
         />
       )}
     </>

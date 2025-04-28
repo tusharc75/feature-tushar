@@ -49,7 +49,7 @@ const EmployeeMasterDetail = () => {
       fetchData();
       fetchLoggedInUserRole();
       fetchPolicy();
-      fetchUnavailabilityFields()
+      fetchUnavailabilityFields();
     }
   }, [id]);
 
@@ -57,7 +57,7 @@ const EmployeeMasterDetail = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.technicianUnavailability}&view=true`);
     data = response?.data?.data;
-    setUnavailabilityFields(data)
+    setUnavailabilityFields(data);
   };
 
   const fetchFields = async () => {
@@ -137,19 +137,22 @@ const EmployeeMasterDetail = () => {
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
-    await axiosInstance().get(`/user/${user.user?._id}`).then(({ data: { data } }) => {
-      data.entities.map((item) => {
-        item.role.forEach((role) => {
-          if (roleIds.includes(role?._id)) {
-          } else {
-            roleIds.push(role?._id);
-          }
+    await axiosInstance()
+      .get(`/user/${user.user?._id}`)
+      .then(({ data: { data } }) => {
+        data.entities.map((item) => {
+          item.role.forEach((role) => {
+            if (roleIds.includes(role?._id)) {
+            } else {
+              roleIds.push(role?._id);
+            }
+          });
         });
+        setRoleAccessOfLoggedInUser(roleIds);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-      setRoleAccessOfLoggedInUser(roleIds);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
@@ -185,10 +188,7 @@ const EmployeeMasterDetail = () => {
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (
-                <ThemeButton
-                  iconForMobile={<EditIcon />}
-                  onClick={handleOpenUpdateDialog}
-                  mobileTooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   Edit
                 </ThemeButton>
               )}
@@ -198,6 +198,7 @@ const EmployeeMasterDetail = () => {
               referenceId={employeeMasterData?._id}
               resource={ACTIVITY_RESOURCE.employeeMaster}
               resourceLabel={employeeMasterData?.employeeNumber}
+              resourceData={employeeMasterData}
             />
           </Box>
         </Box>
@@ -206,9 +207,10 @@ const EmployeeMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'History'} />
-          {unavailabilityFields?.length > 0 &&
-            <CustomTab value={2} label={'Unavailability'} />}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
+          {unavailabilityFields?.length > 0 && <CustomTab value={2} label={'Unavailability'} />}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -225,20 +227,22 @@ const EmployeeMasterDetail = () => {
         <TabPanel value={tabValue} index={2}>
           <Unavailability id={id} />
         </TabPanel>
-        {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => {
-          return (
-            <TabPanel value={tabValue} index={i + 3}>
-              <Step
-                tab={tab}
-                resourcePolicyId={resourceData?._id}
-                resourceId={id}
-                resource={sidebarResource.employeeMaster}
-                data={employeeMasterData}
-                allowedToEdit={permissions?.employeeMaster?.isUpdate}
-              />
-            </TabPanel>
-          );
-        })}
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.employeeMaster}
+                  data={employeeMasterData}
+                  allowedToEdit={permissions?.employeeMaster?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

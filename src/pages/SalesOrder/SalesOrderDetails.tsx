@@ -183,15 +183,16 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
-                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.readyToInvoice].includes(salesOrderData?.status) && (
-                  <ButtonWithPulse
-                    onClick={() => {
-                      setShowClosedConfirmBox(true);
-                    }}
-                  >
-                    Close
-                  </ButtonWithPulse>
-                )}
+                {permissions?.salesOrder?.isUpdate &&
+                  [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.readyToInvoice].includes(salesOrderData?.status) && (
+                    <ButtonWithPulse
+                      onClick={() => {
+                        setShowClosedConfirmBox(true);
+                      }}
+                    >
+                      Close
+                    </ButtonWithPulse>
+                  )}
                 {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <ThemeButton
                     iconForMobile={false}
@@ -218,7 +219,12 @@ const SalesOrderDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={salesOrderData?._id} resource={ACTIVITY_RESOURCE.salesOrder} resourceLabel={salesOrderData?.salesOrderNo} />
+            <ActivityButton
+              referenceId={salesOrderData?._id}
+              resource={ACTIVITY_RESOURCE.salesOrder}
+              resourceLabel={salesOrderData?.salesOrderNo}
+              resourceData={salesOrderData}
+            />
           </Box>
         </Box>
       </Box>

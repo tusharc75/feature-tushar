@@ -135,7 +135,12 @@ const WarehouseDetailsPage = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={warehouseData?._id} resource={ACTIVITY_RESOURCE.warehouse} resourceLabel={warehouseData?.warehouseName} />
+            <ActivityButton
+              referenceId={warehouseData?._id}
+              resource={ACTIVITY_RESOURCE.warehouse}
+              resourceLabel={warehouseData?.warehouseName}
+              resourceData={warehouseData}
+            />
           </Box>
         </Box>
       </Box>

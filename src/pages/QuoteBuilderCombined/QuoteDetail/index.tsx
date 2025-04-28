@@ -476,7 +476,7 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => { })
+      .then(() => {})
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -646,8 +646,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                          ![QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer]?.includes(quoteData?.versions[currentVersion]?.status) &&
-                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                        ![QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer]?.includes(quoteData?.versions[currentVersion]?.status) &&
+                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -705,7 +705,12 @@ export default function QuoteDetail() {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quoteData?._id} resource={ACTIVITY_RESOURCE.quote} resourceLabel={quoteData?.quoteName} />
+            <ActivityButton
+              referenceId={quoteData?._id}
+              resource={ACTIVITY_RESOURCE.quote}
+              resourceLabel={quoteData?.quoteName}
+              resourceData={quoteData}
+            />
           </Box>
         </Box>
       </Box>
@@ -854,8 +859,8 @@ export default function QuoteDetail() {
               sx={{
                 '& .MuiInputBase-root textarea': {
                   resize: 'vertical',
-                  overflow: 'auto',
-                },
+                  overflow: 'auto'
+                }
               }}
             />
           </CustomDialogContent>

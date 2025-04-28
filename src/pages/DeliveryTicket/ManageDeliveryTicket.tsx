@@ -329,7 +329,7 @@ const ManageDeliveryTicket = ({
               else {
                 fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation']?.includes(e.fieldName));
               }
-              if (referenceData?.deliveryTo === DELIVERY_FROM_TO_TYPE.plant) {
+              if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
                 fieldsDataForCreate?.forEach((element) => {
                   if (element?.fieldName === 'deliveryToStorageLocation') {
                     element.required = true;

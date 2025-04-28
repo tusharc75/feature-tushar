@@ -148,7 +148,7 @@ const JobDetail = () => {
               </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} resourceLabel={jobData?.jobNumber} />
+            <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} resourceLabel={jobData?.jobNumber} resourceData={jobData} />
           </Box>
         </Box>
       </Box>

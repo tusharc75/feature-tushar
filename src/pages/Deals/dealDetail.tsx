@@ -69,7 +69,12 @@ const DealDetail = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            <ActivityButton referenceId={dealData?._id} resource={camelCase(sidebarResource.deals)} resourceLabel={dealData?.dealname} />
+            <ActivityButton
+              referenceId={dealData?._id}
+              resource={camelCase(sidebarResource.deals)}
+              resourceLabel={dealData?.dealname}
+              resourceData={dealData}
+            />
           </Box>
         </Box>
       </Box>

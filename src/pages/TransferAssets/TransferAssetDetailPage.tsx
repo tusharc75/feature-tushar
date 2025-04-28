@@ -295,6 +295,7 @@ const TransferAssetDetailPage = () => {
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
               resourceLabel={transferAssetData?.transferAssetNumber}
+              resourceData={transferAssetData}
             />
           </Box>
         </Box>

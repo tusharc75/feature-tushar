@@ -284,6 +284,7 @@ const ProjectSalesDetails = () => {
                   referenceId={projectSalesData?._id}
                   resource={projectSales?.projectSalesResource}
                   resourceLabel={projectSalesData?.projectName}
+                  resourceData={projectSalesData}
                 />
               </>
             )}
