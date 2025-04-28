@@ -45,7 +45,7 @@ const Messages = ({
   resourceData = null,
   fromSidebar = false
 }: MessagesProps) => {
-  const { socket } = state;
+  const { socket, initialLoading } = state;
   const {
     state: {
       user: { user }
@@ -236,7 +236,13 @@ const Messages = ({
         channelData={channelData}
         messageId={lastMessageSeen}
         state={state}
-        disabled={resourceData ? false : !channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'}
+        disabled={
+          initialLoading
+            ? true
+            : resourceData
+              ? false
+              : !channelData?.members.some((d) => d.optionValue === user?._id) || isLoading || type === 'pins'
+        }
         resourceData={resourceData}
       />
       <MoreMenuAndDeleteConfirmDialog

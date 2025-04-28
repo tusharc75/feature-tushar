@@ -1,18 +1,20 @@
-import { Avatar, Dialog, IconButton, ListItem, TextField } from '@mui/material';
-import { Add, RemoveCircleOutline } from '@mui/icons-material';
+import { RemoveCircleOutline } from '@mui/icons-material';
+import { Avatar, Dialog, IconButton, ListItemButton } from '@mui/material';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
-import { getAvatarColor } from 'src/pages/WorkSpace/utils';
-import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import AddMemberAutoComplete from 'src/pages/WorkSpace/MessagePanel/AddMemberAutoComplete';
+import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
+import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 type ViewMembersProps = {
   selectedChannel: Partial<TChannel> | null;
@@ -20,13 +22,20 @@ type ViewMembersProps = {
   channelData: ChannelData | null;
   handleClose: () => void;
   open: boolean;
+  resourceData: any | null;
+  resourceLabel: string | null;
+  state: UseWorkSpace;
 };
 
-const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClose, open }: ViewMembersProps) => {
+const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClose, open, resourceData, resourceLabel, state }: ViewMembersProps) => {
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+  const { setSelectedChannel } = state;
   const toastConfig = useContext(CustomToastContext);
   const [members, setMembers] = useState(channelData?.members || []);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, data: null });
   const [themeColor] = useAppTheme();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -46,14 +55,6 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
   useEffect(() => {
     setMembers(channelData?.members);
   }, [channelData]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    if (value.trim() === '') return setMembers(channelData?.members);
-    const newMembers = channelData?.members.filter((member) => member.optionLabel.toLowerCase().includes(value.trim().toLowerCase()));
-    setMembers(newMembers);
-  };
 
   return (
     <>
@@ -81,33 +82,42 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
           showRequiredLabel={false}
         />
         <CustomDialogContent isFooterPresent={false}>
-          <div className="sticky -top-[16px] z-10 mt-1 flex items-center gap-2 bg-[var(--dark-primary,white)]">
-            <TextField
-              size="small"
-              id="search-member"
-              type="search"
-              label="Search.."
-              variant="outlined"
-              value={searchTerm}
-              onChange={handleSearch}
-              fullWidth
-              autoFocus
-            />
-            {selectedChannel?.isOwner && (
-              <HtmlTooltip title={`Add Members`}>
-                <IconButton
-                  size="small"
-                  style={{ border: '1px solid var(--common-border-color)', padding: 6 }}
-                  onClick={() => setIsAddMemberDialogOpen(true)}
-                >
-                  <Add />
-                </IconButton>
-              </HtmlTooltip>
-            )}
-          </div>
+          {(selectedChannel?.isOwner || resourceData) && (
+            <div className="sticky -top-[16px] z-10 mt-1 flex items-center gap-2 bg-[var(--dark-primary,white)]">
+              <AddMemberAutoComplete
+                fetchChannelData={fetchChannelData}
+                channelId={selectedChannel?._id}
+                resourceData={resourceData}
+                ignoreIds={channelData?.members?.map((member) => member.optionValue)}
+                resourceLabel={resourceLabel}
+                setSelectedChannel={setSelectedChannel}
+              />
+            </div>
+          )}
           <ul className={'mt-4  space-y-2 overflow-y-auto'}>
+            {!channelData && resourceData && (
+              <ListItemButton className="!list-none !items-center !justify-between">
+                <div className="flex items-center gap-2">
+                  <Avatar
+                    style={{
+                      width: 25,
+                      height: 25,
+                      borderRadius: '999px',
+                      fontSize: 12,
+                      ...getAvatarColor(`${user.firstName} ${user.lastName}`, themeColor)
+                    }}
+                    variant="rounded"
+                    className="my-[2px] uppercase "
+                    src={user.avatar}
+                  >
+                    {`${user.firstName} ${user.lastName}`.match(/(\b\S)?/g).join('')}
+                  </Avatar>
+                  <span>{`${user.firstName} ${user.lastName}`}</span>
+                </div>
+              </ListItemButton>
+            )}
             {members?.map((member) => (
-              <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
+              <ListItemButton key={member.optionValue} className="!list-none !items-center !justify-between">
                 <div className="flex items-center gap-2">
                   <Avatar
                     style={{
@@ -132,19 +142,12 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </ListItem>
+              </ListItemButton>
             ))}
           </ul>
         </CustomDialogContent>
       </Dialog>
-      {isAddMemberDialogOpen && (
-        <AddMemberDialog
-          channelId={selectedChannel._id}
-          ignoreIds={channelData?.members?.map((member) => member.optionValue)}
-          onClose={() => setIsAddMemberDialogOpen(false)}
-          onSuccess={fetchChannelData}
-        />
-      )}
+
       {confirmDialog.open && (
         <ConfirmationDialog
           open={true}
