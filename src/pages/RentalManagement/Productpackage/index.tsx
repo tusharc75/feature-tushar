@@ -333,6 +333,7 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
+
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
@@ -344,6 +345,7 @@ const Productpackage = ({
                 <AttachFileIcon fontSize="small" color='primary' />
               </IconButton>
             </HtmlTooltip>
+
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
