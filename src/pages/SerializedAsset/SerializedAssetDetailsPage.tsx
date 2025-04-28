@@ -94,7 +94,7 @@ const SerializedAssetDetailsPage = () => {
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   const extraFields = [
-    {
+    ...(permissions?.rentalManagement?.isRead ? [{
       fieldData: {
         _id: '630dc2429ec41869032395b3',
         fieldName: 'rentalJob',
@@ -106,8 +106,8 @@ const SerializedAssetDetailsPage = () => {
         sectionName: 'Other Information',
       },
       isRead: true,
-    },
-    {
+    }] : []),
+    ...(permissions?.repairOrder?.isRead ? [{
       fieldData: {
         _id: '630dc2429ec41869032395b5',
         fieldName: 'repairOrder',
@@ -119,8 +119,7 @@ const SerializedAssetDetailsPage = () => {
         sectionName: 'Other Information',
       },
       isRead: true,
-    }
-
+    }] : []),
   ]
 
 
