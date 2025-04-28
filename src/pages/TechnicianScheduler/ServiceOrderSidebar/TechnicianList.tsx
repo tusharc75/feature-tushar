@@ -8,6 +8,7 @@ import { TActios, TInitialState } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 
 type TechnicianListProps = {
@@ -112,6 +113,7 @@ const RowSkeleton = ({ isMobile }) => {
 };
 
 export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
+  const [_d, setStore] = useRoadMapStore((state) => state.activeItemData);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,
@@ -168,47 +170,50 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       {
         id: 'customerAccount',
         head: 'Customer',
-        cell:
-          row?.customerAccount ? (
-            <div className="flex items-center">
-              <p title={row?.customerAccount} className="line-clamp-1">
-                {row?.customerAccount}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.customerAccountDetail.path}/${row?.customerAccountId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
+        cell: row?.customerAccount ? (
+          <div className="flex items-center">
+            <p title={row?.customerAccount} className="line-clamp-1">
+              {row?.customerAccount}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.customerAccountDetail.path}/${row?.customerAccountId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
       },
-      ...(viewType === 'service' ? [{
-        id: 'serviceName',
-        head: 'Service',
-        cell:
-          row.serviceName && row.serviceId ? (
-            <div className="flex items-center">
-              <p title={row.serviceName} className="line-clamp-1">
-                {row.serviceName}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      }] : []),
+      ...(viewType === 'service'
+        ? [
+            {
+              id: 'serviceName',
+              head: 'Service',
+              cell:
+                row.serviceName && row.serviceId ? (
+                  <div className="flex items-center">
+                    <p title={row.serviceName} className="line-clamp-1">
+                      {row.serviceName}
+                    </p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
+        : []),
       {
         id: 'estimateStartDate',
         head: 'Estimate Start Date',
@@ -220,7 +225,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         cell: row['estimateEndDate'] ? <p className="text-truncate">{displayDate(row.estimateEndDate)}</p> : <NoDataCell />
       }
     ];
-  }, [row, selectedType]);
+  }, [row, selectedType, viewType]);
 
   const styleDnd = {
     transform: CSS.Translate.toString(transform)
@@ -231,6 +236,12 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       ref={(div) => {
         setDroppableRef(div);
         rowRef.current = div;
+      }}
+      onMouseDown={() => {
+        setStore({ activeItemData: { data: row, type: 'sidebar' } });
+      }}
+      onMouseUp={() => {
+        setStore({ activeItemData: null });
       }}
       className={cn(isMobile ? 'w-[300px] px-1' : 'px-4 pb-3', isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : '')}
     >
