@@ -4,7 +4,15 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, fieldTicket, getObjKeysWithValues, restoreObjKeysWithValues, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
+  fieldTicket,
+  getObjKeysWithValues,
+  restoreObjKeysWithValues,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField } from '@mui/material';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -42,7 +50,17 @@ import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/Contained
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFields, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
+const Consumables = ({
+  allowedToEdit,
+  services,
+  fieldTicketData,
+  fieldTicketFields,
+  fetchMaterial,
+  stepFullScreen,
+  fetchData: fetchFieldTicketData,
+  refreshChild,
+  resourcePolicy
+}) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -215,19 +233,23 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
           )
       },
       ...newColumns,
-      {
-        accessor: 'requestedQty',
-        Header: 'Requested Qty',
-        width: 150,
-        cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-      },
-      {
-        accessor: 'consumedQty',
-        Header: 'Consumed Qty',
-        primaryField: true,
-        width: 150,
-        cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-      },
+      ...(!resourcePolicy?.hideInventoryConsume
+        ? [
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            },
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
+        : []),
       {
         accessor: 'action',
         Header: 'Actions',
@@ -264,7 +286,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
                 </IconButton>
               </HtmlTooltip>
             )}
-            {!isOffline && (
+            {!isOffline && !resourcePolicy?.hideInventoryConsume && (
               <HtmlTooltip title="History">
                 <IconButton
                   size="small"
@@ -393,7 +415,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
             let element: any = e;
-            const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
+            const values = {
+              estimateStartDate: fieldTicketData?.estimateStartDate || new Date(),
+              estimateEndDate: fieldTicketData?.estimateEndDate || new Date()
+            };
             const calValues = autoCalculateSpecificFields(values, element, allFields);
             Object.assign(element, calValues);
             element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
@@ -404,11 +429,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
               element.isFieldServiceOrder = true;
             }
             material.push(element);
-          })
+          });
         });
         AddMaterial(material, null);
-      }
-      else {
+      } else {
         var taxCodeData: any = null;
         const taxCodeOptions = await getTaxList(user, fieldTicketData, fieldTicketFields, MATERIAL_TYPE.product);
         if (taxCodeOptions?.length) {
@@ -459,7 +483,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
         }
       });
     }
-    axiosInstance().post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
+    axiosInstance()
+      .post(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -624,7 +649,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
   };
 
   const rightSideContents = () => {
-    return (
+    return !resourcePolicy?.hideInventoryConsume ? (
       <>
         <HideWhenOffline>
           <ThemeButton disabled={!Boolean(selectedRecords?.length)} onClick={() => setOpenConsumablesQtyDialog(true)} buttonType="theme">
@@ -632,7 +657,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
           </ThemeButton>
         </HideWhenOffline>
       </>
-    );
+    ) : null;
   };
 
   const actionButtonMenuItems = () => {
@@ -687,8 +712,10 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
             </MenuItem>
           </>
         )}
-        {!isOffline && resourcePolicy?.showQuotationAddMaterial
-          && fieldTicketData?.quotation?.optionValue && fieldTicketData?.quotationVersion?.optionValue && (
+        {!isOffline &&
+          resourcePolicy?.showQuotationAddMaterial &&
+          fieldTicketData?.quotation?.optionValue &&
+          fieldTicketData?.quotationVersion?.optionValue && (
             <>
               <MenuItem
                 onClick={() => {
@@ -699,17 +726,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFiel
               </MenuItem>
             </>
           )}
-        {!isOffline && resourcePolicy?.showFieldServiceOrderAddMaterial && fieldTicketData?.isServiceInFieldServiceOrder && fieldTicketData?.fieldServiceOrder?.optionValue && (
-          <>
-            <MenuItem
-              onClick={() => {
-                setAddFieldServiceOrderDataDialog(true);
-              }}
-            >
-              {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
-            </MenuItem>
-          </>
-        )}
+        {!isOffline &&
+          resourcePolicy?.showFieldServiceOrderAddMaterial &&
+          fieldTicketData?.isServiceInFieldServiceOrder &&
+          fieldTicketData?.fieldServiceOrder?.optionValue && (
+            <>
+              <MenuItem
+                onClick={() => {
+                  setAddFieldServiceOrderDataDialog(true);
+                }}
+              >
+                {`Add Consumables From ${resources?.fieldServiceOrder?.titleSingular}`}
+              </MenuItem>
+            </>
+          )}
       </>
     );
   };
