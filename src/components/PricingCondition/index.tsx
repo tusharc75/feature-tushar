@@ -106,11 +106,11 @@ export const getTaxList = async (user: any, referenceData: any, fields: any, mat
   return data;
 };
 
+
 export const getTaxById = async (taxCode: any) => {
   let data = []
   const response = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${taxCode}`);
   data = response?.data?.data || [];
   return data;
 }
-
 

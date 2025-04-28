@@ -45,6 +45,7 @@ const Messages = ({
   resourceData = null,
   fromSidebar = false
 }: MessagesProps) => {
+
   const { socket } = state;
   const {
     state: {
@@ -369,6 +370,7 @@ export const DisplaySingleMessage = ({
   };
 
   const isSelf = user?._id === message?.user?.optionValue;
+
 
   return (
     <>

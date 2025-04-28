@@ -1,0 +1,58 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - uat
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: uat
+    steps:
+      - name: 'Checkout GitHub repository'
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::194722417414:role/GitHubActionsEKSRole
+          aws-region: us-east-2
+
+      - name: 'Login to Amazon ECR'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 'Build and Push Image to ECR'
+        if: success()
+        id: build
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY=${{ secrets.ECR_REPOSITORY }}
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$TIMESTAMP
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+          echo "${{ vars.ENV_VAR }}" >> .env
+          # Build the Docker image
+          docker build -t $IMAGE_URI .
+          # Push the Docker image to ECR
+          docker push $IMAGE_URI
+
+      - name: 'Deploy to EKS'
+        if: success()
+        env:
+          DEPLOYMENT_NAME: frontend-deployment
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
+        run: |
+          # Update kubeconfig
+          aws eks update-kubeconfig \
+            --region ${AWS_REGION} \
+            --name ${EKS_CLUSTER_NAME}
+          # Update the deployment
+          kubectl set image deployment/${DEPLOYMENT_NAME} frontend=${IMAGE_URI}

@@ -24,6 +24,7 @@ import ImageEditor from './ImageEditor';
 import { useData } from 'src/StateProvider/Provider';
 import Comment from 'src/pages/WorkOrder/Diagram/Comment';
 import { isEmpty } from 'lodash';
+import PdfEditor from './ShowPdf/PdfEditor';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -541,7 +542,7 @@ const Diagram = ({
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+                <PdfEditor data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} handleClose={() => setSelectedAttachment(null)}/>
               )
             ) : (
               <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
