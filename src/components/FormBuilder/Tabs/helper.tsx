@@ -88,6 +88,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'hideInventoryConsume',
+        fieldLabel: 'Hide Inventory Consume',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'packageMaterialAdd',
         fieldLabel: 'Package Material Add',
         type: 'multiSelect',
@@ -251,7 +257,7 @@ export const resourcePolicy = [
           { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
         ],
         defaultValue: ''
-      },
+      }
     ]
   },
   {
@@ -379,7 +385,7 @@ export const resourcePolicy = [
         fieldName: 'canCreateRepairOrder',
         fieldLabel: 'Can Create Repair Order',
         type: 'checkBox',
-        defaultValue: false,
+        defaultValue: false
       }
     ]
   },
@@ -390,7 +396,7 @@ export const resourcePolicy = [
         fieldName: 'showWorkOrderPdfPreviewInTile',
         fieldLabel: 'Show Work Order Pdf Preview in Tile',
         type: 'checkBox',
-        defaultValue: false,
+        defaultValue: false
       }
     ]
   },
@@ -401,7 +407,7 @@ export const resourcePolicy = [
         fieldName: 'showOnlyAssignedTickets',
         fieldLabel: 'Show only Assigned Tickets',
         type: 'checkBox',
-        defaultValue: false,
+        defaultValue: false
       }
     ]
   }
