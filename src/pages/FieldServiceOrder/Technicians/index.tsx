@@ -672,17 +672,6 @@ const Technicians = ({
       });
   };
 
-  const rightSideContents = (): ReactNode => (
-    <PreviewDownload
-      fileName={sidebarResource.employeeMaster}
-      resource={sidebarResource.employeeMaster}
-      referenceId={serviceOrderData?._id}
-      columns={[]}
-      hideDetailButton={true}
-      hideDialog={true}
-    />
-  );
-
   return (
     <>
       {allowedToEdit && (
@@ -696,7 +685,14 @@ const Technicians = ({
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
             leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
-            rightSideContentsAfterAction={rightSideContents()}
+            previewDownloadProps={{
+              fileName: sidebarResource.employeeMaster,
+              resource: sidebarResource.employeeMaster,
+              referenceId: serviceOrderData?._id,
+              columns: [],
+              hideDetailButton: true,
+              hideDialog: true
+            }}
           />
         </>
       )}
