@@ -33,7 +33,6 @@ const MessagePanel = ({
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
-
   const [msgType, setMsgType] = useState<'messages' | 'pins'>('messages');
 
   const fetchChannelData = useCallback(async () => {
@@ -126,6 +125,9 @@ const MessagePanel = ({
           fetchChannelData={fetchChannelData}
           selectedChannel={selectedChannel}
           handleClose={() => setIsMemberDialogOpen(false)}
+          resourceData={resourceData}
+          resourceLabel={resourceLabel}
+          state={state}
         />
       )}
     </>
@@ -154,7 +156,7 @@ const MessageHeader = ({
   setMsgType: React.Dispatch<React.SetStateAction<'messages' | 'pins'>>;
 }) => {
   const [themeColor] = useAppTheme();
-  const { selectedChannel, isSidebarCollapsed, permissions, resources } = state;
+  const { selectedChannel, isSidebarCollapsed, permissions, resources, user, initialLoading } = state;
 
   return (
     <div className={cn(' [border-bottom:1px_solid_var(--common-border-color)]', fromSidebar ? 'p-[8px]' : 'p-[7px_15px]')}>
@@ -165,15 +167,34 @@ const MessageHeader = ({
           </h5>
         )}
 
-        {selectedChannel && (
+        {(selectedChannel || fromSidebar) && (
           <HtmlTooltip title={'View all members'}>
             <IconButton
               size={'small'}
-              style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
+              style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30 }}
               onClick={() => setIsMemberDialogOpen(true)}
             >
               <span className="flex flex-row-reverse">
-                {channelData?.members ? (
+                {initialLoading ? (
+                  <div className={cn(' h-[28px] w-[28px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
+                ) : !selectedChannel && fromSidebar ? (
+                  <Avatar
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 999,
+                      fontSize: 11,
+                      outline: '1px solid var(--common-border-color)',
+                      color: 'white',
+                      ...getAvatarColor(`${user.firstName} ${user.lastName}` || '', themeColor)
+                    }}
+                    variant="rounded"
+                    className={cn('my-[2px] uppercase')}
+                    src={user.avatar}
+                  >
+                    {`${user.firstName} ${user.lastName}`.match(/(\b\S)?/g).join('')}
+                  </Avatar>
+                ) : channelData?.members ? (
                   channelData?.members?.map((d, i) => {
                     if (i > 2) return null;
                     return (
@@ -196,9 +217,7 @@ const MessageHeader = ({
                       </Avatar>
                     );
                   })
-                ) : (
-                  <div className={cn(' h-[28px] w-[28px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
-                )}
+                ) : null}
               </span>
               {channelData?.members?.length - 3 > 0 ? (
                 <span className="-ml-[15px] h-[28px] w-[28px] rounded-full bg-[#F0F0F0] text-center text-[11px] leading-[28px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
@@ -211,7 +230,7 @@ const MessageHeader = ({
         {fromSidebar && (
           <>
             {permissions?.['workSpace']?.isRead && (
-              <Link to={`${routes.workSpace.path}?channel=${resourceLabel}`} className="ml-auto">
+              <Link to={`${routes.workSpace.path}?channel=${resourceLabel}`} target="_blank" className="ml-auto">
                 <HtmlTooltip title={`View in ${resources?.workSpace?.titlePlural}`}>
                   <IconButton size="small" color="primary">
                     <Groups fontSize="small" />
