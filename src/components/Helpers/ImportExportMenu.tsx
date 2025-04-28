@@ -14,7 +14,6 @@ const ImportExportMenu = ({
   api,
   afterImportCompleted,
   recordsToExport = 0,
-  exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
   onExportToExcelSuccess = () => { },
@@ -89,11 +88,13 @@ const ImportExportMenu = ({
   };
 
   const exportToExcel = () => {
+
     toastConfig.setToastConfig({
       open: true,
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
+
     let exportApi = `${api}/template?export=true`;
 
     if (additionalParams) {
@@ -101,13 +102,9 @@ const ImportExportMenu = ({
     }
 
     if (recordsToExport > 0) {
-      if (exportSelectedRecords) {
-        exportSelectedRecords();
-        return;
-      }
-
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
+
     axiosInstance()
       .get(exportApi, {
         responseType: 'arraybuffer',

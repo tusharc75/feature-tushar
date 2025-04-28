@@ -35,14 +35,12 @@ export default function ImportExportLinks({
   api,
   afterImportCompleted,
   recordsToExport = 0,
-  exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
   onlyExport = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   isDownloadExcel = true,
-  isBackgroundWhite = false,
   isDropDownIconShow = false,
   extraImportExportLinks = [],
   title = '',
@@ -110,49 +108,55 @@ export default function ImportExportLinks({
         importApi = `${importApi}?${additionalParams}`;
       }
 
-      axiosInstance()
-        .post(apiUrl ? apiUrl : importApi, formData, {
-          responseType: 'blob',
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            ...(headers ? headers : {})
-          }
-        })
-        .then((response) => {
-          if (!response.headers['content-disposition']) {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: 'All Records Added Successfully'
-            });
-            afterImportCompleted();
-          } else {
-            const fileName = response.headers['content-disposition'].split('filename=')[1];
-            downloadExcel(response.data, fileName);
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'error',
-              message: `Found some issue(s) while importing ${module}`
-            });
-            afterImportCompleted();
-          }
-        })
+      axiosInstance().post(apiUrl ? apiUrl : importApi, formData, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...(headers ? headers : {})
+        }
+      }).then((response) => {
+        if (!response.headers['content-disposition']) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: 'All Records Added Successfully'
+          });
+          afterImportCompleted();
+        } else {
+          const fileName = response.headers['content-disposition'].split('filename=')[1];
+          downloadExcel(response.data, fileName);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: `Found some issue(s) while importing ${module}`
+          });
+          afterImportCompleted();
+        }
+      })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     }
   };
 
-  /**
-   * EXPORT TABLES INTO EXCEL
-   */
   const exportToExcel = (apiUrl = null) => {
+
+    if (recordsToExport > 200 && recordsToExport !== total) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'warning',
+        message: 'A maximum of 200 records can be exported per selection.'
+      });
+      return
+    }
+
     toastConfig.setToastConfig({
       hideDuration: null,
       open: true,
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
+
     let exportApi = apiUrl ? apiUrl : `${api}/template?export=true`;
 
     if (additionalParams) {
@@ -170,52 +174,41 @@ export default function ImportExportLinks({
       }
     }
 
-    if (recordsToExport > 0) {
-      if (exportSelectedRecords) {
-        exportSelectedRecords();
-        return;
-      }
-
+    if (recordsToExport > 0 && recordsToExport !== total) {
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
 
-    axiosInstance()
-      .get(exportApi, {
-        responseType: 'arraybuffer',
-        headers: {
-          ...(headers ? headers : {})
+    axiosInstance().get(exportApi, {
+      responseType: 'arraybuffer',
+      headers: {
+        ...(headers ? headers : {})
+      }
+    }).then((response) => {
+      if (asyncExport && resource) {
+        setRefresh(!refresh);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Export to excel added in queue successfully.'
+        });
+      } else {
+        const fileName = response.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(response.data, fileName);
+        if (recordsToExport > 0) {
+          onExportToExcelSuccess();
         }
-      })
-      .then((response) => {
-        if (asyncExport && resource) {
-          setRefresh(!refresh);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Export to excel added in queue successfully.'
-          });
-        } else {
-          const fileName = response.headers['content-disposition'].split('filename=')[1];
-          downloadExcel(response.data, fileName);
-
-          if (recordsToExport > 0) {
-            onExportToExcelSuccess();
-          }
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Exported to excel successfully.'
-          });
-        }
-      })
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Exported to excel successfully.'
+        });
+      }
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  /**
-   * DOWNLOAD TEMPLATE
-   */
   const downloadTemplate = (apiUrl = null) => {
     let exportApi = apiUrl ? apiUrl : `${api}/template`;
     if (additionalParams) {
@@ -456,11 +449,9 @@ export default function ImportExportLinks({
                 }}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
-                {/* {extraImportExportLinks.length > 0 || ImportInput} */}
                 <span>Import from Excel</span>
                 <ImportIcon />
               </label>
-              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
             </>
           )}
           <label
@@ -481,7 +472,6 @@ export default function ImportExportLinks({
           </label>
           {isDownloadExcel && !onlyExport && !hideDownloadTemplate && (
             <>
-              {/* <Divider orientation="vertical" flexItem className={isBackgroundWhite ? classes.darkLinkDivider : classes.linkDivider} /> */}
               <label
                 onClick={(e) => {
                   if (extraImportExportLinks.length > 0) {

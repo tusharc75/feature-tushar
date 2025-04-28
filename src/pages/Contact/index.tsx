@@ -19,9 +19,7 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import CustomContainer from '../../components/CustomContainer';
 import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
@@ -34,17 +32,13 @@ import {
 } from '../../constants/helpers';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
 import { isMobile, isTablet } from 'react-device-detect';
 
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const {
-    state: { user, selectedEntity, permissions, resources },
-    dispatch: entityDispatch
-  }: any = useData();
+  const { state: { user, selectedEntity, permissions, resources } }: any = useData();
   const {
     contact: { contactApi, contactResource, contactPermission, contactRoute }
   } = props;
@@ -88,7 +82,7 @@ export default function Contact(props) {
   const renderedFrom = camelCase(contactResource);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
 
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
@@ -130,15 +124,6 @@ export default function Contact(props) {
   useEffect(() => {
     getContacts();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
-
-  const handleEntityChange = (entityId) => {
-    entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
-  };
-
-  const hasAccessToEntity = (id) => {
-    const entityList = user.entity?.map((entity) => entity._id);
-    return entityList.includes(id);
-  };
 
   const handleAccessToPortal = () => {
     setShowAssignEntityDialog(true);
@@ -380,6 +365,8 @@ export default function Contact(props) {
     );
   };
 
+  console.log(rowCount)
+  console.log(dataRows?.length)
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -401,7 +388,6 @@ export default function Contact(props) {
           additionalParams={getQueryString(true)}
         />
       </div>
-
       <CustomContainer>
         <ListingPageHeader
           toggleButtonList={types}
