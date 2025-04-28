@@ -416,7 +416,7 @@ const SerializedAsset = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] = ![
+          finalObject['canDelete'] = [
             ASSET_STATUS.new,
             ASSET_STATUS.available,
             ASSET_STATUS.lost,
