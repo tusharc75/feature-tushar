@@ -20,6 +20,7 @@ import PdfPreview from './ShowPdf/PdfPreview';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ImageEditor from './ImageEditor';
+import PdfPreview1 from './ShowPdf/PdfPreview1';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -456,7 +457,7 @@ const Diagram = ({
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                <PdfPreview data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+                <PdfPreview1 data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} handleClose={() => setSelectedAttachment(null)}/>
               )
             ) : (
               <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
