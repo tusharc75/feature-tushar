@@ -48,16 +48,15 @@ export default function ImportExportLinks({
   refrenceId,
   onSuccessfulImport,
   recordsToExport = 0,
-  exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
   small = false,
   isCustomImport = false,
-  onSuccessCustomImport = () => {},
+  onSuccessCustomImport = () => { },
   currency = 'USD'
 }) {
   const classes = useStyles();
@@ -203,10 +202,6 @@ export default function ImportExportLinks({
     }
 
     if (recordsToExport > 0) {
-      if (exportSelectedRecords) {
-        exportSelectedRecords();
-        return;
-      }
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
 
