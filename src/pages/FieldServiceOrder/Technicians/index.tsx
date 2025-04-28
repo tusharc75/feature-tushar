@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, isObject } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { ReactNode, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -35,9 +35,9 @@ import ConsumablesDialog from './ConsumablesDialog';
 import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { Visibility } from '@mui/icons-material';
-import { RiUserShared2Fill } from "react-icons/ri";
-import { RiUserReceived2Fill } from "react-icons/ri";
-
+import { RiUserShared2Fill } from 'react-icons/ri';
+import { RiUserReceived2Fill } from 'react-icons/ri';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 const Technicians = ({
   allowedToEdit,
@@ -507,14 +507,13 @@ const Technicians = ({
         fetchData();
         fetchserviceOrderData();
         setIsSubmitting(false);
-        setShowConfirmBox({ open: false, rows: [] })
+        setShowConfirmBox({ open: false, rows: [] });
       })
       .catch((error) => {
         if (skipDateValidation) {
           toastConfig.setToastConfig(error);
-        }
-        else {
-          setShowConfirmBox({ open: true, rows: rows })
+        } else {
+          setShowConfirmBox({ open: true, rows: rows });
         }
         setIsSubmitting(false);
       });
@@ -673,6 +672,17 @@ const Technicians = ({
       });
   };
 
+  const rightSideContents = (): ReactNode => (
+    <PreviewDownload
+      fileName={sidebarResource.employeeMaster}
+      resource={sidebarResource.employeeMaster}
+      referenceId={serviceOrderData?._id}
+      columns={[]}
+      hideDetailButton={true}
+      hideDialog={true}
+    />
+  );
+
   return (
     <>
       {allowedToEdit && (
@@ -686,6 +696,7 @@ const Technicians = ({
             actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
             leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
+            rightSideContentsAfterAction={rightSideContents()}
           />
         </>
       )}
@@ -816,7 +827,7 @@ const Technicians = ({
             setShowConfirmBox({ open: false, rows: [] });
           }}
           onOk={() => {
-            handleAssign(showConfirmBox.rows, true)
+            handleAssign(showConfirmBox.rows, true);
           }}
         />
       )}
