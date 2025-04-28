@@ -53,6 +53,7 @@ interface RoleProps {
   child?: boolean;
   updateChildResource?: (resource: string, access: string, checked: boolean) => void;
   height?: number | string;
+  toggleAllChildResource?: (checked: boolean, propertyToUpdate: 'isRead' | 'isCreate' | 'isUpdate') => void;
 }
 
 type SortingType = 'asc' | 'des' | '';
@@ -72,7 +73,8 @@ const RoleEngine = ({
   tier = ROLE_TIER.tier1,
   child = false,
   height = 400,
-  updateChildResource = null
+  updateChildResource = null,
+  toggleAllChildResource = null
 }: RoleProps) => {
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
@@ -212,7 +214,14 @@ const RoleEngine = ({
   const updateRoles = (propertyToUpdate, isChecked) => {
     const newResource = [...resource];
     const newField = [...field];
-    newResource.forEach((_resource) => {
+
+    let availableResource = newResource,
+      restOfTheResources = [];
+    if (child) {
+      availableResource = newResource.filter((d) => d.isRead || d.isCreate || d.isUpdate);
+      restOfTheResources = newResource.filter((d) => !d.isRead && !d.isCreate && !d.isUpdate);
+    }
+    availableResource.forEach((_resource) => {
       if (isChecked === true) {
         _resource[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && isChecked;
       } else {
@@ -230,7 +239,8 @@ const RoleEngine = ({
           });
       }
     });
-    setResource(newResource);
+    toggleAllChildResource?.(isChecked, propertyToUpdate);
+    setResource([...availableResource, ...restOfTheResources]);
     setField(newField);
   };
 
@@ -247,48 +257,65 @@ const RoleEngine = ({
         if (_resource.resourceId === id) {
           let isCreateUpdateSelected;
           const isSubResourcePresent = newField.filter((_field) => _field.fieldData.resource === _resource.name);
-          if (isSubResourcePresent.length === 0) {
-            isCreateUpdateSelected = _resource['isCreate'] || _resource['isUpdate'];
-          } else {
-            isCreateUpdateSelected = isSubResourcePresent.some((_field) => _field['isCreate'] || _field['isUpdate']);
-          }
-
-          if (access === 'isRead' && isCreateUpdateSelected) {
-          } else {
-            _resource[access] = event.target.checked;
-            if (!_resource?.parentResource) {
-              if (updateChildResource) {
-                updateChildResource(_resource.name, access, event.target.checked);
-              }
-            }
-          }
-          if (event.target.checked) {
+          if (access === 'all') {
             _resource['isRead'] = event.target.checked;
-          }
-
-          if (access !== 'isDelete') {
+            _resource['isCreate'] = event.target.checked;
+            _resource['isUpdate'] = event.target.checked;
+            _resource['isDelete'] = event.target.checked;
+            _resource['isHidden'] = event.target.checked;
             newField.forEach((_field) => {
               if (_field.fieldData.resource === _resource.name) {
-                if (access === 'isRead' && !event.target.value && isCreateUpdateSelected) {
-                } else {
-                  _field[access] = event.target.checked;
-                }
-
-                if (event.target.checked) {
-                  _field['isRead'] = event.target.checked;
-                }
+                _field['isRead'] = event.target.checked;
+                _field['isCreate'] = event.target.checked;
+                _field['isUpdate'] = event.target.checked;
+                _field['isDelete'] = event.target.checked;
+                _field['isHidden'] = event.target.checked;
               }
             });
-          }
+          } else {
+            if (isSubResourcePresent.length === 0) {
+              isCreateUpdateSelected = _resource['isCreate'] || _resource['isUpdate'];
+            } else {
+              isCreateUpdateSelected = isSubResourcePresent.some((_field) => _field['isCreate'] || _field['isUpdate']);
+            }
 
-          if (access === 'isDelete') {
-            newField.forEach((_field) => {
-              if (_field.fieldData.resource === _resource.name && _field.fieldData.required) {
-                if (event.target.checked) {
-                  _field['isRead'] = event.target.checked;
+            if (access === 'isRead' && isCreateUpdateSelected) {
+            } else {
+              _resource[access] = event.target.checked;
+              if (!_resource?.parentResource) {
+                if (updateChildResource) {
+                  updateChildResource(_resource.name, access, event.target.checked);
                 }
               }
-            });
+            }
+            if (event.target.checked) {
+              _resource['isRead'] = event.target.checked;
+            }
+
+            if (access !== 'isDelete') {
+              newField.forEach((_field) => {
+                if (_field.fieldData.resource === _resource.name) {
+                  if (access === 'isRead' && !event.target.value && isCreateUpdateSelected) {
+                  } else {
+                    _field[access] = event.target.checked;
+                  }
+
+                  if (event.target.checked) {
+                    _field['isRead'] = event.target.checked;
+                  }
+                }
+              });
+            }
+
+            if (access === 'isDelete') {
+              newField.forEach((_field) => {
+                if (_field.fieldData.resource === _resource.name && _field.fieldData.required) {
+                  if (event.target.checked) {
+                    _field['isRead'] = event.target.checked;
+                  }
+                }
+              });
+            }
           }
         }
       });
@@ -443,7 +470,7 @@ const RoleEngine = ({
   }, [tier]);
 
   useEffect(() => {
-    validateTier2(resource, field, selectedResource);
+    if (selectedResource) validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 
   const handleSearchFilter = (tableSearchFilterState: TableSearchFilterState, data = [...tableData]) => {
@@ -452,23 +479,6 @@ const RoleEngine = ({
       let tempData: TableData[] = [];
       for (const d of data) {
         const isTopLevelMatch = d.resource.resourceLabel.toLowerCase().includes(search.toLowerCase());
-        // Run deep search inside field data
-        // if (_deepSearch) {
-        //   const deepLevelMatch = d.fields
-        //     .map((f) => f.fieldData.fieldLabel)
-        //     .join(',')
-        //     .toLowerCase()
-        //     .includes(search.toLowerCase());
-        //   if (!deepLevelMatch && isTopLevelMatch) {
-        //     tempData.push(d); // Push the top level data
-        //   } else if (deepLevelMatch) {
-        //     let newData = { ...d, fields: d.fields.filter((f) => f.fieldData.fieldLabel.toLowerCase().includes(search.toLowerCase())) };
-        //     tempData.push(newData);
-        //   }
-        // } else if (isTopLevelMatch) {
-        //   // Run top level searh
-        //   tempData.push(d);
-        // }
         if (isTopLevelMatch) {
           //! Run top level searh
           tempData.push(d);
@@ -504,6 +514,25 @@ const RoleEngine = ({
       handleApplySortSearchFilter('', 'sort');
     }
   };
+
+  useEffect(() => {
+    if (child) {
+      const totalData = filteredAndSortedData.filter((d) => d.resource.isRead || d.resource.isCreate || d.resource.isUpdate);
+      if (totalData.length === 0) {
+        setIsReadChecked(false);
+        setIsCreateChecked(false);
+        setIsUpdateChecked(false);
+        return;
+      }
+      const isReadChecked = totalData.filter((d) => d.resource.isRead);
+      const isCreateChecked = totalData.filter((d) => d.resource.isCreate);
+      const isUpdateChecked = totalData.filter((d) => d.resource.isUpdate);
+
+      setIsReadChecked(isReadChecked.length === totalData.length);
+      setIsCreateChecked(isCreateChecked.length === totalData.length);
+      setIsUpdateChecked(isUpdateChecked.length === totalData.length);
+    }
+  }, [child, filteredAndSortedData]);
 
   return (
     <div>
@@ -549,108 +578,166 @@ const RoleEngine = ({
                   </span>
                 </HtmlTooltip>
               </TableCell>
-              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
-                <FormControlLabel
-                  sx={{ m: 0 }}
-                  control={
-                    <Checkbox
-                      disabled={isDisable || tier === ROLE_TIER.tier2}
-                      checked={isReadChecked}
-                      onChange={(e) => {
-                        setIsReadChecked(e.target.checked);
-                        updateRoles('isRead', e.target.checked);
-                      }}
+              {!child ? (
+                <>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2}
+                          checked={isReadChecked}
+                          onChange={(e) => {
+                            setIsReadChecked(e.target.checked);
+                            updateRoles('isRead', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Read"
                     />
-                  }
-                  label="Read"
-                />
-              </TableCell>
-              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
-                <FormControlLabel
-                  sx={{ m: 0 }}
-                  control={
-                    <Checkbox
-                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                      checked={isCreateChecked}
-                      onChange={(e) => {
-                        setIsCreateChecked(e.target.checked);
-                        updateRoles('isCreate', e.target.checked);
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                          checked={isCreateChecked}
+                          onChange={(e) => {
+                            setIsCreateChecked(e.target.checked);
+                            updateRoles('isCreate', e.target.checked);
 
-                        if (e.target.checked && !isReadChecked) {
-                          setIsReadChecked(e.target.checked);
-                          updateRoles('isRead', e.target.checked);
-                        }
-                      }}
+                            if (e.target.checked && !isReadChecked) {
+                              setIsReadChecked(e.target.checked);
+                              updateRoles('isRead', e.target.checked);
+                            }
+                          }}
+                        />
+                      }
+                      label="Create"
                     />
-                  }
-                  label="Create"
-                />
-              </TableCell>
-              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
-                <FormControlLabel
-                  sx={{ m: 0 }}
-                  control={
-                    <Checkbox
-                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                      checked={isUpdateChecked}
-                      onChange={(e) => {
-                        setIsUpdateChecked(e.target.checked);
-                        updateRoles('isUpdate', e.target.checked);
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                          checked={isUpdateChecked}
+                          onChange={(e) => {
+                            setIsUpdateChecked(e.target.checked);
+                            updateRoles('isUpdate', e.target.checked);
 
-                        if (e.target.checked && !isReadChecked) {
-                          setIsReadChecked(e.target.checked);
-                          updateRoles('isRead', e.target.checked);
-                        }
-                      }}
+                            if (e.target.checked && !isReadChecked) {
+                              setIsReadChecked(e.target.checked);
+                              updateRoles('isRead', e.target.checked);
+                            }
+                          }}
+                        />
+                      }
+                      label="Update"
                     />
-                  }
-                  label="Update"
-                />
-              </TableCell>
-              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
-                <FormControlLabel
-                  sx={{ m: 0 }}
-                  control={
-                    <Checkbox
-                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                      checked={isDeleteChecked}
-                      onChange={(e) => {
-                        setIsDeleteChecked(e.target.checked);
-                        updateRoles('isDelete', e.target.checked);
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                          checked={isDeleteChecked}
+                          onChange={(e) => {
+                            setIsDeleteChecked(e.target.checked);
+                            updateRoles('isDelete', e.target.checked);
 
-                        if (e.target.checked && !isReadChecked) {
-                          setIsReadChecked(e.target.checked);
-                          updateRoles('isRead', e.target.checked);
-                        }
-                      }}
+                            if (e.target.checked && !isReadChecked) {
+                              setIsReadChecked(e.target.checked);
+                              updateRoles('isRead', e.target.checked);
+                            }
+                          }}
+                        />
+                      }
+                      label="Delete"
                     />
-                  }
-                  label="Delete"
-                />
-              </TableCell>
-              <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
-                <FormControlLabel
-                  sx={{ m: 0 }}
-                  control={
-                    <Checkbox
-                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                      checked={isHiddenChecked}
-                      onChange={(e) => {
-                        setIsHiddenChecked(e.target.checked);
-                        updateRoles('isHidden', e.target.checked);
-                      }}
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                          checked={isHiddenChecked}
+                          onChange={(e) => {
+                            setIsHiddenChecked(e.target.checked);
+                            updateRoles('isHidden', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Hidden"
                     />
-                  }
-                  label="Hidden"
-                />
-              </TableCell>
+                  </TableCell>
+                </>
+              ) : (
+                <>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2}
+                          checked={isReadChecked}
+                          onChange={(e) => {
+                            setIsReadChecked(e.target.checked);
+                            updateRoles('isRead', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Read"
+                    />
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2}
+                          checked={isCreateChecked}
+                          onChange={(e) => {
+                            setIsCreateChecked(e.target.checked);
+                            updateRoles('isCreate', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Create"
+                    />
+                  </TableCell>
+                  <TableCell align="left" className="bg-[var(--form-head-bg)_!important]">
+                    <FormControlLabel
+                      sx={{ m: 0 }}
+                      control={
+                        <Checkbox
+                          disabled={isDisable || tier === ROLE_TIER.tier2}
+                          checked={isUpdateChecked}
+                          onChange={(e) => {
+                            setIsUpdateChecked(e.target.checked);
+                            updateRoles('isUpdate', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Update"
+                    />
+                  </TableCell>
+                </>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredAndSortedData.map(({ resource: _resource, fields }, outerIndex) => {
+              if (child && !_resource.isRead && !_resource.isCreate && !_resource.isUpdate && !_resource.isDelete && !_resource.isHidden) {
+                return <></>;
+              }
               return (
                 <React.Fragment key={outerIndex}>
-                  <Row _resource={_resource} isDisable={isDisable} handleChange={handleChange} fieldCheckbox={fields} />
+                  <Row _resource={_resource} isDisable={isDisable} handleChange={handleChange} fieldCheckbox={fields} child={child} />
                 </React.Fragment>
               );
             })}
@@ -671,7 +758,7 @@ const RenderSortIcon = ({ sortBy }: { sortBy: SortingType }) => {
   return <></>;
 };
 
-const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
+const Row = ({ _resource, isDisable, handleChange, fieldCheckbox, child = false }) => {
   const [open, setOpen] = useState(false);
 
   const totalReadCheckboxCheckedLen = fieldCheckbox.filter((f) => f.isRead).length;
@@ -700,75 +787,106 @@ const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
             )}
           </Box>
         </TableCell>
-        <TableCell align="left" sx={{ py: 0 }}>
-          <Checkbox
-            indeterminate={isReadAllChecked}
-            disabled={isDisable || _resource.isReadDisabled}
-            checked={_resource.isRead}
-            onChange={handleChange('resource', _resource.resourceId, 'isRead')}
-          />
-        </TableCell>
-        <TableCell align="left" sx={{ py: 0 }}>
-          <Checkbox
-            indeterminate={isCreateAllChecked}
-            disabled={isDisable || _resource.isCreateDisabled}
-            checked={_resource.isCreate}
-            onChange={handleChange('resource', _resource.resourceId, 'isCreate')}
-          />
-        </TableCell>
-        <TableCell align="left" sx={{ py: 0 }}>
-          <Checkbox
-            indeterminate={isUpdateAllChecked}
-            disabled={isDisable || _resource.isUpdateDisabled}
-            checked={_resource.isUpdate}
-            onChange={handleChange('resource', _resource.resourceId, 'isUpdate')}
-          />
-        </TableCell>
-        <TableCell align="left" sx={{ py: 0 }}>
-          <Checkbox
-            disabled={isDisable || _resource.isDeleteDisabled}
-            checked={_resource.isDelete}
-            onChange={handleChange('resource', _resource.resourceId, 'isDelete')}
-          />
-        </TableCell>
-        <TableCell align="left" sx={{ py: 0 }}>
-          <Checkbox
-            disabled={isDisable || _resource?.isHiddenDisabled}
-            checked={!!_resource.isHidden}
-            onChange={handleChange('resource', _resource.resourceId, 'isHidden')}
-          />
-        </TableCell>
+        {!child ? (
+          <>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isReadAllChecked}
+                disabled={isDisable || _resource.isReadDisabled}
+                checked={_resource.isRead}
+                onChange={handleChange('resource', _resource.resourceId, 'isRead')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isCreateAllChecked}
+                disabled={isDisable || _resource.isCreateDisabled}
+                checked={_resource.isCreate}
+                onChange={handleChange('resource', _resource.resourceId, 'isCreate')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isUpdateAllChecked}
+                disabled={isDisable || _resource.isUpdateDisabled}
+                checked={_resource.isUpdate}
+                onChange={handleChange('resource', _resource.resourceId, 'isUpdate')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                disabled={isDisable || _resource.isDeleteDisabled}
+                checked={_resource.isDelete}
+                onChange={handleChange('resource', _resource.resourceId, 'isDelete')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                disabled={isDisable || _resource?.isHiddenDisabled}
+                checked={!!_resource.isHidden}
+                onChange={handleChange('resource', _resource.resourceId, 'isHidden')}
+              />
+            </TableCell>
+          </>
+        ) : (
+          <>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isReadAllChecked}
+                disabled={isDisable || _resource.isReadDisabled}
+                checked={_resource.isRead}
+                onChange={handleChange('resource', _resource.resourceId, 'isRead')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isCreateAllChecked}
+                disabled={isDisable || _resource.isCreateDisabled}
+                checked={_resource.isCreate}
+                onChange={handleChange('resource', _resource.resourceId, 'isCreate')}
+              />
+            </TableCell>
+            <TableCell align="left" sx={{ py: 0 }}>
+              <Checkbox
+                indeterminate={isUpdateAllChecked}
+                disabled={isDisable || _resource.isUpdateDisabled}
+                checked={_resource.isUpdate}
+                onChange={handleChange('resource', _resource.resourceId, 'isUpdate')}
+              />
+            </TableCell>
+          </>
+        )}
       </TableRow>
       {open &&
         fieldCheckbox.map((_field, innerIndex) => (
           <TableRow key={innerIndex}>
             <TableCell sx={{ py: 0 }}>
               <Typography variant="body1" style={{ fontWeight: '400' }}>
-                {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
+                &emsp; {_field.fieldData.fieldLabel + (_field.fieldData.required ? ' *' : '')}
               </Typography>
             </TableCell>
-            <TableCell align="left" sx={{ py: 0 }}>
+
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isReadDisabled || _field.isReadDisabled}
                 checked={_field.isRead}
                 onChange={handleChange('field', _field.fieldData._id, 'isRead')}
               />
             </TableCell>
-            <TableCell align="left" sx={{ py: 0 }}>
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isCreateDisabled || _field.isCreateDisabled}
                 checked={_field.isCreate}
                 onChange={handleChange('field', _field.fieldData._id, 'isCreate')}
               />
             </TableCell>
-            <TableCell align="left" sx={{ py: 0 }}>
+            <TableCell align="center" sx={{ py: 0 }}>
               <Checkbox
                 disabled={isDisable || _resource.isUpdateDisabled || _field.isUpdateDisabled}
                 checked={_field.isUpdate}
                 onChange={handleChange('field', _field.fieldData._id, 'isUpdate')}
               />
             </TableCell>
-            <TableCell />
           </TableRow>
         ))}
     </React.Fragment>

@@ -33,17 +33,19 @@ const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: Sid
         <div className="flex">
           <SearchButton value={technicianSearchValue} setValue={(val) => setStore({ technicianSearchValue: val })} onOpenToggle={setIsSearchOpen} />
           <div className={cn('flex items-center overflow-hidden transition-all', isSearchOpen ? 'w-0' : 'w-[30px] ')}>
-            <IconButton
-              size="small"
-              color="primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                const userIds = activity?.map((d) => d?.user?.optionValue)?.filter(Boolean);
-                handleSelect(e, userIds, 'map');
-              }}
-            >
-              <Map fontSize="small" />
-            </IconButton>
+            <HtmlTooltip title='Map'>
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const userIds = activity?.map((d) => d?.user?.optionValue)?.filter(Boolean);
+                  handleSelect(e, userIds, 'map');
+                }}
+              >
+                <Map fontSize="small" />
+              </IconButton>
+            </HtmlTooltip>
           </div>
         </div>
       </div>
@@ -177,18 +179,19 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               <AddCircleOutline fontSize="small" className={cn(textColorClass)} />
             </IconButton>
           </HtmlTooltip>
-          <IconButton
-            color="primary"
-            size="small"
-            onClick={(event) => {
-              event.stopPropagation();
-              if (data?.user?.optionValue) {
-                handleSelect(event, [data?.user?.optionValue], 'map');
-              }
-            }}
-          >
-            <Map fontSize="small" className={cn(textColorClass)} />
-          </IconButton>
+          {data?.user?.optionValue &&
+            <HtmlTooltip title='Map'>
+              <IconButton
+                color="primary"
+                size="small"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleSelect(event, [data?.user?.optionValue], 'map');
+                }}
+              >
+                <Map fontSize="small" className={cn(textColorClass)} />
+              </IconButton>
+            </HtmlTooltip>}
         </div>
       </ListItem>
     </li>

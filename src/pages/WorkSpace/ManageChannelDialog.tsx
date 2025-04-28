@@ -13,8 +13,15 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageChannel = ({ onClose, onSuccess, _id }) => {
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+
   const toastConfig = useContext(CustomToastContext);
 
   const validationSchema = object().shape({
@@ -44,7 +51,6 @@ const ManageChannel = ({ onClose, onSuccess, _id }) => {
           toastConfig.setToastConfig(error);
         });
     }
-
   }, [_id]);
 
   const [loading, setLoading] = useState(false);
@@ -58,6 +64,8 @@ const ManageChannel = ({ onClose, onSuccess, _id }) => {
 
     if (_id) {
       updatedValues = { ...values, _id };
+    } else {
+      updatedValues = { ...updatedValues, members: [user._id] };
     }
 
     await axiosInstance()
@@ -76,7 +84,7 @@ const ManageChannel = ({ onClose, onSuccess, _id }) => {
         setLoading(false);
         setSubmitting(false);
         toastConfig.setToastConfig(error);
-        onSuccess();
+        // onSuccess();
       });
   };
 

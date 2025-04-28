@@ -41,7 +41,7 @@ const SendMessage = ({
   state,
   resourceData = null
 }: SendMessageProps) => {
-  const { setNewDirectMessageChannelId, setSelectedChannel } = state;
+  const { setSelectedChannel } = state;
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const numberOfMentions = useRef(0);
@@ -94,7 +94,7 @@ const SendMessage = ({
         audioBlobs?.forEach((audioBlob, index) => {
           formData.append('files', new File([audioBlob], `recording-${index}.webm`, { type: 'audio/webm' }));
         });
-        if (resourceData) {
+        if (resourceData && !channelId) {
           // formData.append('toUsers', JSON.stringify([newChatToUser._id]));
           // await axiosInstance()
           //   .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
@@ -112,7 +112,6 @@ const SendMessage = ({
               if (data && data?._id) {
                 formData.append('channelId', data?._id);
                 await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-
                 setSelectedChannel(data);
                 socket.emit('joinChannel', data?._id);
               }
@@ -121,11 +120,7 @@ const SendMessage = ({
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
-
           await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-          // .then(({ data }) => {
-          //   // socket.emit('newMessagePosted', { channelId, messageId });
-          // });
         }
       }
       setMessage('');
