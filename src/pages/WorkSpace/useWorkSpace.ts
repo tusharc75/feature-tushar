@@ -125,28 +125,32 @@ export const useWorkSpace = ({ title = '', fromSidebar = false }: WorkSpaceProps
   );
 
   const fetchChannelsAndChats = async (setActiveChannel = false, newDirectMessageChannelId = state.newDirectMessageChannelId) => {
-    setInitialLoading(true);
-    let api = '/work-space/channel';
-    if (state.selectedResource) {
-      api = `${api}?resource=${state.selectedResource}`;
-    }
-    const {
-      data: { data }
-    } = await axiosInstance().get(api);
-
-    setAllChannels(data);
-    if (title) {
-      const channel = data?.find((channel) => channel?.title === title);
-      setSelectedChannel(channel, data);
-    } else if (setActiveChannel) {
-      const queryParam = new URLSearchParams(window.location.search);
-      const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');
-      if (channelId) {
-        const channel = data?.find((channel) => channel?._id === channelId);
-        setSelectedChannel(channel, data);
+    try {
+      setInitialLoading(true);
+      let api = '/work-space/channel';
+      if (state.selectedResource) {
+        api = `${api}?resource=${state.selectedResource}`;
       }
+      const {
+        data: { data }
+      } = await axiosInstance().get(api);
+
+      setAllChannels(data);
+      if (title) {
+        const channel = data?.find((channel) => channel?.title === title);
+        setSelectedChannel(channel, data);
+      } else if (setActiveChannel) {
+        const queryParam = new URLSearchParams(window.location.search);
+        const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');
+        if (channelId) {
+          const channel = data?.find((channel) => channel?._id === channelId);
+          setSelectedChannel(channel, data);
+        }
+      }
+    } catch (error) {
+    } finally {
+      setInitialLoading(false);
     }
-    setInitialLoading(false);
   };
 
   useEffect(() => {
