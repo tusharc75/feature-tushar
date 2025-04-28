@@ -109,11 +109,15 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
     const { data: hoverdIemData } = activeItemData;
     const dataStartDate = dayjs(hoverdIemData?.service?.estimateStartDate || hoverdIemData?.estimateStartDate);
     const dataEndDate = dayjs(hoverdIemData?.service?.estimateEndDate || hoverdIemData?.estimateEndDate);
-    return { showColor: true, isBlocked: hasDateOverlap(data?.technicianHistory, dataStartDate, dataEndDate) };
+    const isBlocked = hasDateOverlap(data?.technicianHistory, dataStartDate, dataEndDate);
+    return { showColor: !!activeItemData, isBlocked };
   }, [activeItemData, data]);
 
-  const textColorClass = showColor && over?.id === data._id ? (isBlocked ? 'text-white' : 'text-white') : '';
-  const bgColorClass = showColor && over?.id === data._id ? (isBlocked ? 'bg-red-500' : 'bg-green-500') : '';
+  // const textColorClass = showColor && over?.id === data._id ? (isBlocked ? 'text-white' : 'text-white') : '';
+  // const bgColorClass = showColor && over?.id === data._id ? (isBlocked ? 'bg-red-500' : 'bg-green-500') : '';
+
+  const textColorClass = showColor ? (isBlocked ? 'text-white' : 'text-white') : '';
+  const bgColorClass = showColor ? (isBlocked ? 'bg-red-500' : 'bg-green-500') : '';
 
   const styleDnd = {
     transform: CSS.Translate.toString(transform)
