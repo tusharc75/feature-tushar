@@ -1,6 +1,7 @@
 import { Box, IconButton, MenuItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { camelCase, isEmpty, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,7 +18,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { CHILD_RESOURCE, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, getEmailsFromContacts, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
@@ -37,6 +38,7 @@ import {
   generateDeleteStep
 } from '../walkmeSteps';
 import { getTaxById } from 'src/components/PricingCondition';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -67,6 +69,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [deletePurchaseOrderItem, setDeletePurchaseOrderItem] = useState([]);
   const [material, setMaterial] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
   const isStepDataSet = useRef(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -234,7 +237,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     columns.push({
       accessor: 'action',
       Header: 'Actions',
-      width: permissions?.irtTicket?.isCreate ? 150 : 100,
+      width: permissions?.irtTicket?.isCreate ? 150 : 130,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -255,6 +258,19 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
                 <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
+            {row?.original?.type != 'Manual Entry' && (
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             {permissions?.irtTicket?.isCreate && row.original?.type === 'Product' && (
               <HtmlTooltip title="Explore Inventory">
                 <IconButton
@@ -662,12 +678,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-              uniq(
-                map(
-                  selectedRecords?.filter((e) => !e.hideSelection),
-                  'type'
-                )
-              )?.length === 1
+            uniq(
+              map(
+                selectedRecords?.filter((e) => !e.hideSelection),
+                'type'
+              )
+            )?.length === 1
               ? false
               : true
           }
@@ -712,6 +728,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     isSendEmail: true,
     button1Title: 'Ordered',
     button2Title: 'Received',
+    toEmails: getEmailsFromContacts(purchaseOrderData, 'supplierContact'),
     defaultColumns: [
       'index',
       'type',
@@ -769,21 +786,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                {
-                  field: 'expenseItem',
-                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                }
-              ]
+                  {
+                    field: 'expenseItem',
+                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                  }
+                ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -844,11 +861,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                {
-                  field: 'chartOfAccount',
-                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                }
-              ]
+                  {
+                    field: 'chartOfAccount',
+                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                  }
+                ]
               : []
           }
         />
@@ -870,6 +887,17 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           warehouse={purchaseOrderData?.warehouse?.optionValue}
           data={{ qty: showInventoryStatesDialog.qty }}
           purchaseOrderData={purchaseOrderData}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={purchaseOrderData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.purchaseOrder}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

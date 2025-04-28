@@ -14,7 +14,7 @@ const DoaSetup = ({ resource, entity }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, permissions }
+    state: { permissions }
   }: any = useData();
 
   const [doaData, setDoaData] = useState(null);

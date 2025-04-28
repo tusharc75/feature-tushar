@@ -482,6 +482,7 @@ const RentalManagementDetailsPage = () => {
                   referenceId={rentalManagementData?._id}
                   resource={ACTIVITY_RESOURCE.rentalManagement}
                   resourceLabel={rentalManagementData?.rentalJobName}
+                  resourceData={rentalManagementData}
                 />
               </>
             </Box>
@@ -538,6 +539,7 @@ const RentalManagementDetailsPage = () => {
               {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
                 <Productpackage
                   rentalManagementData={rentalManagementData}
+                  rentalManagementFields={rentalManagementFields}
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
@@ -562,6 +564,7 @@ const RentalManagementDetailsPage = () => {
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
                 <Services
                   rentalManagementData={rentalManagementData}
+                  rentalManagementFields={rentalManagementFields}
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}

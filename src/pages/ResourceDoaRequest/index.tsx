@@ -5,23 +5,23 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { DOA_STATUS, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
+import { DOA_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CancelOutlined, CheckCircleOutlined } from '@mui/icons-material';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';
+import { FiExternalLink } from 'react-icons/fi';
+import { useHistory } from 'react-router-dom';
 
 const renderedFrom = camelCase(sidebarResource?.resourceDoaRequest);
 
 const ResourceDoaRequest = () => {
   const toastConfig = useContext(CustomToastContext);
-
+  const history = useHistory();
   const {
     state: { user, resources }
   }: any = useData();
@@ -31,97 +31,106 @@ const ResourceDoaRequest = () => {
   const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
 
   const [confermApproveRejectBox, setConfermApproveRejectBox] = useState({ open: false, type: '', data: null });
+  const [columns, setColumns] = useState(null);
 
-  const columns: any = [
-    {
-      accessor: 'purchaseRequisition',
-      Header: 'Name',
-      show: true,
-      disabled: true,
-      Cell: ({ row }) => (
-        <div>
-          <p>{row?.original?.purchaseRequisition}</p>
-        </div>
-      )
-    },
-    {
-      accessor: 'resource',
-      Header: 'Resource',
-      Cell: ({ row }) => (
-        <div>
-          <p className="text-truncate">{row?.original?.resource}</p>
-        </div>
-      )
-    },
-    {
-      accessor: 'requestedBy',
-      Header: 'Requested By',
-      show: true,
-      Cell: ({ row }) => (
-        <div>
-          {row?.original?.requestedBy ? (
-            <Link className="link" to={`/user/detail/${row?.original?.requestedById}`} title={row?.original?.requestedBy} target={'_blank'}>
-              {row?.original?.requestedBy}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )}
-        </div>
-      )
-    },
-    {
-      accessor: 'status',
-      Header: 'Status',
-      Cell: ({ row }) => (
-        <div>
-          <p className="text-truncate">{row?.original?.status}</p>
-        </div>
-      )
-    },
-    {
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 110,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <>
-          <HtmlTooltip title={row?.original?.allowToEdit ? 'Approve' : ''}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Approve"
-                disabled={!row?.original?.allowToEdit}
-                onClick={() => {
-                  setConfermApproveRejectBox({ open: true, type: DOA_STATUS.approved, data: row?.original });
-                }}
-              >
-                <CheckCircleOutlined fontSize="small" color={row?.original?.allowToEdit ? 'secondary' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
+  useEffect(() => {
+    const column: any = [
+      {
+        accessor: 'refrenceFrom',
+        Header: 'Name',
+        show: true,
+        disabled: true,
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p
+              className="text-truncate link"
+              onClick={() => {
+                history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
+                  resource: row?.original?.resource
+                });
+              }}
+            >
+              {row?.original?.refrenceFrom}
+            </p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row?.original?.resource === sidebarResource?.serializedAssetStatusChangeRequest) {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.resourceId}`);
+                } else if (row?.original?.resource === sidebarResource?.purchaseRequisition) {
+                  window.open(`${routes.purchaseRequisitionDetail.path}/${row.original.resourceId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        )
+      },
+      {
+        accessor: 'resource',
+        Header: 'Resource',
+        Cell: ({ row }) => (
+          <div>
+            <p className="text-truncate">{row?.original?.resource}</p>
+          </div>
+        )
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (
+          <div>
+            <p className="text-truncate">{row?.original?.status}</p>
+          </div>
+        )
+      }
+    ];
+    setColumns([...column, ...getStaticFields(), ActionsRenderer]);
+  }, []);
 
-          <HtmlTooltip title={row?.original?.allowToEdit ? 'Reject' : ''}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Reject"
-                disabled={!row?.original?.allowToEdit}
-                onClick={() => {
-                  setConfermApproveRejectBox({ open: true, type: DOA_STATUS.rejected, data: row?.original });
-                }}
-              >
-                <CancelOutlined fontSize="small" color={row?.original?.allowToEdit ? 'error' : 'disabled'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        </>
-      )
-    }
-  ];
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 110,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        <HtmlTooltip title={row?.original?.canPerform ? 'Approve' : ''}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Approve"
+              disabled={!row?.original?.canPerform}
+              onClick={() => {
+                setConfermApproveRejectBox({ open: true, type: DOA_STATUS.approved, data: row?.original });
+              }}
+            >
+              <CheckCircleOutlined fontSize="small" color={row?.original?.canPerform ? 'secondary' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.canPerform ? 'Reject' : ''}>
+          <span>
+            <IconButton
+              size="small"
+              aria-label="Reject"
+              disabled={!row?.original?.canPerform}
+              onClick={() => {
+                setConfermApproveRejectBox({ open: true, type: DOA_STATUS.rejected, data: row?.original });
+              }}
+            >
+              <CancelOutlined fontSize="small" color={row?.original?.canPerform ? 'error' : 'disabled'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
+    )
+  };
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -134,17 +143,36 @@ const ResourceDoaRequest = () => {
     axiosInstance()
       .get(`${routes.resourceDoaRequest.path}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        const rows = data?.map((d) => ({
-          _id: d?._id,
-          entity: d?.entity,
-          requestedBy: d?.createdBy?.optionLabel,
-          requestedById: d?.createdBy?.optionValue,
-          purchaseRequisition: d?.purchaseRequisition?.optionLabel,
-          referenceId: d?.referenceId,
-          status: d?.status,
-          resource: d?.resource,
-          allowToEdit: d?.doaUsers?.find((u) => u?.users.includes(user?.user?._id))?.isUpdate || false
-        }));
+        const rows = data?.map((d) => {
+          let status = d?.status;
+          const doaUser = d?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id));
+          if (!doaUser?.isUpdate) {
+            const prevDoaUser = d?.doaUsers?.find((u) => u?.index === doaUser?.index - 1);
+            if (prevDoaUser) {
+              status = `${status} - Awaiting for (${prevDoaUser?.users?.map((u) => u?.name)?.join(', ')})`;
+            }
+          }
+          let finalObject = prepareDataForGrid(d, user);
+          return {
+            ...finalObject,
+            _id: d?._id,
+            entity: d?.entity,
+            refrenceFrom:
+              d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
+                ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionLabel
+                : d?.resource === sidebarResource?.purchaseRequisition
+                  ? d?.purchaseRequisition?.optionLabel
+                  : '',
+            resourceId:
+              d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
+                ? d?.serializedAssetStatusChangeRequest?.assetDetail?.optionValue
+                : d?.referenceId,
+            referenceId: d?.referenceId,
+            canPerform: doaUser?.isUpdate || false,
+            status: status,
+            resource: d?.resource
+          };
+        });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -199,7 +227,7 @@ const ResourceDoaRequest = () => {
       {confermApproveRejectBox.open && (
         <ConfirmationDialog
           open={confermApproveRejectBox.open}
-          message={`Are you sure to ${confermApproveRejectBox.type} ? `}
+          message={`Are you sure you want to ${DOA_STATUS.approved === confermApproveRejectBox.type ? 'Approve' : 'Reject'} ? `}
           onClose={() => {
             setConfermApproveRejectBox({ open: false, type: '', data: null });
           }}

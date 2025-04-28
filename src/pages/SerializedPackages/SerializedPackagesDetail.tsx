@@ -125,11 +125,14 @@ const SerializedPackagesDetail = () => {
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              {permissions?.serializedPackages?.isDelete && serializedPackagesData?.canDelete && (
+                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+              )}
               <ActivityButton
                 referenceId={serializedPackagesData?._id}
                 resource={ACTIVITY_RESOURCE.serializedPackages}
                 resourceLabel={serializedPackagesData?.serializedPackageNumber}
+                resourceData={serializedPackagesData}
               />
             </>
           </Box>
@@ -154,9 +157,7 @@ const SerializedPackagesDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign
-            serializedPackagesData={serializedPackagesData}
-            fetchSerializedPackagesData={fetchData} />
+          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />

@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, displayDateTime } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import dayjs from 'dayjs';
 
-export default function StartStopDate({ onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null, notes = '' }) {
+export default function StartStopDate({ resource, onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null, notes = '' }) {
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
@@ -71,7 +71,10 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
       <Formik initialValues={initialValues} onSubmit={onSubmit} enableReinitialize={true} validate={validate}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <Form>
-            <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
+            <CustomDialogHeader
+              title={resource === sidebarResource.fieldServiceOrder ?
+                `${type === 'start' ? 'Dispatch' : type === 'stop' ? 'Return' : ''}` :
+                `Set ${type === 'start' ? 'Start' : type === 'stop' ? 'End' : 'Start/End'} Date`} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
@@ -82,7 +85,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                         size="small"
                         margin="none"
                         {...(minStartDateTime ? { minDateTime: minStartDateTime } : {})}
-                        label={`Start Date`}
+                        label={`${resource === sidebarResource.fieldServiceOrder ? `Dispatch` : `Start`} Date`}
                         value={values.startDate}
                         onChange={(date) => {
                           setFieldValue('startDate', date);
@@ -99,7 +102,7 @@ export default function StartStopDate({ onClose, type, loading, handleSubmit, da
                         size="small"
                         margin="none"
                         minDateTime={values.startDate}
-                        label={`End Date`}
+                        label={`${resource === sidebarResource.fieldServiceOrder ? `Return` : `End`} Date`}
                         value={values.endDate}
                         onChange={(date) => {
                           setFieldValue('endDate', date);

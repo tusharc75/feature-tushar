@@ -9,13 +9,15 @@ import { useDndSensors } from 'src/hooks';
 import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
 import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSidebar';
 import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
+import { RoadMapProvider, useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
-import Provider from 'src/pages/TechnicianScheduler/Context';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
 function TechnicianSchedulerImpl() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_d, setStore] = useRoadMapStore((state) => state.activeItemData);
   const toastConfig = useContext(CustomToastContext);
   const [selectedResource, setSelectedReSource] = useState<TechnicianResource | null>(null);
   const technicianResources = useTechnicianResources(toastConfig, setSelectedReSource);
@@ -32,11 +34,12 @@ function TechnicianSchedulerImpl() {
   const onDragStart = (event: DragStartEvent) => {
     if (!event.active) return;
     setActiveItem(event.active.data.current.props);
+    setStore({ activeItemData: { data: event.active.data.current?.row || event.active.data.current?.item, type: event.active.data.current.type } });
   };
 
   const onDragEnd = (event: DragEndEvent) => {
     setActiveItem(null);
-
+    setStore({ activeItemData: null });
     const { active, over } = event;
     if (over && over.data.current.accepts.includes(active.data.current.type)) {
       const activeType = active.data.current.type;
@@ -81,8 +84,7 @@ function TechnicianSchedulerImpl() {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs
-            routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
+          <CustomBreadCrumbs routes={[{ title: resources?.technicianScheduler?.titlePlural }]} />
         </Box>
       </Box>
       <Box className="detail-container-v1">
@@ -140,8 +142,8 @@ function TechnicianSchedulerImpl() {
 }
 
 const TechnicianScheduler = () => (
-  <Provider>
+  <RoadMapProvider>
     <TechnicianSchedulerImpl />
-  </Provider>
+  </RoadMapProvider>
 );
 export default TechnicianScheduler;

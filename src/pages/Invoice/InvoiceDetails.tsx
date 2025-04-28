@@ -319,7 +319,8 @@ const InvoiceDetails = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {statusOptions?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
+                  {statusOptions
+                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
                     .map((o) => {
                       return (
                         <MenuItem
@@ -359,7 +360,12 @@ const InvoiceDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={invoiceData?._id} resource={ACTIVITY_RESOURCE.invoice} resourceLabel={invoiceData?.invoiceNumber} />
+            <ActivityButton
+              referenceId={invoiceData?._id}
+              resource={ACTIVITY_RESOURCE.invoice}
+              resourceLabel={invoiceData?.invoiceNumber}
+              resourceData={invoiceData}
+            />
           </Box>
         </Box>
       </Box>
@@ -405,6 +411,7 @@ const InvoiceDetails = () => {
                   {currentStep === 0 && invoiceData && (
                     <Material
                       invoiceData={invoiceData}
+                      invoiceFields={invoiceFields}
                       fetchInvoiceData={fetchInvoiceData}
                       setNextStep={setNextStep}
                       stepFullScreen={stepFullScreen}

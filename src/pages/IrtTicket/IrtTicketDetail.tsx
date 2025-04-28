@@ -119,7 +119,12 @@ const IrtTicketDetail = () => {
               </ThemeButton>
             )}
             {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} resourceLabel={irtTicketData?.irtTicketNumber} />
+            <ActivityButton
+              referenceId={irtTicketData?._id}
+              resource={ACTIVITY_RESOURCE.irtTicket}
+              resourceLabel={irtTicketData?.irtTicketNumber}
+              resourceData={irtTicketData}
+            />
           </Box>
         </Box>
       </Box>

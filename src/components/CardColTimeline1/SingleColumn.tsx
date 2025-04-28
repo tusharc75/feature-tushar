@@ -216,7 +216,7 @@ const SingleCard = <D, C extends readonly string[]>({
           </div>
           {passFailStatus ? <RenderStatusIcon stepStatus={rowData[passFailAccessor]} /> : null}
         </div>
-        <div className="w-full p-[8px] pb-0">
+        <div className="col-timeline-data w-full p-[8px] pb-0">
           {defaultDisplay?.map((d) => {
             const cell = renderCell(d, rowData);
             return (

@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import BuildIcon from '@mui/icons-material/Build';
@@ -53,6 +52,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -67,6 +67,7 @@ const SerializedAssetDetailsPage = () => {
 
   const [assetDetails, setAssetDetails] = useState(null);
   const [fields, setFields] = useState(null);
+  const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState({ open: false, assetLogFields: null, updateStatus: null });
@@ -90,6 +91,38 @@ const SerializedAssetDetailsPage = () => {
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
   const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
   const [refreshAssetHistory, setRefreshAssetHistory] = useState(false);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
+
+  const extraFields = [
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b3',
+        fieldName: 'rentalJob',
+        fieldLabel: resources?.rentalManagement?.titleSingular,
+        lookup: true,
+        lookupResource: sidebarResource.rentalManagement,
+        resource: sidebarResource.serializedAsset,
+        type: 'dropDown',
+        sectionName: 'Other Information',
+      },
+      isRead: true,
+    },
+    {
+      fieldData: {
+        _id: '630dc2429ec41869032395b5',
+        fieldName: 'repairOrder',
+        fieldLabel: resources?.repairOrder?.titleSingular,
+        lookup: true,
+        lookupResource: sidebarResource.repairOrder,
+        resource: sidebarResource.serializedAsset,
+        type: 'dropDown',
+        sectionName: 'Other Information',
+      },
+      isRead: true,
+    }
+
+  ]
+
 
   useEffect(() => {
     if (id) {
@@ -102,6 +135,7 @@ const SerializedAssetDetailsPage = () => {
     fetchData();
     fetchPolicy();
     fetchAssetStates();
+    fetchFieldSerializedAssetStatusChangeRequest();
   };
 
   const handleMainPoints = (data) => {
@@ -233,6 +267,14 @@ const SerializedAssetDetailsPage = () => {
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchFieldSerializedAssetStatusChangeRequest = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetStatusChangeRequestFields([...data]);
       });
   };
 
@@ -491,11 +533,19 @@ const SerializedAssetDetailsPage = () => {
                             disabled={!manualStatus.includes(o?.optionLabel) || o?.optionLabel === assetDetails?.status}
                             onClick={() => {
                               closeActions();
-                              const { policy } = resourceData;
-                              if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
-                                setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                              if (
+                                o?.optionValue === ASSET_STATUS.scrap &&
+                                user?.user?.brandPolicy?.serializedAssetScrapApproval &&
+                                serializedAssetStatusChangeRequestFields?.length > 0
+                              ) {
+                                setStatusChangeRequestDialog(true);
                               } else {
-                                handleStatusChange(o);
+                                const { policy } = resourceData;
+                                if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
+                                  setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
+                                } else {
+                                  handleStatusChange(o);
+                                }
                               }
                             }}
                             value={o}
@@ -518,6 +568,7 @@ const SerializedAssetDetailsPage = () => {
               handleClose={() => {
                 fetchData();
               }}
+              resourceData={assetDetails}
             />
           </Box>
         </Box>
@@ -556,8 +607,8 @@ const SerializedAssetDetailsPage = () => {
                   data={assetDetails}
                   fields={
                     assetDetails?.status && (assetDetails?.status === ASSET_STATUS.scrap || assetDetails?.status === ASSET_STATUS.lost)
-                      ? [...fields, customField]
-                      : fields
+                      ? [...fields, customField, ...extraFields]
+                      : [...fields, ...extraFields]
                   }
                 />
               </>
@@ -685,6 +736,19 @@ const SerializedAssetDetailsPage = () => {
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={[{ _id: assetDetails?._id, assetNumber: assetDetails?.assetNumber, status: assetDetails?.status }]}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchData();
+          }}
+        />
+      )}
     </Box>
   );
 };

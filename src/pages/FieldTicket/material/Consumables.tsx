@@ -42,7 +42,7 @@ import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/Contained
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fieldTicketFields, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -392,32 +392,30 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       if (addQuotationDataDialog || addFieldServiceOrderDataDialog) {
         rows?.forEach((d: any) => {
           rows = rows?.forEach((e: any) => {
-            const obj: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+            let element: any = e;
+            const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
+            const calValues = autoCalculateSpecificFields(values, element, allFields);
+            Object.assign(element, calValues);
+            element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
             if (addQuotationDataDialog) {
-              obj.isQuotation = true;
+              element.isQuotation = true;
             }
             if (addFieldServiceOrderDataDialog) {
-              obj.isFieldServiceOrder = true;
+              element.isFieldServiceOrder = true;
             }
-            material.push(obj);
+            material.push(element);
           })
         });
         AddMaterial(material, null);
       }
       else {
         var taxCodeData: any = null;
-        if (fieldTicketData?.taxCode) {
-          const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.product);
-          if (taxCodeOptions?.length) {
-            taxCodeData = taxCodeOptions[0];
-          }
+        const taxCodeOptions = await getTaxList(user, fieldTicketData, fieldTicketFields, MATERIAL_TYPE.product);
+        if (taxCodeOptions?.length) {
+          taxCodeData = taxCodeOptions[0];
         }
         rows.forEach((d) => {
-          const element: any = {};
-          element.materialId = d._id;
-          element.type = MATERIAL_TYPE.product;
-          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
-          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
+          let element: any = {};
           element.qty = d.qty ? parseFloat(d.qty) : 1;
           element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -429,6 +427,11 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             element.taxCode = taxCodeData?.optionValue;
             element.taxPercentage = taxCodeData?.taxRate || 0;
           }
+          element = { ...getObjKeysWithValues(element, allFields) };
+          element.materialId = d._id;
+          element.type = MATERIAL_TYPE.product;
+          element.service = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?.optionValue : null;
+          element.uniqueId = selectedServiceOption?.optionValue !== 'All' ? selectedServiceOption?._id : null;
           material.push(element);
         });
         if (fieldTicketData?.pricingCondition?.optionValue) {
@@ -443,7 +446,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
         if (element.listPrice) {
           const priceFieldName = `price_${fieldTicketData?.currency?.toLowerCase()}`;
@@ -810,6 +813,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           fieldTicketData={fieldTicketData}
+          fieldTicketFields={fieldTicketFields}
           rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
           material={dataRows}
           selectedServices={selectedRecords}

@@ -66,6 +66,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const Productpackage = ({
   rentalManagementData,
+  rentalManagementFields,
   setNextStep,
   setNextStepToolTip,
   renderedFrom,
@@ -1087,6 +1088,7 @@ const Productpackage = ({
           isBulkedit={isBulkEdit}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={rentalManagementFields}
           rowData={!isBulkEdit ? isProductEdit.data : selectedRecords}
           material={material}
           dataRows={flattenArray(dataRows)}

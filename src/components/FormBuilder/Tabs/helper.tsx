@@ -237,6 +237,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'nonSerializedProductReceivingTicket',
+        fieldLabel: 'Non Serialized Product Receiving Ticket',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
@@ -245,7 +251,7 @@ export const resourcePolicy = [
           { optionValue: 'parentChild', optionLabel: 'Parent Child', order: 1 }
         ],
         defaultValue: ''
-      }
+      },
     ]
   },
   {
@@ -383,6 +389,17 @@ export const resourcePolicy = [
       {
         fieldName: 'showWorkOrderPdfPreviewInTile',
         fieldLabel: 'Show Work Order Pdf Preview in Tile',
+        type: 'checkBox',
+        defaultValue: false,
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.fieldServiceTechnician,
+    policy: [
+      {
+        fieldName: 'showOnlyAssignedTickets',
+        fieldLabel: 'Show only Assigned Tickets',
         type: 'checkBox',
         defaultValue: false,
       }

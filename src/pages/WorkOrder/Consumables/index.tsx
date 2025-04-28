@@ -51,8 +51,10 @@ const Consumables = ({
   workOrderData,
   serialNumberRequired = false,
   hideServiceFilter = false,
-  defaultServiceUniqueId = null
+  defaultServiceUniqueId = null,
+  tableHeight = null
 }) => {
+
   let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_consumable`;
 
   const workOrderId = workOrderData?._id;
@@ -102,7 +104,7 @@ const Consumables = ({
 
   useEffect(() => {
     fetchData();
-  }, [allowedToEdit, workOrderId, selectedService]);
+  }, [allowedToEdit, workOrderId, selectedService, uniqueId]);
 
   const handleUpdate = async (row: any) => {
     setUpdating(true);
@@ -440,10 +442,14 @@ const Consumables = ({
       data: { data }
     }: any = await axiosInstance().get(`${workOrder.api}/service/service/${workOrderId}`);
     if (data?.length) {
-      const serviceData = data?.map((s) => ({ optionLabel: s?.serviceDetail?.optionLabel, optionValue: s?.serviceDetail?.optionValue, uniqueId: s?._id }));
+      const serviceData = data?.map((s) => ({
+        optionLabel: s?.serviceDetail?.optionLabel,
+        optionValue: s?.serviceDetail?.optionValue,
+        uniqueId: s?._id
+      }));
       setServiceOption(serviceData);
       if (defaultServiceUniqueId && serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId)) {
-        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId))
+        setSelectedService(serviceData?.find((e) => e.uniqueId === defaultServiceUniqueId));
       }
     }
   };
@@ -715,7 +721,7 @@ const Consumables = ({
         <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
-              height={isCreate ? 'calc(100vh - 300px)' : 'calc(100vh - 345px)'}
+              height={tableHeight ? tableHeight : isCreate ? 'calc(100vh - 300px)' : 'calc(100vh - 345px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}

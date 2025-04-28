@@ -4,6 +4,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useSocket } from 'src/hooks/useSocket';
 import { TChannel, TChat } from 'src/pages/WorkSpace/types';
 import { useData } from 'src/StateProvider/Provider';
+import { useLocation, useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 
 type UseWorkSpaceActions =
   | { action: 'setIsSidebarCollapsed'; payload: UseWorkSpaceState['isSidebarCollapsed'] }
@@ -11,7 +13,8 @@ type UseWorkSpaceActions =
   | { action: 'setSelectedChannel'; payload: UseWorkSpaceState['selectedChannel'] }
   | { action: 'setEditCreateChannelDialogData'; payload: UseWorkSpaceState['editCreateChannelDialogData'] }
   | { action: 'setNewDirectMessageChannelId'; payload: UseWorkSpaceState['newDirectMessageChannelId'] }
-  | { action: 'setCurrentDeletingChannelId'; payload: UseWorkSpaceState['currentDeletingChannelId'] };
+  | { action: 'setCurrentDeletingChannelId'; payload: UseWorkSpaceState['currentDeletingChannelId'] }
+  | { action: 'setSelectedResource'; payload: UseWorkSpaceState['selectedResource'] };
 
 type UseWorkSpaceState = {
   allChannels: TChannel[] | null;
@@ -20,6 +23,7 @@ type UseWorkSpaceState = {
   currentDeletingChannelId: string | null;
   isSidebarCollapsed: boolean;
   newDirectMessageChannelId: string | null;
+  selectedResource: string | null;
 };
 
 const initialState: UseWorkSpaceState = {
@@ -28,7 +32,8 @@ const initialState: UseWorkSpaceState = {
   currentDeletingChannelId: null,
   editCreateChannelDialogData: { open: false, _id: null },
   selectedChannel: null,
-  newDirectMessageChannelId: null
+  newDirectMessageChannelId: null,
+  selectedResource: null
 };
 
 const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
@@ -45,15 +50,25 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
       return { ...state, currentDeletingChannelId: action.payload };
     case 'setNewDirectMessageChannelId':
       return { ...state, newDirectMessageChannelId: action.payload };
+    case 'setSelectedResource':
+      return { ...state, selectedResource: action.payload };
     default:
       return state;
   }
 };
 
-export const useWorkSpace = () => {
+type WorkSpaceProps = {
+  title?: string | null;
+};
+
+export const useWorkSpace = ({ title = '' }: WorkSpaceProps = {}) => {
+  const location = useLocation();
+  const parsedParams = queryString.parse(location.search);
+  const history = useHistory();
   const {
     state: {
       user: { user },
+      permissions,
       resources
     }
   } = useData();
@@ -78,8 +93,10 @@ export const useWorkSpace = () => {
             return d;
           }
         });
+
         setState({ action: 'setAllChannels', payload: newAllChannels });
       }
+      history.push(`?channel=${payload.title}`);
       setState({ action: 'setSelectedChannel', payload });
     },
     [state.allChannels]
@@ -94,6 +111,9 @@ export const useWorkSpace = () => {
   const setNewDirectMessageChannelId = useCallback((payload: UseWorkSpaceState['newDirectMessageChannelId']) => {
     setState({ action: 'setNewDirectMessageChannelId', payload });
   }, []);
+  const setSelectedResource = useCallback((payload: UseWorkSpaceState['selectedResource']) => {
+    setState({ action: 'setSelectedResource', payload });
+  }, []);
 
   const channels = useMemo(() => {
     return state.allChannels?.filter((a) => a.type !== 'chat');
@@ -107,12 +127,19 @@ export const useWorkSpace = () => {
   );
 
   const fetchChannelsAndChats = async (setActiveChannel = false, newDirectMessageChannelId = state.newDirectMessageChannelId) => {
+    let api = '/work-space/channel';
+    if (state.selectedResource) {
+      api = `${api}?resource=${state.selectedResource}`;
+    }
     const {
       data: { data }
-    } = await axiosInstance().get('/work-space/channel');
+    } = await axiosInstance().get(api);
 
     setAllChannels(data);
-    if (setActiveChannel) {
+    if (title) {
+      const channel = data?.find((channel) => channel?.title === title);
+      setSelectedChannel(channel, data);
+    } else if (setActiveChannel) {
       const queryParam = new URLSearchParams(window.location.search);
       const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');
       if (channelId) {
@@ -125,7 +152,7 @@ export const useWorkSpace = () => {
 
   useEffect(() => {
     fetchChannelsAndChats();
-  }, []);
+  }, [state.selectedResource]);
 
   useEffect(() => {
     if (socket) {
@@ -184,6 +211,15 @@ export const useWorkSpace = () => {
     };
   }, [socket, state.newDirectMessageChannelId]);
 
+  useEffect(() => {
+    if (parsedParams.channel && !state.selectedChannel) {
+      const channelData = state.allChannels?.find((c) => c.title === parsedParams.channel);
+      if (channelData) {
+        initChat(channelData);
+      }
+    }
+  }, [parsedParams.channel, state.allChannels, state.selectedChannel]);
+
   const handleDeleteChannels = useCallback(async (channelIds: string[]) => {
     await axiosInstance().delete('/work-space/channel', { data: { _ids: channelIds } });
     fetchChannelsAndChats();
@@ -205,7 +241,9 @@ export const useWorkSpace = () => {
     setSelectedChannel,
     setEditCreateChannelDialogData,
     setCurrentDeletingChannelId,
-    setState
+    setState,
+    setSelectedResource,
+    permissions
   };
 };
 

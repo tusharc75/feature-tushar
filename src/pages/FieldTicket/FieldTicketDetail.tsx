@@ -232,6 +232,7 @@ const FieldTicketDetail = () => {
                 referenceId: fieldTicketData?.fieldServiceOrder?.optionValue,
                 resource: ACTIVITY_RESOURCE.fieldServiceOrder
               }}
+              resourceData={fieldTicketData}
             />
           </Box>
         </Box>
@@ -273,6 +274,7 @@ const FieldTicketDetail = () => {
             {currentStep === 0 && fieldTicketData && (
               <Material
                 fieldTicketData={fieldTicketData}
+                fieldTicketFields={fields}
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}

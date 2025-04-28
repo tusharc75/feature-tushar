@@ -27,7 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = null, onClose, onSuccess, open }) => {
+const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = null, onClose, onSuccess, open, isRedirectTodetailPage = true }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -119,9 +119,11 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
       axiosInstance()
         .post(`${demandOrder.api}`, values)
         .then(({ data: { data, message } }) => {
-          history.push(`${routes.demandOrderDetail.path}/${data._id}`);
-          setLoading(false);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.demandOrderDetail.path}/${data._id}`);
+          }
           onSuccess(data);
+          setLoading(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',

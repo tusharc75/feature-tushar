@@ -1,12 +1,12 @@
-import { Autocomplete, Box, Collapse, Dialog, IconButton, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Collapse, Dialog, Divider, IconButton, TextField, Typography } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ShowPdf from './ShowPdf';
-
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -16,10 +16,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import PdfPreview from './ShowPdf/PdfPreview';
-import ViewImage from './ViewImage';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import emptyIllustration from 'src/assets/emptyIllustration.webp';
+import ImageEditor from './ImageEditor';
+import { useData } from 'src/StateProvider/Provider';
+import Comment from 'src/pages/WorkOrder/Diagram/Comment';
+import { isEmpty } from 'lodash';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -34,19 +38,28 @@ const Diagram = ({
   attachmentType = null,
   referenceLabel = '',
   showMaterialFilter = false,
-  defaultSelectedUniqueId = null
+  defaultSelectedUniqueId = null,
+  showContainer = true,
+  fullHeight = true
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: {
+      user: { user }
+    }
+  }: any = useData();
+
   const [rowData, setRowData] = useState(null);
   const [expended, setExpended] = useState({});
-  const [attachemntDialog, setAttachemntDialog] = useState({ open: false, id: null, isClone: false });
+  const [attachemntDialog, setAttachemntDialog] = useState({ open: false, file: null, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [commentDialog, setCommentDialog] = useState(false);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -56,7 +69,7 @@ const Diagram = ({
 
   useEffect(() => {
     fetchData();
-  }, [resource, referenceId, currentVersion, selectedService]);
+  }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
   const fetchData = async () => {
     let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
@@ -234,7 +247,7 @@ const Diagram = ({
           message: data.message
         });
         fetchData();
-        setAttachemntDialog({ open: false, id: null, isClone: false });
+        setAttachemntDialog({ open: false, file: null, isClone: false });
         setFullScreen(false);
         setLoading(false);
       })
@@ -244,15 +257,33 @@ const Diagram = ({
       });
   };
 
+  const isSelectedAttachmentImage = checkImageType(selectedAttachment?.url?.split('.')[1]);
+
+  const handleRequestReject = (id) => {
+    axiosInstance()
+      .put('/attachment/deleteRequest', { _id: id, type: 'cancel' })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Box>
-      <Box className="container-with-border" p={'20px'}>
+      <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
         {!disableEdit && (
           <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter ? 'justify-between' : 'justify-end'}`}>
             {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
               <Autocomplete
                 fullWidth
-                className="max-w-[300px]"
+                className="max-w-[250px]"
                 options={serviceOption}
                 getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
                 isOptionEqualToValue={(option: any, val) => option.uniqueId === val}
@@ -275,11 +306,11 @@ const Diagram = ({
                 )}
               />
             )}
-            <Box className="mb-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-              <h6 className="text-[16px] font-semibold min-[600px]:hidden">Attachments</h6>
+            <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
               <ThemeButton
+                buttonType="theme"
                 onClick={() => {
-                  setAttachemntDialog({ open: true, id: null, isClone: false });
+                  setAttachemntDialog({ open: true, file: null, isClone: false });
                 }}
                 iconForMobile={<Add />}
                 mobileTooltip="Add"
@@ -290,9 +321,9 @@ const Diagram = ({
           </div>
         )}
         <Box pt={2} pb={2}>
-          <Box className="h-[calc(100vh-300px)] overflow-auto">
+          <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
-              {rowData &&
+              {rowData && rowData.length > 0 ? (
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
@@ -317,52 +348,109 @@ const Diagram = ({
                             </Typography>
                           </Box>
                         </div>
-                        {!disableEdit && (
-                          <div className="flex gap-2">
-                            <HtmlTooltip title="Edit" placement="top" arrow>
-                              <IconButton
-                                size="small"
-                                color="inherit"
-                                aria-label="edit"
-                                disabled={!file?.canEdit}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAttachemntDialog({ open: true, id: file?._id, isClone: false });
+                        <div className="flex gap-2">
+                          {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
+                            <div className="flex gap-2">
+                              <ThemeButton
+                                buttonType="theme"
+                                onClick={() => {
+                                  handleDeleteFile([file._id]);
                                 }}
                               >
-                                <EditIcon style={{ fontSize: '18px' }} />
-                              </IconButton>
-                            </HtmlTooltip>
-                            <HtmlTooltip title="Clone" placement="top" arrow>
-                              <IconButton
-                                size="small"
-                                color="inherit"
-                                aria-label="clone"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setAttachemntDialog({ open: true, id: file?._id, isClone: true });
+                                Approve
+                              </ThemeButton>
+                              <ThemeButton
+                                buttonType="yellow"
+                                onClick={() => {
+                                  handleRequestReject(file._id);
                                 }}
                               >
-                                <FileCopyIcon style={{ fontSize: '18px' }} />
-                              </IconButton>
-                            </HtmlTooltip>
-                            <HtmlTooltip title="Delete" placement="top" arrow>
-                              <IconButton
-                                size="small"
-                                color="inherit"
-                                style={{ color: 'red' }}
-                                aria-label="delete"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedFile(file);
-                                  setShowConfirmBox(true);
-                                }}
+                                Reject
+                              </ThemeButton>
+                            </div>
+                          )}
+                          <HtmlTooltip
+                            title={
+                              <div className="flex flex-col p-2">
+                                <p>
+                                  Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
+                                </p>
+                                <p>
+                                  Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
+                                </p>
+                                {!isEmpty(file?.deleteRequest) && (
+                                  <>
+                                    <Divider></Divider>
+                                    <p>Delete Request Sent</p>
+                                    <p>
+                                      By: <span>{file?.deleteRequest?.user?.concatedName}</span>
+                                    </p>
+                                    <p>
+                                      Date: <span>{displayDate(file?.deleteRequest?.date)}</span>
+                                    </p>
+                                    <p>
+                                      Reason: <span>{file?.deleteRequest?.comment}</span>
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            }
+                          >
+                            <IconButton size="small" color="inherit">
+                              <InfoOutlinedIcon style={{ fontSize: '18px' }} />
+                            </IconButton>
+                          </HtmlTooltip>
+                          {!disableEdit && (
+                            <>
+                              <HtmlTooltip title="Edit" placement="top" arrow>
+                                <IconButton
+                                  size="small"
+                                  color="inherit"
+                                  aria-label="edit"
+                                  disabled={!file?.canEdit}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAttachemntDialog({ open: true, file: file, isClone: false });
+                                  }}
+                                >
+                                  <EditIcon style={{ fontSize: '18px' }} color={'primary'} />
+                                </IconButton>
+                              </HtmlTooltip>
+                              <HtmlTooltip title="Clone" placement="top" arrow>
+                                <IconButton
+                                  size="small"
+                                  color="inherit"
+                                  aria-label="clone"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAttachemntDialog({ open: true, file: file, isClone: true });
+                                  }}
+                                >
+                                  <FileCopyIcon style={{ fontSize: '18px' }} />
+                                </IconButton>
+                              </HtmlTooltip>
+                              <HtmlTooltip
+                                title={!isEmpty(file?.deleteRequest) ? `Delete request sent to ${file?.createdBy?.user?.concatedName}` : 'Delete'}
+                                placement="top"
+                                arrow
                               >
-                                <Delete style={{ fontSize: '18px' }} />
-                              </IconButton>
-                            </HtmlTooltip>
-                          </div>
-                        )}
+                                <IconButton
+                                  size="small"
+                                  color="inherit"
+                                  aria-label="delete"
+                                  disabled={!isEmpty(file?.deleteRequest) ? true : false}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedFile(file);
+                                    setShowConfirmBox(true);
+                                  }}
+                                >
+                                  <Delete style={{ fontSize: '18px' }} color={!isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
+                                </IconButton>
+                              </HtmlTooltip>
+                            </>
+                          )}
+                        </div>
                       </div>
                       <Collapse in={expended[file?._id]}>
                         <div className="border-t ">
@@ -402,7 +490,12 @@ const Diagram = ({
                       </Collapse>
                     </div>
                   );
-                })}
+                })
+              ) : (
+                <>
+                  <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 w-[250px] opacity-60" loading="lazy" />
+                </>
+              )}
             </div>
           </Box>
         </Box>
@@ -420,21 +513,29 @@ const Diagram = ({
             }
           }}
           fullWidth
+          disableEnforceFocus={true}
         >
-          <CustomDialogHeader
-            title={selectedAttachment?.name}
-            showManimizeMaximize={false}
-            showRequiredLabel={false}
-            onClose={() => {
-              setSelectedAttachment(null);
-            }}
-          />
-          <CustomDialogContent isFooterPresent={false}>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+          {!isSelectedAttachmentImage && disableEdit && (
+            <CustomDialogHeader
+              title={selectedAttachment?.name}
+              showManimizeMaximize={false}
+              showRequiredLabel={false}
+              onClose={() => {
+                setSelectedAttachment(null);
+              }}
+            />
+          )}
+          <CustomDialogContent isFooterPresent={false} className={cn(isSelectedAttachmentImage && !disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
+            {isSelectedAttachmentImage ? (
               disableEdit ? (
                 <ShowPdf data={selectedAttachment} />
               ) : (
-                <ViewImage data={selectedAttachment} fetchData={fetchData} setSelectedAttachment={setSelectedAttachment} />
+                <ImageEditor
+                  data={selectedAttachment}
+                  fetchData={fetchData}
+                  setSelectedAttachment={setSelectedAttachment}
+                  handleClose={() => setSelectedAttachment(null)}
+                />
               )
             ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
               disableEdit ? (
@@ -457,17 +558,18 @@ const Diagram = ({
           maxWidth={'md'}
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
-              setAttachemntDialog({ open: false, id: null, isClone: false });
+              setAttachemntDialog({ open: false, file: null, isClone: false });
             }
             setFullScreen(false);
           }}
           fullWidth
         >
           <ManageAttachment
-            attachmentId={attachemntDialog.id}
+            attachmentId={attachemntDialog.file?._id}
+            attachmentData={attachemntDialog.file}
             isClone={attachemntDialog.isClone}
             handleClose={() => {
-              setAttachemntDialog({ open: false, id: null, isClone: false });
+              setAttachemntDialog({ open: false, file: null, isClone: false });
               setFullScreen(false);
             }}
             relatedTo={getRelatedTo()}
@@ -478,7 +580,8 @@ const Diagram = ({
             showManimizeMaximize={true}
             fetchData={fetchData}
             attachmentType={attachmentType}
-            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.id && !showMaterialFilter ? customhandleAdd : null}
+            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
+            isOwner={attachemntDialog.file ? attachemntDialog.file?.createdBy?.user?._id === user?._id : true}
           />
         </Dialog>
       )}
@@ -490,8 +593,22 @@ const Diagram = ({
             setShowConfirmBox(false);
           }}
           onOk={() => {
-            handleDeleteFile([selectedFile._id]);
+            if (selectedFile?.createdBy?.user?._id === user?._id) {
+              handleDeleteFile([selectedFile._id]);
+            } else {
+              setCommentDialog(true);
+            }
             setShowConfirmBox(false);
+          }}
+        />
+      )}
+      {commentDialog && (
+        <Comment
+          onClose={() => setCommentDialog(false)}
+          file={selectedFile}
+          onSuccess={() => {
+            setCommentDialog(false);
+            fetchData();
           }}
         />
       )}

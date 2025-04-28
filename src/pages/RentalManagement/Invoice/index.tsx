@@ -13,7 +13,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { MATERIAL_TYPE, PACKAGE_TYPE, RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
+import { getEmailsFromContacts, MATERIAL_TYPE, PACKAGE_TYPE, RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../Productpackage/AdditionalCostDialog';
 import { FiExternalLink } from 'react-icons/fi';
@@ -315,6 +315,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
     referenceId: rentalManagementData._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(rentalManagementData),
     defaultColumns: [
       'index',
       'type',

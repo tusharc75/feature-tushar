@@ -1,7 +1,11 @@
+import { Dialog } from '@mui/material';
 import React from 'react';
 import ChatBox from 'src/components/DesktopDM/ChatBox';
+import GenieWindow from 'src/components/DesktopDM/GenieWindow';
 import useDesktopDM from 'src/components/DesktopDM/useDesktopDM';
 import UserList from 'src/components/DesktopDM/UserList';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { useDndSensors } from 'src/hooks';
 
 const DesktopDM = () => {
   const state = useDesktopDM();
@@ -14,15 +18,16 @@ const DesktopDM = () => {
     USER_LIST_CONTAINER_WIDTH,
     PARTIALLY_OPENNED_CONTAINER_HEIGHT,
     USER_LIST_RIGHT_SPACE,
-    isMobile,
-    isMobileDevice
+    isMobile
   } = state;
 
-  if (!mainWindow || isMobileDevice || isMobile) return null;
+  const sensors = useDndSensors();
+
+  if (!mainWindow) return null;
 
   return (
     <div
-      className="l-0 pointer-events-none fixed bottom-0 z-[1300] flex h-4 w-full items-end justify-end"
+      className="pointer-events-none fixed bottom-0 left-0 right-0 z-[1300] flex h-4 items-end justify-end"
       style={
         {
           '--chatbox-gap': `${CHATBOX_GAP}px`,
@@ -34,11 +39,26 @@ const DesktopDM = () => {
         } as React.CSSProperties
       }
     >
-      <aside className="pointer-events-auto flex h-0 flex-1 flex-row-reverse items-end overflow-visible">
+      <aside className="pointer-events-auto flex h-0 w-screen flex-1 flex-row-reverse items-end overflow-visible">
         <UserList state={state} />
-        {openedChats.map((o) => (
-          <ChatBox openedChat={o} state={state} key={o.id} />
-        ))}
+        {isMobile && openedChats.length > 0 ? (
+          <Dialog open={true} slots={{ transition: CustomDialogTransition }} fullScreen fullWidth>
+            {openedChats[openedChats.length - 1].type === 'genie' ? (
+              <>
+                <GenieWindow state={state} openedChat={openedChats[openedChats.length - 1]} key={openedChats[openedChats.length - 1]['id']} />
+              </>
+            ) : (
+              <>
+                <ChatBox openedChat={openedChats[openedChats.length - 1]} state={state} key={openedChats[openedChats.length - 1]['id']} />
+              </>
+            )}
+          </Dialog>
+        ) : (
+          openedChats.map((o) => {
+            if (o.type === 'genie') return <GenieWindow state={state} openedChat={o} key={o.id} />;
+            return <ChatBox openedChat={o} state={state} key={o.id} />;
+          })
+        )}
       </aside>
     </div>
   );

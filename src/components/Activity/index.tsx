@@ -2,13 +2,12 @@ import { Box, Dialog, IconButton } from '@mui/material';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Fragment, useContext, useEffect, useState } from 'react';
-
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from './../../StateProvider/Provider';
 import axiosInstance from './../../axios/axiosInstance';
-import { CustomDialogTransition } from './../../constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition } from './../../constants/helpers';
 import ManageAttachment from './Attachments/ManageAttachment';
 import Attachments from './Attachments/index';
 import { Case } from './Case';
@@ -23,14 +22,14 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
-
 import CloseIcon from '@mui/icons-material/Close';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import MailIcon from '@mui/icons-material/Mail';
-import { isEmpty } from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 import { CollaborateIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { HistoryIcon, IconEventMap } from 'src/assets/svg/CollaborateSidebar';
+import Collaborate from 'src/components/Activity/Collaborate';
 
 const Activity = (props) => {
   const {
@@ -41,8 +40,9 @@ const Activity = (props) => {
     restrictedAddActivities = [],
     resourceId = '',
     resourceLabel = '',
+    resourceData = null,
     resource = '',
-    close = () => { }
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -66,12 +66,30 @@ const Activity = (props) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [tabs, setTabs] = useState([]);
+  const [viewRelatedTo, setViewRelatedTo] = useState([]);
+  const [addRelatedTo, setAddRelatedTo] = useState([]);
+
+  useEffect(() => {
+    let addTemprelated = [...relatedTo];
+    let addViewrelated = [...relatedTo];
+    if (extraRelatedTo && isObject(extraRelatedTo)) {
+      addTemprelated = [...addTemprelated, extraRelatedTo];
+    }
+    if ([ACTIVITY_RESOURCE.fieldTicket]?.includes(resource)) {
+      if (extraRelatedTo && isObject(extraRelatedTo)) {
+        addViewrelated = [...addViewrelated, extraRelatedTo];
+      }
+    }
+    setViewRelatedTo(addViewrelated);
+    setAddRelatedTo(addTemprelated);
+  }, [relatedTo]);
 
   useEffect(() => {
     const options: any = [];
-    ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment']?.forEach((item) => {
+    ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment', 'Collaborate']?.forEach((item) => {
       if (
         (item === 'Event' && permissions?.task?.isRead) ||
+        (item === 'Collaborate' && permissions?.workSpace?.isRead) ||
         (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true)
       ) {
         options.push(item);
@@ -85,10 +103,10 @@ const Activity = (props) => {
   }, []);
 
   useEffect(() => {
-    if (Boolean(relatedTo[0]?.referenceId) && !countFetched) {
+    if (Boolean(viewRelatedTo[0]?.referenceId) && !countFetched) {
       fetchTotalCounts();
     }
-  }, [relatedTo[0]?.referenceId]);
+  }, [viewRelatedTo[0]?.referenceId]);
 
   useEffect(() => {
     let data = [];
@@ -104,7 +122,7 @@ const Activity = (props) => {
 
   const fetchTotalCounts = () => {
     axiosInstance()
-      .get(`/activity/resource/count?relatedTo=${JSON.stringify(relatedTo)}`)
+      .get(`/activity/resource/count?relatedTo=${JSON.stringify(viewRelatedTo)}`)
       .then(({ data: { data } }) => {
         setTotalCount(data);
         setCountFetched(true);
@@ -153,6 +171,7 @@ const Activity = (props) => {
         toastConfig.setToastConfig(err);
       });
   };
+
   const handleSetCount = (name, count) => {
     if (name) {
       setTotalCount((prevState) => ({ ...prevState, [name]: count }));
@@ -205,7 +224,7 @@ const Activity = (props) => {
                     <div className="text-container flex flex-grow">
                       <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
                         {data}
-                        <span className="ml-[2px] text-[12px] text-gray-500">({totalCount[data]})</span>
+                        {data != 'Collaborate' && <span className="ml-[2px] text-[12px] text-gray-500">({totalCount[data]})</span>}
                         <span className="cursor-pointer">
                           {type === data ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
                         </span>
@@ -216,7 +235,7 @@ const Activity = (props) => {
                           <div className="flex items-center">
                             {data === 'Attachment' && (
                               <Box mr={1}>
-                                <HtmlTooltip title={'Add Folder'} >
+                                <HtmlTooltip title={'Add Folder'}>
                                   <IconButton size="small" onClick={(event) => handleCreateActivity(event, 'AttachmentFolder')}>
                                     <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
                                   </IconButton>
@@ -225,14 +244,15 @@ const Activity = (props) => {
                             )}
                             {data === 'Email' && user?.user?.brandPolicy?.inboundEmail && isEmpty(user?.user?.brandPolicy?.inboundEmail) && (
                               <Box mr={1}>
-                                <HtmlTooltip title={`support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
+                                <HtmlTooltip
+                                  title={`support+${viewRelatedTo[0].type}_${viewRelatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`}
                                 >
                                   <IconButton
                                     size="small"
                                     onClick={(e) => {
                                       emailCopy(
                                         e,
-                                        `support+${relatedTo[0].type}_${relatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`
+                                        `support+${viewRelatedTo[0].type}_${viewRelatedTo[0].referenceId}_${user?.user?.brand}${user?.user?.brandPolicy?.inboundEmail}`
                                       );
                                     }}
                                   >
@@ -251,26 +271,29 @@ const Activity = (props) => {
                   </div>
 
                   {type === 'Task' && data === 'Task' ? (
-                    <Task relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Task relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Event' && data === 'Event' ? (
-                    <Event relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Event relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Case' && data === 'Case' ? (
-                    <Case relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Case relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Note' && data === 'Note' ? (
-                    <Note relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Note relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Email' && data === 'Email' ? (
-                    <Email relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
-                    <Attachments relatedTo={relatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Attachments relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                  ) : null}
+                  {type === 'Collaborate' && data === 'Collaborate' ? (
+                    <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
                   ) : null}
                 </Fragment>
               ))}
-
+              {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}
               {resourceId && resource ? (
                 <button
                   className="flex w-full cursor-pointer items-center gap-[10px] rounded-[10px] bg-transparent px-[20px] py-[15px] text-left shadow-lg outline-transparent [border:1px_solid_var(--common-border-color)] focus-within:[outline:2px_solid_var(--new-theme-color)] focus:[outline:2px_solid_var(--new-theme-color)] active:outline-transparent"
@@ -282,8 +305,6 @@ const Activity = (props) => {
                   <span className="text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]">History</span>
                 </button>
               ) : null}
-
-              {relatedTo && relatedTo[0].referenceId ? <Chatter relatedTo={relatedTo} /> : null}
             </div>
           </>
         </Box>
@@ -309,7 +330,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -324,7 +345,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               email={emails}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -340,7 +361,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -355,7 +376,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               handleDialogClose={() => {
                 handleClose();
                 setFullScreen(false);
@@ -374,7 +395,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -390,7 +411,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -405,7 +426,7 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              relatedTo={extraRelatedTo ? [...relatedTo, extraRelatedTo] : relatedTo}
+              relatedTo={addRelatedTo}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);

@@ -216,6 +216,7 @@ const AssemblyOrderDetail = () => {
               referenceId={assemblyOrderData?._id}
               resource={ACTIVITY_RESOURCE.assemblyOrder}
               resourceLabel={assemblyOrderData?.assemblyOrderNumber}
+              resourceData={assemblyOrderData}
             />
           </Box>
         </Box>

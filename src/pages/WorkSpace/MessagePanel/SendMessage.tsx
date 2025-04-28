@@ -1,19 +1,18 @@
+import { AttachFile, Cancel, Close, Mic, MicOff, Send } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import { AttachFile, Send, Mic, MicOff, Cancel, Close } from '@mui/icons-material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, getFileIconSrc } from 'src/constants/helpers';
 import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
 import { ChannelData } from 'src/pages/WorkSpace/types';
-import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { useSearchParams } from 'react-router-dom';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 
 type SendMessageProps = {
   channelId: string;
@@ -26,6 +25,7 @@ type SendMessageProps = {
   disabled?: boolean;
   parentMessageId?: string | null;
   state: UseWorkSpace;
+  resourceData?: any | null;
 };
 
 const SendMessage = ({
@@ -38,9 +38,10 @@ const SendMessage = ({
   channelData,
   disabled = false,
   parentMessageId = null,
-  state
+  state,
+  resourceData = null
 }: SendMessageProps) => {
-  const { setNewDirectMessageChannelId, newChatToUser } = state;
+  const { setNewDirectMessageChannelId, setSelectedChannel } = state;
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const numberOfMentions = useRef(0);
@@ -93,17 +94,34 @@ const SendMessage = ({
         audioBlobs?.forEach((audioBlob, index) => {
           formData.append('files', new File([audioBlob], `recording-${index}.webm`, { type: 'audio/webm' }));
         });
-        if (newChatToUser) {
-          formData.append('toUsers', JSON.stringify([newChatToUser._id]));
+        if (resourceData) {
+          // formData.append('toUsers', JSON.stringify([newChatToUser._id]));
+          // await axiosInstance()
+          //   .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+          //   .then(({ data: { data } }) => {
+          //     setNewDirectMessageChannelId(data?.ops?.[0]?.channel);
+          //     socket.emit('newChat', { channelId: 'directMessaging' });
+          //   });
           await axiosInstance()
-            .post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-            .then(({ data: { data } }) => {
-              setNewDirectMessageChannelId(data?.ops?.[0]?.channel);
-              socket.emit('newChat', { channelId: 'directMessaging' });
-            });
+            .post('/work-space/channel', {
+              access: 'public',
+              description: '',
+              ...resourceData
+            })
+            .then(async ({ data: { data } }) => {
+              if (data && data?._id) {
+                formData.append('channelId', data?._id);
+                await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
+                setSelectedChannel(data);
+                socket.emit('joinChannel', data?._id);
+              }
+            })
+            .catch((error) => {});
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
+
           await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
           // .then(({ data }) => {
           //   // socket.emit('newMessagePosted', { channelId, messageId });
@@ -315,7 +333,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={disabled || !(channelId || newChatToUser)}
+            disabled={disabled || !(channelId || resourceData)}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -413,7 +431,7 @@ const SendMessage = ({
           )}
         </div>
       </div>
-      {mentionInitialPosition && !newChatToUser && (
+      {mentionInitialPosition && !resourceData && (
         <Mention
           editor={editorRef.current}
           mentionInitialPosition={mentionInitialPosition}

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { memo, useMemo, useState } from 'react';
 import { cn } from 'src/constants/helpers';
-import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import Calendar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Calendar';
 import LeftSidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/LeftSidebar';
@@ -10,8 +10,8 @@ import Sidebar from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sideba
 import { TActivity } from 'src/pages/TechnicianScheduler/Roadmap/types';
 
 const dayPixel = 75;
-const startDate = dayjs('2023-01-01');
-const endDate = dayjs('2025-12-31');
+const startDate = dayjs().subtract(1, 'year').startOf('year');
+const endDate = dayjs().add(1, 'year').endOf('year');
 const totalDay = endDate.diff(startDate, 'day');
 
 type DesktopRoadmapProps = {
@@ -37,7 +37,7 @@ const DesktopRoadmapImpl = ({
   setIsSidebarOpen,
   loading
 }: DesktopRoadmapProps) => {
-  const { technicianSearchValue } = useTechnicianContext();
+  const [technicianSearchValue] = useRoadMapStore((state) => state.technicianSearchValue);
   const filteredActivity = useMemo(() => {
     const searchFor = (technicianSearchValue || '').trim().toLowerCase();
     if (searchFor) {

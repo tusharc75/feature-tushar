@@ -10,7 +10,7 @@ import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodas
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
@@ -54,7 +54,7 @@ import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets } from '.
 import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
-import { checkProductInside, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import { checkProductInside, fetch_rental_product_fields, getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
@@ -136,6 +136,8 @@ const LoadingTicket = ({
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
 
+  const { generateColumns } = useColumns();
+
   useEffect(() => {
     if (rentalPolicyData?.loadingReceivingDefaultView) {
       setView(rentalPolicyData?.loadingReceivingDefaultView);
@@ -183,11 +185,13 @@ const LoadingTicket = ({
               'serialNumber',
               'position',
               'wellNumber',
+              'padName',
               'mtrAttached',
               'warehouse',
               'jobCount',
               'currentGpsLocation',
-              'currentGpsWellNames'
+              'currentGpsWellNames',
+              'gpsNumber',
             ]
           }
         ]
@@ -202,6 +206,16 @@ const LoadingTicket = ({
     setColumns(null);
     const productFields = fieldLabels?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
+
+    const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    const newColumns = generateColumns(
+      renderedFrom,
+      rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
+
     const column: any = [
       {
         accessor: 'index',
@@ -209,7 +223,7 @@ const LoadingTicket = ({
         minWidth: 100,
         width: 100,
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div
             className={cn(
               'd-flex align-items-center gap-2',
@@ -256,7 +270,7 @@ const LoadingTicket = ({
         accessor: 'type',
         Header: 'Type',
         disabled: true,
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row.original['type'] ? (
             <p>
               {row.original?.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original?.type)} `}
@@ -270,7 +284,7 @@ const LoadingTicket = ({
         accessor: 'detail',
         Header: 'Details',
         disabled: true,
-        Cell: ({ row }) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate" title={row?.original?.detail}>
               {row?.original?.detail}
@@ -322,14 +336,15 @@ const LoadingTicket = ({
             accessor: 'parentName',
             Header: 'Parent',
             disabled: true,
-            Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
           }
         ]
         : []),
+      ...newColumns,
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.loadingTicket ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
@@ -350,14 +365,14 @@ const LoadingTicket = ({
         accessor: 'qty',
         Header: 'Qty',
         disabled: true,
-        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+        cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
           {
             accessor: 'serialNumber',
             Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -366,7 +381,7 @@ const LoadingTicket = ({
           {
             accessor: 'position',
             Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+            cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
           }
         ]
         : []),
@@ -375,12 +390,21 @@ const LoadingTicket = ({
           {
             accessor: 'jobCount',
             Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'Job Count',
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.jobCount || row?.original?.jobCount === 0 ? (
                 <h5 className="text-truncate">{row?.original?.jobCount}</h5>
               ) : (
                 <NoDataCell />
               )
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'gpsNumber')
+        ? [
+          {
+            accessor: 'gpsNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'gpsNumber')?.fieldLabel || 'gpsNumber',
+            cell: ({ row }) => (row?.original?.gpsNumber ? <div><p className="text-truncate">{row?.original?.gpsNumber}</p></div> : <NoDataCell />)
           }
         ]
         : []),
@@ -402,6 +426,30 @@ const LoadingTicket = ({
           }
         ]
         : []),
+      ...(assetFields?.find((f) => f?.fieldName === 'padName')
+        ? [
+          {
+            accessor: 'padName',
+            Header: assetFields?.find((f) => f.fieldName === 'padName')?.fieldLabel || 'Pad Name',
+            cell: ({ row }) =>
+              row?.original?.padName ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.padName}</h5>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.padMasterDetail.path}/${row?.original?.padId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
+        : []),
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
           {
@@ -414,7 +462,7 @@ const LoadingTicket = ({
                   ? original?.wellNumber?.optionLabel
                   : original?.wellNumber;
             },
-            Cell: ({ row }) => (
+            cell: ({ row }) => (
               <DropdownCell
                 permissions={permissions}
                 permissionForLinks={{}}
@@ -433,7 +481,7 @@ const LoadingTicket = ({
           {
             accessor: 'productName',
             Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product Name',
-            Cell: ({ row }) =>
+            cell: ({ row }) =>
               row?.original?.productName ? (
                 <div className="flex items-center gap-2">
                   <h5 className="text-truncate">{row?.original?.productName}</h5>
@@ -455,12 +503,12 @@ const LoadingTicket = ({
       {
         accessor: 'description',
         Header: 'Description',
-        Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
       {
         accessor: 'warehouse',
         Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
-        Cell: ({ row }) =>
+        cell: ({ row }) =>
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
@@ -480,19 +528,19 @@ const LoadingTicket = ({
       {
         accessor: 'rentalAssetStatus',
         Header: 'Rental Asset Status',
-        Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       },
       {
         accessor: 'status',
         Header: 'Asset Status',
-        Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       }
     ];
     if (assetFields?.find((f) => f.fieldName === 'mtrAttached')) {
       column.push({
         accessor: 'mtrAttachedView',
         Header: 'MTR Attached',
-        Cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
+        cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
       });
     }
     column.push({
@@ -504,7 +552,7 @@ const LoadingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) =>
+      cell: ({ row }) =>
         user?.user?.brandPolicy?.assetDeliveredStatus &&
           [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
             row?.original?.rentalAssetStatus
@@ -659,6 +707,7 @@ const LoadingTicket = ({
               const parent = material?.find((e) => e._id === parentId);
               if (parent) {
                 ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+                ele['longDescription'] = parent?.longDescription || '';
               }
             }
           } else if (ele?.parentId) {
@@ -860,6 +909,8 @@ const LoadingTicket = ({
       obj.rentalAssetStatus = _subRow?.status;
       obj.startDate = _subRow?.startDate;
       obj.wellNumber = _subRow?.inventory?.wellNumber;
+      obj.padName = _subRow?.inventory?.padName?.optionLabel;
+      obj.padId = _subRow?.inventory?.padName?.optionValue;
       obj.position = _subRow?.inventory?.position;
       obj.currentGpsLocation = _subRow?.inventory?.currentGpsLocation;
       obj.currentGpsWellNames = _subRow?.inventory?.currentGpsWellNames?.toString();
@@ -1634,15 +1685,17 @@ const LoadingTicket = ({
           horizontal: 'right'
         }}
       >
-        <MenuItem
-          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
-          onClick={() => {
-            setAnchorEl(null);
-            setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-          }}
-        >
-          {ASSET_STATUS.scrap}
-        </MenuItem>
+        {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
+          <MenuItem
+            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
+            onClick={() => {
+              setAnchorEl(null);
+              setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
+            }}
+          >
+            {ASSET_STATUS.scrap}
+          </MenuItem>
+        )}
         <MenuItem
           disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
           onClick={() => {
@@ -1741,8 +1794,8 @@ const LoadingTicket = ({
                   sx={{
                     '& .MuiInputBase-root textarea': {
                       resize: 'vertical',
-                      overflow: 'auto',
-                    },
+                      overflow: 'auto'
+                    }
                   }}
                 />
               )}

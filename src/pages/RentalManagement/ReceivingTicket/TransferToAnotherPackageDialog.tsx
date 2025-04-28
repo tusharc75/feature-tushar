@@ -9,6 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomMessageDialog from 'src/components/MessageDialog';
 import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, PACKAGE_TYPE, rentalManagement } from 'src/constants/helpers';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
@@ -24,6 +25,8 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
 
+  const [showStatusChangeConfirmBox, setShowStatusChangeConfirmBox] = useState({ open: false, underReviewAssetsData: null, reserveAssetsData: null, assetDataError: [] });
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -33,14 +36,14 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
       ?.filter((e) => e.type === MATERIAL_TYPE.package && e?.packageDetail?.packageType === PACKAGE_TYPE.product)
       ?.map((e) => {
         return {
-          optionLabel: e?.packageDetail?.packageName,
+          optionLabel: `${e?.packageDetail?.packageName}${e?.longDescription ? ` (${e?.longDescription})` : ``}`,
           optionValue: e?._id
         };
       });
     setPackageOptions(data);
   };
 
-  const handleSubmit = (underReviewAssetsData = null, reserveAssetsData = null) => {
+  const handleSubmit = (underReviewAssetsData = null, reserveAssetsData = null, skipTriggerAssetStatusChange = false) => {
     setIsSubmitting(true);
     const data = [];
     assets?.forEach((ele) => {
@@ -65,12 +68,23 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
       data.push(obj);
     });
 
-    axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package`, {
-        assets: data,
-        uniqueId: selectedPackage.optionValue
-      })
-      .then(({ data }) => {
+    axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package`, {
+      assets: data,
+      uniqueId: selectedPackage.optionValue,
+      skipTriggerAssetStatusChange
+    }).then(({ data }) => {
+      if (data?.data?.errors?.length) {
+        const assetDataError = []
+        data?.data?.errors?.forEach((ele) => {
+          let message = ele.assetNumber;
+          ele?.fields?.forEach((e) => {
+            message += ` (${e?.fieldLabel}: ${e?.value})`
+          })
+          assetDataError.push(message)
+        })
+        setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError })
+      }
+      else {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -78,11 +92,11 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
         });
         setIsSubmitting(false);
         onSuccess();
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+      }
+    }).catch((error) => {
+      setIsSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const checkAssetPolicy = (status) => {
@@ -194,6 +208,19 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
           }}
         />
       )}
+      {showStatusChangeConfirmBox.open &&
+        <CustomMessageDialog
+          open={showStatusChangeConfirmBox.open}
+          errorMessages={showStatusChangeConfirmBox.assetDataError}
+          onClose={() => {
+            setShowStatusChangeConfirmBox({ open: false, underReviewAssetsData: null, reserveAssetsData: null, assetDataError: [] })
+            onClose()
+          }}
+          onConfirm={() => {
+            handleSubmit(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true)
+          }}
+          title={"Status change will be triggered for the following assets. Do you want to continue without changing their status?"}
+        />}
     </>
   );
 };

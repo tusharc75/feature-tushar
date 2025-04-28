@@ -1,10 +1,9 @@
 import { Box, Dialog } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { useHistory, useParams, useLocation } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -21,6 +20,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
+import Unavailability from 'src/pages/EmployeeMaster/Unavailability';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -37,8 +37,7 @@ const EmployeeMasterDetail = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
   const [resourceData, setResourceData] = useState(null);
-  const queryParameter = useLocation().search;
-  const givePortalAccessDialog = new URLSearchParams(queryParameter).get('portalAccess');
+  const [unavailabilityFields, setUnavailabilityFields] = useState(null);
 
   const {
     state: { permissions, user, resources }
@@ -50,12 +49,16 @@ const EmployeeMasterDetail = () => {
       fetchData();
       fetchLoggedInUserRole();
       fetchPolicy();
-
-      if (givePortalAccessDialog === 'true') {
-        setShowAssignEntityDialog(true);
-      }
+      fetchUnavailabilityFields();
     }
   }, [id]);
+
+  const fetchUnavailabilityFields = async () => {
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.technicianUnavailability}&view=true`);
+    data = response?.data?.data;
+    setUnavailabilityFields(data);
+  };
 
   const fetchFields = async () => {
     axiosInstance()
@@ -186,7 +189,7 @@ const EmployeeMasterDetail = () => {
               )}
               {permissions?.employeeMaster?.isUpdate && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
-                  {'Edit'}
+                  Edit
                 </ThemeButton>
               )}
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
@@ -195,6 +198,7 @@ const EmployeeMasterDetail = () => {
               referenceId={employeeMasterData?._id}
               resource={ACTIVITY_RESOURCE.employeeMaster}
               resourceLabel={employeeMasterData?.employeeNumber}
+              resourceData={employeeMasterData}
             />
           </Box>
         </Box>
@@ -203,7 +207,10 @@ const EmployeeMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
           <CustomTab value={1} label={'History'} />
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {unavailabilityFields?.length > 0 && <CustomTab value={2} label={'Unavailability'} />}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -216,6 +223,9 @@ const EmployeeMasterDetail = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
           <History id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Unavailability id={id} />
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&

@@ -13,7 +13,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { MATERIAL_TYPE, PACKAGE_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, PACKAGE_TYPE, QUOTATION_STATUS, getEmailsFromContacts, quotation, sidebarResource } from '../../../constants/helpers';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
@@ -383,6 +383,7 @@ const Quotation = ({
     referenceId: quotationData?._id,
     columns: columns,
     isSendEmail: true,
+    toEmails: getEmailsFromContacts(quotationData),
     isExcelDownload: true,
     subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     extraQueryParams: { uniqueId: quotationData?.versions[currentVersion]?._id },

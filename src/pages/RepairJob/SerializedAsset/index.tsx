@@ -29,6 +29,7 @@ import {
   INVENTORY_OWNER_TYPE,
   REPAIR_JOB_STATUS,
   deliveryTicket,
+  getEmailsFromContacts,
   repairJob,
   serializedAsset,
   sidebarResource
@@ -402,11 +403,7 @@ const SerializedAsset = ({
       <>
         {allowedToEdit && allowedOperation && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
           <Fragment>
-            <ThemeButton
-              disabled={selectedRecords.length === 0 || !allowUpdateStatus}
-              onClick={handleClick}
-              endIcon={<ExpandMore />}
-            >
+            <ThemeButton disabled={selectedRecords.length === 0 || !allowUpdateStatus} onClick={handleClick} endIcon={<ExpandMore />}>
               Change Status
             </ThemeButton>
             <Menu
@@ -435,15 +432,17 @@ const SerializedAsset = ({
               >
                 {ASSET_STATUS.needRepair}
               </MenuItem>
-              <MenuItem
-                disabled={checkUniqcurrentOwnerType()}
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-                }}
-              >
-                {ASSET_STATUS.scrap}
-              </MenuItem>
+              {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
+                <MenuItem
+                  disabled={checkUniqcurrentOwnerType()}
+                  onClick={() => {
+                    setAnchorEl(null);
+                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
+                  }}
+                >
+                  {ASSET_STATUS.scrap}
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={() => {
                   setAnchorEl(null);
@@ -523,7 +522,8 @@ const SerializedAsset = ({
     referenceId: repairJobData?._id,
     columns: columns,
     hideDetailButton: true,
-    isSendEmail: true
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(repairJobData, 'supplierContact'),
   };
 
   return (

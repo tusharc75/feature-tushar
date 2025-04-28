@@ -3,7 +3,6 @@ import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { lazy, Suspense, useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import AgentChat from 'src/components/AgentChat';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -21,16 +20,18 @@ import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDeta
 import Integration from 'src/pages/Integration';
 import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
-import ServiceCategory from 'src/pages/ServiceCategory';
-import ServiceCategoryDetail from 'src/pages/ServiceCategory/ServiceCategoryDetail';
 import PackageInventory from 'src/pages/PackageInventory';
 import ProductTypes from 'src/pages/ProductTypes';
 import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
 import ReportsCenter from 'src/pages/Reports';
+import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
+import SerializedAssetStatusChangeRequestDetail from 'src/pages/SerializedAsset/SerializedAssetStatusChangeRequest/SerializedAssetStatusChangeRequestDetail';
 import SerializedPackages from 'src/pages/SerializedPackages';
 import SerializedPackagesDetail from 'src/pages/SerializedPackages/SerializedPackagesDetail';
+import ServiceCategory from 'src/pages/ServiceCategory';
+import ServiceCategoryDetail from 'src/pages/ServiceCategory/ServiceCategoryDetail';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import WorkFlow from 'src/pages/WorkFlow';
@@ -47,15 +48,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import {
-  compareVersions,
-  customerAccount,
-  customerContact,
-  handleHardReload,
-  sidebarResource,
-  supplierAccount,
-  supplierContact
-} from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
@@ -288,10 +281,12 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
-
-const DesktopDM = lazy(() => import('src/components/DesktopDM'));
+import DesktopDM from 'src/components/DesktopDM';
 
 var notificationInterval: any = null;
+let watchIdRef: number | null = null;
+let oldLogitude: number | null = null;
+let oldLatitude: number | null = null;
 
 function App() {
   useEffect(() => {
@@ -410,6 +405,52 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (!user || isOffline || !localStorage.getItem('token')) return;
+    const startTracking = () => {
+      if (!navigator.geolocation || watchIdRef !== null) return;
+      watchIdRef = navigator.geolocation.watchPosition(
+        ({ coords: { latitude, longitude } }) => {
+          if (oldLatitude !== latitude && oldLogitude !== longitude) {
+            axiosInstance().post('user/live-location', { longitude, latitude });
+            oldLatitude = latitude;
+            oldLogitude = longitude;
+          }
+        },
+        (e) => {},
+        { enableHighAccuracy: false }
+      );
+    };
+    const stopTracking = () => {
+      if (watchIdRef !== null) {
+        navigator.geolocation.clearWatch(watchIdRef);
+        watchIdRef = null;
+      }
+    };
+    if (oldLatitude === null && oldLatitude === null) {
+      (async () => {
+        try {
+          const status = await navigator.permissions.query({ name: 'geolocation' });
+          if (status.state === 'prompt') {
+            navigator.geolocation.getCurrentPosition(
+              () => startTracking(),
+              () => stopTracking()
+            );
+          } else if (status.state === 'granted') {
+            startTracking();
+          } else {
+            stopTracking();
+          }
+        } catch (error) {
+          console.error('Error checking location permission:', error);
+        }
+      })();
+    }
+    return () => {
+      stopTracking();
+    };
+  }, [user, isOffline]);
+
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
     if (location && location.search) {
@@ -417,9 +458,6 @@ function App() {
       if (parsedParams.redirect) {
         redirectToAnotherScreen = parsedParams.redirect;
       }
-    }
-    if (user?.user?.customerContactId) {
-      redirectToAnotherScreen = sidebarResource?.pos;
     }
 
     return !user ? (
@@ -1166,6 +1204,9 @@ function App() {
             <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequest.path}`}>
               <SerializedAssetStatusChangeRequest />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedAssetStatusChangeRequestDetail.path}/:id`}>
+              <SerializedAssetStatusChangeRequestDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={routes.units.path}>
               <Units />
             </PrivateRoute>
@@ -1177,6 +1218,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.resourceDoaRequest.path}>
               <ResourceDoaRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.resourceDoaRequestDetail.path}/:id`}>
+              <ResourceDoaRequestDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.subcontractAssembly.path}>
               <SubcontractAssembly />
@@ -1261,8 +1305,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
-          {permissions?.equiptAi?.isRead && <AgentChat />}
-          <Suspense fallback={null}>{user && <DesktopDM />}</Suspense>
+          {user && <DesktopDM />}
         </ErrorBoundaryComponent>
       </AnimatePresence>
 

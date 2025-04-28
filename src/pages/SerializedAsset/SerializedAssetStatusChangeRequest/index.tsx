@@ -13,15 +13,25 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
-import { ASSET_APPROVAL_STATUS, gridLoadingTimeout, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import {
+  ASSET_APPROVAL_STATUS,
+  DOA_STATUS,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serializedAsset,
+  sidebarResource
+} from '../../../constants/helpers';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Autocomplete from '@mui/material/Autocomplete';
+import { FiExternalLink } from 'react-icons/fi';
+import { useHistory } from 'react-router-dom';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
 const SerializedAssetStatusChangeRequest = () => {
   const toastConfig = useContext(CustomToastContext);
+  const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -47,12 +57,34 @@ const SerializedAssetStatusChangeRequest = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data);
-        setColumns([...newColumns, ActionsRenderer]);
-      });
+    axiosInstance().get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`).then(({ data: { data } }) => {
+      let newColumns = generateColumns(renderedFrom, data);
+      const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
+      assetColumn.cell = ({ row }) => (
+        <div className="flex items-center gap-1">
+          <p
+            className="text-truncate link"
+            title={row?.original?.asset}
+            onClick={() => {
+              history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
+            }}
+          >
+            {row?.original?.asset}
+          </p>
+          {row?.original?.assetId && (
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          )}
+        </div>
+      );
+      setColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset'), ActionsRenderer]);
+    });
   };
 
   const ActionsRenderer = {
@@ -66,42 +98,40 @@ const SerializedAssetStatusChangeRequest = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={'Approve'}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Approve"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
-              onClick={() => {
-                setApproveRejectRecord(row?.original);
-                setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
-              }}
-            >
-              <CheckCircleIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'primary'}
-              />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <HtmlTooltip title={'Reject'}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Reject"
-              disabled={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? true : false}
-              onClick={() => {
-                setApproveRejectRecord(row?.original);
-                setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
-              }}
-            >
-              <CancelIcon
-                fontSize="small"
-                color={!permissions?.serializedAsset?.isUpdate || row?.original?.status !== ASSET_APPROVAL_STATUS.pending ? 'disabled' : 'error'}
-              />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
+        {row?.original?.originalStatus === ASSET_APPROVAL_STATUS.pending &&
+          <>
+            <HtmlTooltip title={row?.original?.canPerform ? 'Approve' : 'Sent for DOA Approval'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Approve"
+                  disabled={!row?.original?.canPerform}
+                  onClick={() => {
+                    setApproveRejectRecord(row?.original);
+                    setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.approved });
+                  }}
+                >
+                  <CheckCircleIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'primary'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={row?.original?.canPerform ? 'Reject' : 'Sent for DOA Approval'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Reject"
+                  disabled={!row?.original?.canPerform}
+                  onClick={() => {
+                    setApproveRejectRecord(row?.original);
+                    setShowConfirmDialog({ open: true, status: ASSET_APPROVAL_STATUS.rejected });
+                  }}
+                >
+                  <CancelIcon fontSize="small" color={!row?.original?.canPerform ? 'disabled' : 'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
+        }
       </>
     )
   };
@@ -109,13 +139,24 @@ const SerializedAssetStatusChangeRequest = () => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     axiosInstance()
       .get(`${serializedAsset.api}/status-approval-process/${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['originalStatus'] = finalObject['status'];
+          finalObject['canPerform'] = permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          if (finalObject['doa_status']) {
+            finalObject['canPerform'] = finalObject['status'] === ASSET_APPROVAL_STATUS.pending && [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
+            if (u?.status === DOA_STATUS.pending) {
+              const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
+              if (users?.length > 0) {
+                finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
+              }
+            }
+          }
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -196,7 +237,7 @@ const SerializedAssetStatusChangeRequest = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          isActionButtonVisible={true}
+          isActionButtonVisible={selectedStatus === ASSET_APPROVAL_STATUS.pending}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           isAddButtonVisible={false}
           actionMenuItems={
@@ -207,7 +248,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
@@ -220,7 +261,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAsset?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }

@@ -9,8 +9,8 @@ import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianR
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
-import { useTechnicianContext } from 'src/pages/TechnicianScheduler/Context';
 import { isArray, isObject } from 'lodash';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -46,7 +46,7 @@ const ServiceOrderSidebarImpl = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [container, setContainer] = useState<HTMLDivElement>(null);
   const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
-  const { leftSearchValue } = useTechnicianContext();
+  const [leftSearchValue] = useRoadMapStore((state) => state.leftSearchValue);
 
   const fetchData = (selectedResource: TechnicianResource, search?: string, cancelToken?: CancelToken) => {
     dispatch({ type: 'loading', loading: true });
@@ -56,31 +56,33 @@ const ServiceOrderSidebarImpl = ({
     if (search) {
       api += `&search=${encodeURIComponent(search)}`;
     }
-    axiosInstance().get(api, { cancelToken }).then(({ data: { data } }) => {
-      const rows: any = [];
-      data?.forEach((ele, index) => {
-        const obj: any = { ...ele };
-        obj.index = index + 1;
-        obj._id = ele?.service?.uniqueId || ele._id;
-        obj.resourceId = ele._id;
-        obj.warehouse = ele?.warehouse?.optionValue;
-        obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
-        obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
-        obj.serviceName = ele?.service?.serviceName;
-        obj.serviceId = ele?.service?._id;
-        obj.competencyType = ele?.service?.competencyType?.optionLabel;
-        obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
-        obj.service = ele?.service;
-        obj.customerAccount = ele?.customerAccount?.optionLabel;
-        obj.customerAccountId = ele?.customerAccount?.optionValue;
-        obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
-        obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
-        obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
-        rows.push(obj);
-      });
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
-    })
+    axiosInstance()
+      .get(api, { cancelToken })
+      .then(({ data: { data } }) => {
+        const rows: any = [];
+        data?.forEach((ele, index) => {
+          const obj: any = { ...ele };
+          obj.index = index + 1;
+          obj._id = ele?.service?.uniqueId || ele._id;
+          obj.resourceId = ele._id;
+          obj.warehouse = ele?.warehouse?.optionValue;
+          obj.fieldServiceOrder = ele?.fieldServiceOrder?.optionLabel;
+          obj.fieldServiceOrderId = ele?.fieldServiceOrder?.optionValue;
+          obj.serviceName = ele?.service?.serviceName;
+          obj.serviceId = ele?.service?._id;
+          obj.competencyType = ele?.service?.competencyType?.optionLabel;
+          obj.competencies = ele?.service?.competencies?.map((e) => e?.optionLabel)?.toString();
+          obj.service = ele?.service;
+          obj.customerAccount = ele?.customerAccount?.optionLabel;
+          obj.customerAccountId = ele?.customerAccount?.optionValue;
+          obj.estimateStartDate = ele?.service?.estimateStartDate || ele?.estimateStartDate;
+          obj.estimateEndDate = ele?.service?.estimateEndDate || ele?.estimateEndDate;
+          obj.resourceNumber = ele?.fieldTicketNumber || ele?.fieldServiceOrderNumber || ele?.rentalJobName;
+          rows.push(obj);
+        });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -117,7 +119,7 @@ const ServiceOrderSidebarImpl = ({
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
+      .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?._id }] })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();
@@ -181,9 +183,15 @@ const ServiceOrderSidebarImpl = ({
           handleClose={() => {
             setOpenTechnicianDialog({ open: false, data: null });
           }}
-          defaultCompetencyType={openTechnicianDialog?.data?.service?.competencyType ?
-            isObject(openTechnicianDialog?.data?.service?.competencyType) ? [openTechnicianDialog?.data?.service?.competencyType] :
-              isArray(openTechnicianDialog?.data?.service?.competencyType) ? openTechnicianDialog?.data?.service?.competencyType : [] : []}
+          defaultCompetencyType={
+            openTechnicianDialog?.data?.service?.competencyType
+              ? isObject(openTechnicianDialog?.data?.service?.competencyType)
+                ? [openTechnicianDialog?.data?.service?.competencyType]
+                : isArray(openTechnicianDialog?.data?.service?.competencyType)
+                  ? openTechnicianDialog?.data?.service?.competencyType
+                  : []
+              : []
+          }
           warehouse={openTechnicianDialog.data?.warehouse}
           ids={[]}
           isSubmitting={isSubmitting}

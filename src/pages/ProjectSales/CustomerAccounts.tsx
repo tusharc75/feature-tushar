@@ -1,35 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react';
-import clsx from 'clsx';
-import { Typography, Box, IconButton, Tabs, Tab, Menu, MenuItem, Theme } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { makeStyles } from '@mui/styles';
-import { Skeleton } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { Add, Edit, MoreVert } from '@mui/icons-material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import axiosInstance from '../../axios/axiosInstance';
-import CustomerContacts from './CustomerContacts';
-import BoxWithBorder from '../../components/BoxWithBorder';
-import OpportunityAccordianProjectSales from './OpportunityAccordingProjectSales';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import ManageContactDialog from '../Contact/ManageContact';
-import { customerContact } from '../../constants/helpers';
-import ManageAccountDialog from '../Account/ManageAccount';
-import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
-import QuotesAccordionInProjectSale from './QuotesAccordionInProjectSale';
-import QuotationAccordionInProjectSales from './QuotationAccordionInProjectSales';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { Box, IconButton, Menu, MenuItem, Skeleton, Tab, Tabs, Theme, Typography } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { makeStyles } from '@mui/styles';
+import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import axiosInstance from '../../axios/axiosInstance';
+import BoxWithBorder from '../../components/BoxWithBorder';
+import ConfirmationDialogRaw from '../../components/Helpers/ConfirmationDialog';
+import { customerContact } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import ManageAccountDialog from '../Account/ManageAccount';
+import ManageContactDialog from '../Contact/ManageContact';
+import CustomerContacts from './CustomerContacts';
+import OpportunityAccordianProjectSales from './OpportunityAccordingProjectSales';
+import QuotationAccordionInProjectSales from './QuotationAccordionInProjectSales';
+import QuotesAccordionInProjectSale from './QuotesAccordionInProjectSale';
 
 const useStyles = makeStyles((theme: Theme) => ({
-  root: {
-    border: '1px solid var(--common-border-color)',
-    borderRadius: '5px',
-    marginBottom: 12
-  },
   expand: {
     transform: 'rotate(0deg)',
     transition: theme.transitions.create('transform', {
@@ -443,43 +434,43 @@ const CustomerAccounts = (props) => {
           contactId={null}
         />
       )}
-      <Box className={`${classes.root} ${'pannel_layout'}`}>
-        <div>
+
+      <Box className={` ${'pannel_layout'}`}>
+        <Accordion expanded={expandedParent} onChange={() => setExpandedParent((prev) => !prev)}>
           <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-            <Box
-              display="flex"
-              alignItems="center"
-              className={clsx(classes.expand, {
-                [classes.expandOpen]: expandedParent
-              })}
-            ></Box>
-            <Typography variant="subtitle1" className={classes.cusName}>
-              {resources?.customerAccount?.titlePlural}
-            </Typography>
-            {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-              <>
-                <ThemeButton
-                  buttonType='theme'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    setShowAccountCreateDialog(true);
-                  }}
-                >
-                  {'Create New'}
-                </ThemeButton>
-                <ThemeButton
-                  buttonType='theme'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleOpenDialog('customer-account');
-                  }}
-                >
-                  {'Add Existing'}
-                </ThemeButton>
-              </>
-            ) : null}
+            <div className="flex items-center justify-between">
+              <Typography variant="subtitle1" className={classes.cusName}>
+                {resources?.customerAccount?.titlePlural}
+              </Typography>
+              {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
+                <div className="ml-auto flex flex-wrap gap-2">
+                  <ThemeButton
+                    buttonType="theme"
+                    iconForMobile={<Edit />}
+                    mobileTooltip="Create New"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setShowAccountCreateDialog(true);
+                    }}
+                  >
+                    {'Create New'}
+                  </ThemeButton>
+                  <ThemeButton
+                    iconForMobile={<Add />}
+                    mobileTooltip="Add Existing"
+                    buttonType="theme"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleOpenDialog('customer-account');
+                    }}
+                  >
+                    {'Add Existing'}
+                  </ThemeButton>
+                </div>
+              ) : null}
+            </div>
           </AccordionSummary>
           <AccordionDetails>
             {loading ? (
@@ -539,39 +530,28 @@ const CustomerAccounts = (props) => {
                   {customerAccounts.map((c, i) => (
                     <Box hidden={currentTabIndex !== i} key={c._id}>
                       <Box mb={2}>
-                        <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact(!expandCustomerContact)}>
+                        <Accordion expanded={expandCustomerContact} onChange={() => setExpandCustomerContact((prev) => !prev)}>
                           <AccordionSummary aria-controls="user-panel-content" id="user-panel-header">
-                            <Grid container>
-                              <Grid size={{ xs: 8 }}>
-                                <Box component="div" display="flex" alignItems="center" flexGrow={1}>
-                                  <IconButton size="small" onClick={(e) => e.preventDefault()}>
-                                    {expandCustomerContact === true ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                            <div className="flex items-center justify-between">
+                              <Typography variant="subtitle2">
+                                {resources?.customerContact?.titlePlural} ({customerContacts.filter((ca) => ca.accountName === c._id).length})
+                              </Typography>
+                              {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
+                                <div className="ml-auto">
+                                  <IconButton
+                                    aria-haspopup="true"
+                                    color="primary"
+                                    size="small"
+                                    onClick={(e) => {
+                                      handleClick(e, 'customer-contact');
+                                      setAccId(c._id);
+                                    }}
+                                  >
+                                    <MoreVert />
                                   </IconButton>
-                                  <Box>
-                                    <Typography variant="subtitle2">
-                                      {resources?.customerContact?.titlePlural} ({customerContacts.filter((ca) => ca.accountName === c._id).length})
-                                    </Typography>
-                                  </Box>
-                                </Box>
-                              </Grid>
-                              <Grid size={{ xs: 4 }} container justifyContent="flex-end" alignItems="center">
-                                <Typography variant="subtitle2">
-                                  {(permissions?.projectSales?.isUpdate && isTeamMember) || isManager ? (
-                                    <IconButton
-                                      aria-haspopup="true"
-                                      color="primary"
-                                      size="small"
-                                      onClick={(e) => {
-                                        handleClick(e, 'customer-contact');
-                                        setAccId(c._id);
-                                      }}
-                                    >
-                                      <MoreVert />
-                                    </IconButton>
-                                  ) : null}
-                                </Typography>
-                              </Grid>
-                            </Grid>
+                                </div>
+                              ) : null}
+                            </div>
                           </AccordionSummary>
                           <AccordionDetails>
                             <Box style={{ width: '100%' }}>
@@ -682,7 +662,7 @@ const CustomerAccounts = (props) => {
               <Typography>{`No ${resources?.customerAccount?.titlePlural}`}</Typography>
             )}
           </AccordionDetails>
-        </div>
+        </Accordion>
         {/*</Accordion>*/}
       </Box>
       {showConfirmBox && (

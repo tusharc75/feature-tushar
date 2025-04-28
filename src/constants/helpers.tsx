@@ -175,12 +175,10 @@ export const serviceOrderSteps: stepInterface[] = [
 export const serviceOrderSteps2: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Technicians', title: 'Technicians', icon: 'add' },
-  { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
-  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' },
-  { name: 'Return', title: 'Return', icon: 'receiveProduct' }
+  { name: 'Field Ticket', title: 'Field Tickets', icon: 'receivingTicket' }
 ];
 
-export const FIELD_SERVICE_ORDER_TECHNICIAN_STATUS = {
+export const TECHNICIAN_STATUS = {
   reserved: 'Reserved',
   dispatched: 'Dispatched',
   completed: 'Completed',
@@ -416,7 +414,8 @@ export const sidebarResource = {
   packageCategory: 'Package Category',
   serviceCategory: 'Service Category',
   schedulingMaintenance: 'Scheduling Maintenance',
-  serializedAssetsCertification: 'Serialized Assets Certification'
+  serializedAssetsCertification: 'Serialized Assets Certification',
+  technicianUnavailability: 'Technician Unavailability'
 };
 
 export const primaryFields = {
@@ -1041,12 +1040,16 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else {
+        obj[key.fieldName] = '';
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
+      } else {
+        obj[key.fieldName] = '';
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
@@ -2449,7 +2452,8 @@ export const REPORT_SECTIONS = {
   deals: 'Deals',
   user: 'User',
   integration: 'Integration',
-  iot: 'Iot'
+  iot: 'Iot',
+  technician: 'Technician'
 };
 
 export const REPORT_LIST = [
@@ -2748,6 +2752,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'sytelineInvoiceIntegration',
     section: REPORT_SECTIONS.integration
+  },
+  {
+    title: 'Technician Schedule Report',
+    permission: 'employeeMaster',
+    key: 'standardReport',
+    type: 'technicianSchedule',
+    section: REPORT_SECTIONS.technician
   }
 ];
 
@@ -3564,6 +3575,7 @@ export const cloneResourceData = (fromFields, toFields, data, currency) => {
   );
   const result: any = {};
   overlappingFields?.forEach((e) => {
+    const toField = toFields?.find((f) => f?.fieldName === e?.fieldName);
     let fieldName = e?.fieldName;
     if (e.type === 'currencyAmount') {
       fieldName = `${e?.fieldName}_${currency?.toLowerCase()}`;
@@ -3571,9 +3583,17 @@ export const cloneResourceData = (fromFields, toFields, data, currency) => {
     if (data[fieldName]) {
       if (e?.lookup) {
         if (e?.type === 'dropDown') {
-          result[fieldName] = data[fieldName]?.optionValue || '';
+          if (toField?.type === 'multiSelect') {
+            result[fieldName] = data[fieldName]?.optionValue ? [data[fieldName]?.optionValue] : [];
+          } else {
+            result[fieldName] = data[fieldName]?.optionValue || '';
+          }
         } else {
-          result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
+          if (toField?.type === 'dropDown') {
+            result[fieldName] = isArray(data[fieldName]) && data?.fieldName?.length > 0 ? data[fieldName][0]['optionValue'] : '';
+          } else {
+            result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
+          }
         }
       } else {
         result[fieldName] = data[fieldName];
@@ -3642,6 +3662,10 @@ export const DOA_RESOURCE = [
   {
     key: 'purchaseRequisition',
     resorce: sidebarResource.purchaseRequisition
+  },
+  {
+    key: 'serializedAssetStatusChangeRequest',
+    resorce: sidebarResource.serializedAssetStatusChangeRequest
   }
 ];
 
@@ -4165,4 +4189,18 @@ export const ASSEMBLY_ORDER_STATUS = {
   inProgress: 'In-Progress',
   partiallyConverted: 'Partially Converted',
   converted: 'Converted'
+};
+
+export const getEmailsFromContacts = (data, field = 'customerContact') => {
+  const emails = [];
+  if (isArray(data?.[field])) {
+    data?.[field]?.forEach((e) => {
+      if (e?.email) {
+        emails.push(e?.email);
+      }
+    });
+  } else if (data?.[field]?.email) {
+    emails.push(data?.[field]?.email);
+  }
+  return emails;
 };

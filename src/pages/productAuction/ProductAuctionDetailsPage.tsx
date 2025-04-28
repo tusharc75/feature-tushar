@@ -106,6 +106,7 @@ const ProductAuctionDetailsPage = () => {
               referenceId={productAuctionData?._id}
               resource={ACTIVITY_RESOURCE.productAuction}
               resourceLabel={productAuctionData?.auctionNumber}
+              resourceData={productAuctionData}
             />
           </Box>
         </Box>

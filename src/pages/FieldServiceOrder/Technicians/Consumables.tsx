@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
   CHILD_RESOURCE,
-  FIELD_SERVICE_ORDER_TECHNICIAN_STATUS,
+  TECHNICIAN_STATUS,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   fieldServiceOrder,
@@ -39,11 +39,13 @@ import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationD
 const Consumables = ({
   allowedToEdit,
   serviceOrderData,
+  serviceOrderFields,
   stepFullScreen,
   fetchData: fetchserviceOrderData,
   technicians,
-  refreshChild,
-  fetchConsumablesData
+  fetchConsumablesData,
+  allConsumables,
+  setSelectedRecords = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Consumables`;
 
@@ -73,7 +75,7 @@ const Consumables = ({
 
   useEffect(() => {
     fetchData();
-  }, [selectedTechnician, refreshChild]);
+  }, [selectedTechnician, allConsumables]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, allowedToEdit);
@@ -211,6 +213,10 @@ const Consumables = ({
       }
     ];
 
+    if (setSelectedRecords) {
+      column?.forEach((e) => delete e?.Footer);
+      extracolumns?.forEach((e) => delete e?.Footer);
+    }
     setColumns([...column, ...extracolumns]);
   };
 
@@ -218,22 +224,10 @@ const Consumables = ({
     try {
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
-      let consumables;
-      let api = `${fieldServiceOrder.api}/${serviceOrderData?._id}/material?type=${MATERIAL_TYPE.product}`;
+      let consumables = allConsumables;
       if (selectedTechnician?.technicianId && selectedTechnician?.technicianId !== 'All') {
-        api = `${api}&technician=${selectedTechnician?.technicianId}`;
+        consumables = consumables?.filter((e) => e?.technicianId === selectedTechnician?.technicianId);
       }
-      const response = await axiosInstance().get(api);
-      consumables = response?.data?.data?.material;
-      consumables?.forEach((parent, i) => {
-        parent.index = i + 1;
-        parent.productName = parent?.productDetail?.productName;
-        parent.productDescription = parent?.productDetail?.productDescription;
-        parent.productNumber = parent?.productDetail?.productNumber;
-        parent.technicianId = parent?.technician?.optionValue;
-        parent.technician = parent?.technician?.optionLabel || '';
-        parent.canDelete = parent?.status ? parent?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved : true;
-      });
       dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -245,24 +239,24 @@ const Consumables = ({
   const handleAdd = async (rows) => {
     setSubmitting(true);
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, serviceOrderData, MATERIAL_TYPE.product);
+    const taxCodeOptions = await getTaxList(user, serviceOrderData, serviceOrderFields, MATERIAL_TYPE.product);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
     const material: any = [];
     if (addQuotationDataDialog) {
       rows?.forEach((e: any) => {
-        const element: any = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(e, allFields) };
+        let element: any = e;
+        const values = { estimateStartDate: serviceOrderData?.estimateStartDate || new Date(), estimateEndDate: serviceOrderData?.estimateEndDate || new Date() };
+        const calValues = autoCalculateSpecificFields(values, element, allFields);
+        Object.assign(element, calValues);
+        element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
         material.push(element);
       });
       AddMaterial(material, null);
-    }
-    else {
+    } else {
       rows.forEach((d) => {
-        const element: any = {};
-        element.materialId = d._id;
-        element.type = MATERIAL_TYPE.product;
-        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        let element: any = {};
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -274,6 +268,10 @@ const Consumables = ({
           element.taxCode = taxCodeData?.optionValue;
           element.taxPercentage = taxCodeData?.taxRate || 0;
         }
+        element = { ...getObjKeysWithValues(element, allFields) };
+        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
+        element.materialId = d._id;
+        element.type = MATERIAL_TYPE.product;;
         material.push(element);
       });
       if (serviceOrderData?.pricingCondition?.optionValue) {
@@ -287,7 +285,7 @@ const Consumables = ({
 
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
-    if (priceData) {
+    if (priceData && allFields?.find((e) => e?.fieldName === 'pricingCondition')) {
       tempMaterial.forEach((element) => {
         if (element.listPrice) {
           const priceFieldName = `price_${serviceOrderData?.currency?.toLowerCase()}`;
@@ -309,9 +307,9 @@ const Consumables = ({
           message: data?.message
         });
         setConsumablesDialog(false);
-        setAddQuotationDataDialog(false)
-        fetchData();
+        setAddQuotationDataDialog(false);
         fetchserviceOrderData();
+        dispatch({ type: 'loading', loading: true });
         fetchConsumablesData();
         setSubmitting(false);
       })
@@ -331,9 +329,9 @@ const Consumables = ({
         message: response?.data?.message
       });
       setDeleting(false);
-      fetchData();
-      fetchserviceOrderData();
+      dispatch({ type: 'loading', loading: true });
       fetchConsumablesData();
+      fetchserviceOrderData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);
@@ -351,7 +349,8 @@ const Consumables = ({
         type: 'success',
         message: response?.data?.message
       });
-      fetchData();
+      dispatch({ type: 'loading', loading: true });
+      fetchConsumablesData();
       if (saveAndNext) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
         setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
@@ -448,44 +447,31 @@ const Consumables = ({
 
   return (
     <>
-      <Box style={{ maxWidth: '400px' }} mb={3}>
-        <Autocomplete
-          id={'select-technician'}
-          size="small"
-          style={{ minWidth: '300px' }}
-          fullWidth
-          options={[{ technicianName: 'All', technicianId: 'All' }, ...(technicians || [])]}
-          autoHighlight
-          value={selectedTechnician}
-          getOptionLabel={(option: any) => option?.technicianName || ''}
-          isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
-          onChange={(_, val) => {
-            let value = val;
-            if (!val) {
-              value = { technicianName: 'All', technicianId: 'All' };
-            }
-            dispatch({ type: 'update', data: [] });
-            setSelectedTechnician(value);
-          }}
-          renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
-        />
-      </Box>
-      <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        <Box mb={1}>
-          <Typography variant="subtitle2">Products/Consumables</Typography>
+      {!setSelectedRecords && (
+        <Box style={{ maxWidth: '400px' }} mb={3}>
+          <Autocomplete
+            id={'select-technician'}
+            size="small"
+            style={{ minWidth: '300px' }}
+            fullWidth
+            options={[{ technicianName: 'All', technicianId: 'All' }, ...(technicians || [])]}
+            autoHighlight
+            value={selectedTechnician}
+            getOptionLabel={(option: any) => option?.technicianName || ''}
+            isOptionEqualToValue={(option, val) => (option ? option?.technicianId === val?.technicianId : false)}
+            onChange={(_, val) => {
+              let value = val;
+              if (!val) {
+                value = { technicianName: 'All', technicianId: 'All' };
+              }
+              dispatch({ type: 'update', data: [] });
+              setSelectedTechnician(value);
+            }}
+            renderInput={(params) => <TextField {...params} label={'Select Technician'} variant="outlined" />}
+          />
         </Box>
-        <DetailsPageHeader
-          isAddButtonVisible={
-            isEmpty(selectedTechnician) ||
-            selectedTechnician?.technicianId === 'All' ||
-            selectedTechnician?.status === FIELD_SERVICE_ORDER_TECHNICIAN_STATUS.reserved
-          }
-          addButtonMenuItems={<AddButtonMenuItems />}
-          isActionButtonVisible={true}
-          actionButtonMenuItems={actionButtonMenuItems()}
-          actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-          hasXpadding
-        />
+      )}
+      {setSelectedRecords ? (
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, md: 12, sm: 12 }}>
             {columns ? (
@@ -495,11 +481,14 @@ const Consumables = ({
                 state={state}
                 dispatch={dispatch}
                 onSaveEdit={onSaveInlineEdit}
-                renderedFrom={renderedFrom}
+                renderedFrom={`${renderedFrom}_Dialog`}
                 isClientSideGrid={true}
-                hideSelection={allowedToEdit ? false : true}
-                hideAction={allowedToEdit ? false : true}
-                refreshGrid={fetchData}
+                hideSelection={false}
+                hideAction={true}
+                refreshGrid={fetchConsumablesData}
+                onSelect={(data) => {
+                  setSelectedRecords(data);
+                }}
               />
             ) : (
               <Box p={2} height={300}>
@@ -508,59 +497,102 @@ const Consumables = ({
             )}
           </Grid>
         </Grid>
-      </Box>
-      {consumablesDialog && (
-        <AssignProductDialog
-          handleCloseDialog={() => setConsumablesDialog(false)}
-          ids={dataRows?.map((d) => d?.materialId)}
-          onSuccess={(rows) => {
-            handleAdd(rows);
-          }}
-          serialized={false}
-          isSubmitting={isSubmitting}
-          pricingCondition={serviceOrderData?.pricingCondition?.optionValue || null}
-        />
-      )}
+      ) : (
+        <>
+          <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+            <Box mb={1}>
+              <Typography variant="subtitle2">Products/Consumables</Typography>
+            </Box>
+            <DetailsPageHeader
+              isAddButtonVisible={
+                isEmpty(selectedTechnician) ||
+                selectedTechnician?.technicianId === 'All' ||
+                selectedTechnician?.status === TECHNICIAN_STATUS.reserved
+              }
+              addButtonMenuItems={<AddButtonMenuItems />}
+              isActionButtonVisible={true}
+              actionButtonMenuItems={actionButtonMenuItems()}
+              actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+              hasXpadding
+            />
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+                {columns ? (
+                  <CustomReactTable
+                    height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+                    columns={columns}
+                    state={state}
+                    dispatch={dispatch}
+                    onSaveEdit={onSaveInlineEdit}
+                    renderedFrom={renderedFrom}
+                    isClientSideGrid={true}
+                    hideSelection={allowedToEdit ? false : true}
+                    hideAction={allowedToEdit ? false : true}
+                    refreshGrid={fetchConsumablesData}
+                  />
+                ) : (
+                  <Box p={2} height={300}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                )}
+              </Grid>
+            </Grid>
+          </Box>
+          {consumablesDialog && (
+            <AssignProductDialog
+              handleCloseDialog={() => setConsumablesDialog(false)}
+              ids={dataRows?.map((d) => d?.materialId)}
+              onSuccess={(rows) => {
+                handleAdd(rows);
+              }}
+              serialized={false}
+              isSubmitting={isSubmitting}
+              pricingCondition={serviceOrderData?.pricingCondition?.optionValue || null}
+            />
+          )}
 
-      {isConsumableEdit.open && (
-        <MaterialQtyDialog
-          onClose={() => {
-            setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
-            setIsBulkEdit(false);
-          }}
-          isBulkedit={isBulkEdit}
-          handleSaveData={handleSaveData}
-          serviceOrderData={serviceOrderData}
-          rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
-          material={dataRows}
-          selectedServices={selectedRecords}
-          loading={isUpdating}
-          showSaveAndNext={isConsumableEdit.showSaveAndNext}
-          referenceType={'consumables'}
-        />
-      )}
+          {isConsumableEdit.open && (
+            <MaterialQtyDialog
+              onClose={() => {
+                setIsConsumableEdit({ open: false, data: null, showSaveAndNext: false });
+                setIsBulkEdit(false);
+              }}
+              isBulkedit={isBulkEdit}
+              handleSaveData={handleSaveData}
+              serviceOrderData={serviceOrderData}
+              serviceOrderFields={serviceOrderFields}
+              rowData={!isBulkEdit ? isConsumableEdit.data : selectedRecords}
+              material={dataRows}
+              selectedServices={selectedRecords}
+              loading={isUpdating}
+              showSaveAndNext={isConsumableEdit.showSaveAndNext}
+              referenceType={'consumables'}
+            />
+          )}
 
-      {deleteData && (
-        <ConfirmationDialog
-          open={true}
-          message={`Are you sure you want to delete the record(s)?`}
-          onClose={() => setDeleteData(null)}
-          onOk={() => handleDelete(deleteData)}
-          okBtnLoading={isDeleting}
-        />
-      )}
-      {addQuotationDataDialog && (
-        <AddQuotationDataDialog
-          onClose={() => {
-            setAddQuotationDataDialog(false);
-          }}
-          onSuccess={(rows) => {
-            handleAdd(rows);
-          }}
-          referenceData={serviceOrderData}
-          isSubmitting={isSubmitting}
-          materialType={MATERIAL_TYPE.product}
-        />
+          {deleteData && (
+            <ConfirmationDialog
+              open={true}
+              message={`Are you sure you want to delete the record(s)?`}
+              onClose={() => setDeleteData(null)}
+              onOk={() => handleDelete(deleteData)}
+              okBtnLoading={isDeleting}
+            />
+          )}
+          {addQuotationDataDialog && (
+            <AddQuotationDataDialog
+              onClose={() => {
+                setAddQuotationDataDialog(false);
+              }}
+              onSuccess={(rows) => {
+                handleAdd(rows);
+              }}
+              referenceData={serviceOrderData}
+              isSubmitting={isSubmitting}
+              materialType={MATERIAL_TYPE.product}
+            />
+          )}
+        </>
       )}
     </>
   );

@@ -3,6 +3,7 @@ import Add from '@mui/icons-material/Add';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,6 +25,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PACKAGE_TYPE,
@@ -43,8 +45,20 @@ import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
-const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup, fieldTicketPolicyData }) => {
+const Productpackage = ({
+  quotationData,
+  quotationFields,
+  fetchQuotationData,
+  setNextStep,
+  renderedFrom,
+  stepFullScreen,
+  version,
+  allowedToEdit,
+  updateDOASetup,
+  fieldTicketPolicyData
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, resources }
@@ -83,6 +97,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [costFields, setCostFields] = useState([]);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
   const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
@@ -239,7 +254,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     column.push({
       accessor: 'action',
       Header: 'Actions',
-      width: user?.user?.brandPolicy?.leadTime ? 140 : 100,
+      width: user?.user?.brandPolicy?.leadTime ? 160 : 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -257,6 +272,19 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 }}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
           )}
@@ -388,7 +416,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     setSubmitting(true);
     const material: any = [];
     var taxCodeData: any = null;
-    const taxCodeOptions = await getTaxList(user, quotationData, addDialog.type);
+    const taxCodeOptions = await getTaxList(user, quotationData, quotationFields, addDialog.type);
     if (taxCodeOptions?.length) {
       taxCodeData = taxCodeOptions[0];
     }
@@ -695,7 +723,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
-          quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
+          quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
+          quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
@@ -704,7 +733,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             Add Existing Services
           </MenuItem>
         )}
-        {costFields?.length > 0 && (
+        {costFields?.length > 0 && quotationData?.type != QUOTATION_TYPE.repairOrder && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
@@ -894,6 +923,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           handleSaveData={handleSaveData}
           loadingEdit={isUpdating}
           quotationData={quotationData}
+          quotationFields={quotationFields}
           rowData={!isProductEdit.isBulkedit ? recordToUpdate : selectedRecords}
           material={material}
           selectedProducts={selectedRecords}
@@ -931,6 +961,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           loadingEdit={isUpdating}
           showSaveAndNext={showCostDialog.showSaveAndNext}
           quotationData={quotationData}
+          quotationFields={quotationFields}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
@@ -941,6 +972,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           }}
           serialized={quotationData?.type === QUOTATION_TYPE.fieldJob ? false : null}
           isSubmitting={isSubmitting}
+          extraDeepFilter={quotationData?.type === QUOTATION_TYPE.repairOrder ? [{ field: 'serializedProduct', term: 'Yes' }] : []}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
@@ -1026,6 +1058,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           loading={isSubmitting}
         />
       )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={quotationData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.quotation}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
+        />
+      )}
       {addchildDialog.open && (
         <Popover
           anchorReference="anchorPosition"
@@ -1052,27 +1095,30 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             >
               Add Existing Products
             </MenuItem>
-            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : (
-              <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                {`Add Existing ${resources?.packages?.titlePlural}`}
-              </MenuItem>
-            )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : quotationData?.type ===
-              QUOTATION_TYPE.fieldJob ? null : (
-              <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            )}
+            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null :
+              [QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
+                ? null : (
+                  <MenuItem
+                    onClick={() => {
+                      setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                      setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                    }}
+                  >
+                    {`Add Existing ${resources?.packages?.titlePlural}`}
+                  </MenuItem>
+                )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
+              [QUOTATION_TYPE.fieldJob, QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
+                ? null : (
+                  <MenuItem
+                    onClick={() => {
+                      setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                      setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                    }}
+                  >
+                    Add Existing Services
+                  </MenuItem>
+                )}
           </MenuList>
         </Popover>
       )}

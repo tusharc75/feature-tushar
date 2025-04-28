@@ -440,7 +440,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
             materialData.actualStartDate = actualEndDate;
           } else {
-            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : materialData?.actualStartDate ? materialData?.actualStartDate : new Date().setDate(new Date().getDate() + 1);
           }
           materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
 
@@ -1076,6 +1076,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={[]}
           rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}

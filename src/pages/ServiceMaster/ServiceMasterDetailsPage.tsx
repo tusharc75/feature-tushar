@@ -22,6 +22,9 @@ import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
 import Step from '../DynamicForm/Step';
 import Grid from '@mui/material/Grid2';
+import { isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { mobileNotSupported } from 'src/constants/messageHelpers';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -117,15 +120,17 @@ const ServiceMasterDetailsPage = () => {
               <Skeleton variant="text" width="150px" height="32px" />
             ) : (
               <>
-                {permissions?.serviceMaster?.isUpdate && !isMobile && (
-                  <ThemeButton
-                    onClick={() => {
-                      setOpenConfigureFields(true);
-                    }}
-                    mobileTooltip={'Configure Fields'}
-                  >
-                    {'Configure Fields'}
-                  </ThemeButton>
+                {permissions?.serviceMaster?.isUpdate && (
+                  <HtmlTooltip title={isMobile && !isTablet ? mobileNotSupported : ''}>
+                    <ThemeButton
+                      onClick={() => {
+                        setOpenConfigureFields(true);
+                      }}
+                      disabled={isMobile && !isTablet}
+                    >
+                      Configure Fields
+                    </ThemeButton>
+                  </HtmlTooltip>
                 )}
                 {permissions?.serviceMaster?.isUpdate && (
                   <ThemeButton
@@ -145,6 +150,7 @@ const ServiceMasterDetailsPage = () => {
               referenceId={serviceMasterDetailData?._id}
               resource={ACTIVITY_RESOURCE.serviceMaster}
               resourceLabel={serviceMasterDetailData?.serviceName}
+              resourceData={serviceMasterDetailData}
             />
           </Box>
         </Box>
@@ -165,7 +171,7 @@ const ServiceMasterDetailsPage = () => {
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
-                {user?.user?.brandPolicy?.leadTime &&
+                {user?.user?.brandPolicy?.leadTime && (
                   <Box mb={2} mt={2}>
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 6, sm: 12, md: 6, lg: 6 }}>
@@ -173,7 +179,7 @@ const ServiceMasterDetailsPage = () => {
                       </Grid>
                     </Grid>
                   </Box>
-                }
+                )}
               </>
             )}
           </Box>

@@ -123,7 +123,7 @@ const PurchaseRequisitionDetail = () => {
       ]);
 
       if (data?.doaSetup) {
-        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
+        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}`);
         if (doaResponse?.data?.data) {
           setDOAData(doaResponse?.data?.data);
         }
@@ -219,6 +219,7 @@ const PurchaseRequisitionDetail = () => {
                 referenceId={purchaseRequisitionData?._id}
                 resource={ACTIVITY_RESOURCE.purchaseRequisition}
                 resourceLabel={purchaseRequisitionData?.purchaseRequisitionNumber}
+                resourceData={purchaseRequisitionData}
               />
             </>
           </Box>

@@ -18,7 +18,16 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, PRICING_SETUP_TYPE, pricingCondition, sidebarResource, sublease } from '../../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  PACKAGE_TYPE,
+  PRICING_SETUP_TYPE,
+  pricingCondition,
+  sidebarResource,
+  sublease
+} from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -29,6 +38,8 @@ import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdate
 import { useData } from 'src/StateProvider/Provider';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 import CreateProduct from 'src/components/Product/CreateProduct';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -54,6 +65,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const {
     state: { permissions, resources }
@@ -148,8 +160,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -168,7 +180,17 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               <EditIcon fontSize="small" color={!allowedToEdit ? 'disabled' : 'primary'} />
             </IconButton>
           </HtmlTooltip>
-
+          <HtmlTooltip title="Attachments">
+            <IconButton
+              size="small"
+              aria-label="Attachment"
+              onClick={(e) => {
+                setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+              }}
+            >
+              <AttachFileIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
           <IconButton
             size="small"
             aria-label="Details"
@@ -388,7 +410,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         >
           Add Existing Products
         </MenuItem>
-        {permissions?.packages?.isRead &&
+        {permissions?.packages?.isRead && (
           <MenuItem
             id="add-existing-package-menu-item"
             onClick={() => {
@@ -397,7 +419,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           >
             {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
-        }
+        )}
         {permissions?.product?.isCreate && (
           <MenuItem
             onClick={() => {
@@ -559,6 +581,17 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           }}
           isRedirectToDetailPage={false}
           openFrom="serializedAsset"
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={subleaseData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.sublease}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

@@ -38,6 +38,8 @@ import {
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
+import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -58,7 +60,7 @@ const SerializedAsset = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [showManageProductInventoryDialog, setShowManageProductInventoryDialog] = useState({ open: false, isClone: false, idToClone: null });
@@ -79,10 +81,13 @@ const SerializedAsset = () => {
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [otherStatusOptions, setOtherStatusOptions] = useState(null);
   const [status, setStatus] = useState('');
+  const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
+  const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
       await fetchGridColumns();
+      await fetchFieldSerializedAssetStatusChangeRequest();
     };
     fetch();
   }, [permissions, selectedEntity]);
@@ -140,7 +145,7 @@ const SerializedAsset = () => {
         }
         if (jobCount) {
           if (isObject(JSON.parse(jobCount))) {
-            filterVal['jobCount'] = { filter: ((JSON.parse(jobCount))?.optionValue)?.toString() };
+            filterVal['jobCount'] = { filter: JSON.parse(jobCount)?.optionValue?.toString() };
           }
         }
         dispatch({ type: 'filter', filters: filterVal });
@@ -177,6 +182,14 @@ const SerializedAsset = () => {
         });
     }
   }, [selectedEntity]);
+
+  const fetchFieldSerializedAssetStatusChangeRequest = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
+      .then(({ data: { data } }) => {
+        setSerializedAssetStatusChangeRequestFields([...data]);
+      });
+  };
 
   useEffect(() => {
     axiosInstance()
@@ -272,8 +285,7 @@ const SerializedAsset = () => {
         newColumns.push({
           accessor: 'ownerType',
           Header: 'Actual Owner Type',
-          minWidth: 150,
-          width: 150,
+          width: 200,
           Cell: ({ row }) => (
             <>
               {row?.original?.ownerType ? (
@@ -290,8 +302,7 @@ const SerializedAsset = () => {
         newColumns.push({
           accessor: 'owner',
           Header: 'Actual Owner',
-          minWidth: 150,
-          width: 150,
+          width: 200,
           Cell: ({ row }) => (
             <>
               {row?.original?.owner ? (
@@ -302,6 +313,44 @@ const SerializedAsset = () => {
                 <NoDataCell />
               )}
             </>
+          )
+        });
+
+        newColumns.push({
+          accessor: 'rentalJob',
+          Header: resources?.rentalManagement?.titleSingular,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'rentalJob',
+                lookupResource: sidebarResource.rentalManagement
+              }}
+              original={row?.original}
+            />
+          )
+        });
+
+        newColumns.push({
+          accessor: 'repairOrder',
+          Header: resources?.repairOrder?.titleSingular,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'repairOrder',
+                lookupResource: sidebarResource.repairOrder
+              }}
+              original={row?.original}
+            />
           )
         });
 
@@ -367,18 +416,14 @@ const SerializedAsset = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canDelete'] =
-            permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
-              ? false
-              : true;
+          finalObject['canDelete'] = [
+            ASSET_STATUS.new,
+            ASSET_STATUS.available,
+            ASSET_STATUS.lost,
+            ASSET_STATUS.customerPossession,
+            ASSET_STATUS.onPO,
+            ASSET_STATUS.scrap
+          ]?.includes(u?.status) ? permissions?.serializedAsset?.isDelete : false;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -581,7 +626,11 @@ const SerializedAsset = () => {
             </MenuItem>
             <MenuItem
               onClick={() => {
-                handleStatusChange(ASSET_STATUS.scrap);
+                if (user?.user?.brandPolicy?.serializedAssetScrapApproval && serializedAssetStatusChangeRequestFields?.length > 0) {
+                  setStatusChangeRequestDialog(true);
+                } else {
+                  handleStatusChange(ASSET_STATUS.scrap);
+                }
               }}
               disabled={
                 selectedRecords?.filter((o) =>
@@ -810,6 +859,19 @@ const SerializedAsset = () => {
           onAddReason={(reason) => {
             handleStatusUpdate({ status: status, reason: reason });
             setShowReasonDialog(false);
+          }}
+        />
+      )}
+      {openStatusChangeRequestDialog && (
+        <StatusChangeRequestDialog
+          status={ASSET_STATUS.scrap}
+          onClose={() => {
+            setStatusChangeRequestDialog(false);
+          }}
+          assetData={selectedRecords?.map((s) => ({ _id: s?._id, assetNumber: s?.assetNumber, status: s?.status }))}
+          onSuccess={() => {
+            setStatusChangeRequestDialog(false);
+            fetchData();
           }}
         />
       )}

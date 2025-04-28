@@ -13,7 +13,6 @@ import {
   Theme,
   Typography
 } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import { Image } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -90,10 +89,8 @@ export default function ManageProfile(props) {
   const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
-
   const [addFaceDialog, setAddFaceDialog] = useState(false);
   const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
-
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -348,7 +345,7 @@ export default function ManageProfile(props) {
             <div>
               {otherDetails &&
                 Object.keys(otherDetails).map((k, i) => (
-                  <span className="d-flex align-items-center gap-1">
+                  <span key={i} className="d-flex align-items-center gap-1">
                     {k === 'EmployeeNumber' && otherDetails[k] ? <span>Employee No : {otherDetails[k]}</span> : null}
                     {k === 'Email' && otherDetails[k] ? (
                       <>

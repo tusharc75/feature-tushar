@@ -135,6 +135,7 @@ const CompetencyMasterDetail = () => {
               referenceId={competencyMasterData?._id}
               resource={ACTIVITY_RESOURCE.competencyType}
               resourceLabel={competencyMasterData?.competencyType}
+              resourceData={competencyMasterData}
             />
           </Box>
         </Box>

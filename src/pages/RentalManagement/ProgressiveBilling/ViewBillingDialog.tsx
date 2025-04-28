@@ -362,7 +362,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const handleDeleteData = async (rows) => {
     const data = {
       invoiceId: invoiceData?._id,
-      materialIds: rows?.map((e) => e.materialId) || []
+      _ids: rows?.map((e) => e?.id) || []
     };
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
@@ -501,6 +501,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           isBulkedit={false}
           handleSaveData={handleSaveData}
           rentalManagementData={rentalManagementData}
+          rentalManagementFields={[]}
           rowData={dataRows?.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}

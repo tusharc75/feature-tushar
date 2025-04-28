@@ -16,9 +16,8 @@ import TinyMce from './../../components/TinyMCE/index';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkSuperAdminAccess } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import CustomTable from './customTable/customTable';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
@@ -28,8 +27,6 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const defaultProductColumns = 7;
-
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name  is required'),
   owner: string().required('Owner is required'),
@@ -38,29 +35,11 @@ const PdfTemplateSchema = object().shape({
 });
 
 const useStyles = makeStyles((theme: Theme) => ({
-  mainContainer: {
-    overflowY: 'scroll'
-  },
-  root: {
-    flexGrow: 1
-  },
-  paper: {
-    width: '100%',
-    textAlign: 'center',
-    color: theme.palette.text.secondary
-  },
-  saveButtonContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'end'
-  },
   tinyMCEContainer: {
     width: '725px',
     marginLeft: 'auto',
-    marginRight: 'auto'
-  },
-  headingLabel: {
-    marginBottom: '7px'
+    marginRight: 'auto',
+    marginTop: '10px'
   }
 }));
 
@@ -90,12 +69,10 @@ export default function NewCreateQuotePdfTemplate() {
   }: any = useData();
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
-  const [hasPermissionToUpdate, setHasPermissionToUpdate] = useState(true);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isLandscapChecked, setIsLandscapChecked] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [isPreview, setIsPreview] = useState(false);
-  const [table, setTable] = useState([]);
 
   const [variables, setVariables] = useState([]);
   const [allFields, setAllFields] = useState(null);
@@ -104,8 +81,11 @@ export default function NewCreateQuotePdfTemplate() {
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
   const [variableDialog, setVariableDialog] = useState(false);
 
+  const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
+  const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
+
   const onBackButtonEvent = (e) => {
-    if (hasPermissionToUpdate) {
+    if (allowedToEdit) {
       e.preventDefault();
       window.history.pushState(null, null, window.location.pathname);
       setShowConfirmDialog(true);
@@ -161,20 +141,12 @@ export default function NewCreateQuotePdfTemplate() {
     }
   }, [formValues?.type]);
 
-  async function fetchFieldData(resource) {
-    const fields = await axiosInstance().get(`/field?resource=${resource}&entity=${selectedEntity}&view=true`);
-    return fields?.data?.data?.map((field) => {
-      return { label: field?.fieldData?.fieldLabel, name: field?.fieldData?.fieldName };
-    });
-  }
-
   useEffect(() => {
     fetchData();
     fetchUser();
   }, [id]);
 
   const fetchData = async () => {
-
     const initialValues = {
       landscape: false,
       hideAmountTotalSection: false,
@@ -185,7 +157,6 @@ export default function NewCreateQuotePdfTemplate() {
       tableHeaderBackgroundColor: '',
       tableHeaderFontColor: '',
       tableHeaderFontWeight: '',
-      productColumns: defaultProductColumns,
       name: '',
       pageNumberInFooter: false,
       header: '',
@@ -211,7 +182,7 @@ export default function NewCreateQuotePdfTemplate() {
           setQuoteData(data);
           setVersion(queryParams.version);
           if (data?._id) {
-            setHasPermissionToUpdate(true);
+            setAllowedToEdit(true);
           }
           tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           tempQuoteData = data;
@@ -228,7 +199,7 @@ export default function NewCreateQuotePdfTemplate() {
           setQuoteData(data);
           setVersion(queryParams.version);
           if (data?._id) {
-            setHasPermissionToUpdate(true);
+            setAllowedToEdit(true);
           }
           tempPdfTemplate = data?.versions[Number(queryParams?.version)]?.pdfTemplate;
           tempQuoteData = data;
@@ -236,6 +207,7 @@ export default function NewCreateQuotePdfTemplate() {
           toastConfig.setToastConfig(e);
         }
       }
+
       if (tempPdfTemplate) {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
         initialValues.landscape = tempPdfTemplate?.landscape;
@@ -247,7 +219,6 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues.tableHeaderBackgroundColor = tempPdfTemplate?.tableHeaderBackgroundColor;
         initialValues.tableHeaderFontColor = tempPdfTemplate?.tableHeaderFontColor;
         initialValues.tableHeaderFontWeight = tempPdfTemplate?.tableHeaderFontWeight;
-        initialValues.productColumns = tempPdfTemplate?.productColumns;
         initialValues.name = tempPdfTemplate?.name;
         initialValues.pageNumberInFooter = tempPdfTemplate?.pageNumberInFooter;
         initialValues.header = tempPdfTemplate?.header;
@@ -283,7 +254,6 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tableHeaderBackgroundColor = data?.tableHeaderBackgroundColor;
           initialValues.tableHeaderFontColor = data?.tableHeaderFontColor;
           initialValues.tableHeaderFontWeight = data?.tableHeaderFontWeight;
-          initialValues.productColumns = data?.productColumns;
           initialValues.name = !isClone ? data?.name : '';
           initialValues.pageNumberInFooter = data?.pageNumberInFooter;
           initialValues.header = data?.header;
@@ -303,27 +273,21 @@ export default function NewCreateQuotePdfTemplate() {
             tabelSummaryLeftSide: data?.tabelSummaryLeftSide
           });
           if (tempQuoteData?._id) {
-            setHasPermissionToUpdate(true);
-          } else if (
-            data?.owner &&
-            data?.owner !== undefined &&
-            user.user._id !== data?.owner &&
-            !data?.collaborator?.some((d) => d === user.user._id) &&
-            !checkSuperAdminAccess(user, sidebarResource.quotePdfTemplate)
-          ) {
-            setHasPermissionToUpdate(false);
-          }
-          if (data?.tables && data?.tables?.length) {
-            const tableData = data?.tables?.map(async (d) => {
-              const fetchedFieldData = await fetchFieldData(d?.resourceName);
-              return {
-                ...d,
-                fieldOptions: fetchedFieldData ?? []
-              };
-            });
-            const allTableData = await Promise.all(tableData);
-            if (allTableData.length) {
-              setTable(allTableData);
+            setIsEdit(true);
+            setAllowedToEdit(true);
+          } else {
+            setAllowedToEdit(
+              checkIsAllowedToEdit(user, sidebarResource.quotePdfTemplate, {
+                owner: {
+                  optionValue: initialValues.owner
+                },
+                collaborator: initialValues.collaborator?.map((e) => {
+                  return { optionValue: e };
+                })
+              })
+            );
+            if (isClone) {
+              setIsEdit(true);
             }
           }
         } catch (e) {
@@ -335,16 +299,19 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const fetchUser = () => {
-    axiosInstance().get(`/user`).then(({ data: { data } }) => {
-      setOwnerCollaboratorData(data);
-      setOwnerCollaboratorDataConst(data);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .get(`/user`)
+      .then(({ data: { data } }) => {
+        setOwnerCollaboratorData(data);
+        setOwnerCollaboratorDataConst(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleExport = () => {
-    const exportData = { initialValues, details, table };
+    const exportData = { ...initialValues, ...details };
     const jsonString = JSON.stringify(exportData, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -398,18 +365,17 @@ export default function NewCreateQuotePdfTemplate() {
               tableHeaderBackgroundColor: importedData?.tableHeaderBackgroundColor,
               tableHeaderFontColor: importedData?.tableHeaderFontColor,
               tableHeaderFontWeight: importedData?.tableHeaderFontWeight,
-              productColumns: importedData?.productColumns ? importedData?.productColumns : defaultProductColumns,
               pageNumberInFooter: importedData?.pageNumberInFooter,
-              name: initialValues.name ? initialValues.name : "New",
+              name: initialValues?.name ? initialValues?.name : 'New',
               header: importedData?.header,
               footer: importedData?.footer,
               aboveTable: importedData?.aboveTable,
               belowTable: importedData?.belowTable,
               type: importedData?.type,
-              owner: initialValues.owner,
+              owner: initialValues?.owner,
               collaborator: initialValues?.collaborator,
               entity: initialValues?.entity,
-              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide,
+              tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
             };
             setInitialValues(newInitialValues);
             setIsLandscapChecked(importedData?.landscape);
@@ -420,9 +386,6 @@ export default function NewCreateQuotePdfTemplate() {
               belowTable: importedData?.belowTable,
               tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
             });
-            if (importedData?.table) {
-              setTable(importedData?.table);
-            }
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -491,12 +454,6 @@ export default function NewCreateQuotePdfTemplate() {
           entity: values?.entity,
           type: values?.type,
           owner: values?.owner,
-          tables: table?.map((item) => {
-            return {
-              resourceName: item.resourceName,
-              columns: item.columns
-            };
-          }),
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
@@ -506,8 +463,7 @@ export default function NewCreateQuotePdfTemplate() {
           pdfFontSize: parseInt(values?.pdfFontSize),
           tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
           tableHeaderFontColor: values?.tableHeaderFontColor,
-          tableHeaderFontWeight: values?.tableHeaderFontWeight,
-          productColumns: parseInt(values?.productColumns)
+          tableHeaderFontWeight: values?.tableHeaderFontWeight
         })
         .then(({ data: { data, message } }) => {
           if (isPreview === true) {
@@ -521,6 +477,7 @@ export default function NewCreateQuotePdfTemplate() {
               history.push(`${routes.quotePdfTemplateDetail.path}/${data._id}`);
             }
             setIsUpdating(false);
+            setIsEdit(false);
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -531,6 +488,7 @@ export default function NewCreateQuotePdfTemplate() {
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
+          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     } else {
@@ -546,12 +504,6 @@ export default function NewCreateQuotePdfTemplate() {
           entity: values?.entity,
           type: values?.type,
           owner: values?.owner,
-          tables: table?.map((item) => {
-            return {
-              resourceName: item.resourceName,
-              columns: item.columns
-            };
-          }),
           collaborator: values?.collaborator,
           landscape: values?.landscape,
           hideAmountTotalSection: values?.hideAmountTotalSection,
@@ -561,8 +513,7 @@ export default function NewCreateQuotePdfTemplate() {
           pdfFontSize: parseInt(values?.pdfFontSize),
           tableHeaderBackgroundColor: values?.tableHeaderBackgroundColor,
           tableHeaderFontColor: values?.tableHeaderFontColor,
-          tableHeaderFontWeight: values?.tableHeaderFontWeight,
-          productColumns: parseInt(values?.productColumns)
+          tableHeaderFontWeight: values?.tableHeaderFontWeight
         })
         .then(({ data: { data, message } }) => {
           if (isPreview === true) {
@@ -585,10 +536,12 @@ export default function NewCreateQuotePdfTemplate() {
             message: message
           });
           setIsUpdating(false);
+          setIsEdit(false);
         })
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
+          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -634,10 +587,10 @@ export default function NewCreateQuotePdfTemplate() {
                         title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
                       }
                     ]}
-                    isConfirmBeforeClick={hasPermissionToUpdate}
+                    isConfirmBeforeClick={allowedToEdit}
                     onBreadCrumbClick={(path) => {
                       setIsBreakCrumbPath(path);
-                      if (hasPermissionToUpdate) {
+                      if (allowedToEdit) {
                         if (!isEqual({ ...values, ...details }, initialValues)) {
                           setShowConfirmDialog(true);
                         } else {
@@ -648,24 +601,27 @@ export default function NewCreateQuotePdfTemplate() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <ThemeButton disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} onClick={handleImport} isLoading={isUpdating}>
-                    Import
-                  </ThemeButton>
-                  <ThemeButton disabled={isUpdating || (!isClone && !hasPermissionToUpdate)} onClick={handleExport} isLoading={isUpdating}>
+                  {isEdit && (
+                    <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={handleImport} isLoading={isUpdating}>
+                      Import
+                    </ThemeButton>
+                  )}
+                  <ThemeButton disabled={isUpdating} onClick={handleExport} isLoading={isUpdating}>
                     Export
                   </ThemeButton>
-                  <ThemeButton
-                    disabled={isUpdating || (!isClone && !hasPermissionToUpdate)}
-                    onClick={submitForm}
-                    buttonType="theme"
-                    isLoading={isUpdating}
-                  >
-                    Save
-                  </ThemeButton>
-
-                  {!quoteData && (
+                  {isEdit && (
+                    <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={submitForm} buttonType="theme" isLoading={isUpdating}>
+                      Save
+                    </ThemeButton>
+                  )}
+                  {!isEdit && allowedToEdit && (
+                    <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
+                      Edit
+                    </ThemeButton>
+                  )}
+                  {!quoteData && isEdit && (
                     <ThemeButton
-                      disabled={!isClone && (isUpdatingAndPreview || !hasPermissionToUpdate)}
+                      disabled={!isClone && (isUpdatingAndPreview || !allowedToEdit)}
                       onClick={() => {
                         setIsPreview(true);
                         submitForm();
@@ -676,10 +632,9 @@ export default function NewCreateQuotePdfTemplate() {
                       Save & Preview
                     </ThemeButton>
                   )}
-
                   <ThemeButton
                     onClick={() => {
-                      if (hasPermissionToUpdate && !isEqual({ ...values, ...details }, initialValues)) {
+                      if (allowedToEdit && !isEqual({ ...values, ...details }, initialValues)) {
                         setShowConfirmDialog(true);
                       } else {
                         handleClose();
@@ -691,362 +646,389 @@ export default function NewCreateQuotePdfTemplate() {
                 </div>
               </div>
               <div className={`main-container`}>
-                <Box className={classes.paper} mt={1}>
-                  <Grid container>
-                    <Grid size={{ xs: 12, md: 6 }}></Grid>
-                  </Grid>
-
-                  <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="mt-4">
+                  <Grid container spacing={2} direction={'column'}>
                     {!Boolean(quoteData?._id) && (
                       <>
-                        <TextField
-                          disabled={!isClone && (!hasPermissionToUpdate || Boolean(quoteData?._id))}
-                          variant="outlined"
-                          type="text"
-                          label="PDF Template Name"
-                          required={true}
-                          name="name"
-                          fullWidth
-                          margin="none"
-                          size="small"
-                          value={values['name']}
-                          error={touched['name'] && Boolean(errors['name'])}
-                          helperText={touched['name'] && errors['name']}
-                          onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
-                        />
-                        <Autocomplete
-                          disabled={!isClone && !hasPermissionToUpdate}
-                          multiple
-                          options={user?.entity}
-                          getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                          value={
-                            user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-                              ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-                              : []
-                          }
-                          onChange={(e, val) => {
-                            setFieldValue('entity', val && val?.map((d) => d._id));
-                            setFieldValue('owner', '');
-                            setFieldValue('collaborator', []);
-                            val && val.length !== 0
-                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))))
-                              : setOwnerCollaboratorData(ownerCollaboratorDataConst);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              margin="none"
-                              size="small"
-                              name="entity"
-                              label="Entity"
-                              variant="outlined"
-                              error={touched['entity'] && Boolean(errors['entity'])}
-                              helperText={touched['entity'] && errors['entity']}
-                              fullWidth
-                            />
-                          )}
-                        />
-                        <Autocomplete
-                          disabled={!isClone && !hasPermissionToUpdate}
-                          getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                          value={
-                            ownerCollaboratorData.filter((data) => data._id === values['owner']).length
-                              ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
-                              : ''
-                          }
-                          options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
-                          onChange={(e, val) => {
-                            setFieldValue('owner', val && val._id ? val._id : '');
-                          }}
-                          onOpen={() =>
-                            values['entity'] && values['entity'].length !== 0
-                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))))
-                              : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required={true}
-                              margin="none"
-                              size="small"
-                              name="owner"
-                              label="Owner"
-                              variant="outlined"
-                              error={touched['owner'] && Boolean(errors['owner'])}
-                              helperText={touched['owner'] && errors['owner']}
-                              fullWidth
-                            />
-                          )}
-                        />
-                        <Autocomplete
-                          disabled={!isClone && !hasPermissionToUpdate}
-                          multiple
-                          options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
-                          getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                          value={
-                            ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
-                              ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
-                              : []
-                          }
-                          onChange={(e, val) => {
-                            setFieldValue('collaborator', val && val?.map((d) => d._id));
-                          }}
-                          onOpen={() =>
-                            values['entity'] && values['entity'].length !== 0
-                              ? setOwnerCollaboratorData(ownerCollaboratorDataConst.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))))
-                              : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                          }
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              margin="none"
-                              size="small"
-                              name="collaborator"
-                              label="Collaborator"
-                              variant="outlined"
-                              error={touched['collaborator'] && Boolean(errors['collaborator'])}
-                              helperText={touched['collaborator'] && errors['collaborator']}
-                              fullWidth
-                            />
-                          )}
-                        />
-                        <Autocomplete
-                          disabled={!isClone && !hasPermissionToUpdate}
-                          getOptionLabel={(option) => option.title}
-                          isOptionEqualToValue={(option, value) => option.value === value.value}
-                          value={
-                            pdfResourceOption.find((data) => data.value === values['type'])
-                              ? pdfResourceOption.find((data) => data.value === values['type'])
-                              : null
-                          }
-                          options={pdfResourceOption}
-                          onChange={(e, val: any) => {
-                            setFieldValue('type', val ? val.value : '');
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              required={true}
-                              margin="none"
-                              size="small"
-                              name="type"
-                              label="Type"
-                              variant="outlined"
-                              error={touched['type'] && Boolean(errors['type'])}
-                              helperText={touched['type'] && errors['type']}
-                              fullWidth
-                            />
-                          )}
-                        />
+                        <Grid>
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                              <TextField
+                                disabled={!allowedToEdit || Boolean(quoteData?._id) || !isEdit}
+                                variant="outlined"
+                                type="text"
+                                label="PDF Template Name"
+                                required={true}
+                                name="name"
+                                fullWidth
+                                margin="none"
+                                size="small"
+                                value={values['name']}
+                                error={touched['name'] && Boolean(errors['name'])}
+                                helperText={touched['name'] && errors['name']}
+                                onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                disabled={!allowedToEdit || !isEdit}
+                                getOptionLabel={(option) => option.title}
+                                isOptionEqualToValue={(option, value) => option.value === value.value}
+                                value={
+                                  pdfResourceOption.find((data) => data.value === values['type'])
+                                    ? pdfResourceOption.find((data) => data.value === values['type'])
+                                    : null
+                                }
+                                options={pdfResourceOption}
+                                onChange={(e, val: any) => {
+                                  setFieldValue('type', val ? val.value : '');
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    required={true}
+                                    margin="none"
+                                    size="small"
+                                    name="type"
+                                    label="Type"
+                                    variant="outlined"
+                                    error={touched['type'] && Boolean(errors['type'])}
+                                    helperText={touched['type'] && errors['type']}
+                                    fullWidth
+                                  />
+                                )}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                        <Grid>
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                disabled={!allowedToEdit || !isEdit}
+                                multiple
+                                options={user?.entity}
+                                getOptionLabel={(option: any) => (option ? option?.entityName : '')}
+                                value={
+                                  user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
+                                    ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
+                                    : []
+                                }
+                                onChange={(e, val) => {
+                                  setFieldValue('entity', val && val?.map((d) => d._id));
+                                  setFieldValue('owner', '');
+                                  setFieldValue('collaborator', []);
+                                  val && val.length !== 0
+                                    ? setOwnerCollaboratorData(
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        )
+                                      )
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst);
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="none"
+                                    size="small"
+                                    name="entity"
+                                    label="Entity"
+                                    variant="outlined"
+                                    error={touched['entity'] && Boolean(errors['entity'])}
+                                    helperText={touched['entity'] && errors['entity']}
+                                    fullWidth
+                                  />
+                                )}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                disabled={!allowedToEdit || !isEdit}
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                                value={
+                                  ownerCollaboratorData.filter((data) => data._id === values['owner']).length
+                                    ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
+                                    : ''
+                                }
+                                options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
+                                onChange={(e, val) => {
+                                  setFieldValue('owner', val && val._id ? val._id : '');
+                                }}
+                                onOpen={() =>
+                                  values['entity'] && values['entity'].length !== 0
+                                    ? setOwnerCollaboratorData(
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        )
+                                      )
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    required={true}
+                                    margin="none"
+                                    size="small"
+                                    name="owner"
+                                    label="Owner"
+                                    variant="outlined"
+                                    error={touched['owner'] && Boolean(errors['owner'])}
+                                    helperText={touched['owner'] && errors['owner']}
+                                    fullWidth
+                                  />
+                                )}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                              <Autocomplete
+                                disabled={!allowedToEdit || !isEdit}
+                                multiple
+                                options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
+                                getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                                value={
+                                  ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
+                                    ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
+                                    : []
+                                }
+                                onChange={(e, val) => {
+                                  setFieldValue('collaborator', val && val?.map((d) => d._id));
+                                }}
+                                onOpen={() =>
+                                  values['entity'] && values['entity'].length !== 0
+                                    ? setOwnerCollaboratorData(
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        )
+                                      )
+                                    : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                                }
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="none"
+                                    size="small"
+                                    name="collaborator"
+                                    label="Collaborator"
+                                    variant="outlined"
+                                    error={touched['collaborator'] && Boolean(errors['collaborator'])}
+                                    helperText={touched['collaborator'] && errors['collaborator']}
+                                    fullWidth
+                                  />
+                                )}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </>
                     )}
-
-                    <TextField
-                      name="productColumns"
-                      label="No. of Product Columns"
-                      value={values['productColumns']}
-                      type="number"
-                      fullWidth
-                      variant="outlined"
-                      margin="none"
-                      size="small"
-                      slotProps={{
-                        input: {
-                          inputProps: { min: 5, max: 20 }
-                        }
-                      }}
-                      onChange={(e) => {
-                        setFieldValue('productColumns', e.target.value);
-                      }}
-                      onBlur={(e) => {
-                        const val = parseInt(e.target.value);
-                        if (!(val >= 5 && val <= 20)) {
-                          setFieldValue('productColumns', defaultProductColumns.toString());
-                        }
-                      }}
-                      helperText="Value must be between 5 to 20"
-                    />
-                  </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['pageNumberInFooter']}
-                        control={
-                          <Checkbox
-                            name="pageNumberInFooter"
-                            checked={values['pageNumberInFooter']}
-                            onChange={(e) => {
-                              setFieldValue('pageNumberInFooter', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Show page number in footer"
-                      />
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['landscape']}
-                        control={
-                          <Checkbox
-                            name="landscape"
-                            checked={values['landscape']}
-                            onChange={(e) => {
-                              setIsLandscapChecked(e.target.checked);
-                              setFieldValue('landscape', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Landscape"
-                      />
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['hideAmountTotalSection']}
-                        control={
-                          <Checkbox
-                            name="hideAmountTotalSection"
-                            checked={values['hideAmountTotalSection']}
-                            onChange={(e) => {
-                              setFieldValue('hideAmountTotalSection', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Hide Amount Total Section"
-                      />
-                      <FormControlLabel
-                        disabled={!isClone && !hasPermissionToUpdate}
-                        value={values['tableTotalAtBottom']}
-                        control={
-                          <Checkbox
-                            name="tableTotalAtBottom"
-                            checked={values['tableTotalAtBottom']}
-                            onChange={(e) => {
-                              setFieldValue('tableTotalAtBottom', e.target.checked);
-                            }}
-                            color="primary"
-                          />
-                        }
-                        label="Show Table Total At Bottom"
-                      />
-                    </div>
-                    {allFields?.length && id && id !== '0' && !isClone && (
+                    <Grid>
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                          <div className="flex flex-col rounded-sm border border-gray-300 p-2">
+                            <Typography variant="body2">PDF Property</Typography>
+                            <FormControlLabel
+                              disabled={!allowedToEdit || !isEdit}
+                              value={values['pageNumberInFooter']}
+                              control={
+                                <Checkbox
+                                  name="pageNumberInFooter"
+                                  checked={values['pageNumberInFooter']}
+                                  onChange={(e) => {
+                                    setFieldValue('pageNumberInFooter', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Show page number in footer"
+                            />
+                            <FormControlLabel
+                              disabled={!allowedToEdit || !isEdit}
+                              value={values['landscape']}
+                              control={
+                                <Checkbox
+                                  name="landscape"
+                                  checked={values['landscape']}
+                                  onChange={(e) => {
+                                    setIsLandscapChecked(e.target.checked);
+                                    setFieldValue('landscape', e.target.checked);
+                                  }}
+                                  color="primary"
+                                />
+                              }
+                              label="Landscape"
+                            />
+                            <TextField
+                              variant="outlined"
+                              label={'Pdf Font Size'}
+                              name="pdfFontSize"
+                              type="number"
+                              disabled={!isEdit}
+                              margin="dense"
+                              size={'small'}
+                              value={values['pdfFontSize']}
+                              error={touched['pdfFontSize'] && Boolean(errors['pdfFontSize'])}
+                              helperText={touched['pdfFontSize'] && errors['pdfFontSize']}
+                              sx={{ width: 270 }}
+                              onChange={(e) => {
+                                setFieldValue('pdfFontSize', parseInt(e.target.value.trimStart()));
+                              }}
+                              slotProps={{
+                                input: {
+                                  endAdornment: 'pt'
+                                }
+                              }}
+                            />
+                          </div>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 8, lg: 8 }}>
+                          <div className="rounded-sm border border-gray-300 p-2">
+                            <Typography variant="body2">Table Property</Typography>
+                            <Grid container spacing={2}>
+                              <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
+                                <div className="flex flex-col">
+                                  <FormControlLabel
+                                    disabled={!allowedToEdit || !isEdit}
+                                    value={values['hideAmountTotalSection']}
+                                    control={
+                                      <Checkbox
+                                        name="hideAmountTotalSection"
+                                        checked={values['hideAmountTotalSection']}
+                                        onChange={(e) => {
+                                          setFieldValue('hideAmountTotalSection', e.target.checked);
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label="Hide Amount Total Section"
+                                  />
+                                  <FormControlLabel
+                                    disabled={!allowedToEdit || !isEdit}
+                                    value={values['tableTotalAtBottom']}
+                                    control={
+                                      <Checkbox
+                                        name="tableTotalAtBottom"
+                                        checked={values['tableTotalAtBottom']}
+                                        onChange={(e) => {
+                                          setFieldValue('tableTotalAtBottom', e.target.checked);
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label="Show Table Total At Bottom"
+                                  />
+                                  <FormTypes
+                                    disabled={!allowedToEdit || !isEdit}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={'Table Header Background Color'}
+                                    name={'tableHeaderBackgroundColor'}
+                                    type={'colorPicker'}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    isTooltip={false}
+                                  />
+                                  <Box mt={1}></Box>
+                                  <FormTypes
+                                    disabled={!allowedToEdit || !isEdit}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={'Table Header Font Color'}
+                                    name={'tableHeaderFontColor'}
+                                    type={'colorPicker'}
+                                    setFieldValue={(name, value) => {
+                                      setFieldValue(name, value);
+                                    }}
+                                    isTooltip={false}
+                                  />
+                                </div>
+                              </Grid>
+                              <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
+                                <div className="flex flex-col">
+                                  <TextField
+                                    variant="outlined"
+                                    label={'Table Font Size'}
+                                    name="tableFontSize"
+                                    type="number"
+                                    disabled={!allowedToEdit || !isEdit}
+                                    margin="dense"
+                                    size={'small'}
+                                    value={values['tableFontSize']}
+                                    error={touched['tableFontSize'] && Boolean(errors['tableFontSize'])}
+                                    helperText={touched['tableFontSize'] && errors['tableFontSize']}
+                                    onChange={(e) => {
+                                      setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
+                                    }}
+                                    sx={{ width: 300 }}
+                                    slotProps={{
+                                      input: {
+                                        endAdornment: 'pt'
+                                      }
+                                    }}
+                                  />
+                                  <TextField
+                                    variant="outlined"
+                                    label={'Table Total Font Size'}
+                                    name="belowTableTotalFontSize"
+                                    type="number"
+                                    disabled={!allowedToEdit || !isEdit}
+                                    margin="dense"
+                                    size={'small'}
+                                    sx={{ width: 300 }}
+                                    value={values['belowTableTotalFontSize']}
+                                    error={touched['belowTableTotalFontSize'] && Boolean(errors['belowTableTotalFontSize'])}
+                                    helperText={touched['belowTableTotalFontSize'] && errors['belowTableTotalFontSize']}
+                                    onChange={(e) => {
+                                      setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
+                                    }}
+                                    slotProps={{
+                                      input: {
+                                        endAdornment: 'pt'
+                                      }
+                                    }}
+                                  />
+                                  <Autocomplete
+                                    style={{ maxWidth: '300px' }}
+                                    size="small"
+                                    fullWidth
+                                    disabled={!allowedToEdit || !isEdit}
+                                    options={['normal']}
+                                    getOptionLabel={(option) => startCase(option)}
+                                    isOptionEqualToValue={(option: any, val) => option === val}
+                                    value={values['tableHeaderFontWeight']}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        placeholder="Table Header Font Weight"
+                                        variant="outlined"
+                                        margin="dense"
+                                        label="Table Header Font Weight"
+                                      />
+                                    )}
+                                    onChange={(_, newValue) => {
+                                      setFieldValue('tableHeaderFontWeight', newValue);
+                                    }}
+                                  />
+                                </div>
+                              </Grid>
+                            </Grid>
+                          </div>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  {allFields?.length && id && id !== '0' && (
+                    <div className="mt-2 flex justify-end">
                       <ThemeButton onClick={() => setVariableDialog(true)}>Variables</ThemeButton>
-                    )}
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <TextField
-                        variant="outlined"
-                        label={'Table Font Size'}
-                        name="tableFontSize"
-                        type="number"
-                        margin="none"
-                        size={'small'}
-                        value={values['tableFontSize']}
-                        error={touched['tableFontSize'] && Boolean(errors['tableFontSize'])}
-                        helperText={touched['tableFontSize'] && errors['tableFontSize']}
-                        onChange={(e) => {
-                          setFieldValue('tableFontSize', parseInt(e.target.value.trimStart()));
-                        }}
-                        sx={{ width: 220 }}
-                        slotProps={{
-                          input: {
-                            endAdornment: 'pt'
-                          }
-                        }}
-                      />
-                      <TextField
-                        variant="outlined"
-                        label={'Table Total Font Size'}
-                        name="belowTableTotalFontSize"
-                        type="number"
-                        margin="none"
-                        size={'small'}
-                        sx={{ width: 220 }}
-                        value={values['belowTableTotalFontSize']}
-                        error={touched['belowTableTotalFontSize'] && Boolean(errors['belowTableTotalFontSize'])}
-                        helperText={touched['belowTableTotalFontSize'] && errors['belowTableTotalFontSize']}
-                        onChange={(e) => {
-                          setFieldValue('belowTableTotalFontSize', parseInt(e.target.value.trimStart()));
-                        }}
-                        slotProps={{
-                          input: {
-                            endAdornment: 'pt'
-                          }
-                        }}
-                      />
-                      <TextField
-                        variant="outlined"
-                        label={'Pdf Font Size'}
-                        name="pdfFontSize"
-                        type="number"
-                        margin="none"
-                        size={'small'}
-                        value={values['pdfFontSize']}
-                        error={touched['pdfFontSize'] && Boolean(errors['pdfFontSize'])}
-                        helperText={touched['pdfFontSize'] && errors['pdfFontSize']}
-                        sx={{ width: 220 }}
-                        onChange={(e) => {
-                          setFieldValue('pdfFontSize', parseInt(e.target.value.trimStart()));
-                        }}
-                        slotProps={{
-                          input: {
-                            endAdornment: 'pt'
-                          }
-                        }}
-                      />
                     </div>
-                  </div>
-                  <div className="mt-3 flex items-center gap-5">
-                    <FormTypes
-                      values={values}
-                      errors={errors}
-                      touched={touched}
-                      label={'Table Header Background Color'}
-                      name={'tableHeaderBackgroundColor'}
-                      type={'colorPicker'}
-                      setFieldValue={(name, value) => {
-                        setFieldValue(name, value);
-                      }}
-                      isTooltip={false}
-                    />
-                    <FormTypes
-                      values={values}
-                      errors={errors}
-                      touched={touched}
-                      label={'Table Header Font Color'}
-                      name={'tableHeaderFontColor'}
-                      type={'colorPicker'}
-                      setFieldValue={(name, value) => {
-                        setFieldValue(name, value);
-                      }}
-                      isTooltip={false}
-                    />
-                    <Autocomplete
-                      style={{ maxWidth: '300px' }}
-                      size="small"
-                      fullWidth
-                      options={["normal"]}
-                      getOptionLabel={(option) => startCase(option)}
-                      isOptionEqualToValue={(option: any, val) => option === val}
-                      value={values['tableHeaderFontWeight']}
-                      renderInput={(params) => (
-                        <TextField {...params} placeholder="Table Header Font Weight" variant="outlined" margin="none" label="Table Header Font Weight" />
-                      )}
-                      onChange={(_, newValue) => {
-                        setFieldValue('tableHeaderFontWeight', newValue);
-                      }}
-                    />
-                  </div>
-                  <Grid size={{ xs: 12 }} className="mt-4">
+                  )}
+                  <div className="mt-2 flex flex-col gap-2">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Header
-                      </Typography>
+                      <Typography variant="h6">Header</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="header"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1064,14 +1046,10 @@ export default function NewCreateQuotePdfTemplate() {
                         isCheckHeight={true}
                       />
                     </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Above Table
-                      </Typography>
+                      <Typography variant="h6">Above Table</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="aboveTable"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1087,14 +1065,10 @@ export default function NewCreateQuotePdfTemplate() {
                         showVariableDropdown={true}
                       />
                     </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Below Table
-                      </Typography>
+                      <Typography variant="h6">Below Table</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="belowTable"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1110,14 +1084,10 @@ export default function NewCreateQuotePdfTemplate() {
                         showVariableDropdown={true}
                       />
                     </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Footer
-                      </Typography>
+                      <Typography variant="h6">Footer </Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="footer"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1134,14 +1104,10 @@ export default function NewCreateQuotePdfTemplate() {
                         isCheckHeight={true}
                       />
                     </Box>
-                  </Grid>
-                  <Grid size={{ xs: 12 }} className="mt-4">
                     <Box className={classes.tinyMCEContainer}>
-                      <Typography className={classes.headingLabel} variant="h5" component="h5">
-                        Tabel Summary Left Side
-                      </Typography>
+                      <Typography variant="h6">Tabel Summary Left Side</Typography>
                       <TinyMce
-                        disabledEditor={!hasPermissionToUpdate}
+                        disabledEditor={!allowedToEdit || !isEdit}
                         id="tabelSummaryLeftSide"
                         onChange={(value) => {
                           setDetails((prevState) => ({
@@ -1158,9 +1124,8 @@ export default function NewCreateQuotePdfTemplate() {
                         isCheckHeight={true}
                       />
                     </Box>
-                  </Grid>
-                  <CustomTable id={id} classes={classes} entity={selectedEntity} table={table} setTable={setTable} />
-                </Box>
+                  </div>
+                </div>
               </div>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
@@ -1174,7 +1139,9 @@ export default function NewCreateQuotePdfTemplate() {
                   }}
                 />
               ) : null}
-              {variableDialog ? <VariablesDialog fields={allFields} handleClose={() => setVariableDialog(false)} id={id} /> : null}
+              {variableDialog ? (
+                <VariablesDialog isDisable={!isEdit} fields={allFields} handleClose={() => setVariableDialog(false)} id={id} />
+              ) : null}
             </div>
           </Form>
         )}

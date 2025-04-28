@@ -537,7 +537,12 @@ const QuotationDetails = () => {
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
             )}
-            <ActivityButton referenceId={quotationData?._id} resource={ACTIVITY_RESOURCE.quotation} resourceLabel={quotationData?.quotationNumber} />
+            <ActivityButton
+              referenceId={quotationData?._id}
+              resource={ACTIVITY_RESOURCE.quotation}
+              resourceLabel={quotationData?.quotationNumber}
+              resourceData={quotationData}
+            />
           </Box>
         </Box>
       </Box>
@@ -577,10 +582,10 @@ const QuotationDetails = () => {
             {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-                <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
-                  <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-                </Box>
-              )}
+              <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
             <div>
               <Steps
                 isNextStep={false}
@@ -598,16 +603,17 @@ const QuotationDetails = () => {
                 handleNext={
                   stepNames[currentStep] === 'Quote Approval'
                     ? () => {
-                      if (allowedToEdit) {
-                        setCustomerAcceptable(true);
+                        if (allowedToEdit) {
+                          setCustomerAcceptable(true);
+                        }
                       }
-                    }
                     : null
                 }
               />
               {stepNames[currentStep] === 'Add Products' && quotationData && (
                 <Productpackage
                   quotationData={quotationData}
+                  quotationFields={quotationFields}
                   fetchQuotationData={fetchQuotationData}
                   setNextStep={setNextStep}
                   renderedFrom={`${renderedFrom}_grid-1`}

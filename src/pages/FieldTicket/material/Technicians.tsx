@@ -18,10 +18,9 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import StartStopLogsDialog, { formatDurationInHrs } from './StartStopLogsDialog';
-import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
+import StartStopDateDialog from './StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { Edit } from '@mui/icons-material';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
 
@@ -42,6 +41,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   const {
     state: { permissions }
@@ -307,7 +307,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
-  const handleAssign = (rows) => {
+  const handleAssign = (rows, skipDateValidation = false) => {
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -321,7 +321,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldTicket.api}/technician`, { technician })
+      .post(`${fieldTicket.api}/technician`, { technician, skipDateValidation })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -329,10 +329,15 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           message: data?.message
         });
         setTechnicianDialog(false);
+        setShowConfirmBox({ open: false, rows: [] })
         fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+      }).catch((error) => {
+        if (skipDateValidation) {
+          toastConfig.setToastConfig(error);
+        }
+        else {
+          setShowConfirmBox({ open: true, rows: rows })
+        }
       });
   };
 
@@ -522,6 +527,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       {startEndDateConfermationDialog.open && (
         <StartStopDateDialog
           type={startEndDateConfermationDialog.type}
+          resource={sidebarResource.fieldTicket}
           onClose={() => {
             setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, data: null, notes: '' });
           }}
@@ -547,6 +553,20 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           service={selectedService}
           technician={viewStartStopLog?.technicianId}
           fetchRecords={fetchData}
+          resource={sidebarResource.fieldTicket}
+        />
+      )}
+
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={showConfirmBox.open}
+          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          onClose={() => {
+            setShowConfirmBox({ open: false, rows: [] });
+          }}
+          onOk={() => {
+            handleAssign(showConfirmBox.rows, true)
+          }}
         />
       )}
     </>

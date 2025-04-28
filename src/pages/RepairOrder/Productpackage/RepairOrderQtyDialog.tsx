@@ -9,7 +9,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { flatMapDeep, isEqual, maxBy } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -25,8 +25,8 @@ interface EditDialogProps {
 }
 
 const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, repairOrderData, rowData, material, isBulkedit, loading }) => {
+
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [allFields, setAllFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
@@ -37,7 +37,6 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
 
   const fetchData = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.repairOrderProduct, repairOrderData?.currency, true);
-    setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       data.forEach((element) => {
         element.required = false;
@@ -70,17 +69,17 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
 
   function validate(values) {
     const errors = {};
-
     if (rowData) {
+      const maxAssetQtyRow: any = maxBy(rowData.subRows, 'assetQty');
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.subRows?.length) {
+          if (values.qty * _package[0].qty < maxAssetQtyRow?.assetQty) {
             errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
       } else {
-        if (values.qty < rowData.subRows?.length) {
+        if (values.qty < maxAssetQtyRow?.assetQty) {
           errors['qty'] = 'The quantity is less than what was assigned.';
         }
       }
@@ -153,10 +152,9 @@ const RepairOrderQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, re
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
-                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}  
-                  onClick={submitForm}
-                >
-                  {' '}
+                  buttonType='theme'
+                  disabled={loading || isEqual(ref?.current?.values, initialData.values)}
+                  onClick={submitForm}>
                   Save
                 </ThemeButton>
               </CustomDialogFooter>

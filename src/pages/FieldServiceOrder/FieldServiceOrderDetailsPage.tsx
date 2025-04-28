@@ -39,7 +39,6 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Technicians from './Technicians';
-import TechnicianDispatchReturn from './TechnicianDispatchReturn';
 import Services from './Services';
 import FieldServiceOrderView from './RoadMapViews';
 import OnField from 'src/pages/FieldServiceOrder/OnField';
@@ -143,7 +142,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
           checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
+          data?.canDelete &&
           ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -269,6 +268,7 @@ const ServiceOrderDetailsPage = () => {
                 referenceId={serviceOrderData?._id}
                 resource={ACTIVITY_RESOURCE.fieldServiceOrder}
                 resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
+                resourceData={serviceOrderData}
               />
             </Box>
           )}
@@ -321,6 +321,7 @@ const ServiceOrderDetailsPage = () => {
               (resourceData?.policy?.addServices ? (
                 <Services
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   handleChangeStatus={handleChangeStatus}
                   stepFullScreen={stepFullScreen}
@@ -330,6 +331,7 @@ const ServiceOrderDetailsPage = () => {
               ) : (
                 <Technicians
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}
@@ -343,6 +345,7 @@ const ServiceOrderDetailsPage = () => {
               (resourceData?.policy?.addServices ? (
                 <Technicians
                   serviceOrderData={serviceOrderData}
+                  serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}
@@ -351,23 +354,6 @@ const ServiceOrderDetailsPage = () => {
                   fetchData={fetchServiceOrderData}
                 />
               ) : (
-                <TechnicianDispatchReturn
-                  serviceOrderId={id}
-                  setNextStep={setNextStep}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={allowedToEdit}
-                />
-              ))}
-            {steps[currentStep]?.name === steps[2]?.name &&
-              serviceOrderData &&
-              (resourceData?.policy?.addServices ? (
-                <TechnicianDispatchReturn
-                  serviceOrderId={id}
-                  setNextStep={setNextStep}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={allowedToEdit}
-                />
-              ) : (
                 <FieldTicket
                   serviceOrderData={serviceOrderData}
                   serviceOrderFields={serviceOrderFields}
@@ -378,34 +364,15 @@ const ServiceOrderDetailsPage = () => {
                   noQuotationCheck={true}
                 />
               ))}
-            {steps[currentStep]?.name === steps[3]?.name &&
-              serviceOrderData &&
-              (resourceData?.policy?.addServices ? (
-                <FieldTicket
-                  serviceOrderData={serviceOrderData}
-                  serviceOrderFields={serviceOrderFields}
-                  allowedToEdit={allowedToEdit}
-                  handleChangeStatus={handleChangeStatus}
-                  resource={sidebarResource.fieldServiceOrder}
-                  fetchServiceOrderData={fetchServiceOrderData}
-                  noQuotationCheck={true}
-                />
-              ) : (
-                <TechnicianDispatchReturn
-                  serviceOrderId={id}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={allowedToEdit}
-                  setNextStep={setNextStep}
-                  isReturn={true}
-                />
-              ))}
-            {steps[currentStep]?.name === steps[4]?.name && serviceOrderData && resourceData?.policy?.addServices && (
-              <TechnicianDispatchReturn
-                serviceOrderId={id}
-                stepFullScreen={stepFullScreen}
+            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && resourceData?.policy?.addServices && (
+              <FieldTicket
+                serviceOrderData={serviceOrderData}
+                serviceOrderFields={serviceOrderFields}
                 allowedToEdit={allowedToEdit}
-                setNextStep={setNextStep}
-                isReturn={true}
+                handleChangeStatus={handleChangeStatus}
+                resource={sidebarResource.fieldServiceOrder}
+                fetchServiceOrderData={fetchServiceOrderData}
+                noQuotationCheck={true}
               />
             )}
           </TabPanel>

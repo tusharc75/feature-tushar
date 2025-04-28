@@ -15,12 +15,12 @@ const TooltipWithStyle = styled(({ className, ...props }: TooltipProps) => <Tool
   })
 );
 
-const HtmlTooltip = ({ children, className, onClick, style = {}, title, ...props }: TooltipProps) => {
+const HtmlTooltip = ({ children, className, onClick, style = {}, title, placement = 'top', ...props }: TooltipProps) => {
   return (
     <TooltipWithStyle
       title={title}
       enterTouchDelay={0}
-      placement="top"
+      placement={placement}
       arrow
       slots={{
         transition: Zoom

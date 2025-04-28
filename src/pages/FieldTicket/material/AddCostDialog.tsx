@@ -19,7 +19,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
 
-const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
+const AddCostDialog = ({ costData, onClose, fieldTicketData, fieldTicketFields, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const walkmeInstance = useGetWalkmeInstance();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -49,13 +49,8 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
     setInitialData({ fields: [], values: {} });
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     data = data?.filter((f) => f?.isRead);
-    if (
-      (fieldTicketData?.taxCode ||
-        (fieldTicketData?.billingAddress &&
-          (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) &&
-      !isOffline
-    ) {
-      const taxCodeOptions = await getTaxList(user, fieldTicketData, MATERIAL_TYPE.manualEntry);
+    if (!isOffline) {
+      const taxCodeOptions = await getTaxList(user, fieldTicketData, fieldTicketFields, MATERIAL_TYPE.manualEntry);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;

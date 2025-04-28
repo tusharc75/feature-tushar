@@ -36,7 +36,8 @@ const ManageSublease = ({
   onSuccess,
   referenceType = null,
   referenceId = null,
-  referenceData = null
+  referenceData = null,
+  isRedirectTodetailPage = true
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -198,8 +199,10 @@ const ManageSublease = ({
               .catch((error) => {
                 toastConfig.setToastConfig(error);
               });
-          } else {
+          } else if (isRedirectTodetailPage) {
             history.push(`${sublease.api}/detail/${data._id}`);
+          } else {
+            onSuccess();
           }
         })
         .catch((error) => {

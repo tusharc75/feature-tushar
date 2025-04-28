@@ -1,19 +1,7 @@
 import CloseIcon from '@mui/icons-material/Close';
-import {
-  Box,
-  Checkbox,
-  CircularProgress,
-  IconButton,
-  Popover,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField
-} from '@mui/material';
+import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
@@ -26,14 +14,17 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
+import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
-import axios, { CancelToken } from 'axios';
+import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -221,6 +212,24 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
+  const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
+  const [fields, setFields] = useState([]);
+  const [resourceDatas, setResourceDatas] = useState([]);
+
+  const [colorCodeMap, setColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
+      .then(({ data: { data } }) => {
+        const newMap = new Map<string, SingleColor>();
+        data[sidebarResource.customerAccount].forEach((ele, i) => {
+          newMap.set(ele?.optionValue, getColorByIndex(i));
+        });
+        setColorCodeMap(newMap);
+      })
+      .catch((err) => toastConfig.setToastConfig(err));
+  }, []);
 
   useEffect(() => {
     const lookupResource = [
@@ -295,11 +304,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     if (selectedLookUpResourceData) {
       Object.keys(selectedLookUpResourceData).forEach((d) => {
-        let data = []
+        let data = [];
         if (d === 'technician') {
           data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-        }
-        else {
+        } else {
           data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
         }
         query = `${query}&${d}=${data}`;
@@ -316,6 +324,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       axiosInstance()
         .get(`/planning-view${queryString}`, { cancelToken })
         .then(({ data: { data } }) => {
+          setResourceDatas(data);
           const otherData = [];
           let rows = data?.map((d: any) => {
             if (selectedResource.resource === sidebarResource.serializedAsset) {
@@ -342,7 +351,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       resource: selectedResource.resource,
                       type: 'debit',
                       data: d?.debit
-                      //isRedAlert: debitQty > d?.availableByPlanning ? true : false
                     });
                   }
                 } else if (property === 'credit') {
@@ -402,17 +410,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   });
                 }
               }
-              return null
+              return null;
             }
             let title = d[selectedResource.fieldName];
             let start = dayjs.tz(d[selectedResource.start]).toDate();
             let end = dayjs.tz(d[selectedResource.end]).toDate();
             let fulfillStatus = d?.fulfillStatus;
-            let startDraggable = true;
-            let endDraggable = true;
 
             const extraData: any = {};
-
             if (selectedResource.resource === sidebarResource.rentalManagement) {
               if (d?.parentAccount?.optionLabel) {
                 title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
@@ -420,20 +425,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               if (d?.padName?.optionLabel) {
                 title = `${title}(Pad-${d?.padName?.optionLabel})`;
               }
-              if (d?.actualStartDate) {
-                start = dayjs.tz(d?.actualStartDate).toDate();
-                startDraggable = false;
-              }
-              if (d?.actualEndDate) {
-                end = dayjs.tz(d?.actualEndDate).endOf('day').toDate();
-                endDraggable = false;
-              }
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
               }
-            }
-            else if (d?.customerAccount?.optionLabel) {
+              extraData.customerAccount = d?.customerAccount?.optionValue;
+            } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
+              extraData.customerAccount = d?.customerAccount?.optionValue;
             }
             if (selectedResource.resource === sidebarResource.employeeMaster) {
               title = `${d?.reference?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
@@ -449,11 +447,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               allDay: true,
               resource: selectedResource.resource,
               fulfillStatus: fulfillStatus,
-              startDraggable: startDraggable,
-              endDraggable: endDraggable
             };
           });
-          rows = rows?.filter((e) => e)
+          rows = rows?.filter((e) => e);
           setEvents([...rows, ...otherData]);
           setStaticEvents([...rows, ...otherData]);
           setIsDataFetching(false);
@@ -524,7 +520,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
       element[i].onclick = (clickEvent) => {
         const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent?.target);
+        handleClick(data, clickEvent);
       };
     }
   };
@@ -554,7 +550,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         window.open(`${routes.serializedAsset.path}${query}`);
       } else if (data?.type === 'availableByPlanning') {
       } else if (data?.type) {
-        setAnchor(target);
+        setAnchor(target.target);
         const newData: OnSelectDataType[] = data.data;
         setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
       }
@@ -569,16 +565,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
       }
     } else {
-      if (data.resource) {
-        const resource = resourceList?.find((r) => r.resource === data.resource);
-        window.open(`${resource.path}/${data.id}`);
-      } else {
-        let path = selectedResource.path;
-        if (selectedResource.resource === sidebarResource.serializedAsset) {
-          path = routes[`${camelCase(data.resource)}Detail`]?.path;
-        }
-        window.open(`${path}/${data.id}`);
-      }
+      setShowDetail({ open: true, data: data, anchor: target });
     }
   };
 
@@ -597,13 +584,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance()
-      .put(`/planning-view/change-date`, {
-        _id: event.id,
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
-        resource: event.resource
-      })
+    axiosInstance().put(`/planning-view/change-date`, {
+      _id: event.id,
+      startDate: start.toISOString(),
+      endDate: end.toISOString(),
+      resource: event.resource
+    })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -626,37 +612,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   };
 
   const moveEvent = ({ event, start, end }) => {
-    if (event?.resource === sidebarResource?.rentalManagement && !(event?.startDraggable && event?.endDraggable)) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'warning',
-        message: `can't change start date or end date`
-      });
-    } else {
-      resize(event, start, end);
-    }
+    resize(event, start, end);
   };
 
   const resizeEvent = ({ event, start, end }) => {
-    if (event?.resource === sidebarResource?.rentalManagement) {
-      if (!event?.startDraggable && !dayjs(event?.start).isSame(dayjs(start))) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'warning',
-          message: `can't change start date`
-        });
-      } else if (!event?.endDraggable && !dayjs(event?.end).isSame(dayjs(end))) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'warning',
-          message: `can't change end date`
-        });
-      } else {
-        resize(event, start, end);
-      }
-    } else {
-      resize(event, start, end);
-    }
+    resize(event, start, end);
   };
 
   const onNavigate = useCallback(
@@ -719,6 +679,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
+      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
+        const assignedColor = colorCodeMap.get(obj?.customerAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+        }
+      }
       if (obj?.resource === sidebarResource.rentalManagement) {
         if (obj?.fulfillStatus === 'ERROR') {
           backgroundColor = 'rgb(220, 53, 69)';
@@ -736,8 +703,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode]
+    [themeMode, colorCodeMap]
   );
+
+  useEffect(() => {
+    setFields([]);
+    if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
+      axiosInstance()
+        .get(`/field?resource=${selectedResource?.resource}`)
+        .then(({ data }) => {
+          setFields(data.data);
+        });
+    }
+  }, [selectedResource]);
 
   return (
     <>
@@ -816,7 +794,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           </Box>
         </Box>
         <div className={cn('relative')}>
-          {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
+          {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
             <>
               <CustomCalendar
                 dragAndDrop={true}
@@ -840,8 +818,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 onNavigate={(date) => {
                   onNavigate(date);
                 }}
-                onSelectEvent={(event: any) => {
-                  window.open(`${selectedResource.path}/${event.id}`);
+                onSelectEvent={(data: any, event: any) => {
+                  setShowDetail({ open: true, data: data, anchor: event });
                 }}
               />
             </>
@@ -866,7 +844,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   onNavigate(date);
                 }}
                 onSelectEvent={(data: any, event: any) => {
-                  handleClick(data, event.nativeEvent.target);
+                  handleClick(data, event);
                 }}
               />
             </div>
@@ -902,6 +880,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               ))}
             </Box>
           </Popover>
+        )}
+        {showDetail.open && (
+          <DetailsPopover
+            fields={fields}
+            resourceDatas={resourceDatas}
+            resourceList={resourceList}
+            selectedResource={selectedResource}
+            setShowDetail={setShowDetail}
+            showDetail={showDetail}
+          />
         )}
       </div>
     </>

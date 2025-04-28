@@ -21,10 +21,13 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ASSET_STATUS, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, PACKAGE_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -46,6 +49,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [isAdding, setIsAdding] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [material, setMaterial] = useState([]);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -170,8 +174,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      minWidth: 120,
+      width: 120,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,
@@ -179,16 +183,29 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       Cell: ({ row, table }) => (
         <>
           {row?.original?.type !== MATERIAL_TYPE.serializedAsset && (
-            <IconButton
-              size="small"
-              aria-label="Details"
-              disabled={!allowedToEdit}
-              onClick={() => {
-                onMaterialEdit(row, table.getRowModel().rows);
-              }}
-            >
-              <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-            </IconButton>
+            <>
+              <IconButton
+                size="small"
+                aria-label="Details"
+                disabled={!allowedToEdit}
+                onClick={() => {
+                  onMaterialEdit(row, table.getRowModel().rows);
+                }}
+              >
+                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+              </IconButton>
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            </>
           )}
           <IconButton
             size="small"
@@ -236,6 +253,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             ? parent?.packageDetail?.packageDescription
             : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
+      parent.qtyDisplay = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
@@ -253,7 +271,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     } else {
       showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
     }
-
     setMaterialEdit({
       open: true,
       data: row.original,
@@ -282,7 +299,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? parent.description
               : _subRow?.serviceDetail?.serviceDescription;
-      _subRow.qty = _subRow.qty;
+      _subRow.qty = _subRow?.qty || 1;
+      _subRow.qtyDisplay = _subRow.type === MATERIAL_TYPE.serializedAsset ? 1 : `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -306,7 +324,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
-    if (addDialog.type === 'serializedAsset') {
+    if (addDialog.type === MATERIAL_TYPE.serializedAsset) {
       rows?.forEach((e) => {
         material.push(e);
       });
@@ -404,16 +422,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       });
   };
 
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-    let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, planningData?.currency);
-    handleSaveData(rows);
-  };
 
   const disableAssignSerializedAssets = () => {
     if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f?.type === MATERIAL_TYPE.product && f?.productDetail?.serializedProduct && f?.qty > f?.assetQty);
+    const flatArray = selectedRecords.filter((f) => f?.type === MATERIAL_TYPE.product && f?.productDetail?.serializedProduct && f?.qtyDisplay > f?.assetQty);
     return flatArray.length === 0;
   };
 
@@ -436,7 +448,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             Add Existing Services
           </MenuItem>
         )}
-        {permissions?.packages?.isRead &&
+        {permissions?.packages?.isRead && (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: 'package', parentId: null });
@@ -444,7 +456,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           >
             {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -454,7 +466,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     resource: sidebarResource.planning,
     referenceId: planningData._id,
     columns: columns,
-    isSendEmail: true
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(planningData),
   };
 
   const actionButtonMenuItems = () => {
@@ -464,8 +477,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           <MenuItem
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
-              setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === 'product' && i?.productDetail?.serializedProduct));
-              setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+              setAssetAssignedProduct(selectedRecords.filter((i) => i?.type === MATERIAL_TYPE.product && i?.productDetail?.serializedProduct));
+              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
             }}
           >
             Assign Serialized Asset
@@ -473,7 +486,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         )}
         <MenuItem
           onClick={() => {
-            setMaterialEdit({ open: true, data: selectedRecords?.filter((e) => !e.hideSelection), bulkedit: true, showSaveAndNext: false });
+            setMaterialEdit({
+              open: true,
+              data: selectedRecords?.filter((e) => !e.hideSelection && e?.type !== MATERIAL_TYPE.serializedAsset),
+              bulkedit: true,
+              showSaveAndNext: false
+            });
           }}
         >
           Bulk Edit
@@ -498,6 +516,55 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     );
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
+    if (inputField.hasOwnProperty('qty')) {
+      if (rowData?.type === MATERIAL_TYPE.serializedAsset && inputField['qty']) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Quantity cannot change for asset'
+        });
+        return;
+      }
+      if (!inputField['qty']) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter valid quantity'
+        });
+        return;
+      }
+      let isValid = true;
+      const child: any = flattenArray(dataRows).filter((e) => e.parentId === rowData?._id);
+      if (child?.length) {
+        child?.forEach((e) => {
+          let qty = parseFloat(inputField['qty']) * e?.qty;
+          if (qty < e?.assetQty) {
+            isValid = false;
+            return;
+          }
+        });
+      } else {
+        const qty = getParentMultiplier(material, rowData) * parseFloat(inputField['qty']);
+        if (qty < rowData?.assetQty) {
+          isValid = false;
+        }
+      }
+      if (!isValid) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'The quantity is less than what was assigned.'
+        });
+        return;
+      }
+    }
+    let rows: any = [{ ...rowData, ...updatedData }];
+    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData, planningData?.currency);
+    handleSaveData(rows);
+  };
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -511,7 +578,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         rightSideContents
         hasXpadding={false}
       />
-
       {columns && dataRows ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -552,11 +618,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
           material={material}
-          bulkEdit={materialEdit.bulkedit}
+          dataRows={flattenArray(dataRows)}
+          isBulkedit={materialEdit.bulkedit}
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(d) => {
@@ -565,7 +632,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'service' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.service && (
         <AssignServiceDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -574,7 +641,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -583,7 +650,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
           isSubmitting={isAdding}
         />
       )}
-      {addDialog.open && addDialog.type === 'serializedAsset' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AssignSerializedAssetDialog
           reference={'planning'}
           referenceData={{
@@ -595,19 +662,30 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             setAssetAssignedProduct([]);
           }}
           ids={flattenArray(dataRows)
-            ?.filter((e) => e.type === 'serializedAsset')
+            ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
             ?.map((e) => e.materialId)}
           handleSucess={(rows) => {
             handleAdd(
               rows?.map((e) => {
-                return { materialId: e.asset, type: 'serializedAsset', parentId: e._id };
+                return { materialId: e.asset, type: MATERIAL_TYPE.serializedAsset, parentId: e._id };
               })
             );
           }}
           isAssigning={isAdding}
           selectedProducts={assetAssignedProduct?.map((i) => {
-            return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qty - i.assetQty };
+            return { _id: i._id, product: i.materialId, productName: i.detail, qty: i.qtyDisplay - i.assetQty };
           })}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={planningData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.planning}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
+          }}
         />
       )}
     </Fragment>

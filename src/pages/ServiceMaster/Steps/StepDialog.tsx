@@ -18,6 +18,8 @@ import FieldDialog from './FieldDialog';
 import Grid from '@mui/material/Grid2';
 import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { mobileNotSupported } from 'src/constants/messageHelpers';
 
 export default function StepDialog({
   handleClose, // function to close the dialog
@@ -1030,7 +1032,7 @@ export default function StepDialog({
                                   disabled={notEditable}
                                   size="small"
                                   value={
-                                    values?.returnToStepOnFail && values?.returnToStepOnFail!=='' ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
+                                    values?.returnToStepOnFail && values?.returnToStepOnFail !== '' ? stepOption?.find((data) => data?.optionValue === values?.returnToStepOnFail) : ''
                                   }
                                   getOptionLabel={(option) => option.optionLabel || ''}
                                   isOptionEqualToValue={(option: any, val: any) => option.optionValue === val.optionValue}
@@ -1112,9 +1114,15 @@ export default function StepDialog({
                 </CustomDialogContent>
                 <CustomDialogFooter>
                   {reference === 'workOrder' && (
-                    <ThemeButton buttonType="theme" onClick={() => setOpenFieldDialog(true)}>
-                      Configure Fields
-                    </ThemeButton>
+                    <HtmlTooltip title={isMobile && !isTablet ? mobileNotSupported : ''}>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => setOpenFieldDialog(true)}
+                        disabled={isMobile && !isTablet}
+                      >
+                        Configure Fields
+                      </ThemeButton>
+                    </HtmlTooltip>
                   )}
                   <div style={{ flex: '1 0 0' }} />
                   <ThemeButton
