@@ -365,8 +365,6 @@ export default function Contact(props) {
     );
   };
 
-  console.log(rowCount)
-  console.log(dataRows?.length)
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
