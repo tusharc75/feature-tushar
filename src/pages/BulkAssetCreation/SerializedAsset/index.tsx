@@ -130,7 +130,6 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
             fetchData();
           }}
           isDownloadExcel={false}
-          isBackgroundWhite={true}
           additionalParams={`&filterById=${JSON.stringify([{ field: 'bulkAssetCreation', term: bulkAssetCreationData?._id }])}`}
           small
         />
