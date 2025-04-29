@@ -356,11 +356,12 @@ const AddSerializedAsset = ({
 
   const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null, skipTriggerAssetStatusChange = false) => {
     const assetsAdd: any = [];
+    const records: any = JSON.parse(JSON.stringify(selectedRecords))
     selectedRecordsOfMain?.forEach((e: any) => {
       if (e.type === MATERIAL_TYPE.product) {
         let qty = e.realAssetQty - e.realAssetAssignedQty;
         while (qty) {
-          const result = selectedRecords?.filter((f) => f.productId === e.materialId && !f.isCounted);
+          const result = records?.filter((f) => f.productId === e.materialId && !f.isCounted);
           if (result.length) {
             let obj: any = {};
             obj._id = e._id;
@@ -500,30 +501,29 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                      <Box
-                        border={1}
-                        className={`cursor-pointer p-2 text-[13px] ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      border={1}
+                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        id={`serialized-products-${i}`}
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      id={`serialized-products-${i}`}
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -749,7 +749,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
