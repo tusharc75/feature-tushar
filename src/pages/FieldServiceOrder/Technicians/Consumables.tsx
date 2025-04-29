@@ -507,7 +507,7 @@ const Consumables = ({
               isAddButtonVisible={
                 isEmpty(selectedTechnician) ||
                 selectedTechnician?.technicianId === 'All' ||
-                selectedTechnician?.status === TECHNICIAN_STATUS.reserved
+                [TECHNICIAN_STATUS.reserved, TECHNICIAN_STATUS.returned]?.includes(selectedTechnician?.status)
               }
               addButtonMenuItems={<AddButtonMenuItems />}
               isActionButtonVisible={true}
