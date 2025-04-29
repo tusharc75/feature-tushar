@@ -1,13 +1,13 @@
 import React, { useContext, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
-import { GoogleMap, Marker, MarkerClusterer, InfoWindow, Polyline } from '@react-google-maps/api';
+import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
 
 const MapView = ({ userIds }) => {
 
   const [locationData, setLocationData] = React.useState([]);
-  const [selectedUser, setSelectedUser] = React.useState(null);
   const [loadingData, setLoadingData] = React.useState(false);
   const [mapCenter, setMapCenter] = React.useState({ lat: 31.9686, lng: 99.9018 });
   const toastConfig = useContext(CustomToastContext);
@@ -23,14 +23,15 @@ const MapView = ({ userIds }) => {
     fetchData();
   }, [userIds]);
 
-  //calculating map center based on the locations for inital view to cover maximum locations
   const calculateMapCenter = (locations) => {
     if (!locations || locations.length === 0) return;
-
+    if (locations?.length === 1) {
+      setMapCenter({ lat: locations[0].latitude, lng: locations[0].longitude });
+      return
+    }
     let totalLat = 0;
     let totalLng = 0;
     let validLocations = 0;
-
     locations.forEach(location => {
       if (location?.latitude && location?.longitude) {
         totalLat += parseFloat(location.latitude);
@@ -38,7 +39,6 @@ const MapView = ({ userIds }) => {
         validLocations++;
       }
     });
-
     if (validLocations > 0) {
       const centerLat = totalLat / validLocations;
       const centerLng = totalLng / validLocations;
@@ -98,45 +98,39 @@ const MapView = ({ userIds }) => {
         center={mapCenter}
         zoom={4}
       >
+
         <MarkerClusterer>
           {(clusterer) => (
             <>
               {locationData?.map((data: any, index) => (
-                <Marker
-                  key={data._id}
-                  label={{
-                    text: (index + 1)?.toString(),
-                    fontWeight: 'bold',
-                    color: 'white',
-                    fontSize: '14px'
-                  }}
-                  onClick={() => {
-                    setSelectedUser(data);
-                  }}
-                  position={new google.maps.LatLng(data?.latitude, data?.longitude)}
-                  clusterer={clusterer}
-                />
+                <>
+                  <Marker
+                    key={data._id}
+                    label={{
+                      text: data?.user?.optionLabel[0],
+                      fontWeight: 'bold',
+                      color: 'white',
+                      fontSize: '14px'
+                    }}
+                    position={new google.maps.LatLng(data?.latitude, data?.longitude)}
+                    clusterer={clusterer}
+                  />
+                  <InfoWindow
+                    key={data._id}
+                    options={{
+                      headerDisabled: true,
+                      disableAutoPan: true,
+                      pixelOffset: new window.google.maps.Size(0, -30),
+                    }}
+
+                    position={new google.maps.LatLng(data?.latitude, data?.longitude)}
+                  >
+                    <div style={{ backgroundColor: 'white', color: 'black', minWidth: 100 }}>
+                      <h4 style={{ margin: 0 }}>{data?.user?.optionLabel}</h4>
+                    </div>
+                  </InfoWindow>
+                </>
               ))}
-              <Polyline
-                path={locationData?.map((data: any) => new google.maps.LatLng(data?.latitude, data?.longitude))}
-                options={{
-                  strokeColor: '#0000FF',
-                  strokeOpacity: 1,
-                  strokeWeight: 2,
-                  icons: [{ icon: { path: 'M -2,-2 2,0 M 2,-2 -2,0', strokeOpacity: 1, scale: 1 } }]
-                }}
-              />
-              {selectedUser && (
-                <InfoWindow
-                  key={selectedUser._id}
-                  position={new google.maps.LatLng(selectedUser?.latitude, selectedUser?.longitude)}
-                  onCloseClick={() => setSelectedUser(null)}
-                >
-                  <div style={{ backgroundColor: 'white', color: 'black', minWidth: 100 }}>
-                    <h4 style={{ margin: 0 }}>{selectedUser?.user?.optionLabel}</h4>
-                  </div>
-                </InfoWindow>
-              )}
             </>
           )}
         </MarkerClusterer>
