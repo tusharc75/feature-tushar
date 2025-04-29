@@ -426,7 +426,7 @@ const ChartTypes = ({
                           }
                         }),
                         legend: {
-                          display: chart?.plugins ? chart?.plugins.legend : true
+                          display: chart?.plugins ? chart?.plugins?.legend : true
                         }
                       },
                       onClick: (event, elements) => {
