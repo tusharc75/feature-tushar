@@ -58,6 +58,13 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
   const fetchFields = async () => {
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairJob, ['rentalJob', 'actualEndDate', 'workOrder']);
+      fieldsDataAll?.forEach((e) => {
+        if (e?.fieldName === 'chartOfAccount' && e?.isDefaultValue && e?.defaultValue) {
+          const filteredOption = e?.option?.filter((obj) => obj?.optionValue === e?.defaultValue) || [];
+          e.option = filteredOption;
+        }
+      });
+      setLoading(false);
       if (repairJobId) {
         axiosInstance()
           .get(`${repairJob.api}/` + repairJobId)
@@ -69,7 +76,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
               rest.status = REPAIR_JOB_STATUS.new;
               setInitialData({
                 fields: fieldsDataForCreate,
-                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), expectedCompletionDate: null }
+                values: { ...getObjKeysWithValues(rest, fieldsDataAll, true, user), expectedCompletionDate: null }
               });
               setLoading(false);
             } else {
@@ -82,7 +89,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                         e.disableOnEdit = true;
                         e.isUneditable = true;
                       }
-                    });}
+                    });
+                  }
                   setTitle(`Editing - [${data.repairJobName}]`);
                   setInitialData({
                     fields: fieldsDataForUpdate,
@@ -139,7 +147,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
         setLoading(false);
       }
     }
-    catch(error){
+    catch (error) {
       toastConfig.setToastConfig(error);
     };
   }
