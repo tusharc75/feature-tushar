@@ -36,6 +36,9 @@ export interface ChartDataType extends IFormDataType {
   horizontalChart?: string;
   numberOfCards?: number;
   pin: boolean;
+  plugins?: {
+    legend?: boolean;
+  };
 }
 interface Props {
   chart: ChartDataType;
@@ -60,6 +63,7 @@ const ChartTypes = ({
   kpiFilters,
   fetchKpiFilters
 }: Props) => {
+  console.log('🚀 ~ chart:', chart?.kpi);
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -424,10 +428,7 @@ const ChartTypes = ({
                           }
                         }),
                         legend: {
-                          display: !(
-                            chart.chartTitle.toLowerCase() === 'bar chart of customer in rental' ||
-                            chart.chartTitle.toLowerCase() === 'in use by category'
-                          )
+                          display: chart?.plugins ? chart?.plugins.legend : true
                         }
                       },
                       onClick: (event, elements) => {
