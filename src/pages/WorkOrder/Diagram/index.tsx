@@ -325,13 +325,14 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
                         <button
-                          className="absolute inset-0 cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
+                          className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
                           onClick={() => {
                             setExpended((prev) => ({
                               ...prev,
@@ -399,10 +400,12 @@ const Diagram = ({
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip
-                                title={file?.createdBy?.user?._id === user?._id ? 'Delete'
-                                  : !isEmpty(file?.deleteRequest)
-                                    ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
-                                    : 'Delete Request'
+                                title={
+                                  file?.createdBy?.user?._id === user?._id
+                                    ? 'Delete'
+                                    : !isEmpty(file?.deleteRequest)
+                                      ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
+                                      : 'Delete Request'
                                 }
                                 placement="top"
                                 arrow
@@ -420,10 +423,9 @@ const Diagram = ({
                                         setDeleteRequestDialog({ open: true, data: file });
                                       }
                                     }}
+                                    color={'error'}
                                   >
-                                    <Delete fontSize="small"
-                                      color={file?.createdBy?.user?._id === user?._id ? 'error' : !isEmpty(file?.deleteRequest) ? 'disabled' : 'error'}
-                                    />
+                                    <Delete fontSize="small" />
                                   </IconButton>
                                 </span>
                               </HtmlTooltip>
@@ -433,7 +435,7 @@ const Diagram = ({
                                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                                     </span>
-                                    <HtmlTooltip title='Delete Request'>
+                                    <HtmlTooltip title="Delete Request">
                                       <IconButton
                                         size="small"
                                         color="primary"
