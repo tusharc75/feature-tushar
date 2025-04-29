@@ -1164,6 +1164,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         dateValidation = string().required(message).nullable();
       }
 
+      // Adding validation for invalid dates
+      dateValidation = dateValidation.test(
+        'is-valid-date',
+        `Please enter valid ${input?.fieldLabel}`,
+        function (value) {
+          try {
+            const dateObj = dayjs(value);
+            if (!dateObj.isValid()) return false;
+            return true;
+          } catch (error) {
+            return false;
+          }
+        }
+      );
+
       if (input?.dateValidation && input?.dateValidation?.length > 0) {
         input?.dateValidation?.forEach((d) => {
           dateValidation = dateValidation.test(
