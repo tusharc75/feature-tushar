@@ -52,39 +52,40 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, allowedToEdi
     }
     setDownloadProgress(0);
     setIsDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${encodeURIComponent(file)}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setIsDownloading(false);
-            }, 2000);
-          }
+    axiosInstance().get(`user/download`, {
+      params: {
+        fileName: file,
+      },
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        setDownloadProgress(percentCompleted);
+        if (percentCompleted === 100) {
+          toastConfig.setToastConfig({
+            message: 'File Downloaded Successfully',
+            open: true,
+            type: 'success'
+          });
+          setTimeout(() => {
+            setDownloadProgress(0);
+            setIsDownloading(false);
+          }, 2000);
         }
-      })
-      .then(({ data }) => {
-        const ext = file.split('.').pop().toLowerCase();
-        let mimeType = 'application/octet-stream';
-        if (pdfExtensions?.includes(ext)) {
-          mimeType = 'application/pdf';
-        } else if (imageExtensions?.includes(ext)) {
-          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
-        }
-        const blob = new Blob([data], { type: mimeType });
-        const fileURL = URL.createObjectURL(blob);
-        const newWindow = window.open();
-        newWindow.location.href = fileURL;
-        setIsDownloading(false);
-      })
+      }
+    }).then(({ data }) => {
+      const ext = file.split('.').pop().toLowerCase();
+      let mimeType = 'application/octet-stream';
+      if (pdfExtensions?.includes(ext)) {
+        mimeType = 'application/pdf';
+      } else if (imageExtensions?.includes(ext)) {
+        mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+      }
+      const blob = new Blob([data], { type: mimeType });
+      const fileURL = URL.createObjectURL(blob);
+      const newWindow = window.open();
+      newWindow.location.href = fileURL;
+      setIsDownloading(false);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setIsDownloading(false);
@@ -110,22 +111,23 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, allowedToEdi
       link.click();
       setIsDownloading(false);
     } else if (file.url) {
-      axiosInstance()
-        .get(`user/download?fileName=${encodeURIComponent(file.url)}`, {
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-            setDownloadProgress(percentCompleted);
-
-            if (percentCompleted === 100) {
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-              setTimeout(() => {
-                setDownloadProgress(0);
-                setIsDownloading(false);
-              }, 2000);
-            }
+      axiosInstance().get(`user/download`, {
+        params: {
+          fileName: file.url,
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
           }
-        })
+        }
+      })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
