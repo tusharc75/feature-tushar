@@ -569,7 +569,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     });
 
     axiosInstance()
-      .get(`/pdf/generate-product-inventory-pdf/${ledgerId}`, {
+      .get(`/pdf/${ledgerId}?resource=${sidebarResource.productInventory}`, {
         responseType: 'blob'
       })
       .then((res) => {
