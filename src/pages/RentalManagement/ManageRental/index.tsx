@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { Form, Formik } from 'formik';
-import { isEmpty, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
@@ -24,12 +24,14 @@ import {
   RENTAL_STATUS,
   rentalManagement,
   setFieldsInAscendingOrder,
+  sidebarResource,
   yupSchema
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -69,15 +71,7 @@ const ManageRentalManagementDialog = ({
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Rental Management');
-      fieldData = response?.data?.data;
-
-      fieldData = fieldData?.filter((e) => !['quotation', 'assemblyOrder'].includes(e?.fieldData?.fieldName));
-
-      var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.rentalManagement, ['quotation', 'assemblyOrder'])
       if (rentalManagementId) {
         try {
           let data;
@@ -87,9 +81,7 @@ const ManageRentalManagementDialog = ({
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            fieldsDataForCreate = fieldsDataForCreate?.filter(
-              (obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName)
-            );
+            fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
             setCloneHeading(rentalJobName);
             setRentalData({
               fields: fieldsDataForCreate,
@@ -113,7 +105,7 @@ const ManageRentalManagementDialog = ({
             }
             setRentalData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              initialValues: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }
@@ -147,7 +139,6 @@ const ManageRentalManagementDialog = ({
 
   const handleSubmit = (values) => {
     setLoading(true);
-
     if (rentalManagementId && isClone === false) {
       values._id = rentalManagementId;
       axiosInstance()
