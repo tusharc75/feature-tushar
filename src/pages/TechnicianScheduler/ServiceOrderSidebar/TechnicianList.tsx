@@ -113,7 +113,7 @@ const RowSkeleton = ({ isMobile }) => {
 };
 
 export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
-  const [_d, setStore] = useRoadMapStore((state) => state.activeItemData);
+  const [activeItemData, setStore] = useRoadMapStore((state) => state.activeItemData);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,
@@ -237,11 +237,8 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         setDroppableRef(div);
         rowRef.current = div;
       }}
-      onMouseDown={() => {
-        setStore({ activeItemData: { data: row, type: 'sidebar' } });
-      }}
-      onMouseUp={() => {
-        setStore({ activeItemData: null });
+      onClick={() => {
+        setStore({ activeItemData: activeItemData?.data?._id === row._id ? null : { data: row, type: 'sidebar' } });
       }}
       className={cn(isMobile ? 'w-[300px] px-1' : 'px-4 pb-3', isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : '')}
     >
@@ -256,7 +253,8 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       >
         <div
           className={cn(
-            'cursor-grab space-y-2 rounded-md border  p-3 shadow-lg',
+            'cursor-grab space-y-2 rounded-md border  p-3 shadow-lg transition-all duration-300',
+            activeItemData?.data?._id === row._id ? 'cursor-pointer [box-shadow:0px_0px_0px_2px_var(--new-theme-color)_inset]' : '',
             isOver && active.data.current?.type === 'technician' ? 'bg-gray-300 dark:bg-gray-800' : 'bg-[--dark-secondary,white]',
             className
           )}
