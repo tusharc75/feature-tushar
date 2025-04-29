@@ -233,6 +233,7 @@ const ChartTypes = ({
       });
   };
 
+  console.log('chart: ', chart);
   return (
     <Grid size={{ xs: 12, md: chart?.column || 12 }}>
       {chart.graphType === 'Custom' ? (
@@ -421,18 +422,12 @@ const ChartTypes = ({
                               }
                             }
                           }
-                        })
-                      },
-                      legend: {
-                        labels: {
-                          ...((chart.chartTitle === 'Bar Chart Of Customer In Rental' || chart.chartTitle === 'In Use By Category') && {
-                            boxWidth: 0,
-                            padding: 10
-                          }),
-                          ...(!(chart.chartTitle === 'Bar Chart Of Customer In Rental' || chart.chartTitle === 'In Use By Category') && {
-                            usePointStyle: false,
-                            boxWidth: 40
-                          })
+                        }),
+                        legend: {
+                          display: !(
+                            chart.chartTitle.toLowerCase() === 'bar chart of customer in rental' ||
+                            chart.chartTitle.toLowerCase() === 'in use by category'
+                          )
                         }
                       },
                       onClick: (event, elements) => {
