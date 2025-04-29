@@ -325,11 +325,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           className="absolute inset-0 cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -400,35 +399,33 @@ const Diagram = ({
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip
-                                title={
-                                  file?.createdBy?.user?._id === user?._id
-                                    ? 'Delete'
-                                    : !isEmpty(file?.deleteRequest)
-                                      ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
-                                      : 'Delete Request'
+                                title={file?.createdBy?.user?._id === user?._id ? 'Delete'
+                                  : !isEmpty(file?.deleteRequest)
+                                    ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
+                                    : 'Delete Request'
                                 }
                                 placement="top"
                                 arrow
                               >
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="delete"
-                                  disabled={file?.createdBy?.user?._id === user?._id ? false : !isEmpty(file?.deleteRequest) ? true : false}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (file?.createdBy?.user?._id === user?._id) {
-                                      setShowDeleteConfirmBox({ open: true, data: file });
-                                    } else {
-                                      setDeleteRequestDialog({ open: true, data: file });
-                                    }
-                                  }}
-                                >
-                                  <Delete
-                                    fontSize="small"
-                                    color={file?.createdBy?.user?._id === user?._id ? 'error' : !isEmpty(file?.deleteRequest) ? 'disabled' : 'error'}
-                                  />
-                                </IconButton>
+                                <span>
+                                  <IconButton
+                                    size="small"
+                                    aria-label="delete"
+                                    disabled={file?.createdBy?.user?._id === user?._id ? false : !isEmpty(file?.deleteRequest) ? true : false}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (file?.createdBy?.user?._id === user?._id) {
+                                        setShowDeleteConfirmBox({ open: true, data: file });
+                                      } else {
+                                        setDeleteRequestDialog({ open: true, data: file });
+                                      }
+                                    }}
+                                  >
+                                    <Delete fontSize="small"
+                                      color={file?.createdBy?.user?._id === user?._id ? 'error' : !isEmpty(file?.deleteRequest) ? 'disabled' : 'error'}
+                                    />
+                                  </IconButton>
+                                </span>
                               </HtmlTooltip>
                               {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
                                 <div className="flex gap-2">
@@ -436,17 +433,19 @@ const Diagram = ({
                                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                                     </span>
-                                    <IconButton
-                                      size="small"
-                                      color="primary"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.preventDefault();
-                                        setDeleteRequestAnchorEl(e.currentTarget);
-                                      }}
-                                    >
-                                      <PriorityHigh fontSize="small" />
-                                    </IconButton>
+                                    <HtmlTooltip title='Delete Request'>
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          setDeleteRequestAnchorEl(e.currentTarget);
+                                        }}
+                                      >
+                                        <PriorityHigh fontSize="small" />
+                                      </IconButton>
+                                    </HtmlTooltip>
                                   </span>
                                   <Popover
                                     open={!!deleteRequestAnchorEl}
@@ -464,23 +463,17 @@ const Diagram = ({
                                     <div className="w-[290px] p-3">
                                       <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
                                       <p className="mb-2 text-xs">
-                                        A deletion request was submitted by user&nbsp;
+                                        A deletion request was submitted by&nbsp;
                                         <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
                                           {file?.deleteRequest?.user?.concatedName}
                                         </span>{' '}
                                         on&nbsp;
                                         {displayDate(file?.deleteRequest?.date)}
                                       </p>
-                                      {/* <p className="mb-1 text-xs font-semibold text-gray-500">
-                                        By: <span className="font-normal"></span>
-                                      </p>
-                                      <p className="mb-1 text-xs font-semibold text-gray-500">
-                                        Date: <span className="font-normal">{displayDate(file?.deleteRequest?.date)}</span>
-                                      </p> */}
                                       <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
                                         Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
                                       </p>
-                                      <div className="mt-2 flex justify-between gap-2 border-t pt-2">
+                                      <div className="mt-2 flex  gap-2 border-t pt-2">
                                         <ThemeButton
                                           buttonType="theme"
                                           onClick={() => {
@@ -490,7 +483,7 @@ const Diagram = ({
                                           Approve
                                         </ThemeButton>
                                         <ThemeButton
-                                          buttonType="yellow"
+                                          buttonType="red"
                                           onClick={() => {
                                             handleRequestReject(file._id);
                                           }}
