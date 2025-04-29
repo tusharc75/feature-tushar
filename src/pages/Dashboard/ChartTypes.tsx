@@ -63,7 +63,6 @@ const ChartTypes = ({
   kpiFilters,
   fetchKpiFilters
 }: Props) => {
-  console.log('🚀 ~ chart:', chart?.kpi);
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -237,7 +236,6 @@ const ChartTypes = ({
       });
   };
 
-  console.log('chart: ', chart);
   return (
     <Grid size={{ xs: 12, md: chart?.column || 12 }}>
       {chart.graphType === 'Custom' ? (
