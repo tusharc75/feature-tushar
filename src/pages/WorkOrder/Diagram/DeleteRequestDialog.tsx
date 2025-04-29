@@ -9,7 +9,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const Comment = ({ onClose, file, onSuccess }) => {
+const DeleteRequestDialog = ({ onClose, file, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -23,7 +23,7 @@ const Comment = ({ onClose, file, onSuccess }) => {
   const handleSubmit = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put('/attachment/deleteRequest', { _id: file?._id, comment: comment, type: 'create' })
+      .put('/attachment/delete-request', { _id: file?._id, comment: comment, type: 'create' })
       .then(({ data }) => {
         setIsSubmitting(false);
         onSuccess();
@@ -47,12 +47,12 @@ const Comment = ({ onClose, file, onSuccess }) => {
       aria-labelledby="customized-dialog-title"
       open={true}
       fullWidth
-      onClose={(e, reason) => {}}
+      onClose={(e, reason) => { }}
     >
       <>
         <CustomDialogHeader
           onClose={onClose}
-          title={'Comment'}
+          title={`Delete Request (${file?.createdBy?.user?.concatedName})`}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);
@@ -68,7 +68,7 @@ const Comment = ({ onClose, file, onSuccess }) => {
               placeholder={`Comment`}
               fullWidth
               multiline
-              rows={4}
+              rows={2}
               value={comment}
               onChange={handleChange}
               variant="outlined"
@@ -94,7 +94,7 @@ const Comment = ({ onClose, file, onSuccess }) => {
               handleSubmit();
             }}
           >
-            Submit
+            Request
           </ThemeButton>
         </CustomDialogFooter>
       </>
@@ -102,4 +102,4 @@ const Comment = ({ onClose, file, onSuccess }) => {
   );
 };
 
-export default Comment;
+export default DeleteRequestDialog;

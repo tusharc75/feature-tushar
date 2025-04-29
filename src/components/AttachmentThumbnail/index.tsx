@@ -1,26 +1,21 @@
-import { IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import PreviewIcon from '@mui/icons-material/Visibility';
+import { IconButton } from '@mui/material';
 import axios from 'axios';
-import _ from 'lodash';
 import mimeDb from 'mime-db';
-import { Fragment, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 
-const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
-  const {
-    state: { permissions }
-  }: any = useData();
-
+const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const [, setDownloadProgress] = useState(0);
   const [, setIsDownloading] = useState(false);
@@ -57,39 +52,40 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
     }
     setDownloadProgress(0);
     setIsDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${encodeURIComponent(file)}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setIsDownloading(false);
-            }, 2000);
-          }
+    axiosInstance().get(`user/download`, {
+      params: {
+        fileName: file,
+      },
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        setDownloadProgress(percentCompleted);
+        if (percentCompleted === 100) {
+          toastConfig.setToastConfig({
+            message: 'File Downloaded Successfully',
+            open: true,
+            type: 'success'
+          });
+          setTimeout(() => {
+            setDownloadProgress(0);
+            setIsDownloading(false);
+          }, 2000);
         }
-      })
-      .then(({ data }) => {
-        const ext = file.split('.').pop().toLowerCase();
-        let mimeType = 'application/octet-stream';
-        if (pdfExtensions?.includes(ext)) {
-          mimeType = 'application/pdf';
-        } else if (imageExtensions?.includes(ext)) {
-          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
-        }
-        const blob = new Blob([data], { type: mimeType });
-        const fileURL = URL.createObjectURL(blob);
-        const newWindow = window.open();
-        newWindow.location.href = fileURL;
-        setIsDownloading(false);
-      })
+      }
+    }).then(({ data }) => {
+      const ext = file.split('.').pop().toLowerCase();
+      let mimeType = 'application/octet-stream';
+      if (pdfExtensions?.includes(ext)) {
+        mimeType = 'application/pdf';
+      } else if (imageExtensions?.includes(ext)) {
+        mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+      }
+      const blob = new Blob([data], { type: mimeType });
+      const fileURL = URL.createObjectURL(blob);
+      const newWindow = window.open();
+      newWindow.location.href = fileURL;
+      setIsDownloading(false);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setIsDownloading(false);
@@ -115,22 +111,23 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
       link.click();
       setIsDownloading(false);
     } else if (file.url) {
-      axiosInstance()
-        .get(`user/download?fileName=${encodeURIComponent(file.url)}`, {
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-            setDownloadProgress(percentCompleted);
-
-            if (percentCompleted === 100) {
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-              setTimeout(() => {
-                setDownloadProgress(0);
-                setIsDownloading(false);
-              }, 2000);
-            }
+      axiosInstance().get(`user/download`, {
+        params: {
+          fileName: file.url,
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          setDownloadProgress(percentCompleted);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+            setTimeout(() => {
+              setDownloadProgress(0);
+              setIsDownloading(false);
+            }, 2000);
           }
-        })
+        }
+      })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
@@ -185,95 +182,72 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
             {attachments.map((attachment, i) => {
               const Icon = getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment);
               return (
-                <Fragment key={i}>
-                  <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
-                    <div className="front  group-hover:hidden">
-                      <div className="mx-auto mb-[11px] h-[79px] text-center">
-                        {/* <img
-                          src={}
-                          className={`object-contain mx-auto block h-full w-full max-w-full`}
-                          alt="attchment"
-                        /> */}
-                        <Icon size={79} className="mx-auto" />
-                      </div>
-                      <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">
-                        {attachment
-                          ? attachment?.name
-                            ? attachment?.name
-                            : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment.substring(attachment.lastIndexOf('/') + 1)
-                          : 'attachment'}
-                      </p>
-                    </div>
-                    <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
-                      <p
-                        className=" line-clamp-4 text-[14px] text-[var(--text-primary)]"
-                        title={
-                          attachment
-                            ? attachment?.name
-                              ? attachment?.name
-                              : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
-                            : 'attachment'
-                        }
-                      >
-                        {attachment
-                          ? attachment?.name
-                            ? attachment?.name
-                            : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
-                          : 'attachment'}
-                      </p>
-                      <div className="flex justify-between">
-                        <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
-                          <IconButton
-                            size={'small'}
-                            onClick={(event) => downloadFile(event, attachment)}
-                            style={{ paddingBottom: 3, width: 30, height: 30 }}
-                          >
-                            {<GetAppIcon />}
-                          </IconButton>
-                        </HtmlTooltip>
-                        {[...imageExtensions, ...pdfExtensions]?.includes(attachment?.url?.split('.')?.pop()?.toLowerCase()) && (
-                          <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
-                            <IconButton
-                              size={'small'}
-                              onClick={(e) => {
-                                viewAttachment(e, attachment.url);
-                              }}
-                              style={{ paddingBottom: 3, width: 30, height: 30 }}
-                            >
-                              <PreviewIcon color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
-                        )}
-                        {canEdit && permissions?.attachment?.isDelete ? (
-                          <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
-                            <IconButton
-                              size={'small'}
-                              onClick={() => {
-                                setShowConfirmationDialog(true);
-                                setAttachemnetToDelete(attachment);
-                              }}
-                              style={{ paddingBottom: 3, width: 30, height: 30 }}
-                            >
-                              {<DeleteIcon color="error" fontSize="small" />}
-                            </IconButton>
-                          </HtmlTooltip>
-                        ) : (
-                          <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
-                            <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
-                              <DeleteIcon color="disabled" fontSize="small" />
-                            </IconButton>
-                          </HtmlTooltip>
-                        )}
-                      </div>
-                    </div>
+                <div
+                  key={i}
+                  title={
+                    attachment
+                      ? attachment?.name
+                        ? attachment?.name
+                        : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                          ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                          : attachment.substring(attachment.lastIndexOf('/') + 1)
+                      : 'attachment'
+                  }
+                  className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:8px]"
+                >
+                  <div className="mx-auto mb-[11px] h-[79px] text-center">
+                    <Icon size={79} className="mx-auto" />
                   </div>
-                </Fragment>
+                  <p className="line-clamp-1 text-[14px] text-[var(--text-primary)]">
+                    {attachment
+                      ? attachment?.name
+                        ? attachment?.name
+                        : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                          ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                          : attachment.substring(attachment.lastIndexOf('/') + 1)
+                      : 'attachment'}
+                  </p>
+                  <div className="flex justify-between">
+                    <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
+                      <IconButton
+                        size={'small'}
+                        onClick={(event) => downloadFile(event, attachment)}
+                        style={{ paddingBottom: 3, width: 30, height: 30 }}
+                        color="primary"
+                      >
+                        <GetAppIcon fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
+                    {[...imageExtensions, ...pdfExtensions]?.includes(attachment?.url?.split('.')?.pop()?.toLowerCase()) && (
+                      <HtmlTooltip title="Preview" placement="top" enterTouchDelay={0}>
+                        <IconButton
+                          size={'small'}
+                          onClick={(e) => {
+                            viewAttachment(e, attachment.url);
+                          }}
+                          style={{ paddingBottom: 3, width: 30, height: 30 }}
+                          color="primary"
+                        >
+                          <PreviewIcon fontSize="small" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
+                    <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable} placement="top" enterTouchDelay={0}>
+                      <IconButton
+                        size={'small'}
+                        disabled={!allowedToEdit}
+                        onClick={() => {
+                          setShowConfirmationDialog(true);
+                          setAttachemnetToDelete(attachment);
+                        }}
+                        style={{ paddingBottom: 3, width: 30, height: 30 }}
+                        color="error"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </div>
+                </div>
               );
             })}
           </>

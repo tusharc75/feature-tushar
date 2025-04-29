@@ -36,6 +36,9 @@ export interface ChartDataType extends IFormDataType {
   horizontalChart?: string;
   numberOfCards?: number;
   pin: boolean;
+  plugins?: {
+    legend?: boolean;
+  };
 }
 interface Props {
   chart: ChartDataType;
@@ -421,7 +424,10 @@ const ChartTypes = ({
                               }
                             }
                           }
-                        })
+                        }),
+                        legend: {
+                          display: chart?.plugins ? chart?.plugins?.legend : true
+                        }
                       },
                       onClick: (event, elements) => {
                         if (elements.length > 0 && chart?.kpi?.redirectField && chart?.kpi?.resource) {

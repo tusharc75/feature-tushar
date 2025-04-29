@@ -173,7 +173,7 @@ const AskSupplierPriceDialog = (props) => {
               <Grid size={{ xs: 12 }}>
                 <Box>
                   {otherAttachments && otherAttachments.length > 0 && (
-                    <AttachmentThumbnail attachments={otherAttachments} canEdit={true} handleDeleteAttachment={handleDeleteAttachment} />
+                    <AttachmentThumbnail attachments={otherAttachments} allowedToEdit={true} handleDeleteAttachment={handleDeleteAttachment} />
                   )}
                   {otherAttachments && otherAttachments.length > 0 && (
                     <ImageAttachments
@@ -238,15 +238,15 @@ const AskSupplierPriceDialog = (props) => {
                     onChange={(e, val: any) => {
                       val?.some((d) => d?.fieldName === 'All')
                         ? setSelectedFields(
-                            fields
-                              ?.filter(
-                                (d) =>
-                                  d.sectionName === 'Supplier Information' &&
-                                  d.type === 'currencyAmount' &&
-                                  (d.formula === undefined || d.formula === null || d.formula === '')
-                              )
-                              .map((d) => d?.fieldName)
-                          )
+                          fields
+                            ?.filter(
+                              (d) =>
+                                d.sectionName === 'Supplier Information' &&
+                                d.type === 'currencyAmount' &&
+                                (d.formula === undefined || d.formula === null || d.formula === '')
+                            )
+                            .map((d) => d?.fieldName)
+                        )
                         : setSelectedFields(val && val?.map((d) => d?.fieldName));
                     }}
                     renderInput={(params) => (

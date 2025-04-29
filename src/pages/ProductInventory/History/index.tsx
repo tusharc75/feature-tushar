@@ -27,6 +27,8 @@ import { useContext, useEffect, useState } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Autorenew } from '@mui/icons-material';
 import { FiExternalLink } from 'react-icons/fi';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import dayjs from 'dayjs';
 
 export const ReferenceRenderer = (row) => {
@@ -495,12 +497,38 @@ const History = ({ product, warehouse, storageLocation }) => {
       width: 110,
       sticky: 'right',
       Cell: ({ row }) => (
-        <div>
+        <div className="flex gap-1">
+          <HtmlTooltip title="Preview">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="preview"
+                onClick={() => {
+                  handleLedgerPdfDownload(row?.original?._id, 'preview');
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+          <HtmlTooltip title="Download">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="download"
+                onClick={() => {
+                  handleLedgerPdfDownload(row?.original?._id, 'download');
+                }}
+              >
+                <GetAppIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
           ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
             row?.original?.type?.toLowerCase() === 'debit' &&
             row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
-            <Box pl={1}>
+            <Box>
               <HtmlTooltip title="Revert">
                 <span>
                   <IconButton
@@ -532,6 +560,42 @@ const History = ({ product, warehouse, storageLocation }) => {
       )
     }
   ];
+
+  const handleLedgerPdfDownload = async (ledgerId, processType = 'download') => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `Downloading preview file, Please wait...`
+    });
+
+    axiosInstance()
+      .get(`/pdf/${ledgerId}?resource=${sidebarResource.productInventory}`, {
+        responseType: 'blob'
+      })
+      .then((res) => {
+        if (processType === 'preview') {
+          const file = new Blob([res.data], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+        } else {
+          const url = window.URL.createObjectURL(new Blob([res.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'Product Ledger' + '.pdf');
+          document.body.appendChild(link);
+          link.click();
+        }
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'File downloaded Successfully'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   const handleRevert = () => {
     setRevertLoading(true);

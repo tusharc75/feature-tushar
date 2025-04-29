@@ -448,7 +448,7 @@ export const ViewEmail = ({
                                       __html: initialValues.content || initialValues.message
                                     }}
                                   />
-                                  {<AttachmentThumbnail attachments={otherAttachments} canEdit={false} handleDeleteAttachment={(attachment) => { }} />}
+                                  {<AttachmentThumbnail attachments={otherAttachments} allowedToEdit={false} handleDeleteAttachment={(attachment) => { }} />}
                                   <ImageAttachments
                                     imageAttachments={imageAttachments}
                                     onImageClick={(attachment) => {
@@ -487,7 +487,7 @@ export const ViewEmail = ({
 
                                       <Grid container>
                                         <Grid size={{ xs: 6, sm: 4, md: 3 }}>
-                                          <AttachmentThumbnail attachments={incomingMail.attachments} handleDeleteAttachment={null} canEdit={false} />
+                                          <AttachmentThumbnail attachments={incomingMail.attachments} handleDeleteAttachment={null} allowedToEdit={false} />
                                         </Grid>
                                       </Grid>
                                     </Box>
@@ -510,21 +510,21 @@ export const ViewEmail = ({
                                     <AttachmentThumbnail
                                       attachments={otherAttachments}
                                       handleDeleteAttachment={handleDeleteAttachment}
-                                      canEdit={true}
+                                      allowedToEdit={true}
                                     />
                                   )}
                                   {isQuoteBuilder ? (
                                     <AttachmentThumbnail
                                       attachments={stateQuoteBuilderAttachments}
                                       handleDeleteAttachment={handleDeleteQuoteBuilderAttachment}
-                                      canEdit={true}
+                                      allowedToEdit={true}
                                     />
                                   ) : null}
                                   {isQuoteBuilder ? (
                                     <AttachmentThumbnail
                                       attachments={quoteBuilderOtherAttachments}
                                       handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
-                                      canEdit={true}
+                                      allowedToEdit={true}
                                     />
                                   ) : null}
                                   {fileImageAttachments?.length > 0 && (

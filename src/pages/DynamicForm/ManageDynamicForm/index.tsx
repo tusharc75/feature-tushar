@@ -98,6 +98,7 @@ const ManageDynamicForm = ({
             fieldsDataForCreate?.forEach((_f) => {
               if (_f?.fieldName === _r) {
                 _f.disabled = true;
+                _f.isUneditable = true;
                 tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
                 return;
               }
@@ -268,7 +269,7 @@ const ManageDynamicForm = ({
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  buttonType='transparent'
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>
@@ -280,7 +281,7 @@ const ManageDynamicForm = ({
                   }}
                   disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   isLoading={submitting}
-                  buttonType='theme'
+                  buttonType="theme"
                 >
                   Save
                 </ThemeButton>
