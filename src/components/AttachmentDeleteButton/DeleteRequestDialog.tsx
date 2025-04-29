@@ -8,8 +8,9 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { Attachment } from './type';
 
-const DeleteRequestDialog = ({ onClose, file, onSuccess }) => {
+const DeleteRequestDialog = ({ onClose, file, onSuccess }: { onClose: () => void; file: Attachment; onSuccess?: () => void }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -47,7 +48,7 @@ const DeleteRequestDialog = ({ onClose, file, onSuccess }) => {
       aria-labelledby="customized-dialog-title"
       open={true}
       fullWidth
-      onClose={(e, reason) => { }}
+      onClose={(e, reason) => {}}
     >
       <>
         <CustomDialogHeader
