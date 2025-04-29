@@ -26,6 +26,16 @@ export type Chat = {
   title?: string;
   to?: MessageUser;
   notifications?: number;
+  recentMessage: RecentMessage;
+};
+export type RecentMessage = {
+  message?: string;
+  date?: Date;
+  sender?: Sender;
+};
+export type Sender = {
+  optionValue?: string;
+  optionLabel?: string;
 };
 
 export type CreatedBy = {
