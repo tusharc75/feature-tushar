@@ -245,8 +245,14 @@ export default function ManageAttachment({
     }
   };
 
-  const onUploadFile = (file) => {
-    setAllAttachments((prevState) => [{ name: file.split('_OMS_TS_')?.pop() || file, url: file, date: new Date() }, ...prevState]);
+  const onUploadFile = (files) => {
+    setAllAttachments((prevState) => [...files?.map((e) => {
+      return {
+        name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
+        url: e?.fileName,
+        date: new Date()
+      }
+    }), ...prevState]);
   };
 
   const handleDeleteAttachment = (file) => {
@@ -358,7 +364,7 @@ export default function ManageAttachment({
                                   label=""
                                   name="fileUrl"
                                   required={true}
-                                  type="fileUpload"
+                                  type="multiFileUpload"
                                   values={values}
                                   disabled={!allowedToEdit}
                                   errors={errors}
