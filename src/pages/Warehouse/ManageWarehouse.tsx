@@ -7,7 +7,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../constants/helpers';
+import { CustomDialogTransition, sidebarResource } from '../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -15,6 +15,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,44 +29,46 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Warehouse')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.warehouse);
 
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (warehouseId) {
-          axiosInstance()
-            .get(`/warehouse/` + warehouseId)
-            .then(({ data: { data } }) => {
-              let fields = fieldsDataForUpdate;
-              let tempData = data;
-              if (isClone) {
-                fields = fieldsDataForCreate;
-                const { warehouseName, ...rest } = data;
-                setCloneHeading(warehouseName);
-                tempData = { ...rest };
-              }
-              setInitialData({
-                fields: fields,
-                values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
-              });
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+      if (warehouseId) {
+        axiosInstance()
+          .get(`/warehouse/` + warehouseId)
+          .then(({ data: { data } }) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { warehouseName, ...rest } = data;
+              setCloneHeading(warehouseName);
+              tempData = { ...rest };
+            }
+            setInitialData({
+              fields: fields,
+              values: isClone ? getObjKeysWithValues(tempData, fieldsDataAll, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
-        } else {
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: getObjKeys('', fieldsDataForCreate)
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: getObjKeys('', fieldsDataForCreate)
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetchFields();
+    setLoading(false);
   }, [warehouseId]);
 
   const handleSubmit = (values) => {
