@@ -40,6 +40,7 @@ import axios, { CancelTokenSource } from 'axios';
 import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Add } from '@mui/icons-material';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -87,6 +88,12 @@ const AddSerializedAsset = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, type: '' });
   const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
+  const [showStatusChangeConfirmBox, setShowStatusChangeConfirmBox] = useState({
+    open: false,
+    underReviewAssetsData: null,
+    reserveAssetsData: null,
+    assetDataError: []
+  });
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -347,7 +354,7 @@ const AddSerializedAsset = ({
       });
   };
 
-  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null) => {
+  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null, skipTriggerAssetStatusChange = false) => {
     const assetsAdd: any = [];
     selectedRecordsOfMain?.forEach((e: any) => {
       if (e.type === MATERIAL_TYPE.product) {
@@ -387,11 +394,23 @@ const AddSerializedAsset = ({
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id })
+      .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id, skipTriggerAssetStatusChange })
       .then(({ data }) => {
-        setInuseAssetConfirmBox(false);
-        handleSuccess();
-        setIsSubmitting(false);
+        if (data?.data?.errors?.length) {
+          const assetDataError = [];
+          data?.data?.errors?.forEach((ele) => {
+            let message = ele.assetNumber;
+            ele?.fields?.forEach((e) => {
+              message += ` (${e?.fieldLabel}: ${e?.value})`;
+            });
+            assetDataError.push(message);
+          });
+          setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError });
+        } else {
+          setInuseAssetConfirmBox(false);
+          handleSuccess();
+          setIsSubmitting(false);
+        }
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -766,6 +785,25 @@ const AddSerializedAsset = ({
             wellName: referenceData?.wellName ? (isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName) : null
           }}
           productsDefaultData={selectedProducts}
+        />
+      )}
+      {showStatusChangeConfirmBox.open && (
+        <CustomMessageDialog
+          open={showStatusChangeConfirmBox.open}
+          errorMessages={showStatusChangeConfirmBox.assetDataError}
+          onClose={() => {
+            setShowStatusChangeConfirmBox({
+              open: false,
+              underReviewAssetsData: null,
+              reserveAssetsData: null,
+              assetDataError: []
+            });
+            handleSerializedAssetClose();
+          }}
+          onConfirm={() => {
+            handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
+          }}
+          title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
         />
       )}
     </Fragment>
