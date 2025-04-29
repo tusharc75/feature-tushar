@@ -13,11 +13,12 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, GenerateResourceLineNumber, PLANNING_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const {
@@ -34,14 +35,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedi
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get('/field?resource=Planning');
-      const data = response?.data?.data;
-      let fieldsDataForCreate = data
-        .filter((obj) => obj.isCreate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
-        .map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data
-        .filter((obj) => obj.isUpdate && !['rentalJob', 'salesOrder', 'fieldServiceOrder']?.includes(obj.fieldData?.fieldName))
-        .map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.planning, ['rentalJob', 'salesOrder', 'fieldServiceOrder']);
 
       if (id) {
         axiosInstance()
@@ -64,7 +58,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedi
             }
             setInitialData({
               fields: fields,
-              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fields)
+              values: isClone ? { ...getObjKeysWithValues(tempData, fieldsDataAll, true, user) } : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {
@@ -172,13 +166,12 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedi
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
-                    : `Create ${resources?.planning?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.planningNumber ? `(${initialData.values?.planningNumber})` : ''}`
+                  : `Create ${resources?.planning?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
