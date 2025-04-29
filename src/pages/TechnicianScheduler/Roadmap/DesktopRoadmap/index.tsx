@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from 'src/constants/helpers';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
@@ -38,6 +38,7 @@ const DesktopRoadmapImpl = ({
   loading
 }: DesktopRoadmapProps) => {
   const [technicianSearchValue] = useRoadMapStore((state) => state.technicianSearchValue);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const filteredActivity = useMemo(() => {
     const searchFor = (technicianSearchValue || '').trim().toLowerCase();
     if (searchFor) {
@@ -46,8 +47,14 @@ const DesktopRoadmapImpl = ({
     }
     return activity;
   }, [activity, technicianSearchValue]);
-
   const [container, setContainer] = useState<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (container && selected?.length) {
+      setScrollPosition(container.scrollTop);
+    }
+  }, [container, selected?.length]);
+
   return (
     <div
       ref={setContainer}
@@ -73,7 +80,7 @@ const DesktopRoadmapImpl = ({
           container={container}
         />
       ) : (
-        <div className="">
+        <div className="mt-[400px]" style={{ scrollbarWidth: 'none', marginTop: `${scrollPosition}px` }}>
           <MapImpl selected={selected} setSelected={setSelected} />
         </div>
       )}
