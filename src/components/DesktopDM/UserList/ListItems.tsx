@@ -81,14 +81,14 @@ export const RenderChatUser = memo(
                   </div>
                 )}
                 <span className="line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">
-                  {dayjs(chat.recentMessage.date).isSame(dayjs(), 'date')
-                    ? formatDate(chat.recentMessage.date, 'H:MM A')
-                    : formatDate(chat.recentMessage.date, 'MMM D')}
+                  {dayjs(chat.recentMessage?.date).isSame(dayjs(), 'date')
+                    ? formatDate(chat.recentMessage?.date, 'H:MM A')
+                    : formatDate(chat.recentMessage?.date, 'MMM D')}
                 </span>
               </div>
             </div>
             <span className="line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">
-              {user._id === chat.recentMessage.sender.optionValue ? 'You: ' : `${chat.recentMessage.sender.optionLabel.split(' ')[0]}: `}
+              {user._id === chat.recentMessage?.sender?.optionValue ? 'You: ' : `${chat.recentMessage?.sender?.optionLabel.split(' ')[0]}: `}
               {stripHtmlTags(chat.recentMessage?.message)}
             </span>
           </div>

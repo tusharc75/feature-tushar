@@ -40,7 +40,7 @@ const useDesktopDM = () => {
           chats.push(d);
         }
         setState({
-          chats: chats.sort((a, b) => new Date(b.recentMessage.date).getTime() - new Date(a.recentMessage.date).getTime()),
+          chats: chats.sort((a, b) => new Date(b.recentMessage?.date).getTime() - new Date(a.recentMessage?.date).getTime()),
           users: data.users
         });
         onSuccess();
