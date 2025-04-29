@@ -29,6 +29,7 @@ import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import { Link } from 'react-router-dom';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
@@ -56,6 +57,12 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, type: '' });
   const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
+  const [showStatusChangeConfirmBox, setShowStatusChangeConfirmBox] = useState({
+    open: false,
+    underReviewAssetsData: null,
+    reserveAssetsData: null,
+    assetDataError: []
+  });
 
   useEffect(() => {
     fetchGridColumns();
@@ -272,7 +279,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
       });
   };
 
-  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null) => {
+  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null, skipTriggerAssetStatusChange = false) => {
     const assetsAdd: any = [];
     selectedRecords?.forEach((item) => {
       const obj: any = {};
@@ -304,12 +311,25 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
     axiosInstance()
       .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, {
         assets: assetsAdd,
-        rentalJob: referenceData?.rentalJob
+        rentalJob: referenceData?.rentalJob,
+        skipTriggerAssetStatusChange
       })
       .then(({ data }) => {
-        setIsSubmitting(false);
-        handleSucess();
-        setInuseAssetConfirmBox(false);
+        if (data?.data?.errors?.length) {
+          const assetDataError = [];
+          data?.data?.errors?.forEach((ele) => {
+            let message = ele.assetNumber;
+            ele?.fields?.forEach((e) => {
+              message += ` (${e?.fieldLabel}: ${e?.value})`;
+            });
+            assetDataError.push(message);
+          });
+          setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError });
+        } else {
+          setIsSubmitting(false);
+          handleSucess();
+          setInuseAssetConfirmBox(false);
+        }
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -376,7 +396,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
               <ThemeButton
                 disabled={isSubmitting}
-                buttonType='theme'
+                buttonType="theme"
                 isLoading={isSubmitting}
                 onClick={() => {
                   if (checkAssetPolicy(ASSET_STATUS.reserved)) {
@@ -529,7 +549,9 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
+              ? user?.user?.brandPolicy?.rentalReceivingStatus
+              : ASSET_STATUS.underReview;
             if (checkAssetPolicy(receivingStatus)) {
               const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
               setOpenAssetDataDialog({
@@ -556,7 +578,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
@@ -589,6 +611,25 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             }
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber, wellName: [referenceData?.wellName?.optionValue] }}
+        />
+      )}
+      {showStatusChangeConfirmBox.open && (
+        <CustomMessageDialog
+          open={showStatusChangeConfirmBox.open}
+          errorMessages={showStatusChangeConfirmBox.assetDataError}
+          onClose={() => {
+            setShowStatusChangeConfirmBox({
+              open: false,
+              underReviewAssetsData: null,
+              reserveAssetsData: null,
+              assetDataError: []
+            });
+            handleClose();
+          }}
+          onConfirm={() => {
+            handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
+          }}
+          title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
         />
       )}
     </Dialog>
