@@ -1,13 +1,27 @@
+import { AddOutlined, Delete as DeleteIcon } from '@mui/icons-material';
+import FolderIcon from '@mui/icons-material/Folder';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import SendIcon from '@mui/icons-material/Send';
+import PreviewIcon from '@mui/icons-material/Visibility';
 import { Chip, IconButton, MenuItem, MenuList, Popover, TextField } from '@mui/material';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
-import { AddOutlined, Delete as DeleteIcon } from '@mui/icons-material';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import Autocomplete from '@mui/material/Autocomplete';
+import axios, { CancelTokenSource } from 'axios';
+import _ from 'lodash';
+import mime from 'mime';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -19,20 +33,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-import FolderIcon from '@mui/icons-material/Folder';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import SendIcon from '@mui/icons-material/Send';
-import PreviewIcon from '@mui/icons-material/Visibility';
-import axios, { CancelTokenSource } from 'axios';
-import _ from 'lodash';
-import mime from 'mime';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import { ListingPageHeader } from 'src/components/PageHeaders';
-import { FiExternalLink } from 'react-icons/fi';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 
 const renderedFrom = 'attachment_render';
 
@@ -44,9 +45,6 @@ export default function Attachment() {
   const [filter, setFilter] = useState(null);
   const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
   const [attachmentData, setAttachmentData] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [deleteRecord, setDeleteRecord] = useState(null);
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [sendMail, setSendMail] = useState(false);
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
@@ -249,11 +247,12 @@ export default function Attachment() {
                 </HtmlTooltip>
               )}
               {row.original.canEdit ? (
-                <HtmlTooltip title="Delete">
-                  <IconButton size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </HtmlTooltip>
+                <AttachmentDeleteButton
+                  attachment={row.original}
+                  onSuccess={() => {
+                    fetchAttachments();
+                  }}
+                />
               ) : (
                 <HtmlTooltip className="cursor-stop" title="Signed Quote Attachment can not be deleted">
                   <IconButton size="small" aria-label="Delete">
@@ -590,49 +589,11 @@ export default function Attachment() {
     setOpen({ open: false, type: null, parentFolder: null, parentResource: null });
     setAttachmentData(null);
   };
-  const showConfirmBox = (row) => {
-    if (row) {
-      if (row && row._id) {
-        setDeleteRecord(row);
-      }
-    }
-    setShowDeleteConfirmBox(true);
-  };
-
-  const handleDelete = async () => {
-    setDeleteLoading(true);
-    if (deleteRecord?._id || selectedRecords.length > 0)
-      axiosInstance()
-        .put('attachment/deletemany ', { ids: deleteRecord?._id ? [deleteRecord._id] : selectedRecords.map((d) => d._id) })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: 'Deleted Successfully'
-          });
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord(null);
-          fetchAttachments();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-          setShowDeleteConfirmBox(false);
-          setDeleteLoading(false);
-        });
-  };
 
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={permissions?.attachment?.isDelete ? !selectedRecords?.every((records) => records?.canEdit) : true}
-          onClick={() => {
-            showConfirmBox(null);
-          }}
-        >
-          Delete
-        </MenuItem>
+        <MenuItem disabled={permissions?.attachment?.isDelete ? !selectedRecords?.every((records) => records?.canEdit) : true}>Delete</MenuItem>
       </>
     );
   };
@@ -645,7 +606,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -670,9 +631,9 @@ export default function Attachment() {
             }
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
-            isActionButtonVisible={true}
+            isActionButtonVisible={false}
             actionButtonProps={{ disabled: selectedRecords.length > 0 ? false : true }}
-            actionMenuItems={<ActionMenuItems />}
+            // actionMenuItems={<ActionMenuItems />}
             addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
             isAddButtonVisible={true}
           />
@@ -835,18 +796,6 @@ export default function Attachment() {
             />
           </Dialog>
         )}
-        {showDeleteConfirmBox ? (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete this attachment(s)?`}
-            onClose={() => {
-              if (deleteRecord) setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            okBtnLoading={deleteLoading}
-            onOk={handleDelete}
-          />
-        ) : null}
       </CustomContainer>
     </section>
   );

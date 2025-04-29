@@ -1,6 +1,5 @@
-import { Add, Delete, PriorityHigh } from '@mui/icons-material';
+import { Add, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
@@ -13,13 +12,12 @@ import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
-import DeleteRequestDialog from 'src/pages/WorkOrder/Diagram/DeleteRequestDialog';
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
@@ -57,8 +55,6 @@ const Diagram = ({
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, data: null });
-  const [deleteRequestDialog, setDeleteRequestDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -399,36 +395,13 @@ const Diagram = ({
                                   <FileCopyIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
-                              <HtmlTooltip
-                                title={
-                                  file?.createdBy?.user?._id === user?._id
-                                    ? 'Delete'
-                                    : !isEmpty(file?.deleteRequest)
-                                      ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
-                                      : 'Delete Request'
-                                }
-                                placement="top"
-                                arrow
-                              >
-                                <span>
-                                  <IconButton
-                                    size="small"
-                                    aria-label="delete"
-                                    disabled={file?.createdBy?.user?._id === user?._id ? false : !isEmpty(file?.deleteRequest) ? true : false}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (file?.createdBy?.user?._id === user?._id) {
-                                        setShowDeleteConfirmBox({ open: true, data: file });
-                                      } else {
-                                        setDeleteRequestDialog({ open: true, data: file });
-                                      }
-                                    }}
-                                    color={'error'}
-                                  >
-                                    <Delete fontSize="small" />
-                                  </IconButton>
-                                </span>
-                              </HtmlTooltip>
+                              <AttachmentDeleteButton
+                                attachment={file}
+                                onSuccess={() => {
+                                  setSelectedAttachment(null);
+                                  fetchData();
+                                }}
+                              />
                               {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
                                 <div className="flex gap-2">
                                   <span className="relative">
@@ -628,29 +601,6 @@ const Diagram = ({
             customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
           />
         </Dialog>
-      )}
-      {showDeleteConfirmBox.open && (
-        <ConfirmationDialog
-          open={showDeleteConfirmBox.open}
-          message={`Are you sure you want to delete ${showDeleteConfirmBox?.data?.name}?`}
-          onClose={() => {
-            setShowDeleteConfirmBox({ open: false, data: null });
-          }}
-          onOk={() => {
-            handleDeleteFile([showDeleteConfirmBox?.data?._id]);
-            setShowDeleteConfirmBox({ open: false, data: null });
-          }}
-        />
-      )}
-      {deleteRequestDialog.open && (
-        <DeleteRequestDialog
-          onClose={() => setDeleteRequestDialog({ open: false, data: null })}
-          file={deleteRequestDialog.data}
-          onSuccess={() => {
-            setDeleteRequestDialog({ open: false, data: null });
-            fetchData();
-          }}
-        />
       )}
     </Box>
   );
