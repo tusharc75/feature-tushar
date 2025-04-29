@@ -391,7 +391,7 @@ export const CreateEmail = ({
           <AttachmentThumbnail
             attachments={quoteBuilderOtherAttachments}
             handleDeleteAttachment={handleDeleteQuoteBuilderOtherAttachment}
-            canEdit={true}
+            allowedToEdit={true}
           />
         </>
       ) : null}
@@ -401,10 +401,10 @@ export const CreateEmail = ({
   const renderQuotesFileThumbnails = isAttachmentLoading ? (
     <Typography>Loading...</Typography>
   ) : stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
-    <AttachmentThumbnail attachments={stateQuoteBuilderAttachments} handleDeleteAttachment={handleDeleteQuoteBuilderAttachment} canEdit={true} />
+    <AttachmentThumbnail attachments={stateQuoteBuilderAttachments} handleDeleteAttachment={handleDeleteQuoteBuilderAttachment} allowedToEdit={true} />
   ) : null;
 
-  const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={true} />;
+  const renderFileThumbnails = <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} allowedToEdit={true} />;
 
   const onUploadFile = (file) => {
     if (checkImageUrl(file)) {

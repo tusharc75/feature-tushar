@@ -5,7 +5,6 @@ import GenieWindow from 'src/components/DesktopDM/GenieWindow';
 import useDesktopDM from 'src/components/DesktopDM/useDesktopDM';
 import UserList from 'src/components/DesktopDM/UserList';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import { useDndSensors } from 'src/hooks';
 
 const DesktopDM = () => {
   const state = useDesktopDM();
@@ -20,8 +19,6 @@ const DesktopDM = () => {
     USER_LIST_RIGHT_SPACE,
     isMobile
   } = state;
-
-  const sensors = useDndSensors();
 
   if (!mainWindow) return null;
 

@@ -1,29 +1,26 @@
-import { Autocomplete, Box, Collapse, Dialog, Divider, IconButton, TextField, Typography } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
+import { isEmpty } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import ShowPdf from './ShowPdf';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
-import { getFileIcon, getFileNameWithExtension } from './utils';
-import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ImageEditor from './ImageEditor';
-import { useData } from 'src/StateProvider/Provider';
-import Comment from 'src/pages/WorkOrder/Diagram/Comment';
-import { isEmpty } from 'lodash';
 import PdfEditor from './ShowPdf/PdfEditor';
+import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -54,12 +51,10 @@ const Diagram = ({
   const [expended, setExpended] = useState({});
   const [attachemntDialog, setAttachemntDialog] = useState({ open: false, file: null, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [commentDialog, setCommentDialog] = useState(false);
+  const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -257,10 +252,9 @@ const Diagram = ({
       });
   };
 
-
   const handleRequestReject = (id) => {
     axiosInstance()
-      .put('/attachment/deleteRequest', { _id: id, type: 'cancel' })
+      .put('/attachment/delete-request', { _id: id, type: 'cancel' })
       .then(({ data }) => {
         fetchData();
         toastConfig.setToastConfig({
@@ -327,46 +321,35 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
-                        onClick={() => {
-                          setExpended((prev) => ({
-                            ...prev,
-                            [file?._id]: expended[file?._id] ? false : true
-                          }));
-                        }}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
+                        <button
+                          className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
+                          onClick={() => {
+                            setExpended((prev) => ({
+                              ...prev,
+                              [file?._id]: expended[file?._id] ? false : true
+                            }));
+                          }}
+                        />
+
                         <div className="flex items-center">
-                          <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
-                          <Box ml={2}>
+                          <span className="p-1">
+                            <KeyboardArrowRight
+                              className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(90deg)]')}
+                            />
+                          </span>
+                          <Box>
                             <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
                               {file?.name}
                             </Typography>
                           </Box>
                         </div>
                         <div className="flex gap-2">
-                          {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
-                            <div className="flex gap-2">
-                              <ThemeButton
-                                buttonType="theme"
-                                onClick={() => {
-                                  handleDeleteFile([file._id]);
-                                }}
-                              >
-                                Approve
-                              </ThemeButton>
-                              <ThemeButton
-                                buttonType="yellow"
-                                onClick={() => {
-                                  handleRequestReject(file._id);
-                                }}
-                              >
-                                Reject
-                              </ThemeButton>
-                            </div>
-                          )}
                           <HtmlTooltip
                             title={
                               <div className="flex flex-col p-2">
@@ -376,26 +359,11 @@ const Diagram = ({
                                 <p>
                                   Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
                                 </p>
-                                {!isEmpty(file?.deleteRequest) && (
-                                  <>
-                                    <Divider></Divider>
-                                    <p>Delete Request Sent</p>
-                                    <p>
-                                      By: <span>{file?.deleteRequest?.user?.concatedName}</span>
-                                    </p>
-                                    <p>
-                                      Date: <span>{displayDate(file?.deleteRequest?.date)}</span>
-                                    </p>
-                                    <p>
-                                      Reason: <span>{file?.deleteRequest?.comment}</span>
-                                    </p>
-                                  </>
-                                )}
                               </div>
                             }
                           >
                             <IconButton size="small" color="inherit">
-                              <InfoIcon fontSize='small' color='primary' />
+                              <InfoIcon fontSize="small" color="primary" />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -411,7 +379,7 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: false });
                                   }}
                                 >
-                                  <EditIcon fontSize='small' color='primary' />
+                                  <EditIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip title="Clone" placement="top" arrow>
@@ -424,28 +392,84 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: true });
                                   }}
                                 >
-                                  <FileCopyIcon fontSize='small' color='primary' />
+                                  <FileCopyIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
-                              <HtmlTooltip
-                                title={!isEmpty(file?.deleteRequest) ? `Delete request sent to ${file?.createdBy?.user?.concatedName}` : 'Delete'}
-                                placement="top"
-                                arrow
-                              >
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="delete"
-                                  disabled={!isEmpty(file?.deleteRequest) ? true : false}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedFile(file);
-                                    setShowConfirmBox(true);
-                                  }}
-                                >
-                                  <Delete fontSize='small' color={!isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
-                                </IconButton>
-                              </HtmlTooltip>
+                              <AttachmentDeleteButton
+                                attachment={file}
+                                onSuccess={() => {
+                                  setSelectedAttachment(null);
+                                  fetchData();
+                                }}
+                              />
+                              {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
+                                <div className="flex gap-2">
+                                  <span className="relative">
+                                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                                    </span>
+                                    <HtmlTooltip title="Delete Request">
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          setDeleteRequestAnchorEl(e.currentTarget);
+                                        }}
+                                      >
+                                        <PriorityHigh fontSize="small" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </span>
+                                  <Popover
+                                    open={!!deleteRequestAnchorEl}
+                                    onClose={() => setDeleteRequestAnchorEl(null)}
+                                    anchorEl={deleteRequestAnchorEl}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'right'
+                                    }}
+                                    transformOrigin={{
+                                      vertical: 'top',
+                                      horizontal: 'right'
+                                    }}
+                                  >
+                                    <div className="w-[290px] p-3">
+                                      <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
+                                      <p className="mb-2 text-xs">
+                                        A deletion request was submitted by&nbsp;
+                                        <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
+                                          {file?.deleteRequest?.user?.concatedName}
+                                        </span>{' '}
+                                        on&nbsp;
+                                        {displayDate(file?.deleteRequest?.date)}
+                                      </p>
+                                      <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                        Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
+                                      </p>
+                                      <div className="mt-2 flex  gap-2 border-t pt-2">
+                                        <ThemeButton
+                                          buttonType="theme"
+                                          onClick={() => {
+                                            handleDeleteFile([file._id]);
+                                          }}
+                                        >
+                                          Approve
+                                        </ThemeButton>
+                                        <ThemeButton
+                                          buttonType="red"
+                                          onClick={() => {
+                                            handleRequestReject(file._id);
+                                          }}
+                                        >
+                                          Reject
+                                        </ThemeButton>
+                                      </div>
+                                    </div>
+                                  </Popover>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>
@@ -513,7 +537,7 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          {disableEdit && (
+          {!checkImageType(selectedAttachment?.url?.split('.')[1]) && !checkpdfType(selectedAttachment?.url?.split('.')[1]) && (
             <CustomDialogHeader
               title={selectedAttachment?.name}
               showManimizeMaximize={false}
@@ -524,21 +548,23 @@ const Diagram = ({
             />
           )}
           <CustomDialogContent isFooterPresent={false} className={cn(!disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ?
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
               <ImageEditor
                 data={selectedAttachment}
                 fetchData={fetchData}
                 setSelectedAttachment={setSelectedAttachment}
                 handleClose={() => setSelectedAttachment(null)}
-              /> : checkpdfType(selectedAttachment?.url?.split('.')[1]) ?
-                <PdfEditor
-                  data={selectedAttachment}
-                  fetchData={fetchData}
-                  setSelectedAttachment={setSelectedAttachment}
-                  handleClose={() => setSelectedAttachment(null)} />
-                :
-                <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
-            }
+              />
+            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+              <PdfEditor
+                data={selectedAttachment}
+                fetchData={fetchData}
+                setSelectedAttachment={setSelectedAttachment}
+                handleClose={() => setSelectedAttachment(null)}
+              />
+            ) : (
+              <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+            )}
           </CustomDialogContent>
         </Dialog>
       )}
@@ -559,7 +585,6 @@ const Diagram = ({
         >
           <ManageAttachment
             attachmentId={attachemntDialog.file?._id}
-            attachmentData={attachemntDialog.file}
             isClone={attachemntDialog.isClone}
             handleClose={() => {
               setAttachemntDialog({ open: false, file: null, isClone: false });
@@ -574,36 +599,8 @@ const Diagram = ({
             fetchData={fetchData}
             attachmentType={attachmentType}
             customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
-            isOwner={attachemntDialog.file ? attachemntDialog.file?.createdBy?.user?._id === user?._id : true}
           />
         </Dialog>
-      )}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedFile?.name}?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          onOk={() => {
-            if (selectedFile?.createdBy?.user?._id === user?._id) {
-              handleDeleteFile([selectedFile._id]);
-            } else {
-              setCommentDialog(true);
-            }
-            setShowConfirmBox(false);
-          }}
-        />
-      )}
-      {commentDialog && (
-        <Comment
-          onClose={() => setCommentDialog(false)}
-          file={selectedFile}
-          onSuccess={() => {
-            setCommentDialog(false);
-            fetchData();
-          }}
-        />
       )}
     </Box>
   );

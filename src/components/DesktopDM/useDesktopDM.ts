@@ -29,7 +29,7 @@ const useDesktopDM = () => {
         const {
           data: { data }
         } = await axiosInstance().get('/work-space/channel/chats', { cancelToken });
-        const chats: any = [];
+        const chats: Chat[] = [];
         for (const d of data?.chats) {
           d.notifications = d.notifications || 0;
           const toUser = d?.members?.find((m) => m?.optionValue !== user?._id);
@@ -39,7 +39,10 @@ const useDesktopDM = () => {
           }
           chats.push(d);
         }
-        setState({ chats, users: data.users });
+        setState({
+          chats: chats.sort((a, b) => new Date(b.recentMessage?.date).getTime() - new Date(a.recentMessage?.date).getTime()),
+          users: data.users
+        });
         onSuccess();
       } catch (error) {
         toastConfig.setToastConfig(error);

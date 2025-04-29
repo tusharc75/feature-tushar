@@ -31,6 +31,7 @@ import type { TNestedTree } from './helper';
 import { sortFileStructure, unflatten } from './helper';
 import mime from 'mime';
 import { PreviewFile } from 'src/components/PreviewFile';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -198,8 +199,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     event.stopPropagation();
     handleMail(data);
   };
-  const handleCloseMenu = (event) => {
-    event.stopPropagation();
+  const handleCloseMenu = (event?: any) => {
+    event?.stopPropagation();
     setAnchorEl(null);
     setAttachmentId(null);
   };
@@ -340,7 +341,8 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
           toastConfig.setToastConfig(err);
         });
     } else {
-      axiosInstance().get(`attachment/zip/file/${attachmentData?._id}`, { responseType: 'blob' })
+      axiosInstance()
+        .get(`attachment/zip/file/${attachmentData?._id}`, { responseType: 'blob' })
         .then(({ data }) => {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
@@ -523,7 +525,17 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
                 </span>
               )}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
-              {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
+              <AttachmentDeleteButton
+                attachment={attachmentData}
+                onSuccess={() => {
+                  fetchAttachment();
+                  handleActivityRefresh();
+                }}
+                onClick={handleCloseMenu}
+                element={MenuItem}
+              >
+                Delete
+              </AttachmentDeleteButton>
             </Menu>
             <Dialog
               open={open.open}
