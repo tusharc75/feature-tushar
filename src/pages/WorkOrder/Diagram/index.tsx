@@ -564,7 +564,7 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          {disableEdit && (
+          {!checkImageType(selectedAttachment?.url?.split('.')[1]) && !checkpdfType(selectedAttachment?.url?.split('.')[1]) && (
             <CustomDialogHeader
               title={selectedAttachment?.name}
               showManimizeMaximize={false}
