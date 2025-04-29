@@ -7,19 +7,16 @@ import _ from 'lodash';
 import mimeDb from 'mime-db';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { deleteDisable } from 'src/constants/messageHelpers';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 
-const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) => {
-  const {
-    state: { permissions }
-  }: any = useData();
+const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, allowedToEdit }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [, setDownloadProgress] = useState(0);
@@ -189,11 +186,6 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                   <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
                     <div className="front  group-hover:hidden">
                       <div className="mx-auto mb-[11px] h-[79px] text-center">
-                        {/* <img
-                          src={}
-                          className={`object-contain mx-auto block h-full w-full max-w-full`}
-                          alt="attchment"
-                        /> */}
                         <Icon size={79} className="mx-auto" />
                       </div>
                       <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">
@@ -234,7 +226,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             onClick={(event) => downloadFile(event, attachment)}
                             style={{ paddingBottom: 3, width: 30, height: 30 }}
                           >
-                            {<GetAppIcon />}
+                            <GetAppIcon color="primary" />
                           </IconButton>
                         </HtmlTooltip>
                         {[...imageExtensions, ...pdfExtensions]?.includes(attachment?.url?.split('.')?.pop()?.toLowerCase()) && (
@@ -250,7 +242,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             </IconButton>
                           </HtmlTooltip>
                         )}
-                        {canEdit && permissions?.attachment?.isDelete ? (
+                        {allowedToEdit ? (
                           <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                             <IconButton
                               size={'small'}
@@ -264,7 +256,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
-                          <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
+                          <HtmlTooltip className="cursor-stop" title={deleteDisable} enterTouchDelay={0}>
                             <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
                               <DeleteIcon color="disabled" fontSize="small" />
                             </IconButton>

@@ -80,3 +80,9 @@ export const handleDownload = async (file: Partial<AttachedFileType>, hasToDownl
 export const deleteAttachmentCache = (url: string) => {
   fileUrlCache.delete(url);
 };
+
+export function stripHtmlTags(input: string) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = input;
+  return tempDiv.textContent || tempDiv.innerText || '';
+}

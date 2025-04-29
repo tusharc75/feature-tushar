@@ -645,7 +645,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
@@ -782,7 +782,6 @@ export default function Attachment() {
                 handleClose();
                 setFullScreen(false);
               }}
-              attachmentData={attachmentData}
               fetchData={fetchAttachments}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {

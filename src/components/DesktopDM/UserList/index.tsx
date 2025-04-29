@@ -19,7 +19,7 @@ type UserListProps = {
 
 const UserList = memo(
   ({ state }: UserListProps) => {
-    const { mainWindow, toggleMainWindow, users, chats, handleChatOpen, checkIsUser, resources, permissions, isMobile, openedChats } = state;
+    const { mainWindow, toggleMainWindow, users, chats, handleChatOpen, checkIsUser, resources, permissions, isMobile, openedChats, user } = state;
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const [inputValue, setInputValue] = useState('');
     const { containerRef, handleRef, enableDisableDraggable } = useDragAndDrop();
@@ -98,7 +98,7 @@ const UserList = memo(
                 if (isUser) {
                   return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
                 } else {
-                  return <RenderChatUser chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
+                  return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
                 }
               })
             ) : (

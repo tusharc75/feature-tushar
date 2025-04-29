@@ -21,6 +21,9 @@ import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { useData } from 'src/StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { editDisable } from 'src/constants/messageHelpers';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -37,7 +40,6 @@ export default function ManageAttachment({
   isClone = false,
   handleClose,
   fetchData = null,
-  attachmentData = null,
   isMinimized,
   onMinimizeMaximize,
   showManimizeMaximize,
@@ -45,7 +47,6 @@ export default function ManageAttachment({
   type = 'file',
   attachmentType = null,
   customhandleAdd = null,
-  isOwner = true
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -56,12 +57,16 @@ export default function ManageAttachment({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [imageSource, setImageSource] = useState(null);
   const [open, setOpen] = useState(false);
-  const [canEdit, setCanEdit] = useState(true);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [attachmentToDelete, setAttachemnetToDelete] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [documentScanDialog, setDocumentScanDialog] = useState(false);
+
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [attachmentData, setAttachmentData] = useState(null);
+
+  const { state: { user } }: any = useData();
 
   useEffect(() => {
     fetchAttachmentData();
@@ -77,7 +82,6 @@ export default function ManageAttachment({
         if (attachmentId) {
           const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
           const data = attachmentResponce?.data?.data;
-          setCanEdit(data?.canEdit);
           if (data.file && data.file.length) {
             data?.file?.sort((a: any, b: any) => {
               return new Date(b?.date).getTime() - new Date(a?.date).getTime();
@@ -88,6 +92,10 @@ export default function ManageAttachment({
           let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType };
           if (createFields?.length) {
             initialValue = { ...initialValue, ...getObjKeysWithValues(data, updateFields) };
+          }
+          setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
+          if (!isClone) {
+            setAttachmentData(data)
           }
           setInitialData({
             fields: updateFields,
@@ -105,6 +113,7 @@ export default function ManageAttachment({
             fields: createFields,
             values: initialValue
           });
+          setAllowedToEdit(true)
           setIsFetching(false);
         }
       } else if (type === 'folder') {
@@ -112,12 +121,12 @@ export default function ManageAttachment({
           axiosInstance()
             .get(`/attachment/folder/${attachmentId}`)
             .then(({ data: { data } }) => {
-              setCanEdit(data?.canEdit);
               setInitialData({
                 fields: [],
                 values: data
               });
               parentFolder = data?.parentFolder;
+              setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
               setIsFetching(false);
             })
             .catch((error) => {
@@ -129,6 +138,7 @@ export default function ManageAttachment({
             fields: [],
             values: { name: '' }
           });
+          setAllowedToEdit(true)
           setIsFetching(false);
         }
       }
@@ -283,7 +293,7 @@ export default function ManageAttachment({
                         type="text"
                         label={type === 'file' ? 'Name' : 'Folder Name'}
                         required={true}
-                        disabled={!canEdit && !isClone}
+                        disabled={!allowedToEdit}
                         name="name"
                         fullWidth
                         margin="none"
@@ -307,6 +317,7 @@ export default function ManageAttachment({
                               fieldData={field}
                               values={values}
                               errors={errors}
+                              disabled={!allowedToEdit}
                               touched={touched}
                               label={field.fieldLabel}
                               name={field.fieldName}
@@ -327,7 +338,7 @@ export default function ManageAttachment({
                             size="small"
                             options={Object.values(ATTACHMENT_TYPE)}
                             renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
-                            disabled={attachmentType ? true : !canEdit}
+                            disabled={attachmentType ? true : !allowedToEdit}
                             getOptionLabel={(option) => option || ''}
                             isOptionEqualToValue={(option: any, value: any) => option === value}
                             onChange={(e, val) => {
@@ -349,7 +360,7 @@ export default function ManageAttachment({
                                   required={true}
                                   type="fileUpload"
                                   values={values}
-                                  canEdit={canEdit || isClone}
+                                  disabled={!allowedToEdit}
                                   errors={errors}
                                   touched={touched}
                                   size="small"
@@ -362,7 +373,11 @@ export default function ManageAttachment({
                                   }}
                                 />
                               </div>
-                              <ThemeButton buttonType="theme" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                              <ThemeButton
+                                buttonType="theme"
+                                component="span"
+                                disabled={!allowedToEdit}
+                                onClick={() => setDocumentScanDialog(true)}>
                                 Scan Document
                               </ThemeButton>
                             </div>
@@ -372,10 +387,10 @@ export default function ManageAttachment({
                           <AttachmentThumbnail
                             attachments={allAttachments}
                             handleDeleteAttachment={handleDeleteAttachment}
-                            canEdit={!isOwner ? false : canEdit || isClone}
+                            allowedToEdit={allowedToEdit}
                           />
                         </Grid>
-                        {attachmentId && attachmentData && (
+                        {attachmentData && (
                           <Grid size={{ xs: 12 }}>
                             <div className="flex flex-col p-2">
                               <p>
@@ -403,16 +418,16 @@ export default function ManageAttachment({
               >
                 Cancel
               </ThemeButton>
-              {(canEdit || isClone) && (
+              <HtmlTooltip title={allowedToEdit ? '' : editDisable}>
                 <ThemeButton
                   buttonType="theme"
-                  disabled={!isOwner ? true : loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
+                  disabled={!allowedToEdit ? true : loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
                   isLoading={loading}
                   onClick={submitForm}
                 >
                   Save
                 </ThemeButton>
-              )}
+              </HtmlTooltip>
             </CustomDialogFooter>
             {showConfirmDialog ? (
               <ConfirmCancelDialog

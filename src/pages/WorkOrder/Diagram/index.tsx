@@ -559,7 +559,6 @@ const Diagram = ({
         >
           <ManageAttachment
             attachmentId={attachemntDialog.file?._id}
-            attachmentData={attachemntDialog.file}
             isClone={attachemntDialog.isClone}
             handleClose={() => {
               setAttachemntDialog({ open: false, file: null, isClone: false });
@@ -574,7 +573,6 @@ const Diagram = ({
             fetchData={fetchData}
             attachmentType={attachmentType}
             customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
-            isOwner={attachemntDialog.file ? attachemntDialog.file?.createdBy?.user?._id === user?._id : true}
           />
         </Dialog>
       )}
