@@ -70,6 +70,7 @@ const DiagramDialog = ({
             attachmentType={attachmentType}
             referenceLabel={referenceLabel}
             showMaterialFilter={showMaterialFilter}
+            showContainer={false}
           />
         ) : (
           <Grid container spacing={2}>

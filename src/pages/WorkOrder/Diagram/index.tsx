@@ -1,13 +1,15 @@
-import { Autocomplete, Box, Collapse, Dialog, Divider, IconButton, TextField, Typography } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
+import { isEmpty } from 'lodash';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import ShowPdf from './ShowPdf';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
@@ -17,14 +19,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
-import { getFileIcon, getFileNameWithExtension } from './utils';
-import emptyIllustration from 'src/assets/emptyIllustration.webp';
-import ImageEditor from './ImageEditor';
-import { useData } from 'src/StateProvider/Provider';
 import DeleteRequestDialog from 'src/pages/WorkOrder/Diagram/DeleteRequestDialog';
-import { isEmpty } from 'lodash';
+import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
-import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
+import { getFileIcon, getFileNameWithExtension } from './utils';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -58,7 +56,7 @@ const Diagram = ({
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-
+  const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, data: null });
   const [deleteRequestDialog, setDeleteRequestDialog] = useState({ open: false, data: null });
 
@@ -258,18 +256,20 @@ const Diagram = ({
       });
   };
 
-
   const handleRequestReject = (id) => {
-    axiosInstance().put('/attachment/delete-request', { _id: id, type: 'cancel' }).then(({ data }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put('/attachment/delete-request', { _id: id, type: 'cancel' })
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
@@ -325,20 +325,29 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
-                        onClick={() => {
-                          setExpended((prev) => ({
-                            ...prev,
-                            [file?._id]: expended[file?._id] ? false : true
-                          }));
-                        }}
+                        className={`head relative flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
+                        <button
+                          className="absolute inset-0 cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
+                          onClick={() => {
+                            setExpended((prev) => ({
+                              ...prev,
+                              [file?._id]: expended[file?._id] ? false : true
+                            }));
+                          }}
+                        />
+
                         <div className="flex items-center">
-                          <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
-                          <Box ml={2}>
+                          <span className="p-1">
+                            <KeyboardArrowRight
+                              className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(90deg)]')}
+                            />
+                          </span>
+                          <Box>
                             <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
                               {file?.name}
                             </Typography>
@@ -358,7 +367,7 @@ const Diagram = ({
                             }
                           >
                             <IconButton size="small" color="inherit">
-                              <InfoIcon fontSize='small' color='primary' />
+                              <InfoIcon fontSize="small" color="primary" />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -374,7 +383,7 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: false });
                                   }}
                                 >
-                                  <EditIcon fontSize='small' color='primary' />
+                                  <EditIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip title="Clone" placement="top" arrow>
@@ -387,12 +396,17 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: true });
                                   }}
                                 >
-                                  <FileCopyIcon fontSize='small' color='primary' />
+                                  <FileCopyIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip
-                                title={file?.createdBy?.user?._id === user?._id ? 'Delete' :
-                                  !isEmpty(file?.deleteRequest) ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}` : 'Delete Request'}
+                                title={
+                                  file?.createdBy?.user?._id === user?._id
+                                    ? 'Delete'
+                                    : !isEmpty(file?.deleteRequest)
+                                      ? `Delete request already sent to ${file?.createdBy?.user?.concatedName}`
+                                      : 'Delete Request'
+                                }
                                 placement="top"
                                 arrow
                               >
@@ -405,33 +419,87 @@ const Diagram = ({
                                     e.stopPropagation();
                                     if (file?.createdBy?.user?._id === user?._id) {
                                       setShowDeleteConfirmBox({ open: true, data: file });
-                                    }
-                                    else {
-                                      setDeleteRequestDialog({ open: true, data: file })
+                                    } else {
+                                      setDeleteRequestDialog({ open: true, data: file });
                                     }
                                   }}
                                 >
-                                  <Delete fontSize='small' color={file?.createdBy?.user?._id === user?._id ? 'error' : !isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
+                                  <Delete
+                                    fontSize="small"
+                                    color={file?.createdBy?.user?._id === user?._id ? 'error' : !isEmpty(file?.deleteRequest) ? 'disabled' : 'error'}
+                                  />
                                 </IconButton>
                               </HtmlTooltip>
                               {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
                                 <div className="flex gap-2">
-                                  <ThemeButton
-                                    buttonType="theme"
-                                    onClick={() => {
-                                      handleDeleteFile([file._id]);
+                                  <span className="relative">
+                                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                                    </span>
+                                    <IconButton
+                                      size="small"
+                                      color="primary"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.preventDefault();
+                                        setDeleteRequestAnchorEl(e.currentTarget);
+                                      }}
+                                    >
+                                      <PriorityHigh fontSize="small" />
+                                    </IconButton>
+                                  </span>
+                                  <Popover
+                                    open={!!deleteRequestAnchorEl}
+                                    onClose={() => setDeleteRequestAnchorEl(null)}
+                                    anchorEl={deleteRequestAnchorEl}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'right'
+                                    }}
+                                    transformOrigin={{
+                                      vertical: 'top',
+                                      horizontal: 'right'
                                     }}
                                   >
-                                    Approve
-                                  </ThemeButton>
-                                  <ThemeButton
-                                    buttonType="yellow"
-                                    onClick={() => {
-                                      handleRequestReject(file._id);
-                                    }}
-                                  >
-                                    Reject
-                                  </ThemeButton>
+                                    <div className="w-[290px] p-3">
+                                      <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
+                                      <p className="mb-2 text-xs">
+                                        A deletion request was submitted by user&nbsp;
+                                        <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
+                                          {file?.deleteRequest?.user?.concatedName}
+                                        </span>{' '}
+                                        on&nbsp;
+                                        {displayDate(file?.deleteRequest?.date)}
+                                      </p>
+                                      {/* <p className="mb-1 text-xs font-semibold text-gray-500">
+                                        By: <span className="font-normal"></span>
+                                      </p>
+                                      <p className="mb-1 text-xs font-semibold text-gray-500">
+                                        Date: <span className="font-normal">{displayDate(file?.deleteRequest?.date)}</span>
+                                      </p> */}
+                                      <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                        Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
+                                      </p>
+                                      <div className="mt-2 flex justify-between gap-2 border-t pt-2">
+                                        <ThemeButton
+                                          buttonType="theme"
+                                          onClick={() => {
+                                            handleDeleteFile([file._id]);
+                                          }}
+                                        >
+                                          Approve
+                                        </ThemeButton>
+                                        <ThemeButton
+                                          buttonType="yellow"
+                                          onClick={() => {
+                                            handleRequestReject(file._id);
+                                          }}
+                                        >
+                                          Reject
+                                        </ThemeButton>
+                                      </div>
+                                    </div>
+                                  </Popover>
                                 </div>
                               )}
                             </>
@@ -512,21 +580,23 @@ const Diagram = ({
             />
           )}
           <CustomDialogContent isFooterPresent={false} className={cn(!disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ?
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
               <ImageEditor
                 data={selectedAttachment}
                 fetchData={fetchData}
                 setSelectedAttachment={setSelectedAttachment}
                 handleClose={() => setSelectedAttachment(null)}
-              /> : checkpdfType(selectedAttachment?.url?.split('.')[1]) ?
-                <PdfEditor
-                  data={selectedAttachment}
-                  fetchData={fetchData}
-                  setSelectedAttachment={setSelectedAttachment}
-                  handleClose={() => setSelectedAttachment(null)} />
-                :
-                <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
-            }
+              />
+            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+              <PdfEditor
+                data={selectedAttachment}
+                fetchData={fetchData}
+                setSelectedAttachment={setSelectedAttachment}
+                handleClose={() => setSelectedAttachment(null)}
+              />
+            ) : (
+              <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+            )}
           </CustomDialogContent>
         </Dialog>
       )}
@@ -582,7 +652,7 @@ const Diagram = ({
           onClose={() => setDeleteRequestDialog({ open: false, data: null })}
           file={deleteRequestDialog.data}
           onSuccess={() => {
-            setDeleteRequestDialog({ open: false, data: null })
+            setDeleteRequestDialog({ open: false, data: null });
             fetchData();
           }}
         />
