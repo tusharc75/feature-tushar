@@ -251,6 +251,7 @@ const Consumables = ({
         const calValues = autoCalculateSpecificFields(values, element, allFields);
         Object.assign(element, calValues);
         element = { materialId: e.materialId, type: MATERIAL_TYPE.product, ...getObjKeysWithValues(element, allFields) };
+        element.technician = selectedTechnician?.technicianId === 'All' ? null : selectedTechnician?.technicianId;
         material.push(element);
       });
       AddMaterial(material, null);
