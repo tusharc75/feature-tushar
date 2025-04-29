@@ -332,7 +332,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
                 start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
-                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().toDate(),
+                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
@@ -346,7 +346,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
@@ -358,7 +358,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
@@ -370,7 +370,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'reserved',
@@ -382,7 +382,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `Inventory ${d?.inventory}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource
                     });
@@ -391,7 +391,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   otherData.push({
                     title: `Planned Available ${d?.availableByPlanning || 0}`,
                     start: dayjs.utc(d['date']).tz().toDate(),
-                    end: dayjs.utc(d['date']).tz().toDate(),
+                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
@@ -402,7 +402,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   otherData.push({
                     title: `${property} ${d[property]}`,
                     start: dayjs.utc(d['date']).tz().toDate(),
-                    end: dayjs.utc(d['date']).tz().toDate(),
+                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
                     type: 'assetStatus',
                     status: property,
@@ -414,7 +414,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
             let title = d[selectedResource.fieldName];
             let start = dayjs.utc(d[selectedResource.start]).tz().toDate();
-            let end = dayjs.utc(d[selectedResource.end]).tz().toDate();
+            let end = dayjs.utc(d[selectedResource.end]).tz().endOf('day').toDate();
             let fulfillStatus = d?.fulfillStatus;
 
             const extraData: any = {};
