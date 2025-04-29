@@ -348,7 +348,6 @@ const FormTypes = (props) => {
     addDisplayType,
     removeDisplayType,
     setValues,
-    canEdit = true,
     customError = {},
     handleRemoveField,
     selectedCurrencyCode = null,
@@ -2499,7 +2498,7 @@ const FormTypes = (props) => {
         </Box>
         <Box>
           <input
-            disabled={isFileUploading || !canEdit}
+            disabled={isFileUploading || rest?.disabled}
             id={name}
             name={name}
             onChange={handleUploadFile}
@@ -2512,7 +2511,7 @@ const FormTypes = (props) => {
           <div className="flex items-center gap-2">
             <label htmlFor={name}>
               <ThemeButton
-                disabled={isFileUploading || !canEdit}
+                disabled={isFileUploading || rest?.disabled}
                 onClick={handleUploadFile}
                 buttonType="theme"
                 component="span"
@@ -2572,7 +2571,7 @@ const FormTypes = (props) => {
           <Grid container spacing={1} alignItems="center">
             <Grid size={{ xs: 12, sm: 12, md: 12 }}>
               <input
-                disabled={isFileUploading || !canEdit}
+                disabled={isFileUploading || rest?.disabled}
                 id={name}
                 name={name}
                 onChange={(e) => handleUploadFile(e, true)}
@@ -2584,7 +2583,7 @@ const FormTypes = (props) => {
               />
               <div className="flex items-center gap-2">
                 <label htmlFor={name}>
-                  <ThemeButton component="span" disabled={isFileUploading || !canEdit} buttonType="theme" isLoading={isFileUploading}>
+                  <ThemeButton component="span" disabled={isFileUploading || rest?.disabled} buttonType="theme" isLoading={isFileUploading}>
                     {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
                   </ThemeButton>
                 </label>
