@@ -38,7 +38,8 @@ const Diagram = ({
   showMaterialFilter = false,
   defaultSelectedUniqueId = null,
   showContainer = true,
-  fullHeight = true
+  fullHeight = true,
+  height = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -318,7 +319,7 @@ const Diagram = ({
           </div>
         )}
         <Box pt={2} pb={2}>
-          <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
+          <Box style={{ height }} className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
               {!rowData && (
                 <div className="flex h-full items-center justify-center">
