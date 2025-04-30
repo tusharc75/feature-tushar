@@ -525,7 +525,7 @@ const Diagram = ({
                   );
                 })}
               {rowData?.length === 0 && (
-                <div className="mx-auto mt-4 h-full w-full max-w-[450px] cursor-pointer rounded-md  border-2 border-dashed bg-transparent text-center">
+                <div className="mx-auto mt-4 h-full w-full max-w-[450px] rounded-md  border-2 border-dashed bg-transparent text-center">
                   <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 max-w-[250px] opacity-60" loading="lazy" />
                   {/* <MdOutlineFileUpload size={40} className="mx-auto my-5 block text-gray-500" /> */}
                   <span className="mx-auto block">
