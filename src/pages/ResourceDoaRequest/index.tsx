@@ -32,7 +32,6 @@ const ResourceDoaRequest = () => {
 
   const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
 
-  const [confermApproveRejectBox, setConfermApproveRejectBox] = useState({ open: false, type: '', data: null });
   const [openComment, setOpenComment] = useState({ open: false, type: '', data: null });
   const [columns, setColumns] = useState(null);
   const resourceOptions = DOA_RESOURCE?.map((r) => ({ optionLabel: resources[r?.key]?.titlePlural, optionValue: r?.resorce }));
@@ -129,7 +128,6 @@ const ResourceDoaRequest = () => {
               disabled={!row?.original?.canPerform}
               onClick={() => {
                 setOpenComment({ open: true, type: DOA_STATUS.approved, data: row?.original });
-                // setConfermApproveRejectBox({ open: true, type: DOA_STATUS.approved, data: row?.original });
               }}
             >
               <CheckCircleOutlined fontSize="small" color={row?.original?.canPerform ? 'secondary' : 'disabled'} />
@@ -144,7 +142,6 @@ const ResourceDoaRequest = () => {
               disabled={!row?.original?.canPerform}
               onClick={() => {
                 setOpenComment({ open: true, type: DOA_STATUS.rejected, data: row?.original });
-                // setConfermApproveRejectBox({ open: true, type: DOA_STATUS.rejected, data: row?.original });
               }}
             >
               <CancelOutlined fontSize="small" color={row?.original?.canPerform ? 'error' : 'disabled'} />
@@ -266,16 +263,6 @@ const ResourceDoaRequest = () => {
           </Box>
         )}
       </CustomContainer>
-      {/* {confermApproveRejectBox.open && (
-        <ConfirmationDialog
-          open={confermApproveRejectBox.open}
-          message={`Are you sure you want to ${DOA_STATUS.approved === confermApproveRejectBox.type ? 'Approve' : 'Reject'} ? `}
-          onClose={() => {
-            setConfermApproveRejectBox({ open: false, type: '', data: null });
-          }}
-          onOk={handleApproveReject}
-        />
-      )} */}
       {openComment.open && (
         <CommentDialog
           handleClose={() => {
