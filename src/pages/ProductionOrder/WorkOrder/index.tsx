@@ -332,7 +332,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                     }}
                     disabled={row?.original?.canAutoCompleteWorkOrder ? false : true}
                   >
-                    {row.original['workOrderStatus'] === 'Completed' ? (
+                    {row.original['workOrderStatus'] === WORK_ORDER_STATUS.completed ? (
                       <CheckCircle className="text-[var(--chip-color-completed)] [font-size:19px_!important] dark:text-green-400" />
                     ) : (
                       <AutoCompleteWorkOrder size={20} className={`${row?.original?.canAutoCompleteWorkOrder ? 'text-[var(--primary-text)]' : ''}`} />
@@ -445,7 +445,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         parent.hideSelection = true;
         parent.workOrderStatus = parent?.workOrder?.status;
       }
-      parent.status = parent?.workOrder?.serviceProcessStatus;
+      parent.status = parent?.workOrder?.serviceProcessStatus || parent?.workOrder?.status;
       parent.subRows = generateNestedData(data.material, parent);
       if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
         parent.canAutoCompleteWorkOrder = true;
@@ -1283,8 +1283,8 @@ const ActionButtonMenuItems = ({
       >
         Revert Service
       </MenuItem>
-      {
-        selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
+      {selectedRecords?.filter((e) => !e?.parentId && e?.type === MATERIAL_TYPE.product)?.length > 0 &&
+        selectedRecords?.filter((e) => !e?.parentId && e?.type === MATERIAL_TYPE.product)?.every((r) => r?.canCloseWorkOrder) && (
           <MenuItem
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Close' });
@@ -1293,8 +1293,7 @@ const ActionButtonMenuItems = ({
           >
             Close Work Order(s)
           </MenuItem>
-        )
-      }
+        )}
       <MenuItem
         onClick={() => {
           setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
