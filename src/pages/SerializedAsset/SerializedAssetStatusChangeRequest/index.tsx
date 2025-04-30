@@ -183,7 +183,9 @@ const SerializedAssetStatusChangeRequest = () => {
             }
           }
           const doaComment =
-            [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || '';
+            finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
+              ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
+              : '';
           finalObject['doaComment'] = doaComment;
           return finalObject;
         });
