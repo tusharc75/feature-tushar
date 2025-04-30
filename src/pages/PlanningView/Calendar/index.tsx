@@ -42,15 +42,12 @@ const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
   return data;
 };
 
-
+const localizer = dayjsLocalizer(dayjs);
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
-
-  const localizer = dayjsLocalizer(dayjs);
-  localizer.segmentOffset = 0;
 
   const FILTERS = useMemo(
     () => [

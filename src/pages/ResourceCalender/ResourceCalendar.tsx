@@ -16,11 +16,9 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
+const localizer = dayjsLocalizer(dayjs);
+
 const MyCalendar = (props: Props) => {
-
-  const localizer = dayjsLocalizer(dayjs);
-  localizer.segmentOffset = 0;
-
   const { resource } = useParams();
   const history = useHistory();
   const [resourcecamelCase] = useState(camelCase(resource));
@@ -57,7 +55,7 @@ const MyCalendar = (props: Props) => {
         }));
         setEvents(eventsData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, [resource, dateRange]);
 
   const onRangeChange = useCallback(
