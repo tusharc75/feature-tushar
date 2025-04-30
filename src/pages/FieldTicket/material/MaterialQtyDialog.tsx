@@ -6,7 +6,16 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE, displayDate, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
+import {
+  getObjKeysWithValues,
+  getObjKeys,
+  yupSchema,
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  displayDate,
+  PRICING_SETUP_TYPE,
+  sidebarResource
+} from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -250,7 +259,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       handleSaveData(rows);
     } else {
       if (isEqual(ref?.current?.values, initialData.values)) {
-        handleSaveData([rowData], saveAndNext, true);
+        const data = getObjKeysWithValues(rowData, allFields);
+        data['_id'] = rowData?._id;
+        handleSaveData([data], saveAndNext, true);
         return;
       }
       const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
@@ -261,11 +272,18 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
     if (rowData) {
-      let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, [{
-        materialId: rowData.materialId,
-        type: rowData.type,
-        qty: 1,
-      }], PRICING_SETUP_TYPE.rent);
+      let priceData: any = await getPricingConditions(
+        sidebarResource.fieldTicket,
+        fieldTicketData,
+        [
+          {
+            materialId: rowData.materialId,
+            type: rowData.type,
+            qty: 1
+          }
+        ],
+        PRICING_SETUP_TYPE.rent
+      );
       if (fieldTicketData?.pricingCondition?.optionValue) {
         priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue);
       }
@@ -319,7 +337,10 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
         errors['estimateEndDate'] = 'Please enter valid estimate end date';
       }
-      if (fieldTicketData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')) {
+      if (
+        fieldTicketData?.estimateStartDate &&
+        estimateStartDate.format('YYYY-MM-DD') < dayjs(fieldTicketData.estimateStartDate).format('YYYY-MM-DD')
+      ) {
         errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(fieldTicketData.estimateStartDate)}`;
       }
       if (fieldTicketData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(fieldTicketData.estimateEndDate).format('YYYY-MM-DD')) {
