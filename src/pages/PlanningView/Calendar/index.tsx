@@ -42,12 +42,15 @@ const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
   return data;
 };
 
-const localizer = dayjsLocalizer(dayjs);
+
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
+
+  const localizer = dayjsLocalizer(dayjs);
+  localizer.segmentOffset = 0;
 
   const FILTERS = useMemo(
     () => [
@@ -331,8 +334,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs.tz(d['estimateStartDate'] || d['startDate']).toDate(),
-                end: dayjs.tz(d['estimateEndDate'] || d['endDate']).toDate(),
+                start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
+                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
@@ -345,8 +348,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
@@ -357,8 +360,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
@@ -369,8 +372,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.reserved?.length) {
                     otherData.push({
                       title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'reserved',
@@ -381,8 +384,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.inventory) {
                     otherData.push({
                       title: `Inventory ${d?.inventory}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource
                     });
@@ -390,8 +393,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 } else if (property === 'availableByPlanning') {
                   otherData.push({
                     title: `Planned Available ${d?.availableByPlanning || 0}`,
-                    start: dayjs.tz(d['date']).toDate(),
-                    end: dayjs.tz(d['date']).toDate(),
+                    start: dayjs.utc(d['date']).tz().toDate(),
+                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
@@ -401,8 +404,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 } else if (d[property]) {
                   otherData.push({
                     title: `${property} ${d[property]}`,
-                    start: dayjs.tz(d['date']).toDate(),
-                    end: dayjs.tz(d['date']).toDate(),
+                    start: dayjs.utc(d['date']).tz().toDate(),
+                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
                     type: 'assetStatus',
                     status: property,
@@ -413,8 +416,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return null;
             }
             let title = d[selectedResource.fieldName];
-            let start = dayjs.tz(d[selectedResource.start]).toDate();
-            let end = dayjs.tz(d[selectedResource.end]).toDate();
+            let start = dayjs.utc(d[selectedResource.start]).tz().toDate();
+            let end = dayjs.utc(d[selectedResource.end]).tz().endOf('day').toDate();
             let fulfillStatus = d?.fulfillStatus;
 
             const extraData: any = {};
@@ -623,23 +626,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     (date) => {
       if (view === 'month') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().startOf('month').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().endOf('month').format('MM/DD/YYYY')
         });
       } else if (view === 'week') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().startOf('week').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().endOf('week').format('MM/DD/YYYY')
         });
       } else if (view === 'day') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().format('MM/DD/YYYY')
         });
       } else if (view === 'agenda') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().add(1, 'month').format('MM/DD/YYYY')
         });
       }
     },
@@ -778,7 +781,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 );
               })}
           </div>
-          <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
+          <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
             {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
