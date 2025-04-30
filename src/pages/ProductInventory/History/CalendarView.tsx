@@ -9,12 +9,9 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
+const localizer = dayjsLocalizer(dayjs);
 
 const CalendarView = ({ product, warehouse, storageLocation }) => {
-
-  const localizer = dayjsLocalizer(dayjs);
-  localizer.segmentOffset = 0;
-
   const [activities, setActivities] = useState([]);
 
   useEffect(() => {
