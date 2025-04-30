@@ -14,10 +14,12 @@ type Props = {
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
-const localizer = dayjsLocalizer(dayjs);
 
 const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
   const mobileView = isMobile && !isTablet;
+
+  const localizer = dayjsLocalizer(dayjs);
+  localizer.segmentOffset = 0;
 
   const getEventStyle = useCallback((obj) => {
     return {
