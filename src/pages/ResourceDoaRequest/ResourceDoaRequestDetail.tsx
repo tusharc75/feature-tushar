@@ -12,6 +12,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import CommentDialog from 'src/components/CommentDialog';
 
 const ResourceDoaRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -26,6 +27,7 @@ const ResourceDoaRequestDetail = () => {
   const [doaData, setDoaData] = useState(null);
   const [fields, setFields] = useState(null);
   const [title, setTitle] = useState('');
+  const [openComment, setOpenComment] = useState({ open: false, type: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -44,10 +46,12 @@ const ResourceDoaRequestDetail = () => {
     const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource=${resource}`);
     if (doaResponse?.data?.data) {
       const _data = doaResponse?.data?.data;
-      const title = resource === sidebarResource.serializedAssetStatusChangeRequest
-        ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel : resource === sidebarResource?.purchaseRequisition
-          ? _data?.purchaseRequisition?.optionLabel
-          : '';
+      const title =
+        resource === sidebarResource.serializedAssetStatusChangeRequest
+          ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel
+          : resource === sidebarResource?.purchaseRequisition
+            ? _data?.purchaseRequisition?.optionLabel
+            : '';
       setTitle(title);
       const resourceData =
         resource === sidebarResource.serializedAssetStatusChangeRequest
@@ -68,23 +72,27 @@ const ResourceDoaRequestDetail = () => {
     }
   };
 
-  const handleApproveReject = (status) => {
-    axiosInstance().put(`${routes.resourceDoaRequest.path}`, {
-      _id: doaData._id,
-      status: status,
-      entity: doaData?.entity,
-      referenceId: doaData?.referenceId,
-      resource: doaData?.resource
-    }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        message: data.message,
-        open: true,
-        type: 'success'
+  const handleApproveReject = (comment) => {
+    axiosInstance()
+      .put(`${routes.resourceDoaRequest.path}`, {
+        _id: doaData._id,
+        status: openComment?.type,
+        entity: doaData?.entity,
+        referenceId: doaData?.referenceId,
+        resource: doaData?.resource,
+        doaComment: comment
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          message: data.message,
+          open: true,
+          type: 'success'
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-      fetchData();
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
@@ -94,29 +102,30 @@ const ResourceDoaRequestDetail = () => {
           <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titleSingular }, { title: title }]} />
         </Box>
         <Box className="controls-v1">
-          {doaData?.userDOAstatus === DOA_STATUS.pending &&
+          {doaData?.userDOAstatus === DOA_STATUS.pending && (
             <Box className="control-buttons-v1">
               <ThemeButton
                 onClick={() => {
-                  handleApproveReject(DOA_STATUS.approved);
+                  setOpenComment({ open: true, type: DOA_STATUS.approved });
                 }}
                 disabled={!doaData?.canPerform}
                 startIcon={<ThumbUpIcon />}
-                buttonType='themeBorder'
+                buttonType="themeBorder"
               >
                 {'Accept'}
               </ThemeButton>
               <ThemeButton
                 onClick={() => {
-                  handleApproveReject(DOA_STATUS.rejected);
+                  setOpenComment({ open: true, type: DOA_STATUS.rejected });
                 }}
                 disabled={!doaData?.canPerform}
                 startIcon={<ThumbDownIcon />}
-                buttonType='red'
+                buttonType="red"
               >
                 {'Reject'}
               </ThemeButton>
-            </Box>}
+            </Box>
+          )}
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
@@ -128,6 +137,16 @@ const ResourceDoaRequestDetail = () => {
           <>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </>
+        )}
+        {openComment.open && (
+          <CommentDialog
+            handleClose={() => {
+              setOpenComment({ open: false, type: '' });
+            }}
+            handleSubmit={(comment) => {
+              handleApproveReject(comment);
+            }}
+          />
         )}
       </Box>
     </Box>

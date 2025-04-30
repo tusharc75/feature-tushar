@@ -26,6 +26,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
@@ -37,7 +38,7 @@ const SerializedAssetStatusChangeRequest = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { permissions, selectedEntity, resources }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -57,34 +58,55 @@ const SerializedAssetStatusChangeRequest = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const fetchGridColumns = () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`).then(({ data: { data } }) => {
-      let newColumns = generateColumns(renderedFrom, data);
-      const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
-      assetColumn.cell = ({ row }) => (
-        <div className="flex items-center gap-1">
-          <p
-            className="text-truncate link"
-            title={row?.original?.asset}
-            onClick={() => {
-              history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
-            }}
-          >
-            {row?.original?.asset}
-          </p>
-          {row?.original?.assetId && (
-            <IconButton
-              size="small"
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
+      .then(({ data: { data } }) => {
+        let newColumns = generateColumns(renderedFrom, data);
+        const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
+        assetColumn.cell = ({ row }) => (
+          <div className="flex items-center gap-1">
+            <p
+              className="text-truncate link"
+              title={row?.original?.asset}
               onClick={() => {
-                window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+                history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
               }}
             >
-              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
-            </IconButton>
-          )}
-        </div>
-      );
-      setColumns([assetColumn, ...newColumns?.filter((c) => c?.accessor != 'asset'), ActionsRenderer]);
-    });
+              {row?.original?.asset}
+            </p>
+            {row?.original?.assetId && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            )}
+          </div>
+        );
+        setColumns([
+          assetColumn,
+          ...newColumns?.filter((c) => c?.accessor != 'asset'),
+          {
+            accessor: 'doaComment',
+            Header: 'Doa Comment',
+            Cell: ({ row }) => (
+              <>
+                {row?.original?.doaComment ? (
+                  <p className="text-truncate" title={row?.original?.doaComment}>
+                    {row?.original?.doaComment}
+                  </p>
+                ) : (
+                  <NoDataCell />
+                )}
+              </>
+            )
+          },
+          ActionsRenderer
+        ]);
+      });
   };
 
   const ActionsRenderer = {
@@ -98,7 +120,7 @@ const SerializedAssetStatusChangeRequest = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {row?.original?.originalStatus === ASSET_APPROVAL_STATUS.pending &&
+        {row?.original?.originalStatus === ASSET_APPROVAL_STATUS.pending && (
           <>
             <HtmlTooltip title={row?.original?.canPerform ? 'Approve' : 'Sent for DOA Approval'}>
               <span>
@@ -131,7 +153,7 @@ const SerializedAssetStatusChangeRequest = () => {
               </span>
             </HtmlTooltip>
           </>
-        }
+        )}
       </>
     )
   };
@@ -146,9 +168,12 @@ const SerializedAssetStatusChangeRequest = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['originalStatus'] = finalObject['status'];
-          finalObject['canPerform'] = permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          finalObject['canPerform'] =
+            permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
           if (finalObject['doa_status']) {
-            finalObject['canPerform'] = finalObject['status'] === ASSET_APPROVAL_STATUS.pending && [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
+            finalObject['canPerform'] =
+              finalObject['status'] === ASSET_APPROVAL_STATUS.pending &&
+              [DOA_STATUS.acceptedbyDOA, DOA_STATUS.rejectedbyDOA]?.includes(finalObject['doa_status']);
             finalObject['status'] = `${finalObject['status']} - ${finalObject['doa_status']}`;
             if (u?.status === DOA_STATUS.pending) {
               const users = u?.doaUsers?.find((e) => e?.status === DOA_STATUS.pending)?.users;
@@ -157,6 +182,11 @@ const SerializedAssetStatusChangeRequest = () => {
               }
             }
           }
+          const doaComment =
+            finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
+              ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
+              : '';
+          finalObject['doaComment'] = doaComment;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -248,7 +278,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
@@ -261,7 +291,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
