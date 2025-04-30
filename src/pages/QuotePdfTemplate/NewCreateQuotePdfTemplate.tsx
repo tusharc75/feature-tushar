@@ -290,6 +290,7 @@ export default function NewCreateQuotePdfTemplate() {
               })
             );
             if (isClone) {
+              setAllowedToEdit(true)
               setIsEdit(true);
             }
           }
@@ -493,7 +494,6 @@ export default function NewCreateQuotePdfTemplate() {
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
-          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     } else {
@@ -547,7 +547,6 @@ export default function NewCreateQuotePdfTemplate() {
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
-          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     }
