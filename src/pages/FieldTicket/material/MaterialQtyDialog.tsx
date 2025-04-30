@@ -259,9 +259,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       handleSaveData(rows);
     } else {
       if (isEqual(ref?.current?.values, initialData.values)) {
-        const data = getObjKeysWithValues(rowData, allFields);
-        data['_id'] = rowData?._id;
-        handleSaveData([data], saveAndNext, true);
+        handleSaveData([rowData], saveAndNext, true);
         return;
       }
       const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);

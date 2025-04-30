@@ -553,7 +553,7 @@ const Consumables = ({
     }
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
+  const handleSaveData = async (rows: any, saveAndNext = false, next = false) => {
     try {
       setUpdating(true);
       if (isOffline) {
@@ -587,15 +587,19 @@ const Consumables = ({
           await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
         }
       } else {
-        const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: response?.data?.message
-        });
+        if (!next) {
+          const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: response?.data?.message
+          });
+        }
       }
-      fetchData();
-      if (saveAndNext) {
+      if (!next) {
+        fetchData();
+      }
+      if (saveAndNext || next) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
         setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
       } else {
