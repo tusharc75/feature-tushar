@@ -24,6 +24,8 @@ import { getFileIcon, getFileNameWithExtension } from './utils';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import RippleButton from 'src/components/RippleButton';
 import { MdOutlineFileUpload } from 'react-icons/md';
+import { fileIcons, fileIconsMap } from 'src/assets/fileIcons';
+import { CiFileOn } from 'react-icons/ci';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -526,8 +528,8 @@ const Diagram = ({
                 })}
               {rowData?.length === 0 && (
                 <div className="mx-auto mt-4 h-full w-full max-w-[450px] rounded-md  border-2 border-dashed bg-transparent text-center">
-                  <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 max-w-[250px] opacity-60" loading="lazy" />
-                  {/* <MdOutlineFileUpload size={40} className="mx-auto my-5 block text-gray-500" /> */}
+                  <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
+                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
                   <span className="mx-auto block">
                     <ThemeButton
                       buttonType="theme"
@@ -540,7 +542,7 @@ const Diagram = ({
                       <Add /> Add
                     </ThemeButton>
                   </span>
-                  <p className="py-5 text-center text-gray-500">Click to Add to upload files</p>
+                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>
                 </div>
               )}
             </div>
