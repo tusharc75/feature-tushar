@@ -778,7 +778,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 );
               })}
           </div>
-          <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
+          <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
             {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
