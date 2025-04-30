@@ -11,7 +11,6 @@ import routes from 'src/components/Helpers/Routes';
 import { DOA_RESOURCE, DOA_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CancelOutlined, CheckCircleOutlined } from '@mui/icons-material';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
 import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
@@ -32,7 +31,7 @@ const ResourceDoaRequest = () => {
 
   const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
 
-  const [openComment, setOpenComment] = useState({ open: false, type: '', data: null });
+  const [openComment, setOpenComment] = useState({ open: false, status: '', data: null });
   const [columns, setColumns] = useState(null);
   const resourceOptions = DOA_RESOURCE?.map((r) => ({ optionLabel: resources[r?.key]?.titlePlural, optionValue: r?.resorce }));
   const [selectedResource, setSelectedResource] = useState({
@@ -127,7 +126,7 @@ const ResourceDoaRequest = () => {
               aria-label="Approve"
               disabled={!row?.original?.canPerform}
               onClick={() => {
-                setOpenComment({ open: true, type: DOA_STATUS.approved, data: row?.original });
+                setOpenComment({ open: true, status: DOA_STATUS.approved, data: row?.original });
               }}
             >
               <CheckCircleOutlined fontSize="small" color={row?.original?.canPerform ? 'secondary' : 'disabled'} />
@@ -141,7 +140,7 @@ const ResourceDoaRequest = () => {
               aria-label="Reject"
               disabled={!row?.original?.canPerform}
               onClick={() => {
-                setOpenComment({ open: true, type: DOA_STATUS.rejected, data: row?.original });
+                setOpenComment({ open: true, status: DOA_STATUS.rejected, data: row?.original });
               }}
             >
               <CancelOutlined fontSize="small" color={row?.original?.canPerform ? 'error' : 'disabled'} />
@@ -202,22 +201,24 @@ const ResourceDoaRequest = () => {
   };
 
   const handleApproveReject = (comment = '') => {
-    axiosInstance()
-      .put(`${routes.resourceDoaRequest.path}`, {
-        _id: openComment?.data?._id,
-        status: openComment?.type,
-        entity: openComment?.data?.entity,
-        referenceId: openComment?.data?.referenceId,
-        resource: openComment?.data?.resource,
-        doaComment: comment
-      })
-      .then((res) => {
-        fetchData();
-        setOpenComment({ open: false, type: '', data: null });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`${routes.resourceDoaRequest.path}`, {
+      _id: openComment?.data?._id,
+      status: openComment?.status,
+      entity: openComment?.data?.entity,
+      referenceId: openComment?.data?.referenceId,
+      resource: openComment?.data?.resource,
+      doaComment: comment
+    }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        message: data.message,
+        open: true,
+        type: 'success'
       });
+      fetchData();
+      setOpenComment({ open: false, status: '', data: null });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const leftSideContents = () => {
@@ -265,8 +266,9 @@ const ResourceDoaRequest = () => {
       </CustomContainer>
       {openComment.open && (
         <CommentDialog
+          required={false}
           handleClose={() => {
-            setOpenComment({ open: false, type: '', data: null });
+            setOpenComment({ open: false, status: '', data: null });
           }}
           handleSubmit={(comment) => {
             handleApproveReject(comment);
