@@ -1,9 +1,11 @@
 import { CircularProgress, useMediaQuery } from '@mui/material';
+import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, CalendarProps } from 'react-big-calendar';
+import { Calendar, CalendarProps, Navigate } from 'react-big-calendar';
 import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
 import { isMobile, isTablet } from 'react-device-detect';
 import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
+import CustomToolbar from 'src/components/CustomCalendar/Toolbar';
 import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
 
@@ -39,8 +41,12 @@ const CustomCalendar = ({
   onSelectEvent,
   loading = false,
   dragAndDrop = false,
+  defaultDate,
+  date,
+  onNavigate,
   ...rest
 }: CustomCalendarProps & CommonProps) => {
+  const [stateDate, setStateDate] = useState(date || defaultDate || dayjs());
   const isMobileView = useMediaQuery('(max-width: 767px)');
   const mobileView = (isMobile && !isTablet) || isMobileView;
   const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
@@ -115,12 +121,17 @@ const CustomCalendar = ({
   return (
     <div className="relative min-h-[300px] [&_.rbc-agenda-empty]:hidden">
       <Component
+        date={stateDate}
+        onNavigate={(date: Date, view: ViewType, action: 'PREV' | 'NEXT' | 'TODAY' | 'DATE') => {
+          setStateDate(date);
+          onNavigate?.(date, view, action);
+        }}
         view={stateView}
         events={mobileView ? mobileEvents : events}
         onView={handleView}
         onRangeChange={handleRangeChange}
         views={views}
-        components={components}
+        components={{ ...components, toolbar: (props: any) => <CustomToolbar {...props} setStateDate={setStateDate} /> }}
         onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
         {...rest}
       />
