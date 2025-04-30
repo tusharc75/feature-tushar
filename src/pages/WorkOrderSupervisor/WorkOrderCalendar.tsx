@@ -32,12 +32,13 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const localizer = dayjsLocalizer(dayjs);
-
 function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   const {
     state: { resources }
   }: any = useData();
+
+  const localizer = dayjsLocalizer(dayjs);
+  localizer.segmentOffset = 0;
 
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
