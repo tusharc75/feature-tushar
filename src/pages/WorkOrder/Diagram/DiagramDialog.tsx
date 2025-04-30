@@ -61,6 +61,7 @@ const DiagramDialog = ({
       <CustomDialogContent isFooterPresent={false}>
         {!loading ? (
           <Diagram
+            height={'calc(100vh - 150px)'}
             resource={resource}
             referenceId={referenceId}
             uniqueId={uniqueId}
