@@ -34,10 +34,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const localizer = dayjsLocalizer(dayjs);
-
 const CalendarView = (props: Props) => {
   const classes = useStyles();
+
+  const localizer = dayjsLocalizer(dayjs);
+  localizer.segmentOffset = 0;
+
   const {
     state: { permissions, selectedEntity, user }
   }: any = useData();
