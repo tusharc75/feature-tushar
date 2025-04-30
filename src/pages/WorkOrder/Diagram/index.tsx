@@ -1,6 +1,9 @@
 import { Add, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import InfoIcon from '@mui/icons-material/Info';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import SendIcon from '@mui/icons-material/Send';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
 import { isEmpty } from 'lodash';
@@ -17,13 +20,17 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axios from 'axios';
+import mime from 'mime';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+const pdfExtensions = ['pdf'];
 
 const Diagram = ({
   resource,
@@ -57,6 +64,8 @@ const Diagram = ({
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
   const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [sendMail, setSendMail] = useState(false);
+  const [emailAttachment, setEmailAttachment] = useState(null);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -271,6 +280,159 @@ const Diagram = ({
       });
   };
 
+  const downloadZip = (_id, name) => {
+    axiosInstance()
+      .get(`attachment/zip/file/${_id}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', name ? `${name}.zip` : 'download.zip');
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const viewAttachment = (event, file) => {
+    if (event) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `File is Loading, Please wait...`
+      });
+    }
+    axiosInstance()
+      .get(`user/download`, {
+        params: {
+          fileName: file
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Downloaded Successfully',
+              open: true,
+              type: 'success'
+            });
+          }
+        }
+      })
+      .then(({ data }) => {
+        const ext = file.split('.').pop().toLowerCase();
+        let mimeType = 'application/octet-stream';
+        if (pdfExtensions?.includes(ext)) {
+          mimeType = 'application/pdf';
+        } else if (imageExtensions?.includes(ext)) {
+          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+        }
+        const blob = new Blob([data], { type: mimeType });
+        const fileURL = URL.createObjectURL(blob);
+        const newWindow = window.open();
+        newWindow.location.href = fileURL;
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const downloadFile = (event, file) => {
+    if (event && !file?.base64) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'info',
+        message: `Downloading, Please wait...`
+      });
+    }
+
+    if (file?.base64) {
+      let link = document.createElement('a');
+      link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
+      link.download = `${file?.name}${file?.extension}`;
+      link.click();
+    } else if (file.url) {
+      axiosInstance()
+        .get(`user/download`, {
+          params: {
+            fileName: file.url
+          },
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+            if (percentCompleted === 100) {
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+            }
+          }
+        })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file.url);
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    } else {
+      axios
+        .get(file, {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+
+            if (percentCompleted === 100) {
+              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+            }
+          }
+        })
+        .then((data) => {
+          const url = window.URL.createObjectURL(new Blob([data.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file?.substring(file.lastIndexOf('/') + 1));
+          document.body.appendChild(link);
+          link.click();
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  };
+
+  const handleMail = async (file) => {
+    try {
+      const attachments: any[] = [];
+
+      const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
+
+      const base64data: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+      });
+
+      attachments.push({
+        base64: base64data.substring(base64data.indexOf(',') + 1),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${file.url.split('.')?.pop()}`,
+        name: file.name
+      });
+
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+  };
+
   return (
     <Box>
       <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
@@ -360,6 +522,18 @@ const Diagram = ({
                           </Box>
                         </div>
                         <div className="flex gap-2">
+                          <HtmlTooltip title={'Download'}>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadZip(file?._id, file?.name);
+                              }}
+                            >
+                              <GetAppIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
                           <HtmlTooltip
                             title={
                               <div className="flex flex-col p-2">
@@ -505,13 +679,55 @@ const Diagram = ({
                                     selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                 }}
                               >
-                                <div className="flex max-w-fit cursor-pointer items-center gap-2 px-[--px] py-[--py]">
-                                  <div className="w-[20px]">
-                                    <Icon size={20} />
+                                <div className="flex items-center justify-between">
+                                  <div className="flex max-w-fit cursor-pointer items-center gap-2 px-[--px] py-[--py]">
+                                    <div className="w-[20px]">
+                                      <Icon size={20} />
+                                    </div>
+                                    <HtmlTooltip title={f.name} className="max-w-fit">
+                                      <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
+                                    </HtmlTooltip>
                                   </div>
-                                  <HtmlTooltip title={f.name} className="max-w-fit">
-                                    <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
-                                  </HtmlTooltip>
+                                  <div className="flex items-center gap-1 pr-2">
+                                    <HtmlTooltip title={'Download'}>
+                                      <IconButton
+                                        size="small"
+                                        color="inherit"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          downloadFile(e, f);
+                                        }}
+                                      >
+                                        <GetAppIcon fontSize="small" color="primary" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                    {[...imageExtensions, ...pdfExtensions]?.includes(f?.url?.split('.')?.pop()?.toLowerCase()) && (
+                                      <HtmlTooltip title={'Preview'}>
+                                        <IconButton
+                                          size="small"
+                                          color="inherit"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            viewAttachment(e, f?.url);
+                                          }}
+                                        >
+                                          <VisibilityIcon fontSize="small" color="primary" />
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    )}
+                                    <HtmlTooltip title={'Send Email'}>
+                                      <IconButton
+                                        size="small"
+                                        color="inherit"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleMail(f);
+                                        }}
+                                      >
+                                        <SendIcon fontSize="small" color="primary" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </div>
                                 </div>
 
                                 {imageExtensions.includes(extension) && <ImagePreview name={f.name} url={f.url} />}
@@ -623,6 +839,47 @@ const Diagram = ({
             fetchData={fetchData}
             attachmentType={attachmentType}
             customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
+          />
+        </Dialog>
+      )}
+      {sendMail && (
+        <Dialog
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          open={sendMail}
+          aria-labelledby="customized-dialog-title"
+          maxWidth={'md'}
+          onClose={() => {
+            setSendMail(false);
+            setFullScreen(false);
+          }}
+          disableEnforceFocus={true}
+          fullWidth
+        >
+          <CreateEmail
+            emailId={null}
+            relatedTo={[
+              {
+                type: resource,
+                referenceId: referenceId,
+                access: true
+              }
+            ]}
+            handleClose={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            fetchData={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            isMinimized={!fullScreen}
+            showManimizeMaximize={true}
+            qouteBuilderAttachments={emailAttachment}
+            isQuoteBuilder={true}
           />
         </Dialog>
       )}
