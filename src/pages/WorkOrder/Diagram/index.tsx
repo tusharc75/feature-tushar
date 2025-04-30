@@ -21,6 +21,11 @@ import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import RippleButton from 'src/components/RippleButton';
+import { MdOutlineFileUpload } from 'react-icons/md';
+import { fileIcons, fileIconsMap } from 'src/assets/fileIcons';
+import { CiFileOn } from 'react-icons/ci';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -97,6 +102,7 @@ const Diagram = ({
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setRowData([]);
       });
   };
 
@@ -299,24 +305,31 @@ const Diagram = ({
                 )}
               />
             )}
-            <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-              <ThemeButton
-                buttonType="theme"
-                onClick={() => {
-                  setAttachemntDialog({ open: true, file: null, isClone: false });
-                }}
-                iconForMobile={<Add />}
-                mobileTooltip="Add"
-              >
-                <Add /> Add
-              </ThemeButton>
-            </Box>
+            {!Array.isArray(rowData) && (
+              <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+                <ThemeButton
+                  buttonType="theme"
+                  onClick={() => {
+                    setAttachemntDialog({ open: true, file: null, isClone: false });
+                  }}
+                  iconForMobile={<Add />}
+                  mobileTooltip="Add"
+                >
+                  <Add /> Add
+                </ThemeButton>
+              </Box>
+            )}
           </div>
         )}
         <Box pt={2} pb={2}>
           <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
-              {rowData && rowData.length > 0 ? (
+              {!rowData && (
+                <div className="flex h-full items-center justify-center">
+                  <CommonSkeleton />
+                </div>
+              )}
+              {rowData?.length > 0 &&
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
@@ -512,11 +525,25 @@ const Diagram = ({
                       </Collapse>
                     </div>
                   );
-                })
-              ) : (
-                <>
-                  <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 w-[250px] opacity-60" loading="lazy" />
-                </>
+                })}
+              {rowData?.length === 0 && (
+                <div className="mx-auto mt-4 h-full w-full max-w-[450px] rounded-md  border-2 border-dashed bg-transparent text-center">
+                  <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
+                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
+                  <span className="mx-auto block">
+                    <ThemeButton
+                      buttonType="theme"
+                      iconForMobile={<Add />}
+                      mobileTooltip="Add"
+                      onClick={() => {
+                        setAttachemntDialog({ open: true, file: null, isClone: false });
+                      }}
+                    >
+                      <Add /> Add
+                    </ThemeButton>
+                  </span>
+                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>
+                </div>
               )}
             </div>
           </Box>
