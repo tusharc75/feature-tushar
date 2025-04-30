@@ -281,6 +281,11 @@ const Diagram = ({
   };
 
   const downloadZip = (_id, name) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `Downloading, Please wait...`
+    });
     axiosInstance()
       .get(`attachment/zip/file/${_id}`, { responseType: 'blob' })
       .then(({ data }) => {
@@ -290,126 +295,88 @@ const Diagram = ({
         link.setAttribute('download', name ? `${name}.zip` : 'download.zip');
         document.body.appendChild(link);
         link.click();
+        toastConfig.setToastConfig({
+          message: 'Downloaded Successfully',
+          open: true,
+          type: 'success'
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const viewAttachment = (event, file) => {
-    if (event) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'info',
-        message: `File is Loading, Please wait...`
-      });
-    }
-    axiosInstance()
-      .get(`user/download`, {
-        params: {
-          fileName: file
-        },
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-          }
+  const viewAttachment = (file) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `File is Loading, Please wait...`
+    });
+    axiosInstance().get(`user/download`, {
+      params: {
+        fileName: file
+      },
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        if (percentCompleted === 100) {
+          toastConfig.setToastConfig({
+            message: 'File Viewed Successfully',
+            open: true,
+            type: 'success'
+          });
         }
-      })
-      .then(({ data }) => {
-        const ext = file.split('.').pop().toLowerCase();
-        let mimeType = 'application/octet-stream';
-        if (pdfExtensions?.includes(ext)) {
-          mimeType = 'application/pdf';
-        } else if (imageExtensions?.includes(ext)) {
-          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
-        }
-        const blob = new Blob([data], { type: mimeType });
-        const fileURL = URL.createObjectURL(blob);
-        const newWindow = window.open();
-        newWindow.location.href = fileURL;
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+      }
+    }).then(({ data }) => {
+      const ext = file.split('.').pop().toLowerCase();
+      let mimeType = 'application/octet-stream';
+      if (pdfExtensions?.includes(ext)) {
+        mimeType = 'application/pdf';
+      } else if (imageExtensions?.includes(ext)) {
+        mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+      }
+      const blob = new Blob([data], { type: mimeType });
+      const fileURL = URL.createObjectURL(blob);
+      const newWindow = window.open();
+      newWindow.location.href = fileURL;
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
-  const downloadFile = (event, file) => {
-    if (event && !file?.base64) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'info',
-        message: `Downloading, Please wait...`
-      });
-    }
-
-    if (file?.base64) {
-      let link = document.createElement('a');
-      link.href = `data:application/${file?.contentType};base64,${file?.base64}`;
-      link.download = `${file?.name}${file?.extension}`;
+  const downloadFile = (file) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `File is Downloading, Please wait...`
+    });
+    axiosInstance().get(`user/download`, {
+      params: {
+        fileName: file?.url
+      },
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+        if (percentCompleted === 100) {
+          toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+        }
+      }
+    }).then(({ data }) => {
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', file.name);
+      document.body.appendChild(link);
       link.click();
-    } else if (file.url) {
-      axiosInstance()
-        .get(`user/download`, {
-          params: {
-            fileName: file.url
-          },
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-            if (percentCompleted === 100) {
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-            }
-          }
-        })
-        .then(({ data }) => {
-          const url = window.URL.createObjectURL(new Blob([data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', file.url);
-          document.body.appendChild(link);
-          link.click();
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    } else {
-      axios
-        .get(file, {
-          responseType: 'blob',
-          onDownloadProgress: (progressEvent) => {
-            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-
-            if (percentCompleted === 100) {
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
-            }
-          }
-        })
-        .then((data) => {
-          const url = window.URL.createObjectURL(new Blob([data.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', file?.substring(file.lastIndexOf('/') + 1));
-          document.body.appendChild(link);
-          link.click();
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
-    }
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const handleMail = async (file) => {
     try {
       const attachments: any[] = [];
-
       const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
-
       const base64data: string = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
@@ -418,14 +385,12 @@ const Diagram = ({
         };
         reader.onerror = reject;
       });
-
       attachments.push({
         base64: base64data.substring(base64data.indexOf(',') + 1),
         contentType: base64data.split(';')[0].split(':')[1],
         extension: `.${file.url.split('.')?.pop()}`,
         name: file.name
       });
-
       setEmailAttachment(attachments);
       setSendMail(true);
     } catch (err) {
@@ -493,11 +458,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -508,7 +472,6 @@ const Diagram = ({
                             }));
                           }}
                         />
-
                         <div className="flex items-center">
                           <span className="p-1">
                             <KeyboardArrowRight
@@ -522,18 +485,6 @@ const Diagram = ({
                           </Box>
                         </div>
                         <div className="flex gap-2">
-                          <HtmlTooltip title={'Download'}>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                downloadZip(file?._id, file?.name);
-                              }}
-                            >
-                              <GetAppIcon fontSize="small" color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
                           <HtmlTooltip
                             title={
                               <div className="flex flex-col p-2">
@@ -548,6 +499,18 @@ const Diagram = ({
                           >
                             <IconButton size="small" color="inherit">
                               <InfoIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title={'Download'}>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadZip(file?._id, file?.name);
+                              }}
+                            >
+                              <GetAppIcon fontSize="small" color="primary" />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -695,7 +658,7 @@ const Diagram = ({
                                         color="inherit"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          downloadFile(e, f);
+                                          downloadFile(f);
                                         }}
                                       >
                                         <GetAppIcon fontSize="small" color="primary" />
@@ -708,7 +671,7 @@ const Diagram = ({
                                           color="inherit"
                                           onClick={(e) => {
                                             e.stopPropagation();
-                                            viewAttachment(e, f?.url);
+                                            viewAttachment(f?.url);
                                           }}
                                         >
                                           <VisibilityIcon fontSize="small" color="primary" />
