@@ -27,7 +27,7 @@ const ResourceDoaRequestDetail = () => {
   const [doaData, setDoaData] = useState(null);
   const [fields, setFields] = useState(null);
   const [title, setTitle] = useState('');
-  const [openComment, setOpenComment] = useState({ open: false, type: '' });
+  const [openComment, setOpenComment] = useState({ open: false, status: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -76,7 +76,7 @@ const ResourceDoaRequestDetail = () => {
     axiosInstance()
       .put(`${routes.resourceDoaRequest.path}`, {
         _id: doaData._id,
-        status: openComment?.type,
+        status: openComment?.status,
         entity: doaData?.entity,
         referenceId: doaData?.referenceId,
         resource: doaData?.resource,
@@ -89,6 +89,7 @@ const ResourceDoaRequestDetail = () => {
           type: 'success'
         });
         fetchData();
+        setOpenComment({ open: false, status: '' });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -106,7 +107,7 @@ const ResourceDoaRequestDetail = () => {
             <Box className="control-buttons-v1">
               <ThemeButton
                 onClick={() => {
-                  setOpenComment({ open: true, type: DOA_STATUS.approved });
+                  setOpenComment({ open: true, status: DOA_STATUS.approved });
                 }}
                 disabled={!doaData?.canPerform}
                 startIcon={<ThumbUpIcon />}
@@ -116,7 +117,7 @@ const ResourceDoaRequestDetail = () => {
               </ThemeButton>
               <ThemeButton
                 onClick={() => {
-                  setOpenComment({ open: true, type: DOA_STATUS.rejected });
+                  setOpenComment({ open: true, status: DOA_STATUS.rejected });
                 }}
                 disabled={!doaData?.canPerform}
                 startIcon={<ThumbDownIcon />}
@@ -140,8 +141,9 @@ const ResourceDoaRequestDetail = () => {
         )}
         {openComment.open && (
           <CommentDialog
+            required={false}
             handleClose={() => {
-              setOpenComment({ open: false, type: '' });
+              setOpenComment({ open: false, status: '' });
             }}
             handleSubmit={(comment) => {
               handleApproveReject(comment);
