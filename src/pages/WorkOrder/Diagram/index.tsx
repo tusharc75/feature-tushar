@@ -6,9 +6,9 @@ import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Ty
 import { isEmpty } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CiFileOn } from 'react-icons/ci';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
@@ -17,15 +17,11 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import RippleButton from 'src/components/RippleButton';
-import { MdOutlineFileUpload } from 'react-icons/md';
-import { fileIcons, fileIconsMap } from 'src/assets/fileIcons';
-import { CiFileOn } from 'react-icons/ci';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 
@@ -305,7 +301,7 @@ const Diagram = ({
                 )}
               />
             )}
-            {!Array.isArray(rowData) && (
+            {rowData != null && rowData?.length > 0 && (
               <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
                 <ThemeButton
                   buttonType="theme"
