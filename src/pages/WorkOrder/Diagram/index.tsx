@@ -312,36 +312,39 @@ const Diagram = ({
       type: 'info',
       message: `File is Loading, Please wait...`
     });
-    axiosInstance().get(`user/download`, {
-      params: {
-        fileName: file
-      },
-      responseType: 'blob',
-      onDownloadProgress: (progressEvent) => {
-        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-        if (percentCompleted === 100) {
-          toastConfig.setToastConfig({
-            message: 'File Viewed Successfully',
-            open: true,
-            type: 'success'
-          });
+    axiosInstance()
+      .get(`user/download`, {
+        params: {
+          fileName: file
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Viewed Successfully',
+              open: true,
+              type: 'success'
+            });
+          }
         }
-      }
-    }).then(({ data }) => {
-      const ext = file.split('.').pop().toLowerCase();
-      let mimeType = 'application/octet-stream';
-      if (pdfExtensions?.includes(ext)) {
-        mimeType = 'application/pdf';
-      } else if (imageExtensions?.includes(ext)) {
-        mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
-      }
-      const blob = new Blob([data], { type: mimeType });
-      const fileURL = URL.createObjectURL(blob);
-      const newWindow = window.open();
-      newWindow.location.href = fileURL;
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
+      })
+      .then(({ data }) => {
+        const ext = file.split('.').pop().toLowerCase();
+        let mimeType = 'application/octet-stream';
+        if (pdfExtensions?.includes(ext)) {
+          mimeType = 'application/pdf';
+        } else if (imageExtensions?.includes(ext)) {
+          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+        }
+        const blob = new Blob([data], { type: mimeType });
+        const fileURL = URL.createObjectURL(blob);
+        const newWindow = window.open();
+        newWindow.location.href = fileURL;
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const downloadFile = (file) => {
@@ -350,27 +353,30 @@ const Diagram = ({
       type: 'info',
       message: `File is Downloading, Please wait...`
     });
-    axiosInstance().get(`user/download`, {
-      params: {
-        fileName: file?.url
-      },
-      responseType: 'blob',
-      onDownloadProgress: (progressEvent) => {
-        let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-        if (percentCompleted === 100) {
-          toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+    axiosInstance()
+      .get(`user/download`, {
+        params: {
+          fileName: file?.url
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+          }
         }
-      }
-    }).then(({ data }) => {
-      const url = window.URL.createObjectURL(new Blob([data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', file.name);
-      document.body.appendChild(link);
-      link.click();
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', file.name);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const handleMail = async (file) => {
@@ -396,6 +402,13 @@ const Diagram = ({
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
+  };
+
+  const toggleAccordion = (file) => {
+    setExpended((prev) => ({
+      ...prev,
+      [file?._id]: expended[file?._id] ? false : true
+    }));
   };
 
   return (
@@ -458,21 +471,19 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
                           onClick={() => {
-                            setExpended((prev) => ({
-                              ...prev,
-                              [file?._id]: expended[file?._id] ? false : true
-                            }));
+                            toggleAccordion(file);
                           }}
                         />
-                        <div className="flex items-center">
+                        <div className="pointer-events-none flex items-center">
                           <span className="p-1">
                             <KeyboardArrowRight
                               className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(90deg)]')}
