@@ -9,6 +9,7 @@ import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Ty
 import { isEmpty } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CiFileOn } from 'react-icons/ci';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
@@ -24,7 +25,6 @@ import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CiFileOn } from 'react-icons/ci';
 import axios from 'axios';
 import mime from 'mime';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
@@ -45,7 +45,8 @@ const Diagram = ({
   showMaterialFilter = false,
   defaultSelectedUniqueId = null,
   showContainer = true,
-  fullHeight = true
+  fullHeight = true,
+  height = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -463,7 +464,7 @@ const Diagram = ({
                 )}
               />
             )}
-            {!Array.isArray(rowData) && (
+            {rowData != null && rowData?.length > 0 && (
               <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
                 <ThemeButton
                   buttonType="theme"
@@ -480,7 +481,7 @@ const Diagram = ({
           </div>
         )}
         <Box pt={2} pb={2}>
-          <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
+          <Box style={{ height }} className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
               {!rowData && (
                 <div className="flex h-full items-center justify-center">

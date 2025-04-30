@@ -7,7 +7,7 @@ import { ViewType } from 'src/components/CustomCalendar';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 const buttonClass = 'bg-transparent px-[14px] py-[6px] hover:bg-gray-100 dark:hover:bg-gray-800 text-[13px] font-medium';
-const buttonClassActive = 'bg-theme text-white';
+const buttonClassActive = 'bg-theme hover:bg-theme text-white hover:text-white';
 
 type CustomToolbarProps = {
   onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY' | 'DATE') => void;
@@ -55,10 +55,11 @@ const CustomToolbar = ({ onNavigate, onView, label, date, localizer, view, views
       >
         <StaticDatePicker
           value={dayjs(date)}
-          views={['month', 'year']}
+          views={view === 'month' ? ['month', 'year'] : ['year', 'month', 'day']}
           onChange={(value) => {
             setStateDate(value);
           }}
+          shouldDisableDate={(date) => (view === 'week' ? !dayjs(date).startOf('week').isSame(date, 'day') : false)}
           slotProps={{
             actionBar: {
               sx: { display: 'none' }
