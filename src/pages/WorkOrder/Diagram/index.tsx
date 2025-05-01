@@ -66,6 +66,7 @@ const Diagram = ({
   const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [sendMail, setSendMail] = useState(false);
   const [emailAttachment, setEmailAttachment] = useState(null);
+  const [isEmailAttachmentLoading, setIsEmailAttachmentLoading] = useState(true);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -379,28 +380,42 @@ const Diagram = ({
       });
   };
 
-  const handleMail = async (file) => {
+  const handleMail = async (data) => {
+    const attachments: any = [];
+    setIsEmailAttachmentLoading(true)
     try {
-      const attachments: any[] = [];
-      const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
-      const base64data: string = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-        reader.onloadend = () => {
-          resolve(reader.result as string);
-        };
-        reader.onerror = reject;
-      });
-      attachments.push({
-        base64: base64data.substring(base64data.indexOf(',') + 1),
-        contentType: base64data.split(';')[0].split(':')[1],
-        extension: `.${file.url.split('.')?.pop()}`,
-        name: file.name
-      });
+      await Promise.all(
+        data?.file.map(async (file) => {
+          try {
+            const response = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
+            const data = response.data;
+
+            let reader = new FileReader();
+            reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+
+            await new Promise<void>((resolve) => {
+              reader.onloadend = function () {
+                let base64data: any = reader.result;
+                attachments.push({
+                  base64: base64data.substring(base64data.indexOf(',') + 1),
+                  contentType: base64data.split(';')[0].split(':')[1],
+                  extension: `.${file.url.split('.')?.pop()}`,
+                  name: file.name
+                });
+                resolve();
+              };
+            });
+          } catch (err) {
+            toastConfig.setToastConfig(err);
+          }
+        })
+      );
       setEmailAttachment(attachments);
-      setSendMail(true);
+      setIsEmailAttachmentLoading(false)
+
     } catch (err) {
       toastConfig.setToastConfig(err);
+      setIsEmailAttachmentLoading(false)
     }
   };
 
@@ -471,11 +486,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -522,6 +536,19 @@ const Diagram = ({
                               }}
                             >
                               <GetAppIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title={'Send Email'}>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSendMail(true);
+                                handleMail(file);
+                              }}
+                            >
+                              <SendIcon fontSize="small" color="primary" />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -695,7 +722,8 @@ const Diagram = ({
                                         color="inherit"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          handleMail(f);
+                                          setSendMail(true);
+                                          handleMail({ file: [f] });
                                         }}
                                       >
                                         <SendIcon fontSize="small" color="primary" />
@@ -832,6 +860,7 @@ const Diagram = ({
         >
           <CreateEmail
             emailId={null}
+            subject={referenceLabel}
             relatedTo={[
               {
                 type: resource,
@@ -842,10 +871,12 @@ const Diagram = ({
             handleClose={() => {
               setSendMail(false);
               setFullScreen(false);
+              setIsEmailAttachmentLoading(false)
             }}
             fetchData={() => {
               setSendMail(false);
               setFullScreen(false);
+              setIsEmailAttachmentLoading(false)
             }}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
@@ -854,6 +885,7 @@ const Diagram = ({
             showManimizeMaximize={true}
             qouteBuilderAttachments={emailAttachment}
             isQuoteBuilder={true}
+            isAttachmentLoading={isEmailAttachmentLoading}
           />
         </Dialog>
       )}
