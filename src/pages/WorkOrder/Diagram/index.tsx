@@ -1,13 +1,13 @@
-import { Add, PriorityHigh } from '@mui/icons-material';
+import { Add, KeyboardArrowDown, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import GetAppIcon from '@mui/icons-material/GetApp';
+import InfoIcon from '@mui/icons-material/Info';
 import SendIcon from '@mui/icons-material/Send';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Autocomplete, Box, Checkbox, Collapse, Dialog, FormControlLabel, IconButton, MenuItem, Popover, TextField, Typography } from '@mui/material';
 import { isEmpty } from 'lodash';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import mime from 'mime';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CiFileOn } from 'react-icons/ci';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,19 +15,18 @@ import { useData } from 'src/StateProvider/Provider';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import axios from 'axios';
-import mime from 'mime';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
@@ -55,7 +54,6 @@ const Diagram = ({
       user: { user }
     }
   }: any = useData();
-
   const [rowData, setRowData] = useState(null);
   const [expended, setExpended] = useState({});
   const [attachemntDialog, setAttachemntDialog] = useState({ open: false, file: null, isClone: false });
@@ -67,6 +65,7 @@ const Diagram = ({
   const [sendMail, setSendMail] = useState(false);
   const [emailAttachment, setEmailAttachment] = useState(null);
   const [isEmailAttachmentLoading, setIsEmailAttachmentLoading] = useState(true);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -75,10 +74,10 @@ const Diagram = ({
   }, [resource, referenceId]);
 
   useEffect(() => {
-    fetchData();
+    fetchData(true);
   }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
-  const fetchData = async () => {
+  const fetchData = async (expandAll = false) => {
     let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
     if (attachmentType) {
       query = `${query}&attachmentType=${attachmentType}`;
@@ -100,12 +99,14 @@ const Diagram = ({
     axiosInstance()
       .get(query)
       .then(({ data: { data } }) => {
-        const expend: any = {};
         setRowData(data);
-        data?.forEach((file) => {
-          expend[file?._id] = true;
-        });
-        setExpended(expend);
+        if (expandAll) {
+          const expend: any = {};
+          data?.forEach((file) => {
+            expend[file?._id] = true;
+          });
+          setExpended(expend);
+        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -267,7 +268,7 @@ const Diagram = ({
 
   const handleRequestReject = (id) => {
     axiosInstance()
-      .put('/attachment/delete-request', { _id: id, type: 'cancel' })
+      .put('/attachment/delete-request', { ids: [id], type: 'cancel' })
       .then(({ data }) => {
         fetchData();
         toastConfig.setToastConfig({
@@ -382,7 +383,7 @@ const Diagram = ({
 
   const handleMail = async (data) => {
     const attachments: any = [];
-    setIsEmailAttachmentLoading(true)
+    setIsEmailAttachmentLoading(true);
     try {
       await Promise.all(
         data?.file.map(async (file) => {
@@ -411,11 +412,10 @@ const Diagram = ({
         })
       );
       setEmailAttachment(attachments);
-      setIsEmailAttachmentLoading(false)
-
+      setIsEmailAttachmentLoading(false);
     } catch (err) {
       toastConfig.setToastConfig(err);
-      setIsEmailAttachmentLoading(false)
+      setIsEmailAttachmentLoading(false);
     }
   };
 
@@ -426,11 +426,40 @@ const Diagram = ({
     }));
   };
 
+  const toggleSelectAll = () => {
+    setSelectedFiles((prev) => {
+      if (prev.length === rowData?.length) {
+        return [];
+      }
+      return rowData?.map((file) => file);
+    });
+  };
+
+  const handleSelectFile = (file) => {
+    setSelectedFiles((prev) => {
+      const index = prev.findIndex((f) => f?._id === file?._id);
+      if (index !== -1) {
+        return prev.filter((_, i) => i !== index);
+      }
+      return [...prev, file];
+    });
+  };
+
+  const isAllSelected = selectedFiles?.length === rowData?.length;
+  const isFileSelected = (file) => selectedFiles?.some((f) => f?._id === file?._id);
+
+  console.log(rowData);
+
   return (
     <Box>
       <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
         {!disableEdit && (
-          <div className={`flex items-center ${resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter ? 'justify-between' : 'justify-end'}`}>
+          <div className={`flex items-center justify-between gap-2`}>
+            <FormControlLabel
+              control={<Checkbox checked={isAllSelected} size="small" onChange={toggleSelectAll} />}
+              label="Select All"
+              sx={{ ml: '15px' }}
+            />
             {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
               <Autocomplete
                 fullWidth
@@ -457,20 +486,41 @@ const Diagram = ({
                 )}
               />
             )}
-            {rowData != null && rowData?.length > 0 && (
-              <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-                <ThemeButton
-                  buttonType="theme"
-                  onClick={() => {
-                    setAttachemntDialog({ open: true, file: null, isClone: false });
-                  }}
-                  iconForMobile={<Add />}
-                  mobileTooltip="Add"
-                >
-                  <Add /> Add
-                </ThemeButton>
-              </Box>
-            )}
+            <div className="flex items-center gap-2">
+              {rowData?.length > 0 && (
+                <>
+                  <Box className="flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+                    <ThemeButton
+                      buttonType="theme"
+                      onClick={() => {
+                        setAttachemntDialog({ open: true, file: null, isClone: false });
+                      }}
+                      iconForMobile={<Add />}
+                      mobileTooltip="Add"
+                    >
+                      <Add /> Add
+                    </ThemeButton>
+                  </Box>
+                  <ActionButtonWithMenu
+                    disabled={selectedFiles?.length === 0}
+                    actionMenuItems={
+                      <>
+                        <AttachmentDeleteButton
+                          attachments={selectedFiles}
+                          onSuccess={() => {
+                            setSelectedAttachment(null);
+                            fetchData();
+                          }}
+                          element={MenuItem}
+                        >
+                          Delete
+                        </AttachmentDeleteButton>
+                      </>
+                    }
+                  />
+                </>
+              )}
+            </div>
           </div>
         )}
         <Box pt={2} pb={2}>
@@ -486,10 +536,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -498,165 +549,168 @@ const Diagram = ({
                           }}
                         />
                         <div className="pointer-events-none flex items-center">
-                          <span className="p-1">
-                            <KeyboardArrowRight
-                              className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(90deg)]')}
-                            />
-                          </span>
-                          <Box>
-                            <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
-                              {file?.name}
-                            </Typography>
-                          </Box>
+                          <div className="pointer-events-auto">
+                            <Checkbox size="small" checked={isFileSelected(file)} onChange={() => handleSelectFile(file)} />
+                          </div>
+                          <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
+                            {file?.name}
+                          </Typography>
                         </div>
-                        <div className="flex gap-2">
-                          <HtmlTooltip
-                            title={
-                              <div className="flex flex-col p-2">
-                                <p>
-                                  Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
-                                </p>
-                                <p>
-                                  Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
-                                </p>
-                              </div>
-                            }
-                          >
-                            <IconButton size="small" color="inherit">
-                              <InfoIcon fontSize="small" color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
-                          <HtmlTooltip title={'Download'}>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                downloadZip(file?._id, file?.name);
-                              }}
+                        <div className="pointer-events-none flex items-center gap-2">
+                          <div className="pointer-events-auto flex gap-2">
+                            <HtmlTooltip
+                              title={
+                                <div className="flex flex-col p-2">
+                                  <p>
+                                    Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
+                                  </p>
+                                  <p>
+                                    Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
+                                  </p>
+                                </div>
+                              }
                             >
-                              <GetAppIcon fontSize="small" color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
-                          <HtmlTooltip title={'Send Email'}>
-                            <IconButton
-                              size="small"
-                              color="inherit"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSendMail(true);
-                                handleMail(file);
-                              }}
-                            >
-                              <SendIcon fontSize="small" color="primary" />
-                            </IconButton>
-                          </HtmlTooltip>
-                          {!disableEdit && (
-                            <>
-                              <HtmlTooltip title="Edit" placement="top" arrow>
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="edit"
-                                  disabled={!file?.canEdit}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAttachemntDialog({ open: true, file: file, isClone: false });
-                                  }}
-                                >
-                                  <EditIcon fontSize="small" color="primary" />
-                                </IconButton>
-                              </HtmlTooltip>
-                              <HtmlTooltip title="Clone" placement="top" arrow>
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="clone"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setAttachemntDialog({ open: true, file: file, isClone: true });
-                                  }}
-                                >
-                                  <FileCopyIcon fontSize="small" color="primary" />
-                                </IconButton>
-                              </HtmlTooltip>
-                              <AttachmentDeleteButton
-                                attachment={file}
-                                onSuccess={() => {
-                                  setSelectedAttachment(null);
-                                  fetchData();
+                              <IconButton size="small" color="inherit">
+                                <InfoIcon fontSize="small" color="primary" />
+                              </IconButton>
+                            </HtmlTooltip>
+                            <HtmlTooltip title={'Download'}>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  downloadZip(file?._id, file?.name);
                                 }}
-                              />
-                              {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
-                                <div className="flex gap-2">
-                                  <span className="relative">
-                                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
-                                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
-                                    </span>
-                                    <HtmlTooltip title="Delete Request">
-                                      <IconButton
-                                        size="small"
-                                        color="primary"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                          setDeleteRequestAnchorEl(e.currentTarget);
-                                        }}
-                                      >
-                                        <PriorityHigh fontSize="small" />
-                                      </IconButton>
-                                    </HtmlTooltip>
-                                  </span>
-                                  <Popover
-                                    open={!!deleteRequestAnchorEl}
-                                    onClose={() => setDeleteRequestAnchorEl(null)}
-                                    anchorEl={deleteRequestAnchorEl}
-                                    anchorOrigin={{
-                                      vertical: 'bottom',
-                                      horizontal: 'right'
-                                    }}
-                                    transformOrigin={{
-                                      vertical: 'top',
-                                      horizontal: 'right'
+                              >
+                                <GetAppIcon fontSize="small" color="primary" />
+                              </IconButton>
+                            </HtmlTooltip>
+                            <HtmlTooltip title={'Send Email'}>
+                              <IconButton
+                                size="small"
+                                color="inherit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSendMail(true);
+                                  handleMail(file);
+                                }}
+                              >
+                                <SendIcon fontSize="small" color="primary" />
+                              </IconButton>
+                            </HtmlTooltip>
+                            {!disableEdit && (
+                              <>
+                                <HtmlTooltip title="Edit" placement="top" arrow>
+                                  <IconButton
+                                    size="small"
+                                    color="inherit"
+                                    aria-label="edit"
+                                    disabled={!file?.canEdit}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAttachemntDialog({ open: true, file: file, isClone: false });
                                     }}
                                   >
-                                    <div className="w-[290px] p-3">
-                                      <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
-                                      <p className="mb-2 text-xs">
-                                        A deletion request was submitted by&nbsp;
-                                        <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
-                                          {file?.deleteRequest?.user?.concatedName}
-                                        </span>{' '}
-                                        on&nbsp;
-                                        {displayDate(file?.deleteRequest?.date)}
-                                      </p>
-                                      <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                        Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
-                                      </p>
-                                      <div className="mt-2 flex  gap-2 border-t pt-2">
-                                        <ThemeButton
-                                          buttonType="theme"
-                                          onClick={() => {
-                                            handleDeleteFile([file._id]);
+                                    <EditIcon fontSize="small" color="primary" />
+                                  </IconButton>
+                                </HtmlTooltip>
+                                <HtmlTooltip title="Clone" placement="top" arrow>
+                                  <IconButton
+                                    size="small"
+                                    color="inherit"
+                                    aria-label="clone"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAttachemntDialog({ open: true, file: file, isClone: true });
+                                    }}
+                                  >
+                                    <FileCopyIcon fontSize="small" color="primary" />
+                                  </IconButton>
+                                </HtmlTooltip>
+                                <AttachmentDeleteButton
+                                  attachments={[file]}
+                                  onSuccess={() => {
+                                    setSelectedAttachment(null);
+                                    fetchData();
+                                  }}
+                                />
+                                {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
+                                  <div className="flex gap-2">
+                                    <span className="relative">
+                                      <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                                        <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                                      </span>
+                                      <HtmlTooltip title="Delete Request">
+                                        <IconButton
+                                          size="small"
+                                          color="primary"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            setDeleteRequestAnchorEl(e.currentTarget);
                                           }}
                                         >
-                                          Approve
-                                        </ThemeButton>
-                                        <ThemeButton
-                                          buttonType="red"
-                                          onClick={() => {
-                                            handleRequestReject(file._id);
-                                          }}
-                                        >
-                                          Reject
-                                        </ThemeButton>
+                                          <PriorityHigh fontSize="small" />
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    </span>
+                                    <Popover
+                                      open={!!deleteRequestAnchorEl}
+                                      onClose={() => setDeleteRequestAnchorEl(null)}
+                                      anchorEl={deleteRequestAnchorEl}
+                                      anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right'
+                                      }}
+                                      transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right'
+                                      }}
+                                    >
+                                      <div className="w-[290px] p-3">
+                                        <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
+                                        <p className="mb-2 text-xs">
+                                          A deletion request was submitted by&nbsp;
+                                          <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
+                                            {file?.deleteRequest?.user?.concatedName}
+                                          </span>{' '}
+                                          on&nbsp;
+                                          {displayDate(file?.deleteRequest?.date)}
+                                        </p>
+                                        <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                          Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
+                                        </p>
+                                        <div className="mt-2 flex  gap-2 border-t pt-2">
+                                          <ThemeButton
+                                            buttonType="theme"
+                                            onClick={() => {
+                                              handleDeleteFile([file._id]);
+                                            }}
+                                          >
+                                            Approve
+                                          </ThemeButton>
+                                          <ThemeButton
+                                            buttonType="red"
+                                            onClick={() => {
+                                              handleRequestReject(file._id);
+                                            }}
+                                          >
+                                            Reject
+                                          </ThemeButton>
+                                        </div>
                                       </div>
-                                    </div>
-                                  </Popover>
-                                </div>
-                              )}
-                            </>
-                          )}
+                                    </Popover>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                          <span className="pointer-events-none p-1">
+                            <KeyboardArrowDown
+                              className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(-180deg)]')}
+                            />
+                          </span>
                         </div>
                       </div>
                       <Collapse in={expended[file?._id]}>
@@ -871,12 +925,12 @@ const Diagram = ({
             handleClose={() => {
               setSendMail(false);
               setFullScreen(false);
-              setIsEmailAttachmentLoading(false)
+              setIsEmailAttachmentLoading(false);
             }}
             fetchData={() => {
               setSendMail(false);
               setFullScreen(false);
-              setIsEmailAttachmentLoading(false)
+              setIsEmailAttachmentLoading(false);
             }}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
