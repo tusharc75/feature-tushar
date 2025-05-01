@@ -352,10 +352,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
-      parent.assetQty =
-        parent.type === MATERIAL_TYPE.product
-          ? material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
-          : 0;
+      parent.assetQty = parent.type === MATERIAL_TYPE.product
+        ? data.material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
+        : 0;
       parent.isValid = true;
       parent.canDelete = parent.workOrder || !allowedToEdit ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
@@ -593,7 +592,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       </>
     );
   };
-
+  console.log(selectedRecords)
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -741,7 +740,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           handleSucess={(rows) => {
             if (products?.length) {
               const dataToAddFormat = rows?.map((d) => {
-                return { ...d, _id: d?.asset };
+                return { ...d, _id: d?.asset, qty: 1 };
               });
               handleAdd([...dataToAddFormat]);
             } else {
