@@ -16,7 +16,7 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
-import { isEqual } from 'lodash';
+import { isArray, isEqual, isObject, isString } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -246,13 +246,18 @@ export default function ManageAttachment({
   };
 
   const onUploadFile = (files) => {
-    setAllAttachments((prevState) => [...files?.map((e) => {
-      return {
-        name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
-        url: e?.fileName,
-        date: new Date()
-      }
-    }), ...prevState]);
+    if (isArray(files)) {
+      setAllAttachments((prevState) => [...files?.map((e) => {
+        return {
+          name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
+          url: e?.fileName,
+          date: new Date()
+        }
+      }), ...prevState]);
+    }
+    else if (isString(files)) {
+      setAllAttachments((prevState) => [{ name: files?.split('_OMS_TS_')?.pop() || files, url: files, date: new Date() }, ...prevState]);
+    }
   };
 
   const handleDeleteAttachment = (file) => {

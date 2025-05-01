@@ -26,6 +26,9 @@ import {
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -159,6 +162,11 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
+              {row?.original?.loadingTicketId && (
+                <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                  <LocalShippingIcon fontSize="small" color={'primary'} />
+                </HtmlTooltip>
+              )}
             </div>
           ) : (
             <NoDataCell />

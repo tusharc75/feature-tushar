@@ -266,7 +266,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tabelSummaryLeftSide = data?.tabelSummaryLeftSide;
           initialValues.entity = data?.entity ? data?.entity : [];
           initialValues.type = data?.type;
-          initialValues.owner = data?.owner && data?.owner !== undefined ? data?.owner : user.user._id;
+          initialValues.owner = isClone ? user.user._id : data?.owner || user.user._id;
           initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
           setDetails({
             header: data?.header,
