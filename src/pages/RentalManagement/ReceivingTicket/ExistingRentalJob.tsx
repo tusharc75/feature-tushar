@@ -323,6 +323,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
               true
             )
           }}
+          isSubmitting={isSubmitting}
           title={"Status change will be triggered for the following assets. Do you want to continue without changing their status?"}
         />}
     </Dialog>

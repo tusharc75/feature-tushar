@@ -394,8 +394,7 @@ const AddSerializedAsset = ({
       }
     });
     setIsSubmitting(true);
-    axiosInstance()
-      .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id, skipTriggerAssetStatusChange })
+    axiosInstance().post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id, skipTriggerAssetStatusChange })
       .then(({ data }) => {
         if (data?.data?.errors?.length) {
           const assetDataError = [];
@@ -406,6 +405,7 @@ const AddSerializedAsset = ({
             });
             assetDataError.push(message);
           });
+          setIsSubmitting(false);
           setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError });
         } else {
           setInuseAssetConfirmBox(false);
@@ -803,6 +803,7 @@ const AddSerializedAsset = ({
           onConfirm={() => {
             handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
           }}
+          isSubmitting={isSubmitting}
           title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
         />
       )}

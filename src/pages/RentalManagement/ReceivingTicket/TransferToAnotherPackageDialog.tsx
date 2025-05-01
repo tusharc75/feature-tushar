@@ -82,6 +82,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
           })
           assetDataError.push(message)
         })
+        setIsSubmitting(false);
         setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError })
       }
       else {
@@ -219,6 +220,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
           onConfirm={() => {
             handleSubmit(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true)
           }}
+          isSubmitting={isSubmitting}
           title={"Status change will be triggered for the following assets. Do you want to continue without changing their status?"}
         />}
     </>
