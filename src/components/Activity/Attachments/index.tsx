@@ -526,7 +526,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               )}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               <AttachmentDeleteButton
-                attachment={attachmentData}
+                attachments={[attachmentData]}
                 onSuccess={() => {
                   fetchAttachment();
                   handleActivityRefresh();

@@ -248,7 +248,7 @@ export default function Attachment() {
               )}
               {row.original.canEdit ? (
                 <AttachmentDeleteButton
-                  attachment={row.original}
+                  attachments={[row.original]}
                   onSuccess={() => {
                     fetchAttachments();
                   }}
