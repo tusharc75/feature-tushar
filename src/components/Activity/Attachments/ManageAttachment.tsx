@@ -24,6 +24,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { editDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -76,9 +77,7 @@ export default function ManageAttachment({
     try {
       setIsFetching(true);
       if (type === 'file') {
-        const fieldsResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
-        const createFields = fieldsResponce?.data?.data?.filter((f) => f.isCreate).map((f) => f.fieldData);
-        const updateFields = fieldsResponce?.data?.data?.filter((f) => f.isUpdate).map((f) => f.fieldData);
+        let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);      
         if (attachmentId) {
           const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
           const data = attachmentResponce?.data?.data;
@@ -90,27 +89,27 @@ export default function ManageAttachment({
           }
           setIsFetching(false);
           let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeysWithValues(data, updateFields) };
+          if (fieldsDataForUpdate?.length) {
+            initialValue = { ...initialValue, ...getObjKeysWithValues(data, fieldsDataAll) };
           }
           setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
           if (!isClone) {
             setAttachmentData(data)
           }
           setInitialData({
-            fields: updateFields,
+            fields: fieldsDataForUpdate,
             values: initialValue
           });
         } else {
           let initialValue: any = { name: '', attachmentType: '' };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeys('', createFields) };
+          if (fieldsDataForCreate?.length) {
+            initialValue = { ...initialValue, ...getObjKeys('', fieldsDataForCreate) };
           }
           if (attachmentType) {
             initialValue.attachmentType = attachmentType;
           }
           setInitialData({
-            fields: createFields,
+            fields: fieldsDataForCreate,
             values: initialValue
           });
           setAllowedToEdit(true)

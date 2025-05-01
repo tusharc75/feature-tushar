@@ -31,6 +31,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ItemizeExpenses from 'src/pages/Expenses/ItemizeExpenses';
 import ItemizeMileage from 'src/pages/Expenses/ItemizeMileage';
 import AddIcon from '@mui/icons-material/Add';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
   const history = useHistory();
@@ -59,12 +60,12 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
 
   useEffect(() => {
     fetchPolicy();
+    fetchFields();
   }, []);
 
-  useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.expenses}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.expenses);
       if (expenseId) {
         axiosInstance()
           .get(`${expenses.api}/` + expenseId)
@@ -94,7 +95,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
               setTitle(`Edit - ${data.expenseNumber}`);
               setInitialData({
                 fields: fieldsDataForUpdate,
-                values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+                values: { ...getObjKeysWithValues(data, fieldsDataAll) }
               });
             }
           })
@@ -115,11 +116,11 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           values: initialData
         });
       }
-    })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const fetchPolicy = async () => {
     try {

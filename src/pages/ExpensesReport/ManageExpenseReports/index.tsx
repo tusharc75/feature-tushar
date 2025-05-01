@@ -27,6 +27,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageExpenseReports = ({ expenseReportId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -42,10 +43,9 @@ const ManageExpenseReports = ({ expenseReportId = null, onClose, onSuccess }) =>
   const [expenses, setExpences] = useState([]);
   const [editing, setEditing] = useState(false);
 
-  useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.expenseReport);
       if (expenseReportId) {
         axiosInstance()
           .get(`${expenseReport.api}/` + expenseReportId)
@@ -54,7 +54,7 @@ const ManageExpenseReports = ({ expenseReportId = null, onClose, onSuccess }) =>
             setEditing(true);
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
+              values: { ...getObjKeysWithValues(data, fieldsDataAll) }
             });
           })
           .catch((error) => {
@@ -86,11 +86,15 @@ const ManageExpenseReports = ({ expenseReportId = null, onClose, onSuccess }) =>
           toastConfig.setToastConfig(error);
         });
       }
-    })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, []);
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    };
+  }
+
+  useEffect(() => {
+    fetchFields();
+  }, [expenseReportId]);
 
   const handleSubmit = (value) => {
     setIsSubmitting(true);
