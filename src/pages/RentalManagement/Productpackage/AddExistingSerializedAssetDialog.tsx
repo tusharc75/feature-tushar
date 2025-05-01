@@ -324,6 +324,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
             });
             assetDataError.push(message);
           });
+          setIsSubmitting(false);
           setShowStatusChangeConfirmBox({ open: true, underReviewAssetsData, reserveAssetsData, assetDataError });
         } else {
           setIsSubmitting(false);
@@ -578,7 +579,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
@@ -629,6 +630,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           onConfirm={() => {
             handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
           }}
+          isSubmitting={isSubmitting}
           title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
         />
       )}
