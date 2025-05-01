@@ -2807,7 +2807,7 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' },
   { title: sidebarResource.assemblyOrder, value: sidebarResource.assemblyOrder, key: 'assemblyOrder' },
   { title: sidebarResource.creditMemo, value: sidebarResource.creditMemo, key: 'creditMemo' },
-  { title: sidebarResource.employeeMaster, value: sidebarResource.employeeMaster, key: 'employeeMaster' }
+  { title: sidebarResource.productInventory, value: sidebarResource.productInventory, key: 'productInventory' }
 ];
 
 export const COLOUR_MASTER = {

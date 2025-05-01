@@ -686,8 +686,8 @@ const Technicians = ({
             leftSideContents={resourcePolicy?.addServices && serviceOption?.length > 1 ? leftSideContents() : null}
             hasXpadding
             previewDownloadProps={{
-              fileName: sidebarResource.employeeMaster,
-              resource: sidebarResource.employeeMaster,
+              fileName: sidebarResource.fieldServiceOrder,
+              resource: sidebarResource.fieldServiceOrder,
               referenceId: serviceOrderData?._id,
               columns: [],
               hideDetailButton: true,

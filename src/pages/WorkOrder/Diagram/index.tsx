@@ -1,31 +1,36 @@
-import { Autocomplete, Box, Collapse, Dialog, Divider, IconButton, TextField, Typography } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, PriorityHigh } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoIcon from '@mui/icons-material/Info';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import SendIcon from '@mui/icons-material/Send';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { Autocomplete, Box, Collapse, Dialog, IconButton, Popover, TextField, Typography } from '@mui/material';
+import { isEmpty } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import ShowPdf from './ShowPdf';
+import { CiFileOn } from 'react-icons/ci';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
-import { getFileIcon, getFileNameWithExtension } from './utils';
-import emptyIllustration from 'src/assets/emptyIllustration.webp';
 import ImageEditor from './ImageEditor';
-import { useData } from 'src/StateProvider/Provider';
-import Comment from 'src/pages/WorkOrder/Diagram/Comment';
-import { isEmpty } from 'lodash';
 import PdfEditor from './ShowPdf/PdfEditor';
+import { getFileIcon, getFileNameWithExtension } from './utils';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axios from 'axios';
+import mime from 'mime';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+const pdfExtensions = ['pdf'];
 
 const Diagram = ({
   resource,
@@ -40,7 +45,8 @@ const Diagram = ({
   showMaterialFilter = false,
   defaultSelectedUniqueId = null,
   showContainer = true,
-  fullHeight = true
+  fullHeight = true,
+  height = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -54,12 +60,12 @@ const Diagram = ({
   const [expended, setExpended] = useState({});
   const [attachemntDialog, setAttachemntDialog] = useState({ open: false, file: null, isClone: false });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [selectedAttachment, setSelectedAttachment] = useState(null);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [commentDialog, setCommentDialog] = useState(false);
+  const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [sendMail, setSendMail] = useState(false);
+  const [emailAttachment, setEmailAttachment] = useState(null);
 
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
@@ -102,6 +108,7 @@ const Diagram = ({
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setRowData([]);
       });
   };
 
@@ -257,10 +264,9 @@ const Diagram = ({
       });
   };
 
-
   const handleRequestReject = (id) => {
     axiosInstance()
-      .put('/attachment/deleteRequest', { _id: id, type: 'cancel' })
+      .put('/attachment/delete-request', { _id: id, type: 'cancel' })
       .then(({ data }) => {
         fetchData();
         toastConfig.setToastConfig({
@@ -272,6 +278,137 @@ const Diagram = ({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+  const downloadZip = (_id, name) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `Downloading, Please wait...`
+    });
+    axiosInstance()
+      .get(`attachment/zip/file/${_id}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', name ? `${name}.zip` : 'download.zip');
+        document.body.appendChild(link);
+        link.click();
+        toastConfig.setToastConfig({
+          message: 'Downloaded Successfully',
+          open: true,
+          type: 'success'
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const viewAttachment = (file) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `File is Loading, Please wait...`
+    });
+    axiosInstance()
+      .get(`user/download`, {
+        params: {
+          fileName: file
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({
+              message: 'File Viewed Successfully',
+              open: true,
+              type: 'success'
+            });
+          }
+        }
+      })
+      .then(({ data }) => {
+        const ext = file.split('.').pop().toLowerCase();
+        let mimeType = 'application/octet-stream';
+        if (pdfExtensions?.includes(ext)) {
+          mimeType = 'application/pdf';
+        } else if (imageExtensions?.includes(ext)) {
+          mimeType = `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+        }
+        const blob = new Blob([data], { type: mimeType });
+        const fileURL = URL.createObjectURL(blob);
+        const newWindow = window.open();
+        newWindow.location.href = fileURL;
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const downloadFile = (file) => {
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'info',
+      message: `File is Downloading, Please wait...`
+    });
+    axiosInstance()
+      .get(`user/download`, {
+        params: {
+          fileName: file?.url
+        },
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+          if (percentCompleted === 100) {
+            toastConfig.setToastConfig({ open: true, type: 'success', message: 'File downloaded successfully.' });
+          }
+        }
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', file.name);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const handleMail = async (file) => {
+    try {
+      const attachments: any[] = [];
+      const { data } = await axiosInstance().get(`user/download?fileName=${encodeURIComponent(file?.url)}`, { responseType: 'blob' });
+      const base64data: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.onerror = reject;
+      });
+      attachments.push({
+        base64: base64data.substring(base64data.indexOf(',') + 1),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${file.url.split('.')?.pop()}`,
+        name: file.name
+      });
+      setEmailAttachment(attachments);
+      setSendMail(true);
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+  };
+
+  const toggleAccordion = (file) => {
+    setExpended((prev) => ({
+      ...prev,
+      [file?._id]: expended[file?._id] ? false : true
+    }));
   };
 
   return (
@@ -305,68 +442,60 @@ const Diagram = ({
                 )}
               />
             )}
-            <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-              <ThemeButton
-                buttonType="theme"
-                onClick={() => {
-                  setAttachemntDialog({ open: true, file: null, isClone: false });
-                }}
-                iconForMobile={<Add />}
-                mobileTooltip="Add"
-              >
-                <Add /> Add
-              </ThemeButton>
-            </Box>
+            {rowData != null && rowData?.length > 0 && (
+              <Box className="mb-2 ml-2 flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
+                <ThemeButton
+                  buttonType="theme"
+                  onClick={() => {
+                    setAttachemntDialog({ open: true, file: null, isClone: false });
+                  }}
+                  iconForMobile={<Add />}
+                  mobileTooltip="Add"
+                >
+                  <Add /> Add
+                </ThemeButton>
+              </Box>
+            )}
           </div>
         )}
         <Box pt={2} pb={2}>
-          <Box className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
+          <Box style={{ height }} className={cn('overflow-auto', fullHeight ? 'h-[calc(100vh-300px)] ' : '')}>
             <div className="grid gap-3">
-              {rowData && rowData.length > 0 ? (
+              {!rowData && (
+                <div className="flex h-full items-center justify-center">
+                  <CommonSkeleton />
+                </div>
+              )}
+              {rowData?.length > 0 &&
                 rowData?.map((file, index) => {
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
-                        onClick={() => {
-                          setExpended((prev) => ({
-                            ...prev,
-                            [file?._id]: expended[file?._id] ? false : true
-                          }));
-                        }}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
-                        <div className="flex items-center">
-                          <span className="p-1">{expended[file?._id] ? <ExpandMoreIcon /> : <KeyboardArrowRight />}</span>
-                          <Box ml={2}>
+                        <button
+                          className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
+                          onClick={() => {
+                            toggleAccordion(file);
+                          }}
+                        />
+                        <div className="pointer-events-none flex items-center">
+                          <span className="p-1">
+                            <KeyboardArrowRight
+                              className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(90deg)]')}
+                            />
+                          </span>
+                          <Box>
                             <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
                               {file?.name}
                             </Typography>
                           </Box>
                         </div>
                         <div className="flex gap-2">
-                          {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
-                            <div className="flex gap-2">
-                              <ThemeButton
-                                buttonType="theme"
-                                onClick={() => {
-                                  handleDeleteFile([file._id]);
-                                }}
-                              >
-                                Approve
-                              </ThemeButton>
-                              <ThemeButton
-                                buttonType="yellow"
-                                onClick={() => {
-                                  handleRequestReject(file._id);
-                                }}
-                              >
-                                Reject
-                              </ThemeButton>
-                            </div>
-                          )}
                           <HtmlTooltip
                             title={
                               <div className="flex flex-col p-2">
@@ -376,26 +505,23 @@ const Diagram = ({
                                 <p>
                                   Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
                                 </p>
-                                {!isEmpty(file?.deleteRequest) && (
-                                  <>
-                                    <Divider></Divider>
-                                    <p>Delete Request Sent</p>
-                                    <p>
-                                      By: <span>{file?.deleteRequest?.user?.concatedName}</span>
-                                    </p>
-                                    <p>
-                                      Date: <span>{displayDate(file?.deleteRequest?.date)}</span>
-                                    </p>
-                                    <p>
-                                      Reason: <span>{file?.deleteRequest?.comment}</span>
-                                    </p>
-                                  </>
-                                )}
                               </div>
                             }
                           >
                             <IconButton size="small" color="inherit">
-                              <InfoIcon fontSize='small' color='primary' />
+                              <InfoIcon fontSize="small" color="primary" />
+                            </IconButton>
+                          </HtmlTooltip>
+                          <HtmlTooltip title={'Download'}>
+                            <IconButton
+                              size="small"
+                              color="inherit"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                downloadZip(file?._id, file?.name);
+                              }}
+                            >
+                              <GetAppIcon fontSize="small" color="primary" />
                             </IconButton>
                           </HtmlTooltip>
                           {!disableEdit && (
@@ -411,7 +537,7 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: false });
                                   }}
                                 >
-                                  <EditIcon fontSize='small' color='primary' />
+                                  <EditIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
                               <HtmlTooltip title="Clone" placement="top" arrow>
@@ -424,28 +550,84 @@ const Diagram = ({
                                     setAttachemntDialog({ open: true, file: file, isClone: true });
                                   }}
                                 >
-                                  <FileCopyIcon fontSize='small' color='primary' />
+                                  <FileCopyIcon fontSize="small" color="primary" />
                                 </IconButton>
                               </HtmlTooltip>
-                              <HtmlTooltip
-                                title={!isEmpty(file?.deleteRequest) ? `Delete request sent to ${file?.createdBy?.user?.concatedName}` : 'Delete'}
-                                placement="top"
-                                arrow
-                              >
-                                <IconButton
-                                  size="small"
-                                  color="inherit"
-                                  aria-label="delete"
-                                  disabled={!isEmpty(file?.deleteRequest) ? true : false}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedFile(file);
-                                    setShowConfirmBox(true);
-                                  }}
-                                >
-                                  <Delete fontSize='small' color={!isEmpty(file?.deleteRequest) ? 'disabled' : 'error'} />
-                                </IconButton>
-                              </HtmlTooltip>
+                              <AttachmentDeleteButton
+                                attachment={file}
+                                onSuccess={() => {
+                                  setSelectedAttachment(null);
+                                  fetchData();
+                                }}
+                              />
+                              {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
+                                <div className="flex gap-2">
+                                  <span className="relative">
+                                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                                    </span>
+                                    <HtmlTooltip title="Delete Request">
+                                      <IconButton
+                                        size="small"
+                                        color="primary"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          setDeleteRequestAnchorEl(e.currentTarget);
+                                        }}
+                                      >
+                                        <PriorityHigh fontSize="small" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </span>
+                                  <Popover
+                                    open={!!deleteRequestAnchorEl}
+                                    onClose={() => setDeleteRequestAnchorEl(null)}
+                                    anchorEl={deleteRequestAnchorEl}
+                                    anchorOrigin={{
+                                      vertical: 'bottom',
+                                      horizontal: 'right'
+                                    }}
+                                    transformOrigin={{
+                                      vertical: 'top',
+                                      horizontal: 'right'
+                                    }}
+                                  >
+                                    <div className="w-[290px] p-3">
+                                      <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
+                                      <p className="mb-2 text-xs">
+                                        A deletion request was submitted by&nbsp;
+                                        <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
+                                          {file?.deleteRequest?.user?.concatedName}
+                                        </span>{' '}
+                                        on&nbsp;
+                                        {displayDate(file?.deleteRequest?.date)}
+                                      </p>
+                                      <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                        Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
+                                      </p>
+                                      <div className="mt-2 flex  gap-2 border-t pt-2">
+                                        <ThemeButton
+                                          buttonType="theme"
+                                          onClick={() => {
+                                            handleDeleteFile([file._id]);
+                                          }}
+                                        >
+                                          Approve
+                                        </ThemeButton>
+                                        <ThemeButton
+                                          buttonType="red"
+                                          onClick={() => {
+                                            handleRequestReject(file._id);
+                                          }}
+                                        >
+                                          Reject
+                                        </ThemeButton>
+                                      </div>
+                                    </div>
+                                  </Popover>
+                                </div>
+                              )}
                             </>
                           )}
                         </div>
@@ -471,13 +653,55 @@ const Diagram = ({
                                     selectedAttachment?.url === f?.url ? 'var(--dark-active-border-color,#0F9FA9 )' : 'var(--common-border-color)'
                                 }}
                               >
-                                <div className="flex max-w-fit cursor-pointer items-center gap-2 px-[--px] py-[--py]">
-                                  <div className="w-[20px]">
-                                    <Icon size={20} />
+                                <div className="flex items-center justify-between">
+                                  <div className="flex max-w-fit cursor-pointer items-center gap-2 px-[--px] py-[--py]">
+                                    <div className="w-[20px]">
+                                      <Icon size={20} />
+                                    </div>
+                                    <HtmlTooltip title={f.name} className="max-w-fit">
+                                      <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
+                                    </HtmlTooltip>
                                   </div>
-                                  <HtmlTooltip title={f.name} className="max-w-fit">
-                                    <p className=" line-clamp-1 text-[14px] font-normal">{getFileNameWithExtension(f)}</p>
-                                  </HtmlTooltip>
+                                  <div className="flex items-center gap-1 pr-2">
+                                    <HtmlTooltip title={'Download'}>
+                                      <IconButton
+                                        size="small"
+                                        color="inherit"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          downloadFile(f);
+                                        }}
+                                      >
+                                        <GetAppIcon fontSize="small" color="primary" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                    {[...imageExtensions, ...pdfExtensions]?.includes(f?.url?.split('.')?.pop()?.toLowerCase()) && (
+                                      <HtmlTooltip title={'Preview'}>
+                                        <IconButton
+                                          size="small"
+                                          color="inherit"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            viewAttachment(f?.url);
+                                          }}
+                                        >
+                                          <VisibilityIcon fontSize="small" color="primary" />
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    )}
+                                    <HtmlTooltip title={'Send Email'}>
+                                      <IconButton
+                                        size="small"
+                                        color="inherit"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleMail(f);
+                                        }}
+                                      >
+                                        <SendIcon fontSize="small" color="primary" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </div>
                                 </div>
 
                                 {imageExtensions.includes(extension) && <ImagePreview name={f.name} url={f.url} />}
@@ -488,11 +712,25 @@ const Diagram = ({
                       </Collapse>
                     </div>
                   );
-                })
-              ) : (
-                <>
-                  <img src={emptyIllustration} alt="empty" className="mx-auto mb-2 w-[250px] opacity-60" loading="lazy" />
-                </>
+                })}
+              {rowData?.length === 0 && (
+                <div className="mx-auto mt-4 h-full w-full max-w-[450px] rounded-md  border-2 border-dashed bg-transparent text-center">
+                  <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
+                  <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
+                  <span className="mx-auto block">
+                    <ThemeButton
+                      buttonType="theme"
+                      iconForMobile={<Add />}
+                      mobileTooltip="Add"
+                      onClick={() => {
+                        setAttachemntDialog({ open: true, file: null, isClone: false });
+                      }}
+                    >
+                      <Add /> Add
+                    </ThemeButton>
+                  </span>
+                  <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>
+                </div>
               )}
             </div>
           </Box>
@@ -513,7 +751,7 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          {disableEdit && (
+          {!checkImageType(selectedAttachment?.url?.split('.')[1]) && !checkpdfType(selectedAttachment?.url?.split('.')[1]) && (
             <CustomDialogHeader
               title={selectedAttachment?.name}
               showManimizeMaximize={false}
@@ -524,21 +762,23 @@ const Diagram = ({
             />
           )}
           <CustomDialogContent isFooterPresent={false} className={cn(!disableEdit ? 'px-0 py-0' : 'px-4 py-3')}>
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ?
+            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
               <ImageEditor
                 data={selectedAttachment}
                 fetchData={fetchData}
                 setSelectedAttachment={setSelectedAttachment}
                 handleClose={() => setSelectedAttachment(null)}
-              /> : checkpdfType(selectedAttachment?.url?.split('.')[1]) ?
-                <PdfEditor
-                  data={selectedAttachment}
-                  fetchData={fetchData}
-                  setSelectedAttachment={setSelectedAttachment}
-                  handleClose={() => setSelectedAttachment(null)} />
-                :
-                <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
-            }
+              />
+            ) : checkpdfType(selectedAttachment?.url?.split('.')[1]) ? (
+              <PdfEditor
+                data={selectedAttachment}
+                fetchData={fetchData}
+                setSelectedAttachment={setSelectedAttachment}
+                handleClose={() => setSelectedAttachment(null)}
+              />
+            ) : (
+              <ShowOtherFiles data={selectedAttachment} key={selectedAttachment.url} />
+            )}
           </CustomDialogContent>
         </Dialog>
       )}
@@ -559,7 +799,6 @@ const Diagram = ({
         >
           <ManageAttachment
             attachmentId={attachemntDialog.file?._id}
-            attachmentData={attachemntDialog.file}
             isClone={attachemntDialog.isClone}
             handleClose={() => {
               setAttachemntDialog({ open: false, file: null, isClone: false });
@@ -574,36 +813,49 @@ const Diagram = ({
             fetchData={fetchData}
             attachmentType={attachmentType}
             customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
-            isOwner={attachemntDialog.file ? attachemntDialog.file?.createdBy?.user?._id === user?._id : true}
           />
         </Dialog>
       )}
-      {showConfirmBox && (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${selectedFile?.name}?`}
+      {sendMail && (
+        <Dialog
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          open={sendMail}
+          aria-labelledby="customized-dialog-title"
+          maxWidth={'md'}
           onClose={() => {
-            setShowConfirmBox(false);
+            setSendMail(false);
+            setFullScreen(false);
           }}
-          onOk={() => {
-            if (selectedFile?.createdBy?.user?._id === user?._id) {
-              handleDeleteFile([selectedFile._id]);
-            } else {
-              setCommentDialog(true);
-            }
-            setShowConfirmBox(false);
-          }}
-        />
-      )}
-      {commentDialog && (
-        <Comment
-          onClose={() => setCommentDialog(false)}
-          file={selectedFile}
-          onSuccess={() => {
-            setCommentDialog(false);
-            fetchData();
-          }}
-        />
+          disableEnforceFocus={true}
+          fullWidth
+        >
+          <CreateEmail
+            emailId={null}
+            relatedTo={[
+              {
+                type: resource,
+                referenceId: referenceId,
+                access: true
+              }
+            ]}
+            handleClose={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            fetchData={() => {
+              setSendMail(false);
+              setFullScreen(false);
+            }}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            isMinimized={!fullScreen}
+            showManimizeMaximize={true}
+            qouteBuilderAttachments={emailAttachment}
+            isQuoteBuilder={true}
+          />
+        </Dialog>
       )}
     </Box>
   );
