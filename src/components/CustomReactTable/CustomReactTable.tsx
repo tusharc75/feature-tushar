@@ -314,7 +314,7 @@ const CustomReactTable = ({
     };
     let length = getRowCount(table.getExpandedRowModel().rows, limit);
     return Math.max(length, limit);
-  }, [table, limit, isAllRowsExpanded, isClientSideGrid, expander, isMobileView]);
+  }, [table, limit, isAllRowsExpanded, expanded, isClientSideGrid, expander, isMobileView]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
