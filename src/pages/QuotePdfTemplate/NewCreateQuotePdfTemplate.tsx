@@ -1063,7 +1063,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1121,7 +1120,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1141,7 +1139,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                   </div>

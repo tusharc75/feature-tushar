@@ -10,7 +10,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Attachment } from './type';
 
-const DeleteRequestDialog = ({ onClose, file, onSuccess }: { onClose: () => void; file: Attachment; onSuccess?: () => void }) => {
+const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => void; files: Attachment[]; onSuccess?: () => void }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -24,7 +24,7 @@ const DeleteRequestDialog = ({ onClose, file, onSuccess }: { onClose: () => void
   const handleSubmit = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put('/attachment/delete-request', { _id: file?._id, comment: comment, type: 'create' })
+      .put('/attachment/delete-request', { ids: files.map((file) => file?._id), comment: comment, type: 'create' })
       .then(({ data }) => {
         setIsSubmitting(false);
         onSuccess();
@@ -53,7 +53,7 @@ const DeleteRequestDialog = ({ onClose, file, onSuccess }: { onClose: () => void
       <>
         <CustomDialogHeader
           onClose={onClose}
-          title={`Delete Request (${file?.createdBy?.user?.concatedName})`}
+          title={`Delete Request (${files.map((file) => file?.createdBy?.user?.concatedName).join(', ')})`}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);

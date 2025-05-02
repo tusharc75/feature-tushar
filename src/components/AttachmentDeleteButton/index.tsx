@@ -1,6 +1,6 @@
 import { Delete } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -11,7 +11,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isEmpty } from 'lodash';
 
 type AttachmentDeleteButtonProps = {
-  attachment: Attachment;
+  attachments: Attachment[];
   children?: React.ReactNode | Element[];
   element?: keyof HTMLElementTagNameMap | React.ComponentType<any>;
   onSuccess?: () => void;
@@ -22,7 +22,7 @@ type AttachmentDeleteButtonProps = {
 const AttachmentDeleteButton = ({
   element = IconButton,
   children = <Delete fontSize="small" />,
-  attachment,
+  attachments = [],
   onSuccess,
   onClick,
   props
@@ -38,9 +38,9 @@ const AttachmentDeleteButton = ({
   const [deleteRequestDialog, setDeleteRequestDialog] = useState({ open: false });
 
   const handleDeleteFile = async () => {
-    if (attachment) {
+    if (attachments.length > 0) {
       axiosInstance()
-        .put('attachment/deletemany', { ids: [attachment._id] })
+        .put('attachment/deletemany', { ids: attachments.map((attachment) => attachment._id) })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -54,16 +54,22 @@ const AttachmentDeleteButton = ({
         });
     }
   };
+  const isDeleteRequestSent = useMemo(() => attachments?.some((attachment) => !isEmpty(attachment?.deleteRequest)), [attachments]);
+  const allAttachmentsAreFromUser = useMemo(
+    () => attachments?.every((attachment) => attachment?.createdBy?.user?._id === user?._id),
+    [attachments, user]
+  );
 
   if (!permissions['attachment']?.isDelete) return null;
+
   return (
     <>
       <HtmlTooltip
         title={
-          attachment?.createdBy?.user?._id === user?._id
+          allAttachmentsAreFromUser
             ? 'Delete'
-            : !isEmpty(attachment?.deleteRequest)
-              ? `Delete request already sent to ${attachment?.createdBy?.user?.concatedName}`
+            : isDeleteRequestSent
+              ? `Delete request already sent to ${attachments.map((attachment) => attachment?.createdBy?.user?.concatedName).join(', ')}`
               : 'Delete Request'
         }
         placement="top"
@@ -74,12 +80,12 @@ const AttachmentDeleteButton = ({
           {
             size: 'small',
             color: 'error',
-            disabled: attachment?.createdBy?.user?._id === user?._id ? false : !isEmpty(attachment?.deleteRequest) ? true : false,
+            disabled: allAttachmentsAreFromUser ? false : isDeleteRequestSent ? true : false,
             ...props,
             onClick: (e: any) => {
               e.stopPropagation();
               onClick?.(e);
-              if (attachment.createdBy.user._id === user?._id) {
+              if (allAttachmentsAreFromUser) {
                 setShowDeleteConfirmBox({ open: true });
               } else {
                 setDeleteRequestDialog({ open: true });
@@ -92,7 +98,7 @@ const AttachmentDeleteButton = ({
       {showDeleteConfirmBox.open && (
         <ConfirmationDialog
           open={showDeleteConfirmBox.open}
-          message={`Are you sure you want to delete ${attachment.name}?`}
+          message={`Are you sure you want to delete ${attachments.map((attachment) => attachment.name).join(', ')}?`}
           onClose={() => {
             setShowDeleteConfirmBox({ open: false });
           }}
@@ -105,7 +111,7 @@ const AttachmentDeleteButton = ({
       {deleteRequestDialog.open && (
         <DeleteRequestDialog
           onClose={() => setDeleteRequestDialog({ open: false })}
-          file={attachment}
+          files={attachments}
           onSuccess={() => {
             onSuccess?.();
             setDeleteRequestDialog({ open: false });
