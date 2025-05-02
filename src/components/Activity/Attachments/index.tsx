@@ -212,7 +212,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const handleFolderDelete = (folderId) => {
     axiosInstance()
-      .put('attachment/folder/deletemany', { ids: [folderId] })
+      .put('attachment/deletemany', { ids: [folderId] })
       .then(({ data }) => {
         setAnchorEl(null);
         toastConfig.setToastConfig({
