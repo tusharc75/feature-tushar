@@ -448,18 +448,18 @@ const Diagram = ({
   const isAllSelected = selectedFiles?.length === rowData?.length;
   const isFileSelected = (file) => selectedFiles?.some((f) => f?._id === file?._id);
 
-  console.log(rowData);
-
   return (
     <Box>
       <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
         {!disableEdit && (
           <div className={`flex items-center justify-between gap-2`}>
-            <FormControlLabel
-              control={<Checkbox checked={isAllSelected} size="small" onChange={toggleSelectAll} />}
-              label="Select All"
-              sx={{ ml: '15px' }}
-            />
+            {rowData?.length > 0 && (
+              <FormControlLabel
+                control={<Checkbox checked={isAllSelected} size="small" onChange={toggleSelectAll} />}
+                label="Select All"
+                sx={{ ml: '16px' }}
+              />
+            )}
             {resource === ACTIVITY_RESOURCE.workOrder && showMaterialFilter && (
               <Autocomplete
                 fullWidth
@@ -508,7 +508,8 @@ const Diagram = ({
                         <AttachmentDeleteButton
                           attachments={selectedFiles}
                           onSuccess={() => {
-                            setSelectedAttachment(null);
+                            setSelectedFiles(null);
+                            setSelectedFiles([]);
                             fetchData();
                           }}
                           element={MenuItem}
