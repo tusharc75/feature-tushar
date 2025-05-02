@@ -18,7 +18,7 @@ export const useCreateColumns = ({
   renderedFrom,
   expanderWithCustomContent
 }) => {
-  const { dataRows: allRows, customExpanderRowData } = state;
+  const { customExpanderRowData } = state;
   const isMobile = useMediaQuery('(max-width:768px)');
 
   const handleToggleAllCustomExpnader = useCallback(() => {
