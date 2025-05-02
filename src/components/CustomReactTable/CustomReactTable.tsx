@@ -111,17 +111,8 @@ const CustomReactTable = ({
   }: TInitialState = state;
 
   const debouncedSearch = useDebounce(search, 500);
-
   const isMobileView = useMediaQuery('(max-width:768px)');
-  const [expandedRefChanged, setExpandedRefChanged] = useState(0);
   const [newColumns, setNewColumns] = useState([]);
-
-  function toggleExpandChange() {
-    if (isMobileView) return;
-    setExpandedRefChanged((prev) => {
-      return prev === 10 ? 0 : (prev += 1);
-    });
-  }
 
   const hookColumns = useCreateColumns({
     columns,
@@ -132,7 +123,6 @@ const CustomReactTable = ({
     dispatch,
     state,
     isClientSideGrid,
-    toggleExpandChange,
     resource,
     renderedFrom,
     expanderWithCustomContent
@@ -324,7 +314,7 @@ const CustomReactTable = ({
     };
     let length = getRowCount(table.getExpandedRowModel().rows, limit);
     return Math.max(length, limit);
-  }, [table, limit, expandedRefChanged, isAllRowsExpanded, isClientSideGrid, expander, isMobileView]);
+  }, [table, limit, isAllRowsExpanded, expanded, isClientSideGrid, expander, isMobileView]);
 
   useEffect(() => {
     table.setPageSize(paginationLimit);
