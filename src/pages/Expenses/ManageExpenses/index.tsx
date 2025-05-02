@@ -61,7 +61,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
   useEffect(() => {
     fetchPolicy();
     fetchFields();
-  }, []);
+  }, [expenseId]);
 
   const fetchFields = async () => {
     try {

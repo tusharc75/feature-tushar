@@ -17,6 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -37,12 +38,7 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.padMaster}`);
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.padMaster);
       if (id) {
         axiosInstance()
           .get(`${routes?.padMaster?.path}/${id}`)
@@ -57,7 +53,7 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -154,13 +150,12 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
                     : `Create ${resources?.padMaster?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
