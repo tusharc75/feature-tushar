@@ -157,6 +157,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                       }}
                       fullWidth
                       {...(minReceiveDate ? { minDate: minReceiveDate } : {})}
+                      maxDate={new Date()}
                       error={validateDate()?.receiveDate}
                       helperText={validateDate()?.receiveDate ? validateDate()?.receiveDate : ''}
                     />
