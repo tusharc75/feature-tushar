@@ -1,9 +1,9 @@
-import { IconButton, useMediaQuery } from '@mui/material';
-import { memo, useCallback, useMemo } from 'react';
+import { CircularProgress, IconButton, useMediaQuery } from '@mui/material';
+import { useCallback, useMemo, useState } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
-import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
-import { childrenProperty, insertChildRowIntoTable } from '../utils';
 import { fuzzySort, serverSort } from '../ReactTableHelpers';
+import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
+import { childrenProperty } from '../utils';
 
 export const useCreateColumns = ({
   columns,
@@ -13,7 +13,6 @@ export const useCreateColumns = ({
   hideAction,
   dispatch,
   isClientSideGrid,
-  toggleExpandChange,
   resource,
   state,
   renderedFrom,
@@ -71,7 +70,7 @@ export const useCreateColumns = ({
       );
     }
     if (expander) {
-      updatedColumn.push(expanderColumn({ fetchChildAttachment, isMobile, fetchChildAttachmentWrapper, toggleExpandChange, allRows, dispatch }));
+      updatedColumn.push(expanderColumn({ fetchChildAttachment, isMobile }));
     }
     if (!hideSelection) {
       updatedColumn.push(selectionColumn({ resource, renderedFrom }));
@@ -149,7 +148,8 @@ export const useCreateColumns = ({
     handleToggleAllCustomExpnader,
     handleToggleSingleCustomExpnader,
     isAllCustomExpanderExpanded,
-    isSingleCustomExpanderExpanded
+    isSingleCustomExpanderExpanded,
+    fetchChildAttachment
   ]);
 
   return newColumns;
@@ -203,7 +203,7 @@ const selectionColumn = ({ resource, renderedFrom }) => ({
   )
 });
 
-const expanderColumn = ({ fetchChildAttachment, isMobile, fetchChildAttachmentWrapper, toggleExpandChange, dispatch, allRows }) => ({
+const expanderColumn = ({ fetchChildAttachment, isMobile }) => ({
   id: 'expander',
   enableResizing: false,
   header: ({ table }) =>
@@ -233,27 +233,7 @@ const expanderColumn = ({ fetchChildAttachment, isMobile, fetchChildAttachmentWr
   filterFn: null,
   sortingFn: null,
   canDrag: false,
-  cell: ({ row }) => (
-    <div
-      style={{
-        marginLeft: isMobile ? 0 : `${row.depth * 15}px`
-      }}
-    >
-      {row.original.canExpand === true || row.getCanExpand() ? (
-        <IconButton
-          size="small"
-          style={{ fontSize: 13 }}
-          onClick={async () => {
-            row.getToggleExpandedHandler()();
-            fetchChildAttachmentWrapper({ row, fetchChildAttachment, dispatch, allRows });
-            toggleExpandChange();
-          }}
-        >
-          {row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
-        </IconButton>
-      ) : null}
-    </div>
-  )
+  cell: ({ row }) => <ExpanderCell row={row} fetchChildAttachment={fetchChildAttachment} isMobile={isMobile} />
 });
 
 const expanderColumnWithCustomComponent = ({
@@ -294,30 +274,44 @@ const expanderColumnWithCustomComponent = ({
   )
 });
 
-const fetchChildAttachmentWrapper = async ({ row, fetchChildAttachment, dispatch, allRows }) => {
+const ExpanderCell = ({ row, fetchChildAttachment, isMobile }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  return (
+    <div
+      style={{
+        marginLeft: isMobile ? 0 : `${row.depth * 15}px`
+      }}
+    >
+      {row.original.canExpand === true || row.getCanExpand() ? (
+        <IconButton
+          size="small"
+          style={{ fontSize: 13 }}
+          onClick={async () => {
+            row.getToggleExpandedHandler()();
+            fetchChildAttachmentWrapper({ row, fetchChildAttachment, setIsLoading });
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? <CircularProgress size={13} /> : row.getIsExpanded() || row.isExpanded ? <FaAngleDown /> : <FaAngleRight />}
+        </IconButton>
+      ) : null}
+    </div>
+  );
+};
+const fetchChildAttachmentWrapper = async ({ row, fetchChildAttachment, setIsLoading }) => {
   if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
-  dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
+  setIsLoading(true);
   try {
     if (row?.original[childrenProperty]?.length > 0 || row[childrenProperty]?.length > 0) {
       row?.toggleExpanded();
-      dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
+      setIsLoading(false);
       return;
     }
-
-    let subRows = await fetchChildAttachment(row.original._id);
-    if (!subRows || subRows?.length === 0) {
-      row.original.canExpand = false;
-      row.canExpand = false;
-      return;
-    }
-    insertChildRowIntoTable({ existingRows: allRows, subRowsToInsert: subRows, parentId: row.original._id, dispatch });
-
-    setTimeout(() => {
-      row?.toggleExpanded();
-    }, 50);
+    await fetchChildAttachment(row.original._id);
+    row?.toggleExpanded();
   } catch (error) {
     console.error(error);
   } finally {
-    dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: null });
+    setIsLoading(false);
   }
 };

@@ -1,12 +1,13 @@
 import { Column, Header } from '@tanstack/react-table';
 import dayjs from 'dayjs';
-import { flatMapDeep, isArray, isEmpty, snakeCase, uniqBy } from 'lodash';
+import { flatMapDeep, isArray, isEmpty, snakeCase, uniqBy, update } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { dateFormatToSend } from 'src/constants/helpers';
 import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
 import { FilterModel } from './types';
+import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 
 export const childrenProperty = 'subRows';
 
@@ -158,32 +159,42 @@ export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
   setCellValue(getCellValue(cell) || null);
 };
 
-export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, dispatch, parentId }) => {
-  const updatedRows = [...existingRows];
+export const insertChildRowIntoTable = ({
+  parentId,
+  dispatch,
+  state,
+  subRows
+}: {
+  parentId: string;
+  state: TInitialState;
+  subRows: any[];
+  dispatch: React.Dispatch<TActios>;
+}) => {
+  const { dataRows } = state;
+  const updatedRows = [...dataRows];
 
-  for (let row of updatedRows) {
-    if (row._id === parentId) {
-      if (subRowsToInsert.length > 0) {
-        row.subRows = subRowsToInsert;
-      } else {
-        row.canExpand = false;
+  function nestRows(parentId: string, allRows: any[], subRows: any[]) {
+    for (let i = 0; i < allRows.length; i++) {
+      const row = allRows[i];
+      if (row._id === parentId) {
+        if (subRows.length > 0) {
+          row[childrenProperty] = subRows;
+        } else {
+          row.canExpand = false;
+        }
+        return;
+      } else if (row[childrenProperty]) {
+        nestRows(parentId, row[childrenProperty], subRows);
       }
-      break;
-    } else if (row.subRows) {
-      insertChildRowIntoTable({
-        existingRows: row.subRows,
-        subRowsToInsert,
-        parentId,
-        dispatch
-      });
     }
   }
+
+  nestRows(parentId, updatedRows, subRows);
 
   dispatch({
     type: 'update',
     data: updatedRows
   });
-
   return updatedRows;
 };
 
@@ -739,6 +750,9 @@ export function adjustSizes(original: TColType[], visibleColumns: { [key: string
 }
 
 export const AccessorFunction = (data: any, fieldName: any) => {
-  return isArray(data?.[fieldName]) ? data?.[fieldName]?.map((e) => e?.optionLabel)?.toString()
-    : typeof data?.[fieldName] === 'object' ? data[fieldName]?.optionLabel : data?.[fieldName];
-}
+  return isArray(data?.[fieldName])
+    ? data?.[fieldName]?.map((e) => e?.optionLabel)?.toString()
+    : typeof data?.[fieldName] === 'object'
+      ? data[fieldName]?.optionLabel
+      : data?.[fieldName];
+};
