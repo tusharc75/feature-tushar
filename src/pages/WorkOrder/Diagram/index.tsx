@@ -7,7 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Autocomplete, Box, Checkbox, Collapse, Dialog, FormControlLabel, IconButton, MenuItem, Popover, TextField, Typography } from '@mui/material';
 import { isEmpty } from 'lodash';
 import mime from 'mime';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CiFileOn } from 'react-icons/ci';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -102,13 +102,11 @@ const Diagram = ({
         setRowData(data);
         setExpended((prev) => {
           const expend: any = {};
-          data?.forEach((file) => {
+          data?.forEach((file, index) => {
             if (prev[file?._id] === true || prev[file._id] === false) {
-              // if the file is already expanded or collapsed, then set the same state
               expend[file?._id] = prev[file?._id];
             } else {
-              // if the file is not expanded then set it to open state
-              expend[file?._id] = true;
+              expend[file?._id] = index === 0 ? true : false;
             }
           });
           return expend;
@@ -139,8 +137,7 @@ const Diagram = ({
 
   const handleDeleteFile = async (ids) => {
     if (ids?.length) {
-      axiosInstance()
-        .put('attachment/deletemany', { ids })
+      axiosInstance().put('attachment/deletemany', { ids })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -508,7 +505,11 @@ const Diagram = ({
                     </ThemeButton>
                   </Box>
                   <ActionButtonWithMenu
-                    disabled={selectedFiles?.length === 0}
+                    disabled={selectedFiles?.length === 0
+                      || selectedFiles?.find((e) => !isEmpty(e?.deleteRequest)
+                        || (!selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id)
+                          && !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
+                        ? true : false)}
                     actionMenuItems={
                       <>
                         <AttachmentDeleteButton
@@ -520,7 +521,7 @@ const Diagram = ({
                           }}
                           element={MenuItem}
                         >
-                          Delete
+                          {selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id) ? `Delete Request` : `Delete`}
                         </AttachmentDeleteButton>
                       </>
                     }
@@ -543,11 +544,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -803,7 +803,7 @@ const Diagram = ({
                   );
                 })}
               {rowData?.length === 0 && (
-                <div className="mx-auto mt-4 h-full w-full max-w-[450px] rounded-md  border-2 border-dashed bg-transparent text-center">
+                <div className="mx-auto mt-4 h-full w-full rounded-md  border-2 border-dashed bg-transparent text-center">
                   <CiFileOn size={100} className="mx-auto mt-5 block select-none text-gray-400 dark:text-gray-500" />
                   <p className="mb-5 select-none text-sm text-gray-400 dark:text-gray-500">No files uploaded</p>
                   <span className="mx-auto block">

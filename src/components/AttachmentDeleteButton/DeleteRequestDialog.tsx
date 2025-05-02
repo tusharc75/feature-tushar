@@ -23,8 +23,7 @@ const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => voi
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-    axiosInstance()
-      .put('/attachment/delete-request', { ids: files.map((file) => file?._id), comment: comment, type: 'create' })
+    axiosInstance().put('/attachment/delete-request', { ids: files?.map((e) => e?._id), comment: comment, type: 'create' })
       .then(({ data }) => {
         setIsSubmitting(false);
         onSuccess();
@@ -48,12 +47,12 @@ const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => voi
       aria-labelledby="customized-dialog-title"
       open={true}
       fullWidth
-      onClose={(e, reason) => {}}
+      onClose={(e, reason) => { }}
     >
       <>
         <CustomDialogHeader
           onClose={onClose}
-          title={`Delete Request (${files.map((file) => file?.createdBy?.user?.concatedName).join(', ')})`}
+          title={`Delete Request (${files?.map((e) => e?.createdBy?.user?.concatedName).join(', ')})`}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
             setFullScreen((prevState) => !prevState);

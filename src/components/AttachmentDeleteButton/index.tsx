@@ -40,7 +40,7 @@ const AttachmentDeleteButton = ({
   const handleDeleteFile = async () => {
     if (attachments.length > 0) {
       axiosInstance()
-        .put('attachment/deletemany', { ids: attachments.map((attachment) => attachment._id) })
+        .put('attachment/deletemany', { ids: attachments?.map((e) => e._id) })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -55,10 +55,7 @@ const AttachmentDeleteButton = ({
     }
   };
   const isDeleteRequestSent = useMemo(() => attachments?.some((attachment) => !isEmpty(attachment?.deleteRequest)), [attachments]);
-  const allAttachmentsAreFromUser = useMemo(
-    () => attachments?.every((attachment) => attachment?.createdBy?.user?._id === user?._id),
-    [attachments, user]
-  );
+  const allAttachmentsAreFromUser = useMemo(() => attachments?.every((attachment) => attachment?.createdBy?.user?._id === user?._id), [attachments, user]);
 
   if (!permissions['attachment']?.isDelete) return null;
 
@@ -69,7 +66,7 @@ const AttachmentDeleteButton = ({
           allAttachmentsAreFromUser
             ? 'Delete'
             : isDeleteRequestSent
-              ? `Delete request already sent to ${attachments.map((attachment) => attachment?.createdBy?.user?.concatedName).join(', ')}`
+              ? `Delete request already sent to ${attachments?.map((e) => e?.createdBy?.user?.concatedName).join(', ')}`
               : 'Delete Request'
         }
         placement="top"
@@ -98,7 +95,7 @@ const AttachmentDeleteButton = ({
       {showDeleteConfirmBox.open && (
         <ConfirmationDialog
           open={showDeleteConfirmBox.open}
-          message={`Are you sure you want to delete ${attachments.map((attachment) => attachment.name).join(', ')}?`}
+          message={`Are you sure you want to delete ${attachments?.map((e) => e.name).join(', ')}?`}
           onClose={() => {
             setShowDeleteConfirmBox({ open: false });
           }}
