@@ -12,12 +12,13 @@ import axios, { CancelTokenSource } from 'axios';
 import _ from 'lodash';
 import mime from 'mime';
 import queryString from 'query-string';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
+import CustomReactTable, { gridFilterParser, insertChildRowIntoTable, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -29,11 +30,9 @@ import ManageAttachment from '../../../components/Activity/Attachments/ManageAtt
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
 import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 
 const renderedFrom = 'attachment_render';
 
@@ -55,7 +54,7 @@ export default function Attachment() {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
+  const { rowCount, selectedRecords, page, limit, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [emailAttachment, setEmailAttachment] = useState(null);
@@ -550,15 +549,19 @@ export default function Attachment() {
       });
   };
 
-  const fetchChildAttachment = async (id) => {
-    const attachment = await axiosInstance().get(`/attachment/child/${id}`);
-    return attachment?.data?.data.map((d) => ({
-      ...d,
-      id: d._id,
-      canEdit: d.type === 'folder' ? true : d?.canEdit,
-      canExpand: d.type === 'folder'
-    }));
-  };
+  const fetchChildAttachment = useCallback(
+    async (parentId: string) => {
+      const attachment = await axiosInstance().get(`/attachment/child/${parentId}`);
+      const subRows = attachment?.data?.data.map((d) => ({
+        ...d,
+        id: d._id,
+        canEdit: d.type === 'folder' ? true : d?.canEdit,
+        canExpand: d.type === 'folder'
+      }));
+      insertChildRowIntoTable({ subRows, parentId, dispatch, state });
+    },
+    [dispatch, state]
+  );
 
   const generateNestedData = (data, parent) => {
     const childRow = data
