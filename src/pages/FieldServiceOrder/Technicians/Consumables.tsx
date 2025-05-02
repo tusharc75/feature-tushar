@@ -341,15 +341,17 @@ const Consumables = ({
     }
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
+  const handleSaveData = async (rows: any, saveAndNext = false, showNext = false) => {
     try {
       setUpdating(true);
-      const response = await axiosInstance().put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: rows });
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: response?.data?.message
-      });
+      if (!showNext) {
+        const response = await axiosInstance().put(`${fieldServiceOrder.api}/${serviceOrderData?._id}/material`, { material: rows });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: response?.data?.message
+        });
+      }
       dispatch({ type: 'loading', loading: true });
       fetchConsumablesData();
       if (saveAndNext) {
