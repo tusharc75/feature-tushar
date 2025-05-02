@@ -26,11 +26,13 @@ import {
   getObjKeysWithValues,
   serializedAsset,
   setFieldsInAscendingOrder,
+  sidebarResource,
   yupSchema
 } from '../../constants/helpers';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageSerializedAsset = ({
   isClone = false,
@@ -73,132 +75,125 @@ const ManageSerializedAsset = ({
   }, [allFields]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        data = data.filter((d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName));
+    fetchFields();
+  }, [productInventoryId]);
 
-        if (assetLogFields && assetLogFields?.length) {
-          data = data.filter((d) => [...assetLogFields].includes(d.fieldData.fieldName));
-          data.forEach((d) => {
-            d.fieldData.disableOnEdit = false;
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.serializedAsset, [
+        'currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation']);
+
+      const categoryOptions = fieldsDataAll.find((obj) => obj?.fieldName === 'productCategory')?.option || [];
+      const plantsOptions = fieldsDataAll.find((obj) => obj?.fieldName === 'warehouse')?.option || [];
+      const productOptions = fieldsDataAll.find((obj) => obj?.fieldName === 'product')?.option || [];
+      setProductCategoryOptions(categoryOptions);
+      setProductTypeOptions(productOptions);
+      setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate);
+
+      if (productInventoryId) {
+        axiosInstance()
+          .get(`${serializedAsset.api}/` + productInventoryId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const {
+                _id,
+                createdBy,
+                updatedBy,
+                assetNumber,
+                mtrAttached,
+                mtrAttachedBy,
+                mtrAttachedDate,
+                certificateAttached,
+                certificateIssueDate,
+                certificateExpiryDate,
+                ...rest
+              } = data;
+              setCloneHeading(assetNumber);
+              let oldValues = { ...rest };
+              oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
+              oldValues.assetNumber = data.assetNumberType === ASSET_NUMBER_TYPE.manual ? ''
+                : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
+
+              let createValues = getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user);
+              const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
+              keyClear?.forEach((key) => {
+                if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
+                  createValues[key] = '';
+                }
+              });
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                values: createValues
+              });
+            } else {
+              fieldsDataForUpdate?.forEach((e: any) => {
+                if (e?.fieldName === 'warehouse') {
+                  e.required = false;
+                }
+              });
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        let createValues = getObjKeys('', fieldsDataForCreate);
+        if (productId && fieldsDataForCreate.some((e) => e.fieldName === 'product')) {
+          createValues['product'] = productId;
         }
-        let allFields = data.map((d: any) => d.fieldData);
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        const categoryOptions = data.find((obj) => obj?.fieldData.fieldName === 'productCategory')?.fieldData?.option || [];
-        const plantsOptions = data.find((obj) => obj?.fieldData.fieldName === 'warehouse')?.fieldData?.option || [];
-        const productOptions = data.find((obj) => obj?.fieldData.fieldName === 'product')?.fieldData?.option || [];
-
-        setProductCategoryOptions(categoryOptions);
-        setProductTypeOptions(productOptions);
-        setAllFields(productInventoryId ? fieldsDataForUpdate : fieldsDataForCreate);
-
-        if (productInventoryId) {
-          axiosInstance()
-            .get(`${serializedAsset.api}/` + productInventoryId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const {
-                  _id,
-                  createdBy,
-                  updatedBy,
-                  assetNumber,
-                  mtrAttached,
-                  mtrAttachedBy,
-                  mtrAttachedDate,
-                  certificateAttached,
-                  certificateIssueDate,
-                  certificateExpiryDate,
-                  ...rest
-                } = data;
-                setCloneHeading(assetNumber);
-                let oldValues = { ...rest };
-                oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
-                oldValues.assetNumber = data.assetNumberType === ASSET_NUMBER_TYPE.manual ? ''
-                  : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
-
-                let createValues = getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user);
-                const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
-                keyClear?.forEach((key) => {
-                  if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
-                    createValues[key] = '';
-                  }
-                });
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: createValues
-                });
-              } else {
-                fieldsDataForUpdate?.forEach((e: any) => {
-                  if (e?.fieldName === 'warehouse') {
-                    e.required = false;
-                  }
-                });
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-                  values: getObjKeysWithValues(data, allFields)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues = getObjKeys('', fieldsDataForCreate);
-          if (productId && fieldsDataForCreate.some((e) => e.fieldName === 'product')) {
-            createValues['product'] = productId;
+        if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === 'productCategory')) {
+          createValues['productCategory'] = productCategory;
+        }
+        const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
+        keyClear?.forEach((key) => {
+          if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
+            createValues[key] = '';
           }
-          if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === 'productCategory')) {
-            createValues['productCategory'] = productCategory;
+        });
+        if (referenceType === 'repairOrder' || referenceType === 'repairJob') {
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
+            createValues['customerAccount'] = referenceData?.customerAccount;
           }
-          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
-          keyClear?.forEach((key) => {
-            if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
-              createValues[key] = '';
-            }
-          });
-          if (referenceType === 'repairOrder' || referenceType === 'repairJob') {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
-              createValues['customerAccount'] = referenceData?.customerAccount;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse') && referenceData?.warehouse) {
-              createValues['warehouse'] = referenceData?.warehouse;
-              const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
-              if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
-                createValues['currentLocation'] = warehouseAddress?.address;
-              }
-            }
-            fieldsDataForCreate?.forEach((e) => {
-              if (referenceData?.customerAccount && ['customerAccount'].includes(e.fieldName)) {
-                e.isUneditable = true;
-              }
-              if (['warehouse', 'currentLocation'].includes(e.fieldName)) {
-                e.isUneditable = true;
-              }
-            });
-          }
-          if (createValues['warehouse'] && !createValues['currentLocation']) {
-            const warehouseAddress = plantsOptions?.find((e) => e.optionValue === createValues['warehouse']);
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'warehouse') && referenceData?.warehouse) {
+            createValues['warehouse'] = referenceData?.warehouse;
+            const warehouseAddress = plantsOptions?.find((e) => e.optionValue === referenceData?.warehouse);
             if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
               createValues['currentLocation'] = warehouseAddress?.address;
             }
           }
-          if (createValues['assetNumberType'] === ASSET_NUMBER_TYPE.manual) {
-            createValues['assetNumber'] = '';
-          }
-          setInitialData({
-            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-            values: createValues
+          fieldsDataForCreate?.forEach((e) => {
+            if (referenceData?.customerAccount && ['customerAccount'].includes(e.fieldName)) {
+              e.isUneditable = true;
+            }
+            if (['warehouse', 'currentLocation'].includes(e.fieldName)) {
+              e.isUneditable = true;
+            }
           });
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [productInventoryId]);
+        if (createValues['warehouse'] && !createValues['currentLocation']) {
+          const warehouseAddress = plantsOptions?.find((e) => e.optionValue === createValues['warehouse']);
+          if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
+            createValues['currentLocation'] = warehouseAddress?.address;
+          }
+        }
+        if (createValues['assetNumberType'] === ASSET_NUMBER_TYPE.manual) {
+          createValues['assetNumber'] = '';
+        }
+        setInitialData({
+          fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+          values: createValues
+        });
+      }
+
+
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setProductCategoryID(null);
