@@ -51,7 +51,6 @@ const GeneralRemarkManagement = (props) => {
                 height={300}
                 initialValue={initialValues?.generalRemark || ''}
                 imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                isCheckHeight={true}
                 doNotShowUploadFile={true}
               />
             </Box>
