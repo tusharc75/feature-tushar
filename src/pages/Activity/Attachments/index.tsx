@@ -9,7 +9,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import axios, { CancelTokenSource } from 'axios';
-import _ from 'lodash';
+import _, { isEmpty } from 'lodash';
 import mime from 'mime';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -260,14 +260,12 @@ export default function Attachment() {
                   </IconButton>
                 </HtmlTooltip>
               )}
-              {row.original?.type === 'file' &&
-                <DeleteRequest
-                  file={row.original}
-                  handleSucess={() => {
-                    setIsRefresh(!isRefresh)
-                  }}
-                />
-              }
+              <DeleteRequest
+                file={row.original}
+                handleSucess={() => {
+                  setIsRefresh(!isRefresh)
+                }}
+              />
             </div>
           );
         }
@@ -300,14 +298,11 @@ export default function Attachment() {
 
   useEffect(() => {
     if (referenceType) {
-      axiosInstance()
-        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
-        .then(({ data: { data } }) => {
-          setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
+      axiosInstance().get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`).then(({ data: { data } }) => {
+        setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
     } else {
       setFilter([]);
     }
@@ -317,8 +312,6 @@ export default function Attachment() {
     const cancelToken = axios.CancelToken.source();
     if (filter) fetchAttachments(cancelToken);
     return () => cancelToken.cancel();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filter, filters, sorting, isRefresh]);
 
   useEffect(() => {
@@ -599,12 +592,19 @@ export default function Attachment() {
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={permissions?.attachment?.isDelete ?
-            !selectedRecords?.every((records) => records?.canEdit) : true}>Delete</MenuItem>
+        <AttachmentDeleteButton
+          attachments={selectedRecords}
+          onSuccess={() => {
+            fetchAttachments();
+          }}
+          element={MenuItem}
+        >
+          {selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id) ? `Delete Request` : `Delete`}
+        </AttachmentDeleteButton>
       </>
     );
   };
+
 
   return (
     <section className="main-container-v1">
@@ -642,7 +642,14 @@ export default function Attachment() {
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
             isActionButtonVisible={true}
-            actionButtonProps={{ disabled: selectedRecords.length > 0 ? false : true }}
+            actionButtonProps={{
+              disabled:
+                (selectedRecords?.length === 0
+                  || selectedRecords?.find((e) => !isEmpty(e?.deleteRequest)
+                    || (!selectedRecords?.every((e) => e?.createdBy?.user?._id === user?.user?._id)
+                      && !selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))))
+                  ? true : !permissions?.attachment?.isDelete
+            }}
             actionMenuItems={<ActionMenuItems />}
             addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
             isAddButtonVisible={true}
