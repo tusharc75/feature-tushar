@@ -104,8 +104,10 @@ const Diagram = ({
           const expend: any = {};
           data?.forEach((file) => {
             if (prev[file?._id] === true || prev[file._id] === false) {
+              // if the file is already expanded or collapsed, then set the same state
               expend[file?._id] = prev[file?._id];
             } else {
+              // if the file is not expanded then set the open state
               expend[file?._id] = true;
             }
           });
