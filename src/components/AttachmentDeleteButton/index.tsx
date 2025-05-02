@@ -22,7 +22,7 @@ type AttachmentDeleteButtonProps = {
 const AttachmentDeleteButton = ({
   element = IconButton,
   children = <Delete fontSize="small" />,
-  attachments,
+  attachments = [],
   onSuccess,
   onClick,
   props
@@ -54,9 +54,9 @@ const AttachmentDeleteButton = ({
         });
     }
   };
-  const isDeleteRequestSent = useMemo(() => attachments.some((attachment) => !isEmpty(attachment?.deleteRequest)), [attachments]);
+  const isDeleteRequestSent = useMemo(() => attachments?.some((attachment) => !isEmpty(attachment?.deleteRequest)), [attachments]);
   const allAttachmentsAreFromUser = useMemo(
-    () => attachments.every((attachment) => attachment?.createdBy?.user?._id === user?._id),
+    () => attachments?.every((attachment) => attachment?.createdBy?.user?._id === user?._id),
     [attachments, user]
   );
 
