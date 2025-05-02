@@ -10,12 +10,13 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
 import InputField from '../../components/Helpers/InputField';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const CreateProductCategory = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,50 +32,51 @@ const CreateProductCategory = (props) => {
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Product Category')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (productCategoryId) {
-          axiosInstance()
-            .get(`/product-category/` + productCategoryId)
-            .then(({ data: { data } }) => {
-              let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory')?.option;
-              if (tempOptionArray) {
-                fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory').option = tempOptionArray.filter(
-                  (data) => data.optionValue !== productCategoryId
-                );
-              }
-              const { name, ...rest } = data;
-              setCloneHeading(name);
-              if (isClone) {
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: getObjKeys('', fieldsDataForCreate)
-          });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [productCategoryId]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productCategory);
+
+      if (productCategoryId) {
+        axiosInstance()
+          .get(`/product-category/` + productCategoryId)
+          .then(({ data: { data } }) => {
+            let tempOptionArray = fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory')?.option;
+            if (tempOptionArray) {
+              fieldsDataForUpdate.find((d) => d.fieldName === 'parentCategory').option = tempOptionArray.filter(
+                (data) => data.optionValue !== productCategoryId
+              );
+            }
+            const { name, ...rest } = data;
+            setCloneHeading(name);
+            if (isClone) {
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: getObjKeys('', fieldsDataForCreate)
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
 
   const handleSubmit = (values) => {
     setSaveClick(true);

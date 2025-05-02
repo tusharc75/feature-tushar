@@ -16,6 +16,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export const ManageProductTypes = ({ isClone = false, productTypesId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
 
@@ -31,9 +32,13 @@ export const ManageProductTypes = ({ isClone = false, productTypesId = null, isR
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.productTypes}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    fetchFields();
+  }, []);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productTypes);
+
       if (productTypesId) {
         axiosInstance()
           .get(`${productTypes.api}/` + productTypesId)
@@ -54,7 +59,7 @@ export const ManageProductTypes = ({ isClone = false, productTypesId = null, isR
             else {
               setInitialData({
                 fields: fieldsDataForUpdate,
-                values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                values: getObjKeysWithValues(data, fieldsDataAll)
               });
             }
           })
@@ -70,9 +75,10 @@ export const ManageProductTypes = ({ isClone = false, productTypesId = null, isR
           values: initialData
         });
       }
-    })
-  }, []);
-
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);

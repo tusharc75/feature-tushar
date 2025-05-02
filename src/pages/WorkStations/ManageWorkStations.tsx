@@ -54,7 +54,7 @@ const ManageWorkStations = ({ onClose, onSuccess, isClone = false, id = null }) 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fieldsDataAll, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {

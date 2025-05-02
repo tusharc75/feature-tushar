@@ -47,7 +47,7 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fieldsDataAll, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {

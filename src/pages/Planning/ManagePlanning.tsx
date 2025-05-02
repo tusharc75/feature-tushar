@@ -58,7 +58,7 @@ const ManagePlanning = ({ onClose, onSuccess, isClone = false, id = null, isRedi
             }
             setInitialData({
               fields: fields,
-              values: isClone ? { ...getObjKeysWithValues(tempData, fieldsDataAll, true, user) } : getObjKeysWithValues(tempData, fields)
+              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
