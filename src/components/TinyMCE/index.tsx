@@ -18,7 +18,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-// import 'tinymce/icons/default';
 import './tinymce.scss';
 
 import { startCase } from 'lodash';
@@ -69,7 +68,6 @@ export default function TinyMCE(props) {
     doNotShowUploadFile = false,
     showVariableDropdown = false,
     id,
-    isCheckHeight = false,
     disabledEditor = false,
     isSendToCustomer = false,
     onQuoteUpload = null,
@@ -77,7 +75,6 @@ export default function TinyMCE(props) {
   } = props;
 
   const classes = useStyles();
-  const [prevData, setPrevData] = useState('');
   const [imageDetails, setImageDetails] = useState({ width: 0, height: 0, alt: '' });
   const [imageUrl, setImageUrl] = useState('');
   const [uploadError, setUploadError] = useState(false);
@@ -93,7 +90,7 @@ export default function TinyMCE(props) {
 
   useEffect(() => {
     if (id && ['header', 'footer'].indexOf(id) >= 0) {
-      setImageDetails({ width: 0, height: 60, alt: '' });
+      setImageDetails({ width: 0, height: 0, alt: '' });
     }
   }, []);
 
@@ -127,6 +124,7 @@ export default function TinyMCE(props) {
       ev.target.value = '';
     }
   };
+
   const getFileUrl = (file, api, details) => {
     setImageUploadProgress(0);
     let formData = new FormData();
@@ -164,14 +162,9 @@ export default function TinyMCE(props) {
           if (onUploadFile) {
             onUploadFile(data.fileUrl);
           } else {
-            if (isCheckHeight) {
-              if (isValidHeight()) {
-                editorRef.current.execCommand('mceInsertContent', false, data);
-              }
-            } else editorRef.current.execCommand('mceInsertContent', false, data);
+            editorRef.current.execCommand('mceInsertContent', false, data);
           }
         }
-        //data.fileUrl data.fileName
       })
       .catch((err) => {
         setImgUploading(false);
@@ -200,41 +193,6 @@ export default function TinyMCE(props) {
     }
   };
 
-  const getImageUrl1 = (file) => {
-    let formData = new FormData();
-    formData.append('file', file);
-    setIsImageLoading(true);
-    axiosInstance()
-      .post('/user/upload-public', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      .then(({ data }) => {
-        setIsImageLoading(false);
-        setUploadError(false);
-        setImageUrl(data.fileUrl);
-      })
-      .catch((err) => setIsImageLoading(false));
-  };
-
-  const isValidHeight = () => {
-    return true;
-    // const contentDiv = document.getElementById('contentDiv');
-    // let content = editorRef.current.getContent();
-    // contentDiv.innerHTML = content;
-    // let contentHeight = contentDiv.offsetHeight;
-    // let validHeight = height ? height / 2.5 : 106;
-
-    // if (contentHeight < validHeight) {
-    //   setPrevData(content);
-    //   contentDiv.innerHTML = '';
-    //   return true;
-    // } else {
-    //   editorRef.current.setContent(prevData);
-    //   contentDiv.innerHTML = '';
-    //   return false;
-    // }
-  };
-
   const handleSubmit = () => {
     if (!imageUrl) {
       setUploadError(true);
@@ -246,8 +204,6 @@ export default function TinyMCE(props) {
     }
     if (imageDetails && imageDetails.height) {
       imgTag = `${imgTag} height='${imageDetails.height}'`;
-    } else if (isCheckHeight) {
-      imgTag = `${imgTag} height='${60}'`;
     }
 
     if (imageDetails && imageDetails.alt) {
@@ -255,16 +211,11 @@ export default function TinyMCE(props) {
     }
     imgTag = `${imgTag} />`;
 
-    if (isCheckHeight) {
-      if (isValidHeight()) {
-        editorRef.current.execCommand('mceInsertContent', false, imgTag);
-      }
-    } else editorRef.current.execCommand('mceInsertContent', false, imgTag);
+    editorRef.current.execCommand('mceInsertContent', false, imgTag);
 
     setIsUploadImage(false);
     setImageUrl('');
-    let tempHeight = id && ['header', 'footer'].indexOf(id) >= 0 ? 60 : 0;
-    setImageDetails({ width: 0, height: tempHeight, alt: '' });
+    setImageDetails({ width: 0, height: 0, alt: '' });
   };
 
   const handleChange = (e) => {
@@ -274,11 +225,7 @@ export default function TinyMCE(props) {
 
   const handleVaribleSelect = (e) => {
     let newTag = `<p>{{${e}}}</p>`;
-    if (isCheckHeight) {
-      if (isValidHeight()) {
-        editorRef.current.execCommand('mceInsertContent', false, newTag);
-      }
-    } else editorRef.current.execCommand('mceInsertContent', false, newTag);
+    editorRef.current.execCommand('mceInsertContent', false, newTag);
   };
 
   const openActions = (event) => {
@@ -423,8 +370,7 @@ export default function TinyMCE(props) {
                     <ThemeButton
                       buttonType="transparent"
                       onClick={() => {
-                        let tempHeight = id && ['header', 'footer'].indexOf(id) >= 0 ? 60 : 0;
-                        setImageDetails({ width: 0, height: tempHeight, alt: '' });
+                        setImageDetails({ width: 0, height: 0, alt: '' });
                         setImageUrl('');
                         setIsUploadImage(false);
                       }}
@@ -521,17 +467,7 @@ export default function TinyMCE(props) {
               initialValue={initialValue || ''}
               onChange={(content) => {
                 if (editorRef.current.isDirty()) {
-                  if (isCheckHeight) {
-                    if (isValidHeight()) {
-                      onChange(editorRef.current.getContent());
-                    } else {
-                      setToastConfig({
-                        open: true,
-                        type: 'error',
-                        message: `${id ? id.charAt(0).toUpperCase() + id.slice(1) : 'Editor'} height is restricted so you cannot add more content`
-                      });
-                    }
-                  } else onChange(editorRef.current.getContent());
+                  onChange(editorRef.current.getContent());
                 }
               }}
               init={{

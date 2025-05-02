@@ -13,6 +13,7 @@ import { cn } from 'src/constants/helpers';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
+import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -74,7 +75,7 @@ const ListingPageHeader = ({
   const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const [locationKeys, setLocationKeys] = useState([]);
   const { setGlobalSearch } = useSearch();
 
@@ -101,14 +102,6 @@ const ListingPageHeader = ({
     if (setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
     onToggle && onToggle(event, value);
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -197,8 +190,9 @@ const ListingPageHeader = ({
           </>
         ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -252,35 +246,15 @@ const ListingPageHeader = ({
                 <HideWhenOffline>
                   {isActionButtonVisible ? (
                     <>
-                      <ThemeButton
-                        tooltip={actionButtonTooltip ?? ''}
-                        size="small"
-                        id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
-                        disabled={actionButtonDisabled}
+                      <ActionButtonWithMenu
+                        actionMenuItems={actionMenuItems}
+                        tooltip={actionButtonTooltip}
+                        showSearchInMobile={showSearchInMobile}
+                        disabeled={actionButtonDisabled}
+                        actionButtonIconsEnabled={actionButtonIconsEnabled}
+                        loading={actionButtonLoading}
                         {...restOfActionButtonProps}
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        buttonType="yellow"
-                        endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
-                        iconForMobile={<FaCircleChevronDown size={16} />}
-                        isLoading={actionButtonLoading}
-                      >
-                        Actions
-                      </ThemeButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                        TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
-                      >
-                        <span onClick={() => closeActions()}>{actionMenuItems}</span>
-                      </Menu>
+                      />
                     </>
                   ) : null}
                 </HideWhenOffline>
