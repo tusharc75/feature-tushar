@@ -107,7 +107,7 @@ const Diagram = ({
               // if the file is already expanded or collapsed, then set the same state
               expend[file?._id] = prev[file?._id];
             } else {
-              // if the file is not expanded then set the open state
+              // if the file is not expanded then set it to open state
               expend[file?._id] = true;
             }
           });
@@ -462,7 +462,7 @@ const Diagram = ({
             {rowData?.length > 0 && (
               <FormControlLabel
                 control={<Checkbox checked={isAllSelected} size="small" onChange={toggleSelectAll} />}
-                label="Select All"
+                label={<span className="font-semibold">Select All</span>}
                 sx={{ ml: '16px' }}
               />
             )}
