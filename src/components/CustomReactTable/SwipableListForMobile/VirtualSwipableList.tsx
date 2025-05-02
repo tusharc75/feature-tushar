@@ -142,10 +142,10 @@ const VirtualSwipableList = ({
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCollapse(row.original._id);
+                                  handleCollapse(row.id);
                                 }}
                               >
-                                {compareCollapse(row.original._id) ? <BsChevronExpand /> : <BsChevronContract />}
+                                {compareCollapse(row.id) ? <BsChevronExpand /> : <BsChevronContract />}
                               </IconButton>
                             )}
                           </div>
@@ -172,7 +172,7 @@ const VirtualSwipableList = ({
                           );
                         })}
                       </div>
-                      <Collapse in={compareCollapse(row.original._id)} unmountOnExit>
+                      <Collapse in={compareCollapse(row.id)} unmountOnExit>
                         <div className="grid w-full gap-2">
                           {collapsibleFields.map((field) => {
                             return (
