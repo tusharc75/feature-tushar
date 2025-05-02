@@ -16,7 +16,6 @@ import { DownloadIcon, FileCopyIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -27,6 +26,8 @@ import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, displayDate, WORK_ORDER_
 import ImageEditor from './ImageEditor';
 import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
+import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
+import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
@@ -61,7 +62,6 @@ const Diagram = ({
   const [selectedAttachment, setSelectedAttachment] = useState(null);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
-  const [deleteRequestAnchorEl, setDeleteRequestAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [sendMail, setSendMail] = useState(false);
   const [emailAttachment, setEmailAttachment] = useState(null);
   const [isEmailAttachmentLoading, setIsEmailAttachmentLoading] = useState(true);
@@ -132,24 +132,6 @@ const Diagram = ({
       if (defaultSelectedUniqueId && serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId)) {
         setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId));
       }
-    }
-  };
-
-  const handleDeleteFile = async (ids) => {
-    if (ids?.length) {
-      axiosInstance().put('attachment/deletemany', { ids })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          setSelectedAttachment(null);
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
     }
   };
 
@@ -265,22 +247,6 @@ const Diagram = ({
       })
       .catch((error) => {
         setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleRequestReject = (id) => {
-    axiosInstance()
-      .put('/attachment/delete-request', { ids: [id], type: 'cancel' })
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
@@ -642,74 +608,7 @@ const Diagram = ({
                                     fetchData();
                                   }}
                                 />
-                                {!isEmpty(file?.deleteRequest) && file?.createdBy?.user?._id === user?._id && (
-                                  <div className="flex gap-2">
-                                    <span className="relative">
-                                      <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
-                                        <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
-                                      </span>
-                                      <HtmlTooltip title="Delete Request">
-                                        <IconButton
-                                          size="small"
-                                          color="primary"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            e.preventDefault();
-                                            setDeleteRequestAnchorEl(e.currentTarget);
-                                          }}
-                                        >
-                                          <PriorityHigh fontSize="small" />
-                                        </IconButton>
-                                      </HtmlTooltip>
-                                    </span>
-                                    <Popover
-                                      open={!!deleteRequestAnchorEl}
-                                      onClose={() => setDeleteRequestAnchorEl(null)}
-                                      anchorEl={deleteRequestAnchorEl}
-                                      anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right'
-                                      }}
-                                      transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right'
-                                      }}
-                                    >
-                                      <div className="w-[290px] p-3">
-                                        <p className="mb-2 border-b pb-1 font-semibold">Delete Request</p>
-                                        <p className="mb-2 text-xs">
-                                          A deletion request was submitted by&nbsp;
-                                          <span className="rounded-md bg-gray-100 px-1 py-[0px] font-semibold dark:bg-gray-600">
-                                            {file?.deleteRequest?.user?.concatedName}
-                                          </span>{' '}
-                                          on&nbsp;
-                                          {displayDate(file?.deleteRequest?.date)}
-                                        </p>
-                                        <p className="mb-1 max-w-[200px] text-xs font-semibold text-gray-500 dark:text-gray-400">
-                                          Reason: <span className="font-normal">{file?.deleteRequest?.comment}</span>
-                                        </p>
-                                        <div className="mt-2 flex  gap-2 border-t pt-2">
-                                          <ThemeButton
-                                            buttonType="theme"
-                                            onClick={() => {
-                                              handleDeleteFile([file._id]);
-                                            }}
-                                          >
-                                            Approve
-                                          </ThemeButton>
-                                          <ThemeButton
-                                            buttonType="red"
-                                            onClick={() => {
-                                              handleRequestReject(file._id);
-                                            }}
-                                          >
-                                            Reject
-                                          </ThemeButton>
-                                        </div>
-                                      </div>
-                                    </Popover>
-                                  </div>
-                                )}
+                                <DeleteRequest file={file} handleSucess={() => { fetchData() }} />
                               </>
                             )}
                           </div>

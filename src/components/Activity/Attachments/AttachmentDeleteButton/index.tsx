@@ -5,10 +5,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import DeleteRequestDialog from 'src/components/AttachmentDeleteButton/DeleteRequestDialog';
-import { Attachment } from 'src/components/AttachmentDeleteButton/type';
+import { Attachment } from 'src/components/Activity/Attachments/AttachmentDeleteButton/type';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isEmpty } from 'lodash';
+import DeleteRequestDialog from 'src/components/Activity/Attachments/AttachmentDeleteButton/DeleteRequestDialog';
 
 type AttachmentDeleteButtonProps = {
   attachments: Attachment[];
