@@ -74,10 +74,10 @@ const Diagram = ({
   }, [resource, referenceId]);
 
   useEffect(() => {
-    fetchData(true);
+    fetchData();
   }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
-  const fetchData = async (expandAll = false) => {
+  const fetchData = async () => {
     let query = `/attachment/resource-attachment-type?resource=${resource}&referenceId=${referenceId}`;
     if (attachmentType) {
       query = `${query}&attachmentType=${attachmentType}`;
@@ -100,13 +100,17 @@ const Diagram = ({
       .get(query)
       .then(({ data: { data } }) => {
         setRowData(data);
-        if (expandAll) {
+        setExpended((prev) => {
           const expend: any = {};
           data?.forEach((file) => {
-            expend[file?._id] = true;
+            if (prev[file?._id] === true || prev[file._id] === false) {
+              expend[file?._id] = prev[file?._id];
+            } else {
+              expend[file?._id] = true;
+            }
           });
-          setExpended(expend);
-        }
+          return expend;
+        });
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
