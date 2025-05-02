@@ -17,7 +17,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
-import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
 import CustomReactTable, { gridFilterParser, insertChildRowIntoTable, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -33,6 +32,8 @@ import CustomContainer from '../../../components/CustomContainer';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
+import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
+import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
 const renderedFrom = 'attachment_render';
 
@@ -62,6 +63,7 @@ export default function Attachment() {
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
   const [addchildDialog, setAddchildDialog] = useState({ open: false, data: null, top: null, bottom: null });
+  const [isRefresh, setIsRefresh] = useState(false);
 
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
@@ -193,8 +195,7 @@ export default function Attachment() {
         id: 'action',
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 120,
-        width: 120,
+        width: 150,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -249,7 +250,7 @@ export default function Attachment() {
                 <AttachmentDeleteButton
                   attachments={[row.original]}
                   onSuccess={() => {
-                    fetchAttachments();
+                    setIsRefresh(!isRefresh)
                   }}
                 />
               ) : (
@@ -259,6 +260,14 @@ export default function Attachment() {
                   </IconButton>
                 </HtmlTooltip>
               )}
+              {row.original?.type === 'file' &&
+                <DeleteRequest
+                  file={row.original}
+                  handleSucess={() => {
+                    setIsRefresh(!isRefresh)
+                  }}
+                />
+              }
             </div>
           );
         }
@@ -310,7 +319,7 @@ export default function Attachment() {
     return () => cancelToken.cancel();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit, filter, filters, sorting]);
+  }, [page, limit, filter, filters, sorting, isRefresh]);
 
   useEffect(() => {
     if (resource && resource?.optionValue) {
@@ -341,20 +350,18 @@ export default function Attachment() {
     const file = data1?.file;
     setIsDownloading(true);
     if (file?.length === 1) {
-      axiosInstance()
-        .get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
-          responseType: 'blob'
-        })
-        .then(({ data }) => {
-          const url = window.URL.createObjectURL(new Blob([data]));
-          const link = document.createElement('a');
-          link.href = url;
-          var fileExt = file[0].url?.split('.').pop();
-          link.setAttribute('download', file[0].name + '.' + fileExt);
-          document.body.appendChild(link);
-          link.click();
-          setTimeout(() => setIsDownloading(false), 2000);
-        })
+      axiosInstance().get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
+        responseType: 'blob'
+      }).then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        var fileExt = file[0].url?.split('.').pop();
+        link.setAttribute('download', file[0].name + '.' + fileExt);
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => setIsDownloading(false), 2000);
+      })
         .catch((err) => {
           toastConfig.setToastConfig(err);
           setIsDownloading(false);
@@ -480,7 +487,6 @@ export default function Attachment() {
           const fileURL = URL.createObjectURL(file);
           const pdfWindow = window.open();
           pdfWindow.location.href = fileURL;
-          // toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
           setIsDownloading(false);
         })
         .catch((err) => {
@@ -515,32 +521,29 @@ export default function Attachment() {
       gridApi.setRowData([]);
     }
     let api = `/attachment?graphLookup=0&relatedTo=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance()
-      .get(api, { cancelToken: cancelTokenSource?.token })
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data?.filter((e) => !e?.parentFolder);
-          const parentRows = rows.map((parent, idx) => {
-            parent.subRows = generateNestedData(data, parent);
-            return {
-              ...parent,
-              id: parent._id,
-              fileUrl: parent.fileUrl,
-              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-              canExpand: parent.type === 'folder',
-              isChecked: false
-            };
-          });
-          dispatch({ type: 'initialize', data: parentRows, count: count });
+    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(
+      ({
+        data: {
+          data: { data, count }
         }
-      )
+      }) => {
+        let rows = data?.filter((e) => !e?.parentFolder);
+        const parentRows = rows.map((parent, idx) => {
+          parent.subRows = generateNestedData(data, parent);
+          return {
+            ...parent,
+            id: parent._id,
+            fileUrl: parent.fileUrl,
+            canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+            canExpand: parent.type === 'folder',
+            isChecked: false
+          };
+        });
+        dispatch({ type: 'initialize', data: parentRows, count: count });
+      }
+    )
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        // dispatch({ type: 'error', error: true });
       })
       .finally(() => {
         setTimeout(() => {
@@ -596,7 +599,9 @@ export default function Attachment() {
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem disabled={permissions?.attachment?.isDelete ? !selectedRecords?.every((records) => records?.canEdit) : true}>Delete</MenuItem>
+        <MenuItem
+          disabled={permissions?.attachment?.isDelete ?
+            !selectedRecords?.every((records) => records?.canEdit) : true}>Delete</MenuItem>
       </>
     );
   };
@@ -609,9 +614,11 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => {}}
+          afterImportCompleted={() => { }}
           total={rowCount}
           onlyExport={true}
+          asyncExport={true}
+          resource={sidebarResource.attachment}
           additionalParams={`&relatedTo=${JSON.stringify(filter)}${getQueryString(true)}`}
         />
       </div>
@@ -634,9 +641,9 @@ export default function Attachment() {
             }
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
-            isActionButtonVisible={false}
+            isActionButtonVisible={true}
             actionButtonProps={{ disabled: selectedRecords.length > 0 ? false : true }}
-            // actionMenuItems={<ActionMenuItems />}
+            actionMenuItems={<ActionMenuItems />}
             addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
             isAddButtonVisible={true}
           />
