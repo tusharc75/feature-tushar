@@ -430,8 +430,8 @@ export const DisplaySingleMessage = ({
                         [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
                        [&_span:last-child]:text-gray-400`,
                       isSelf
-                        ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white',
+                        ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white',
                       message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
                     )}
                     dangerouslySetInnerHTML={{
