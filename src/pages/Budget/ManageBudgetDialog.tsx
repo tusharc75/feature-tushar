@@ -25,6 +25,7 @@ import {
 } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId, isClone }) {
   const { api } = budget;
@@ -46,47 +47,47 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     getBudgetFields();
   }, []);
 
-  const getBudgetFields = () => {
-    axiosInstance()
-      .get(`/field?resource=Budget`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (budgetId) {
-          axiosInstance()
-            .get(`${api}/${budgetId}`)
-            .then(({ data: { data } }) => {
-              data.year = new Date(`${data.year}-01-01`);
-              let clonedData = { ...data };
-              if (isClone) {
-                let { name, _id, ...rest } = clonedData;
-                clonedData = { ...rest };
-                clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: tempObjKeysWithValues
-                });
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
-          tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: tempObjKeysWithValues
+  const getBudgetFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.budget);
+      if (budgetId) {
+        axiosInstance()
+          .get(`${api}/${budgetId}`)
+          .then(({ data: { data } }) => {
+            data.year = new Date(`${data.year}-01-01`);
+            let clonedData = { ...data };
+            if (isClone) {
+              let { name, _id, ...rest } = clonedData;
+              clonedData = { ...rest };
+              clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: tempObjKeysWithValues
+              });
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }
-      });
-  };
+      } else {
+        let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
+        tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: tempObjKeysWithValues
+        });
+      }
+    }
+    catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+  }
 
   const onSubmit = (values) => {
     setLoading(true);

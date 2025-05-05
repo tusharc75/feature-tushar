@@ -31,6 +31,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -71,14 +72,7 @@ const ManageRepairOrder = ({
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Repair Order');
-      fieldData = response?.data?.data;
-
-      fieldData = fieldData?.filter((e) => !['quotation', 'invoice']?.includes(e.fieldData.fieldName));
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairOrder,['quotation', 'invoice']);
       if (repairOrderId) {
         try {
           let data;
@@ -105,7 +99,7 @@ const ManageRepairOrder = ({
             }
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }
@@ -146,8 +140,7 @@ const ManageRepairOrder = ({
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
                 initialData[key] = referenceData[key];
-              }
-            }
+              }}
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'warehouse') {
                 e.disableOnEdit = true;

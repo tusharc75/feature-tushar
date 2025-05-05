@@ -24,6 +24,7 @@ import {
   sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -46,11 +47,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.subcontractAssembly}`);
-      data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.subcontractAssembly);
 
       if (id) {
         let data;
@@ -76,7 +73,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
         }
         setInitialData({
           fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
-          values: getObjKeysWithValues(tempData, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
+          values: getObjKeysWithValues(tempData, isClone ? fieldsDataForCreate : fieldsDataAll)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);

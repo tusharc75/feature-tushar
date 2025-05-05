@@ -15,8 +15,9 @@ import { useHistory } from 'react-router-dom';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTaxMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const history = useHistory();
@@ -37,11 +38,7 @@ const ManageTaxMaster = ({ onClose, onSuccess, isClone = false, id = null }) => 
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get('/field?resource=Tax Master');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.taxMaster);
 
       if (id) {
         axiosInstance()
@@ -57,7 +54,7 @@ const ManageTaxMaster = ({ onClose, onSuccess, isClone = false, id = null }) => 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {

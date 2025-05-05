@@ -17,6 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
@@ -37,14 +38,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.purchaseRequisition}`);
-      data = response?.data?.data;
-
-      data = data.filter((f) => f?.fieldData.fieldName !== 'purchaseOrder');
-
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.purchaseRequisition, ['purchaseOrder']);
 
       if (id) {
         axiosInstance()
@@ -62,7 +56,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -158,13 +152,12 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
-                    : `Create ${resources?.purchaseRequisition?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.purchaseRequisitionNumber ? `(${initialData.values?.purchaseRequisitionNumber})` : ''}`
+                  : `Create ${resources?.purchaseRequisition?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

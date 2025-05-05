@@ -15,6 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 interface InitialData {
   fields: any[];
   values: object;
@@ -41,33 +42,29 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
     getInitialData();
   }, []);
 
-  const getInitialData = () => {
+  const getInitialData = async() => {
     setLoading(true);
-    axiosInstance()
-      .get('/field?resource=Entity')
-      .then(async ({ data: { data } }) => {
-        const fieldsData = isNew
-          ? data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
-          : data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        let tempData = getObjKeys('', fieldsData);
-        if (isClone) {
-          const {
-            data: { data }
-          } = await axiosInstance().get(`/entity/${entityId}`);
-          const { entityName, ...rest } = data;
-          setCloneHeading(entityName);
-          tempData = getObjKeysWithValues({ ...rest }, fieldsData, true, user);
-        }
-
-        setInitialData({
-          fields: fieldsData,
-          values: isNew ? tempData : getObjKeysWithValues(values, fieldsData)
-        });
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.entity);
+      const fieldsData = isNew ? fieldsDataForCreate : fieldsDataForUpdate;
+      let tempData = getObjKeys('', fieldsData);
+      if (isClone) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/entity/${entityId}`);
+        const { entityName, ...rest } = data;
+        setCloneHeading(entityName);
+        tempData = getObjKeysWithValues({ ...rest }, fieldsData, true, user);
+      }
+      setInitialData({
+        fields: fieldsData,
+        values: isNew ? tempData : getObjKeysWithValues(values, fieldsDataAll)
       });
+      setLoading(false);
+    }
+    catch (err) {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (enteredValues) => {

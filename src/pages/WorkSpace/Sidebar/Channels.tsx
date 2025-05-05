@@ -8,7 +8,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { ACTIVITY_RESOURCE, cn, opportunity, projectSales, sidebarResource } from 'src/constants/helpers';
+import { cn } from 'src/constants/helpers';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { useData } from 'src/StateProvider/Provider';
@@ -97,17 +97,8 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
       />
       <SearchBox value={searchValue} onChange={handleFilter} />
       <div className=" relative">
-        <ThemeButton
-          buttonType="transparent"
-          onClick={() => {
-            setIsExpanded((prev) => !prev);
-          }}
-          endIcon={isExpanded ? <ArrowDropDown fontSize="large" /> : <ArrowDropUp fontSize="large" />}
-        >
-          Channels
-        </ThemeButton>
         {filteredChannels ? (
-          <Collapse in={isExpanded}>
+          <>
             <List dense className="max-h-[calc(100vh-300px)] min-h-[400px] overflow-y-auto">
               {filteredChannels?.map((c, index) => (
                 <>
@@ -162,7 +153,7 @@ const Channels = ({ state }: { state: UseWorkSpace }) => {
                 <h6 className="py-[60px] text-center text-[16px] text-gray-400 dark:text-gray-600">No channels found</h6>
               </div>
             )}
-          </Collapse>
+          </>
         ) : (
           <div className="m-3">
             <CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />

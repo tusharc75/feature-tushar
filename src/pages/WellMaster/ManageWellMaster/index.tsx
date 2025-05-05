@@ -12,6 +12,7 @@ import {
   getObjKeysWithValues,
   wellMaster,
   setFieldsInAscendingOrder,
+  sidebarResource,
   yupSchema
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -24,6 +25,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -40,67 +42,69 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
   const [title, setTitle] = useState('');
   const ref = useRef(null);
 
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.wellMaster)
+
+      if (wellMasterId) {
+        axiosInstance()
+          .get(`${wellMaster.api}/` + wellMasterId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { _id, brand, createdBy, wellName, updatedBy, ...rest } = data;
+              setTitle(`Clone - ${wellName}`);
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+              setAllFields(fieldsDataForCreate);
+              setLoading(false);
+            } else {
+              setTitle(`Editing - ${data.wellName}`);
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+              setAllFields(fieldsDataForUpdate);
+
+              setLoading(false);
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        setTitle(`Create ${resources?.wellMaster?.titleSingular}`);
+        let tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        for (const key in referenceData) {
+          if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+            const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
+            if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
+              tempInitialData[key] = [referenceData[key]];
+            } else {
+              tempInitialData[key] = referenceData[key];
+            }
+            field.disableOnEdit = true;
+            field.isUneditable = true;
+          }
+        }
+        setAllFields(fieldsDataForCreate);
+        setInitialData({
+          fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+          values: tempInitialData
+        });
+        setLoading(false);
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get('/field?resource=Well Master')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (wellMasterId) {
-          axiosInstance()
-            .get(`${wellMaster.api}/` + wellMasterId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, wellName, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${wellName}`);
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-                setAllFields(fieldsDataForCreate);
-                setLoading(false);
-              } else {
-                setTitle(`Editing - ${data.wellName}`);
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-                setAllFields(fieldsDataForUpdate);
-
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setTitle(`Create ${resources?.wellMaster?.titleSingular}`);
-          let tempInitialData: any = getObjKeys('', fieldsDataForCreate);
-          for (const key in referenceData) {
-            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-              const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
-              if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
-                tempInitialData[key] = [referenceData[key]];
-              } else {
-                tempInitialData[key] = referenceData[key];
-              }
-              field.disableOnEdit = true;
-              field.isUneditable = true;
-            }
-          }
-          setAllFields(fieldsDataForCreate);
-          setInitialData({
-            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-            values: tempInitialData
-          });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
+    setLoading(false);
   }, [wellMasterId]);
 
   const handleSubmit = (values) => {

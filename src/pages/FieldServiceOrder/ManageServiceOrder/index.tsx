@@ -27,6 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess, open, isRedirectTodetailPage = true }) => {
   const {
@@ -49,20 +50,13 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
   const fetchFields = async () => {
     setLoading(true);
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      fieldData = response?.data?.data;
-
-      fieldData = fieldData?.filter((e) => !['quotation'].includes(e?.fieldData?.fieldName));
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.fieldServiceOrder ,['quotation']);
       var statusOptions = [];
-      fieldData?.forEach((e: any) => {
-        if (e?.fieldData?.fieldName === 'status') {
-          statusOptions = e.fieldData.option;
+      fieldsDataAll?.forEach((e: any) => {
+        if (e?.fieldName === 'status') {
+          statusOptions = e?.option;
         }
       });
-      var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (serviceOrderId) {
         try {
@@ -109,7 +103,8 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
         });
         setLoading(false);
       }
-    } catch (error) {
+    } 
+    catch (error) {
       toastConfig.setToastConfig(error);
     }
   };

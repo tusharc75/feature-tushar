@@ -14,6 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
   const toastConfig = useContext(CustomToastContext);
@@ -23,37 +24,38 @@ function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [title, setTitle] = useState('');
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.technicianUnavailability}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (id) {
-          axiosInstance()
-            .get(`${routes?.employeeMaster?.path}/unavailability/one/${id}`)
-            .then(({ data: { data } }) => {
-              setTitle(`Edit - ${data?.title}`);
-              setInitialData({
-                fields: fieldsDataForUpdate,
-                values: { ...getObjKeysWithValues(data, fieldsDataForUpdate) }
-              });
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.technicianUnavailability);
+      if (id) {
+        axiosInstance()
+          .get(`${routes?.employeeMaster?.path}/unavailability/one/${id}`)
+          .then(({ data: { data } }) => {
+            setTitle(`Edit - ${data?.title}`);
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: { ...getObjKeysWithValues(data, fieldsDataAll) }
             });
-        } else {
-          setTitle(`Create - Unavailability`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setTitle(`Create - Unavailability`);
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, []);
 
   const handleSave = (values: any) => {

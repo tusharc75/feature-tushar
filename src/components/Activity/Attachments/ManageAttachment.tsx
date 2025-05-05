@@ -16,14 +16,16 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
-import { isArray, isEqual, isObject, isString } from 'lodash';
+import { isArray, isEqual, isString } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { editDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
+import { updateDisable } from 'src/constants/messageHelpers';
+import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -76,9 +78,7 @@ export default function ManageAttachment({
     try {
       setIsFetching(true);
       if (type === 'file') {
-        const fieldsResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
-        const createFields = fieldsResponce?.data?.data?.filter((f) => f.isCreate).map((f) => f.fieldData);
-        const updateFields = fieldsResponce?.data?.data?.filter((f) => f.isUpdate).map((f) => f.fieldData);
+        let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);      
         if (attachmentId) {
           const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
           const data = attachmentResponce?.data?.data;
@@ -90,27 +90,27 @@ export default function ManageAttachment({
           }
           setIsFetching(false);
           let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeysWithValues(data, updateFields) };
+          if (fieldsDataForUpdate?.length) {
+            initialValue = { ...initialValue, ...getObjKeysWithValues(data, fieldsDataAll) };
           }
           setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
           if (!isClone) {
             setAttachmentData(data)
           }
           setInitialData({
-            fields: updateFields,
+            fields: fieldsDataForUpdate,
             values: initialValue
           });
         } else {
           let initialValue: any = { name: '', attachmentType: '' };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeys('', createFields) };
+          if (fieldsDataForCreate?.length) {
+            initialValue = { ...initialValue, ...getObjKeys('', fieldsDataForCreate) };
           }
           if (attachmentType) {
             initialValue.attachmentType = attachmentType;
           }
           setInitialData({
-            fields: createFields,
+            fields: fieldsDataForCreate,
             values: initialValue
           });
           setAllowedToEdit(true)
@@ -402,16 +402,29 @@ export default function ManageAttachment({
                           />
                         </Grid>
                         {attachmentData && (
-                          <Grid size={{ xs: 12 }}>
-                            <div className="flex flex-col p-2">
-                              <p>
-                                Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
-                              </p>
-                              <p>
-                                Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
-                              </p>
-                            </div>
-                          </Grid>
+                          <>
+                            <Grid size={{ xs: 6 }}>
+                              <div className="flex flex-col p-2">
+                                <p>
+                                  Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
+                                </p>
+                                <p>
+                                  Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
+                                </p>
+                              </div>
+                            </Grid>
+                            <Grid size={{ xs: 6 }}>
+                              <DeleteRequest
+                                file={attachmentData}
+                                handleSucess={() => {
+                                  fetchData()
+                                  handleClose()
+                                }}
+                                showWithoutPopOver={true}
+
+                              />
+                            </Grid>
+                          </>
                         )}
                       </Grid>
                     )}
@@ -429,7 +442,7 @@ export default function ManageAttachment({
               >
                 Cancel
               </ThemeButton>
-              <HtmlTooltip title={allowedToEdit ? '' : editDisable}>
+              <HtmlTooltip title={allowedToEdit ? '' : updateDisable}>
                 <ThemeButton
                   buttonType="theme"
                   disabled={!allowedToEdit ? true : loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
