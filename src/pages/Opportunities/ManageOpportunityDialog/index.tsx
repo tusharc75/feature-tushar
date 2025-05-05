@@ -52,7 +52,6 @@ export default function ManageOpportunityDialog({
   const fetchFields = async () => {
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.opportunity);
-      console.log(fieldsDataAll);
       const process = fieldsDataAll.find((obj) => obj?.type === 'process');
       if (process) {
         fieldsDataAll = fieldsDataAll?.filter((e) => e.sectionName !== process?.additionalInfoSection);
@@ -67,8 +66,6 @@ export default function ManageOpportunityDialog({
           const { opportunityName, ...rest } = opportunityData;
           rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setCloneHeading(opportunityName);
-
-          //it should be fieldsDataForCreate not fielddataforupdate
           setInitialData({
             fields: fieldsDataForUpdate,
             values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -88,7 +85,7 @@ export default function ManageOpportunityDialog({
         });
       }
     }
-    catch(error){
+    catch (error) {
       toastConfig.setToastConfig(error);
     }
   }
