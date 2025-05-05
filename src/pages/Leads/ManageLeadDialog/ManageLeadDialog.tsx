@@ -4,7 +4,7 @@ import { Formik, Form } from 'formik';
 import { useHistory } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import { getObjKeys, yupSchema, getObjKeysWithValues } from '../../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -18,6 +18,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export default function ManageLeadDialog({
   open,
@@ -49,12 +50,7 @@ export default function ManageLeadDialog({
   }, []);
 
   const getLeadFields = async () => {
-    const response = await axiosInstance().get(`/field?resource=Lead`);
-    let data = response?.data?.data;
-
-    const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-    const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+    let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.lead);
     if (isNew) {
       if (isClone) {
         axiosInstance()
@@ -80,7 +76,7 @@ export default function ManageLeadDialog({
     } else {
       setInitialData({
         fields: fieldsDataForUpdate,
-        values: getObjKeysWithValues(dataToUpdate, fieldsDataForUpdate)
+        values: getObjKeysWithValues(dataToUpdate, fieldsDataAll)
       });
     }
   };

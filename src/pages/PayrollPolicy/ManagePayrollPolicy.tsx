@@ -17,6 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { useHistory } from 'react-router-dom';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -33,11 +34,7 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.payrollPolicy}`);
-      const data = response?.data?.data;
-
-      const fieldsDataForCreate = data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.payrollPolicy);
 
       if (id) {
         axiosInstance()
@@ -53,7 +50,7 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -138,13 +135,12 @@ const ManagePayrollPolicy = ({ onClose, onSuccess, isClone = false, id = null })
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.payrollPolicyName ? `(${initialData.values?.payrollPolicyName})` : ''}`
-                    : `Create ${resources?.payrollPolicy?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.payrollPolicyName ? `(${initialData.values?.payrollPolicyName})` : ''}`
+                  : `Create ${resources?.payrollPolicy?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

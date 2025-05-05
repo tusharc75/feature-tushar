@@ -17,6 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import { useHistory } from 'react-router-dom';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -32,11 +33,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.triggerNotificationMaster}`);
-      const data = response?.data?.data;
-
-      const fieldsDataForCreate = data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.triggerNotificationMaster);
 
       if (id) {
         axiosInstance()
@@ -48,7 +45,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fields)
+              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fieldsDataAll)
             });
           })
           .catch((error) => {

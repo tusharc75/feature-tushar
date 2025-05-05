@@ -15,8 +15,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
-const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageContactUs = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
     state: { user, resources }
   }: any = useData();
@@ -34,12 +35,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get('/field?resource=Contact Us');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.contactUs);
       if (id) {
         axiosInstance()
           .get(`/contact-us/${id}`)
@@ -54,7 +50,7 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -136,13 +132,12 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create ${resources?.contactUs?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -208,4 +203,4 @@ const ManageBlog = ({ onClose, onSuccess, isClone = false, id = null }) => {
   );
 };
 
-export default ManageBlog;
+export default ManageContactUs;

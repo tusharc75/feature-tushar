@@ -34,7 +34,7 @@ const Workspace = ({ fromSidebar = false }: { fromSidebar?: boolean }) => {
               state.fetchChannelsAndChats();
               state.setEditCreateChannelDialogData({ open: false, _id: null });
             }}
-            _id={state.editCreateChannelDialogData._id}
+            _id={state.editCreateChannelDialogData?._id}
           />
         )}
       </div>

@@ -43,6 +43,7 @@ import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -269,18 +270,26 @@ const ManageDeliveryTicket = ({
   }, [deliveryTicketId, referenceData]);
 
   const fetchFields = async () => {
+
+    // made common 
+
     try {
-      let data;
+      let fieldsDataAll;
+      let fieldsDataForCreate;
+      let fieldsDataForUpdate;
       if (isOffline) {
-        data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
+        let data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
+        fieldsDataAll = data?.fieldData?.map((d: any) => d.fieldData)
+        fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}`);
-        data = response?.data?.data;
+        let response = await fetch_resource_fields(sidebarResource['deliveryTicket']);
+        fieldsDataAll = response?.fieldsDataAll;
+        fieldsDataForCreate = response?.fieldsDataForCreate;
+        fieldsDataForUpdate = response?.fieldsDataForUpdate;
       }
       if (walkmeInstance) {
       }
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (deliveryTicketId) {
         let data;
         if (isOffline) {
@@ -305,7 +314,7 @@ const ManageDeliveryTicket = ({
         );
         setInitialData({
           fields: fieldsDataForUpdate,
-          values: getObjKeysWithValues(data, fieldsDataForUpdate)
+          values: getObjKeysWithValues(data, fieldsDataAll)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);

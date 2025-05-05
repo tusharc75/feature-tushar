@@ -18,6 +18,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePurchaseOrder = ({
   isClone = false,
@@ -57,83 +58,84 @@ const ManagePurchaseOrder = ({
     }
   }, [initialData]);
 
-  useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Purchase Order')
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        fieldsDataForCreate = fieldsDataForCreate.filter((f) => f.fieldName !== 'rentalJob');
-        fieldsDataForUpdate = fieldsDataForUpdate.filter((f) => f.fieldName !== 'rentalJob');
-        if (purchaseOrderId) {
-          axiosInstance()
-            .get(`${purchaseOrder.api}/` + purchaseOrderId)
-            .then(({ data: { data } }) => {
-              setPurchaseOrderData(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
-                rest['status'] = PURCHASE_ORDER_STATUS.open;
-                rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setCloneHeading(purchaseOrderNumber);
-                setLoading(false);
-              } else {
-                if (data?.canEdit === false) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['warehouse', 'currency', 'expenseItem', 'supplierAccount']?.includes(e?.fieldName)) {
-                      e.disableOnEdit = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.purchaseOrder);
+      if (purchaseOrderId) {
+        axiosInstance()
+          .get(`${purchaseOrder.api}/` + purchaseOrderId)
+          .then(({ data: { data } }) => {
+            setPurchaseOrderData(data);
+            if (isClone) {
+              const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
+              rest['status'] = PURCHASE_ORDER_STATUS.open;
+              rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setCloneHeading(purchaseOrderNumber);
+              setLoading(false);
+            } else {
+              if (data?.canEdit === false) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['warehouse', 'currency', 'expenseItem', 'supplierAccount']?.includes(e?.fieldName)) {
+                    e.disableOnEdit = true;
+                  }
                 });
               }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          createValues['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (rentalManagementId) {
-            createValues['rentalJob'] = rentalManagementId;
-          }
-          if (warehouseId) {
-            createValues['warehouse'] = warehouseId;
-          }
-          if (currency) {
-            createValues['currency'] = currency;
-          } else {
-            if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
-              createValues['currency'] = user.user?.brandCurrency;
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+              setLoading(false);
             }
-          }
-          if (refrenceData) {
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
-              createValues['wellName'] = refrenceData?.wellName;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && refrenceData?.wellNumber) {
-              createValues['wellNumber'] = refrenceData?.wellNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
-              createValues['afeNumber'] = refrenceData?.afeNumber;
-            }
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        createValues['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (rentalManagementId) {
+          createValues['rentalJob'] = rentalManagementId;
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        if (warehouseId) {
+          createValues['warehouse'] = warehouseId;
+        }
+        if (currency) {
+          createValues['currency'] = currency;
+        } else {
+          if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
+            createValues['currency'] = user.user?.brandCurrency;
+          }
+        }
+        if (refrenceData) {
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+            createValues['wellName'] = refrenceData?.wellName;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && refrenceData?.wellNumber) {
+            createValues['wellNumber'] = refrenceData?.wellNumber;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+            createValues['afeNumber'] = refrenceData?.afeNumber;
+          }
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+        setLoading(false);
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    };
+  }
+
+  useEffect(() => {
+    setLoading(true);
+    fetchFields();
   }, [purchaseOrderId]);
 
   const handleSubmit = (values) => {

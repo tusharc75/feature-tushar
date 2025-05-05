@@ -42,7 +42,11 @@ export default function AssetDetailsChangeDialog({
 
   const [allFields, setAllFields] = useState([]);
 
-  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
+  const [assetHeaders, setAssetHeaders] = useState({
+    assetNumber: '',
+    product: '',
+    gpsNumber: ''
+  });
 
   useEffect(() => {
     fetchFields();
@@ -57,7 +61,8 @@ export default function AssetDetailsChangeDialog({
 
     setAssetHeaders({
       assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
-      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
+      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product',
+      gpsNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'gpsNumber')?.fieldData?.fieldLabel || 'GPS Number'
     });
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
@@ -205,7 +210,7 @@ export default function AssetDetailsChangeDialog({
     const { assetData } = values;
     const fieldNames = initialData?.fields?.map((f) => f?.fieldName);
 
-    const gpsNumberField = allFields?.find((e) => e?.fieldData?.fieldName === 'gpsNumber')?.fieldData || null
+    const gpsNumberField = allFields?.find((e) => e?.fieldData?.fieldName === 'gpsNumber')?.fieldData || null;
 
     const json_data = assetData?.map((_data) => {
       const dynamicFields = fieldNames?.reduce((acc, f) => {
@@ -243,12 +248,12 @@ export default function AssetDetailsChangeDialog({
     }
 
     let header1 = [];
-    header1.push(assetHeaders.assetNumber)
-    header1.push(assetHeaders.product)
+    header1.push(assetHeaders.assetNumber);
+    header1.push(assetHeaders.product);
     if (gpsNumberField) {
-      header1.push(gpsNumberField.fieldLabel)
+      header1.push(gpsNumberField.fieldLabel);
     }
-    header1 = [...header1, ...initialData?.fields?.map((f) => f?.fieldLabel)]
+    header1 = [...header1, ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
     const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
@@ -308,9 +313,9 @@ export default function AssetDetailsChangeDialog({
       const ws = readedData.Sheets[wsname];
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
 
-      const ignoreColoumIndex = [0, 1]
+      const ignoreColoumIndex = [0, 1];
       if (allFields?.find((e) => e?.fieldData?.fieldName === 'gpsNumber')) {
-        ignoreColoumIndex.push(2)
+        ignoreColoumIndex.push(2);
       }
 
       if (parsedData.length > 1) {
@@ -395,8 +400,22 @@ export default function AssetDetailsChangeDialog({
                               key={index}
                             >
                               <div>
-                                <span className="font-semibold text-[var(--primary-text)]">
-                                  {`${data?.assetNumber} (${data?.productName})${data?.gpsNumber ? ` (${data?.gpsNumber})` : ``}`}</span>
+                                <div className="flex flex-wrap items-start gap-2 text-[var(--primary-text)] md:gap-4">
+                                  <h6 className="text-base font-medium leading-normal">
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.assetNumber}</span>
+                                    {data?.assetNumber}
+                                  </h6>
+                                  <h6 className="text-base font-medium leading-normal">
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.product}</span>
+                                    {data?.productName}
+                                  </h6>
+                                  {data?.gpsNumber && (
+                                    <h6 className="text-base font-medium leading-normal">
+                                      <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.gpsNumber}</span>
+                                      {data?.gpsNumber}
+                                    </h6>
+                                  )}
+                                </div>
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
