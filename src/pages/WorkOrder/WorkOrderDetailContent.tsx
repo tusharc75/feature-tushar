@@ -398,12 +398,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -426,10 +426,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          !workOrderData?.currentRepairJob &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -474,7 +474,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           } else {
             updateStatus(WORK_ORDER_STATUS.completed);
           }
-        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package) {
+        } else if (workOrderData?.type === WORK_ORDER_TYPE.assemblyOrder && workOrderData?.package && !workOrderData?.serializedPackage) {
           setOpenSerializedPackageDialog(true);
         } else {
           updateStatus(WORK_ORDER_STATUS.completed);
@@ -505,9 +505,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -520,9 +520,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -631,13 +631,16 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               {resource === sidebarResource.workOrder && <CustomTab value={0}>Header</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={1}>Services</CustomTab>}
-              {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={2}>Products/Consumables</CustomTab>}
-              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
-                && resourceData?.policy?.showBom && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
-                  <CustomTab value={3}>BOM</CustomTab>
-                )}
+              {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
+                <CustomTab value={2}>Products/Consumables</CustomTab>
+              )}
+              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+                resourceData?.policy?.showBom &&
+                workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>BOM</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
-              {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={5}>Views</CustomTab>}
+              {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
+                <CustomTab value={5}>Views</CustomTab>
+              )}
               {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
           </Grid>
