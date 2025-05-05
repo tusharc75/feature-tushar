@@ -40,12 +40,10 @@ const renderedFrom = 'attachment_render';
 export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
-  const { referenceType, referenceId } = parsed;
+  const { referenceType, referenceId, attachmentId } = parsed;
 
   const [filter, setFilter] = useState(null);
-  const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null });
-  const [attachmentData, setAttachmentData] = useState(null);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [open, setOpen] = useState({ open: false, type: null, parentFolder: null, parentResource: null, _id: null });
   const [sendMail, setSendMail] = useState(false);
   const [isAttachmentLoading, setIsAttachmentLoading] = useState(true);
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +51,6 @@ export default function Attachment() {
     state: { user, permissions, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [gridApi, setGridApi] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, selectedRecords, page, limit, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
@@ -67,6 +64,13 @@ export default function Attachment() {
 
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    if (attachmentId) {
+      setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null, _id: attachmentId })
+      history.push(routes.attachment.path);
+    }
+  }, [attachmentId]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -341,7 +345,6 @@ export default function Attachment() {
 
   const downloadFile = (data1) => {
     const file = data1?.file;
-    setIsDownloading(true);
     if (file?.length === 1) {
       axiosInstance().get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
         responseType: 'blob'
@@ -353,11 +356,10 @@ export default function Attachment() {
         link.setAttribute('download', file[0].name + '.' + fileExt);
         document.body.appendChild(link);
         link.click();
-        setTimeout(() => setIsDownloading(false), 2000);
+        setTimeout(() => 2000);
       })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          setIsDownloading(false);
         });
     } else {
       axiosInstance()
@@ -368,14 +370,13 @@ export default function Attachment() {
           const url = window.URL.createObjectURL(new Blob([data]));
           const link = document.createElement('a');
           link.href = url;
-          link.setAttribute('download', attachmentData?.name ? `${attachmentData?.name}.zip` : 'download.zip');
+          link.setAttribute('download', data1?.name ? `${data1?.name}.zip` : 'download.zip');
           document.body.appendChild(link);
           link.click();
-          setTimeout(() => setIsDownloading(false), 2000);
+          setTimeout(() => 2000);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          setIsDownloading(false);
         });
     }
   };
@@ -456,7 +457,6 @@ export default function Attachment() {
     }
     const file = data?.file;
     file?.forEach((ele) => {
-      setIsDownloading(true);
       axiosInstance()
         .get(`user/download?fileName=${encodeURIComponent(ele.url)}`, {
           responseType: 'blob',
@@ -470,7 +470,6 @@ export default function Attachment() {
                 type: 'success'
               });
               setTimeout(() => {
-                setIsDownloading(false);
               }, 2000);
             }
           }
@@ -480,11 +479,9 @@ export default function Attachment() {
           const fileURL = URL.createObjectURL(file);
           const pdfWindow = window.open();
           pdfWindow.location.href = fileURL;
-          setIsDownloading(false);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          setIsDownloading(false);
         });
     });
   };
@@ -510,9 +507,6 @@ export default function Attachment() {
   const fetchAttachments = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    if (gridApi) {
-      gridApi.setRowData([]);
-    }
     let api = `/attachment?graphLookup=0&relatedTo=${JSON.stringify(filter)}${queryString}`;
     axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(
       ({
@@ -580,13 +574,11 @@ export default function Attachment() {
   };
 
   const handleActivityOpen = (data) => {
-    setOpen({ open: true, type: data?.type ? data.type : 'file', parentFolder: data?.parentFolder, parentResource: null });
-    setAttachmentData(data);
+    setOpen({ open: true, type: data?.type ? data.type : 'file', parentFolder: data?.parentFolder, parentResource: null, _id: data._id });
   };
 
   const handleClose = () => {
-    setOpen({ open: false, type: null, parentFolder: null, parentResource: null });
-    setAttachmentData(null);
+    setOpen({ open: false, type: null, parentFolder: null, parentResource: null, _id: null });
   };
 
   const ActionMenuItems = () => {
@@ -651,7 +643,7 @@ export default function Attachment() {
                   ? true : !permissions?.attachment?.isDelete
             }}
             actionMenuItems={<ActionMenuItems />}
-            addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null })}
+            addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null, _id: null })}
             isAddButtonVisible={true}
           />
         )}
@@ -704,7 +696,7 @@ export default function Attachment() {
                       type: addchildDialog.data?.relatedTo[0]?.type
                     };
                   }
-                  setOpen({ open: true, type: 'folder', parentFolder: addchildDialog.data._id, parentResource: parentResource });
+                  setOpen({ open: true, type: 'folder', parentFolder: addchildDialog.data._id, parentResource: parentResource, _id: null });
                   setAddchildDialog({ open: false, data: null, top: null, bottom: null });
                 }}
               >
@@ -719,7 +711,7 @@ export default function Attachment() {
                       type: addchildDialog.data?.relatedTo[0]?.type
                     };
                   }
-                  setOpen({ open: true, type: 'file', parentFolder: addchildDialog.data._id, parentResource: parentResource });
+                  setOpen({ open: true, type: 'file', parentFolder: addchildDialog.data._id, parentResource: parentResource, _id: null });
                   setAddchildDialog({ open: false, data: null, top: null, bottom: null });
                 }}
               >
@@ -744,7 +736,7 @@ export default function Attachment() {
             fullWidth
           >
             <ManageAttachment
-              attachmentId={attachmentData?.id}
+              attachmentId={open?._id}
               relatedTo={[
                 {
                   type: open.parentResource ? open.parentResource?.type : resource && selectedResourceData ? resource.optionValue : 'user',
