@@ -17,6 +17,7 @@ import { useHistory } from 'react-router-dom';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageUnit = ({ onClose, onSuccess, id = null }) => {
   const {
@@ -36,13 +37,7 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.units}`);
-      var data = response?.data?.data;
-
-      data = data.filter((e) => e.fieldData?.fieldName !== 'deal');
-
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.units, ['deal']);
 
       if (id) {
         const response = await axiosInstance().get(`${routes?.units?.path}/${id}`);
@@ -56,7 +51,7 @@ const ManageUnit = ({ onClose, onSuccess, id = null }) => {
         }
         setInitialData({
           fields: fieldsDataForUpdate,
-          values: getObjKeysWithValues(data, fieldsDataForUpdate)
+          values: getObjKeysWithValues(data, fieldsDataAll)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
