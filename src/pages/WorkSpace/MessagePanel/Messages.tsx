@@ -194,8 +194,8 @@ const Messages = ({
               <li key={date} className="mb- list-none">
                 <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
                   <p
-                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
-                    text-gray-400 [border:1px_solid_var(--common-border-color)] [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
+                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center text-xs 
+                    text-gray-400 [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
                   >
                     {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
                   </p>

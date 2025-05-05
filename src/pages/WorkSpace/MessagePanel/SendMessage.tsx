@@ -403,7 +403,7 @@ const SendMessage = ({
                 sx={{
                   display: 'block',
                   padding: '8px',
-                  borderRadius: '0px',
+                  borderRadius: '4px',
                   background: 'var(--new-theme-color)',
                   color: 'white',
                   '&:hover': {
