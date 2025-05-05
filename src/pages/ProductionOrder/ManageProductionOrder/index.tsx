@@ -25,6 +25,7 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
@@ -47,12 +48,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Production Order');
-      fieldData = response?.data?.data;
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productionOrder);
 
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (productionOrderId) {
         try {
           let data;
@@ -72,7 +69,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

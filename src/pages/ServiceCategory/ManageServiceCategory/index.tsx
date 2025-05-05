@@ -16,6 +16,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export const ManageServiceCategory = ({ isClone = false, serviceCategoryId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
 
@@ -31,9 +32,13 @@ export const ManageServiceCategory = ({ isClone = false, serviceCategoryId = nul
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.serviceCategory}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    fetchFields();
+  }, []);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.serviceCategory);
+
       if (serviceCategoryId) {
         axiosInstance().get(`${serviceCategory.api}/${serviceCategoryId}`).then(({ data: { data } }) => {
           if (isClone) {
@@ -48,7 +53,7 @@ export const ManageServiceCategory = ({ isClone = false, serviceCategoryId = nul
           else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
           }
         })
@@ -63,8 +68,11 @@ export const ManageServiceCategory = ({ isClone = false, serviceCategoryId = nul
           values: initialData
         });
       }
-    })
-  }, []);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);

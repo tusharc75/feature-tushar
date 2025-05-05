@@ -14,7 +14,7 @@ import {
   GenerateResourceLineNumber,
   TRANSFER_INVENTORY_STATUS
 } from 'src/constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -22,6 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 interface Props {
   isClone?: boolean;
@@ -77,78 +78,79 @@ const ManageTransferInventory: FC<Props> = (props) => {
   //   fetchPlants();
   // }, [user]);
 
-  useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Transfer Inventory')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (transferInventoryId) {
-          axiosInstance()
-            .get(`${transferInventory.api}/` + transferInventoryId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, createdBy, updatedBy, entity, transferNumber, ...rest } = data;
-                let oldValues = { ...rest };
-                oldValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-                oldValues.status = TRANSFER_INVENTORY_STATUS.new;
-                setCloneHeading(transferNumber);
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
-                });
-              } else {
-                if (!data?.canEdit) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['transferFromPlant', 'transferFromStorageLocation']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                if (!data?.canEditDeliveryTo) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['transfertoPlant', 'transferToStorageLocation']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.transferInventory);
+
+      if (transferInventoryId) {
+        axiosInstance()
+          .get(`${transferInventory.api}/` + transferInventoryId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { _id, createdBy, updatedBy, entity, transferNumber, ...rest } = data;
+              let oldValues = { ...rest };
+              oldValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+              oldValues.status = TRANSFER_INVENTORY_STATUS.new;
+              setCloneHeading(transferNumber);
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+                values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
+              });
+            } else {
+              if (!data?.canEdit) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['transferFromPlant', 'transferFromStorageLocation']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
                 });
               }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-          setAllFields(fieldsDataForUpdate);
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          setAllFields(fieldsDataForCreate);
-          createValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-          createValues.status = 'New';
-          if (referenceType === 'Rental Job' && referenceData) {
-            for (const key in referenceData) {
-              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-                createValues[key] = referenceData[key];
+              if (!data?.canEditDeliveryTo) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['transfertoPlant', 'transferToStorageLocation']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
+                });
               }
+              setInitialData({
+                fields: setFieldsInAscendingOrder(fieldsDataForUpdate),
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
             }
-            fieldsDataForCreate?.forEach((e) => {
-              if (['rentalJob', 'transferFromPlant', 'transfertoPlant']?.includes(e.fieldName)) {
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+        setAllFields(fieldsDataForUpdate);
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        setAllFields(fieldsDataForCreate);
+        createValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+        createValues.status = 'New';
+        if (referenceType === 'Rental Job' && referenceData) {
+          for (const key in referenceData) {
+            if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+              createValues[key] = referenceData[key];
+            }
           }
-          setInitialData({
-            fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-            values: createValues
+          fieldsDataForCreate?.forEach((e) => {
+            if (['rentalJob', 'transferFromPlant', 'transfertoPlant']?.includes(e.fieldName)) {
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
           });
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        setInitialData({
+          fields: setFieldsInAscendingOrder(fieldsDataForCreate),
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, [transferInventoryId]);
 
   const handleSubmit = (values) => {

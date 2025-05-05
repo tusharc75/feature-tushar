@@ -27,6 +27,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSuccess, referenceType = null, referenceData = null }) => {
   const history = useHistory();
@@ -54,110 +55,106 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     }
   }, [initialData]);
 
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairJob, ['rentalJob', 'actualEndDate', 'workOrder']);
+      fieldsDataAll?.forEach((e) => {
+        if (e?.fieldName === 'chartOfAccount' && e?.isDefaultValue && e?.defaultValue) {
+          const filteredOption = e?.option?.filter((obj) => obj?.optionValue === e?.defaultValue) || [];
+          e.option = filteredOption;
+        }
+      });
+      setLoading(false);
+      if (repairJobId) {
+        axiosInstance()
+          .get(`${repairJob.api}/` + repairJobId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { _id, brand, createdBy, history, repairJobName, actualEndDate, updatedBy, ...rest } = data;
+              setTitle(`Clone - ${repairJobName}`);
+              rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
+              rest.status = REPAIR_JOB_STATUS.new;
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataAll, true, user), expectedCompletionDate: null }
+              });
+              setLoading(false);
+            } else {
+              axiosInstance()
+                .get(`${repairJob.api}/${repairJobId}/assets`)
+                .then(({ data: { data: assetData } }) => {
+                  if (assetData.length) {
+                    fieldsDataForUpdate?.forEach((e) => {
+                      if (['supplierAccount', 'warehouse']?.includes(e?.fieldName)) {
+                        e.disableOnEdit = true;
+                        e.isUneditable = true;
+                      }
+                    });
+                  }
+                  setTitle(`Editing - [${data.repairJobName}]`);
+                  setInitialData({
+                    fields: fieldsDataForUpdate,
+                    values: getObjKeysWithValues(data, fieldsDataAll)
+                  });
+                })
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+              setLoading(false);
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        setTitle(`Create ${resources?.repairJob?.titleSingular}`);
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
+        initialData['repairJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {
+          initialData['expectedCompletionDate'] = null;
+        }
+        if (referenceType === 'Rental Job') {
+          initialData['warehouse'] = referenceData?.warehouse;
+          initialData['rentalJob'] = referenceData?._id;
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+            initialData['wellName'] = referenceData?.wellName;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
+            initialData['wellNumber'] = referenceData?.wellNumber;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+            initialData['afeNumber'] = referenceData?.afeNumber;
+          }
+        }
+        if (referenceData?.warehouse && fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
+          initialData['warehouse'] = referenceData?.warehouse;
+        }
+        if (referenceType === sidebarResource.workOrder || referenceType === sidebarResource.workOrderTechnician) {
+          initialData['workOrder'] = referenceData?.workOrder;
+          fieldsDataForCreate?.forEach((e) => {
+            if (['warehouse']?.includes(e?.fieldName)) {
+              e.isUneditable = true;
+            }
+          });
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+        setLoading(false);
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    };
+  }
+
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.repairJob}`)
-      .then(({ data: { data } }) => {
-        const hideFields = ['rentalJob', 'actualEndDate', 'workOrder'];
-
-        data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
-
-        data?.forEach((e) => {
-          if (e?.fieldData?.fieldName === 'chartOfAccount' && e?.fieldData?.isDefaultValue && e?.fieldData?.defaultValue) {
-            const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
-            e.fieldData.option = filteredOption;
-          }
-        });
-
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (repairJobId) {
-          axiosInstance()
-            .get(`${repairJob.api}/` + repairJobId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, history, repairJobName, actualEndDate, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${repairJobName}`);
-                rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest.status = REPAIR_JOB_STATUS.new;
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), expectedCompletionDate: null }
-                });
-                setLoading(false);
-              } else {
-                axiosInstance()
-                  .get(`${repairJob.api}/${repairJobId}/assets`)
-                  .then(({ data: { data: assetData } }) => {
-                    if (assetData.length) {
-                      fieldsDataForUpdate?.forEach((e) => {
-                        if (['supplierAccount', 'warehouse']?.includes(e?.fieldName)) {
-                          e.disableOnEdit = true;
-                          e.isUneditable = true;
-                        }
-                      });
-                    }
-                    setTitle(`Editing - [${data.repairJobName}]`);
-                    setInitialData({
-                      fields: fieldsDataForUpdate,
-                      values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                    });
-                  })
-                  .catch((error) => {
-                    toastConfig.setToastConfig(error);
-                  });
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setTitle(`Create ${resources?.repairJob?.titleSingular}`);
-          let initialData = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            initialData['currency'] = user.user?.brandCurrency;
-          }
-          initialData['repairJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'expectedCompletionDate')) {
-            initialData['expectedCompletionDate'] = null;
-          }
-          if (referenceType === 'Rental Job') {
-            initialData['warehouse'] = referenceData?.warehouse;
-            initialData['rentalJob'] = referenceData?._id;
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
-              initialData['wellName'] = referenceData?.wellName;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
-              initialData['wellNumber'] = referenceData?.wellNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
-              initialData['afeNumber'] = referenceData?.afeNumber;
-            }
-          }
-          if (referenceData?.warehouse && fieldsDataForCreate.some((e) => e.fieldName === 'warehouse')) {
-            initialData['warehouse'] = referenceData?.warehouse;
-          }
-          if (referenceType === sidebarResource.workOrder || referenceType === sidebarResource.workOrderTechnician) {
-            initialData['workOrder'] = referenceData?.workOrder;
-            fieldsDataForCreate?.forEach((e) => {
-              if (['warehouse']?.includes(e?.fieldName)) {
-                e.isUneditable = true;
-              }
-            });
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [repairJobId]);
 
   const handleSubmit = (values) => {

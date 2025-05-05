@@ -19,6 +19,7 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -35,48 +36,49 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.transactionLock}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (id) {
-          axiosInstance()
-            .get(`${routes.transactionLock.path}/` + id)
-            .then(({ data: { data } }) => {
-              setTransactionLockData(data);
-              if (isClone) {
-                const { lockNumber, ...rest } = data;
-                rest.lockNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-                setCloneHeading(lockNumber);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          createValues['lockNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
-          });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [id]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.transactionLock);
+      if (id) {
+        axiosInstance()
+          .get(`${routes.transactionLock.path}/` + id)
+          .then(({ data: { data } }) => {
+            setTransactionLockData(data);
+            if (isClone) {
+              const { lockNumber, ...rest } = data;
+              rest.lockNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+              setCloneHeading(lockNumber);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        createValues['lockNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
 
   const handleSubmit = (values) => {
     if (values?.fromDate) {

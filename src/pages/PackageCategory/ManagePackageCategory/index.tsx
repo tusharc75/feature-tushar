@@ -16,6 +16,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export const ManagePackageCategory = ({ isClone = false, packageCategoryId = null, isRedirectToDetailPage = true, onClose, onSuccess }) => {
 
@@ -30,10 +31,9 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
 
-  useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.packageCategory}`).then(({ data: { data } }) => {
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.packageCategory);
       if (packageCategoryId) {
         axiosInstance().get(`${packageCategory.api}/${packageCategoryId}`).then(({ data: { data } }) => {
           if (isClone) {
@@ -48,7 +48,7 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
           else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
           }
         })
@@ -63,8 +63,15 @@ export const ManagePackageCategory = ({ isClone = false, packageCategoryId = nul
           values: initialData
         });
       }
-    })
-  }, []);
+    }
+    catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
+  }, [packageCategoryId]);
 
   const handleSubmit = (values) => {
     setIsSubmitting(true);
