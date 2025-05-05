@@ -1,5 +1,5 @@
 import { Avatar, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
-import { MoreVert, Delete, GetApp, Reply, PushPin } from '@mui/icons-material';
+import { MoreVert, Delete, GetApp, Reply, PushPin, Edit } from '@mui/icons-material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -731,8 +731,22 @@ export const MoreMenuAndDeleteConfirmDialog = ({
               <ListItemText>Reply</ListItemText>
             </MenuItem>
           )}
-          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>}
-          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => setShowConfirmBox(true)}>Delete</MenuItem>}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem onClick={() => handleEdit()}>
+              <ListItemIcon>
+                <Edit fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText>Edit</ListItemText>
+            </MenuItem>
+          )}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem onClick={() => setShowConfirmBox(true)}>
+              <ListItemIcon>
+                <Delete fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText>Delete</ListItemText>
+            </MenuItem>
+          )}
         </span>
       </Menu>
       {showConfirmBox && (

@@ -11,9 +11,11 @@ const Collaborate = ({ resource, resourceLabel, resourceData }) => {
           node.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
         }
       }}
-      className="activityDetailBox overflow-x-hidden"
+      className="activityDetailBox overflow-hidden"
     >
-      <MessagePanel state={state} resource={resource} fromSidebar={true} resourceLabel={resourceLabel} resourceData={resourceData} />
+      <div className="rounded-md border">
+        <MessagePanel state={state} resource={resource} fromSidebar={true} resourceLabel={resourceLabel} resourceData={resourceData} />
+      </div>
     </div>
   );
 };

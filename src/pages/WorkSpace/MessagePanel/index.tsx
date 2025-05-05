@@ -73,10 +73,10 @@ const MessagePanel = ({
     <>
       <div
         className={cn(
-          'relative flex-grow transition-all duration-300 [--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]',
-          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]',
+          'relative flex-grow transition-all duration-300 ',
+          threadDialogOpen?.open && !fromSidebar ? 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]' : '',
           // isSidebarCollapsed && 'px-2',
-          fromSidebar ? 'rounded-md border ' : ''
+          fromSidebar ? '[--thread-bar-width:360px]' : '[--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]'
         )}
       >
         {isSidebarCollapsed && (
