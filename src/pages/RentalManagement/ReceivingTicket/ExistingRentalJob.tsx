@@ -158,6 +158,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
             })
             assetDataError.push(message)
           })
+          setIsSubmitting(false);
           setShowStatusChangeConfirmBox({ open: true, toRentalData, selectedPackage, underReviewAssetsData, reserveAssetsData, assetDataError })
         }
         else {

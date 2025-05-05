@@ -31,7 +31,7 @@ import type { TNestedTree } from './helper';
 import { sortFileStructure, unflatten } from './helper';
 import mime from 'mime';
 import { PreviewFile } from 'src/components/PreviewFile';
-import AttachmentDeleteButton from 'src/components/AttachmentDeleteButton';
+import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -71,23 +71,20 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   const fetchAttachment = async () => {
     setLoading(true);
     let api = `/attachment?graphLookup=1&relatedTo=${JSON.stringify(relatedTo)}`;
-    axiosInstance()
-      .get(api)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          setTreeStructure(unflatten(data));
-          setLoading(false);
-          onSetCount('Attachment', count);
+    axiosInstance().get(api).then(
+      ({
+        data: {
+          data: { data, count }
         }
-      )
-      .catch((error) => {
+      }) => {
+        setTreeStructure(unflatten(data));
         setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
+        onSetCount('Attachment', count);
+      }
+    ).catch((error) => {
+      setLoading(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const folderIconButtons = (attachment) => {
@@ -195,10 +192,12 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     setAttachmentId(_id);
     if (data && data?._id) setAttachmentData(data);
   };
+
   const handleSendMail = (event, data) => {
     event.stopPropagation();
     handleMail(data);
   };
+
   const handleCloseMenu = (event?: any) => {
     event?.stopPropagation();
     setAnchorEl(null);
@@ -211,31 +210,9 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
     setOpen({ open: true, type: 'file', parentFolder: null, purpose: 'edit' });
   };
 
-  const handleDelete = (event) => {
-    setAnchorEl(null);
-    if (attachmentId) {
-      event.stopPropagation();
-      axiosInstance()
-        .put('attachment/deletemany', { ids: [attachmentId] })
-        .then(({ data }) => {
-          setAnchorEl(null);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          fetchAttachment();
-          handleActivityRefresh();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const handleFolderDelete = (folderId) => {
     axiosInstance()
-      .put('attachment/folder/deletemany', { ids: [folderId] })
+      .put('attachment/deletemany', { ids: [folderId] })
       .then(({ data }) => {
         setAnchorEl(null);
         toastConfig.setToastConfig({
@@ -526,7 +503,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               )}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               <AttachmentDeleteButton
-                attachment={attachmentData}
+                attachments={[attachmentData]}
                 onSuccess={() => {
                   fetchAttachment();
                   handleActivityRefresh();

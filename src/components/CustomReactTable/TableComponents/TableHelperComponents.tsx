@@ -686,7 +686,7 @@ export const CellRenderer = ({
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
-  const { currentEditingCellPosition, loadingExpanderRowId } = state;
+  const { currentEditingCellPosition } = state;
   const { style: stickyStyle, className: stickyClassName } =
     vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
   const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
@@ -733,14 +733,6 @@ export const CellRenderer = ({
 
   switch (true) {
     case cell.getIsPlaceholder():
-      return (
-        <td {...props}>
-          <div className="p-[5px_10px]">
-            <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
-          </div>
-        </td>
-      );
-    case cell?.column.id === 'expander' && loadingExpanderRowId === row.original._id:
       return (
         <td {...props}>
           <div className="p-[5px_10px]">

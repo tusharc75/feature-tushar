@@ -127,11 +127,11 @@ function SideBar({ location }) {
       <div
         onClick={() => {
           if (sidebarOpenedByButton) return;
-          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
+          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 500);
         }}
         onMouseEnter={() => {
           if (sidebarOpenedByButton) return;
-          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
+          toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 500);
         }}
         onMouseLeave={() => {
           if (sidebarOpenedByButton) return;

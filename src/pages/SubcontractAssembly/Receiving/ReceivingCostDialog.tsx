@@ -26,6 +26,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import Grid from '@mui/material/Grid2';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData }) {
   const toastConfig = useContext(CustomToastContext);
@@ -97,7 +98,9 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
     if (minReceiveDate && receiveDate < minReceiveDate) {
       errors['receiveDate'] = `Receive date can't be less than ${displayDate(minReceiveDate)}`;
     }
-
+    if (dayjs(receiveDate).isAfter(dayjs())) {
+      errors['receiveDate'] = `Please select valid receive date`;
+    }
     return errors;
   };
 
@@ -157,6 +160,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
                       }}
                       fullWidth
                       {...(minReceiveDate ? { minDate: minReceiveDate } : {})}
+                      maxDate={new Date()}
                       error={validateDate()?.receiveDate}
                       helperText={validateDate()?.receiveDate ? validateDate()?.receiveDate : ''}
                     />

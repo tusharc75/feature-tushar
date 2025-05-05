@@ -141,53 +141,48 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 {row.original.detail}
               </p>
             )}
-            {allowedToEdit && row.original.type !== 'serializedAsset' && (
-              <HtmlTooltip
-                title={
-                  row.original.type === 'package'
-                    ? `Add Existing Product`
-                    : row.subRows?.length !== row.original.qtyDisplay
-                      ? `Add`
-                      : `Can't add more asset!`
-                }
-              >
-                <IconButton
-                  onClick={(event) => {
-                    if (row.original.qtyDisplay !== row.subRows?.length && row.original.type === 'product') {
-                      setProducts([
-                        {
-                          parentId: row.original._id,
-                          product: row.original.materialId,
-                          qty: row.original.qtyDisplay - (row.subRows?.length || 0),
-                          productName: row.original?.detail
-                        }
-                      ]);
-                      setAddchildDialog({
-                        open: true,
-                        parentId: row.original?._id,
-                        top: event.clientY,
-                        bottom: event.clientX,
-                        productId: row?.original?.productDetail._id,
-                        productCategory: row?.original?.productDetail?.productCategory
-                      });
-                    }
-                    if (row.original.type !== MATERIAL_TYPE.product) {
-                      setAddExistingProductDialog({
-                        open: true,
-                        type: MATERIAL_TYPE.product,
-                        parentId: row.original?._id,
-                        existing: false,
-                        productId: null,
-                        productCategory: null
-                      });
-                    }
-                  }}
-                  size="small"
+            {allowedToEdit && (row.original.type === MATERIAL_TYPE.package ||
+              (row.original.type === MATERIAL_TYPE.product && row.original.qtyDisplay > row.original.assetQty)) && (
+                <HtmlTooltip
+                  title={row.original.type === MATERIAL_TYPE.package ? `Add Existing Product` : `Add`}
                 >
-                  <Add color="disabled" fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
+                  <IconButton
+                    onClick={(event) => {
+                      if (row.original.type === MATERIAL_TYPE.product) {
+                        setProducts([
+                          {
+                            parentId: row.original._id,
+                            product: row.original.materialId,
+                            qty: row.original.qtyDisplay - (row.original.assetQty || 0),
+                            productName: row.original?.detail
+                          }
+                        ]);
+                        setAddchildDialog({
+                          open: true,
+                          parentId: row.original?._id,
+                          top: event.clientY,
+                          bottom: event.clientX,
+                          productId: row?.original?.productDetail._id,
+                          productCategory: row?.original?.productDetail?.productCategory
+                        });
+                      }
+                      if (row.original.type !== MATERIAL_TYPE.product) {
+                        setAddExistingProductDialog({
+                          open: true,
+                          type: MATERIAL_TYPE.product,
+                          parentId: row.original?._id,
+                          existing: false,
+                          productId: null,
+                          productCategory: null
+                        });
+                      }
+                    }}
+                    size="small"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
             {row.original?.subRows?.length > 0 && (
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
@@ -352,10 +347,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qtyDisplay = parent.qty;
-      parent.assetQty =
-        parent.type === MATERIAL_TYPE.product
-          ? material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
-          : 0;
+      parent.assetQty = parent.type === MATERIAL_TYPE.product
+        ? data.material?.filter((m) => m?.parentId === parent?._id && m?.type === MATERIAL_TYPE.serializedAsset)?.length || 0
+        : 0;
       parent.isValid = true;
       parent.canDelete = parent.workOrder || !allowedToEdit ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
@@ -593,7 +587,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       </>
     );
   };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -741,7 +734,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           handleSucess={(rows) => {
             if (products?.length) {
               const dataToAddFormat = rows?.map((d) => {
-                return { ...d, _id: d?.asset };
+                return { ...d, _id: d?.asset, qty: 1 };
               });
               handleAdd([...dataToAddFormat]);
             } else {

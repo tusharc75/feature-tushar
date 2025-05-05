@@ -365,18 +365,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       data: d?.credit
                     });
                   }
-                } else if (property === 'reserved') {
-                  if (d?.reserved?.length) {
-                    otherData.push({
-                      title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
-                      allDay: true,
-                      resource: selectedResource.resource,
-                      type: 'reserved',
-                      data: d?.reserved
-                    });
-                  }
                 } else if (property === 'inventory') {
                   if (d?.inventory) {
                     otherData.push({
@@ -666,8 +654,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       if (obj?.resource === sidebarResource.product) {
         if (obj?.type === 'credit') {
           backgroundColor = 'var(--success-light) ';
-        } else if (obj?.type === 'reserved') {
-          backgroundColor = 'var(--warning-light)';
         } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
           backgroundColor = 'var(--danger-light)';
           color = 'white';

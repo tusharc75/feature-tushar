@@ -132,7 +132,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue, onUploadFile }) => {
           <ThemeButton
             buttonType="theme"
             onClick={handleCapture}
-            disabled={isScanning}
+            disabled={isScanning || !webcamRef?.current?.video}
             isLoading={isScanning}
           >
             Capture

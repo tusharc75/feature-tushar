@@ -399,7 +399,7 @@ export const CreateEmail = ({
   );
 
   const renderQuotesFileThumbnails = isAttachmentLoading ? (
-    <Typography>Loading...</Typography>
+    <Typography>Loading Attachments...</Typography>
   ) : stateQuoteBuilderAttachments && stateQuoteBuilderAttachments.length > 0 ? (
     <AttachmentThumbnail attachments={stateQuoteBuilderAttachments} handleDeleteAttachment={handleDeleteQuoteBuilderAttachment} allowedToEdit={true} />
   ) : null;
