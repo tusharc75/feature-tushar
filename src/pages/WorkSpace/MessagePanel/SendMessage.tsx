@@ -247,7 +247,7 @@ const SendMessage = ({
   };
 
   return (
-    <div className={`send-message bg-[var(--dark-primary,white)] py-3`}>
+    <div className={`send-message bg-[var(--dark-primary,white)] pt-3`}>
       <div className="editor overflow-hidden ">
         {files.length > 0 && (
           <div className="flex flex-wrap p-1">
@@ -310,7 +310,7 @@ const SendMessage = ({
           ))}
         </div>
 
-        <div className="editor" key={themeColor}>
+        <div className="editor [&_.tox-tinymce]:border-b-0" key={themeColor}>
           <Editor
             key={themeColor}
             id={editorId ? editorId : 'default'}
@@ -369,7 +369,7 @@ const SendMessage = ({
             }}
           />
         </div>
-        <div className="footer flex justify-between gap-2 [border-top:1px_solid_var(--common-border-color)]">
+        <div className="flex items-center justify-between gap-2">
           {!initialMessage ? (
             <>
               <input
@@ -382,8 +382,8 @@ const SendMessage = ({
               />
               <label htmlFor="file-upload">
                 <HtmlTooltip title="Attach file(s)" placement="top">
-                  <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled}>
-                    <AttachFile />
+                  <IconButton color="primary" aria-label="upload" component="span" sx={{ padding: '5px', borderRadius: 0 }} disabled={disabled}>
+                    <AttachFile fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
               </label>
@@ -392,21 +392,36 @@ const SendMessage = ({
                   color="primary"
                   aria-label="upload-audio"
                   component="span"
-                  style={{ padding: 5, borderRadius: 0 }}
+                  sx={{ padding: '5px', borderRadius: 0 }}
                   disabled={disabled}
                   onClick={getAudio}
                 >
-                  {isRecording ? <MicOff /> : <Mic />}
+                  {isRecording ? <MicOff fontSize="small" /> : <Mic fontSize="small" />}
                 </IconButton>
               </HtmlTooltip>
               <IconButton
-                style={{ padding: 5 }}
+                sx={{
+                  display: 'block',
+                  padding: '8px',
+                  borderRadius: '0px',
+                  background: 'var(--new-theme-color)',
+                  color: 'white',
+                  '&:hover': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color-disabled)',
+                    color: 'white',
+                    opacity: 0.5
+                  }
+                }}
                 disabled={disabled || !message || isLoading}
                 size="small"
                 className="send-button !ml-auto !block"
                 onClick={postMessage}
               >
-                <Send />
+                <Send fontSize="small" />
               </IconButton>
             </>
           ) : (
