@@ -1284,8 +1284,7 @@ const ActionButtonMenuItems = ({
         Revert Service
       </MenuItem>
       {
-        selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) &&
-        !selectedRecords?.some((e) => e?.type === 'service') && (
+        selectedRecords?.filter((e) => !e?.parentId)?.every((r) => r?.canCloseWorkOrder) && (
           <MenuItem
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Close' });
