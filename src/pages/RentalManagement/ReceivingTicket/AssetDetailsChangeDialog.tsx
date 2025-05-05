@@ -42,7 +42,11 @@ export default function AssetDetailsChangeDialog({
 
   const [allFields, setAllFields] = useState([]);
 
-  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
+  const [assetHeaders, setAssetHeaders] = useState({
+    assetNumber: '',
+    product: '',
+    gpsNumber: ''
+  });
 
   useEffect(() => {
     fetchFields();
@@ -57,7 +61,8 @@ export default function AssetDetailsChangeDialog({
 
     setAssetHeaders({
       assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
-      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
+      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product',
+      gpsNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'gpsNumber')?.fieldData?.fieldLabel || 'GPS Number'
     });
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
@@ -397,16 +402,16 @@ export default function AssetDetailsChangeDialog({
                               <div>
                                 <div className="flex flex-wrap items-start gap-2 text-[var(--primary-text)] md:gap-4">
                                   <h6 className="text-base font-medium leading-normal">
-                                    <span className="block text-[10px] font-normal text-gray-500">Asset Number</span>
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.assetNumber}</span>
                                     {data?.assetNumber}
                                   </h6>
                                   <h6 className="text-base font-medium leading-normal">
-                                    <span className="block text-[10px] font-normal text-gray-500">Product Name</span>
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.product}</span>
                                     {data?.productName}
                                   </h6>
                                   {data?.gpsNumber && (
                                     <h6 className="text-base font-medium leading-normal">
-                                      <span className="block text-[10px] font-normal text-gray-500">GPS Number</span>
+                                      <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.gpsNumber}</span>
                                       {data?.gpsNumber}
                                     </h6>
                                   )}
@@ -421,12 +426,12 @@ export default function AssetDetailsChangeDialog({
                                         ...field,
                                         isWarningTooltip:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? true
                                             : field?.isWarningTooltip,
                                         warningTooltipMessage:
                                           autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] ||
-                                          autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
+                                            autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] === 0
                                             ? `Auto Increment (Previous Value ${autoIncrementFieldNameValue[`${field.fieldName}_${data?._id}`] || 0})`
                                             : field?.warningTooltipMessage
                                       }}
