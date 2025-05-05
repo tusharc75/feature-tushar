@@ -48,6 +48,7 @@ const WorkOrder = () => {
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false, isClone: false, idToClone: null });
   const [columns, setColumns] = useState(null);
+  const [createWorkOrderResouce, setCreateWorkOrderResouce] = useState([]);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -260,76 +261,38 @@ const WorkOrder = () => {
     }
   };
 
-  const CreateMenuItems = () => {
-    const createWorkOrderResouce = []
+  useEffect(() => {
+    const createWorkOrderResouce = [];
     if (permissions?.repairOrder?.isCreate) {
       createWorkOrderResouce.push({
         title: resources?.repairOrder?.titleSingular,
         path: routes.repairOrder.path
-      })
+      });
     }
     if (permissions?.productionOrder?.isCreate) {
       createWorkOrderResouce.push({
         title: resources?.productionOrder?.titleSingular,
         path: routes.productionOrder.path
-      })
+      });
     }
     if (permissions?.assemblyOrder?.isCreate) {
       createWorkOrderResouce.push({
         title: resources?.assemblyOrder?.titleSingular,
         path: routes.assemblyOrder.path
-      })
+      });
     }
     if (createWorkOrderResouce?.length === 0) {
-      return null
+      return null;
     }
-    return <>
-      <ThemeButton
-        buttonType="theme"
-        onClick={(event) => {
-          if (createWorkOrderResouce?.length === 1) {
-            history.push(createWorkOrderResouce[0].path)
-          }
-          else {
-            setAnchorEl(event.currentTarget);
-          }
-        }}
-        startIcon={<AddOutlined />}
-        id={'create-workOrder'}
-        aria-controls="create-menu"
-      >
-        Create
-      </ThemeButton>
-      <Menu
-        anchorEl={anchorEl}
-        keepMounted
-        id="create-menu"
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-        open={Boolean(anchorEl)}
-        onClose={() => {
-          setAnchorEl(null);
-        }}
-        slotProps={{
-          transition: { timeout: 200 }
-        }}
-      >
-        {createWorkOrderResouce.map((item) => {
-          return (
-            <MenuItem
-              onClick={() => {
-                history.push(item.path)
-              }}
-            >
-              {item?.title}
-            </MenuItem>
-          );
-        })}
-      </Menu>
-    </>
-  }
+    setCreateWorkOrderResouce(createWorkOrderResouce);
+  }, [
+    permissions?.assemblyOrder?.isCreate,
+    permissions?.productionOrder?.isCreate,
+    permissions?.repairOrder?.isCreate,
+    resources?.assemblyOrder?.titleSingular,
+    resources?.productionOrder?.titleSingular,
+    resources?.repairOrder?.titleSingular
+  ]);
 
   const ActionMenuItems = () => {
     return (
@@ -381,12 +344,46 @@ const WorkOrder = () => {
           isActionButtonVisible={permissions?.workOrder?.isDelete}
           actionMenuItems={<ActionMenuItems />}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
-          addButtonOnclick={() => {
-            setShowManageWorkOrder({ open: true, isClone: false, idToClone: null });
+          addButtonOnclick={(e) => {
+            // setShowManageWorkOrder({ open: true, isClone: false, idToClone: null });
+            if (createWorkOrderResouce?.length === 1) {
+              history.push(createWorkOrderResouce[0].path);
+            } else {
+              setAnchorEl(e.currentTarget);
+            }
           }}
-          rightSideContentsBeforeAction={permissions?.workOrder?.isCreate ? <CreateMenuItems /> : null}
-          isAddButtonVisible={false}
+          isAddButtonVisible={true}
         />
+        {createWorkOrderResouce.length > 1 && (
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            id="create-menu"
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            open={Boolean(anchorEl)}
+            onClose={() => {
+              setAnchorEl(null);
+            }}
+            slotProps={{
+              transition: { timeout: 200 }
+            }}
+          >
+            {createWorkOrderResouce.map((item) => {
+              return (
+                <MenuItem
+                  onClick={() => {
+                    history.push(item.path);
+                  }}
+                >
+                  {item?.title}
+                </MenuItem>
+              );
+            })}
+          </Menu>
+        )}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -408,11 +405,12 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
