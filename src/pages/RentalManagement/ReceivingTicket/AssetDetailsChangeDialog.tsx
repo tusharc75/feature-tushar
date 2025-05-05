@@ -395,20 +395,20 @@ export default function AssetDetailsChangeDialog({
                               key={index}
                             >
                               <div>
-                                <div className="flex flex-wrap items-start gap-2 font-medium text-[var(--primary-text)] md:gap-4">
-                                  <div className="inline-block">
+                                <div className="flex flex-wrap items-start gap-2 text-[var(--primary-text)] md:gap-4">
+                                  <h6 className="text-base font-medium leading-normal">
                                     <span className="block text-[10px] font-normal text-gray-500">Asset Number</span>
                                     {data?.assetNumber}
-                                  </div>
-                                  <div className="inline-block">
+                                  </h6>
+                                  <h6 className="text-base font-medium leading-normal">
                                     <span className="block text-[10px] font-normal text-gray-500">Product Name</span>
                                     {data?.productName}
-                                  </div>
+                                  </h6>
                                   {data?.gpsNumber && (
-                                    <div className="inline-block">
+                                    <h6 className="text-base font-medium leading-normal">
                                       <span className="block text-[10px] font-normal text-gray-500">GPS Number</span>
                                       {data?.gpsNumber}
-                                    </div>
+                                    </h6>
                                   )}
                                 </div>
                               </div>
