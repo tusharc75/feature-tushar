@@ -1911,8 +1911,7 @@ const ReceivingTicket = ({
           _ids: statusPolicy?.assetIds,
           referenceData: data,
           ticketType: ticketType,
-          stopAutoIncrementIds:
-            ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
+          stopAutoIncrementIds: ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
         });
       } else {
         setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
@@ -2862,9 +2861,7 @@ const ReceivingTicket = ({
           products={getFilterSelectedRecords(MATERIAL_TYPE.product)}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
-              ? user?.user?.brandPolicy?.rentalReceivingStatus
-              : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length && !onReceiveAssetDataCapture) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
