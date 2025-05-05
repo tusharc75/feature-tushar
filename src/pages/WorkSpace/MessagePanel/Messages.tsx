@@ -402,7 +402,7 @@ export const DisplaySingleMessage = ({
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
           <div className="flex-grow">
-            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit' : '')}>
+            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit flex-row-reverse' : '')}>
               <h6 className="user text-[14px] font-medium">
                 {message.user?.optionLabel}
                 {isSelf ? ' (you)' : ''}
