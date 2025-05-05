@@ -298,16 +298,18 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   function validate(values) {
     const errors = {};
-    let estimateStartDate = dayjs(values?.estimateStartDate);
-    let estimateEndDate = dayjs(values?.estimateEndDate);
-    if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
-      errors['estimateEndDate'] = 'Please enter valid estimate end date';
-    }
-    if (serviceOrderData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(serviceOrderData.estimateStartDate).format('YYYY-MM-DD')) {
-      errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(serviceOrderData.estimateStartDate)}`;
-    }
-    if (serviceOrderData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(serviceOrderData.estimateEndDate).format('YYYY-MM-DD')) {
-      errors['estimateEndDate'] = `End date cannot be later than ${displayDate(serviceOrderData.estimateEndDate)}`;
+    if (values?.estimateStartDate && values?.estimateEndDate) {
+      let estimateStartDate = dayjs(values?.estimateStartDate);
+      let estimateEndDate = dayjs(values?.estimateEndDate);
+      if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
+        errors['estimateEndDate'] = 'Please enter valid estimate end date';
+      }
+      if (serviceOrderData?.estimateStartDate && estimateStartDate.format('YYYY-MM-DD') < dayjs(serviceOrderData.estimateStartDate).format('YYYY-MM-DD')) {
+        errors['estimateStartDate'] = `Start date cannot be earlier than ${displayDate(serviceOrderData.estimateStartDate)}`;
+      }
+      if (serviceOrderData?.estimateEndDate && estimateEndDate.format('YYYY-MM-DD') > dayjs(serviceOrderData.estimateEndDate).format('YYYY-MM-DD')) {
+        errors['estimateEndDate'] = `End date cannot be later than ${displayDate(serviceOrderData.estimateEndDate)}`;
+      }
     }
     if (referenceType === 'consumables') {
       if (isBulkedit && rowData?.find((e) => e?.consumedQty || e?.requestedQty) && values.qty > 0) {
