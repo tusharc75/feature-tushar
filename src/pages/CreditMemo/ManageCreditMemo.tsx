@@ -18,6 +18,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getTaxById } from 'src/components/PricingCondition';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
@@ -38,12 +39,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.creditMemo);
       if (creditMemoId) {
         axiosInstance()
           .get(`${routes?.creditMemo?.path}/${creditMemoId}`)
@@ -59,7 +55,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {

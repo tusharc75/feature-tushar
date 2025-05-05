@@ -16,6 +16,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageDynamicForm = ({
   resource,
@@ -47,12 +48,7 @@ const ManageDynamicForm = ({
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${resource}`);
-      data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(resource);    
       if (id) {
         axiosInstance()
           .get(`/dynamic-form/${id}`, {
@@ -81,7 +77,7 @@ const ManageDynamicForm = ({
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fields)
+              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fieldsDataAll)
             });
           })
           .catch((error) => {

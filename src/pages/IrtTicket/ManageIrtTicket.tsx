@@ -11,12 +11,13 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { useHistory } from 'react-router-dom';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const {
@@ -38,12 +39,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get('/field?resource=IRT Ticket');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.irtTicket);
       if (id) {
         axiosInstance()
           .get(`${routes?.irtTicket?.path}/${id}`)
@@ -59,7 +55,7 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
             }
             setInitialData({
               fields: fields,
-              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fields)
+              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -185,13 +181,12 @@ const ManageIrtTicket = ({ onClose, onSuccess, isClone = false, id = null, refer
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.irtTicketNumber ? `(${initialData.values?.irtTicketNumber})` : ''}`
                     : `Create ${resources?.irtTicket?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

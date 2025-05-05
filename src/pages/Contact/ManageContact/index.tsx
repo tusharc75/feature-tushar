@@ -15,6 +15,7 @@ import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 export default function ManageContactDialog({
   contactResource,
@@ -50,13 +51,7 @@ export default function ManageContactDialog({
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`);
-      fieldData = response?.data?.data;
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource[contactResource]);
       if (contactId) {
         let data;
         const response: any = await axiosInstance().get(`/${contactApi}/${contactId}`);
@@ -73,7 +68,7 @@ export default function ManageContactDialog({
         } else {
           setContactData({
             fields: fieldsDataForUpdate,
-            initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+            initialValues: getObjKeysWithValues(data, fieldsDataAll)
           });
           setLoading(false);
         }
@@ -95,7 +90,6 @@ export default function ManageContactDialog({
             }
           });
         }
-
         setContactData({
           fields: fieldsDataForCreate,
           initialValues: initialData
@@ -225,7 +219,7 @@ export default function ManageContactDialog({
                     if (isEqual(contactData.initialValues, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  buttonType="transparent" 
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>

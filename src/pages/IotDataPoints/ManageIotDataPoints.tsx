@@ -20,6 +20,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import Autocomplete from '@mui/material/Autocomplete';
 import { checkFormula } from 'src/constants/formulaUtility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -61,12 +62,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource?.iotDataPoints}`);
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.iotDataPoints);
       if (id) {
         axiosInstance()
           .get(`${routes?.iotDataPoints?.path}/${id}`)
@@ -87,8 +83,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                 }
               });
             }
-
-            const tempInitialData: any = isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields);
+            const tempInitialData: any = isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll);
             tempInitialData.formula = tempData?.formula || '';
             tempInitialData.returnType = tempData?.returnType || 'decimal';
             tempInitialData.dataPoints = tempData?.dataPoints || [];

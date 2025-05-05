@@ -10,11 +10,12 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -34,11 +35,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.frequentlyAskedQuestion);
 
       if (id) {
         axiosInstance()
@@ -54,7 +51,7 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -135,13 +132,12 @@ const ManageFrequentlyAskedQuestion = ({ onClose, onSuccess, isClone = false, id
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.label ? `(${initialData.values?.label})` : ''}`
                     : `Create Frequently Asked Question`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

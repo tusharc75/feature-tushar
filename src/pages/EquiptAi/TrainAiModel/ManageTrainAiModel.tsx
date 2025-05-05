@@ -16,6 +16,7 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
   const {
@@ -28,35 +29,36 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.trainAiModel}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (trainAiModelId) {
-          axiosInstance()
-            .get(`/generative-ai/feed-data/` + trainAiModelId)
-            .then(({ data: { data } }) => {
-              setInitialData({
-                fields: fieldsDataForUpdate,
-                values: getObjKeysWithValues(data, fieldsDataForUpdate)
-              });
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.trainAiModel);
+      if (trainAiModelId) {
+        axiosInstance()
+          .get(`/generative-ai/feed-data/` + trainAiModelId)
+          .then(({ data: { data } }) => {
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, [trainAiModelId]);
 
   const handleSubmit = (values) => {
