@@ -25,6 +25,7 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData, state 
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
@@ -52,6 +53,7 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData, state 
         <div className="flex-grow overflow-auto">
           <div className="sticky top-0 z-10 bg-[var(--dark-primary,white)] pt-2">
             <DisplaySingleMessage
+              state={state}
               key={message?._id}
               message={message}
               selectedMessage={selectedMessage}
@@ -79,6 +81,7 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData, state 
                   {messages?.map((message) => (
                     <>
                       <DisplaySingleMessage
+                        state={state}
                         key={message._id}
                         message={message}
                         selectedMessage={selectedMessage}
