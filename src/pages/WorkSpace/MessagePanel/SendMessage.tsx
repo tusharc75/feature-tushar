@@ -247,8 +247,8 @@ const SendMessage = ({
   };
 
   return (
-    <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
-      <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
+    <div className={`send-message bg-[var(--dark-primary,white)] py-3`}>
+      <div className="editor overflow-hidden ">
         {files.length > 0 && (
           <div className="flex flex-wrap p-1">
             {filesWithUrl?.map((file, index) => {
