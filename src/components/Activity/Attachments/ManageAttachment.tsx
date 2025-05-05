@@ -16,14 +16,15 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
-import { isArray, isEqual, isObject, isString } from 'lodash';
+import { isArray, isEqual, isString } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { editDisable } from 'src/constants/messageHelpers';
+import { updateDisable } from 'src/constants/messageHelpers';
+import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -402,16 +403,29 @@ export default function ManageAttachment({
                           />
                         </Grid>
                         {attachmentData && (
-                          <Grid size={{ xs: 12 }}>
-                            <div className="flex flex-col p-2">
-                              <p>
-                                Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
-                              </p>
-                              <p>
-                                Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
-                              </p>
-                            </div>
-                          </Grid>
+                          <>
+                            <Grid size={{ xs: 6 }}>
+                              <div className="flex flex-col p-2">
+                                <p>
+                                  Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
+                                </p>
+                                <p>
+                                  Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
+                                </p>
+                              </div>
+                            </Grid>
+                            <Grid size={{ xs: 6 }}>
+                              <DeleteRequest
+                                file={attachmentData}
+                                handleSucess={() => {
+                                  fetchData()
+                                  handleClose()
+                                }}
+                                showWithoutPopOver={true}
+
+                              />
+                            </Grid>
+                          </>
                         )}
                       </Grid>
                     )}
@@ -429,7 +443,7 @@ export default function ManageAttachment({
               >
                 Cancel
               </ThemeButton>
-              <HtmlTooltip title={allowedToEdit ? '' : editDisable}>
+              <HtmlTooltip title={allowedToEdit ? '' : updateDisable}>
                 <ThemeButton
                   buttonType="theme"
                   disabled={!allowedToEdit ? true : loading || ((uploadingImageOrFileProgress > 0 || allAttachments.length === 0) && type === 'file')}
