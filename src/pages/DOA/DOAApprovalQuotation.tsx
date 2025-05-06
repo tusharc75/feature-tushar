@@ -156,7 +156,6 @@ const DoaQuotationApproval = () => {
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         width: 100,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       },

@@ -103,7 +103,6 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           Header: 'Type',
           disableFilters: true,
           width: 200,
-          disabled: true,
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) =>
             row.original['type'] ? (

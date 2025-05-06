@@ -269,7 +269,6 @@ const LoadingTicket = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         cell: ({ row }) =>
           row.original['type'] ? (
             <p>

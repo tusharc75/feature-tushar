@@ -88,7 +88,6 @@ const OnField = ({ rentalId, referenceFrom }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
       },
       {

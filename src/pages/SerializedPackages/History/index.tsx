@@ -61,7 +61,6 @@ const History = ({ id }) => {
     {
       accessor: 'type',
       Header: 'Type',
-      disabled: true,
       Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
     },
     {

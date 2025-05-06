@@ -70,7 +70,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },

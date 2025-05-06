@@ -38,7 +38,6 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
         accessor: 'type',
         Header: 'Type',
         width: 200,
-        disabled: true,
         Cell: ({ row }) => {
           return row.original?.type ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
         }

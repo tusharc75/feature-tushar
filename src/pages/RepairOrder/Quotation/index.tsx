@@ -182,7 +182,6 @@ const Quotation = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
       },
