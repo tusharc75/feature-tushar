@@ -7,16 +7,16 @@ import { memo, useCallback, useMemo } from 'react';
 import { CheckBoxOutlined } from '@mui/icons-material';
 
 const Sidebar = memo(({ state, values, setFieldValue }: SidebarProps) => {
-  const { isSidebarOpen, loading, toggleSidebar, filterdColumns, handleSearch, search, columnsWithoutSticky, isMobile } = state;
+  const { isSidebarOpen, loading, toggleSidebar, filterdColumns, handleSearch, search, allowedColumns, isMobile } = state;
   const isAllVisible = useMemo(() => values.hide.length === 0, [values.hide.length]);
   const indeterminate = useMemo(
-    () => !isAllVisible && values.hide.length < columnsWithoutSticky.length,
-    [columnsWithoutSticky.length, isAllVisible, values.hide.length]
+    () => !isAllVisible && values.hide.length < allowedColumns.length,
+    [allowedColumns.length, isAllVisible, values.hide.length]
   );
 
   const visibleColumnMap = useMemo<{ [key: string]: boolean }>(() => {
     const visibleColumns: { [key: string]: boolean } = {};
-    for (const col of columnsWithoutSticky) {
+    for (const col of allowedColumns) {
       const key = col.id ?? col.accessor;
       if (!values.hide.includes(key)) {
         visibleColumns[key] = true;
@@ -25,18 +25,18 @@ const Sidebar = memo(({ state, values, setFieldValue }: SidebarProps) => {
       }
     }
     return visibleColumns;
-  }, [columnsWithoutSticky, values.hide]);
+  }, [allowedColumns, values.hide]);
 
   const handleCheckAll = useCallback(() => {
     if (isAllVisible) {
       setFieldValue(
         'hide',
-        columnsWithoutSticky.filter((d) => d.disabled !== true).map((c) => c?.id ?? c?.accessor)
+        allowedColumns.filter((d) => d.disabled !== true).map((c) => c?.id ?? c?.accessor)
       );
     } else {
       setFieldValue('hide', []);
     }
-  }, [isAllVisible, setFieldValue, columnsWithoutSticky]);
+  }, [isAllVisible, setFieldValue, allowedColumns]);
 
   const handleCheckSingle = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, colName: string) => {
