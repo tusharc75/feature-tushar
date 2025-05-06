@@ -33,6 +33,7 @@ import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import { flattenArray } from 'src/constants/columns';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -262,7 +263,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         handleSaveData([rowData], saveAndNext, true);
         return;
       }
-      const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
+      const rows = await calculateRowsField(flattenArray(material), values, allFields, rowData, fieldTicketData?.currency);
       handleSaveData(rows, saveAndNext);
       setShowConfirmationDialog(false);
     }
