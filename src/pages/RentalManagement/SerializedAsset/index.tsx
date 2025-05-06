@@ -1479,14 +1479,18 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       )}
       {rfidQrDialogOpen && (
         <AddSerializedAssetThroughRfid
-          isAdding={isAdding}
           selectedProducts={assetAssignedProduct}
-          onSuccess={(data) => {
-            handleAddSerializedAsset(data);
+          onSuccess={() => {
+            setRfidQrDialogOpen(false);
+            fetchData();
+            setAssetAssignedProduct([]);
           }}
           onClose={() => {
             setRfidQrDialogOpen(false);
+            fetchData();
+            setAssetAssignedProduct([]);
           }}
+          referenceData={rentalManagementData}
         />
       )}
     </Fragment>
