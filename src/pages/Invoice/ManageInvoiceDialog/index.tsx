@@ -15,7 +15,8 @@ import {
   invoice,
   yupSchema,
   GenerateResourceLineNumber,
-  sidebarResource
+  sidebarResource,
+  INVOICE_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -61,8 +62,8 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
           data = response?.data?.data;
 
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, invoiceNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { _id, brand, createdBy, entity, history, products, status, invoiceNumber, fieldTicket, repairOrder, rentalJob, updatedBy, ...rest } = data;
+            rest.status = INVOICE_STATUS.new;
             rest.invoiceNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(invoiceNumber);
             setInitialData({
