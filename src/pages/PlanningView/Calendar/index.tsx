@@ -14,10 +14,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
@@ -44,7 +42,7 @@ const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
 
 const localizer = dayjsLocalizer(dayjs);
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -339,8 +337,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               };
             }
             if (selectedResource.resource === sidebarResource.product) {
+              const today = dayjs.tz()
               for (const property in d) {
-                if (property === 'debit') {
+                const ledgerDate = dayjs.utc(d['date']).tz()
+                if (resourcePolicy?.hideBackDatedPlanning && ledgerDate.isBefore(today, 'day') && ['debit', 'credit', 'availableByPlanning']?.includes(property)) {
+                }
+                else if (property === 'debit') {
                   if (d?.debit?.length) {
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
@@ -365,16 +367,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       data: d?.credit
                     });
                   }
-                } else if (property === 'inventory') {
-                  if (d?.inventory) {
-                    otherData.push({
-                      title: `Inventory ${d?.inventory}`,
-                      start: dayjs.utc(d['date']).tz().toDate(),
-                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
-                      allDay: true,
-                      resource: selectedResource.resource
-                    });
-                  }
                 } else if (property === 'availableByPlanning') {
                   otherData.push({
                     title: `Planned Available ${d?.availableByPlanning || 0}`,
@@ -385,17 +377,47 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     resource: selectedResource.resource,
                     isRedAlert: d?.availableByPlanning < 0 ? true : false
                   });
-                } else if (['assetCount', 'date']?.includes(property)) {
+                } else if (property === 'inventory') {
+                  if (d?.inventory) {
+                    otherData.push({
+                      title: `Inventory ${d?.inventory}`,
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      allDay: true,
+                      resource: selectedResource.resource
+                    });
+                  }
+                } else if (['date']?.includes(property)) {
+                } else if (property === 'assetCount') {
+                  if (d[property]) {
+                    if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
+                    }
+                    else {
+                      otherData.push({
+                        title: `Total Assets ${d[property]}`,
+                        start: dayjs.utc(d['date']).tz().toDate(),
+                        end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                        allDay: true,
+                        type: 'assetCount',
+                        status: property,
+                        resource: selectedResource.resource
+                      });
+                    }
+                  }
                 } else if (d[property]) {
-                  otherData.push({
-                    title: `${property} ${d[property]}`,
-                    start: dayjs.utc(d['date']).tz().toDate(),
-                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
-                    allDay: true,
-                    type: 'assetStatus',
-                    status: property,
-                    resource: selectedResource.resource
-                  });
+                  if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
+                  }
+                  else {
+                    otherData.push({
+                      title: `${property} ${d[property]}`,
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      allDay: true,
+                      type: 'assetStatus',
+                      status: property,
+                      resource: selectedResource.resource
+                    });
+                  }
                 }
               }
               return null;
@@ -693,13 +715,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   );
 
   useEffect(() => {
-    setFields([]);
-    if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
-      axiosInstance()
-        .get(`/field?resource=${selectedResource?.resource}`)
-        .then(({ data }) => {
-          setFields(data.data);
-        });
+    if (selectedResource) {
+      setFields([]);
+      if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
+        axiosInstance().get(`/field?resource=${selectedResource?.resource}`)
+          .then(({ data }) => {
+            setFields(data.data);
+          });
+      }
     }
   }, [selectedResource]);
 

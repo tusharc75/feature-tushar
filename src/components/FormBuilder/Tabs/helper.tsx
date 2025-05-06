@@ -410,5 +410,22 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
+  },
+  {
+    resource: sidebarResource.planningView,
+    policy: [
+      {
+        fieldName: 'hideBackDatedPlanning',
+        fieldLabel: 'Hide Back Dated Planning',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'hideAssetStatusForFutureDates',
+        fieldLabel: 'Hide Asset Status For Future Dates',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
   }
 ];
