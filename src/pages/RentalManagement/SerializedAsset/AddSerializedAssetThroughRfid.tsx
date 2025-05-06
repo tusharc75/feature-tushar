@@ -72,7 +72,7 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
         open: true
       });
       const deepFilter: any = [{ field: 'assetNumber', term: assetNumber }];
-      let queryString = `?deepFilter=${JSON.stringify(deepFilter)}&rentalJobId=${referenceData?._id}`;
+      let queryString = `?deepFilter=${JSON.stringify(deepFilter)}`;
       if (selectedProducts.length > 0) {
         var updatedFilters = [];
         updatedFilters.push({ field: 'product', term: { $in: selectedProducts.map((m) => m?.id) } });
@@ -88,9 +88,9 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
           const matchedAssets = rows.filter(asset => asset.productId === product.id);
           let assetsToTake = matchedAssets?.slice(0, product.qty);
           assetsToTake = assetsToTake?.map((asset) => {
-            if(![ASSET_STATUS.new, ASSET_STATUS.available].includes(asset.status)) {
+            if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(asset.status)) {
               toastConfig.setToastConfig({
-                message: `Asset(${asset.assetNumber}) status is not valid for ${product.productName}`,
+                message: `Asset ${asset.assetNumber} status is not valid`,
                 type: 'error',
                 open: true
               });
@@ -98,7 +98,6 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
             }
             return asset;
           })?.filter(Boolean);
-
           assetsToAssign.push(...assetsToTake);
         }
         if (assetsToAssign.length > 0) {
