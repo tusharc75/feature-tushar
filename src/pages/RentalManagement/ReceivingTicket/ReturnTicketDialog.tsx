@@ -49,7 +49,6 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
         }
       });
     }
-    console.log(errors)
     return errors;
   };
 
