@@ -478,6 +478,26 @@ const Material = ({
     }
   };
 
+  const createRow = (d, type, taxCodeData, parentId) => {
+    let element: any = {};
+    element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+    element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+    element.qty = d.qty ? parseFloat(d.qty) : 1;
+    element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+    element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+    if (taxCodeData) {
+      element.taxCode = taxCodeData?.optionValue;
+      element.taxPercentage = taxCodeData?.taxRate || 0;
+    }
+    const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+    Object.assign(element, calValues);
+    element = { ...getObjKeysWithValues(element, allFields) };
+    element.materialId = d._id;
+    element.type = type;
+    element.parentId = parentId;
+    return element;
+  };
+
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     if (isOffline) {
@@ -576,43 +596,13 @@ const Material = ({
             ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
             ?.forEach((r) => {
               rows.forEach((d) => {
-                let element: any = {};
-                element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-                element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-                element.qty = d.qty ? parseFloat(d.qty) : 1;
-                element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-                element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-                if (taxCodeData) {
-                  element.taxCode = taxCodeData?.optionValue;
-                  element.taxPercentage = taxCodeData?.taxRate || 0;
-                }
-                const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-                Object.assign(element, calValues);
-                element = { ...getObjKeysWithValues(element, allFields) };
-                element.materialId = d._id;
-                element.type = type;
-                element.parentId = r?._id;
+                const element = createRow(d, type, taxCodeData, r?._id);
                 material.push(element);
               });
             });
         } else {
           rows.forEach((d) => {
-            let element: any = {};
-            element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-            element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-            element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-            element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-            if (taxCodeData) {
-              element.taxCode = taxCodeData?.optionValue;
-              element.taxPercentage = taxCodeData?.taxRate || 0;
-            }
-            const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-            Object.assign(element, calValues);
-            element = { ...getObjKeysWithValues(element, allFields) };
-            element.materialId = d._id;
-            element.type = type;
-            element.parentId = materialDialog.parentId;
+            const element = createRow(d, type, taxCodeData, materialDialog.parentId);
             material.push(element);
           });
         }
