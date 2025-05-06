@@ -1,21 +1,21 @@
-import { Box, IconButton, Popover } from '@mui/material';
+import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { displayDateTime, downloadExcel, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import CloseIcon from '@mui/icons-material/Close';
 import routes from 'src/components/Helpers/Routes';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
-const PlannedIncomingPopover = ({ anchor, setShowPlannedIncoming, product, resourceList }) => {
+const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
   const renderedFrom = `${camelCase(sidebarResource?.planningView)}_planned/Incomming`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -201,72 +201,40 @@ const PlannedIncomingPopover = ({ anchor, setShowPlannedIncoming, product, resou
   };
 
   return (
-    <Popover
-      open={true}
-      anchorEl={anchor}
-      anchorOrigin={{
-        vertical: 'center',
-        horizontal: 'right'
-      }}
-      anchorReference={'anchorPosition'}
-      anchorPosition={{ top: 400, left: 200 }}
-      transformOrigin={{
-        vertical: 'center',
-        horizontal: 'left'
-      }}
-      onClose={() => {
-        setShowPlannedIncoming({ open: false, anchor: null });
-      }}
-    >
-      <div className="p-2" style={{ minWidth: '1000px', minHeight: '500px' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
-            <h5 className="text-sm">{`${product?.optionLabel}`}</h5>
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(`${routes?.productDetail.path}/${product?.optionValue}`);
-              }}
-              className="close-icon-v1"
-            >
-              <FiExternalLink fontSize="medium" />
-            </IconButton>
-          </div>
-          <HtmlTooltip title="Close">
-            <IconButton size="small" onClick={() => setShowPlannedIncoming({ open: false, anchor: null })} className="close-icon-v1">
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        </div>
-        <div className="mt-1">
-          <Box>
-            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} label={'Planned'} />
-              <CustomTab value={1} label={'Incoming'} />
-            </CustomTabs>
-          </Box>
+    <Dialog fullWidth maxWidth="md" open={true} onClose={handleClose} fullScreen={true} aria-labelledby="assign-dialog">
+      <CustomDialogHeader onClose={handleClose} title={`${product?.optionLabel}`} showRequiredLabel={false} />
+      <CustomDialogContent>
+        <div className="p-2">
           <div className="mt-1">
-            <div className="flex items-center justify-end">
-              <label onClick={exportToExcel} className={`new-headerbox-button-v1 small}`}>
-                <span>Export to Excel </span>
-                <ExportIcon />
-              </label>
+            <Box>
+              <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                <CustomTab value={0} label={'Planned'} />
+                <CustomTab value={1} label={'Incoming'} />
+              </CustomTabs>
+            </Box>
+            <div className="mt-1">
+              <div className="flex items-center justify-end">
+                <label onClick={exportToExcel} className={`new-headerbox-button-v1 small}`}>
+                  <span>Export to Excel </span>
+                  <ExportIcon />
+                </label>
+              </div>
+              <CustomReactTable
+                height={'calc(100vh - 300px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                hideSelection={true}
+                isClientSideGrid={true}
+              />
             </div>
-            <CustomReactTable
-              height={'calc(100vh - 300px)'}
-              columns={columns}
-              state={state}
-              dispatch={dispatch}
-              renderedFrom={renderedFrom}
-              refreshGrid={fetchData}
-              hideSelection={true}
-              isClientSideGrid={true}
-            />
           </div>
         </div>
-      </div>
-    </Popover>
+      </CustomDialogContent>
+    </Dialog>
   );
 };
 
-export default PlannedIncomingPopover;
+export default PlannedIncomingDialog;

@@ -24,7 +24,7 @@ import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import InfoIcon from '@mui/icons-material/Info';
-import PlannedIncomingPopover from 'src/pages/PlanningView/Calendar/PlannedIncomingPopover';
+import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -213,7 +213,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
-  const [showPlannedIncoming, setShowPlannedIncoming] = useState({ open: false, anchor: null });
+  const [showPlannedIncoming, setShowPlannedIncoming] = useState(false);
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
@@ -807,8 +807,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 <HtmlTooltip title={'Planned/Incoming'}>
                   <IconButton
                     size={'small'}
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                      setShowPlannedIncoming({ open: true, anchor: e.currentTarget });
+                    onClick={() => {
+                      setShowPlannedIncoming(true);
                     }}
                   >
                     <InfoIcon fontSize="small" color={'primary'} />
@@ -929,10 +929,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             showDetail={showDetail}
           />
         )}
-        {showPlannedIncoming.open && (
-          <PlannedIncomingPopover
-            anchor={showPlannedIncoming.anchor}
-            setShowPlannedIncoming={setShowPlannedIncoming}
+        {showPlannedIncoming && (
+          <PlannedIncomingDialog
+            handleClose={() => {
+              setShowPlannedIncoming(false);
+            }}
             product={selectedLookUpResourceData['product'][0]}
             resourceList={resourceList}
           />
