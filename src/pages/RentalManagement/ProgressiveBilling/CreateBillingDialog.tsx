@@ -165,9 +165,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         width: 200,
-        disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>

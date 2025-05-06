@@ -71,7 +71,6 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)

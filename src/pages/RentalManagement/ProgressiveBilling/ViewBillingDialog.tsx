@@ -125,9 +125,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           accessor: 'type',
           Header: 'Type',
           width: 200,
-          disableFilters: true,
           sticky: isMobile || isTablet ? 'none' : 'left',
-          disabled: true,
           Cell: ({ row }) =>
             row.original['type'] ? (
               <p>

@@ -73,7 +73,6 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type) || <NoDataCell />}</p>

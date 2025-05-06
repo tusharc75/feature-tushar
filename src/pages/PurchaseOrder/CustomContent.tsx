@@ -110,7 +110,6 @@ const CustomContent = React.memo(
           Header: 'Type',
           width: 100,
           primaryField: true,
-          disabled: true,
           Cell: ({ row }) => {
             return row.original['type'] ? (
               <div>

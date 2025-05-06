@@ -135,7 +135,6 @@ const Services = ({
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         disableFilters: true,
-        disabled: true,
         width: 200,
         Cell: ({ row }) =>
           row.original['type'] ? (

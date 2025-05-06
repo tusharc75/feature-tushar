@@ -96,7 +96,6 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>

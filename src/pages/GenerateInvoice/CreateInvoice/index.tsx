@@ -94,7 +94,6 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 100,
-        disabled: true,
         disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (

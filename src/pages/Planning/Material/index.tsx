@@ -78,7 +78,6 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (
