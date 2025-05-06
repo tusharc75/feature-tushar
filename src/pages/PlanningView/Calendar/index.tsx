@@ -23,22 +23,13 @@ import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
+import InfoIcon from '@mui/icons-material/Info';
+import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-  const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-  for (const key in obj) {
-    data.push({
-      items: obj[key],
-      key: key,
-      heading: routes[camelCase(key)].title || key
-    });
-  }
-  return data;
-};
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -119,6 +110,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       resources?.warehouse?.titlePlural
     ]
   );
+
+  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
+    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+    for (const key in obj) {
+      data.push({
+        items: obj[key],
+        key: key,
+        heading: resources?.[camelCase(key)]?.titlePlural || key
+      });
+    }
+    return data;
+  };
+
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -211,6 +215,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
+  const [showPlannedIncoming, setShowPlannedIncoming] = useState(false);
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
@@ -329,20 +334,30 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
-                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
+                start: dayjs
+                  .utc(d['estimateStartDate'] || d['startDate'])
+                  .tz()
+                  .toDate(),
+                end: dayjs
+                  .utc(d['estimateEndDate'] || d['endDate'])
+                  .tz()
+                  .endOf('day')
+                  .toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
               };
             }
             if (selectedResource.resource === sidebarResource.product) {
-              const today = dayjs.tz()
+              const today = dayjs.tz();
               for (const property in d) {
-                const ledgerDate = dayjs.utc(d['date']).tz()
-                if (resourcePolicy?.hideBackDatedPlanning && ledgerDate.isBefore(today, 'day') && ['debit', 'credit', 'availableByPlanning']?.includes(property)) {
-                }
-                else if (property === 'debit') {
+                const ledgerDate = dayjs.utc(d['date']).tz();
+                if (
+                  resourcePolicy?.hideBackDatedPlanning &&
+                  ledgerDate.isBefore(today, 'day') &&
+                  ['debit', 'credit', 'availableByPlanning']?.includes(property)
+                ) {
+                } else if (property === 'debit') {
                   if (d?.debit?.length) {
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
@@ -391,8 +406,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 } else if (property === 'assetCount') {
                   if (d[property]) {
                     if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
-                    }
-                    else {
+                    } else {
                       otherData.push({
                         title: `Total Assets ${d[property]}`,
                         start: dayjs.utc(d['date']).tz().toDate(),
@@ -406,8 +420,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   }
                 } else if (d[property]) {
                   if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
-                  }
-                  else {
+                  } else {
                     otherData.push({
                       title: `${property} ${d[property]}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
@@ -456,7 +469,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               ...(!isEmpty(extraData) ? extraData : {}),
               allDay: true,
               resource: selectedResource.resource,
-              fulfillStatus: fulfillStatus,
+              fulfillStatus: fulfillStatus
             };
           });
           rows = rows?.filter((e) => e);
@@ -594,12 +607,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance().put(`/planning-view/change-date`, {
-      _id: event.id,
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      resource: event.resource
-    })
+    axiosInstance()
+      .put(`/planning-view/change-date`, {
+        _id: event.id,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        resource: event.resource
+      })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -718,7 +732,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     if (selectedResource) {
       setFields([]);
       if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
-        axiosInstance().get(`/field?resource=${selectedResource?.resource}`)
+        axiosInstance()
+          .get(`/field?resource=${selectedResource?.resource}`)
           .then(({ data }) => {
             setFields(data.data);
           });
@@ -737,6 +752,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               style={{ width: '300px' }}
               value={selectedResource}
               onChange={(event, newValue) => {
+                console.log('new', newValue);
                 setSelectedResource(newValue);
               }}
               size="small"
@@ -786,6 +802,20 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   />
                 );
               })}
+            {selectedResource?.resource === sidebarResource.product && !isEmpty(selectedLookUpResourceData) &&
+              selectedLookUpResourceData['product'] &&
+              selectedLookUpResourceData['product']?.length === 1 && (
+                <HtmlTooltip title={'Planned/Incoming'}>
+                  <IconButton
+                    size={'small'}
+                    onClick={() => {
+                      setShowPlannedIncoming(true);
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
             {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
@@ -898,6 +928,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             selectedResource={selectedResource}
             setShowDetail={setShowDetail}
             showDetail={showDetail}
+          />
+        )}
+        {showPlannedIncoming && (
+          <PlannedIncomingDialog
+            handleClose={() => {
+              setShowPlannedIncoming(false);
+            }}
+            product={selectedLookUpResourceData['product'][0]}
+            resourceList={resourceList}
           />
         )}
       </div>
