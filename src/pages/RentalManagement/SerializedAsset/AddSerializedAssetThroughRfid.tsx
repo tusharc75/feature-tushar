@@ -23,11 +23,6 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
     if (assetNumberRef.current) {
       assetNumberRef.current.focus();
     }
-    setTimeout(() => {
-      const assetNumber = 'Ca-048773';
-      setAssetNumber(assetNumber);
-      assignAssets(assetNumber);
-    }, 3000);
   }, []);
 
   const getQueryString = () => {
@@ -62,13 +57,13 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
       if (assets?.length > 0) {
         const rows = assets.map(u => prepareDataForGrid(u));
         const assetsToAssign = [];
-        
+
         for (const product of selectedProducts) {
           const matchedAssets = rows.filter(asset => asset.productId === product.id);
           const assetsToTake = matchedAssets?.slice(0, product.qty);
           assetsToAssign.push(...assetsToTake);
         }
-        
+
         if (assetsToAssign.length > 0) {
           onSuccess(assetsToAssign);
         }
@@ -103,10 +98,12 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
               variant="outlined"
               inputRef={assetNumberRef}
               value={assetNumber}
-            // onChange={(e) => assignAssets(e.target.value)}
-            // onPaste={((e: any) => {
-            //   console.log('e', e);
-            // })}
+              onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => {
+                e.preventDefault();
+                const pastedText = e.clipboardData.getData('text');
+                setAssetNumber(pastedText);
+                assignAssets(pastedText);
+              }}
             />
           </Box>
         </CustomDialogContent>

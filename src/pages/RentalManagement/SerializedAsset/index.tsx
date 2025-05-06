@@ -69,7 +69,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [columns, setColumns] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
-  const [anchorRfidQrEl, setAnchorRfidQrEl] = useState(null);
   const [rfidQrDialogOpen, setRfidQrDialogOpen] = useState(false);
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
@@ -1052,17 +1051,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
-        {rentalPolicyData?.assignAssetUsingNfcQr && (
+        {rentalPolicyData?.assignAssetUsingRfidQr && (
           <ThemeButton
             id="assign-serialized-asset-button-rfid-qr"
             disabled={disableAssignSerializedAssets(selectedRecords)}
-            onClick={(event) => {
-              setAnchorRfidQrEl(event.currentTarget);
+            onClick={() => {
+              setRfidQrDialogOpen(true);
             }}
             tooltip={!allowedToEdit ? ownerAndColaborator : ``}
             buttonType="theme"
           >
-            {`Assign ${resources?.serializedAsset?.titleSingular} Through RFID/QR`}
+            {`Assign ${resources?.serializedAsset?.titleSingular} Through RFID`}
           </ThemeButton>
         )}
         <ThemeButton
@@ -1262,35 +1261,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           </MenuItem>
         )}
       </Menu>
-
-      <Menu
-        anchorEl={anchorRfidQrEl}
-        keepMounted
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-        id="rfid-qr-menu"
-        open={Boolean(anchorRfidQrEl)}
-        onClose={() => {
-          setAnchorRfidQrEl(null);
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            setRfidQrDialogOpen(true);
-          }}
-        >
-          Assign Through RFID
-        </MenuItem>
-
-        <MenuItem onClick={() => {}}>Assign Through QR</MenuItem>
-      </Menu>
-
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
