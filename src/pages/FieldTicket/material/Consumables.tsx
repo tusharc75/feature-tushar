@@ -235,20 +235,20 @@ const Consumables = ({
       ...newColumns,
       ...(!resourcePolicy?.hideInventoryConsume
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            },
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       {
         accessor: 'action',
@@ -349,6 +349,7 @@ const Consumables = ({
       }
       consumables?.forEach((parent, i) => {
         parent.index = i + 1;
+        parent.detail = parent?.productDetail?.productName;
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
@@ -807,6 +808,8 @@ const Consumables = ({
                   hideSelection={allowedToEdit ? false : true}
                   hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
+                  resource={sidebarResource.fieldTicket}
+                  arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
                 />
               ) : (
                 <Box p={2} height={300}>

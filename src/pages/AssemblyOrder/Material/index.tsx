@@ -471,8 +471,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
             isClientSideGrid={true}
-            resource={sidebarResource.assemblyOrder}
             expander={true}
+            resource={sidebarResource.assemblyOrder}
             arrangeRowField={{ key: 'material', _id: assemblyOrderData?._id, materialKey: '_id' }}
           />
         </Box>
