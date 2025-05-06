@@ -1,7 +1,6 @@
 import { Box, Dialog, IconButton } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -14,8 +13,10 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import Grid from '@mui/material/Grid2';
 
 const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
+
   const renderedFrom = `${camelCase(sidebarResource?.planningView)}_planned/Incomming`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -29,12 +30,16 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
 
   const columns = [
     {
+      accessor: 'resource',
+      Header: 'Resource',
+      Cell: ({ row }) => {
+        return row.original['resource'] ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />;
+      }
+    },
+    {
       accessor: 'resourceLabel',
-      Header: 'Resource Label',
-      minWidth: 200,
-      width: 200,
+      Header: 'Reference',
       disabled: true,
-      sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <p> {row.original.resourceLabel}</p>
@@ -49,14 +54,6 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
           </IconButton>
         </div>
       )
-    },
-    {
-      accessor: 'resource',
-      Header: 'Resource',
-      width: 200,
-      Cell: ({ row }) => {
-        return row.original['resource'] ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />;
-      }
     },
     {
       accessor: 'customerAccount',
@@ -107,26 +104,13 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
     {
       accessor: 'qty',
       Header: 'Qty',
-      width: 200,
       Cell: ({ row }) => {
         return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
       }
     },
     {
-      accessor: 'serializedProduct',
-      Header: 'Serialized Product',
-      width: 200,
-      Cell: ({ row }) => <p className="text-truncate">{row?.original?.serializedProduct ? 'Yes' : 'No'}</p>,
-      accessorFn: (original) => {
-        return original?.serializedProduct ? 'Yes' : 'No';
-      }
-    },
-    {
       accessor: 'date',
       Header: 'Date',
-      disableFilters: true,
-      disabled: true,
-      disableSortBy: true,
       Cell: ({ row }) => (
         <div>
           {row?.original?.date ? (
@@ -164,6 +148,7 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
       let rows = tabValue === 0 ? data['palnning'] : tabValue === 1 ? data['incoming'] : [];
       rows = rows.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
+        finalObject.resource = resources?.[camelCase(u?.resource)]?.titleSingular || u?.resource;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -182,19 +167,17 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
       message: `File is Loading, Please wait...`
     });
 
-    axiosInstance()
-      .get(`${routes?.planningView.path}/back-date/export?product=${product?.optionValue}`, {
-        responseType: 'arraybuffer'
-      })
-      .then((response) => {
-        const fileName = response.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(response.data, fileName);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'Exported to excel successfully.'
-        });
-      })
+    axiosInstance().get(`${routes?.planningView.path}/back-date/export?product=${product?.optionValue}`, {
+      responseType: 'arraybuffer'
+    }).then((response) => {
+      const fileName = response.headers['content-disposition'].split('filename=')[1];
+      downloadExcel(response.data, fileName);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Exported to excel successfully.'
+      });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -207,29 +190,33 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
         <div className="p-2">
           <div className="mt-1">
             <Box>
-              <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} label={'Planned'} />
-                <CustomTab value={1} label={'Incoming'} />
-              </CustomTabs>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 8 }}>
+                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                    <CustomTab value={0} label={'Planned'} />
+                    <CustomTab value={1} label={'Incoming'} />
+                  </CustomTabs>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <div className="flex items-center justify-end">
+                    <label onClick={exportToExcel} className={`new-headerbox-button-v1 small}`}>
+                      <span>Export to Excel </span>
+                      <ExportIcon />
+                    </label>
+                  </div>
+                </Grid>
+              </Grid>
             </Box>
-            <div className="mt-1">
-              <div className="flex items-center justify-end">
-                <label onClick={exportToExcel} className={`new-headerbox-button-v1 small}`}>
-                  <span>Export to Excel </span>
-                  <ExportIcon />
-                </label>
-              </div>
-              <CustomReactTable
-                height={'calc(100vh - 300px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchData}
-                hideSelection={true}
-                isClientSideGrid={true}
-              />
-            </div>
+            <CustomReactTable
+              height={'calc(100vh - 250px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchData}
+              hideSelection={true}
+              isClientSideGrid={true}
+            />
           </div>
         </div>
       </CustomDialogContent>

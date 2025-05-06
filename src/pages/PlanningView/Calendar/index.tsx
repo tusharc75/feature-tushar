@@ -30,17 +30,6 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-  const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-  for (const key in obj) {
-    data.push({
-      items: obj[key],
-      key: key,
-      heading: routes[camelCase(key)].title || key
-    });
-  }
-  return data;
-};
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -53,57 +42,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
+          {
+            label: resources?.warehouse?.titlePlural,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
+          {
+            label: resources?.product?.titlePlural,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
+          {
+            label: resources?.serializedAsset?.titlePlural,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
+          {
+            label: resources?.serviceMaster?.titlePlural,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
+          {
+            label: resources?.customerAccount?.titlePlural,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
+          {
+            label: resources?.competencies?.titlePlural,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
         : [])
     ],
     [
@@ -121,6 +110,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       resources?.warehouse?.titlePlural
     ]
   );
+
+  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
+    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+    for (const key in obj) {
+      data.push({
+        items: obj[key],
+        key: key,
+        heading: resources?.[camelCase(key)]?.titlePlural || key
+      });
+    }
+    return data;
+  };
+
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -174,12 +176,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
+          {
+            label: resources?.padMaster?.titlePlural,
+            value: 'Pad Master',
+            key: 'padMaster'
+          }
+        ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -800,8 +802,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   />
                 );
               })}
-            {selectedResource?.resource === sidebarResource.product &&
-              !isEmpty(selectedLookUpResourceData) &&
+            {selectedResource?.resource === sidebarResource.product && !isEmpty(selectedLookUpResourceData) &&
               selectedLookUpResourceData['product'] &&
               selectedLookUpResourceData['product']?.length === 1 && (
                 <HtmlTooltip title={'Planned/Incoming'}>
