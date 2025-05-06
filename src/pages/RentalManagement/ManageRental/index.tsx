@@ -32,6 +32,7 @@ import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -59,6 +60,7 @@ const ManageRentalManagementDialog = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [rentalDetails, setRentalDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(rentalData.fields));
@@ -422,8 +424,12 @@ const ManageRentalManagementDialog = ({
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
-                    submitForm();
-                  }}
+                      if (rentalManagementId && isClone) {
+                        setShowConfirmCloneDetailsDialog(true);
+                      } else {
+                        submitForm();
+                      }
+                    }}
                 >
                   Save
                 </ThemeButton>
@@ -434,11 +440,30 @@ const ManageRentalManagementDialog = ({
                   onSave={() => {
                     setShowConfirmDialog(false);
                     handleScroll(errors);
-                    submitForm();
-                  }}
+                      if (rentalManagementId && isClone) {
+                        setShowConfirmCloneDetailsDialog(true);
+                      } else {
+                        submitForm();
+                      }
+                    }}
                   onClose={() => {
                     setShowConfirmDialog(false);
                     onClose();
+                  }}
+                />
+              )}
+              {showConfirmCloneDetailsDialog && (
+                <ConfirmationDialog
+                  open={true}
+                  message="Please confirm this if you want to clone  details ?"
+                  onOk={() => {
+                    setFieldValue('rentalJobId', rentalManagementId);
+                    setShowConfirmCloneDetailsDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmCloneDetailsDialog(false);
+                    submitForm();
                   }}
                 />
               )}
