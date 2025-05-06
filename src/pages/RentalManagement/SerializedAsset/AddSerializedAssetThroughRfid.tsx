@@ -84,7 +84,7 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
       <Dialog TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} maxWidth="xs">
         <CustomDialogHeader
           showRequiredLabel={false}
-          title={`Assign ${resources?.serializedAsset?.titleSingular} Through RFID`}
+          title={`Scan RFID`}
           onClose={onClose}
         ></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
