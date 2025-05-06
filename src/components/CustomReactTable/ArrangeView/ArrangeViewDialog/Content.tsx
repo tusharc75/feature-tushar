@@ -96,7 +96,7 @@ const RenderListItem = memo(
         index,
         props: { column, index, hidden, from: 'table' }
       },
-      disabled: column.lockPosition || hidden
+      disabled: column.lockPosition || hidden || !!column.sticky
     });
 
     const style = {
@@ -123,7 +123,7 @@ const RenderListItem = memo(
                 <IconButton
                   {...attributes}
                   {...listeners}
-                  disabled={column.lockPosition}
+                  disabled={column.lockPosition || !!column.sticky}
                   className={cn(`pl-2`, column.lockPosition ? '' : '!cursor-grab ', isDragging ? '!cursor-grabbing' : '')}
                   sx={{ borderRadius: 2 }}
                   size="small"
@@ -132,7 +132,13 @@ const RenderListItem = memo(
                 </IconButton>
               </HtmlTooltip>
 
-              <h6 className={cn('line-clamp-1 select-none text-sm font-medium leading-4', column.lockPosition ? 'text-gray-500' : '')} id={key}>
+              <h6
+                className={cn(
+                  'line-clamp-1 select-none text-sm font-medium leading-4',
+                  column.lockPosition || !!column.sticky ? 'text-gray-500' : ''
+                )}
+                id={key}
+              >
                 {column.Header || startCase(key)}
               </h6>
             </div>
