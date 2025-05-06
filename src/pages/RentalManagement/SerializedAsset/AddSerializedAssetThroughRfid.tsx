@@ -48,7 +48,7 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data.message
+          message: 'Asset(s) assigned successfully'
         });
         const updatedProducts = products?.filter((e: any) => e.realAssetQty - e.realAssetAssignedQty > 0);
         if (updatedProducts?.length) {
@@ -63,8 +63,6 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
       });
     }
   };
-
-  console.log(selectedProducts);
 
   const assignAssets = async (assetNumber: string) => {
     try {
