@@ -6,19 +6,63 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, prepareDataForGrid, serializedAsset } from '../../../constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, prepareDataForGrid, rentalManagement, serializedAsset } from '../../../constants/helpers';
 
-const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedProducts, ids = [] }) => {
+const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [assetNumber, setAssetNumber] = useState('');
   const assetNumberRef = useRef(null);
+  const [products, setProducts] = useState(null);
+  const [isAdding, setAdding] = useState(false);
 
   useEffect(() => {
     if (assetNumberRef.current) {
       assetNumberRef.current.focus();
     }
+    setProducts(selectedProducts);
   }, []);
+
+  const handleAddSerializedAsset = (assets) => {
+    var data = [];
+    products?.forEach((e: any) => {
+      let qty = e.realAssetQty - e.realAssetAssignedQty;
+      while (qty) {
+        const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
+        if (result.length) {
+          let obj: any = {};
+          obj._id = e._id;
+          obj.inventory = result[0].id;
+          obj.product = e.materialId;
+          data.push(obj);
+          result[0].isCounted = true;
+          e.realAssetAssignedQty++;
+        }
+        qty--;
+      }
+    });
+    if (data?.length) {
+      setAdding(true);
+      axiosInstance().post(`${rentalManagement.api}/${referenceData._id}/inventory`, { products: data, withTransfer: false }).then(({ data }) => {
+        setAdding(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Asset(s) assigned successfully'
+        });
+        const updatedProducts = products?.filter((e: any) => e.realAssetQty - e.realAssetAssignedQty > 0);
+        if (updatedProducts?.length) {
+          setProducts(updatedProducts);
+          setAssetNumber('');
+        } else {
+          onSuccess();
+        }
+      }).catch((error) => {
+        setAdding(false);
+        toastConfig.setToastConfig(error);
+      });
+    }
+  };
 
   const assignAssets = async (assetNumber: string) => {
     try {
@@ -27,15 +71,13 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
         type: 'info',
         open: true
       });
-      const ignoreIds = ids && ids?.length > 0 ? ids : [];
-      let queryString = `?ignoreIds=${JSON.stringify(ignoreIds)}`;
+      const deepFilter: any = [{ field: 'assetNumber', term: assetNumber }];
+      let queryString = `?deepFilter=${JSON.stringify(deepFilter)}`;
       if (selectedProducts.length > 0) {
         var updatedFilters = [];
         updatedFilters.push({ field: 'product', term: { $in: selectedProducts.map((m) => m?.id) } });
         queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterType=and`;
       }
-      const deepFilter: any = [{ field: 'assetNumber', term: assetNumber }];
-      queryString = `${queryString}&deepFilter=${JSON.stringify(deepFilter)}`;
 
       const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`);
       const assets = response?.data?.data?.filter((d) => d?.assetNumber === assetNumber);
@@ -44,15 +86,26 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
         const assetsToAssign = [];
         for (const product of selectedProducts) {
           const matchedAssets = rows.filter(asset => asset.productId === product.id);
-          const assetsToTake = matchedAssets?.slice(0, product.qty);
+          let assetsToTake = matchedAssets?.slice(0, product.qty);
+          assetsToTake = assetsToTake?.map((asset) => {
+            if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(asset.status)) {
+              toastConfig.setToastConfig({
+                message: `Asset ${asset.assetNumber} status is not valid`,
+                type: 'error',
+                open: true
+              });
+              return null;
+            }
+            return asset;
+          })?.filter(Boolean);
           assetsToAssign.push(...assetsToTake);
         }
         if (assetsToAssign.length > 0) {
-          onSuccess(assetsToAssign)
+          handleAddSerializedAsset(assetsToAssign)
         }
       } else {
         toastConfig.setToastConfig({
-          message: 'Invalid Asset Number',
+          message: 'No asset found for selected product(s)',
           type: 'error',
           open: true
         });
