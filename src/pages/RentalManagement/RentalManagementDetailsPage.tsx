@@ -606,6 +606,7 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
+                  rentalPolicyData={resourceData?.policy}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Loading Ticket' && rentalManagementData && (
