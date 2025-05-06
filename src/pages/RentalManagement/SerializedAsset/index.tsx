@@ -49,8 +49,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AddSerializedAssetThroughRfid from './AddSerializedAssetThroughRfid';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
@@ -68,6 +69,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [columns, setColumns] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
+  const [anchorRfidQrEl, setAnchorRfidQrEl] = useState(null);
+  const [rfidQrDialogOpen, setRfidQrDialogOpen] = useState(false);
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
@@ -821,6 +824,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         .then(({ data }) => {
           setAddSerializedAssetDialog({ open: false });
           fetchData();
+          setRfidQrDialogOpen(false);
           setAssetAssignedProduct([]);
           setAdding(false);
           toastConfig.setToastConfig({
@@ -1048,6 +1052,19 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
+        {rentalPolicyData?.assignAssetUsingNfcQr && (
+          <ThemeButton
+            id="assign-serialized-asset-button-rfid-qr"
+            disabled={disableAssignSerializedAssets(selectedRecords)}
+            onClick={(event) => {
+              setAnchorRfidQrEl(event.currentTarget);
+            }}
+            tooltip={!allowedToEdit ? ownerAndColaborator : ``}
+            buttonType="theme"
+          >
+            {`Assign ${resources?.serializedAsset?.titleSingular} Through RFID/QR`}
+          </ThemeButton>
+        )}
         <ThemeButton
           id="assign-serialized-asset-button"
           disabled={disableAssignSerializedAssets(selectedRecords)}
@@ -1245,6 +1262,35 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           </MenuItem>
         )}
       </Menu>
+
+      <Menu
+        anchorEl={anchorRfidQrEl}
+        keepMounted
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        id="rfid-qr-menu"
+        open={Boolean(anchorRfidQrEl)}
+        onClose={() => {
+          setAnchorRfidQrEl(null);
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            setRfidQrDialogOpen(true);
+          }}
+        >
+          Assign Through RFID
+        </MenuItem>
+
+        <MenuItem onClick={() => {}}>Assign Through QR</MenuItem>
+      </Menu>
+
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
@@ -1463,6 +1509,34 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           ids={productSerialNumbers?.map((e) => e?.serialNumber)}
           showWarehouseFilter={true}
           referenceData={{ rentalJob: rentalManagementData._id }}
+        />
+      )}
+      {rfidQrDialogOpen && (
+        <AddSerializedAssetThroughRfid
+          isAdding={isAdding}
+          selectedProducts={assetAssignedProduct}
+          onSuccess={(data) => {
+            handleAddSerializedAsset(data);
+          }}
+          onClose={() => {
+            setRfidQrDialogOpen(false);
+          }}
+          referenceType={'Rental Job'}
+          referenceData={{
+            _id: rentalManagementData?._id,
+            warehouse: rentalManagementData?.warehouse?.optionValue,
+            customerAccount: rentalManagementData?.customerAccount?.optionValue,
+            shippingAddress: rentalManagementData?.shippingAddress?.optionValue,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            wellName: rentalManagementData?.wellName
+              ? rentalManagementData?.wellName?.optionValue || rentalManagementData?.wellName?.map((e) => e?.optionValue)
+              : null,
+            fromDate: rentalManagementData?.estimateStartDate,
+            toDate: rentalManagementData?.estimateEndDate,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
         />
       )}
     </Fragment>

@@ -249,6 +249,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'assignAssetUsingRfidQr',
+        fieldLabel: 'Assign Asset Using RFID/QR',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
