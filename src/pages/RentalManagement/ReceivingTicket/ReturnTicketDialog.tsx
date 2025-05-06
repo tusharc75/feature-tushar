@@ -49,7 +49,6 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
         }
       });
     }
-    console.log(errors)
     return errors;
   };
 
@@ -240,7 +239,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               </ThemeButton>
               <ThemeButton
                 onClick={() => {
-                  if (!validate(values.products).returnQuantity) {
+                  if (!validate(values.products).returnQuantity && !validate(values.products).productSerialNumbers) {
                     handleSubmit(values);
                   }
                 }}

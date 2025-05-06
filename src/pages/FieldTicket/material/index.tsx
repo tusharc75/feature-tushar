@@ -29,7 +29,7 @@ import {
   fieldTicket,
   getObjKeysWithValues,
   restoreObjKeysWithValues,
-  sidebarResource,
+  sidebarResource
 } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -60,14 +60,23 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
-const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
+const Material = ({
+  fieldTicketData,
+  fieldTicketFields,
+  stepFullScreen,
+  allowedToEdit,
+  setNextStep,
+  handleChangeStatus,
+  resourcePolicy,
+  fetchData
+}) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Material`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null });
+  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null, serializedAssetService: false });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -203,15 +212,22 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
             ) : (
               <NoDataCell />
             )}
-            {row.original.type === MATERIAL_TYPE.package && (
+            {[MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]?.includes(row.original.type) && (
               <>
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
-                  <Box ml={1}>
-                    <HtmlTooltip title={`Add ${resources?.packages?.titleSingular}`}>
+                  <Box>
+                    <HtmlTooltip
+                      title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}
+                    >
                       <IconButton
                         onClick={() => {
-                          setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: row.original._id });
+                          setMaterialDialog({
+                            open: true,
+                            type: row.original.type === MATERIAL_TYPE.package ? MATERIAL_TYPE.package : MATERIAL_TYPE.service,
+                            parentId: row.original._id,
+                            serializedAssetService: row.original.type === MATERIAL_TYPE.package ? false : true
+                          });
                         }}
                         size="small"
                       >
@@ -248,52 +264,56 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <div>
-            <p className="text-truncate">{row.original.description}</p>
-          </div> : <NoDataCell />;
+          return row.original['description'] ? (
+            <div>
+              <p className="text-truncate">{row.original.description}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -458,6 +478,26 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
     }
   };
 
+  const createRow = (d, type, taxCodeData, parentId) => {
+    let element: any = {};
+    element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+    element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+    element.qty = d.qty ? parseFloat(d.qty) : 1;
+    element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+    element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+    if (taxCodeData) {
+      element.taxCode = taxCodeData?.optionValue;
+      element.taxPercentage = taxCodeData?.taxRate || 0;
+    }
+    const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+    Object.assign(element, calValues);
+    element = { ...getObjKeysWithValues(element, allFields) };
+    element.materialId = d._id;
+    element.type = type;
+    element.parentId = parentId;
+    return element;
+  };
+
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     if (isOffline) {
@@ -487,7 +527,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         material.push(element);
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         fetchMaterial();
-        setMaterialDialog({ open: false, type: '', parentId: null });
+        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
@@ -515,7 +555,10 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       if (addRentalJobDataDialog.open || addQuotationDataDialog.open || addFieldServiceOrderDataDialog) {
         rows?.forEach((e: any) => {
           let element: any = e;
-          const values = { estimateStartDate: fieldTicketData?.estimateStartDate || new Date(), estimateEndDate: fieldTicketData?.estimateEndDate || new Date() };
+          const values = {
+            estimateStartDate: fieldTicketData?.estimateStartDate || new Date(),
+            estimateEndDate: fieldTicketData?.estimateEndDate || new Date()
+          };
           const calValues = autoCalculateSpecificFields(values, element, allFields);
           Object.assign(element, calValues);
           element = { _id: e._id, parentId: e?.parentId, materialId: e.materialId, type: e.type, ...getObjKeysWithValues(element, allFields) };
@@ -548,25 +591,21 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         });
         AddMaterial(material, null);
       } else {
-        rows.forEach((d) => {
-          let element: any = {};
-          element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-          element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-          element.qty = d.qty ? parseFloat(d.qty) : 1;
-          element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-          element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-          if (taxCodeData) {
-            element.taxCode = taxCodeData?.optionValue;
-            element.taxPercentage = taxCodeData?.taxRate || 0;
-          }
-          const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-          Object.assign(element, calValues);
-          element = { ...getObjKeysWithValues(element, allFields) };
-          element.materialId = d._id;
-          element.type = type;
-          element.parentId = materialDialog.parentId;
-          material.push(element);
-        });
+        if (type === MATERIAL_TYPE.service && materialDialog.serializedAssetService && !materialDialog?.parentId) {
+          selectedRecords
+            ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
+            ?.forEach((r) => {
+              rows.forEach((d) => {
+                const element = createRow(d, type, taxCodeData, r?._id);
+                material.push(element);
+              });
+            });
+        } else {
+          rows.forEach((d) => {
+            const element = createRow(d, type, taxCodeData, materialDialog.parentId);
+            material.push(element);
+          });
+        }
         let priceData: any = await getPricingConditions(sidebarResource.fieldTicket, fieldTicketData, material, PRICING_SETUP_TYPE.rent);
         AddMaterial(material, priceData);
       }
@@ -596,7 +635,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         }
         fetchMaterial();
         fetchData();
-        setMaterialDialog({ open: false, type: '', parentId: null });
+        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setAddFieldServiceOrderDataDialog(false);
@@ -875,7 +914,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
       <>
         <MenuItem
           onClick={() => {
-            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: false });
           }}
           id={'add-existing-service-menu-item'}
         >
@@ -884,7 +923,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         {permissions?.serviceMaster?.isCreate && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: 'newService', parentId: null });
+              setMaterialDialog({ open: true, type: 'newService', parentId: null, serializedAssetService: false });
             }}
             id={'add-new-service-menu-item'}
           >
@@ -894,7 +933,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, serializedAssetService: false });
             }}
             id={'add-existing-package-menu-item'}
           >
@@ -982,6 +1021,15 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
             Bulk Edit
           </MenuItem>
         </HtmlTooltip>
+        {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
+          <MenuItem
+            onClick={() => {
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: true });
+            }}
+          >
+            Add Existing Service
+          </MenuItem>
+        )}
         <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
           <MenuItem
             disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
@@ -1059,7 +1107,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
             handleAdd(rows, MATERIAL_TYPE.service);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null });
+            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
           }}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
@@ -1073,7 +1121,7 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
             handleAdd(rows, MATERIAL_TYPE.package);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null });
+            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
           }}
           ids={[]}
           isSubmitting={isSubmitting}
@@ -1083,13 +1131,13 @@ const Material = ({ fieldTicketData, fieldTicketFields, stepFullScreen, allowedT
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
-          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null })}
+          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false })}
           onSuccess={(data) => {
             const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row], MATERIAL_TYPE.service);
-            setMaterialDialog({ open: false, type: '', parentId: null });
+            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
           }}
           isRedirectToDetailPage={false}
           referenceData={{ serviceType: SERVICE_TYPE.fieldService }}

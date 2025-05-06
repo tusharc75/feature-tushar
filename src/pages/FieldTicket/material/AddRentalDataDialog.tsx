@@ -211,8 +211,11 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
     >
       <CustomDialogHeader
         title={
-          materialType === MATERIAL_TYPE.product ? `Add Rental Consumables`
-            : materialType === MATERIAL_TYPE.package ? `Add Rental ${resources?.packages?.titlePlural}` : `Add Rental Assets`
+          materialType === MATERIAL_TYPE.product
+            ? `Add Rental Consumables`
+            : materialType === MATERIAL_TYPE.package
+              ? `Add Rental ${resources?.packages?.titlePlural}`
+              : `Add Rental Assets`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}
@@ -228,7 +231,8 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
               iconsEnabled: false,
               disabled: isSubmitting || selectedRecords?.length === 0,
               loading: isSubmitting,
-              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
+              textAddShow: true
             }}
             addButtonOnclick={() => {
               onSuccess(selectedRecords, allFields);
