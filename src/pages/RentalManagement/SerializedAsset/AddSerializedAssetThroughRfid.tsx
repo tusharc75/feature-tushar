@@ -65,7 +65,7 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
         }
 
         if (assetsToAssign.length > 0) {
-          onSuccess(assetsToAssign);
+          onSuccess(assetsToAssign)
         }
       } else {
         toastConfig.setToastConfig({
@@ -98,9 +98,10 @@ const AddSerializedAssetThroughRfid = ({ isAdding, onSuccess, onClose, selectedP
               variant="outlined"
               inputRef={assetNumberRef}
               value={assetNumber}
+              onChange={(e) => setAssetNumber(e.target.value)}
               onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => {
                 e.preventDefault();
-                const pastedText = e.clipboardData.getData('text');
+                const pastedText = e?.clipboardData?.getData('text')?.trim();
                 setAssetNumber(pastedText);
                 assignAssets(pastedText);
               }}
