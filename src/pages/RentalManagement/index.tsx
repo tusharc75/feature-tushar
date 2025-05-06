@@ -311,10 +311,7 @@ const RentalManagement = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-        finalObject['canDelete'] =
-          permissions?.rentalManagement?.isDelete &&
-          u?.material?.length === 0 &&
-          checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
+        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && u?.canDelete && checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });

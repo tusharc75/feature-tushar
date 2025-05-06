@@ -204,7 +204,6 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>

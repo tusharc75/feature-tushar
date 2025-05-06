@@ -179,7 +179,6 @@ const Material = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
@@ -275,45 +274,45 @@ const Material = ({
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -478,6 +477,26 @@ const Material = ({
     }
   };
 
+  const createRow = (d, type, taxCodeData, parentId) => {
+    let element: any = {};
+    element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
+    element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+    element.qty = d.qty ? parseFloat(d.qty) : 1;
+    element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
+    element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
+    if (taxCodeData) {
+      element.taxCode = taxCodeData?.optionValue;
+      element.taxPercentage = taxCodeData?.taxRate || 0;
+    }
+    const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+    Object.assign(element, calValues);
+    element = { ...getObjKeysWithValues(element, allFields) };
+    element.materialId = d._id;
+    element.type = type;
+    element.parentId = parentId;
+    return element;
+  };
+
   const handleAdd = async (rows: any, type: string) => {
     setIsSubmitting(true);
     if (isOffline) {
@@ -576,43 +595,13 @@ const Material = ({
             ?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)
             ?.forEach((r) => {
               rows.forEach((d) => {
-                let element: any = {};
-                element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-                element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-                element.qty = d.qty ? parseFloat(d.qty) : 1;
-                element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-                element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-                if (taxCodeData) {
-                  element.taxCode = taxCodeData?.optionValue;
-                  element.taxPercentage = taxCodeData?.taxRate || 0;
-                }
-                const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-                Object.assign(element, calValues);
-                element = { ...getObjKeysWithValues(element, allFields) };
-                element.materialId = d._id;
-                element.type = type;
-                element.parentId = r?._id;
+                const element = createRow(d, type, taxCodeData, r?._id);
                 material.push(element);
               });
             });
         } else {
           rows.forEach((d) => {
-            let element: any = {};
-            element.unit = d.unitMain && d.unitMain.length ? d.unitMain[0] : '';
-            element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
-            element.qty = d.qty ? parseFloat(d.qty) : 1;
-            element.estimateStartDate = fieldTicketData ? fieldTicketData?.estimateStartDate : new Date();
-            element.estimateEndDate = fieldTicketData ? fieldTicketData?.estimateEndDate : new Date();
-            if (taxCodeData) {
-              element.taxCode = taxCodeData?.optionValue;
-              element.taxPercentage = taxCodeData?.taxRate || 0;
-            }
-            const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
-            Object.assign(element, calValues);
-            element = { ...getObjKeysWithValues(element, allFields) };
-            element.materialId = d._id;
-            element.type = type;
-            element.parentId = materialDialog.parentId;
+            const element = createRow(d, type, taxCodeData, materialDialog.parentId);
             material.push(element);
           });
         }
@@ -1091,6 +1080,8 @@ const Material = ({
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
             expander={resourcePolicy?.showAddPackages ? true : false}
+            resource={sidebarResource.fieldTicket}
+            arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
           />
         </Box>
       ) : (

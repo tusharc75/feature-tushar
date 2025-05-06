@@ -64,7 +64,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         accessor: 'type',
         Header: 'Type',
         width: 150,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },

@@ -42,6 +42,8 @@ const initialValue = {
   hide: []
 };
 
+const NOT_ALLOWED_COLUMNS = ['action', 'actions', 'expander', 'selection', 'index'];
+
 const useArrangeView = ({
   columns,
   data,
@@ -59,6 +61,9 @@ const useArrangeView = ({
     () => columns.filter((c) => !stickyColumns.includes(c.id || c.accessor)),
     [stickyColumns, columns]
   );
+  const allowedColumns = useMemo(() => {
+    return columns.filter((c) => !NOT_ALLOWED_COLUMNS.includes(c.id || c.accessor));
+  }, [columns]);
 
   const isMobile = useMediaQuery('(max-width:768px)');
 
@@ -67,13 +72,11 @@ const useArrangeView = ({
       loading: false,
       resized: false,
       search: '',
-      sortedColumns: data?.order
-        ? [...columnsWithoutSticky].sort((a, b) => data?.order?.indexOf(a.id) - data?.order?.indexOf(b.id))
-        : columnsWithoutSticky,
+      sortedColumns: data?.order ? [...allowedColumns].sort((a, b) => data?.order?.indexOf(a.id) - data?.order?.indexOf(b.id)) : allowedColumns,
       activeItem: null,
       isSidebarOpen: true
     }),
-    [columnsWithoutSticky, data?.order]
+    [allowedColumns, data?.order]
   );
   const defaultValue = useMemo(
     () => (data ? { name: data?.name, access: data?.access, default: data?.default, order: data?.order, hide: data?.hide } : initialValue),
@@ -174,8 +177,16 @@ const useArrangeView = ({
       const dragCard = state.sortedColumns[dragIndex];
       const hoverCard = state.sortedColumns[dropIndex];
 
-      if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
-      if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
+      if (
+        NOT_ALLOWED_COLUMNS.includes(dragCard.accessor || dragCard.id) ||
+        NOT_ALLOWED_COLUMNS.includes(hoverCard.accessor || hoverCard.id) ||
+        dragCard?.lockPosition ||
+        hoverCard?.lockPosition ||
+        !!dragCard.sticky ||
+        !!hoverCard.sticky
+      ) {
+        return;
+      }
 
       const columnsForGrid = update(state.sortedColumns, {
         $splice: [
@@ -194,10 +205,10 @@ const useArrangeView = ({
 
   const handleReset = (setFieldValue: SetFieldValue) => {
     const visibleColumns = {};
-    columnsWithoutSticky.forEach((col) => {
+    allowedColumns.forEach((col) => {
       visibleColumns[col.id] = true;
     });
-    setSortedColumns(columnsWithoutSticky);
+    setSortedColumns(allowedColumns);
     setFieldValue('order', []);
     setFieldValue('hide', []);
   };
@@ -227,15 +238,16 @@ const useArrangeView = ({
     let filteredColumns: TColType[] = [];
     const searchFor = state.search.trim().toLowerCase();
     if (searchFor !== '') {
-      filteredColumns = columnsWithoutSticky.filter((column) => column.Header.toLowerCase().includes(searchFor));
+      filteredColumns = allowedColumns.filter((column) => column.Header.toLowerCase().includes(searchFor));
     } else {
-      filteredColumns = columnsWithoutSticky;
+      filteredColumns = allowedColumns;
     }
     return filteredColumns;
-  }, [columnsWithoutSticky, state.search]);
+  }, [allowedColumns, state.search]);
 
   return {
     ...state,
+    allowedColumns,
     data,
     isMobile,
     defaultValue,

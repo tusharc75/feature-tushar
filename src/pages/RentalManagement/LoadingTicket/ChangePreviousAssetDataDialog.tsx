@@ -24,7 +24,8 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: { assetData: [] } });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
+  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '', gpsNumber: '' });
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -39,8 +40,10 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
 
     setAssetHeaders({
       assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
-      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
+      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product',
+      gpsNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'gpsNumber')?.fieldData?.fieldLabel || 'GPS Number'
     });
+    setAllFields(JSON.parse(JSON.stringify(fieldsData)));
 
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     const fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
@@ -52,6 +55,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
       initialValues['productName'] = data?.product?.optionLabel;
+      initialValues['gpsNumber'] = data?.gpsNumber;
       tempAssetData.push(initialValues);
     });
     values['assetData'] = tempAssetData;
@@ -83,6 +87,8 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
     const { assetData } = values;
     const fieldNames = initialData?.fields?.map((f) => f?.fieldName);
 
+    const gpsNumberField = allFields?.find((e) => e?.fieldData?.fieldName === 'gpsNumber')?.fieldData || null;
+
     const json_data = assetData?.map((_data) => {
       const dynamicFields = fieldNames?.reduce((acc, f) => {
         const field = initialData?.fields?.find((_f) => _f?.fieldName === f);
@@ -94,6 +100,7 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
       return {
         [assetHeaders.assetNumber]: _data?.assetNumber || '',
         [assetHeaders.product]: _data?.productName || '',
+        ...(gpsNumberField ? { [gpsNumberField.fieldLabel]: _data?.gpsNumber || '' } : {}),
         ...dynamicFields
       };
     });
@@ -117,7 +124,13 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
       json_data_value.push(mergedObject);
     }
 
-    const header1 = [assetHeaders.assetNumber, assetHeaders.product, ...initialData?.fields?.map((f) => f?.fieldLabel)];
+    let header1 = [];
+    header1.push(assetHeaders.assetNumber);
+    header1.push(assetHeaders.product);
+    if (gpsNumberField) {
+      header1.push(gpsNumberField.fieldLabel);
+    }
+    header1 = [...header1, ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
     const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
@@ -175,12 +188,17 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
       const ws = readedData.Sheets[wsname];
       const parsedData = utils.sheet_to_json(ws, { header: 1 });
 
+      const ignoreColoumIndex = [0, 1];
+      if (allFields?.find((e) => e?.fieldData?.fieldName === 'gpsNumber')) {
+        ignoreColoumIndex.push(2);
+      }
+
       if (parsedData.length > 1) {
         let header = parsedData.slice(0, 1)[0];
         let row = parsedData.slice(1, parsedData.length);
         row.forEach((item: any[]) => {
           item?.forEach((_d, i) => {
-            if (i != 0 && i != 1) {
+            if (!ignoreColoumIndex?.includes(i)) {
               const { index, fieldName, value } = getValueInImport(_d, item[0], item[1], header[i], values?.assetData);
               setFieldValue(`assetData.${index}.${fieldName}`, value);
             }
@@ -287,7 +305,22 @@ const ChangePreviousAssetDataDialog = ({ onClose, statusPolicy, staticLookUpFilt
                               key={index}
                             >
                               <div>
-                                <span className="font-semibold text-[var(--primary-text)]">{`${data?.assetNumber} (${data?.productName})`}</span>
+                                <div className="flex flex-wrap items-start gap-2 text-[var(--primary-text)] md:gap-4">
+                                  <h6 className="text-base font-medium leading-normal">
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.assetNumber}</span>
+                                    {data?.assetNumber}
+                                  </h6>
+                                  <h6 className="text-base font-medium leading-normal">
+                                    <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.product}</span>
+                                    {data?.productName}
+                                  </h6>
+                                  {data?.gpsNumber && (
+                                    <h6 className="text-base font-medium leading-normal">
+                                      <span className="block text-[10px] font-normal text-gray-500">{assetHeaders.gpsNumber}</span>
+                                      {data?.gpsNumber}
+                                    </h6>
+                                  )}
+                                </div>
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (

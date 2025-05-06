@@ -51,7 +51,6 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         disableFilters: true,
         width: 200,
         Cell: ({ row }) =>
