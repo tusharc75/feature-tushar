@@ -752,7 +752,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               style={{ width: '300px' }}
               value={selectedResource}
               onChange={(event, newValue) => {
-                console.log('new', newValue);
                 setSelectedResource(newValue);
               }}
               size="small"
