@@ -111,7 +111,6 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>

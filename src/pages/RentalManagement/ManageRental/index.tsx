@@ -32,6 +32,7 @@ import { useData } from '../../../StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -59,6 +60,8 @@ const ManageRentalManagementDialog = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [rentalDetails, setRentalDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
+  const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(rentalData.fields));
@@ -83,6 +86,7 @@ const ManageRentalManagementDialog = ({
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
             fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
             setCloneHeading(rentalJobName);
+            setIsMaterialAvailable(!data?.canDelete)
             setRentalData({
               fields: fieldsDataForCreate,
               initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), estimateEndDate: null }
@@ -157,25 +161,23 @@ const ManageRentalManagementDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance()
-        .post(`${rentalManagement.api}`, values)
-        .then(({ data: { data, message } }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-          if (referenceData || isAutomated) {
-            onSuccess(data);
-          } else {
-            history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().post(`${rentalManagement.api}`, values).then(({ data: { data, message } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
         });
+        setShowConfirmCloneDetailsDialog(false)
+        if (referenceData || isAutomated) {
+          onSuccess(data);
+        } else {
+          history.push(`${routes.rentalManagementDetail.path}/${data?._id}`);
+          setLoading(false);
+        }
+      }).catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -198,13 +200,6 @@ const ManageRentalManagementDialog = ({
     if (estimateEndDate.diff(estimateStartDate, 'day') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
-    // let actualStartDate = dayjs(values?.actualStartDate);
-    // let actualEndDate = dayjs(values?.actualEndDate);
-    // if (actualStartDate.format('YYYY-MM-DD') !== actualEndDate.format('YYYY-MM-DD')) {
-    //   if (actualEndDate.diff(actualStartDate, 'day') <= 0) {
-    //     errors['actualEndDate'] = 'Please enter valid actual end date';
-    //   }
-    // }
     return errors;
   }
 
@@ -228,7 +223,14 @@ const ManageRentalManagementDialog = ({
           validationSchema={yupSchema(rentalData.fields)}
           validateOnMount
           validate={validate}
-          onSubmit={handleSubmit}
+          onSubmit={(values) => {
+            if (rentalManagementId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
+              setShowConfirmCloneDetailsDialog(true);
+            }
+            else {
+              handleSubmit(values)
+            }
+          }}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
@@ -440,6 +442,20 @@ const ManageRentalManagementDialog = ({
                     setShowConfirmDialog(false);
                     onClose();
                   }}
+                />
+              )}
+              {showConfirmCloneDetailsDialog && (
+                <ConfirmationDialog
+                  open={true}
+                  message="Please confirm this if you want to clone details ?"
+                  onOk={() => {
+                    setFieldValue('rentalJobId', rentalManagementId);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    submitForm();
+                  }}
+                  okBtnLoading={loading}
                 />
               )}
             </Fragment>

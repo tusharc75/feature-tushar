@@ -208,7 +208,6 @@ const QuotationSupplierPrice = ({ openAuthData, openAuthId }) => {
             Header: 'Type',
             width: 150,
             show: true,
-            disabled: true,
             Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type)}</p>
           },
           {

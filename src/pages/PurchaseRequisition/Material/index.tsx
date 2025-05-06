@@ -97,7 +97,6 @@ const Material = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (

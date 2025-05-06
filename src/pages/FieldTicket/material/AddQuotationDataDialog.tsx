@@ -59,7 +59,6 @@ const AddQuotationDataDialog = ({ onSuccess, onClose, referenceData, materialTyp
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
