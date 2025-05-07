@@ -2,7 +2,7 @@ import { Popover } from '@mui/material';
 import { StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import { useState } from 'react';
-import { Navigate } from 'react-big-calendar';
+import { Navigate, NavigateAction, View } from 'react-big-calendar';
 import { ViewType } from 'src/components/CustomCalendar';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
@@ -18,6 +18,7 @@ type CustomToolbarProps = {
   view: ViewType;
   views: ViewType[];
   setStateDate: (date: dayjs.Dayjs) => void;
+  parentOnNavigate: (newDate: Date, view: View, action: NavigateAction) => void;
 };
 
 const viewMap = {
@@ -27,7 +28,7 @@ const viewMap = {
   agenda: 'List'
 };
 
-const CustomToolbar = ({ onNavigate, onView, label, date, localizer, view, views, setStateDate }: CustomToolbarProps) => {
+const CustomToolbar = ({ onNavigate, onView, label, date, localizer, view, views, setStateDate, parentOnNavigate }: CustomToolbarProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const handleToday = () => onNavigate(Navigate.TODAY);
   const handlePrev = () => onNavigate(Navigate.PREVIOUS);
@@ -58,6 +59,7 @@ const CustomToolbar = ({ onNavigate, onView, label, date, localizer, view, views
           views={view === 'month' ? ['month', 'year'] : ['year', 'month', 'day']}
           onChange={(value) => {
             setStateDate(value);
+            parentOnNavigate?.(value.toDate(), view, 'DATE');
           }}
           shouldDisableDate={(date) => (view === 'week' ? !dayjs(date).startOf('week').isSame(date, 'day') : false)}
           slotProps={{
