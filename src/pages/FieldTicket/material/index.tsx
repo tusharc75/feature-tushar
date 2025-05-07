@@ -182,8 +182,8 @@ const Material = ({
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
+          <div>
+            <p>{`${startCase(row.original?.type)}`}</p>
           </div>
         )
       },
@@ -211,32 +211,6 @@ const Material = ({
             ) : (
               <NoDataCell />
             )}
-            {[MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]?.includes(row.original.type) && (
-              <>
-                <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
-                {!isOffline && allowedToEdit && (
-                  <Box>
-                    <HtmlTooltip
-                      title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}
-                    >
-                      <IconButton
-                        onClick={() => {
-                          setMaterialDialog({
-                            open: true,
-                            type: row.original.type === MATERIAL_TYPE.package ? MATERIAL_TYPE.package : MATERIAL_TYPE.service,
-                            parentId: row.original._id,
-                            serializedAssetService: row.original.type === MATERIAL_TYPE.package ? false : true
-                          });
-                        }}
-                        size="small"
-                      >
-                        <Add color="primary" fontSize="small" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
-                )}
-              </>
-            )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && !isOffline && (
               <IconButton
                 size="small"
@@ -254,6 +228,28 @@ const Material = ({
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
+            )}
+            {[MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]?.includes(row.original.type) && (
+              <>
+                <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
+                {!isOffline && allowedToEdit && (
+                  <HtmlTooltip title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}  >
+                    <IconButton
+                      onClick={() => {
+                        setMaterialDialog({
+                          open: true,
+                          type: row.original.type === MATERIAL_TYPE.package ? MATERIAL_TYPE.package : MATERIAL_TYPE.service,
+                          parentId: row.original._id,
+                          serializedAssetService: row.original.type === MATERIAL_TYPE.package ? false : true
+                        });
+                      }}
+                      size="small"
+                    >
+                      <Add color="primary" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </>
             )}
           </div>
         )
