@@ -50,21 +50,20 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
   const fetchFields = async () => {
     setLoading(true);
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.fieldServiceOrder ,['quotation']);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.fieldServiceOrder, ['quotation']);
       var statusOptions = [];
       fieldsDataAll?.forEach((e: any) => {
         if (e?.fieldName === 'status') {
           statusOptions = e?.option;
         }
       });
-
       if (serviceOrderId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/` + serviceOrderId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, fieldServiceOrderNumber, updatedBy, ...rest } = data;
+            const { fieldServiceOrderNumber, rentalJob, ...rest } = data;
             rest['status'] = SERVICE_ORDER_STATUS.new;
             rest['fieldServiceOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(fieldServiceOrderNumber);
@@ -103,7 +102,7 @@ const ManageServiceOrderDialog = ({ isClone, serviceOrderId, onClose, onSuccess,
         });
         setLoading(false);
       }
-    } 
+    }
     catch (error) {
       toastConfig.setToastConfig(error);
     }

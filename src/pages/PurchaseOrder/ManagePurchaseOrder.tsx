@@ -67,7 +67,7 @@ const ManagePurchaseOrder = ({
           .then(({ data: { data } }) => {
             setPurchaseOrderData(data);
             if (isClone) {
-              const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
+              const { purchaseOrderNumber, ...rest } = data;
               rest['status'] = PURCHASE_ORDER_STATUS.open;
               rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
               setInitialData({

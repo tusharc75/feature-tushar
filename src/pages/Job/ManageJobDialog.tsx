@@ -47,21 +47,19 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
   const fetchFields = async () => {
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.job);
-
       var statusOptions = [];
       fieldsDataAll?.forEach((e: any) => {
         if (e?.fieldName === 'status') {
           statusOptions = e.option;
         }
       });
-     
       if (jobId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${routes.job.path}/` + jobId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, jobNumber, updatedBy, ...rest } = data;
+            const { jobNumber, ...rest } = data;
             rest['status'] = 'New';
             rest['jobNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(jobNumber);

@@ -51,7 +51,6 @@ const ManageRentalManagementDialog = ({
   const [loading, setLoading] = useState(false);
 
   const [rentalData, setRentalData] = useState({ fields: [], initialValues: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
   const {
@@ -81,7 +80,7 @@ const ManageRentalManagementDialog = ({
           const response: any = await axiosInstance().get(`${rentalManagement.api}/` + rentalManagementId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
+            const { rentalJobName, ...rest } = data;
             rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
             fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
@@ -383,13 +382,6 @@ const ManageRentalManagementDialog = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
                                         fields={rentalData.fields}
                                       />
                                     )}
@@ -420,7 +412,7 @@ const ManageRentalManagementDialog = ({
                   id="dialog-save-button"
                   buttonType="theme"
                   isLoading={loading}
-                  disabled={uploadingImageOrFileProgress > 0 || loading || (rentalManagementId && !isClone && isEqual(rentalData.initialValues, values))}
+                  disabled={loading || (rentalManagementId && !isClone && isEqual(rentalData.initialValues, values))}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

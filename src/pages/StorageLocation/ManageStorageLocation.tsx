@@ -48,7 +48,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
           .then(({ data: { data } }) => {
             setStorageLocationData(data);
             if (isClone) {
-              const { _id, createdBy, updatedBy, storageLocation, ...rest } = data;
+              const { storageLocationName, ...rest } = data;
               setInitialData({
                 fields: fieldsDataForCreate,
                 values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)

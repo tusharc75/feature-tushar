@@ -55,12 +55,9 @@ const CreateProjectSales = ({
     fields: [],
     values: {}
   });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const history = useHistory();
 
   const [productSalesName, setProductSalesName] = useState('');
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 

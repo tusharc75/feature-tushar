@@ -15,7 +15,8 @@ import {
   invoice,
   yupSchema,
   GenerateResourceLineNumber,
-  sidebarResource
+  sidebarResource,
+  INVOICE_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -49,16 +50,14 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const fetchFields = async () => {
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.invoice);
-
       if (invoiceId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${invoice.api}/` + invoiceId);
           data = response?.data?.data;
-
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, invoiceNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { invoiceNumber, rentalJob, fieldTicket, sublease, repairOrder, salesOrder, ...rest } = data;
+            rest.status = INVOICE_STATUS.new;
             rest.invoiceNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(invoiceNumber);
             setInitialData({
