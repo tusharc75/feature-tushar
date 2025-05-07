@@ -447,7 +447,7 @@ const ManageRentalManagementDialog = ({
               {showConfirmCloneDetailsDialog && (
                 <ConfirmationDialog
                   open={true}
-                  message="Please confirm this if you want to clone details ?"
+                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
                   onOk={() => {
                     setFieldValue('rentalJobId', rentalManagementId);
                     submitForm();
