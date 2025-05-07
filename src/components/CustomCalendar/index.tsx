@@ -131,7 +131,10 @@ const CustomCalendar = ({
         onView={handleView}
         onRangeChange={handleRangeChange}
         views={views}
-        components={{ ...components, toolbar: (props: any) => <CustomToolbar {...props} setStateDate={setStateDate} /> }}
+        components={{
+          ...components,
+          toolbar: (props: any) => <CustomToolbar {...props} parentOnNavigate={onNavigate} setStateDate={setStateDate} />
+        }}
         onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
         {...rest}
       />
