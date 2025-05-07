@@ -816,16 +816,21 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               selectedLookUpResourceData['product'] &&
               selectedLookUpResourceData['product']?.length > 0 && (
                 <Box mt={0.5}>
-                  <HtmlTooltip title={'Pending Planned/Incoming'}>
-                    <IconButton
-                      size={'small'}
-                      onClick={() => {
-                        setShowPlannedIncoming(true);
-                      }}
-                    >
-                      <InfoIcon fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </HtmlTooltip>
+                  <span className="relative">
+                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                    </span>
+                    <HtmlTooltip title={'Pending Planned/Incoming'}>
+                      <IconButton
+                        size={'small'}
+                        onClick={() => {
+                          setShowPlannedIncoming(true);
+                        }}
+                      >
+                        <InfoIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </span>
                 </Box>
               )}
           </div>
