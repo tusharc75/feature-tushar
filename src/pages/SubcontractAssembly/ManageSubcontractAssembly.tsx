@@ -26,7 +26,7 @@ import {
 } from 'src/constants/helpers';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 
-const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -48,15 +48,12 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
   const fetchFields = async () => {
     try {
       const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.subcontractAssembly);
-
       if (id) {
         let data;
         const response = await axiosInstance().get(`${routes?.subcontractAssembly?.path}/${id}`);
         data = response?.data?.data;
-        let fields = fieldsDataForUpdate;
         let tempData = data;
         if (isClone) {
-          fields = fieldsDataForCreate;
           const { subcontractAssemblyNumber, ...rest } = data;
           rest.subcontractAssemblyNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           rest.status = SUBCONTRACT_ASSEMBLY_STATUS.new;
@@ -111,11 +108,13 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance()
-        .post(`${routes.subcontractAssembly?.path}`, values)
+      axiosInstance().post(`${routes.subcontractAssembly?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-          history.push(`${routes.subcontractAssembly.path}/detail/${data?.data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.subcontractAssembly.path}/detail/${data?.data?._id}`);
+          }
+          onSuccess();
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,

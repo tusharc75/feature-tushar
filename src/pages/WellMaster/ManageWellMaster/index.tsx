@@ -51,7 +51,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
           .get(`${wellMaster.api}/` + wellMasterId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, brand, createdBy, wellName, updatedBy, ...rest } = data;
+              const { wellName, ...rest } = data;
               setTitle(`Clone - ${wellName}`);
               setInitialData({
                 fields: setFieldsInAscendingOrder(fieldsDataForCreate),

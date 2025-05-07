@@ -41,7 +41,6 @@ export default function ManageLeadDialog({
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
 
@@ -185,9 +184,6 @@ export default function ManageLeadDialog({
                       fieldsData={initialData.fields}
                       size="small"
                       fullWidth
-                      onImageUploadCompletePercentage={(completePercentage) => {
-                        setUploadingImageOrFileProgress(completePercentage);
-                      }}
                       resource={resource}
                       referenceId={leadId}
                     />
@@ -206,7 +202,7 @@ export default function ManageLeadDialog({
                   <ThemeButton
                     isLoading={loading}
                     buttonType="theme"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);

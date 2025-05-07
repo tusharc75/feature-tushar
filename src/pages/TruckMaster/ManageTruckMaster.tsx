@@ -39,7 +39,7 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
           .get(`${routes?.truckMaster.path}/` + id)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, brand, createdBy, fleetNumber, updatedBy, ...rest } = data;
+              const { fleetNumber, ...rest } = data;
               setTitle(`Clone - ${fleetNumber}`);
               setInitialData({
                 fields: fieldsDataForCreate,

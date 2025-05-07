@@ -87,7 +87,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
           .get(`${transferInventory.api}/` + transferInventoryId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, createdBy, updatedBy, entity, transferNumber, ...rest } = data;
+              const { transferNumber, ...rest } = data;
               let oldValues = { ...rest };
               oldValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               oldValues.status = TRANSFER_INVENTORY_STATUS.new;

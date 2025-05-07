@@ -1057,7 +1057,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             tooltip={!allowedToEdit ? ownerAndColaborator : ``}
             buttonType="theme"
           >
-            {`Assign Through RFID`}
+            {`Assign Through RFID/QR`}
           </ThemeButton>
         )}
         <ThemeButton

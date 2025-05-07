@@ -14,7 +14,8 @@ import {
   salesOrder,
   yupSchema,
   GenerateResourceLineNumber,
-  sidebarResource
+  sidebarResource,
+  SALES_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -33,7 +34,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     state: { user, resources }
@@ -49,16 +49,14 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const fetchFields = async () => {
     try {
       const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.salesOrder, ['quotation', 'invoice']);
-
       if (salesOrderId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${salesOrder.api}/` + salesOrderId);
           data = response?.data?.data;
-
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, salesOrderNo, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { salesOrderNo, ...rest } = data;
+            rest.status = SALES_ORDER_STATUS.new;
             rest.salesOrderNo = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(salesOrderNo);
             setInitialData({
@@ -226,7 +224,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
                 <ThemeButton
                   isLoading={loading}
                   buttonType="theme"
-                  disabled={uploadingImageOrFileProgress > 0 || loading}
+                  disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

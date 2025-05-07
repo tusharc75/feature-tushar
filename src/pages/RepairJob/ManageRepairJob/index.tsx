@@ -70,7 +70,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
           .get(`${repairJob.api}/` + repairJobId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, brand, createdBy, history, repairJobName, actualEndDate, updatedBy, ...rest } = data;
+              const { repairJobName, actualEndDate, ...rest } = data;
               setTitle(`Clone - ${repairJobName}`);
               rest.repairJobName = GenerateResourceLineNumber(fieldsDataForCreate);
               rest.status = REPAIR_JOB_STATUS.new;

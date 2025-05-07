@@ -101,11 +101,8 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }
       const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       setAllFields(allFields)
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
-        .map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
-        .map((d: any) => d.fieldData);
-
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
       if (id) {
         let mainData;
         if (isOffline) {

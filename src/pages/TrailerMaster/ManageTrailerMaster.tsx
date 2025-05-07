@@ -44,7 +44,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
           .get(`${routes?.trailerMaster.path}/` + id)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, brand, createdBy, trailerName, updatedBy, ...rest } = data;
+              const { trailerName, ...rest } = data;
               setTitle(`Clone - ${trailerName}`);
               setInitialData({
                 fields: fieldsDataForCreate,

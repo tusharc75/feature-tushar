@@ -51,7 +51,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             }
           }
           if (isClone) {
-            const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data;
+            const { packageName, ...rest } = data;
             setPackageName(packageName);
             setInitialData({
               fields: fieldsDataForCreate,

@@ -43,7 +43,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
           .then(({ data: { data } }) => {
             setBulkAssetCreationData(data);
             if (isClone) {
-              const { _id, createdBy, updatedBy, serialNumber, baNumber, ...rest } = data;
+              const { baNumber, ...rest } = data;
               rest['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
               rest['status'] = 'New';
               setInitialData({

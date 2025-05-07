@@ -752,6 +752,7 @@ const SerializedAsset = () => {
           }}
           additionalParams={getQueryString(true)}
           asyncExport={true}
+          asyncImport={true}
           resource={sidebarResource.serializedAsset}
         />
       </div>

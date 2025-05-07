@@ -71,7 +71,7 @@ const ManageExpenses = ({ isClone = false, expenseId = null, isRedirectToDetailP
           .get(`${expenses.api}/` + expenseId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, brand, createdBy, history, expenseNumber, updatedBy, ...rest } = data;
+              const { expenseNumber, ...rest } = data;
               setTitle(`Clone - ${expenseNumber}`);
               rest.expenseNumber = GenerateResourceLineNumber(fieldsDataForCreate);
               rest.status = EXPENSE_STATUS.unreported;
