@@ -6,7 +6,12 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { ASSET_STATUS, CustomDialogTransition, prepareDataForGrid, rentalManagement, serializedAsset } from '../../../constants/helpers';
+import { CustomDialogTransition, rentalManagement, serializedAsset } from '../../../constants/helpers';
+import BarcodeScannerComponent from 'react-qr-barcode-scanner';
+import { IconButton } from '@mui/material';
+import { QrCode, FlipCameraIos } from '@mui/icons-material';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -15,6 +20,9 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
   const assetNumberRef = useRef(null);
   const [products, setProducts] = useState(null);
   const [isAdding, setAdding] = useState(false);
+  const [showQrScanner, setShowQrScanner] = useState(false);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
 
   useEffect(() => {
     if (assetNumberRef.current) {
@@ -23,45 +31,55 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
     setProducts(selectedProducts);
   }, []);
 
-  const handleAddSerializedAsset = (assets) => {
-    var data = [];
-    products?.forEach((e: any) => {
-      let qty = e.realAssetQty - e.realAssetAssignedQty;
-      while (qty) {
-        const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
-        if (result.length) {
-          let obj: any = {};
-          obj._id = e._id;
-          obj.inventory = result[0].id;
-          obj.product = e.materialId;
-          data.push(obj);
-          result[0].isCounted = true;
-          e.realAssetAssignedQty++;
-        }
-        qty--;
+  useEffect(() => {
+    // Checking if device has multiple cameras
+    if (showQrScanner && 'mediaDevices' in navigator) {
+      navigator?.mediaDevices?.enumerateDevices()
+        .then((devices) => {
+          const videoDevices = devices?.filter((device) => device?.kind === 'videoinput');
+          setHasMultipleCameras(videoDevices?.length > 1);
+        })
+        .catch(err => {
+          console.error("Error checking cameras:", err);
+          setHasMultipleCameras(false);
+        });
+    }
+  }, [showQrScanner]);
+
+  const handleAddSerializedAsset = (asset) => {
+    setAdding(true);
+    const product = products?.find((e: any) => e.materialId === asset.product);
+    const data = [
+      {
+        _id: product._id,
+        inventory: asset._id,
+        product: product.materialId
       }
-    });
-    if (data?.length) {
-      setAdding(true);
-      axiosInstance().post(`${rentalManagement.api}/${referenceData._id}/inventory`, { products: data, withTransfer: false }).then(({ data }) => {
+    ];
+
+    axiosInstance()
+      .post(`${rentalManagement.api}/${referenceData._id}/inventory`, { products: data, withTransfer: false })
+      .then(() => {
         setAdding(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: 'Asset(s) assigned successfully'
+          message: 'Asset assigned successfully'
         });
+        product.realAssetAssignedQty++;
         const updatedProducts = products?.filter((e: any) => e.realAssetQty - e.realAssetAssignedQty > 0);
         if (updatedProducts?.length) {
           setProducts(updatedProducts);
           setAssetNumber('');
+          assetNumberRef.current.focus();
         } else {
           onSuccess();
         }
-      }).catch((error) => {
+      })
+      .catch((error) => {
         setAdding(false);
         toastConfig.setToastConfig(error);
       });
-    }
   };
 
   const assignAssets = async (assetNumber: string) => {
@@ -71,81 +89,104 @@ const AddSerializedAssetThroughRfid = ({ onSuccess, onClose, selectedProducts, r
         type: 'info',
         open: true
       });
-      const deepFilter: any = [{ field: 'assetNumber', term: assetNumber }];
-      let queryString = `?deepFilter=${JSON.stringify(deepFilter)}`;
-      if (selectedProducts.length > 0) {
-        var updatedFilters = [];
-        updatedFilters.push({ field: 'product', term: { $in: selectedProducts.map((m) => m?.id) } });
-        queryString = `${queryString}&filterById=${JSON.stringify(updatedFilters)}&filterType=and`;
+      let productIds = [];
+      if (selectedProducts?.length > 0) {
+        productIds = selectedProducts.map((m) => m?.id);
       }
+      let queryString = `?assetNumber=${assetNumber}&products=${JSON.stringify(productIds)}`;
 
-      const response = await axiosInstance().get(`${serializedAsset.api}${queryString}`);
-      const assets = response?.data?.data?.filter((d) => d?.assetNumber === assetNumber);
-      if (assets?.length > 0) {
-        const rows = assets.map(u => prepareDataForGrid(u));
-        const assetsToAssign = [];
-        for (const product of selectedProducts) {
-          const matchedAssets = rows.filter(asset => asset.productId === product.id);
-          let assetsToTake = matchedAssets?.slice(0, product.qty);
-          assetsToTake = assetsToTake?.map((asset) => {
-            if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(asset.status)) {
-              toastConfig.setToastConfig({
-                message: `Asset ${asset.assetNumber} status is not valid`,
-                type: 'error',
-                open: true
-              });
-              return null;
-            }
-            return asset;
-          })?.filter(Boolean);
-          assetsToAssign.push(...assetsToTake);
-        }
-        if (assetsToAssign.length > 0) {
-          handleAddSerializedAsset(assetsToAssign)
-        }
-      } else {
-        toastConfig.setToastConfig({
-          message: 'No asset found for selected product(s)',
-          type: 'error',
-          open: true
-        });
+      const response = await axiosInstance().get(`${serializedAsset.api}/find-using-asset-number${queryString}`);
+      const asset = response?.data?.data;
+      if (asset) {
+        handleAddSerializedAsset(asset);
       }
     } catch (error: any) {
       toastConfig.setToastConfig(error);
     }
   };
 
+  const handleScanResult = (err, result) => {
+    if (result && result?.text) {
+      setAssetNumber(result?.text);
+      assignAssets(result?.text);
+      setShowQrScanner(false);
+    }
+  };
+
+  const toggleCamera = () => setFacingMode(facingMode === 'environment' ? 'user' : 'environment');
+
   return (
     <Fragment>
-      <Dialog
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        open={true}
-        maxWidth="xs"
-        fullWidth
-      >
-        <CustomDialogHeader showRequiredLabel={false} title={`Scan RFID`} onClose={onClose}       ></CustomDialogHeader>
+      <Dialog TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} maxWidth="xs" fullWidth>
+        <CustomDialogHeader showRequiredLabel={false} title={`Scan RFID/QR`} onClose={onClose}></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
           <Box pt={1} pb={1} className="main-container-v1">
-            <TextField
-              disabled={isAdding}
-              autoFocus
-              margin="dense"
-              fullWidth
-              label="Asset Number"
-              placeholder='Auto paste asset number when scan'
-              variant="outlined"
-              size='small'
-              inputRef={assetNumberRef}
-              value={assetNumber}
-              onChange={(e) => setAssetNumber(e.target.value)}
-              onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => {
-                e.preventDefault();
-                const pastedText = e?.clipboardData?.getData('text')?.trim();
-                setAssetNumber(pastedText);
-                assignAssets(pastedText);
-              }}
-            />
+            <Box display="flex" alignItems="center">
+              <TextField
+                disabled={isAdding}
+                autoFocus
+                margin="dense"
+                fullWidth
+                label="Asset Number"
+                placeholder="Auto paste asset number when scan"
+                variant="outlined"
+                size="small"
+                inputRef={assetNumberRef}
+                value={assetNumber}
+                onChange={(e) => setAssetNumber(e.target.value)}
+                onPaste={(e: React.ClipboardEvent<HTMLInputElement>) => {
+                  e.preventDefault();
+                  const pastedText = e?.clipboardData?.getData('text')?.trim();
+                  setAssetNumber(pastedText);
+                  assignAssets(pastedText);
+                }}
+              />
+              <HtmlTooltip title="Scan QR code">
+                <IconButton color="primary" onClick={() => setShowQrScanner(true)} disabled={isAdding} sx={{ ml: 1 }}>
+                  <QrCode />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+
+            {showQrScanner && (
+              <Box mt={2} position="relative">
+                <BarcodeScannerComponent
+                  width="100%"
+                  height="100%"
+                  onUpdate={handleScanResult}
+                  facingMode={facingMode}
+                />
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: 10,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 2
+                  }}
+                >
+                  <ThemeButton
+                    buttonType="theme"
+                    onClick={() => setShowQrScanner(false)}
+                  >
+                    Cancel
+                  </ThemeButton>
+
+                  {hasMultipleCameras && (
+                    <ThemeButton
+                      buttonType="theme"
+                      onClick={toggleCamera}
+                      startIcon={<FlipCameraIos />}
+                    >
+                      Switch
+                    </ThemeButton>
+                  )}
+                </Box>
+              </Box>
+            )}
           </Box>
         </CustomDialogContent>
       </Dialog>
