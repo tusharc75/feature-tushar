@@ -12,6 +12,7 @@ import {
   transferAsset,
   setFieldsInAscendingOrder,
   GenerateResourceLineNumber,
+  TRANSFER_ASSET_STATUS,
 } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -89,10 +90,10 @@ const ManageTransferAsset: FC<Props> = (props) => {
           .get(`${transferAsset.api}/` + transferAssetId)
           .then(({ data: { data } }) => {
             if (isClone) {
-              const { _id, createdBy, updatedBy, entity, transferAssetNumber, ...rest } = data;
+              const { transferAssetNumber, ...rest } = data;
               let oldValues = { ...rest };
               oldValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-              oldValues.status = 'New';
+              oldValues.status = TRANSFER_ASSET_STATUS.new;
               setCloneHeading(transferAssetNumber);
               setInitialData({
                 fields: setFieldsInAscendingOrder(fieldsDataForCreate),

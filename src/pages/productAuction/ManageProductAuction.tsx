@@ -47,7 +47,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
           .then(({ data: { data } }) => {
             setProductAuctionData(data);
             if (isClone) {
-              const { _id, createdBy, updatedBy, productAuction, ...rest } = data;
+              const { productAuction, ...rest } = data;
               rest['status'] = 'New';
               rest['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
               setInitialData({

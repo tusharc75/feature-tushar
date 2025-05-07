@@ -61,10 +61,8 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [digitalData, setDigitalData] = useState(itemData);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     setDigitalData(itemData);
@@ -182,13 +180,6 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                                 required={imageField.required}
                                 fullWidth
                                 size="small"
-                                imageOrFileUploadCompletePercentage={
-                                  ['imageUpload', 'fileUpload'].some((s) => s === imageField.type)
-                                    ? (completePercentage) => {
-                                      setUploadingImageOrFileProgress(completePercentage);
-                                    }
-                                    : null
-                                }
                                 row={true}
                               />
                             </Grid>
@@ -275,7 +266,7 @@ const ConfigureItemDialog = ({ open, onClose, itemData, setFormData }) => {
                   <ThemeButton
                     isLoading={loading}
                     buttonType="theme"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={submitForm}
                   >
                     Save

@@ -50,7 +50,7 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { _id, createdBy, updatedBy, templateName, ...rest } = data;
+              const { templateName, ...rest } = data;
               setCloneHeading(templateName);
               tempData = { ...rest };
             }

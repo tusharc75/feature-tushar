@@ -39,7 +39,6 @@ export default function ManageContactDialog({
   const [cloneHeading, setCloneHeading] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const history = useHistory();
 
   const isNew = isClone ? true : contactId ? false : true;
@@ -225,7 +224,7 @@ export default function ManageContactDialog({
                 </ThemeButton>
                 <ThemeButton
                   buttonType="theme"
-                  disabled={loading || uploadingImageOrFileProgress > 0}
+                  disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

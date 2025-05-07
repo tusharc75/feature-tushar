@@ -82,17 +82,15 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           setAssetOptionData(lookupResource[serializedAsset.resource]);
         }
       }
-
       if (workOrderId) {
         let data;
         const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`);
         data = response?.data?.data;
         assetOption = assetOption.filter((i) => i.warehouse === data?.warehouse?.optionValue);
         if (isClone) {
-          const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
+          const { workOrderNumber, status, ...rest } = data;
           rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           rest['status'] = WORK_ORDER_STATUS.new;
-          // it should be fieldsDataForCreate not fieldsDataForUpdate
           setInitialData({
             fields: fieldsDataForUpdate,
             values: getObjKeysWithValues(rest, fieldsDataForUpdate, true, user)

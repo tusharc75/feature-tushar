@@ -43,7 +43,7 @@ const ManageSublease = ({
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -63,7 +63,7 @@ const ManageSublease = ({
           .then(({ data: { data } }) => {
             setSubleaseData(data);
             if (isClone) {
-              const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
+              const { subleaseName, ...rest } = data;
               rest['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
               rest['status'] = SUBLEASE_STATUS.new;
               fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
