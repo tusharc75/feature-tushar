@@ -15,7 +15,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Grid from '@mui/material/Grid2';
 
-const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
+const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList }) => {
 
   const renderedFrom = `${camelCase(sidebarResource?.planningView)}_planned/Incomming`;
   const toastConfig = useContext(CustomToastContext);
@@ -30,10 +30,10 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
 
   const columns = [
     {
-      accessor: 'resource',
+      accessor: 'resourceLabel',
       Header: 'Resource',
       Cell: ({ row }) => {
-        return row.original['resource'] ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />;
+        return row.original['resourceLabel'] ? <p className="text-truncate">{row.original.resourceLabel}</p> : <NoDataCell />;
       }
     },
     {
@@ -47,7 +47,9 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
             size="small"
             onClick={() => {
               const resource = resourceList?.find((r) => r.resource === row.original?.resource);
-              window.open(`${resource.path}/${row.original?.referenceId}`);
+              if (resource) {
+                window.open(`${resource.path}/${row.original?.referenceId}`);
+              }
             }}
           >
             <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -125,21 +127,26 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
     }
   ];
 
+  const getQueryString = () => {
+    let query = `?product=${products?.map((e) => e?.optionValue)?.toString()}`
+    if (warehouses && warehouses?.length) {
+      query += `&warehouse=${warehouses?.map((e) => e?.optionValue)?.toString()}`
+    }
+    return query;
+  }
+
   useEffect(() => {
     fetchData();
-  }, [product]);
+  }, [products]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-    axiosInstance()
-      .get(`${routes?.planningView.path}/back-date?product=${product?.optionValue}`)
-      .then(({ data: { data } }) => {
-        setData(data);
-      })
-      .catch((error) => {
-        dispatch({ type: 'loading', loading: false });
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().get(`${routes?.planningView.path}/back-date${getQueryString()}`).then(({ data: { data } }) => {
+      setData(data);
+    }).catch((error) => {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    });
   };
 
   useEffect(() => {
@@ -148,7 +155,7 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
       let rows = tabValue === 0 ? data['palnning'] : tabValue === 1 ? data['incoming'] : [];
       rows = rows.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resource = resources?.[camelCase(u?.resource)]?.titleSingular || u?.resource;
+        finalObject.resourceLabel = resources?.[camelCase(u?.resource)]?.titleSingular || u?.resource;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -167,7 +174,7 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
       message: `File is Loading, Please wait...`
     });
 
-    axiosInstance().get(`${routes?.planningView.path}/back-date/export?product=${product?.optionValue}`, {
+    axiosInstance().get(`${routes?.planningView.path}/back-date/export${getQueryString()}`, {
       responseType: 'arraybuffer'
     }).then((response) => {
       const fileName = response.headers['content-disposition'].split('filename=')[1];
@@ -184,8 +191,14 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" open={true} onClose={handleClose} fullScreen={true} aria-labelledby="assign-dialog">
-      <CustomDialogHeader onClose={handleClose} title={`${product?.optionLabel}`} showRequiredLabel={false} />
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      open={true}
+      onClose={handleClose}
+      fullScreen={true}
+      aria-labelledby="assign-dialog">
+      <CustomDialogHeader onClose={handleClose} title={`${products?.map((e) => e?.optionLabel)?.toString()}`} showRequiredLabel={false} />
       <CustomDialogContent>
         <div className="p-2">
           <div className="mt-1">
@@ -193,8 +206,8 @@ const PlannedIncomingDialog = ({ handleClose, product, resourceList }) => {
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} label={'Planned'} />
-                    <CustomTab value={1} label={'Incoming'} />
+                    <CustomTab value={0} label={'Pending Planned'} />
+                    <CustomTab value={1} label={'Pending Incoming'} />
                   </CustomTabs>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>

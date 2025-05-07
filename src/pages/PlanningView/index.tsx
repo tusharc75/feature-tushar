@@ -31,6 +31,7 @@ import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 
 function PlanningView() {
   const {
@@ -191,6 +192,15 @@ function PlanningView() {
       fieldName: 'assemblyOrderNumber',
       start: 'createDate',
       end: 'estimateCompleteDate'
+    },
+    {
+      key: 'subcontractAssembly',
+      resource: sidebarResource.subcontractAssembly,
+      title: resources?.subcontractAssembly?.titlePlural,
+      path: routes.subcontractAssemblyDetail.path,
+      fieldName: 'subcontractAssemblyNumber',
+      start: 'createDate',
+      end: 'expectedDeliveryDate'
     }
   ];
 
@@ -448,6 +458,16 @@ function PlanningView() {
         <ManageAssemblyOrder
           isClone={false}
           assemblyOrderId={null}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => {
+            onClickRefreshIcon();
+          }}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {createDialog && selectedResource?.resource === sidebarResource?.subcontractAssembly && (
+        <ManageSubcontractAssembly
+          isClone={false}
           onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();
