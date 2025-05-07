@@ -219,17 +219,24 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
-  const [colorCodeMap, setColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+  const [customerColorCodeMap, setCustomerColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+  const [supplierColorCodeMap, setSupplierColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`)
       .then(({ data: { data } }) => {
-        const newMap = new Map<string, SingleColor>();
-        data[sidebarResource.customerAccount].forEach((ele, i) => {
-          newMap.set(ele?.optionValue, getColorByIndex(i));
+        const newMapCustomer = new Map<string, SingleColor>();
+        data[sidebarResource.customerAccount]?.forEach((ele, i) => {
+          newMapCustomer.set(ele?.optionValue, getColorByIndex(i));
         });
-        setColorCodeMap(newMap);
+        setCustomerColorCodeMap(newMapCustomer);
+
+        const newMapSupplier = new Map<string, SingleColor>();
+        data[sidebarResource.supplierAccount]?.forEach((ele, i) => {
+          newMapSupplier.set(ele?.optionValue, getColorByIndex(i));
+        });
+        setSupplierColorCodeMap(newMapSupplier);
       })
       .catch((err) => toastConfig.setToastConfig(err));
   }, []);
@@ -455,7 +462,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
               extraData.customerAccount = d?.customerAccount?.optionValue;
+            } else if (d?.supplierAccount?.optionLabel) {
+              title = `${title} (${d?.supplierAccount?.optionLabel})`;
+              extraData.supplierAccount = d?.supplierAccount?.optionValue;
             }
+
             if (selectedResource.resource === sidebarResource.employeeMaster) {
               title = `${d?.reference?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
               extraData.referenceType = d?.referenceType;
@@ -701,8 +712,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
-      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
-        const assignedColor = colorCodeMap.get(obj?.customerAccount);
+      if ((obj?.customerAccount || obj?.supplierAccount) && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
+        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
         if (assignedColor) {
           backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
           color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
@@ -725,7 +736,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode, colorCodeMap]
+    [themeMode, customerColorCodeMap, supplierColorCodeMap]
   );
 
   useEffect(() => {
@@ -803,17 +814,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               })}
             {selectedResource?.resource === sidebarResource.product && !isEmpty(selectedLookUpResourceData) &&
               selectedLookUpResourceData['product'] &&
-              selectedLookUpResourceData['product']?.length === 1 && (
-                <HtmlTooltip title={'Planned/Incoming'}>
-                  <IconButton
-                    size={'small'}
-                    onClick={() => {
-                      setShowPlannedIncoming(true);
-                    }}
-                  >
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
+              selectedLookUpResourceData['product']?.length > 0 && (
+                <Box mt={0.5}>
+                  <HtmlTooltip title={'Pending Planned/Incoming'}>
+                    <IconButton
+                      size={'small'}
+                      onClick={() => {
+                        setShowPlannedIncoming(true);
+                      }}
+                    >
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
               )}
           </div>
           <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
@@ -912,7 +925,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} resources={resources} />
+                    <RenderTable data={d.items} resources={resources} resourceList={resourceList} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -934,7 +947,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             handleClose={() => {
               setShowPlannedIncoming(false);
             }}
-            product={selectedLookUpResourceData['product'][0]}
+            products={selectedLookUpResourceData['product']}
+            warehouses={selectedLookUpResourceData['warehouse']}
             resourceList={resourceList}
           />
         )}
@@ -945,7 +959,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data, resources }) => {
+const RenderTable = ({ data, resources, resourceList }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -964,22 +978,9 @@ const RenderTable = ({ data, resources }) => {
               <TableCell component="th" scope="row">
                 <p
                   onClick={() => {
-                    if (row?.resource === sidebarResource.rentalManagement) {
-                      window.open(`${routes.rentalManagementDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.purchaseOrder) {
-                      window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.purchaseRequisition) {
-                      window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.demandOrder) {
-                      window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.repairJob) {
-                      window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.salesOrder) {
-                      window.open(`${routes.salesOrderDetail.path}/${row.referenceId}`);
+                    const resource = resourceList?.find((r) => r.resource === row?.resource);
+                    if (resource) {
+                      window.open(`${resource.path}/${row?.referenceId}`);
                     }
                   }}
                   className="link text-truncate"
