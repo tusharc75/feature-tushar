@@ -60,15 +60,16 @@ const ManageQuotationDialog = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.quotation, ['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.quotation,
+        ['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']);
       if (quotationId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${quotation.api}/` + quotationId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { quotationNumber, ...rest } = data;
+            rest.status = QUOTATION_STATUS.new;
             rest.quotationNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(quotationNumber);
             setInitialData({

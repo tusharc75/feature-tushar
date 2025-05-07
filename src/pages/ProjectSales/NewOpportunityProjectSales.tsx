@@ -42,7 +42,6 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
   const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   const [showAddMarketSegmentDialog, setShowAddMarketSegmentDialog] = useState(false);
   const [mainMarketSegmentDataSource, setMainMarketSegmentDataSource] = useState([]);
@@ -451,13 +450,6 @@ export default function NewOpportunityProjectSales({ open, onSuccess, onClose, a
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
                                           fieldData={field}
                                           fields={opportunityData?.fields}
                                         />

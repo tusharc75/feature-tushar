@@ -16,7 +16,8 @@ import {
   yupSchema,
   productionOrder,
   GenerateResourceLineNumber,
-  sidebarResource
+  sidebarResource,
+  PRODUCTION_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -49,7 +50,6 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
   const fetchFields = async () => {
     try {
       const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productionOrder);
-
       if (productionOrderId) {
         try {
           let data;
@@ -57,8 +57,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           data = response?.data?.data;
           setProductionOrderData(data);
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { productionOrderNumber, ...rest } = data;
+            rest.status = PRODUCTION_ORDER_STATUS.new;
             rest.productionOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(productionOrderNumber);
             setInitialData({

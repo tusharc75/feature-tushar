@@ -119,25 +119,25 @@ const UpdateDetailsDialog = (props) => {
                                 imageOrFileUploadCompletePercentage={
                                   ['imageUpload', 'fileUpload'].some((s) => s === field.fieldData.type)
                                     ? (completePercentage) => {
-                                        setUploadingImageOrFileProgress(completePercentage);
-                                      }
+                                      setUploadingImageOrFileProgress(completePercentage);
+                                    }
                                     : null
                                 }
                                 onChange={
                                   field.fieldData.fieldName === 'currency'
                                     ? (e, val) => {
-                                        if (val && val.currencyCode) {
-                                          setFieldValue(field.fieldData.fieldName, val.currencyCode);
-                                          setCurrencySymbol(val.symbolNative);
-                                        } else {
-                                          setFieldValue(field.fieldData.fieldName, '');
-                                          setCurrencySymbol(null);
-                                        }
+                                      if (val && val.currencyCode) {
+                                        setFieldValue(field.fieldData.fieldName, val.currencyCode);
+                                        setCurrencySymbol(val.symbolNative);
+                                      } else {
+                                        setFieldValue(field.fieldData.fieldName, '');
+                                        setCurrencySymbol(null);
                                       }
+                                    }
                                     : field.fieldData.type === 'dropDown'
                                       ? (e, val) => {
-                                          setFieldValue(field.fieldData.fieldName, val && val.optionValue ? val.optionValue : '');
-                                        }
+                                        setFieldValue(field.fieldData.fieldName, val && val.optionValue ? val.optionValue : '');
+                                      }
                                       : null
                                 }
                               />

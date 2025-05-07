@@ -21,6 +21,7 @@ import {
   GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
+  REPAIR_ORDER_STATUS,
   REPAIR_ORDER_TYPE,
   repairOrder,
   setFieldsInAscendingOrder,
@@ -51,10 +52,9 @@ const ManageRepairOrder = ({
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
 
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -72,7 +72,7 @@ const ManageRepairOrder = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairOrder,['quotation', 'invoice']);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairOrder, ['quotation', 'invoice']);
       if (repairOrderId) {
         try {
           let data;
@@ -80,8 +80,8 @@ const ManageRepairOrder = ({
           data = response?.data?.data;
           setRepairOrderData(data);
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, repairOrderNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { repairOrderNumber, rentalJob, ...rest } = data;
+            rest.status = REPAIR_ORDER_STATUS.new;
             rest.repairOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(repairOrderNumber);
             setInitialData({
@@ -140,7 +140,8 @@ const ManageRepairOrder = ({
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
                 initialData[key] = referenceData[key];
-              }}
+              }
+            }
             fieldsDataForCreate?.forEach((e) => {
               if (e.fieldName === 'warehouse') {
                 e.disableOnEdit = true;
@@ -433,13 +434,6 @@ const ManageRepairOrder = ({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
                                         />
                                       )}
                                     </Grid>
@@ -467,7 +461,7 @@ const ManageRepairOrder = ({
                     isLoading={loading}
                     buttonType="theme"
                     id="dialog-save-button"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);

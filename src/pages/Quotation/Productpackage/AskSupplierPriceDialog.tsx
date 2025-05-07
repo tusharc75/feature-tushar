@@ -25,7 +25,6 @@ const AskSupplierPriceDialog = (props) => {
   const [imageSource, setImageSource] = useState(null);
   const [imageAttachments, setImageAttachments] = useState([]);
   const [contantValue, setContantValue] = useState(null);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const toastConfig = useContext(CustomToastContext);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [contactId, setContactId] = useState([]);
@@ -204,9 +203,6 @@ const AskSupplierPriceDialog = (props) => {
                       setContantValue(value);
                     }}
                     initialValue={''}
-                    imageOrFileUploadCompletePercentage={(completePercentage) => {
-                      setUploadingImageOrFileProgress(completePercentage);
-                    }}
                     doNotShowUploadFile={false}
                     onUploadFile={onUploadFile}
                     onUploadImage={handleUploadImage}

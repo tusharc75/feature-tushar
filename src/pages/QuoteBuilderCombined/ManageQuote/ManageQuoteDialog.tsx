@@ -92,7 +92,6 @@ export default function ManageQuoteDialog({
   const [currencySymbol, setCurrencySymbol] = useState(null);
   const [showAddProjectSalesDialog, setShowAddProjectSalesDialog] = useState(false);
   const [showCreateOpportunity, setShowCreateOpportunity] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [opportunityMainDataSource, setOpportunityMainDataSource] = useState([]);
   const [projectSalesMainDataSource, setProjectSalesMainDataSource] = useState([]);
   const [opportunityDataSource, setOpportunityDataSource] = useState([]);
@@ -256,7 +255,7 @@ export default function ManageQuoteDialog({
 
         if (isClone) {
           let tempQuoteData = JSON.parse(JSON.stringify(dataToUpdate));
-          const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
+          const { quoteName, versions, ...rest } = tempQuoteData;
           rest.owner = user?.user?._id;
           rest['quoteName'] = GenerateResourceLineNumber(newFields);
           setInitialData({
@@ -827,13 +826,6 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
                                           customError={customError}
                                           onChange={(date) => {
                                             setFieldValue(field.fieldName, date);
@@ -918,13 +910,6 @@ export default function ManageQuoteDialog({
                                           isTooltip={field?.isTooltip || false}
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                              : null
-                                          }
                                           fieldData={field}
                                           fields={initialData?.fields}
                                         />
@@ -953,7 +938,7 @@ export default function ManageQuoteDialog({
                   <ThemeButton
                     isLoading={loading}
                     buttonType="theme"
-                    disabled={loading || uploadingImageOrFileProgress > 0}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll({ ...errors, ...customError });
