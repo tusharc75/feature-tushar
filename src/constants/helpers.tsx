@@ -415,7 +415,9 @@ export const sidebarResource = {
   serviceCategory: 'Service Category',
   schedulingMaintenance: 'Scheduling Maintenance',
   serializedAssetsCertification: 'Serialized Assets Certification',
-  technicianUnavailability: 'Technician Unavailability'
+  technicianUnavailability: 'Technician Unavailability',
+  customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
+  customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping'
 };
 
 export const primaryFields = {
