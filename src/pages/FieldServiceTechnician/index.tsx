@@ -24,7 +24,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useData } from 'src/StateProvider/Provider';
-import { cloneDisable } from 'src/constants/messageHelpers';
+import { createDisable } from 'src/constants/messageHelpers';
 import ViewFieldTicketDialog from './ViewFieldTicketDialog';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -54,12 +54,12 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     Cell: ({ row }) => (
       <>
         {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${resources?.fieldTicket?.titleSingular}` : cloneDisable}>
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}>
             <span>
               <IconButton
                 size="small"
                 aria-label="Add"
-                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
+                disabled={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? false : true}
                 onClick={() => {
                   handleCreateFieldTicket(
                     row?.original?.orignalData,
@@ -67,7 +67,7 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
                   );
                 }}
               >
-                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
+                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -188,7 +188,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -290,6 +290,7 @@ const FieldServiceTechnician = () => {
       }
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
+        finalObject.canEdit = checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, u)
         finalObject.orignalData = u;
         return finalObject;
       });
@@ -369,8 +370,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -447,10 +448,10 @@ const FieldServiceTechnician = () => {
                         <FieldTicket
                           serviceOrderData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
-                          handleChangeStatus={() => {}}
+                          handleChangeStatus={() => { }}
                           resource={sidebarResource.fieldServiceTechnician}
                           enableGlobalSearch={false}
-                          fetchServiceOrderData={() => {}}
+                          fetchServiceOrderData={() => { }}
                         />
                       )
                     ) : (
