@@ -552,8 +552,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               <FormControlLabel
                 control={
                   <Checkbox
-                    // disabled={values?.lookup}
-                    name="isAddBukOption"
+                    name="addBulkOptions"
                     checked={values['addBulkOptions']}
                     onChange={(e) => {
                       setFieldValue('addBulkOptions', e.target.checked);
@@ -562,6 +561,28 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   />
                 }
                 label="Add Bulk Options"
+              />
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            {(fieldData.type === 'number' || fieldData.type === 'decimal') && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="isAllowedMinus"
+                    checked={values['isAllowedMinus']}
+                    onChange={(e) => {
+                      setFieldValue('isAllowedMinus', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Allow Minus Value"
               />
             )}
           </Grid>
