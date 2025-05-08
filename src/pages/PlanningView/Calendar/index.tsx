@@ -14,10 +14,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import DetailsPage from 'src/components/Shared/DetailsPage';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
@@ -25,26 +23,17 @@ import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
+import InfoIcon from '@mui/icons-material/Info';
+import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-  const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-  for (const key in obj) {
-    data.push({
-      items: obj[key],
-      key: key,
-      heading: routes[camelCase(key)].title || key
-    });
-  }
-  return data;
-};
 
 const localizer = dayjsLocalizer(dayjs);
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -121,6 +110,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       resources?.warehouse?.titlePlural
     ]
   );
+
+  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
+    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+    for (const key in obj) {
+      data.push({
+        items: obj[key],
+        key: key,
+        heading: resources?.[camelCase(key)]?.titlePlural || key
+      });
+    }
+    return data;
+  };
+
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -213,20 +215,28 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
+  const [showPlannedIncoming, setShowPlannedIncoming] = useState(false);
   const [fields, setFields] = useState([]);
   const [resourceDatas, setResourceDatas] = useState([]);
 
-  const [colorCodeMap, setColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+  const [customerColorCodeMap, setCustomerColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+  const [supplierColorCodeMap, setSupplierColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`)
       .then(({ data: { data } }) => {
-        const newMap = new Map<string, SingleColor>();
-        data[sidebarResource.customerAccount].forEach((ele, i) => {
-          newMap.set(ele?.optionValue, getColorByIndex(i));
+        const newMapCustomer = new Map<string, SingleColor>();
+        data[sidebarResource.customerAccount]?.forEach((ele, i) => {
+          newMapCustomer.set(ele?.optionValue, getColorByIndex(i));
         });
-        setColorCodeMap(newMap);
+        setCustomerColorCodeMap(newMapCustomer);
+
+        const newMapSupplier = new Map<string, SingleColor>();
+        data[sidebarResource.supplierAccount]?.forEach((ele, i) => {
+          newMapSupplier.set(ele?.optionValue, getColorByIndex(i));
+        });
+        setSupplierColorCodeMap(newMapSupplier);
       })
       .catch((err) => toastConfig.setToastConfig(err));
   }, []);
@@ -331,22 +341,36 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs.tz(d['estimateStartDate'] || d['startDate']).toDate(),
-                end: dayjs.tz(d['estimateEndDate'] || d['endDate']).toDate(),
+                start: dayjs
+                  .utc(d['estimateStartDate'] || d['startDate'])
+                  .tz()
+                  .toDate(),
+                end: dayjs
+                  .utc(d['estimateEndDate'] || d['endDate'])
+                  .tz()
+                  .endOf('day')
+                  .toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
               };
             }
             if (selectedResource.resource === sidebarResource.product) {
+              const today = dayjs.tz();
               for (const property in d) {
-                if (property === 'debit') {
+                const ledgerDate = dayjs.utc(d['date']).tz();
+                if (
+                  resourcePolicy?.hideBackDatedPlanning &&
+                  ledgerDate.isBefore(today, 'day') &&
+                  ['debit', 'credit', 'availableByPlanning']?.includes(property)
+                ) {
+                } else if (property === 'debit') {
                   if (d?.debit?.length) {
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
@@ -357,64 +381,70 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
                       data: d?.credit
                     });
                   }
-                } else if (property === 'reserved') {
-                  if (d?.reserved?.length) {
-                    otherData.push({
-                      title: `Reserved ${d?.reserved.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
-                      allDay: true,
-                      resource: selectedResource.resource,
-                      type: 'reserved',
-                      data: d?.reserved
-                    });
-                  }
-                } else if (property === 'inventory') {
-                  if (d?.inventory) {
-                    otherData.push({
-                      title: `Inventory ${d?.inventory}`,
-                      start: dayjs.tz(d['date']).toDate(),
-                      end: dayjs.tz(d['date']).toDate(),
-                      allDay: true,
-                      resource: selectedResource.resource
-                    });
-                  }
                 } else if (property === 'availableByPlanning') {
                   otherData.push({
                     title: `Planned Available ${d?.availableByPlanning || 0}`,
-                    start: dayjs.tz(d['date']).toDate(),
-                    end: dayjs.tz(d['date']).toDate(),
+                    start: dayjs.utc(d['date']).tz().toDate(),
+                    end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
                     isRedAlert: d?.availableByPlanning < 0 ? true : false
                   });
-                } else if (['assetCount', 'date']?.includes(property)) {
+                } else if (property === 'inventory') {
+                  if (d?.inventory) {
+                    otherData.push({
+                      title: `Inventory ${d?.inventory}`,
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      allDay: true,
+                      resource: selectedResource.resource
+                    });
+                  }
+                } else if (['date']?.includes(property)) {
+                } else if (property === 'assetCount') {
+                  if (d[property]) {
+                    if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
+                    } else {
+                      otherData.push({
+                        title: `Total Assets ${d[property]}`,
+                        start: dayjs.utc(d['date']).tz().toDate(),
+                        end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                        allDay: true,
+                        type: 'assetCount',
+                        status: property,
+                        resource: selectedResource.resource
+                      });
+                    }
+                  }
                 } else if (d[property]) {
-                  otherData.push({
-                    title: `${property} ${d[property]}`,
-                    start: dayjs.tz(d['date']).toDate(),
-                    end: dayjs.tz(d['date']).toDate(),
-                    allDay: true,
-                    type: 'assetStatus',
-                    status: property,
-                    resource: selectedResource.resource
-                  });
+                  if (resourcePolicy?.hideAssetStatusForFutureDates && ledgerDate.isAfter(today, 'day')) {
+                  } else {
+                    otherData.push({
+                      title: `${property} ${d[property]}`,
+                      start: dayjs.utc(d['date']).tz().toDate(),
+                      end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      allDay: true,
+                      type: 'assetStatus',
+                      status: property,
+                      resource: selectedResource.resource
+                    });
+                  }
                 }
               }
               return null;
             }
             let title = d[selectedResource.fieldName];
-            let start = dayjs.tz(d[selectedResource.start]).toDate();
-            let end = dayjs.tz(d[selectedResource.end]).toDate();
+            let start = dayjs.utc(d[selectedResource.start]).tz().toDate();
+            let end = dayjs.utc(d[selectedResource.end]).tz().endOf('day').toDate();
             let fulfillStatus = d?.fulfillStatus;
 
             const extraData: any = {};
@@ -432,7 +462,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             } else if (d?.customerAccount?.optionLabel) {
               title = `${title} (${d?.customerAccount?.optionLabel})`;
               extraData.customerAccount = d?.customerAccount?.optionValue;
+            } else if (d?.supplierAccount?.optionLabel) {
+              title = `${title} (${d?.supplierAccount?.optionLabel})`;
+              extraData.supplierAccount = d?.supplierAccount?.optionValue;
             }
+
             if (selectedResource.resource === sidebarResource.employeeMaster) {
               title = `${d?.reference?.optionLabel} ${d?.service ? `(${d?.service?.optionLabel})` : ''} - ${d?.technician?.optionLabel}`;
               extraData.referenceType = d?.referenceType;
@@ -446,7 +480,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               ...(!isEmpty(extraData) ? extraData : {}),
               allDay: true,
               resource: selectedResource.resource,
-              fulfillStatus: fulfillStatus,
+              fulfillStatus: fulfillStatus
             };
           });
           rows = rows?.filter((e) => e);
@@ -584,12 +618,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance().put(`/planning-view/change-date`, {
-      _id: event.id,
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      resource: event.resource
-    })
+    axiosInstance()
+      .put(`/planning-view/change-date`, {
+        _id: event.id,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        resource: event.resource
+      })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -623,23 +658,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     (date) => {
       if (view === 'month') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().startOf('month').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().endOf('month').format('MM/DD/YYYY')
         });
       } else if (view === 'week') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().startOf('week').format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().endOf('week').format('MM/DD/YYYY')
         });
       } else if (view === 'day') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().format('MM/DD/YYYY')
         });
       } else if (view === 'agenda') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs.utc(date).tz().add(1, 'month').format('MM/DD/YYYY')
         });
       }
     },
@@ -666,8 +701,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       if (obj?.resource === sidebarResource.product) {
         if (obj?.type === 'credit') {
           backgroundColor = 'var(--success-light) ';
-        } else if (obj?.type === 'reserved') {
-          backgroundColor = 'var(--warning-light)';
         } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
           backgroundColor = 'var(--danger-light)';
           color = 'white';
@@ -679,8 +712,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
-      if (obj?.customerAccount && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
-        const assignedColor = colorCodeMap.get(obj?.customerAccount);
+      if ((obj?.customerAccount || obj?.supplierAccount) && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
+        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
         if (assignedColor) {
           backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
           color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
@@ -703,17 +736,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       };
     },
-    [themeMode, colorCodeMap]
+    [themeMode, customerColorCodeMap, supplierColorCodeMap]
   );
 
   useEffect(() => {
-    setFields([]);
-    if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
-      axiosInstance()
-        .get(`/field?resource=${selectedResource?.resource}`)
-        .then(({ data }) => {
-          setFields(data.data);
-        });
+    if (selectedResource) {
+      setFields([]);
+      if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
+        axiosInstance()
+          .get(`/field?resource=${selectedResource?.resource}`)
+          .then(({ data }) => {
+            setFields(data.data);
+          });
+      }
     }
   }, [selectedResource]);
 
@@ -777,8 +812,29 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   />
                 );
               })}
+            {selectedResource?.resource === sidebarResource.product && !isEmpty(selectedLookUpResourceData) &&
+              selectedLookUpResourceData['product'] &&
+              selectedLookUpResourceData['product']?.length > 0 && (
+                <Box mt={0.5}>
+                  <span className="relative">
+                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                    </span>
+                    <HtmlTooltip title={'Pending Planned/Incoming'}>
+                      <IconButton
+                        size={'small'}
+                        onClick={() => {
+                          setShowPlannedIncoming(true);
+                        }}
+                      >
+                        <InfoIcon fontSize="small" color={'primary'} />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </span>
+                </Box>
+              )}
           </div>
-          <Box display="flex" flexDirection="row" className="gap-1" ml={1} mt={2}>
+          <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
             {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
@@ -874,7 +930,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <h6 className=" text-sm font-semibold">{d.heading}</h6>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <RenderTable data={d.items} resources={resources} />
+                    <RenderTable data={d.items} resources={resources} resourceList={resourceList} />
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -891,6 +947,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             showDetail={showDetail}
           />
         )}
+        {showPlannedIncoming && (
+          <PlannedIncomingDialog
+            handleClose={() => {
+              setShowPlannedIncoming(false);
+            }}
+            products={selectedLookUpResourceData['product']}
+            warehouses={selectedLookUpResourceData['warehouse']}
+            resourceList={resourceList}
+          />
+        )}
       </div>
     </>
   );
@@ -898,7 +964,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
 export default forwardRef(CalendarView);
 
-const RenderTable = ({ data, resources }) => {
+const RenderTable = ({ data, resources, resourceList }) => {
   return (
     <TableContainer>
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
@@ -917,22 +983,9 @@ const RenderTable = ({ data, resources }) => {
               <TableCell component="th" scope="row">
                 <p
                   onClick={() => {
-                    if (row?.resource === sidebarResource.rentalManagement) {
-                      window.open(`${routes.rentalManagementDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.purchaseOrder) {
-                      window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.purchaseRequisition) {
-                      window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.productionOrder) {
-                      window.open(`${routes?.productionOrderDetail?.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.demandOrder) {
-                      window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.repairOrder) {
-                      window.open(`${routes?.repairOrderDetail?.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.repairJob) {
-                      window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
-                    } else if (row?.resource === sidebarResource.salesOrder) {
-                      window.open(`${routes.salesOrderDetail.path}/${row.referenceId}`);
+                    const resource = resourceList?.find((r) => r.resource === row?.resource);
+                    if (resource) {
+                      window.open(`${resource.path}/${row?.referenceId}`);
                     }
                   }}
                   className="link text-truncate"

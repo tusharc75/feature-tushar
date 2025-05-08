@@ -10,7 +10,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../../constants/helpers';
 import InputField from '../../../components/Helpers/InputField';
-import { getObjKeysWithValues, getObjKeys, yupSchema, pricingCondition } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema, pricingCondition } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
@@ -18,6 +18,7 @@ import { isEqual, startCase } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../../StateProvider/Provider';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,51 +32,54 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
   }: any = useData();
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${startCase(pricingCondition.resource)}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (pricingConditionId) {
-          axiosInstance()
-            .get(`${pricingCondition.api}/` + pricingConditionId)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(data, fieldsDataForCreate, true, user) }
-                });
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          const initialData = getObjKeys('', fieldsDataForCreate)
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            initialData['currency'] = user.user?.brandCurrency;
-          }
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'startDate')) {
-            initialData['startDate'] = '';
-          }
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'endDate')) {
-            initialData['endDate'] = '';
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, []);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(
+        sidebarResource.pricingCondition);
+
+      if (pricingConditionId) {
+        axiosInstance()
+          .get(`${pricingCondition.api}/` + pricingConditionId)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(data, fieldsDataForCreate, true, user) }
+              });
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        const initialData = getObjKeys('', fieldsDataForCreate)
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'startDate')) {
+          initialData['startDate'] = '';
+        }
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'endDate')) {
+          initialData['endDate'] = '';
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
 
   const handleSubmit = (values) => {
     if (pricingConditionId && !isClone) {

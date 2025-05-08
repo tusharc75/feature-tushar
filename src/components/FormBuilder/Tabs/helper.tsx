@@ -249,6 +249,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'assignAssetUsingRfidQr',
+        fieldLabel: 'Assign Asset Using RFID/QR',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
@@ -406,6 +412,23 @@ export const resourcePolicy = [
       {
         fieldName: 'showOnlyAssignedTickets',
         fieldLabel: 'Show only Assigned Tickets',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.planningView,
+    policy: [
+      {
+        fieldName: 'hideBackDatedPlanning',
+        fieldLabel: 'Hide Back Dated Planning',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'hideAssetStatusForFutureDates',
+        fieldLabel: 'Hide Asset Status For Future Dates',
         type: 'checkBox',
         defaultValue: false
       }

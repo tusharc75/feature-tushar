@@ -17,13 +17,15 @@ export default function CustomMessageDialog({
   errorMessages,
   onClose,
   title,
-  onConfirm
+  onConfirm,
+  isSubmitting
 }: {
   open: boolean;
   errorMessages: ErrorMessages[];
   onClose: () => void;
   title?: string;
   onConfirm?: () => void;
+  isSubmitting?: boolean
 }) {
   const getMessageList = (message) => {
     const errorMessages: any = [];
@@ -72,7 +74,11 @@ export default function CustomMessageDialog({
             <ThemeButton buttonType="transparent" onClick={onClose}>
               Cancel
             </ThemeButton>
-            <ThemeButton buttonType="theme" onClick={onConfirm}>
+            <ThemeButton
+              isLoading={isSubmitting}
+              disabled={isSubmitting}
+              buttonType="theme"
+              onClick={onConfirm}>
               Confirm
             </ThemeButton>
           </>

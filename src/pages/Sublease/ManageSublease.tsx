@@ -28,6 +28,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageSublease = ({
   isClone = false,
@@ -42,7 +43,7 @@ const ManageSublease = ({
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, resources }
   }: any = useData();
   const ref = useRef(null);
 
@@ -53,100 +54,99 @@ const ManageSublease = ({
   const [subleaseData, setSubleaseData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.sublease}`)
-      .then(({ data: { data } }) => {
-        data = data.filter((d) => !['rentalJob'].includes(d.fieldData.fieldName));
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (subleaseId) {
-          axiosInstance()
-            .get(`${sublease.api}/` + subleaseId)
-            .then(({ data: { data } }) => {
-              setSubleaseData(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
-                rest['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest['status'] = SUBLEASE_STATUS.new;
-                fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                if (data?.actualStartDate && data?.actualStartDate === '') {
-                  fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualStartDate'].includes(obj.fieldName));
-                }
-                if (data?.actualEndDate && data?.actualEndDate === '') {
-                  fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualEndDate'].includes(obj.fieldName));
-                }
-                if (data?.canEdit === false) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['type', 'supplierAccount', 'warehouse', 'fromWarehouse']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                if (data?.ticketCreated) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['toWarehouse']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.sublease, ['rentalJob']);
+      if (subleaseId) {
+        axiosInstance()
+          .get(`${sublease.api}/` + subleaseId)
+          .then(({ data: { data } }) => {
+            setSubleaseData(data);
+            if (isClone) {
+              const { subleaseName, ...rest } = data;
+              rest['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              rest['status'] = SUBLEASE_STATUS.new;
+              fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              if (data?.actualStartDate && data?.actualStartDate === '') {
+                fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualStartDate'].includes(obj.fieldName));
+              }
+              if (data?.actualEndDate && data?.actualEndDate === '') {
+                fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualEndDate'].includes(obj.fieldName));
+              }
+              if (data?.canEdit === false) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['type', 'supplierAccount', 'warehouse', 'fromWarehouse']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
                 });
               }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          createValues['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            createValues['currency'] = user.user?.brandCurrency;
-          }
-          if (referenceType === 'rentalJob') {
-            createValues['rentalJob'] = referenceId;
-            createValues['estimateStartDate'] = referenceData.estimateStartDate;
-            createValues['estimateEndDate'] = referenceData.estimateEndDate;
-            if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
-              createValues['warehouse'] = referenceData?.warehouse?.optionValue;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
-              createValues['wellName'] = referenceData?.wellName?.optionValue;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
-              if (referenceData?.wellNumber?.optionValue) {
-                createValues['wellNumber'] = referenceData?.wellNumber?.optionValue;
-              } else {
-                createValues['wellNumber'] = referenceData?.wellNumber?.map((e) => e?.optionValue);
+              if (data?.ticketCreated) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['toWarehouse']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
+                });
               }
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
-              createValues['afeNumber'] = referenceData?.afeNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'processor')) {
-              createValues['processor'] = referenceData?.processor?.optionValue;
-            }
-          }
-          createValues['actualStartDate'] = '';
-          createValues['actualEndDate'] = '';
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        createValues['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          createValues['currency'] = user.user?.brandCurrency;
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        if (referenceType === 'rentalJob') {
+          createValues['rentalJob'] = referenceId;
+          createValues['estimateStartDate'] = referenceData.estimateStartDate;
+          createValues['estimateEndDate'] = referenceData.estimateEndDate;
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
+            createValues['warehouse'] = referenceData?.warehouse?.optionValue;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+            createValues['wellName'] = referenceData?.wellName?.optionValue;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && referenceData?.wellNumber) {
+            if (referenceData?.wellNumber?.optionValue) {
+              createValues['wellNumber'] = referenceData?.wellNumber?.optionValue;
+            } else {
+              createValues['wellNumber'] = referenceData?.wellNumber?.map((e) => e?.optionValue);
+            }
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+            createValues['afeNumber'] = referenceData?.afeNumber;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'processor')) {
+            createValues['processor'] = referenceData?.processor?.optionValue;
+          }
+        }
+        createValues['actualStartDate'] = '';
+        createValues['actualEndDate'] = '';
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, [subleaseId]);
 
   useEffect(() => {

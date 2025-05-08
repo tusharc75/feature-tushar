@@ -39,6 +39,7 @@ const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, ma
         // imageEditor.resizeCanvasDimension({ width: data.newWidth, height: data.newHeight });
         imageEditor?.clearUndoStack?.();
       });
+
       imageEditor.on('undoStackChanged', (undoStackLength) => {
         setStore({ undoStackLength });
       });

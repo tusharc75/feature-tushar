@@ -16,6 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,51 +29,53 @@ const ManageTruckMaster = ({ isClone = false, id = null, onClose, onSuccess }) =
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [title, setTitle] = useState('');
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.truckMaster);
+
+      if (id) {
+        axiosInstance()
+          .get(`${routes?.truckMaster.path}/` + id)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { fleetNumber, ...rest } = data;
+              setTitle(`Clone - ${fleetNumber}`);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+              setLoading(false);
+            } else {
+              setTitle(`Editing - ${data.fleetNumber}`);
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+              setLoading(false);
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        setTitle(`Create ${resources?.truckMaster?.titleSingular}`);
+        let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.truckMaster}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (id) {
-          axiosInstance()
-            .get(`${routes?.truckMaster.path}/` + id)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, fleetNumber, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${fleetNumber}`);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-                setLoading(false);
-              } else {
-                setTitle(`Editing - ${data.fleetNumber}`);
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setTitle(`Create ${resources?.truckMaster?.titleSingular}`);
-          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
+    setLoading(false);
   }, [id]);
 
   const handleSubmit = (values) => {

@@ -125,7 +125,7 @@ const ManageChannel = ({ onClose, onSuccess, _id }) => {
                   onClose();
                 }
               }}
-              title={'Create Channel'}
+              title={`${_id ? 'Edit' : 'Create'} Channel`}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);

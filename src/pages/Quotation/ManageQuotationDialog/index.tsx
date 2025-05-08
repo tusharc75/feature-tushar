@@ -27,6 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import dayjs from 'dayjs';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageQuotationDialog = ({
   isClone,
@@ -59,23 +60,16 @@ const ManageQuotationDialog = ({
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Quotation');
-      fieldData = response?.data?.data?.filter(
-        (obj) => !['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']?.includes(obj?.fieldData?.fieldName)
-      );
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.quotation,
+        ['rentalJob', 'repairOrder', 'salesOrder', 'fieldJob', 'assemblyOrder']);
       if (quotationId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${quotation.api}/` + quotationId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, quotationNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { quotationNumber, ...rest } = data;
+            rest.status = QUOTATION_STATUS.new;
             rest.quotationNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(quotationNumber);
             setInitialData({
@@ -89,17 +83,15 @@ const ManageQuotationDialog = ({
                 if (['warehouse', 'type']?.includes(e?.fieldName)) {
                   e.isUneditable = true;
                 }
-                if (
-                  ['customerAccount']?.includes(e?.fieldName) &&
-                  [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(data?.status)
-                ) {
+                if (['customerAccount']?.includes(e?.fieldName)
+                  && [QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(data?.status)) {
                   e.isUneditable = true;
                 }
               });
             }
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

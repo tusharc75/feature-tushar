@@ -212,7 +212,6 @@ const WorkOrder = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : capitalize(row.original.type)}</p>

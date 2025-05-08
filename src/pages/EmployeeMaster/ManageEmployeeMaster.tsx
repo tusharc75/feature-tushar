@@ -17,6 +17,7 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useLocation, useHistory } from 'react-router-dom';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }) => {
   const {
@@ -38,12 +39,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.employeeMaster}`);
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.employeeMaster);
       if (id) {
         axiosInstance()
           .get(`${routes?.employeeMaster?.path}/${id}`)
@@ -58,7 +54,7 @@ const ManageEmployeeMaster = ({ onClose, onSuccess, isClone = false, id = null }
             }
             setInitialData({
               fields: fields,
-              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fields)
+              values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {

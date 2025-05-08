@@ -91,7 +91,9 @@ const SerializedAssetStatusChangeRequest = () => {
           ...newColumns?.filter((c) => c?.accessor != 'asset'),
           {
             accessor: 'doaComment',
-            Header: 'Doa Comment',
+            Header: 'DOA Comment',
+            disableFilters: true,
+            disableSortBy: true,
             Cell: ({ row }) => (
               <>
                 {row?.original?.doaComment ? (
@@ -182,10 +184,9 @@ const SerializedAssetStatusChangeRequest = () => {
               }
             }
           }
-          const doaComment =
-            finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
-              ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
-              : '';
+          const doaComment = finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
+            ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
+            : '';
           finalObject['doaComment'] = doaComment;
           return finalObject;
         });
@@ -278,7 +279,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
@@ -291,7 +292,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }

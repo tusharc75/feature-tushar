@@ -386,7 +386,10 @@ const Invoice = () => {
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={fetchData}
+          asyncExport={true}
+          asyncImport={true}
           additionalParams={getQueryString(true)}
+          resource={sidebarResource.invoice}
         />
       </div>
       <CustomContainer>

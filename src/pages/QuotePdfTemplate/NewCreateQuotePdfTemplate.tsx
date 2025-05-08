@@ -266,7 +266,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.tabelSummaryLeftSide = data?.tabelSummaryLeftSide;
           initialValues.entity = data?.entity ? data?.entity : [];
           initialValues.type = data?.type;
-          initialValues.owner = data?.owner && data?.owner !== undefined ? data?.owner : user.user._id;
+          initialValues.owner = isClone ? user.user._id : data?.owner || user.user._id;
           initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
           setDetails({
             header: data?.header,
@@ -290,6 +290,7 @@ export default function NewCreateQuotePdfTemplate() {
               })
             );
             if (isClone) {
+              setAllowedToEdit(true)
               setIsEdit(true);
             }
           }
@@ -493,7 +494,6 @@ export default function NewCreateQuotePdfTemplate() {
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
-          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     } else {
@@ -547,7 +547,6 @@ export default function NewCreateQuotePdfTemplate() {
         .catch((error) => {
           setIsUpdating(false);
           setIsUpdatingAndPreview(false);
-          setIsEdit(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -1064,7 +1063,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1122,7 +1120,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1142,7 +1139,6 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
-                        isCheckHeight={true}
                       />
                     </Box>
                   </div>

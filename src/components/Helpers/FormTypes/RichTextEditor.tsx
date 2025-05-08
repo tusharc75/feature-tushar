@@ -38,11 +38,9 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const editorRef = useRef(null);
   const [themeColor] = useAppTheme();
   const classes = useStyles();
-  const [prevData, setPrevData] = useState('');
   const [isUpdate, setIsUpdate] = React.useState(true);
   const [isUploadImage, setIsUploadImage] = useState(false);
   const [isImgUploading, setImgUploading] = React.useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageUploadProgress, setImageUploadProgress] = React.useState(0);
   const [imageUrl, setImageUrl] = useState('');
   const [uploadError, setUploadError] = useState(false);
@@ -52,7 +50,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const fileInputRef = useRef(null);
 
   const handleUploadFileClick = (e) => {
-    // Trigger the file input click event when the "Upload File" button is clicked
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -113,7 +110,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
           setImageUploadProgress(completedPercent);
-
           if (completedPercent === 100) {
             setTimeout(() => {
               setImageUploadProgress(0);
@@ -134,7 +130,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           });
           editorRef.current.execCommand('mceInsertContent', false, data);
         }
-        //data.fileUrl data.fileName
       })
       .catch((err) => {
         setImgUploading(false);
@@ -154,10 +149,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
     }
     if (imageDetails && imageDetails.height) {
       imgTag = `${imgTag} height='${imageDetails.height}'`;
-    } else if (false) {
-      imgTag = `${imgTag} height='${60}'`;
     }
-
     if (imageDetails && imageDetails.alt) {
       imgTag = `${imgTag} alt='${imageDetails.alt}'`;
     }
@@ -167,7 +159,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
 
     setIsUploadImage(false);
     setImageUrl('');
-    setImageDetails({ width: 0, height: 60, alt: '' });
+    setImageDetails({ width: 0, height: 0, alt: '' });
   };
 
   const handleChange = (e) => {
@@ -210,13 +202,12 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                     onClick={(e: any) => (e.target.value = null)}
                     type="file"
                   />
-
                   <label htmlFor="avatar">
                     <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
                       <ThemeButton
+                        component="span"
                         startIcon={<HiOutlinePhotograph />}
-                        buttonType='transparent'
-                        disabled={isImageLoading}
+                        disabled={isImgUploading}
                       >
                         Upload Image
                       </ThemeButton>
@@ -257,7 +248,16 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                   </Grid>
                 ) : null}
                 <Grid size={{ xs: 6 }}>
-                  <TextField id="width" type="number" name="width" size="small" label="Width" variant="outlined" onChange={handleChange} />
+                  <TextField
+                    id="width"
+                    type="number"
+                    name="width"
+                    size="small"
+                    label="Width"
+                    variant="outlined"
+                    defaultValue={imageDetails.height}
+                    onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                    onChange={handleChange} />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                   <TextField
@@ -273,7 +273,14 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
+                  <TextField
+                    id="alt"
+                    name="Alternative Text"
+                    size="small"
+                    label="alt"
+                    fullWidth
+                    variant="outlined"
+                    onChange={handleChange} />
                 </Grid>
               </Grid>
             </div>
@@ -282,7 +289,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             <ThemeButton
               buttonType="transparent"
               onClick={() => {
-                setImageDetails({ width: 0, height: 60, alt: '' });
+                setImageDetails({ width: 0, height: 0, alt: '' });
                 setImageUrl('');
                 setIsUploadImage(false);
               }}

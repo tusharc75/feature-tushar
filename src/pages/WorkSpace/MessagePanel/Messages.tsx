@@ -1,5 +1,5 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
-import { MoreVert, Delete, GetApp } from '@mui/icons-material';
+import { Avatar, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popper, Tooltip } from '@mui/material';
+import { MoreVert, Delete, GetApp, Reply, PushPin, Edit } from '@mui/icons-material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
@@ -19,6 +19,7 @@ import SendMessage from './SendMessage';
 import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import Thread from './Thread';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { TiPin } from 'react-icons/ti';
 
 type MessagesProps = {
   channelId: string;
@@ -169,6 +170,7 @@ const Messages = ({
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedMessage(null);
   };
 
   const handleEdit = () => {
@@ -192,10 +194,10 @@ const Messages = ({
           <ul className="mt-8 list-none">
             {Object.keys(messages).map((date) => (
               <li key={date} className="mb- list-none">
-                <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
+                <div className="relative mx-auto my-[20px] h-[1px] w-[calc(100%-30px)] bg-[var(--common-border-color)]">
                   <p
-                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
-                    text-gray-400 [border:1px_solid_var(--common-border-color)] [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
+                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center text-xs 
+                    text-gray-400 [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
                   >
                     {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
                   </p>
@@ -381,8 +383,8 @@ export const DisplaySingleMessage = ({
       <li
         key={message._id}
         className={cn(
-          'group relative list-none px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',
-          selectedMessage?._id === message._id && 'bg-gray-100 dark:bg-gray-800'
+          'group relative list-none px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800',
+          selectedMessage?._id === message._id && 'bg-gray-50 dark:bg-gray-800'
         )}
         onMouseLeave={closeEmojiPanel}
       >
@@ -402,12 +404,12 @@ export const DisplaySingleMessage = ({
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
           <div className="flex-grow">
-            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit' : '')}>
-              <h6 className="user text-[14px] font-medium">
+            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit flex-row-reverse' : '')}>
+              <h6 className="user text-sm font-semibold text-gray-900 dark:text-white">
                 {message.user?.optionLabel}
                 {isSelf ? ' (you)' : ''}
               </h6>
-              <span className="text-[12px] font-normal ">{messageTimeFormatter(message.date)}</span>
+              <span className="text-[12px] font-normal text-gray-500">{messageTimeFormatter(message.date)}</span>
             </div>
             {editingMessage?._id === message._id ? (
               <SendMessage
@@ -430,8 +432,8 @@ export const DisplaySingleMessage = ({
                         [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
                        [&_span:last-child]:text-gray-400`,
                       isSelf
-                        ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white',
+                        ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white',
                       message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
                     )}
                     dangerouslySetInnerHTML={{
@@ -710,7 +712,12 @@ export const MoreMenuAndDeleteConfirmDialog = ({
         }}
       >
         <span onClick={handleMenuClose}>
-          <MenuItem onClick={pinMessage}>{selectedMessage?.pinned ? 'Unpin' : 'Pin'}</MenuItem>
+          <MenuItem onClick={pinMessage}>
+            <ListItemIcon>
+              {selectedMessage?.pinned ? <TiPin size={22} className="text-black dark:text-white" /> : <PushPin fontSize="small" color="primary" />}
+            </ListItemIcon>
+            <ListItemText>{selectedMessage?.pinned ? 'Unpin' : 'Pin'}</ListItemText>
+          </MenuItem>
           {setThreadDialogOpen && type !== 'pins' && (
             <MenuItem
               onClick={() => {
@@ -718,11 +725,28 @@ export const MoreMenuAndDeleteConfirmDialog = ({
                 setThreadDialogOpen({ open: true, message: selectedMessage });
               }}
             >
-              Reply
+              <ListItemIcon>
+                <Reply fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText>Reply</ListItemText>
             </MenuItem>
           )}
-          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>}
-          {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={() => setShowConfirmBox(true)}>Delete</MenuItem>}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem onClick={() => handleEdit()}>
+              <ListItemIcon>
+                <Edit fontSize="small" color="primary" />
+              </ListItemIcon>
+              <ListItemText>Edit</ListItemText>
+            </MenuItem>
+          )}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem onClick={() => setShowConfirmBox(true)}>
+              <ListItemIcon>
+                <Delete fontSize="small" color="error" />
+              </ListItemIcon>
+              <ListItemText>Delete</ListItemText>
+            </MenuItem>
+          )}
         </span>
       </Menu>
       {showConfirmBox && (

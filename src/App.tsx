@@ -282,6 +282,7 @@ import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToa
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
+import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 
 var notificationInterval: any = null;
 let watchIdRef: number | null = null;
@@ -1290,6 +1291,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.customerAccountsAndServicesDataMapping.path}`}>
+              <ResourceDataMapping resourceRendered={'customerAccountsAndServicesDataMapping'} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.customerAccountsAndProductsDataMapping.path}`}>
+              <ResourceDataMapping resourceRendered={'customerAccountsAndProductsDataMapping'} />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

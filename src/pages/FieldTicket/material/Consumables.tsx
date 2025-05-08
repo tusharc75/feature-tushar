@@ -235,20 +235,20 @@ const Consumables = ({
       ...newColumns,
       ...(!resourcePolicy?.hideInventoryConsume
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            },
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       {
         accessor: 'action',
@@ -349,6 +349,7 @@ const Consumables = ({
       }
       consumables?.forEach((parent, i) => {
         parent.index = i + 1;
+        parent.detail = parent?.productDetail?.productName;
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
@@ -553,7 +554,7 @@ const Consumables = ({
     }
   };
 
-  const handleSaveData = async (rows: any, saveAndNext = false) => {
+  const handleSaveData = async (rows: any, saveAndNext = false, next = false) => {
     try {
       setUpdating(true);
       if (isOffline) {
@@ -587,15 +588,19 @@ const Consumables = ({
           await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
         }
       } else {
-        const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: response?.data?.message
-        });
+        if (!next) {
+          const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: response?.data?.message
+          });
+        }
       }
-      fetchData();
-      if (saveAndNext) {
+      if (!next) {
+        fetchData();
+      }
+      if (saveAndNext || next) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
         setIsConsumableEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
       } else {
@@ -803,6 +808,8 @@ const Consumables = ({
                   hideSelection={allowedToEdit ? false : true}
                   hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
+                  resource={sidebarResource.fieldTicket}
+                  arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
                 />
               ) : (
                 <Box p={2} height={300}>

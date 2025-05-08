@@ -24,6 +24,7 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {
   const history = useHistory();
@@ -45,25 +46,20 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Job');
-      fieldData = response?.data?.data;
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.job);
       var statusOptions = [];
-      fieldData?.forEach((e: any) => {
-        if (e?.fieldData?.fieldName === 'status') {
-          statusOptions = e.fieldData.option;
+      fieldsDataAll?.forEach((e: any) => {
+        if (e?.fieldName === 'status') {
+          statusOptions = e.option;
         }
       });
-      var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (jobId) {
         try {
           let data;
           const response: any = await axiosInstance().get(`${routes.job.path}/` + jobId);
           data = response?.data?.data;
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, jobNumber, updatedBy, ...rest } = data;
+            const { jobNumber, ...rest } = data;
             rest['status'] = 'New';
             rest['jobNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(jobNumber);
@@ -76,7 +72,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
             setJobDetails(data);
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

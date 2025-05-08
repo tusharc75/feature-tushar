@@ -96,7 +96,6 @@ const ServiceMaster = (props: Props) => {
         Header: 'Type',
         width: 100,
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>

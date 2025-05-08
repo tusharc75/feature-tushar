@@ -106,7 +106,6 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       Header: 'Type',
       width: 100,
       primaryField: true,
-      disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? (

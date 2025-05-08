@@ -17,6 +17,7 @@ import routes from '../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess, open }) => {
   const history = useHistory();
@@ -38,13 +39,7 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
   const fetchFields = async () => {
     setLoading(true);
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.deviceTemplates}`);
-      fieldData = response?.data?.data;
-
-      var fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      var fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.deviceTemplates);
       if (deviceTemplatesId) {
         try {
           let data;
@@ -55,7 +50,7 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
             let tempData = data;
             if (isClone) {
               fields = fieldsDataForCreate;
-              const { _id, createdBy, updatedBy, templateName, ...rest } = data;
+              const { templateName, ...rest } = data;
               setCloneHeading(templateName);
               tempData = { ...rest };
             }
@@ -67,7 +62,7 @@ const ManageDeviceTemplates = ({ isClone, deviceTemplatesId, onClose, onSuccess,
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

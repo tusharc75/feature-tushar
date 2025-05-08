@@ -8,6 +8,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
+  ASSEMBLY_ORDER_STATUS,
   CustomDialogTransition,
   GenerateResourceLineNumber,
   getObjKeys,
@@ -23,6 +24,7 @@ import { isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageAssemblyOrder = ({
   isClone = false,
@@ -52,14 +54,8 @@ const ManageAssemblyOrder = ({
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.assemblyOrder}`);
-      fieldData = response?.data?.data;
-
-      fieldData = fieldData?.filter((e) => !['quotation', 'rentalJob'].includes(e?.fieldData?.fieldName));
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(
+        sidebarResource.assemblyOrder, ['quotation', 'rentalJob']);
       if (assemblyOrderId) {
         try {
           let data;
@@ -67,8 +63,8 @@ const ManageAssemblyOrder = ({
           data = response?.data?.data;
           setAssemblyOrderData(data);
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, assemblyOrderNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { assemblyOrderNumber, ...rest } = data;
+            rest.status = ASSEMBLY_ORDER_STATUS.new;
             rest.assemblyOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(assemblyOrderNumber);
             setInitialData({
@@ -79,7 +75,7 @@ const ManageAssemblyOrder = ({
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

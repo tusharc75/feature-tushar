@@ -96,11 +96,11 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
+        width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
+          <div>
+            <p>{`${startCase(row.original?.type)}`}</p>
           </div>
         )
       },

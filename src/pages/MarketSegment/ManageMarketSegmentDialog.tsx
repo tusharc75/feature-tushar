@@ -16,6 +16,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageMarketSegmentDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,44 +29,45 @@ const ManageMarketSegmentDialog = (props) => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=Market Segment`)
-      .then(({ data: { data } }) => {
-        const fieldsData = marketSegmentId
-          ? data.filter((d) => d.isUpdate).map((d: any) => d.fieldData)
-          : data.filter((d) => d.isCreate).map((d: any) => d.fieldData);
-        if (marketSegmentId) {
-          let tempOptionArray = fieldsData.find((d) => d.fieldName === 'parentMarketSegment').option;
-          fieldsData.find((d) => d.fieldName === 'parentMarketSegment').option = tempOptionArray.filter(
-            (data) => data.optionValue !== marketSegmentId
-          );
-          axiosInstance()
-            .get(`${marketSegment.marketSegmentApi}/` + marketSegmentId)
-            .then(({ data: { data } }) => {
-              let tempData = { ...data };
-              if (isClone) {
-                const { _id, createdBy, history, name, ...rest } = tempData;
-                tempData = { ...rest };
-              }
-              setInitialData({
-                fields: fieldsData,
-                values: isClone ? getObjKeysWithValues(tempData, fieldsData, true, user) : getObjKeysWithValues(tempData, fieldsData)
-              });
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.marketSegment);
+      const fieldsData = marketSegmentId ? fieldsDataForUpdate : fieldsDataForCreate;
+      if (marketSegmentId) {
+        let tempOptionArray = fieldsData.find((d) => d.fieldName === 'parentMarketSegment').option;
+        fieldsData.find((d) => d.fieldName === 'parentMarketSegment').option = tempOptionArray.filter(
+          (data) => data.optionValue !== marketSegmentId
+        );
+        axiosInstance()
+          .get(`${marketSegment.marketSegmentApi}/` + marketSegmentId)
+          .then(({ data: { data } }) => {
+            let tempData = { ...data };
+            if (isClone) {
+              const { _id, createdBy, history, name, ...rest } = tempData;
+              tempData = { ...rest };
+            }
+            setInitialData({
+              fields: fieldsData,
+              values: isClone ? getObjKeysWithValues(tempData, fieldsData, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
-        } else {
-          setInitialData({
-            fields: fieldsData,
-            values: getObjKeys('', fieldsData)
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setInitialData({
+          fields: fieldsData,
+          values: getObjKeys('', fieldsData)
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, [marketSegmentId]);
 
   const handleSubmit = (values) => {

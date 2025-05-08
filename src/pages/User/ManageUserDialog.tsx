@@ -41,7 +41,6 @@ export default function ManageUserDialog({
   const location = useLocation();
   const history = useHistory();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeadingName, setCloneHeadingName] = useState('');
 
@@ -203,7 +202,7 @@ export default function ManageUserDialog({
                 </ThemeButton>
                 <ThemeButton
                   buttonType='theme'
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
+                  disabled={isSubmitting || loading}
                   onClick={() => {
                     handleScroll(errors);
                     submitForm();

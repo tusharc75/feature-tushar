@@ -154,7 +154,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     columns.push({
       accessor: 'type',
       Header: 'Type',
-      disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;

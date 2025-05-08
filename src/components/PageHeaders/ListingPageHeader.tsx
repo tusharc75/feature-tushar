@@ -13,6 +13,7 @@ import { cn } from 'src/constants/helpers';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
+import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -34,6 +35,7 @@ type ListingPageHeaderProps = {
   searchFilter?: any[];
   handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
+  rightSideContentsBeforeAction?: ReactNode;
   leftSideContentsOfSearchFilter?: ReactNode;
   isActionButtonVisible: boolean;
   actionButtonProps?: Omit<ButtonPropsWithExtraData, 'text'>;
@@ -54,6 +56,7 @@ const ListingPageHeader = ({
 
   leftSideContents,
   rightSideContents,
+  rightSideContentsBeforeAction,
   leftSideContentsOfSearchFilter,
 
   searchValue,
@@ -74,7 +77,7 @@ const ListingPageHeader = ({
   const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const [locationKeys, setLocationKeys] = useState([]);
   const { setGlobalSearch } = useSearch();
 
@@ -101,14 +104,6 @@ const ListingPageHeader = ({
     if (setQueryString) history.push(`?type=${data}`);
     setSelectedType && setSelectedType(data);
     onToggle && onToggle(event, value);
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
   };
 
   useEffect(() => {
@@ -223,7 +218,7 @@ const ListingPageHeader = ({
               activityName="note"
             />
           ) : null}
-          {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
+          {rightSideContents || rightSideContentsBeforeAction || isAddButtonVisible || isActionButtonVisible ? (
             <>
               <div className="flex min-w-fit flex-wrap items-center gap-[8px]">
                 {isAddButtonVisible ? (
@@ -248,39 +243,19 @@ const ListingPageHeader = ({
                     </ThemeButton>
                   </HtmlTooltip>
                 ) : null}
-
+                {rightSideContentsBeforeAction ? rightSideContentsBeforeAction : null}
                 <HideWhenOffline>
                   {isActionButtonVisible ? (
                     <>
-                      <ThemeButton
-                        tooltip={actionButtonTooltip ?? ''}
-                        size="small"
-                        id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
-                        disabled={actionButtonDisabled}
+                      <ActionButtonWithMenu
+                        actionMenuItems={actionMenuItems}
+                        tooltip={actionButtonTooltip}
+                        showSearchInMobile={showSearchInMobile}
+                        disabeled={actionButtonDisabled}
+                        actionButtonIconsEnabled={actionButtonIconsEnabled}
+                        loading={actionButtonLoading}
                         {...restOfActionButtonProps}
-                        onClick={openActions}
-                        aria-controls="action-menu"
-                        buttonType="yellow"
-                        endIcon={isMobile ? null : actionButtonIconsEnabled ? <ExpandMore /> : null}
-                        iconForMobile={<FaCircleChevronDown size={16} />}
-                        isLoading={actionButtonLoading}
-                      >
-                        Actions
-                      </ThemeButton>
-                      <Menu
-                        anchorEl={anchorEl}
-                        keepMounted
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'left'
-                        }}
-                        id="action-menu"
-                        open={Boolean(anchorEl)}
-                        onClose={closeActions}
-                        TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
-                      >
-                        <span onClick={() => closeActions()}>{actionMenuItems}</span>
-                      </Menu>
+                      />
                     </>
                   ) : null}
                 </HideWhenOffline>

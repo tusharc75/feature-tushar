@@ -11,8 +11,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
-  ASSET_STATUS,
-  COLOUR_MASTER,
   displayDate,
   gridLoadingTimeout,
   MATERIAL_TYPE,
@@ -23,15 +21,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 
 const OnField = ({ rentalId, referenceFrom }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${referenceFrom}_onField`;
 
   const {
-    state: { user, permissions, resources }
+    state: { permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords, dataRows } = state;
 
   const [fieldLabels, setFieldLabels] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -88,7 +86,6 @@ const OnField = ({ rentalId, referenceFrom }) => {
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         Cell: ({ row }) => (row.original['type'] ? <p>{startCase(row.original?.type)}</p> : <NoDataCell />)
       },
       {
@@ -117,53 +114,53 @@ const OnField = ({ rentalId, referenceFrom }) => {
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-            {
-              accessor: 'serialNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-              Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'serialNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-              Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'position',
+            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-            {
-              accessor: 'jobCount',
-              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-              Cell: ({ row }) =>
-                row?.original?.jobCount || row?.original?.jobCount === 0 ? (
-                  <h5 className="text-truncate">{row?.original?.jobCount}</h5>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            accessor: 'jobCount',
+            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
+            Cell: ({ row }) =>
+              row?.original?.jobCount || row?.original?.jobCount === 0 ? (
+                <h5 className="text-truncate">{row?.original?.jobCount}</h5>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsLocation')
         ? [
-            {
-              accessor: 'currentGpsLocation',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
-              cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
-            }
-          ]
+          {
+            accessor: 'currentGpsLocation',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsLocation')?.fieldLabel || 'currentGpsLocation',
+            cell: ({ row }) => <GpsLocationCell value={row?.original?.currentGpsLocation} />
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')
         ? [
-            {
-              accessor: 'currentGpsWellNames',
-              Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
-              cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
-            }
-          ]
+          {
+            accessor: 'currentGpsWellNames',
+            Header: assetFields?.find((f) => f.fieldName === 'currentGpsWellNames')?.fieldLabel || 'currentGpsWellNames',
+            cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.currentGpsWellNames} />
+          }
+        ]
         : []),
       {
         accessor: 'productName',
@@ -217,29 +214,29 @@ const OnField = ({ rentalId, referenceFrom }) => {
       },
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-            {
-              accessor: 'wellNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
-              accessorFn: (original) => {
-                return isArray(original?.wellNumber)
-                  ? original?.wellNumber[0]?.optionLabel
-                  : isObject(original?.wellNumber)
-                    ? original?.wellNumber?.optionLabel
-                    : original?.wellNumber;
-              },
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'wellNumber',
-                    lookupResource: sidebarResource.wellNumber
-                  }}
-                  original={row?.original}
-                />
-              )
-            }
-          ]
+          {
+            accessor: 'wellNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+            accessorFn: (original) => {
+              return isArray(original?.wellNumber)
+                ? original?.wellNumber[0]?.optionLabel
+                : isObject(original?.wellNumber)
+                  ? original?.wellNumber?.optionLabel
+                  : original?.wellNumber;
+            },
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'wellNumber',
+                  lookupResource: sidebarResource.wellNumber
+                }}
+                original={row?.original}
+              />
+            )
+          }
+        ]
         : []),
       {
         accessor: 'manualStartDate',
@@ -292,13 +289,6 @@ const OnField = ({ rentalId, referenceFrom }) => {
           )
       }
     ];
-    if (user?.user?.brandPolicy?.rentalReceivingStepConsume) {
-      column.push({
-        accessor: 'consumeQty',
-        Header: 'Consumed Qty',
-        Cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
-      });
-    }
     setColumns(column);
   };
 

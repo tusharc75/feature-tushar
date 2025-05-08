@@ -631,13 +631,16 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
               {resource === sidebarResource.workOrder && <CustomTab value={0}>Header</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={1}>Services</CustomTab>}
-              {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={2}>Products/Consumables</CustomTab>}
-              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type)
-                && resourceData?.policy?.showBom && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
-                  <CustomTab value={3}>BOM</CustomTab>
-                )}
+              {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
+                <CustomTab value={2}>Products/Consumables</CustomTab>
+              )}
+              {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
+                resourceData?.policy?.showBom &&
+                workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>BOM</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
-              {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={5}>Views</CustomTab>}
+              {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
+                <CustomTab value={5}>Views</CustomTab>
+              )}
               {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
           </Grid>

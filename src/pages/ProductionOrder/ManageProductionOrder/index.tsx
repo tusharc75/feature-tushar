@@ -16,7 +16,8 @@ import {
   yupSchema,
   productionOrder,
   GenerateResourceLineNumber,
-  sidebarResource
+  sidebarResource,
+  PRODUCTION_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@mui/material/Dialog';
@@ -25,6 +26,7 @@ import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
@@ -47,12 +49,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Production Order');
-      fieldData = response?.data?.data;
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productionOrder);
       if (productionOrderId) {
         try {
           let data;
@@ -60,8 +57,8 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           data = response?.data?.data;
           setProductionOrderData(data);
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, productionOrderNumber, updatedBy, ...rest } = data;
-            rest.status = 'New';
+            const { productionOrderNumber, ...rest } = data;
+            rest.status = PRODUCTION_ORDER_STATUS.new;
             rest.productionOrderNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(productionOrderNumber);
             setInitialData({
@@ -72,7 +69,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

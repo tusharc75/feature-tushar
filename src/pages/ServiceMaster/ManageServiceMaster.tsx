@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, serviceMaster } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -19,6 +19,7 @@ import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageServiceMaster = ({
   isClone = false,
@@ -51,56 +52,55 @@ const ManageServiceMaster = ({
   }, [initialData]);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${serviceMaster.resource}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (serviceMasterId) {
-          axiosInstance()
-            .get(`${serviceMaster.api}/` + serviceMasterId)
-            .then(({ data: { data } }) => {
-              setServiceMasterManage(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, serviceMaster, ...rest } = data;
-                rest['status'] = 'New';
-                rest['serviceName'] = '';
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (referenceData?.serviceType) {
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'serviceType') {
-                createValues.serviceType = referenceData?.serviceType;
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+    fetchFields();
+  }, [serviceMasterId]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.serviceMaster);
+
+      if (serviceMasterId) {
+        axiosInstance()
+          .get(`${serviceMaster.api}/` + serviceMasterId)
+          .then(({ data: { data } }) => {
+            setServiceMasterManage(data);
+            if (isClone) {
+              const { serviceName, ...rest } = data;
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData?.serviceType) {
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'serviceType') {
+              createValues.serviceType = referenceData?.serviceType;
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
           });
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [serviceMasterId]);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setLoading(true);

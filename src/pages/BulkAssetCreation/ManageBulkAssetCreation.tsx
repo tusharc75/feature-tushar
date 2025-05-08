@@ -17,6 +17,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, onClose, onSuccess, referenceId = null, refrenceData = null }) => {
   const history = useHistory();
@@ -32,73 +33,75 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
   const [cloneHeading, setCloneHeading] = useState('head');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Bulk Asset Creation')
-      .then(({ data: { data } }) => {
-        data = data?.filter((obj) => !['rentalJob'].includes(obj?.fieldData?.fieldName));
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (bulkAssetCreationId) {
-          axiosInstance()
-            .get(`${bulkAssetCreation.api}/` + bulkAssetCreationId)
-            .then(({ data: { data } }) => {
-              setBulkAssetCreationData(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, serialNumber, baNumber, ...rest } = data;
-                rest['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                rest['status'] = 'New';
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-                setCloneHeading(baNumber);
-                setLoading(false);
-              } else {
-                if (data?.canEdit === false) {
-                  fieldsDataForUpdate?.forEach((e) => {
-                    if (['warehouse', 'supplierAccount']?.includes(e?.fieldName)) {
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource, ['rentalJob']);
+
+      if (bulkAssetCreationId) {
+        axiosInstance()
+          .get(`${bulkAssetCreation.api}/` + bulkAssetCreationId)
+          .then(({ data: { data } }) => {
+            setBulkAssetCreationData(data);
+            if (isClone) {
+              const { baNumber, ...rest } = data;
+              rest['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              rest['status'] = 'New';
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+              setCloneHeading(baNumber);
+              setLoading(false);
+            } else {
+              if (data?.canEdit === false) {
+                fieldsDataForUpdate?.forEach((e) => {
+                  if (['warehouse', 'supplierAccount']?.includes(e?.fieldName)) {
+                    e.isUneditable = true;
+                  }
                 });
               }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
-            createValues['currency'] = user.user?.brandCurrency;
-          }
-          createValues['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (refrenceData) {
-            createValues['rentalJob'] = referenceId;
-            createValues['warehouse'] = refrenceData?.warehouse;
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
-              createValues['wellName'] = refrenceData?.wellName;
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
             }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && refrenceData?.wellNumber) {
-              createValues['wellNumber'] = refrenceData?.wellNumber;
-            }
-            if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
-              createValues['afeNumber'] = refrenceData?.afeNumber;
-            }
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
+          createValues['currency'] = user.user?.brandCurrency;
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        createValues['baNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (refrenceData) {
+          createValues['rentalJob'] = referenceId;
+          createValues['warehouse'] = refrenceData?.warehouse;
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
+            createValues['wellName'] = refrenceData?.wellName;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'wellNumber') && refrenceData?.wellNumber) {
+            createValues['wellNumber'] = refrenceData?.wellNumber;
+          }
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'afeNumber')) {
+            createValues['afeNumber'] = refrenceData?.afeNumber;
+          }
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+
+  useEffect(() => {
+    fetchFields();
   }, [bulkAssetCreationId]);
 
   const handleSubmit = (values) => {

@@ -10,7 +10,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, productAuction, GenerateResourceLineNumber } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -18,6 +18,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -34,51 +35,51 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${productAuction.resource}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (productAuctionId) {
-          axiosInstance()
-            .get(`${productAuction.api}/` + productAuctionId)
-            .then(({ data: { data } }) => {
-              setProductAuctionData(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, productAuction, ...rest } = data;
-                rest['status'] = 'New';
-                rest['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-                setLoading(false);
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
-            createValues['currency'] = user.user?.brandCurrency;
-          }
-          createValues['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
-          });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [productAuctionId]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.productAuction);
+      if (productAuctionId) {
+        axiosInstance()
+          .get(`${productAuction.api}/` + productAuctionId)
+          .then(({ data: { data } }) => {
+            setProductAuctionData(data);
+            if (isClone) {
+              const { productAuction, ...rest } = data;
+              rest['status'] = 'New';
+              rest['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+              setLoading(false);
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          createValues['currency'] = user.user?.brandCurrency;
+        }
+        createValues['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setLoading(true);

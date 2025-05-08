@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -29,6 +29,9 @@ import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CreateProjectSales from 'src/pages/ProjectSales/CreateProjectSales';
 import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 
 function PlanningView() {
   const {
@@ -49,6 +52,9 @@ function PlanningView() {
 
   const [view, setView] = useState('calendar');
   const [createDialog, setCreateDialog] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const [resourcePolicy, setResourcePolicy] = useState(null);
+
   const ref: any = useRef();
 
   const PLANNING_RESOURCE = [
@@ -186,8 +192,21 @@ function PlanningView() {
       fieldName: 'assemblyOrderNumber',
       start: 'createDate',
       end: 'estimateCompleteDate'
+    },
+    {
+      key: 'subcontractAssembly',
+      resource: sidebarResource.subcontractAssembly,
+      title: resources?.subcontractAssembly?.titlePlural,
+      path: routes.subcontractAssemblyDetail.path,
+      fieldName: 'subcontractAssemblyNumber',
+      start: 'createDate',
+      end: 'expectedDeliveryDate'
     }
   ];
+
+  useEffect(() => {
+    fetchPolicy()
+  }, []);
 
   useEffect(() => {
     const options: any = [];
@@ -210,6 +229,19 @@ function PlanningView() {
     if (ref?.current) {
       ref?.current?.fetchData();
       setCreateDialog(false);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.planningView}`);
+      if (data) {
+        setResourcePolicy(data?.policy);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -280,6 +312,7 @@ function PlanningView() {
               setSelectedResource={setSelectedResource}
               setQueryString={setQueryString}
               ref={ref}
+              resourcePolicy={resourcePolicy}
             />
           )}
           {view === 'list' && (
@@ -425,6 +458,16 @@ function PlanningView() {
         <ManageAssemblyOrder
           isClone={false}
           assemblyOrderId={null}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => {
+            onClickRefreshIcon();
+          }}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {createDialog && selectedResource?.resource === sidebarResource?.subcontractAssembly && (
+        <ManageSubcontractAssembly
+          isClone={false}
           onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();

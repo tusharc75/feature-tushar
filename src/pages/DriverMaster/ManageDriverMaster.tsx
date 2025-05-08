@@ -17,6 +17,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -37,11 +38,7 @@ const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, re
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.driverMaster}`);
-      data = response?.data?.data;
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.driverMaster);
 
       if (id) {
         axiosInstance()
@@ -57,7 +54,7 @@ const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, re
             }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)
             });
           })
           .catch((error) => {
@@ -143,13 +140,12 @@ const ManageDriverMaster = ({ onClose, onSuccess, isClone = false, id = null, re
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
+                title={`${id
                     ? isClone
                       ? `Clone - ${cloneHeading}`
                       : `Update ${initialData.values?.driverName ? `(${initialData.values?.driverName})` : ''}`
                     : `Create ${resources?.driverMaster?.titleSingular}`
-                }`}
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

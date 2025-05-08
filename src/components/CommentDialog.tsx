@@ -71,10 +71,11 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
           id={'dialog-submit-button'}
           buttonType='theme'
           onClick={() => {
-            if (comment?.trim()) {
-              handleSubmit(comment?.trim());
-            } else {
+            if (required && !comment?.trim()) {
               setError('Comment is required');
+            }
+            else {
+              handleSubmit(comment?.trim());
             }
           }}
         >

@@ -80,12 +80,11 @@ const VirtualSwipableList = ({
               }
 
               return (
-                <div key={row.original._id} className="pb-2">
+                <div key={row.key} className="pb-2">
                   <div
                     className={`rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                       backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
                     } ${typeof onRowClick === 'function' ? 'focus:outline-0 focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)]' : ''}`}
-                    key={row.original._id}
                     style={{
                       border: '1px solid var(--common-border-color)',
                       cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
@@ -143,10 +142,10 @@ const VirtualSwipableList = ({
                                 size="small"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleCollapse(row.original._id);
+                                  handleCollapse(row.id);
                                 }}
                               >
-                                {compareCollapse(row.original._id) ? <BsChevronExpand /> : <BsChevronContract />}
+                                {compareCollapse(row.id) ? <BsChevronExpand /> : <BsChevronContract />}
                               </IconButton>
                             )}
                           </div>
@@ -173,7 +172,7 @@ const VirtualSwipableList = ({
                           );
                         })}
                       </div>
-                      <Collapse in={compareCollapse(row.original._id)} unmountOnExit>
+                      <Collapse in={compareCollapse(row.id)} unmountOnExit>
                         <div className="grid w-full gap-2">
                           {collapsibleFields.map((field) => {
                             return (
