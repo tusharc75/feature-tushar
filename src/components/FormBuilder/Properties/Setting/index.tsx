@@ -582,7 +582,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     color="primary"
                   />
                 }
-                label="Allow Minus Value"
+                label="Allow Negative Value"
               />
             )}
           </Grid>
