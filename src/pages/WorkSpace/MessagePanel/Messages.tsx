@@ -225,7 +225,7 @@ const Messages = ({
             ))}
           </ul>
         ) : !channelId ? (
-          <div className={'absolute inset-2 flex select-none items-center justify-center text-gray-500'}>Start Conversession</div>
+          <div className={'absolute inset-2 flex select-none items-center justify-center text-gray-500'}>Start Conversation</div>
         ) : (
           <div className="p-3">
             <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
@@ -255,15 +255,16 @@ const Messages = ({
         handleEdit={handleEdit}
         socket={socket}
       />
-      <Thread
-        state={state}
-        message={threadDialogOpen.message}
-        open={threadDialogOpen.open}
-        onClose={() => setThreadDialogOpen({ open: false, message: null })}
-        socket={socket}
-        channelId={channelId}
-        channelData={channelData}
-      />
+      {threadDialogOpen.open &&
+        <Thread
+          state={state}
+          message={threadDialogOpen.message}
+          open={threadDialogOpen.open}
+          onClose={() => setThreadDialogOpen({ open: false, message: null })}
+          socket={socket}
+          channelId={channelId}
+          channelData={channelData}
+        />}
     </>
   );
 };
@@ -502,21 +503,19 @@ export const DisplaySingleMessage = ({
                                       <IconButton
                                         size={'small'}
                                         onClick={() => downloadFile(attachment.url)}
-                                        style={{ paddingBottom: 3, width: 30, height: 30 }}
                                       >
-                                        {<GetApp />}
+                                        <GetApp fontSize='small' color='primary' />
                                       </IconButton>
                                     </HtmlTooltip>
                                     {message?.user?.optionValue === user?._id && (
-                                      <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
+                                      <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                                         <IconButton
                                           size={'small'}
                                           onClick={() => {
                                             setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id });
                                           }}
-                                          style={{ paddingBottom: 3, width: 30, height: 30 }}
                                         >
-                                          {<Delete color="error" />}
+                                          <Delete color="error" fontSize='small' />
                                         </IconButton>
                                       </HtmlTooltip>
                                     )}
@@ -600,21 +599,8 @@ export const DisplaySingleMessage = ({
                     open={Boolean(emojiPanleAnchor)}
                     anchorEl={emojiPanleAnchor}
                     disablePortal={true}
-                    modifiers={{
-                      flip: {
-                        enabled: true
-                      },
-                      preventOverflow: {
-                        enabled: true,
-                        boundariesElement: 'scrollParent'
-                      },
-                      arrow: {
-                        enabled: true
-                      }
-                    }}
                   >
                     <EmojiPicker
-                      theme={theme}
                       open={Boolean(emojiPanleAnchor)}
                       lazyLoadEmojis
                       className=" z-[10]"
