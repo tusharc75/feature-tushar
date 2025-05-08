@@ -988,7 +988,6 @@ const FormTypes = (props) => {
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
-            inputLabel: { shrink: !!values[name] },
             input: {
               inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
               readOnly: fieldData?.isUneditable ? true : false
