@@ -764,6 +764,12 @@ const routes = {
   },
   schedulingMaintenance: {
     path: '/scheduling-maintenance'
+  },
+  customerAccountsAndServicesDataMapping: {
+    path: '/customer-accounts-and-services-data-mapping'
+  },
+  customerAccountsAndProductsDataMapping: {
+    path: '/customer-accounts-and-products-data-mapping'
   }
 };
 
