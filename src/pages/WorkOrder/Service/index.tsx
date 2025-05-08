@@ -923,7 +923,7 @@ const Service = ({
                 }}
                 disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true} 
               >
-                Properties
+                Properties 
               </MenuItem>
               {resource === sidebarResource.workOrder && (
                 <MenuItem
