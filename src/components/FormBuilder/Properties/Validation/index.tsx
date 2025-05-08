@@ -2,8 +2,8 @@ import { Box, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography
 import { MoreHoriz, Settings } from '@mui/icons-material';
 import { useState } from 'react';
 import { OPERATOR } from 'src/components/FormBuilder/helper';
-import ValidationDialog from 'src/components/FormBuilder/Properties/Validation/ValidationDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ValidationDialog from './ValidationDialog';
 
 const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
   const [anchorElSetting, setAnchorElSetting] = useState(null);
