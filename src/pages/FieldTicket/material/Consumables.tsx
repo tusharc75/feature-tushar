@@ -36,7 +36,7 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
-import { camelCase } from 'lodash';
+import { camelCase, orderBy } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -235,20 +235,20 @@ const Consumables = ({
       ...newColumns,
       ...(!resourcePolicy?.hideInventoryConsume
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          },
-          {
-            accessor: 'consumedQty',
-            Header: 'Consumed Qty',
-            primaryField: true,
-            width: 150,
-            cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            },
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       {
         accessor: 'action',
@@ -356,7 +356,7 @@ const Consumables = ({
         parent.serviceId = parent?.service?.optionValue;
         parent.service = parent?.service?.optionLabel;
       });
-      dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
+      dispatch({ type: 'initialize', data: orderBy(consumables, ['order']) || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
       dispatch({ type: 'loading', loading: false });
@@ -809,7 +809,10 @@ const Consumables = ({
                   hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
                   resource={sidebarResource.fieldTicket}
-                  arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
+                  arrangeRowField={{
+                    keys: [{ key: 'material', materialKey: '_id', filterType: [MATERIAL_TYPE.product] }],
+                    _id: fieldTicketData?._id
+                  }}
                 />
               ) : (
                 <Box p={2} height={300}>

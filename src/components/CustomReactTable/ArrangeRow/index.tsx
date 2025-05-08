@@ -12,24 +12,39 @@ const ArrangeRow = ({ state, arrangeRowField, resource, refreshGrid }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSuccess = async (_data) => {
-    const { key, materialKey, _id, ...rest } = arrangeRowField;
-    setLoading(true);
-    await axiosInstance().put(`/dynamic-form/arrange-rows/${_id}`,
-      { key, _ids: _data?.map((r) => r?.[materialKey]), ...rest },
-      {
-        headers: {
-          Resource: resource
-        }
-      }
-    ).then(() => {
-      refreshGrid();
-      setLoading(false);
-      setOpen(false);
-    }).catch((err) => {
-      setLoading(false);
-      setOpen(false);
-      toastConfig.setToastConfig(err);
+    const { keys, _id, ...rest } = arrangeRowField;
+    const data: any = [];
+    keys?.forEach((ele) => {
+      data.push({
+        key: ele?.key,
+        materialKey: ele?.materialKey,
+        data: _data
+          ?.filter((d) => ele?.filterType?.includes(d?.type))
+          ?.map((d) => ({ _id: d?.[ele?.materialKey], order: _data?.findIndex((_d) => _d?.[ele?.materialKey] === d?.[ele?.materialKey]) }))
+      });
     });
+
+    setLoading(true);
+    await axiosInstance()
+      .put(
+        `/dynamic-form/arrange-rows/${_id}`,
+        { data, ...rest },
+        {
+          headers: {
+            Resource: resource
+          }
+        }
+      )
+      .then(() => {
+        refreshGrid();
+        setLoading(false);
+        setOpen(false);
+      })
+      .catch((err) => {
+        setLoading(false);
+        setOpen(false);
+        toastConfig.setToastConfig(err);
+      });
   };
 
   return (
