@@ -6,7 +6,8 @@ import { cn } from 'src/constants/helpers';
 import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
 import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
-import { DisplaySingleMessage, MoreMenuAndDeleteConfirmDialog } from './Messages';
+import { MoreMenuAndDeleteConfirmDialog } from './Messages';
+import { DisplaySingleMessage } from 'src/pages/WorkSpace/MessagePanel/DisplaySingleMessage';
 
 const Thread = ({ message, onClose, socket, channelId, open, channelData, state }) => {
   const [messages, setMessages] = useState(null);
