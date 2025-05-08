@@ -5,7 +5,7 @@ import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, dayjsLocalizer } from 'react-big-calendar';
+import { Event, View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -30,7 +30,6 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-
 const localizer = dayjsLocalizer(dayjs);
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
@@ -42,57 +41,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.warehouse?.isRead
         ? [
-          {
-            label: resources?.warehouse?.titlePlural,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+            {
+              label: resources?.warehouse?.titlePlural,
+              value: 'Warehouse',
+              key: 'warehouse'
+            }
+          ]
         : []),
       ...(permissions?.product?.isRead
         ? [
-          {
-            label: resources?.product?.titlePlural,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+            {
+              label: resources?.product?.titlePlural,
+              value: 'Product',
+              key: 'product'
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            label: resources?.serializedAsset?.titlePlural,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+            {
+              label: resources?.serializedAsset?.titlePlural,
+              value: 'Serialized Asset',
+              key: 'asset'
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            label: resources?.serviceMaster?.titlePlural,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+            {
+              label: resources?.serviceMaster?.titlePlural,
+              value: 'Service Master',
+              key: 'service'
+            }
+          ]
         : []),
       ...(permissions?.customerAccount?.isRead
         ? [
-          {
-            label: resources?.customerAccount?.titlePlural,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+            {
+              label: resources?.customerAccount?.titlePlural,
+              value: 'Customer Account',
+              key: 'customerAccount'
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            label: resources?.competencies?.titlePlural,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+            {
+              label: resources?.competencies?.titlePlural,
+              value: 'Competencies',
+              key: 'competencies'
+            }
+          ]
         : [])
     ],
     [
@@ -122,7 +121,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
     return data;
   };
-
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -176,12 +174,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       },
       ...(resources?.padMaster
         ? [
-          {
-            label: resources?.padMaster?.titlePlural,
-            value: 'Pad Master',
-            key: 'padMaster'
-          }
-        ]
+            {
+              label: resources?.padMaster?.titlePlural,
+              value: 'Pad Master',
+              key: 'padMaster'
+            }
+          ]
         : [])
     ],
     [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
@@ -559,49 +557,52 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   };
 
-  const handleClick = (data, target) => {
-    if (selectedResource.resource === sidebarResource.product) {
-      if (data?.type === 'assetStatus') {
-        let query = `?assetStatus=${data?.status}`;
-        if (selectedLookUpResourceData?.product) {
-          query += `&product=${encodeURIComponent(
-            JSON.stringify(
-              selectedLookUpResourceData?.product?.map((e) => {
-                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
-              })
-            )
-          )}`;
+  const handleClick = useCallback(
+    (data, target) => {
+      if (selectedResource.resource === sidebarResource.product) {
+        if (data?.type === 'assetStatus') {
+          let query = `?assetStatus=${data?.status}`;
+          if (selectedLookUpResourceData?.product) {
+            query += `&product=${encodeURIComponent(
+              JSON.stringify(
+                selectedLookUpResourceData?.product?.map((e) => {
+                  return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+                })
+              )
+            )}`;
+          }
+          if (selectedLookUpResourceData?.warehouse) {
+            query += `&warehouse=${encodeURIComponent(
+              JSON.stringify(
+                selectedLookUpResourceData?.warehouse?.map((e) => {
+                  return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
+                })
+              )
+            )}`;
+          }
+          window.open(`${routes.serializedAsset.path}${query}`);
+        } else if (data?.type === 'availableByPlanning') {
+        } else if (data?.type) {
+          setAnchor(target.target);
+          const newData: OnSelectDataType[] = data.data;
+          setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
         }
-        if (selectedLookUpResourceData?.warehouse) {
-          query += `&warehouse=${encodeURIComponent(
-            JSON.stringify(
-              selectedLookUpResourceData?.warehouse?.map((e) => {
-                return { optionLabel: e?.optionLabel, optionValue: e?.optionValue };
-              })
-            )
-          )}`;
+      } else if (selectedResource.resource === sidebarResource.employeeMaster) {
+        if (data?.referenceType === sidebarResource.fieldTicket) {
+          window.open(`${routes.fieldTicketDetail.path}/${data?.referenceId}`);
+        } else if (data?.referenceType === sidebarResource.fieldServiceOrder) {
+          window.open(`${routes.fieldServiceOrderDetail.path}/${data?.referenceId}`);
+        } else if (data?.referenceType === sidebarResource.rentalManagement) {
+          window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
+        } else if (data?.referenceType === sidebarResource.workOrder) {
+          window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
         }
-        window.open(`${routes.serializedAsset.path}${query}`);
-      } else if (data?.type === 'availableByPlanning') {
-      } else if (data?.type) {
-        setAnchor(target.target);
-        const newData: OnSelectDataType[] = data.data;
-        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
+      } else {
+        setShowDetail({ open: true, data: data, anchor: target });
       }
-    } else if (selectedResource.resource === sidebarResource.employeeMaster) {
-      if (data?.referenceType === sidebarResource.fieldTicket) {
-        window.open(`${routes.fieldTicketDetail.path}/${data?.referenceId}`);
-      } else if (data?.referenceType === sidebarResource.fieldServiceOrder) {
-        window.open(`${routes.fieldServiceOrderDetail.path}/${data?.referenceId}`);
-      } else if (data?.referenceType === sidebarResource.rentalManagement) {
-        window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
-      } else if (data?.referenceType === sidebarResource.workOrder) {
-        window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
-      }
-    } else {
-      setShowDetail({ open: true, data: data, anchor: target });
-    }
-  };
+    },
+    [mapObjectToList, selectedLookUpResourceData?.product, selectedLookUpResourceData?.warehouse, selectedResource?.resource]
+  );
 
   useEffect(() => {
     if (view === 'agenda') {
@@ -712,7 +713,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         }
       }
 
-      if ((obj?.customerAccount || obj?.supplierAccount) && ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)) {
+      if (
+        (obj?.customerAccount || obj?.supplierAccount) &&
+        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
+      ) {
         const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
         if (assignedColor) {
           backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
@@ -751,6 +755,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
     }
   }, [selectedResource]);
+
+  const dragAndDropOnSelectEvent = useCallback((data: any, event: any) => {
+    setShowDetail({ open: true, data: data, anchor: event });
+  }, []);
 
   return (
     <>
@@ -812,7 +820,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   />
                 );
               })}
-            {selectedResource?.resource === sidebarResource.product && !isEmpty(selectedLookUpResourceData) &&
+            {selectedResource?.resource === sidebarResource.product &&
+              !isEmpty(selectedLookUpResourceData) &&
               selectedLookUpResourceData['product'] &&
               selectedLookUpResourceData['product']?.length > 0 && (
                 <Box mt={0.5}>
@@ -866,12 +875,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 onView={setView}
                 view={view}
                 eventPropGetter={setEventStyle}
-                onNavigate={(date) => {
-                  onNavigate(date);
-                }}
-                onSelectEvent={(data: any, event: any) => {
-                  setShowDetail({ open: true, data: data, anchor: event });
-                }}
+                onNavigate={onNavigate}
+                onSelectEvent={dragAndDropOnSelectEvent}
               />
             </>
           ) : (
@@ -891,12 +896,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 onView={setView}
                 view={view}
                 eventPropGetter={setEventStyle}
-                onNavigate={(date) => {
-                  onNavigate(date);
-                }}
-                onSelectEvent={(data: any, event: any) => {
-                  handleClick(data, event);
-                }}
+                onNavigate={onNavigate}
+                onSelectEvent={handleClick}
               />
             </div>
           )}
