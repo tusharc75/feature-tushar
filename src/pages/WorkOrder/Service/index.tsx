@@ -921,7 +921,7 @@ const Service = ({
                   setOpenProperties(true);
                   setAnchorEl(null);
                 }}
-                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
+                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true} 
               >
                 Properties
               </MenuItem>
