@@ -40,7 +40,7 @@ const ShowMorePopup = React.memo(
             e.stopPropagation();
             e.preventDefault();
           }}
-          className="pointer-events-auto w-full text-[white]"
+          className="pointer-events-auto w-full bg-[#32324f] text-[white]"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
