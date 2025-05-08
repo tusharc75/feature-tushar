@@ -977,6 +977,8 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
+          type='number'
+          onKeyDown={(e) => (fieldData?.isAllowedMinus ? ['e', 'E', '+'] : ['e', 'E', '+', '-']).includes(e.key) && e.preventDefault()}
           label={getLabel(label)}
           name={name}
           required={required}
@@ -986,16 +988,9 @@ const FormTypes = (props) => {
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
-            inputLabel: { shrink: !!values[name] },
             input: {
-              inputComponent: CustomFormat as any,
-              inputProps: {
-                allowNegative: false,
-                onValueChange: (values) => {
-                  handleChange(name, values.value);
-                },
-                selectedCurrencyCode: selectedCurrencyCode
-              }
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
+              readOnly: fieldData?.isUneditable ? true : false
             }
           }}
         />
@@ -1020,7 +1015,6 @@ const FormTypes = (props) => {
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
             input: {
-              inputComponent: CustomFormat as any,
               inputProps: {
                 allowNegative: false,
                 onValueChange: (values) => {
@@ -1028,9 +1022,7 @@ const FormTypes = (props) => {
                 },
                 selectedCurrencyCode: selectedCurrencyCode
               },
-              startAdornment: startAdornment ? (
-                startAdornment
-              ) : (
+              startAdornment: startAdornment ? (startAdornment) : (
                 <InputAdornment position="start">
                   {result(
                     find(getUniqueCurrencies(), function (obj) {
@@ -1863,7 +1855,7 @@ const FormTypes = (props) => {
           {...rest}
           variant="outlined"
           type="number"
-          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+          onKeyDown={(e) => (fieldData?.isAllowedMinus ? ['e', 'E', '+'] : ['e', 'E', '+', '-']).includes(e.key) && e.preventDefault()}
           label={label}
           required={required}
           name={name}
@@ -1880,7 +1872,7 @@ const FormTypes = (props) => {
           }
           slotProps={{
             input: {
-              inputProps: { min: 0 },
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
               readOnly: fieldData && fieldData?.isUneditable ? true : false
             }
           }}

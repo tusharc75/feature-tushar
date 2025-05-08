@@ -125,18 +125,11 @@
 }
 
 .rbc-show-more {
-  background-color: #32324f;
-  color: white;
   margin-inline: auto;
   margin-block: 2px;
   width: calc(100% - 10px);
   border-radius: 5px;
-  [data-mode='dark'] & {
-    background-color: #32324f;
-  }
-  &:is(:hover, :focus) {
-    color: white;
-  }
+  pointer-events: none;
 }
 .rbc-ellipsis,
 .rbc-event-label,

@@ -1,10 +1,18 @@
-import { Box, Dialog, IconButton } from '@mui/material';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import CloseIcon from '@mui/icons-material/Close';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MailIcon from '@mui/icons-material/Mail';
+import { Box, Dialog, IconButton } from '@mui/material';
+import { isEmpty, isObject } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
-import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import { isMobile, isTablet } from 'react-device-detect';
+import { HistoryIcon, getCollaborateIconBasedOnName } from 'src/assets/svg/CollaborateSidebar';
+import { CollaborateIcon } from 'src/assets/svg/svgIcons';
+import Collaborate from 'src/components/Activity/Collaborate';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import HtmlTooltip from '../CustomTooltipTitle';
 import { useData } from './../../StateProvider/Provider';
 import axiosInstance from './../../axios/axiosInstance';
 import { ACTIVITY_RESOURCE, CustomDialogTransition } from './../../constants/helpers';
@@ -22,14 +30,6 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
-import CloseIcon from '@mui/icons-material/Close';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import MailIcon from '@mui/icons-material/Mail';
-import { isEmpty, isObject } from 'lodash';
-import { CollaborateIcon } from 'src/assets/svg/svgIcons';
-import HtmlTooltip from '../CustomTooltipTitle';
-import { HistoryIcon, IconEventMap } from 'src/assets/svg/CollaborateSidebar';
-import Collaborate from 'src/components/Activity/Collaborate';
 
 const Activity = (props) => {
   const {
@@ -220,7 +220,7 @@ const Activity = (props) => {
                     className="flex cursor-pointer items-center gap-3 rounded-[10px] px-[20px] py-[9px] shadow-lg [border:1px_solid_var(--common-border-color)]"
                     onClick={(event) => handleChangeType(event, data)}
                   >
-                    <div className="icon-container max-w-[25px] [&_svg]:block">{IconEventMap[data]}</div>
+                    <div className="icon-container max-w-[25px] [&_svg]:block">{getCollaborateIconBasedOnName(data)}</div>
                     <div className="text-container flex flex-grow">
                       <h6 className={`flex w-full items-center text-[16px] font-semibold leading-[19px] text-[var(--dark-primary-text,#2A3042)]`}>
                         {data}
