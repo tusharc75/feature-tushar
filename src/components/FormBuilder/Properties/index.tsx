@@ -211,6 +211,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.addBulkOptions = values.addBulkOptions;
+            ele.isAllowedMinus = values.isAllowedMinus;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
