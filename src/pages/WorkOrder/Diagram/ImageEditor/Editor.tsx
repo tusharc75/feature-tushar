@@ -50,7 +50,6 @@ const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, ma
         setStore({ newTextPosition: pos.originPosition });
       });
       imageEditor.on('click', (...args) => {
-        console.log({ ...args });
       });
       imageEditor.on('objectActivated', (obj) => {
         if (!obj) {
