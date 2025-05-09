@@ -42,12 +42,11 @@ const buttonMaps = [
     icon: <LuShapes size={24} />,
     text: 'Shape'
   },
-  //! Need to implement
-  // {
-  //   type: 'icon',
-  //   icon: <GradeOutlined />,
-  //   text: 'Icon'
-  // },
+  {
+    type: 'icon',
+    icon: <GradeOutlined />,
+    text: 'Icon'
+  },
   {
     type: 'text',
     icon: <PiTextAa size={22} />,

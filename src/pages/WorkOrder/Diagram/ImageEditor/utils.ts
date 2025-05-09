@@ -61,3 +61,32 @@ export const isValidHexColor = (color: string): boolean => {
   const hexColorRegex = /^#([A-Fa-f0-9]{6})$/;
   return hexColorRegex.test(color);
 };
+
+export function polygonToPath(polygonString: string, width: number = 50, height: number = 50): string {
+  const points = polygonString
+    .trim()
+    .split(/\s+|,/)
+    .map((val, i) => {
+      // Convert percentage values to absolute pixel values
+      if (val.includes('%')) {
+        const num = parseFloat(val) / 100;
+        return i % 2 === 0 ? num * width : num * height;
+      }
+      return parseFloat(val);
+    });
+
+  if (points.length < 4) {
+    throw new Error('Invalid polygon input. At least two points required.');
+  }
+  const [x0, y0, ...restPoints] = points;
+  let pathData = `M${x0},${y0} L${restPoints.join(' ')}`;
+  return pathData + ' Z'; // Close the shape
+}
+
+export function scalePath(pathData: string, widthFactor: number, heightFactor: number): string {
+  return pathData.replace(/(-?\d+(\.\d+)?)/g, (match, num) => {
+    const value = parseFloat(num);
+    const isXCoordinate = pathData.indexOf(match) % 2 === 0; // Assume alternating x/y pairs
+    return (isXCoordinate ? value * widthFactor : value * heightFactor).toString();
+  });
+}
