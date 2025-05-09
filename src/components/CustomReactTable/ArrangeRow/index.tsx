@@ -17,10 +17,9 @@ const ArrangeRow = ({ state, arrangeRowField, resource, refreshGrid }) => {
     keys?.forEach((ele) => {
       data.push({
         key: ele?.key,
-        materialKey: ele?.materialKey,
         data: _data
           ?.filter((d) => ele?.filterType?.includes(d?.type))
-          ?.map((d) => ({ _id: d?.[ele?.materialKey], order: _data?.findIndex((_d) => _d?.[ele?.materialKey] === d?.[ele?.materialKey]) }))
+          ?.map((d) => ({ _id: d?._id, order: _data?.findIndex((_d) => _d?._id === d?._id) }))
       });
     });
 

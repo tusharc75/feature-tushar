@@ -482,7 +482,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             expander={true}
             resource={sidebarResource.assemblyOrder}
             arrangeRowField={{
-              keys: [{ key: 'material', materialKey: '_id', filterType: [MATERIAL_TYPE.package] }],
+              keys: [{ key: 'material', filterType: [MATERIAL_TYPE.package] }],
               _id: assemblyOrderData?._id
             }}
           />

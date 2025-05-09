@@ -1080,8 +1080,8 @@ const Material = ({
             resource={sidebarResource.fieldTicket}
             arrangeRowField={{
               keys: [
-                { key: 'material', materialKey: '_id', filterType: [MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset] },
-                { key: 'cost', materialKey: '_id', filterType: [MATERIAL_TYPE.manualEntry] }
+                { key: 'material', filterType: [MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset] },
+                { key: 'cost', filterType: [MATERIAL_TYPE.manualEntry] }
               ],
               _id: fieldTicketData?._id
             }}

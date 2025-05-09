@@ -901,8 +901,8 @@ const Productpackage = ({
             resource={sidebarResource.quotation}
             arrangeRowField={{
               keys: [
-                { key: 'material', materialKey: '_id', filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package] },
-                { key: 'additionalCost', materialKey: '_id', filterType: [MATERIAL_TYPE.manualEntry] }
+                { key: 'material', filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package] },
+                { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
               ],
               _id: versionId,
               quotation: quotationData?._id

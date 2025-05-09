@@ -810,7 +810,7 @@ const Consumables = ({
                   refreshGrid={fetchData}
                   resource={sidebarResource.fieldTicket}
                   arrangeRowField={{
-                    keys: [{ key: 'material', materialKey: '_id', filterType: [MATERIAL_TYPE.product] }],
+                    keys: [{ key: 'material', filterType: [MATERIAL_TYPE.product] }],
                     _id: fieldTicketData?._id
                   }}
                 />
