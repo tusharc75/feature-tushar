@@ -30,10 +30,10 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
 
   const columns = [
     {
-      accessor: 'resourceLabel',
+      accessor: 'resourceBrandLabel',
       Header: 'Resource',
       Cell: ({ row }) => {
-        return row.original['resourceLabel'] ? <p className="text-truncate">{row.original.resourceLabel}</p> : <NoDataCell />;
+        return row.original['resourceBrandLabel'] ? <p className="text-truncate">{row.original.resourceBrandLabel}</p> : <NoDataCell />;
       }
     },
     {
@@ -155,7 +155,7 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
       let rows = tabValue === 0 ? data['palnning'] : tabValue === 1 ? data['incoming'] : [];
       rows = rows.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.resourceLabel = resources?.[camelCase(u?.resource)]?.titleSingular || u?.resource;
+        finalObject.resourceBrandLabel = resources?.[camelCase(u?.resource)]?.titleSingular || u?.resource;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
