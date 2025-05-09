@@ -14,69 +14,77 @@ import { LuOctagon } from 'react-icons/lu';
 import RippleButton from 'src/components/RippleButton';
 import { subMenuButtonClassname, subMenuHelperTextClassName, SubmenuItemProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
 import ColorPicker from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/ColorPicker';
-import { getIconPath, scalePath } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
+import { scalePath } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
 
 const shapeMap = {
   // arrow
   arrow1: {
     icon: <EastSharp />,
-    path: scalePath('m15 5-1.41 1.41L18.17 11H2v2h16.17l-4.59 4.59L15 19l7-7z', 40, 40),
+    path: scalePath('m15 5-1.41 1.41L18.17 11H2v2h16.17l-4.59 4.59L15 19l7-7z', 8, 8),
     label: 'Arrow',
     name: 'arrow1'
   },
   arrow2: {
     icon: <ArrowRightAltSharp />,
-    path: scalePath('M16.01 11H4v2h12.01v3L20 12l-3.99-4z', 40, 40),
+    path: scalePath('M16.01 11H4v2h12.01v3L20 12l-3.99-4z', 8, 8),
     label: 'Arrow-2',
     name: 'arrow2'
   },
   arrow3: {
     icon: <ArrowForwardIosSharp />,
-    path: scalePath('M6.23 20.23 8 22l10-10L8 2 6.23 3.77 14.46 12z', 40, 40),
+    path: scalePath('M6.23 20.23 8 22l10-10L8 2 6.23 3.77 14.46 12z', 5, 5),
     label: 'Arrow-3',
     name: 'arrow3'
   },
   horizontalLine: {
     icon: <HorizontalRuleSharp />,
-    path: scalePath('M4 11h16v2H4z', 40, 40),
+    path: scalePath('M4 11h16v2H4z', 8, 8),
     label: 'Line',
     name: 'horizontalLine'
   },
   // star
   star: {
     icon: <IoIosStarOutline />,
-    path: 'M463 192H315.9L271.2 58.6C269 52.1 262.9 48 256 48s-13 4.1-15.2 10.6L196.1 192H48c-8.8 0-16 7.2-16 16 0 .9.1 1.9.3 2.7.2 3.5 1.8 7.4 6.7 11.3l120.9 85.2-46.4 134.9c-2.3 6.5 0 13.8 5.5 18 2.9 2.1 5.6 3.9 9 3.9 3.3 0 7.2-1.7 10-3.6l118-84.1 118 84.1c2.8 2 6.7 3.6 10 3.6 3.4 0 6.1-1.7 8.9-3.9 5.6-4.2 7.8-11.4 5.5-18L352 307.2l119.9-86 2.9-2.5c2.6-2.8 5.2-6.6 5.2-10.7 0-8.8-8.2-16-17-16zm-127.2 92.5c-10 7.2-14.2 20.2-10.2 31.8l30.1 87.7c1.3 3.7-2.9 6.8-6.1 4.6l-77.4-55.2c-4.9-3.5-10.6-5.2-16.3-5.2-5.7 0-11.4 1.7-16.2 5.2l-77.4 55.1c-3.2 2.3-7.4-.9-6.1-4.6l30.1-87.7c4-11.8-.2-24.8-10.3-32l-81-57.1c-3.2-2.2-1.6-7.3 2.3-7.3H196c12 0 22.7-7.7 26.5-19.1l29.6-88.2c1.2-3.6 6.4-3.6 7.6 0l29.6 88.2c3.8 11.4 14.5 19.1 26.5 19.1h97.3c3.9 0 5.5 5 2.3 7.2l-79.6 57.5z',
+    path: scalePath('M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z', 5, 5),
     label: 'Star',
     name: 'star'
   },
   customPolygon: {
     icon: <LuOctagon />,
-    path: scalePath('M15.936 2.50098L21.501 8.06595V15.936L15.936 21.501H8.06595L2.50098 15.936V8.06595L8.06595 2.50098H15.936Z', 30, 30),
+    path: scalePath('M15.936 2.50098L21.501 8.06595V15.936L15.936 21.501H8.06595L2.50098 15.936V8.06595L8.06595 2.50098H15.936Z', 5, 5),
     label: 'Polygon',
     name: 'customPolygon'
   },
   circle: {
     icon: <CircleOutlined />,
-    path: 'M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200z',
+    path: scalePath('M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2', 5, 5),
     label: 'Circle',
     name: 'circle'
   },
   // shapes
   location: {
     icon: <LocationOnOutlined />,
-    path: 'M256 32C167.67 32 96 96.51 96 176c0 128 160 304 160 304s160-176 160-304c0-79.49-71.67-144-160-144zm0 224a64 64 0 1 1 64-64 64.07 64.07 0 0 1-64 64z',
+    path: scalePath(
+      'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7m0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5',
+      5,
+      5
+    ),
     label: 'Location',
     name: 'location'
   },
   heart: {
     icon: <FavoriteBorderOutlined />,
-    path: 'M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z',
+    path: scalePath(
+      'm12 21.35-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z',
+      5,
+      5
+    ),
     label: 'Heart',
     name: 'heart'
   },
   customChatBubble: {
     icon: <ChatBubbleOutlineOutlined />,
-    path: scalePath('M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2', 40, 40),
+    path: scalePath('M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2', 10, 10),
     label: 'Bubble',
     name: 'customChatBubble'
   }
