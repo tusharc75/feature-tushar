@@ -9,10 +9,7 @@ import {
   LocationOnOutlined
 } from '@mui/icons-material';
 import { useEffect, useRef, useState } from 'react';
-import { CiLocationOn } from 'react-icons/ci';
-import { FaHeart, FaRegCircle } from 'react-icons/fa';
 import { IoIosStarOutline } from 'react-icons/io';
-import { IoLocationSharp } from 'react-icons/io5';
 import { LuOctagon } from 'react-icons/lu';
 import RippleButton from 'src/components/RippleButton';
 import { subMenuButtonClassname, subMenuHelperTextClassName, SubmenuItemProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
@@ -54,7 +51,7 @@ const shapeMap = {
   },
   customPolygon: {
     icon: <LuOctagon />,
-    path: 'M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1z',
+    path: scalePath('M15.936 2.50098L21.501 8.06595V15.936L15.936 21.501H8.06595L2.50098 15.936V8.06595L8.06595 2.50098H15.936Z', 30, 30),
     label: 'Polygon',
     name: 'customPolygon'
   },
@@ -108,7 +105,7 @@ type StateValue = {
   color: string;
 };
 
-const Icon = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
+const IconSubmenu = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
   const [data, setData] = useState<StateValue>({ position: null, shape: null, color: '#000000' });
   const isListenerAttached = useRef(false);
   const isShapeSelected = useRef(false);
@@ -169,4 +166,4 @@ const Icon = ({ hideMenu, imageEditor }: SubmenuItemProps) => {
   );
 };
 
-export default Icon;
+export default IconSubmenu;
