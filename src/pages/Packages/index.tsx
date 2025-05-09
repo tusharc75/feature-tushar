@@ -252,6 +252,9 @@ const PackageList = () => {
               type: 'import'
             }
           ]}
+          asyncExport={true}
+          asyncImport={true}
+          resource={sidebarResource.packages}
         />
       </div>
       <CustomContainer>
