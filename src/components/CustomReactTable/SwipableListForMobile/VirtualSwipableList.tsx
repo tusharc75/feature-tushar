@@ -80,7 +80,7 @@ const VirtualSwipableList = ({
               }
 
               return (
-                <div key={row.key} className="pb-2">
+                <div key={`${virtualRow.key}`} data-index={virtualRow.index} ref={rowVirtualizer.measureElement} className="pb-2">
                   <div
                     className={`rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                       backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
