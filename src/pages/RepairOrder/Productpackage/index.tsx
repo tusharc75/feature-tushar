@@ -578,7 +578,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 }}
                 id="add-new-package-menu-item"
               >
-                {`Add Existing ${resources?.packages?.titleSingular}`}
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
           </>
