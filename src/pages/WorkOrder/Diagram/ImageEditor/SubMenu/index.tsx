@@ -8,7 +8,7 @@ import Mask from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Mask';
 import Rotate from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Rotate';
 import Shape from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Shape';
 import Text from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/Text';
-import Icon from 'src/pages/workOrder/Diagram/ImageEditor/SubMenu/Icon';
+import IconSubmenu from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/IconSubmenu';
 
 import TUIImageEditor from 'tui-image-editor';
 
@@ -45,7 +45,7 @@ const Submenu = memo(({ activeMenu, imageEditor, hideMenu }: SubMenuPorps) => {
     case 'filter':
       return <Filter imageEditor={imageEditor} hideMenu={hideMenu} />;
     case 'icon':
-      return <Icon imageEditor={imageEditor} hideMenu={hideMenu} />;
+      return <IconSubmenu imageEditor={imageEditor} hideMenu={hideMenu} />;
     default:
       return null;
   }
