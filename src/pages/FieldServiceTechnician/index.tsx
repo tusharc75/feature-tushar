@@ -54,7 +54,9 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     Cell: ({ row }) => (
       <>
         {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
-          <HtmlTooltip title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}>
+          <HtmlTooltip
+            title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}
+          >
             <span>
               <IconButton
                 size="small"
@@ -67,7 +69,10 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
                   );
                 }}
               >
-                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? 'primary' : 'disabled'} />
+                <NoteAddIcon
+                  fontSize="small"
+                  color={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? 'primary' : 'disabled'}
+                />
               </IconButton>
             </span>
           </HtmlTooltip>
@@ -188,7 +193,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -290,7 +295,7 @@ const FieldServiceTechnician = () => {
       }
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.canEdit = checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, u)
+        finalObject.canEdit = checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, u);
         finalObject.orignalData = u;
         return finalObject;
       });
@@ -370,8 +375,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -400,7 +405,7 @@ const FieldServiceTechnician = () => {
         <CustomBreadCrumbs routes={[{ title: resources?.fieldServiceTechnician?.titlePlural }]} />
       </div>
       <CustomContainer>
-        {initialDataLoaded && dataRows.length > 0 && (
+        {initialDataLoaded && (
           <ListingPageHeader
             searchValue={search}
             onSearch={handleSearch}
@@ -417,7 +422,7 @@ const FieldServiceTechnician = () => {
         {columns ? (
           view === 'card' ? (
             <div className="relative grid grid-cols-1 gap-4 md:min-h-[calc(100vh-200px)] md:grid-cols-[400px_1fr]">
-              {initialDataLoaded && dataRows.length > 0 ? (
+              {initialDataLoaded ? (
                 <>
                   <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
                     <CustomReactTable
@@ -448,10 +453,10 @@ const FieldServiceTechnician = () => {
                         <FieldTicket
                           serviceOrderData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
-                          handleChangeStatus={() => { }}
+                          handleChangeStatus={() => {}}
                           resource={sidebarResource.fieldServiceTechnician}
                           enableGlobalSearch={false}
-                          fetchServiceOrderData={() => { }}
+                          fetchServiceOrderData={() => {}}
                         />
                       )
                     ) : (
