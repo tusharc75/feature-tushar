@@ -40,7 +40,6 @@ export type PreviewFileProps = PreviewFileInternal | PreviewFileEnternal;
 type PreviewFileInternalCommon = {
   fileName: string;
   component?: 'IconButton' | 'MenuItem' | keyof HTMLElementTagNameMap;
-  showDownload?: boolean;
 };
 type PreviewFileInternal = {
   externalImageViewer?: false;
