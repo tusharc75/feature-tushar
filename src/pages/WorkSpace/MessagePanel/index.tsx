@@ -65,7 +65,7 @@ const MessagePanel = ({
     return {
       members: members,
       title: resourceLabel,
-      resource: resource
+      relatedTo: { type: resource, refrenceId: resourceData?._id }
     };
   }, [resource, resourceData, resourceLabel]);
 
