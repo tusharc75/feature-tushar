@@ -33,7 +33,7 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => { },
+  onEditComplete = () => {},
   editorId = '',
   channelData,
   disabled = false,
@@ -116,7 +116,7 @@ const SendMessage = ({
                 socket.emit('joinChannel', data?._id);
               }
             })
-            .catch((error) => { });
+            .catch((error) => {});
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
@@ -187,7 +187,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => { }
+          toJSON: () => {}
         })
       });
     }
@@ -326,7 +326,7 @@ const SendMessage = ({
                 editor.setContent(initialMessage);
               }
             }}
-            initialValue={""}
+            initialValue={''}
             disabled={disabled || !(channelId || resourceData)}
             init={{
               placeholder: 'Type a message',

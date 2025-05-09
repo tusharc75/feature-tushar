@@ -1,0 +1,374 @@
+import { Delete, GetApp, MoreVert } from '@mui/icons-material';
+import { Avatar, IconButton, Popper, Tooltip } from '@mui/material';
+import EmojiPicker from 'emoji-picker-react';
+import { groupBy, uniqBy } from 'lodash';
+import { useContext, useState } from 'react';
+import { BsEmojiGrin, BsReply } from 'react-icons/bs';
+import { Socket } from 'socket.io-client';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { cn, displayDateTime, getFileIconSrc } from 'src/constants/helpers';
+import { ChannelData, Message } from 'src/pages/WorkSpace/types';
+import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
+import { formatDateWithTodayYestarday, getAvatarColor } from 'src/pages/WorkSpace/utils';
+import SendMessage from './SendMessage';
+
+type DisplaySingleMessageProps = {
+  message: Message;
+  selectedMessage: Message;
+  editingMessage: Message;
+  channelId: string;
+  socket: Socket;
+  state: UseWorkSpace;
+  handleEditComplete: () => void;
+  setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
+  handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
+  messageTimeFormatter?: (string) => string;
+  channelData: ChannelData;
+  type?: 'messages' | 'pins';
+};
+
+export const DisplaySingleMessage = ({
+  message,
+  selectedMessage,
+  editingMessage,
+  channelId,
+  socket,
+  state,
+  handleEditComplete,
+  setThreadDialogOpen,
+  handleMenuClick,
+  messageTimeFormatter = (date) => displayDateTime(date, 'hh:mm A'),
+  channelData,
+  type = 'messages'
+}: DisplaySingleMessageProps) => {
+  const [theme] = useAppTheme();
+  const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
+  const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
+  const [themeColor] = useAppTheme();
+  const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
+    setEmojiPanelAnchor((prev) => (!prev ? e.currentTarget : null));
+  };
+  const closeEmojiPanel = () => {
+    setEmojiPanelAnchor(null);
+  };
+  const toastConfig = useContext(CustomToastContext);
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+
+  if (!message) return null;
+
+  const replies = message.replies || [];
+  const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  const groupedReactions = Object.values(groupBy(message.reactions, 'emoji')).map((reactions) => ({
+    emoji: reactions[0].emoji,
+    count: reactions.length,
+    users: reactions.map((reaction) => reaction.user)
+  }));
+
+  const handleReaction = async (emoji) => {
+    try {
+      await axiosInstance().post('/work-space/channel/message/reaction', { messageId: message._id, emoji });
+      socket.emit('reaction', { channelId, messageId: message._id, emoji });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      closeEmojiPanel();
+    }
+  };
+
+  const handleReactionClick = async (reaction) => {
+    try {
+      if (reaction?.users?.find((u) => u.optionValue === user?._id)) {
+        await axiosInstance().delete(`/work-space/channel/message/reaction`, { data: { messageId: message._id, emoji: reaction.emoji } });
+        socket.emit('removeReaction', { channelId, messageId: message._id, emoji: reaction.emoji });
+      } else {
+        await handleReaction(reaction.emoji);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const downloadFile = (attachment) => {
+    axiosInstance()
+      .get(`user/download?fileName=${encodeURIComponent(attachment)}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', attachment);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const deleteAttachment = async (messageId, attachmentId) => {
+    try {
+      await axiosInstance().put(`/work-space/channel/message/remove-attachment`, { messageId, attachmentId });
+      socket.emit('messageDeleted', { channelId });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const isSelf = user?._id === message?.user?.optionValue;
+
+  return (
+    <>
+      <li
+        key={message._id}
+        className={cn(
+          'group relative list-none px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800',
+          selectedMessage?._id === message._id && 'bg-gray-50 dark:bg-gray-800'
+        )}
+        onMouseLeave={closeEmojiPanel}
+      >
+        <div className={cn('flex gap-2', isSelf ? ' flex-row-reverse justify-start' : '')}>
+          <Avatar
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 999,
+              fontSize: 13,
+              ...getAvatarColor(message.user?.optionLabel || '', themeColor)
+            }}
+            variant="rounded"
+            className="uppercase"
+            src={message?.user?.avatar}
+          >
+            {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
+          </Avatar>
+          <div className="flex-grow">
+            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit flex-row-reverse' : '')}>
+              <h6 className="user text-sm font-semibold text-gray-900 dark:text-white">
+                {message.user?.optionLabel}
+                {isSelf ? ' (you)' : ''}
+              </h6>
+              <span className="text-[12px] font-normal text-gray-500">{messageTimeFormatter(message.date)}</span>
+            </div>
+            {editingMessage?._id === message._id ? (
+              <SendMessage
+                channelId={channelId}
+                socket={socket}
+                state={state}
+                messageId={message._id}
+                initialMessage={message.message}
+                onEditComplete={handleEditComplete}
+                editorId={`sone`}
+                channelData={channelData}
+                disabled={!channelData?.members.some((d) => d.optionValue === user?._id)}
+              />
+            ) : (
+              <>
+                <div>
+                  <span
+                    className={cn(
+                      `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
+                        [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
+                       [&_span:last-child]:text-gray-400`,
+                      isSelf
+                        ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
+                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white',
+                      message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
+                    )}
+                    dangerouslySetInnerHTML={{
+                      __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
+                    }}
+                  ></span>
+                  {message?.pinned && (
+                    <span className="absolute right-11 top-7 text-[15px]" title="Pinned">
+                      📌
+                    </span>
+                  )}
+                  <div className={cn('max-w-fit', isSelf ? 'ml-auto text-right' : '')}>
+                    {groupedReactions?.length > 0 && (
+                      <div className={cn('reactions mt-2 flex gap-1', isSelf ? ' justify-end' : '')}>
+                        {groupedReactions?.map((reaction, index) => (
+                          <Tooltip
+                            key={index}
+                            title={
+                              <div className="p-1">
+                                <p>
+                                  {reaction.users
+                                    .map((u) => {
+                                      if (u.optionValue === user?._id) return 'You';
+                                      else return u.optionLabel;
+                                    })
+                                    .join(', ')}{' '}
+                                  reacted with {reaction.emoji}
+                                </p>
+                              </div>
+                            }
+                          >
+                            <div className="reaction flex items-center gap-1 rounded-md bg-gray-200 p-1 dark:bg-gray-700">
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReactionClick(reaction);
+                                }}
+                              >
+                                {reaction.emoji}
+                              </span>
+                              <span>{reaction.count}</span>
+                            </div>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    )}
+                    {message?.attachments?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 py-3">
+                        {message?.attachments?.map((attachment) => {
+                          const Icon = getFileIconSrc(attachment?.url);
+                          return (
+                            <>
+                              <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
+                                <div className="front  group-hover:hidden">
+                                  <div className="mx-auto mb-[11px] h-[79px] text-center">
+                                    <Icon size={50} className="mx-auto" />
+                                  </div>
+                                  <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{attachment?.fileName}</p>
+                                </div>
+                                <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
+                                  <p className=" line-clamp-2 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
+                                    {attachment?.fileName}
+                                  </p>
+                                  <div className="flex justify-between">
+                                    <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
+                                      <IconButton size={'small'} onClick={() => downloadFile(attachment.url)}>
+                                        <GetApp fontSize="small" color="primary" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                    {message?.user?.optionValue === user?._id && (
+                                      <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
+                                        <IconButton
+                                          size={'small'}
+                                          onClick={() => {
+                                            setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id });
+                                          }}
+                                        >
+                                          <Delete color="error" fontSize="small" />
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {replies.length > 0 && setThreadDialogOpen && type !== 'pins' && (
+                      <div
+                        onClick={() => setThreadDialogOpen({ open: true, message })}
+                        className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
+                      >
+                        {uniqueReplies.map((reply, index) => {
+                          if (index > 3) return null;
+                          return (
+                            <Avatar
+                              style={{
+                                width: 24,
+                                height: 24,
+                                fontSize: 10,
+                                borderRadius: 999
+                              }}
+                              variant="rounded"
+                              src={reply.user.avatar}
+                            >
+                              {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
+                            </Avatar>
+                          );
+                        })}
+                        <span className="link ml-1 line-clamp-1">
+                          {message.replies.length} {message.replies.length > 1 ? 'replies' : 'reply'}
+                        </span>
+                        <div className="relative ml-1 text-[13px] font-normal">
+                          <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
+                          <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
+                            Last reply {formatDateWithTodayYestarday(replies[replies.length - 1].date)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  className={cn(
+                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
+                  )}
+                >
+                  <HtmlTooltip title="Find reaction">
+                    <IconButton size="small" onClick={(e) => openEmojiPanel(e, message)}>
+                      <span className="flex h-6 w-6 items-center justify-center">
+                        <BsEmojiGrin />
+                      </span>
+                    </IconButton>
+                  </HtmlTooltip>
+                  {setThreadDialogOpen && type !== 'pins' && (
+                    <HtmlTooltip title="Reply in thread">
+                      <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
+                        <span className="flex h-6 w-6 items-center justify-center">
+                          <BsReply size={24} />
+                        </span>
+                      </IconButton>
+                    </HtmlTooltip>
+                  )}
+                  <HtmlTooltip title="More actions">
+                    <IconButton
+                      onClick={(event) => {
+                        handleMenuClick(event, message);
+                      }}
+                      size="small"
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <Popper placement="bottom-end" open={Boolean(emojiPanleAnchor)} anchorEl={emojiPanleAnchor} disablePortal={true}>
+                    <EmojiPicker
+                      open={Boolean(emojiPanleAnchor)}
+                      lazyLoadEmojis
+                      className=" z-[10]"
+                      width={400}
+                      height={400}
+                      reactions={[]}
+                      onEmojiClick={(d) => {
+                        handleReaction(d.emoji);
+                      }}
+                    />
+                  </Popper>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </li>
+      {attachmentConfirmBox.open && (
+        <ConfirmationDialog
+          open={attachmentConfirmBox.open}
+          message={`Are you sure you want to delete attachment?`}
+          onClose={() => {
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+          onOk={() => {
+            deleteAttachment(attachmentConfirmBox.messageId, attachmentConfirmBox.attachmentId);
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+        />
+      )}
+    </>
+  );
+};
