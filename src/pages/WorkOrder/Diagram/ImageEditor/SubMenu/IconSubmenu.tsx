@@ -14,7 +14,7 @@ import { LuOctagon } from 'react-icons/lu';
 import RippleButton from 'src/components/RippleButton';
 import { subMenuButtonClassname, subMenuHelperTextClassName, SubmenuItemProps } from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu';
 import ColorPicker from 'src/pages/WorkOrder/Diagram/ImageEditor/SubMenu/ColorPicker';
-import { scalePath } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
+import { getIconPath, scalePath } from 'src/pages/WorkOrder/Diagram/ImageEditor/utils';
 
 const shapeMap = {
   // arrow
