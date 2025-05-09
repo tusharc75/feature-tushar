@@ -1,4 +1,4 @@
-import { Delete, GetApp, MoreVert } from '@mui/icons-material';
+import { Delete, MoreVert } from '@mui/icons-material';
 import { Avatar, IconButton, Popper, Tooltip } from '@mui/material';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
@@ -10,6 +10,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { PreviewFile } from 'src/components/PreviewFile';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, displayDateTime, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
@@ -96,22 +97,6 @@ export const DisplaySingleMessage = ({
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const downloadFile = (attachment) => {
-    axiosInstance()
-      .get(`user/download?fileName=${encodeURIComponent(attachment)}`, { responseType: 'blob' })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', attachment);
-        document.body.appendChild(link);
-        link.click();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const deleteAttachment = async (messageId, attachmentId) => {
@@ -244,12 +229,8 @@ export const DisplaySingleMessage = ({
                                   <p className=" line-clamp-2 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
                                     {attachment?.fileName}
                                   </p>
-                                  <div className="flex justify-between">
-                                    <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
-                                      <IconButton size={'small'} onClick={() => downloadFile(attachment.url)}>
-                                        <GetApp fontSize="small" color="primary" />
-                                      </IconButton>
-                                    </HtmlTooltip>
+                                  <div className="flex flex-wrap justify-between">
+                                    <PreviewFile fileName={attachment.url} />
                                     {message?.user?.optionValue === user?._id && (
                                       <HtmlTooltip title="Delete" placement="top" enterTouchDelay={0}>
                                         <IconButton

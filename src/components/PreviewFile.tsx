@@ -40,6 +40,7 @@ export type PreviewFileProps = PreviewFileInternal | PreviewFileEnternal;
 type PreviewFileInternalCommon = {
   fileName: string;
   component?: 'IconButton' | 'MenuItem' | keyof HTMLElementTagNameMap;
+  showDownload?: boolean;
 };
 type PreviewFileInternal = {
   externalImageViewer?: false;
@@ -165,7 +166,7 @@ export const PreviewFile: React.FC<PreviewFileProps> = (props) => {
   if (!fileName) return null;
 
   return (
-    <div>
+    <>
       {component === 'IconButton' ? (
         <>
           {validExtensions.includes(extension) && (
@@ -195,7 +196,7 @@ export const PreviewFile: React.FC<PreviewFileProps> = (props) => {
         </>
       )}
       {!externalImageViewer && <ViewImage imageDialogData={imageDialogData} setImageDialogData={setImageDialogData} />}
-    </div>
+    </>
   );
 };
 
