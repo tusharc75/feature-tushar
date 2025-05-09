@@ -17,11 +17,19 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PACKAGE_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource, WORK_ORDER_TYPE } from '../../../constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  PACKAGE_TYPE,
+  SERIALIZED_PACKAGES_STATUS,
+  sidebarResource,
+  WORK_ORDER_TYPE
+} from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 import AssignSerializedPackagesDialog from 'src/components/AssignRolesDialog/AssignSerializedPackagesDialog';
+import { orderBy } from 'lodash';
 
 const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, fetchAssembleOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -231,7 +239,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     } else {
       setNextStep(false);
     }
-    dispatch({ type: 'initialize', data: rows, count: count });
+    dispatch({ type: 'initialize', data: orderBy(rows, ['order']), count: count });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -350,7 +358,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           : {})
       });
     });
-    axiosInstance().put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
+    axiosInstance()
+      .put(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material: data })
       .then(({ data }) => {
         dispatch({ type: 'selection', selectedRecords: [] });
         setUpdating(false);
@@ -472,7 +481,10 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
             isClientSideGrid={true}
             expander={true}
             resource={sidebarResource.assemblyOrder}
-            arrangeRowField={{ key: 'material', _id: assemblyOrderData?._id, materialKey: '_id' }}
+            arrangeRowField={{
+              keys: [{ key: 'material', filterType: [MATERIAL_TYPE.package] }],
+              _id: assemblyOrderData?._id
+            }}
           />
         </Box>
       ) : (

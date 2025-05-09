@@ -4,7 +4,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { startCase, uniqBy } from 'lodash';
+import { orderBy, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -206,13 +206,14 @@ const Productpackage = ({
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${row.original.type === MATERIAL_TYPE.serializedAsset
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === MATERIAL_TYPE.product
-                        ? routes.productDetail.path
-                        : row.original.type === MATERIAL_TYPE.package
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
+                    `${
+                      row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -225,19 +226,19 @@ const Productpackage = ({
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
+            {
+              accessor: 'leadTime',
+              Header: 'Lead Time (Days)',
+              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+              Footer: (info) => {
+                let rows = info.table.getExpandedRowModel().rows;
+                const total = rows
+                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+                return <>{total}</>;
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'description',
@@ -340,16 +341,17 @@ const Productpackage = ({
     rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent.detail
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -370,7 +372,7 @@ const Productpackage = ({
     } else {
       setNextStep(true);
     }
-    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'initialize', data: orderBy(rows, ['order']), count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     updateDOASetup(data?.doasetup);
   };
@@ -379,14 +381,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -723,8 +726,8 @@ const Productpackage = ({
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
-          quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
-          quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
+        quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
+        quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
@@ -807,8 +810,8 @@ const Productpackage = ({
           disabled={
             !Boolean(
               selectedRecords &&
-              selectedRecords.filter((e) => !e.hideSelection).length &&
-              !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+                selectedRecords.filter((e) => !e.hideSelection).length &&
+                !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
             )
           }
           onClick={() => {
@@ -896,7 +899,14 @@ const Productpackage = ({
             hideAction={!allowedToEdit}
             expander={true}
             resource={sidebarResource.quotation}
-            arrangeRowField={{ key: 'material', _id: versionId, quotation: quotationData?._id, materialKey: '_id' }}
+            arrangeRowField={{
+              keys: [
+                { key: 'material', filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package] },
+                { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+              ],
+              _id: versionId,
+              quotation: quotationData?._id
+            }}
           />
         </Box>
       ) : (
@@ -1095,30 +1105,31 @@ const Productpackage = ({
             >
               Add Existing Products
             </MenuItem>
-            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null :
-              [QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
-                ? null : (
-                  <MenuItem
-                    onClick={() => {
-                      setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                      setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                    }}
-                  >
-                    {`Add Existing ${resources?.packages?.titlePlural}`}
-                  </MenuItem>
-                )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
-              [QUOTATION_TYPE.fieldJob, QUOTATION_TYPE.repairOrder]?.includes(quotationData?.type)
-                ? null : (
-                  <MenuItem
-                    onClick={() => {
-                      setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                      setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                    }}
-                  >
-                    Add Existing Services
-                  </MenuItem>
-                )}
+            {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : [
+                QUOTATION_TYPE.repairOrder
+              ]?.includes(quotationData?.type) ? null : (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                }}
+              >
+                {`Add Existing ${resources?.packages?.titlePlural}`}
+              </MenuItem>
+            )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : [
+                QUOTATION_TYPE.fieldJob,
+                QUOTATION_TYPE.repairOrder
+              ]?.includes(quotationData?.type) ? null : (
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}
