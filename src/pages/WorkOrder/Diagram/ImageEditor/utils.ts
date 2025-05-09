@@ -1,5 +1,6 @@
 import { SingleButtonOption } from 'src/pages/WorkOrder/Diagram/ImageEditor/LeftSidebar';
 import TUIImageEditor from 'tui-image-editor';
+import ReactDOMServer from 'react-dom/server';
 
 export const handleSetImageEditorMode = (option: SingleButtonOption, imageEditor: TUIImageEditor) => {
   imageEditor.discardSelection();
@@ -90,3 +91,17 @@ export function scalePath(pathData: string, widthFactor: number, heightFactor: n
     return (isXCoordinate ? value * widthFactor : value * heightFactor).toString();
   });
 }
+
+export const getIconPath = (icon: React.ReactElement) => {
+  if (!icon) return;
+  const svgString = ReactDOMServer.renderToStaticMarkup(icon);
+  const div = document.createElement('div');
+  div.innerHTML = svgString;
+  const path = div.querySelector('path');
+  if (path) {
+    const d = path.getAttribute('d');
+    if (!d) return;
+    return d;
+  }
+  return null;
+};
