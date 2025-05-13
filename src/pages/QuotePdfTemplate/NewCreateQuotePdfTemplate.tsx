@@ -131,7 +131,7 @@ export default function NewCreateQuotePdfTemplate() {
           .get(`/field?resource=${resource}`)
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
-            setVariables(['entity', ...vars]);
+            setVariables(['entity', 'currentDate', ...vars]);
             setAllFields(data);
           })
           .catch((err) => {
