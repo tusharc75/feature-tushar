@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, MenuItem } from '@mui/material';
-import { Delete, Key } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
