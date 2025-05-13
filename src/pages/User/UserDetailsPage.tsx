@@ -184,11 +184,7 @@ const UserDetailsPage = () => {
     await axiosInstance()
       .get(`/user/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.hideEmail) {
-          data.email = null;
-        }
         handleMainPoints(data);
-        const name = [data.firstName, data.lastName].filter((d) => d).join(' ');
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
