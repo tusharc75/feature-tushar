@@ -177,7 +177,6 @@ const RentalManagement = () => {
                 </IconButton>
               </span>
             </HtmlTooltip>
-
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
@@ -189,7 +188,6 @@ const RentalManagement = () => {
                 <AttachFileIcon fontSize="small" color='primary' />
               </IconButton>
             </HtmlTooltip>
-
             <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton
