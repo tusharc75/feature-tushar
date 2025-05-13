@@ -255,6 +255,18 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'showFieldJobs',
+        fieldLabel: 'Show Field Jobs',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'showFieldTickets',
+        fieldLabel: 'Show Field Tickets',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
