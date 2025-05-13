@@ -73,32 +73,6 @@ const MenuWithGroupping = ({ uniqueId, getItemId, anchorEl, handleClose, childre
     },
     [items]
   );
-  const handleKeydown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.ctrlKey) {
-      switch (e.key) {
-        case 'z':
-        case 'Z':
-          e.preventDefault();
-          e.stopPropagation();
-          historyItemsRef.current?.[0]?.click();
-          break;
-        case 'x':
-        case 'X':
-          e.preventDefault();
-          e.stopPropagation();
-          historyItemsRef.current?.[1]?.click();
-          break;
-        case 'c':
-        case 'C':
-          e.preventDefault();
-          e.stopPropagation();
-          historyItemsRef.current?.[2]?.click();
-          break;
-        default:
-          break;
-      }
-    }
-  };
 
   useEffect(() => {
     // for getting initial items
@@ -114,8 +88,7 @@ const MenuWithGroupping = ({ uniqueId, getItemId, anchorEl, handleClose, childre
         anchorEl={anchorEl}
         slotProps={{
           paper: {
-            sx: { borderRadius: '10px', minWidth: 'min(100%, 250px)', minHeight: '400px', maxHeight: '600px' },
-            onKeyDown: handleKeydown
+            sx: { borderRadius: '10px', minWidth: 'min(100%, 250px)', minHeight: '400px', maxHeight: '600px' }
           }
         }}
         open={Boolean(anchorEl)}
@@ -172,12 +145,7 @@ const MenuWithGroupping = ({ uniqueId, getItemId, anchorEl, handleClose, childre
                   }}
                   {...rest}
                 >
-                  <div className="flex w-full flex-grow justify-between gap-2">
-                    <div className="flex items-center gap-2">{children}</div>
-                    <span className="select-none text-xs text-gray-400 dark:text-gray-700">
-                      {index === 0 ? 'Ctrl+Z' : index === 1 ? 'Ctrl+S' : 'Ctrl+C'}
-                    </span>
-                  </div>
+                  {children}
                 </MenuItem>
               );
             })}
