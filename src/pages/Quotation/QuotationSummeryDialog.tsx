@@ -73,14 +73,10 @@ const QuotationSummeryDialog = ({ quotationData, versionId, onClose }) => {
   const fetchProductInventory = async () => {
     var data: any = [];
     var inventory: any = [];
-    var additionalData: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
-    const additionalCostResponce = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
     data = response?.data?.data;
-    additionalData = additionalCostResponce?.data?.data || [];
     inventory = data?.inventory ? data?.inventory : [];
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...additionalData];
     const totalFinalPrice = rows
       .filter(
         (f) =>
