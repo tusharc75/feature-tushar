@@ -577,9 +577,9 @@ const User: FC = () => {
           disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
           onClick={() => {
             if (selectedRecords) {
-              setDeleteUser(selectedRecords[0]);
+              setDeleteUser(selectedRecords);
             } else {
-              setDeleteUser(null);
+              setDeleteUser([]);
             }
             setShowDeleteDialog(true);
           }}

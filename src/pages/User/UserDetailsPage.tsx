@@ -775,7 +775,7 @@ const UserDetailsPage = () => {
           open={showConfirmBox}
           resource="User"
           fromResource={[userData]}
-          allResourceData={allUsers}
+          allResourceData={allUsers?.filter((u) => u?.optionValue != userData?._id)}
           onClose={() => setShowConfirmBox(false)}
           handleDelete={() => {
             setShowConfirmBox(false);
