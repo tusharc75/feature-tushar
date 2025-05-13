@@ -39,6 +39,10 @@ const FieldTicket = () => {
     {
       key: `All ${resources?.fieldTicket?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.fieldTicket?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -152,7 +156,12 @@ const FieldTicket = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
