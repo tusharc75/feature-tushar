@@ -7,6 +7,7 @@ import RenderCellWithHeader from './RenderCellWithHeader';
 import RenderSubCard from './RenderSubCard';
 import React, { memo, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { throttle } from 'src/hooks/useThrottle';
 
 const VirtualSwipableList = ({
   dataRows,
@@ -80,14 +81,23 @@ const VirtualSwipableList = ({
               }
 
               return (
-                <div key={`${virtualRow.key}`} data-index={virtualRow.index} ref={rowVirtualizer.measureElement} className="pb-2">
+                <div
+                  key={`${virtualRow.key}`}
+                  data-index={virtualRow.index}
+                  ref={(node) => {
+                    const cb = throttle(() => {
+                      rowVirtualizer.measureElement(node);
+                    }, 2000);
+                    cb();
+                  }}
+                  className="pb-2"
+                >
                   <div
                     className={`rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                       backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-                    } ${typeof onRowClick === 'function' ? 'focus:outline-0 focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)]' : ''}`}
+                    } ${typeof onRowClick === 'function' ? 'cursor-pointer focus:outline-0 focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)]' : ''}`}
                     style={{
-                      border: '1px solid var(--common-border-color)',
-                      cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
+                      border: '1px solid var(--common-border-color)'
                     }}
                     onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
                     tabIndex={typeof onRowClick === 'function' ? 0 : -1}
@@ -111,8 +121,9 @@ const VirtualSwipableList = ({
                     }}
                   >
                     <div className={`flex items-center gap-2`}>
-                      {expander && expanderCol && flexRender(expanderCell.column.columnDef.cell, expanderCell?.getContext())}
-                      {allowSelection && !row.original.hideSelection && (
+                      <RenderExpander {...{ expander, expanderCol, expanderCell }} />
+                      <RenderSelection allowSelection={allowSelection} row={row} isSelected={row.getIsSelected()} />
+                      {/* {allowSelection && !row.original.hideSelection && (
                         <div>
                           <IndeterminateCheckbox
                             {...{
@@ -122,12 +133,11 @@ const VirtualSwipableList = ({
                             }}
                           />
                         </div>
-                      )}
+                      )} */}
                       <div className="flex-grow">
                         <div className="flex items-center justify-between gap-2">
                           <RenderPrimaryField primaryField={primaryField} row={row} table={table} />
                           <div className="icon-layout  d-flex align-items-center gap-2">
-                            {/* {actionField && actionField?.cell?.({ row, table })} */}
                             <RenderAction actionField={actionField} row={row} table={table} />
                             <RenderCollapseIcon
                               compareCollapse={compareCollapse}
@@ -135,17 +145,6 @@ const VirtualSwipableList = ({
                               collapsibleFields={collapsibleFields}
                               row={row}
                             />
-                            {/* {collapsibleFields.length > 0 && (
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCollapse(row.id);
-                                }}
-                              >
-                                {compareCollapse(row.id) ? <BsChevronExpand /> : <BsChevronContract />}
-                              </IconButton>
-                            )} */}
                           </div>
                         </div>
                       </div>
@@ -170,7 +169,8 @@ const VirtualSwipableList = ({
                           );
                         })}
                       </div>
-                      <Collapse in={compareCollapse(row.id)} unmountOnExit>
+                      <RenderHiddenFields {...{ compareCollapse, row, collapsibleFields, submitInput, cellValue, setCellValue, state, dispatch }} />
+                      {/* <Collapse in={compareCollapse(row.id)} unmountOnExit>
                         <div className="grid w-full gap-2">
                           {collapsibleFields.map((field) => {
                             return (
@@ -187,7 +187,7 @@ const VirtualSwipableList = ({
                             );
                           })}
                         </div>
-                      </Collapse>
+                      </Collapse> */}
                     </div>
                     {expander && (
                       <Collapse in={row.getIsExpanded()} unmountOnExit>
@@ -291,3 +291,52 @@ const RenderCollapseIcon = memo(
     prev.collapsibleFields?.length === next.collapsibleFields?.length &&
     prev.compareCollapse === next.compareCollapse
 );
+
+const RenderHiddenFields = memo(({ compareCollapse, row, collapsibleFields, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
+  return (
+    <Collapse in={compareCollapse(row.id)} unmountOnExit>
+      <div className="grid w-full gap-2">
+        {collapsibleFields.map((field) => {
+          return (
+            <RenderCellWithHeader
+              key={field.id}
+              field={field}
+              row={row}
+              submitInput={submitInput}
+              cellValue={cellValue}
+              setCellValue={setCellValue}
+              state={state}
+              dispatch={dispatch}
+            />
+          );
+        })}
+      </div>
+    </Collapse>
+  );
+});
+
+const RenderExpander = memo(({ expander, expanderCol, expanderCell }: any) => {
+  if (expander && expanderCol) {
+    return flexRender(expanderCell.column.columnDef.cell, expanderCell?.getContext());
+  } else {
+    return null;
+  }
+});
+
+const RenderSelection = memo(({ row, allowSelection, isSelected }: any) => {
+  if (allowSelection && !row.original.hideSelection) {
+    return (
+      <div>
+        <IndeterminateCheckbox
+          {...{
+            checked: isSelected,
+            indeterminate: row.getIsSomeSelected(),
+            onChange: row.getToggleSelectedHandler()
+          }}
+        />
+      </div>
+    );
+  } else {
+    return null;
+  }
+});

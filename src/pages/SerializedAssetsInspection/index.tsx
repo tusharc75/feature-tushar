@@ -585,16 +585,16 @@ const RightSideContents = ({
           onClick={() => setShowRepairOrderDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-            selectedRecords?.every((e) =>
-              [
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.scrap,
-                ASSET_STATUS.needRecert,
-                ASSET_STATUS.needRepair,
-                ASSET_STATUS.underReview
-              ]?.includes(e.status)
-            )
+              selectedRecords?.every((e) =>
+                [
+                  ASSET_STATUS.new,
+                  ASSET_STATUS.available,
+                  ASSET_STATUS.scrap,
+                  ASSET_STATUS.needRecert,
+                  ASSET_STATUS.needRepair,
+                  ASSET_STATUS.underReview
+                ]?.includes(e.status)
+              )
               ? false
               : true
           }
@@ -608,9 +608,9 @@ const RightSideContents = ({
           onClick={() => setShowRepairJobDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-            selectedRecords?.every((e) =>
-              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
-            )
+              selectedRecords?.every((e) =>
+                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+              )
               ? false
               : true
           }
@@ -623,7 +623,7 @@ const RightSideContents = ({
         endIcon={<ExpandMore />}
         buttonType="yellow"
         disabled={selectedRecords?.length ? false : true}
-        mobileTooltip="Actions"
+        mobileTooltip="Change Status"
         iconForMobile={<RiExchange2Line size={24} />}
       >
         Change Status
