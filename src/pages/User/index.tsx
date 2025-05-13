@@ -18,13 +18,11 @@ import AssignRolesDialog from '../../components/AssignRolesDialog/AssignRolesDia
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import {
-  checkSuperAdminAccess,
   CustomDialogTransition,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -308,19 +306,16 @@ const User: FC = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    axiosInstance()
-      .get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance().get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { entities } = u;
-
           const allRegionalWideRoles = uniqBy(entities.map((d) => d.role).flat(), '_id')?.filter((e) => e) as any[];
           const allAssignedEntities = uniqBy(entities.map((d) => d.entity).flat(), '_id') as any[];
           const tiers = uniq(map(allRegionalWideRoles, 'tier'));
           let finalObject = prepareDataForGrid(u);
           finalObject['canDelete'] = permissions?.user?.isDelete;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['email'] = u.hideEmail ? null : u?.email;
           let res = {
             ...finalObject,
             status: u.blocked ? u.blocked : false,
@@ -473,9 +468,7 @@ const User: FC = () => {
 
   const unAssignUsersFromEntity = () => {
     setIsConformDialogVisible(true);
-
     let recs = selectedRecords.map((o) => o.id);
-
     if (recs && recs.length > 0 && selectedEntity?.optionValue) {
       let dataObj = {
         users: recs,
@@ -484,6 +477,7 @@ const User: FC = () => {
       axiosInstance()
         .put(`/user/unassign-users`, dataObj)
         .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -511,25 +505,6 @@ const User: FC = () => {
             type: 'success',
             message: data.message
           });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
-  const handleEmailVisibility = (data) => {
-    let userIds = selectedRecords.map((o) => o?._id);
-    if (userIds && userIds.length > 0) {
-      axiosInstance()
-        .post(`/user/hide-email`, { users: [...userIds], hideEmail: data })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          fetchUsers();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -630,22 +605,6 @@ const User: FC = () => {
           }}
         >
           Reset Password
-        </MenuItem>
-        <MenuItem
-          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
-          onClick={() => {
-            handleEmailVisibility(true);
-          }}
-        >
-          Hide Email
-        </MenuItem>
-        <MenuItem
-          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
-          onClick={() => {
-            handleEmailVisibility(false);
-          }}
-        >
-          Unhide Email
         </MenuItem>
       </>
     );
