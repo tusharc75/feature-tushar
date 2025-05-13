@@ -5,7 +5,7 @@ import { DEFAULT_DATA_ROWS_VISIBLE } from 'src/components/CustomReactTable/Swipa
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import RenderCellWithHeader from './RenderCellWithHeader';
 import RenderSubCard from './RenderSubCard';
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 const VirtualSwipableList = ({
@@ -80,7 +80,7 @@ const VirtualSwipableList = ({
               }
 
               return (
-                <div key={row.key} className="pb-2">
+                <div key={`${virtualRow.key}`} data-index={virtualRow.index} ref={rowVirtualizer.measureElement} className="pb-2">
                   <div
                     className={`rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                       backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
@@ -125,19 +125,17 @@ const VirtualSwipableList = ({
                       )}
                       <div className="flex-grow">
                         <div className="flex items-center justify-between gap-2">
-                          {primaryField && (
-                            <div className="line-clamp-1">
-                              <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">
-                                {primaryField.header}:
-                              </h6>
-                              <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
-                                {primaryField.cell({ row, table })}
-                              </h4>
-                            </div>
-                          )}
+                          <RenderPrimaryField primaryField={primaryField} row={row} table={table} />
                           <div className="icon-layout  d-flex align-items-center gap-2">
-                            {actionField && actionField?.cell?.({ row, table })}
-                            {collapsibleFields.length > 0 && (
+                            {/* {actionField && actionField?.cell?.({ row, table })} */}
+                            <RenderAction actionField={actionField} row={row} table={table} />
+                            <RenderCollapseIcon
+                              compareCollapse={compareCollapse}
+                              handleCollapse={handleCollapse}
+                              collapsibleFields={collapsibleFields}
+                              row={row}
+                            />
+                            {/* {collapsibleFields.length > 0 && (
                               <IconButton
                                 size="small"
                                 onClick={(e) => {
@@ -147,7 +145,7 @@ const VirtualSwipableList = ({
                               >
                                 {compareCollapse(row.id) ? <BsChevronExpand /> : <BsChevronContract />}
                               </IconButton>
-                            )}
+                            )} */}
                           </div>
                         </div>
                       </div>
@@ -249,3 +247,47 @@ const VirtualSwipableList = ({
 };
 
 export default VirtualSwipableList;
+
+const RenderPrimaryField = memo(
+  ({ primaryField, row, table }: any) => {
+    if (!primaryField) return null;
+    return (
+      <div className="line-clamp-1">
+        <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.header}:</h6>
+        <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
+          {primaryField.cell({ row, table })}
+        </h4>
+      </div>
+    );
+  },
+  (prev, next) => prev.primaryField?.header === next.primaryField?.header
+);
+
+const RenderAction = memo(
+  ({ actionField, row, table }: any) => {
+    if (!actionField) return null;
+    return actionField?.cell?.({ row, table });
+  },
+  (prev, next) => prev.row === next.row
+);
+
+const RenderCollapseIcon = memo(
+  ({ compareCollapse, handleCollapse, collapsibleFields, row }: any) => {
+    if (collapsibleFields.length === 0) return null;
+    return (
+      <IconButton
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCollapse(row.id);
+        }}
+      >
+        {compareCollapse(row.id) ? <BsChevronExpand /> : <BsChevronContract />}
+      </IconButton>
+    );
+  },
+  (prev, next) =>
+    prev.row?.id === next.row?.id &&
+    prev.collapsibleFields?.length === next.collapsibleFields?.length &&
+    prev.compareCollapse === next.compareCollapse
+);

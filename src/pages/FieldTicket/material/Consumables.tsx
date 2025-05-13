@@ -356,7 +356,7 @@ const Consumables = ({
         parent.serviceId = parent?.service?.optionValue;
         parent.service = parent?.service?.optionLabel;
       });
-      dispatch({ type: 'initialize', data: orderBy(consumables, ['order']) || [], count: consumables?.length || 0 });
+      dispatch({ type: 'initialize', data: consumables || [], count: consumables?.length || 0 });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
       dispatch({ type: 'loading', loading: false });

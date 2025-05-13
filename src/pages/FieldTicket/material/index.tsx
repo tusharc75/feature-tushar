@@ -385,12 +385,7 @@ const Material = ({
       );
     } else {
       const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.service}`);
-      const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
-      let costData = costResponse?.data?.data;
-      costData = costData?.map((e: any) => {
-        return { ...e, type: MATERIAL_TYPE.manualEntry };
-      });
-      data = [...response?.data?.data?.material, ...costData];
+      data = response?.data?.data?.material;
     }
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
@@ -430,7 +425,7 @@ const Material = ({
       }
     }
 
-    dispatch({ type: 'initialize', data: orderBy(rows, ['order']), count: rows?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     setRefreshChild(!refreshChild);
   };

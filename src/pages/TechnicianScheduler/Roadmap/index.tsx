@@ -12,6 +12,12 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { AddOutlined } from '@mui/icons-material';
+import { sidebarResource } from 'src/constants/helpers';
+import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
+import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
+import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 
 export type HandleSelect = (event: React.SyntheticEvent, data: TActivity | string[], type: 'technician' | 'map' | '') => void;
 
@@ -43,6 +49,7 @@ function Roadmap({
     _id: null
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createDialog, setCreateDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -127,6 +134,17 @@ function Roadmap({
           <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />
           {headerSlot}
           <div className="ml-auto flex gap-1">
+            <ThemeButton
+              className="mr-2"
+              buttonType="theme"
+              id={'add-button'}
+              onClick={(e) => {
+                setCreateDialog(true);
+              }}
+              startIcon={<AddOutlined />}
+            >
+              Create
+            </ThemeButton>
             <IconButtonTabs
               items={
                 [
@@ -208,6 +226,36 @@ function Roadmap({
           loading={isSubmitting}
           minStartDateTime={startEndDateConfermationDialog.minDateTime}
           notes={startEndDateConfermationDialog.notes}
+        />
+      )}
+
+      {createDialog && selectedResource?.resource === sidebarResource.fieldServiceOrder && (
+        <ManageServiceOrderDialog
+          isClone={false}
+          serviceOrderId={null}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => setCreateDialog(false)}
+          open={createDialog}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {createDialog && selectedResource?.resource === sidebarResource.fieldTicket && (
+        <ManageFieldTicket
+          id={null}
+          isClone={false}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => setCreateDialog(false)}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {createDialog && selectedResource?.resource === sidebarResource.rentalManagement && (
+        <ManageRentalManagementDialog
+          isClone={false}
+          open={createDialog}
+          rentalManagementId={null}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => setCreateDialog(false)}
+          isAutomated={true}
         />
       )}
     </>
