@@ -773,7 +773,7 @@ const Service = ({
             {allowedToEdit && resource === sidebarResource.workOrder && (
               <ActionMenuItem
                 id={'assignTechnicians'}
-                group="Assignment"
+                group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
                     ? false
@@ -790,7 +790,7 @@ const Service = ({
             )}
             {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
               <ActionMenuItem
-                group="Assignment"
+                group="Add/Assign"
                 id={'AssignWorkStations'}
                 disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
                 onClick={() => {
@@ -806,7 +806,7 @@ const Service = ({
             {resource === sidebarResource.workOrder && (
               <ActionMenuItem
                 id={'addExistingServices'}
-                group={'Service Management'}
+                group="Add/Assign"
                 disabled={!isAllowedToServiceEdit}
                 onClick={() => {
                   setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
@@ -821,7 +821,7 @@ const Service = ({
             {resource === sidebarResource.workOrder && (
               <ActionMenuItem
                 id={'addSteps'}
-                group={'Service Management'}
+                group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
                   isAllowedToServiceEdit &&
@@ -842,7 +842,7 @@ const Service = ({
             {resource === sidebarResource.workOrder && (
               <ActionMenuItem
                 id={'addStepsInOtherServices'}
-                group={'Service Management'}
+                group="Add/Assign"
                 disabled={
                   allowedToEdit &&
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
@@ -860,18 +860,7 @@ const Service = ({
                 Add Steps in Other Services
               </ActionMenuItem>
             )}
-            <ActionMenuItem
-              group={'Service Management'}
-              id={'viewServiceStepsData'}
-              onClick={() => {
-                setViewServiceStepDataDialog({ open: true, selectedService: selectedService });
-                setAnchorEl(null);
-              }}
-              searchKey="View Service Steps Data"
-            >
-              <PiFileArchiveLight />
-              View Service Steps Data
-            </ActionMenuItem>
+
             <ActionMenuItem
               group="Documentation"
               id={'uploadDocuments'}
@@ -1003,6 +992,18 @@ const Service = ({
             >
               <PiInfoLight />
               Properties
+            </ActionMenuItem>
+            <ActionMenuItem
+              group={'Info'}
+              id={'viewServiceStepsData'}
+              onClick={() => {
+                setViewServiceStepDataDialog({ open: true, selectedService: selectedService });
+                setAnchorEl(null);
+              }}
+              searchKey="View Service Steps Data"
+            >
+              <PiFileArchiveLight />
+              View Service Steps Data
             </ActionMenuItem>
             {resource === sidebarResource.workOrder && (
               <ActionMenuItem
