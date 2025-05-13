@@ -37,7 +37,7 @@ const ActionButtonWithMenu = ({
   return (
     <>
       <ThemeButton
-        tooltip={tooltip ?? ''}
+        tooltip={tooltip ?? 'Actions'}
         id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
         disabled={disabeled}
         {...rest}
