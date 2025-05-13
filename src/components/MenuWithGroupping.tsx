@@ -80,19 +80,19 @@ const MenuWithGroupping = ({ uniqueId, getItemId, anchorEl, handleClose, childre
         case 'Z':
           e.preventDefault();
           e.stopPropagation();
-          historyItemsRef.current[0]?.click();
+          historyItemsRef.current?.[0]?.click();
           break;
         case 'x':
         case 'X':
           e.preventDefault();
           e.stopPropagation();
-          historyItemsRef.current[1]?.click();
+          historyItemsRef.current?.[1]?.click();
           break;
         case 'c':
         case 'C':
           e.preventDefault();
           e.stopPropagation();
-          historyItemsRef.current[2]?.click();
+          historyItemsRef.current?.[2]?.click();
           break;
         default:
           break;
