@@ -45,6 +45,25 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
+import MenuWithGroupping, { ActionMenuItem } from 'src/components/MenuWithGroupping';
+import { AiOutlineDelete, AiOutlineUserAdd } from 'react-icons/ai';
+import { GoLog, GoPlus } from 'react-icons/go';
+import {
+  PiBuildingOfficeThin,
+  PiCertificateLight,
+  PiChatCenteredDotsLight,
+  PiChatDotsLight,
+  PiChecksLight,
+  PiFileArchiveLight,
+  PiFilePlusLight,
+  PiInfoLight,
+  PiLinkLight,
+  PiPlusLight,
+  PiSkipForwardLight,
+  PiUploadSimpleLight
+} from 'react-icons/pi';
+import { BsCart2 } from 'react-icons/bs';
+import { RiFileHistoryLine } from 'react-icons/ri';
 
 type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
 
@@ -578,7 +597,7 @@ const Service = ({
             )}
 
             {/* ------------------ RIGHT SIDE CONTENTS ------------------ */}
-            {selectedService &&
+            {selectedService && (
               <div className="max-w-full border transition-all md:border-l-0">
                 <ul className="max-h-[calc(100vh-200px)] min-h-[calc(100%-53px)] overflow-y-auto">
                   <CustomCollapsible
@@ -682,7 +701,7 @@ const Service = ({
                   </CustomCollapsible>
                 </ul>
               </div>
-            }
+            )}
           </div>
           {mobScreen && (
             <div
@@ -744,200 +763,263 @@ const Service = ({
               </Menu>
             </>
           )}
-          {anchorEl && (
-            <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-              {allowedToEdit && resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
-                      ? false
-                      : true
-                  }
-                  onClick={() => {
-                    setUserAssignDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Assign Technicians
-                </MenuItem>
-              )}
-              {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
-                <MenuItem
-                  disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
-                  onClick={() => {
-                    setWorkStationAssignDialog(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Assign Work Stations
-                </MenuItem>
-              )}
-              {resource === sidebarResource.workOrder && (
-                <MenuItem
+          <MenuWithGroupping
+            anchorEl={anchorEl}
+            getItemId={(item) => item.id}
+            keepMounted
+            handleClose={handleCloseMenu}
+            uniqueId="work-order-service-menu"
+          >
+            {allowedToEdit && resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                id={'assignTechnicians'}
+                group="Assignment"
+                disabled={
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setUserAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Technicians"
+              >
+                <AiOutlineUserAdd /> Assign Technicians
+              </ActionMenuItem>
+            )}
+            {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
+              <ActionMenuItem
+                group="Assignment"
+                id={'AssignWorkStations'}
+                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                onClick={() => {
+                  setWorkStationAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Work Stations"
+              >
+                <PiBuildingOfficeThin />
+                Assign Work Stations
+              </ActionMenuItem>
+            )}
+            {resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                id={'addExistingServices'}
+                group={'Service Management'}
+                disabled={!isAllowedToServiceEdit}
+                onClick={() => {
+                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Existing Services"
+              >
+                <PiFilePlusLight />
+                Add Existing Services
+              </ActionMenuItem>
+            )}
+            {resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                id={'addSteps'}
+                group={'Service Management'}
+                disabled={
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  isAllowedToServiceEdit &&
+                  selectedService?.clickable
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setAssignSteps(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Steps"
+              >
+                <PiPlusLight />
+                Add Steps
+              </ActionMenuItem>
+            )}
+            {resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                id={'addStepsInOtherServices'}
+                group={'Service Management'}
+                disabled={
+                  allowedToEdit &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  !completed
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setSetpsInOtherServices(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Steps in Other Services"
+              >
+                <PiLinkLight />
+                Add Steps in Other Services
+              </ActionMenuItem>
+            )}
+            <ActionMenuItem
+              group={'Service Management'}
+              id={'viewServiceStepsData'}
+              onClick={() => {
+                setViewServiceStepDataDialog({ open: true, selectedService: selectedService });
+                setAnchorEl(null);
+              }}
+              searchKey="View Service Steps Data"
+            >
+              <PiFileArchiveLight />
+              View Service Steps Data
+            </ActionMenuItem>
+            <ActionMenuItem
+              group="Documentation"
+              id={'uploadDocuments'}
+              onClick={() => {
+                setAttchmentsDialog({
+                  open: true,
+                  uniqueServiceId: selectedService.uniqueId,
+                  stepId: null,
+                  serviceName: selectedService.serviceName,
+                  stepName: selectedService?.serviceName || ''
+                });
+                setAnchorEl(null);
+              }}
+              disabled={!isAllowedToServiceEdit}
+              searchKey="Upload Documents"
+            >
+              <PiUploadSimpleLight />
+              Upload Documents
+            </ActionMenuItem>
+            {!user?.brandPolicy?.workOrderConsumableHide &&
+              (resource === sidebarResource.workOrder ||
+                (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
+                <ActionMenuItem
+                  group="Documentation"
+                  id="addConsumeProducts"
                   disabled={!isAllowedToServiceEdit}
                   onClick={() => {
-                    setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                    setConsumablesDialog({
+                      open: true,
+                      uniqueId: selectedService.uniqueId,
+                      service: selectedService._id,
+                      stepId: null,
+                      serviceName: selectedService.serviceName
+                    });
                     setAnchorEl(null);
                   }}
+                  searchKey="Add/Consume Products"
                 >
-                  Add Existing Services
-                </MenuItem>
+                  <BsCart2 />
+                  Add/Consume Products
+                </ActionMenuItem>
               )}
-              {resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                      isAllowedToServiceEdit &&
-                      selectedService?.clickable
-                      ? false
-                      : true
-                  }
-                  onClick={() => {
-                    setAssignSteps(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add Steps
-                </MenuItem>
-              )}
-              {resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={
-                    allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                      !completed
-                      ? false
-                      : true
-                  }
-                  onClick={() => {
-                    setSetpsInOtherServices(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Add Steps in Other Services
-                </MenuItem>
-              )}
-              <MenuItem
+            <ActionMenuItem
+              group="Service Actions"
+              id={'completeService'}
+              disabled={
+                isAllowedToServiceEdit &&
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
+                  ? false
+                  : true
+              }
+              onClick={() => {
+                handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
+                setAnchorEl(null);
+              }}
+              searchKey="Complete Service"
+            >
+              <PiChecksLight />
+              Complete Service
+            </ActionMenuItem>
+            <ActionMenuItem
+              group="Service Actions"
+              id="skipService"
+              disabled={
+                isAllowedToServiceEdit &&
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
+                  ? false
+                  : true
+              }
+              onClick={() => {
+                handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
+                setAnchorEl(null);
+              }}
+              searchKey="Skip Service"
+            >
+              <PiSkipForwardLight />
+              Skip Service
+            </ActionMenuItem>
+            <ActionMenuItem
+              group="Communication"
+              id="comments"
+              onClick={() => {
+                setCommentsDialog(true);
+                setAnchorEl(null);
+              }}
+              disabled={!isAllowedToServiceEdit}
+              searchKey="Comments"
+            >
+              <PiChatDotsLight />
+              Comments
+            </ActionMenuItem>
+            {user?.brandPolicy?.subcontractPurchaseOrder && resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                group="Communication"
+                id={'subcontractPO'}
                 onClick={() => {
-                  setViewServiceStepDataDialog({ open: true, selectedService: selectedService });
+                  setShowManagePurchaseOrder(true);
                   setAnchorEl(null);
                 }}
+                searchKey="Subcontract PO"
               >
-                View Service Steps Data
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setAttchmentsDialog({
-                    open: true,
-                    uniqueServiceId: selectedService.uniqueId,
-                    stepId: null,
-                    serviceName: selectedService.serviceName,
-                    stepName: selectedService?.serviceName || ''
-                  });
-                  setAnchorEl(null);
-                }}
-                disabled={!isAllowedToServiceEdit}
-              >
-                Upload Documents
-              </MenuItem>
-              {!user?.brandPolicy?.workOrderConsumableHide &&
-                (resource === sidebarResource.workOrder ||
-                  (resource === sidebarResource.workOrderTechnician && user?.brandPolicy?.workOrderTechnicianConsumable)) && (
-                  <MenuItem
-                    disabled={!isAllowedToServiceEdit}
-                    onClick={() => {
-                      setConsumablesDialog({
-                        open: true,
-                        uniqueId: selectedService.uniqueId,
-                        service: selectedService._id,
-                        stepId: null,
-                        serviceName: selectedService.serviceName
-                      });
-                      setAnchorEl(null);
-                    }}
-                  >
-                    Add/Consume Products
-                  </MenuItem>
-                )}
-              <MenuItem
-                disabled={
-                  isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
-                  setAnchorEl(null);
-                }}
-              >
-                Complete Service
-              </MenuItem>
-              <MenuItem
-                disabled={
-                  isAllowedToServiceEdit &&
-                    [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    selectedService?.clickable
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
-                  setAnchorEl(null);
-                }}
-              >
-                Skip Service
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setCommentsDialog(true);
-                  setAnchorEl(null);
-                }}
-                disabled={!isAllowedToServiceEdit}
-              >
-                Comments
-              </MenuItem>
-              {user?.brandPolicy?.subcontractPurchaseOrder && resource === sidebarResource.workOrder && (
-                <MenuItem
-                  onClick={() => {
-                    setShowManagePurchaseOrder(true);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Subcontract PO
-                </MenuItem>
-              )}
-              <MenuItem
-                onClick={() => {
-                  setLogsDialog(true);
-                  setAnchorEl(null);
-                }}
-              >
-                Logs
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  setOpenProperties(true);
-                  setAnchorEl(null);
-                }}
+                <PiCertificateLight />
+                Subcontract PO
+              </ActionMenuItem>
+            )}
+            <ActionMenuItem
+              group="Info"
+              id="logs"
+              onClick={() => {
+                setLogsDialog(true);
+                setAnchorEl(null);
+              }}
+              searchKey="Logs"
+            >
+              <RiFileHistoryLine className="text-gray-500" />
+              Logs
+            </ActionMenuItem>
+            <ActionMenuItem
+              group={'Info'}
+              id="properties"
+              onClick={() => {
+                setOpenProperties(true);
+                setAnchorEl(null);
+              }}
+              disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
+              searchKey="Properties"
+            >
+              <PiInfoLight />
+              Properties
+            </ActionMenuItem>
+            {resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                group="Service Actions"
+                id={'delete'}
                 disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
+                onClick={() => {
+                  handleRemoveService(selectedService?.uniqueId);
+                  setAnchorEl(null);
+                }}
+                searchKey="Delete"
               >
-                Properties
-              </MenuItem>
-              {resource === sidebarResource.workOrder && (
-                <MenuItem
-                  disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
-                  onClick={() => {
-                    handleRemoveService(selectedService?.uniqueId);
-                    setAnchorEl(null);
-                  }}
-                >
-                  Delete
-                </MenuItem>
-              )}
-            </Menu>
-          )}
+                <AiOutlineDelete className="text-gray-500" />
+                Delete
+              </ActionMenuItem>
+            )}
+          </MenuWithGroupping>
         </>
       ) : (
         <Box p={2} height={500}>
