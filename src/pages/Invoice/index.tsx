@@ -1,5 +1,5 @@
 import { Box, Chip, IconButton, MenuItem } from '@mui/material';
-import { Delete } from '@mui/icons-material';
+import { Delete, Key } from '@mui/icons-material';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -69,6 +69,10 @@ const Invoice = () => {
     {
       key: `All ${resources?.invoice?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.invoice?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -220,7 +224,12 @@ const Invoice = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
