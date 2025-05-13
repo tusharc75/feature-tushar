@@ -27,9 +27,9 @@ export default function ResourceTransferDialog(props) {
   const handleTransfer = () => {
     setLoading(true);
     let tempData = null;
-    if (fromResource.length > 0) {
+    if (fromResource?.length > 0) {
       tempData = {
-        users: fromResource.map((d) => d._id)
+        users: fromResource?.map((d) => d?._id)
       };
     }
 
@@ -37,7 +37,9 @@ export default function ResourceTransferDialog(props) {
       resource === 'User'
         ? `user/resource-change/${toResource?.optionValue}`
         : `entity/entity-change/${fromResource?._id}/${toResource?.optionValue}`;
-    if (fromResource && toResource?.optionValue) {
+
+    const canCallApi = resource === 'User' && fromResource?.length > 0 ? true : resource === 'Entity' && fromResource ? true : false;
+    if (canCallApi && toResource?.optionValue) {
       axiosInstance()
         .put(api, tempData)
         .then((data) => {
@@ -118,18 +120,10 @@ export default function ResourceTransferDialog(props) {
         </Box>
       </DialogContent>
       <CustomDialogFooter>
-        <ThemeButton
-          onClick={onClose}
-          buttonType='transparent'
-        >
+        <ThemeButton onClick={onClose} buttonType="transparent">
           Cancel
         </ThemeButton>
-        <ThemeButton
-          onClick={handleTransfer}
-          disabled={loading || !toResource}
-          isLoading={loading}
-          buttonType='theme'
-        >
+        <ThemeButton onClick={handleTransfer} disabled={loading || !toResource} isLoading={loading} buttonType="theme">
           Submit
         </ThemeButton>
       </CustomDialogFooter>
