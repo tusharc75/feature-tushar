@@ -1,7 +1,7 @@
 import { Close } from '@mui/icons-material';
 import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { kebabCase, lowerCase } from 'lodash';
-import React, { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
 import { Link, useHistory, withRouter } from 'react-router-dom';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
@@ -33,11 +33,12 @@ function SideBar({ location }) {
   };
 
   const {
-    state: { permissions, user, selectedEntity }
+    state: { permissions, user, selectedEntity, tour }
   }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
 
   const history = useHistory();
+  const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
   const pathName = pathnames[0];
@@ -185,31 +186,79 @@ function SideBar({ location }) {
 
                 return (
                   <React.Fragment key={listItem.name}>
-                    <RenderListItem
-                      listItem={listItem}
-                      isItemActive={isItemActive}
-                      isSidebarOpen={isSidebarOpen}
-                      handleCollapse={handleCollapse}
-                      history={history}
-                      hasChild={hasChild}
-                      open={open}
-                      index={i}
-                    />
-                    <RenderNestedItem
-                      {...{
-                        hasChild,
-                        open,
-                        listItem,
-                        isItemActive,
-                        pathName,
-                        itemToAddActiveClass,
-                        index: i,
-                        setItemToAddActiveClass,
-                        setSubItemToAddActiveClass,
-                        subItemToAddActiveClass,
-                        pathnames
+                    <ListItemButton
+                      className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
+                      key={listItem.name + '' + i}
+                      onClick={() => {
+                        if (isSidebarOpen) {
+                          handleCollapse(listItem.name);
+                        }
+                        if (!listItem.items?.length) {
+                          history.push(listItem.link);
+                        }
                       }}
-                    />
+                      id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
+                    >
+                      <span
+                        className={cn(
+                          '-z-10',
+                          isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
+                          isSidebarOpen ? 'left-3 right-3' : 'left-[18px] h-[40px] w-[45px]'
+                        )}
+                      ></span>
+                      <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
+                      <ListItemText
+                        primary={listItem.name}
+                        className={cn(
+                          `wordWrap [&>span]:!font-normal`,
+                          isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]'
+                        )}
+                      />
+                      {hasChild && (
+                        <span className={cn('expand-icon mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
+                          {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
+                        </span>
+                      )}
+                    </ListItemButton>
+                    {hasChild && (
+                      <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
+                        <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
+                          {listItem.items.map((item, j) => (
+                            <Link
+                              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
+                                itemToAddActiveClass === i && subItemToAddActiveClass === j ? 'active_sub' : ''
+                              }`}
+                              key={j}
+                              onClick={() => {
+                                setItemToAddActiveClass(i);
+                                setSubItemToAddActiveClass(j);
+                                // setOpen({});
+                              }}
+                              to={item.link}
+                            >
+                              <ListItemButton
+                                selected={pathnames?.includes(lowerCase(item.name))}
+                                className={`${styles.subListItems} `}
+                                id={`sidebar-item-${(item.resourceLabel || item.name).split(' ').join('-')}`}
+                                style={{ gap: 32 }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                                  <path
+                                    d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                                    fill="currentcolor"
+                                    stroke="currentcolor"
+                                  ></path>
+                                </svg>
+                                <ListItemText
+                                  primary={item.resourceLabel || item.name}
+                                  className={`line-clamp-1 !text-[var(--sidebar-text-color)] [&>span]:!font-normal`}
+                                />
+                              </ListItemButton>
+                            </Link>
+                          ))}
+                        </List>
+                      </Collapse>
+                    )}
                   </React.Fragment>
                 );
               })}
@@ -222,96 +271,3 @@ function SideBar({ location }) {
 }
 
 export default withRouter(SideBar);
-
-const RenderListItem = memo(({ listItem, isItemActive, isSidebarOpen, handleCollapse, history, hasChild, open, index }: any) => {
-  return (
-    <ListItemButton
-      className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
-      key={listItem.name + '' + index}
-      onClick={() => {
-        if (isSidebarOpen) {
-          handleCollapse(listItem.name);
-        }
-        if (!listItem.items?.length) {
-          history.push(listItem.link);
-        }
-      }}
-      id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
-    >
-      <span
-        className={cn(
-          '-z-10',
-          isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
-          isSidebarOpen ? 'left-3 right-3' : 'left-[18px] h-[40px] w-[45px]'
-        )}
-      ></span>
-      <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
-      <ListItemText
-        primary={listItem.name}
-        className={cn(`wordWrap [&>span]:!font-normal`, isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]')}
-      />
-      {hasChild && (
-        <span className={cn('expand-icon mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
-          {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
-        </span>
-      )}
-    </ListItemButton>
-  );
-});
-
-const RenderNestedItem = memo(
-  ({
-    hasChild,
-    open,
-    listItem,
-    isItemActive,
-    pathName,
-    itemToAddActiveClass,
-    index,
-    setItemToAddActiveClass,
-    setSubItemToAddActiveClass,
-    subItemToAddActiveClass,
-    pathnames
-  }: any) => {
-    if (!hasChild) return null;
-    return (
-      <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
-        <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
-          {listItem.items.map((item, j) => (
-            <Link
-              className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
-                itemToAddActiveClass === index && subItemToAddActiveClass === j ? 'active_sub' : ''
-              }`}
-              key={j}
-              onClick={() => {
-                setItemToAddActiveClass(index);
-                setSubItemToAddActiveClass(j);
-                // setOpen({});
-              }}
-              to={item.link}
-            >
-              <ListItemButton
-                selected={pathnames?.includes(lowerCase(item.name))}
-                className={`${styles.subListItems} `}
-                id={`sidebar-item-${(item.resourceLabel || item.name).split(' ').join('-')}`}
-                style={{ gap: 32 }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
-                  <path
-                    d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
-                    fill="currentcolor"
-                    stroke="currentcolor"
-                  ></path>
-                </svg>
-                <ListItemText
-                  primary={item.resourceLabel || item.name}
-                  className={`line-clamp-1 !text-[var(--sidebar-text-color)] [&>span]:!font-normal`}
-                />
-              </ListItemButton>
-            </Link>
-          ))}
-        </List>
-      </Collapse>
-    );
-  }
-);
