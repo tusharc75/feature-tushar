@@ -32,6 +32,7 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 
 function PlanningView() {
   const {
@@ -205,7 +206,7 @@ function PlanningView() {
   ];
 
   useEffect(() => {
-    fetchPolicy()
+    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -249,16 +250,17 @@ function PlanningView() {
     <>
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
+          <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
+          <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} />
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -266,7 +268,8 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource && permissions[selectedResource?.key]?.isCreate &&
+            {selectedResource &&
+              permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
                   className="mr-2"
@@ -423,7 +426,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => { }}
+          fetchData={() => {}}
           onSuccess={() => {
             onClickRefreshIcon();
           }}

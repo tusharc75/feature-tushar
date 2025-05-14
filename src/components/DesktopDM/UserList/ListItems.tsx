@@ -36,7 +36,7 @@ export const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
             <Person className="!text-[28px]" />
           </Avatar>
         </Badge>
-        <GenieText className="max-h-[14px]" />
+        <GenieText className="max-h-[14px] w-[64px]" />
       </button>
       <span className="ml-auto block w-[calc(264px-64px)] border-b " />
     </>
