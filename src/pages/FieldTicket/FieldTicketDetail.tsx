@@ -295,7 +295,11 @@ const FieldTicketDetail = () => {
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <OnField rentalId={fieldTicketData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldTicket} />
+          <OnField
+            referenceData={fieldTicketData}
+            rentalJob={fieldTicketData?.rentalJob?.optionValue}
+            referenceFrom={sidebarResource?.fieldTicket}
+          />
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&
