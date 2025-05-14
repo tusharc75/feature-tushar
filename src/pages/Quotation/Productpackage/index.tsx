@@ -4,7 +4,7 @@ import DateRangeIcon from '@mui/icons-material/DateRange';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { orderBy, startCase, uniqBy } from 'lodash';
+import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -329,16 +329,10 @@ const Productpackage = ({
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
-    const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
-    const additionalData = additionalCost?.data?.data || [];
-    const updatedAdditionalData = additionalData?.map((e: any) => {
-      return { ...e, type: MATERIAL_TYPE.manualEntry };
-    });
 
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...updatedAdditionalData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
@@ -372,7 +366,7 @@ const Productpackage = ({
     } else {
       setNextStep(true);
     }
-    dispatch({ type: 'initialize', data: orderBy(rows, ['order']), count: rows?.length });
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     updateDOASetup(data?.doasetup);
   };

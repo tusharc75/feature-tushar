@@ -11,7 +11,8 @@ import {
   PRICING_SETUP_TYPE,
   fieldServiceOrder,
   getObjKeysWithValues,
-  sidebarResource
+  sidebarResource,
+  ACTIVITY_RESOURCE
 } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField, Typography } from '@mui/material';
@@ -35,6 +36,10 @@ import { FiExternalLink } from 'react-icons/fi';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
 import AddQuotationDataDialog from 'src/pages/FieldTicket/material/AddQuotationDataDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+
 
 const Consumables = ({
   allowedToEdit,
@@ -64,6 +69,8 @@ const Consumables = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const {
     state: { user, resources }
@@ -194,6 +201,18 @@ const Consumables = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {!isOffline &&
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>}
             <HtmlTooltip title={allowedToEdit && row?.original?.canDelete ? 'Delete' : 'Already dispatched/returned'}>
               <span>
                 <IconButton
@@ -593,6 +612,17 @@ const Consumables = ({
               referenceData={serviceOrderData}
               isSubmitting={isSubmitting}
               materialType={MATERIAL_TYPE.product}
+            />
+          )}
+          {showAttachmentDialog.open && (
+            <DiagramDialog
+              referenceId={serviceOrderData?._id}
+              uniqueId={showAttachmentDialog?._id}
+              referenceLabel={showAttachmentDialog.label}
+              resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+              handleClose={() => {
+                setShowAttachmentDialog({ open: false, _id: null, label: '' });
+              }}
             />
           )}
         </>

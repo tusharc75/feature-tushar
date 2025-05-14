@@ -123,15 +123,9 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
 
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
-    const additionalData = await axiosInstance().get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`);
-    let additionalCost = additionalData?.data?.data || [];
-    additionalCost = additionalCost?.map((e: any) => {
-      return { ...e, type: MATERIAL_TYPE.manualEntry };
-    });
     data = response?.data?.data;
 
     let rows = data.material.filter((e) => !e.parentId);
-    rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =

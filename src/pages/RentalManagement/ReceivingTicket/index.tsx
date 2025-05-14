@@ -2582,7 +2582,7 @@ const ReceivingTicket = ({
       <TabPanel value={tabValue} index={0}>
         <DetailsPageHeader
           isAddButtonVisible={false}
-          isActionButtonVisible={true}
+          isActionButtonVisible={allowedToEdit}
           actionButtonMenuItems={
             <ActionButtonMenuItems
               {...{
