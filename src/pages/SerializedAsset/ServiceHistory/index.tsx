@@ -205,9 +205,9 @@ const ServiceHistory = ({ id, refresh }) => {
           <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
         </Box>
         <ImportExportLinks
-          permissions={permissions?.history}
-          module={'Asset History'}
-          api={`/history/inventory/${id}`}
+          permissions={permissions?.serializedAsset}
+          module={'Service History'}
+          api={`/history/asset-service/${id}`}
           afterImportCompleted={() => { }}
           onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
