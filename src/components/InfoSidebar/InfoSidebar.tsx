@@ -17,10 +17,7 @@ const InfoSidebar = () => {
   }, [setStore]);
 
   return (
-    <div
-      className="max-h-[calc(100vh-111px)] flex-grow [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] "
-      style={{ transform: `translateY(${y}px)` }}
-    >
+    <div className="max-h-[calc(100vh-111px)] flex-grow [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
       <div className="flex items-center justify-between gap-2 border-b px-[--px] py-[--py]">
         <h6 className="line-clamp-1 text-base font-semibold">{title}</h6>
         <IconButton color="primary" size="small" onClick={handleClose} sx={{ borderRadius: '5px' }}>

@@ -2,14 +2,12 @@ import { Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { InfoSidebarContainer } from 'src/components/InfoSidebar';
 import { cn } from 'src/constants/helpers';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import Sidebar from './Sidebar/Sidebar';
-import { useInforSidebar } from 'src/components/InfoSidebar/store';
-import { InfoSidebar } from 'src/components/InfoSidebar';
 
 const Layout = ({ children }) => {
-  const [infoSidebarData] = useInforSidebar((state) => state.data);
   const contentRef = useRef(null);
   const bodyRef = useRef(null);
   const isSidebarOutsideScreen = useMediaQuery('(max-width:959px)');
@@ -61,14 +59,7 @@ const Layout = ({ children }) => {
               {children}
             </div>
           </motion.div>
-          <div
-            className={cn(
-              'max-sm: absolute bottom-0 right-0 top-0 flex h-screen flex-shrink-0 overflow-hidden transition-[width] duration-0 motion-safe:duration-300 sm:static',
-              infoSidebarData ? 'w-[--info-sidebar-w]' : 'w-0'
-            )}
-          >
-            <div className="sticky top-0 z-10 flex w-[--info-sidebar-w] flex-grow border bg-white">{infoSidebarData && <InfoSidebar />}</div>
-          </div>
+          <InfoSidebarContainer />
         </div>
       </div>
     </>
