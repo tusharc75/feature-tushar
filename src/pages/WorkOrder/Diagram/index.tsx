@@ -549,7 +549,7 @@ const Diagram = ({
                           </Typography>
                         </div>
 
-                        <div className="pointer-events-none flex items-center gap-2">
+                        <div className="pointer-events-none flex items-center gap-1">
                           <AccordionButtons
                             disableEdit={disableEdit}
                             downloadZip={downloadZip}
