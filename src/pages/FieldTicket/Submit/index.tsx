@@ -194,14 +194,13 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
     materialRows?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail =
-        parent?.productDetail?.productName ||
+      parent.detail = parent?.productDetail?.productName ||
         parent?.serviceDetail?.serviceName ||
         parent?.serializedAssetDetail?.assetNumber ||
         parent?.packageDetail?.packageName ||
-        '';
-      parent.description =
-        parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
+        parent?.detail || '';
+      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription
+        || parent?.packageDetail?.packageDescription || parent?.description || '';
       parent.subRows = generateNestedData(material, parent);
     });
     dispatch({ type: 'initialize', data: materialRows, count: materialRows?.length });
