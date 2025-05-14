@@ -66,6 +66,14 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
   if (mobileMedia) {
     return (
       <div className="pointer-events-auto flex gap-1">
+        {!disableEdit && (
+          <DeleteRequest
+            file={file}
+            handleSucess={() => {
+              fetchData();
+            }}
+          />
+        )}
         <HtmlTooltip
           title={
             <div className="flex flex-col p-2">
@@ -82,14 +90,6 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
             <InfoIcon fontSize="small" color="primary" />
           </IconButton>
         </HtmlTooltip>
-        {!disableEdit && (
-          <DeleteRequest
-            file={file}
-            handleSucess={() => {
-              fetchData();
-            }}
-          />
-        )}
         <IconButton size="small" color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
           <MoreVert fontSize="small" />
         </IconButton>
