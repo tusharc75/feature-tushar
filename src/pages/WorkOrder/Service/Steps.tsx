@@ -1804,7 +1804,7 @@ const Steps = ({
                 uniqueId={selectedService?.uniqueId}
               />
             )}
-            {attchmentsDialog.open && (
+            {attchmentsDialog.open && permissions?.attachment?.isRead && (
               <DiagramDialog
                 referenceId={workOrderId}
                 handleClose={() => {
@@ -1984,7 +1984,7 @@ const Steps = ({
           isClone={addNewStep.clone}
         />
       )}
-      {showDrawing && (
+      {showDrawing && permissions?.attachment?.isRead && (
         <DiagramDialog
           referenceId={workOrderData?._id}
           handleClose={() => {

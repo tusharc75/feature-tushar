@@ -469,7 +469,7 @@ const WorkOrderTechnician = () => {
         {
           disabled:
             selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
+              selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
               selectedRecords?.length
               ? false
               : true,
@@ -685,7 +685,7 @@ const WorkOrderTechnician = () => {
           setFilterTerm={setFilterTerm}
         />
       )}
-      {showDrawingDialog.open && (
+      {showDrawingDialog.open && permissions?.attachment?.isRead && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
           handleClose={() => {

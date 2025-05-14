@@ -824,8 +824,8 @@ const Service = ({
                 group={'Service Management'}
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  isAllowedToServiceEdit &&
-                  selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -845,8 +845,8 @@ const Service = ({
                 group={'Service Management'}
                 disabled={
                   allowedToEdit &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                     ? false
                     : true
                 }
@@ -919,8 +919,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -938,8 +938,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -1186,7 +1186,7 @@ const Service = ({
         />
       )}
 
-      {attchmentsDialog.open && (
+      {attchmentsDialog.open && permissions?.attachment?.isRead && (
         <DiagramDialog
           referenceId={workOrderId}
           handleClose={() => {

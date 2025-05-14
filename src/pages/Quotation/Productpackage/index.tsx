@@ -61,7 +61,7 @@ const Productpackage = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, resources }
+    state: { user, resources ,permissions}
   }: any = useData();
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -276,7 +276,7 @@ const Productpackage = ({
               </IconButton>
             </HtmlTooltip>
           )}
-          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"

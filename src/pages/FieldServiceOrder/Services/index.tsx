@@ -219,17 +219,18 @@ const Services = ({ serviceOrderData, serviceOrderFields, stepFullScreen, allowe
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-                }}
-              >
-                <AttachFileIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
+            {permissions?.attachment?.isRead && (
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>)}
             <HtmlTooltip title={'Delete'}>
               <span>
                 <IconButton
