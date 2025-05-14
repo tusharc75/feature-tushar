@@ -2463,7 +2463,7 @@ export const REPORT_SECTIONS = {
   inventory: 'Inventory',
   asset: 'Asset',
   purchase: 'Purchase',
-  fieldTicket: 'Field Ticket',
+  field: 'Field',
   production: 'Production',
   workOrder: 'Work Order',
   deals: 'Deals',
@@ -2615,11 +2615,18 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
+    title: sidebarResource.fieldServiceOrder,
+    permission: 'fieldServiceOrder',
+    key: 'fieldServiceOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.field
+  },
+  {
     title: sidebarResource.fieldTicket,
     permission: 'fieldTicket',
     key: 'fieldTicket',
     type: 'dynamic',
-    section: REPORT_SECTIONS.fieldTicket
+    section: REPORT_SECTIONS.field
   },
   {
     title: sidebarResource.workOrder,
@@ -2776,13 +2783,6 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'technicianSchedule',
     section: REPORT_SECTIONS.technician
-  },
-  {
-    title: sidebarResource.fieldServiceOrder,
-    permission: 'fieldServiceOrder',
-    key: 'fieldServiceOrder',
-    type: 'dynamic',
-    section: REPORT_SECTIONS.fieldTicket
   }
 ];
 
