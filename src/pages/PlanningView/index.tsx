@@ -253,14 +253,14 @@ function PlanningView() {
           <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
-          <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} />
+          {/* <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} /> */}
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -426,7 +426,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => {}}
+          fetchData={() => { }}
           onSuccess={() => {
             onClickRefreshIcon();
           }}
