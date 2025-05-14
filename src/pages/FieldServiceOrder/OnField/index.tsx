@@ -1,7 +1,6 @@
 import { Box } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   checkIsAllowedToEdit,
@@ -16,29 +15,45 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useData } from 'src/StateProvider/Provider';
 
-
-const OnField = ({ rentalId, referenceFrom }) => {
+const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = `${referenceFrom}_onField`;
   const {
-    state: { user, resourceData },
+    state: { user },
   }: any = useData();
   const [loading, setLoading] = useState(true);
   const [rentalManagementData, setRentalManagementData] = useState(null);
   const [isProcessor, setIsProcessor] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
-    if (rentalId) {
+    fetchPolicy()
+    fetchAssetStatusRights();
+
+  }, []);
+
+  useEffect(() => {
+    if (rentalJob) {
       fetchRentalManagementData();
-      if (serializedAsset?.resource) {
-        fetchAssetStatusRights();
-      }
     }
-  }, [rentalId]);
+  }, [rentalJob]);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchAssetStatusRights = () => {
     axiosInstance()
@@ -56,18 +71,17 @@ const OnField = ({ rentalId, referenceFrom }) => {
       .catch((err) => { });
   };
 
-
   const fetchRentalManagementData = async () => {
     try {
       let data;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalJob}`);
         data = response?.data?.data;
       } else {
-        data = await findOne(objectStore.rentalManagement, rentalId);
+        data = await findOne(objectStore.rentalManagement, rentalJob);
       }
       setLoading(false);
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, data));
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData));
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -83,11 +97,11 @@ const OnField = ({ rentalId, referenceFrom }) => {
         <ReceivingTicket
           fetchRentalData={fetchRentalManagementData}
           rentalManagementData={rentalManagementData}
-          currentStep={RENTAL_STEPS.onField}
+          currentStep={user?.user?.brandPolicy?.rentalOnFieldStep ? RENTAL_STEPS.onField : RENTAL_STEPS.receiving}
           setNextStep={() => { }}
           setNextStepToolTip={() => { }}
-          renderedFrom={`${renderedFrom}_grid-4`}
-          allowedToEdit={allowedToEdit}
+          renderedFrom={`${renderedFrom}`}
+          allowedToEdit={resourceData?.policy?.allowOnFieldUpdateFieldJobTicket ? allowedToEdit : false}
           isProcessor={isProcessor}
           stepFullScreen={false}
           allowUpdateStatus={allowUpdateStatus}
