@@ -1,9 +1,9 @@
 import { makeStyles } from '@mui/styles';
-import { Typography, List, ListItem, ListItemSecondaryAction, ListItemText, IconButton, Theme } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Typography, List, ListItem, ListItemText, IconButton, Theme } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import BoxWithBorder from '../../components/BoxWithBorder';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { FiExternalLink } from 'react-icons/fi';
+import routes from 'src/components/Helpers/Routes';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -32,30 +32,46 @@ const UserRoles = ({ data, unassignRole, permissions }: props) => {
         <List sx={{ padding: 0 }}>
           {data && data.length
             ? data.map((obj: any, i: string) => (
-                <ListItem key={i} className="rounded border">
-                  <ListItemText
-                    primary={
-                      <Typography title={obj.name || ''} className={permissions?.role?.isRead ? 'link text-truncate' : 'text-truncate'}>
-                        {permissions?.role?.isRead ? <Link to={`/role/detail/${obj._id}`}>{obj.name || ''}</Link> : <span>{obj.name || ''}</span>}
+              <ListItem key={i} className="border-b border-r">
+                <ListItemText
+                  primary={
+                    <div className="flex items-center gap-1">
+                      <Typography variant='subtitle2' title={obj.name || ''} className={'text-truncate'}>
+                        <span>{obj.name || ''}</span>
                       </Typography>
-                    }
-                    secondary={
-                      <Typography color="textSecondary" title={obj.description || ''} className="text-truncate">
-                        {obj.description || ''}
-                      </Typography>
-                    }
-                  />
-                  {permissions?.user?.isUpdate && (
-                    <ListItemSecondaryAction>
-                      <HtmlTooltip title={'Unassign Role'}>
-                        <IconButton size="small" edge="end" aria-label="delete" onClick={() => unassignRole(obj)}>
-                          <DeleteIcon color={'error'} />
+                      {permissions?.role?.isRead &&
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            window.open(`${routes.roleDetail.path}/${obj._id}`);
+
+                          }}
+                        >
+                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                         </IconButton>
-                      </HtmlTooltip>
-                    </ListItemSecondaryAction>
-                  )}
-                </ListItem>
-              ))
+                      }
+                    </div>
+                  }
+                  secondary={
+                    <Typography variant='caption' title={obj.description || ''} className="text-truncate">
+                      {obj.description || ''}
+                    </Typography>
+                  }
+                />
+                {permissions?.user?.isUpdate && (
+                  <HtmlTooltip title={data.length === 1 ? 'Cannot be unassigned as one role required for the user.' : 'Unassign Role'}>
+                    <IconButton
+                      size="small"
+                      edge="end"
+                      aria-label="delete"
+                      disabled={data.length === 1 ? true : false}
+                      onClick={() => unassignRole(obj)}>
+                      <DeleteIcon color={data.length === 1 ? 'disabled' : 'error'} fontSize='small' />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </ListItem>
+            ))
             : null}
         </List>
       </div>
