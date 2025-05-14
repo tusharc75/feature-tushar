@@ -90,9 +90,11 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
             <InfoIcon fontSize="small" color="primary" />
           </IconButton>
         </HtmlTooltip>
-        <IconButton size="small" color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
-          <MoreVert fontSize="small" />
-        </IconButton>
+        <HtmlTooltip title='Actions'>
+          <IconButton size="small" color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
+            <MoreVert fontSize="small" color='primary' />
+          </IconButton>
+        </HtmlTooltip>
         <Menu
           anchorOrigin={{
             vertical: 'bottom',
