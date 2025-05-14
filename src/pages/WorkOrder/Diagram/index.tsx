@@ -534,6 +534,7 @@ const Diagram = ({
                         }`}
                       >
                         <button
+                          title={file?.name}
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
                           onClick={() => {
                             toggleAccordion(file);
@@ -543,10 +544,11 @@ const Diagram = ({
                           <div className="pointer-events-auto">
                             <Checkbox size="small" checked={isFileSelected(file)} onChange={() => handleSelectFile(file)} />
                           </div>
-                          <Typography style={{ fontWeight: 600 }} className=" break-all" title={file?.name}>
+                          <Typography style={{ fontWeight: 600 }} className="line-clamp-1 break-all" title={file?.name}>
                             {file?.name}
                           </Typography>
                         </div>
+
                         <div className="pointer-events-none flex items-center gap-2">
                           <AccordionButtons
                             disableEdit={disableEdit}
