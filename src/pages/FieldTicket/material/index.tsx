@@ -337,7 +337,7 @@ const Material = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
+            {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"
