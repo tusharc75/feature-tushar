@@ -1,7 +1,7 @@
 import { Close } from '@mui/icons-material';
 import { Collapse, CssBaseline, IconButton, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import { kebabCase, lowerCase } from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { GoChevronDown, GoChevronUp } from 'react-icons/go';
 import { Link, useHistory, withRouter } from 'react-router-dom';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
@@ -33,12 +33,11 @@ function SideBar({ location }) {
   };
 
   const {
-    state: { permissions, user, selectedEntity, tour }
+    state: { permissions, user, selectedEntity }
   }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
 
   const history = useHistory();
-  const classes = useStyles();
   const [open, setOpen] = useState({});
   const pathnames = location.pathname.split('/').filter((x) => x);
   const pathName = pathnames[0];
@@ -186,7 +185,7 @@ function SideBar({ location }) {
 
                 return (
                   <React.Fragment key={listItem.name}>
-                    <ListItemButton
+                    {/* <ListItemButton
                       className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
                       key={listItem.name + '' + i}
                       onClick={() => {
@@ -219,7 +218,17 @@ function SideBar({ location }) {
                           {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
                         </span>
                       )}
-                    </ListItemButton>
+                    </ListItemButton> */}
+                    <RenderListItem
+                      listItem={listItem}
+                      isItemActive={isItemActive}
+                      isSidebarOpen={isSidebarOpen}
+                      handleCollapse={handleCollapse}
+                      history={history}
+                      hasChild={hasChild}
+                      open={open}
+                      index={i}
+                    />
                     {hasChild && (
                       <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
                         <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
@@ -271,3 +280,39 @@ function SideBar({ location }) {
 }
 
 export default withRouter(SideBar);
+
+const RenderListItem = memo(({ listItem, isItemActive, isSidebarOpen, handleCollapse, history, hasChild, open, index }: any) => {
+  return (
+    <ListItemButton
+      className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
+      key={listItem.name + '' + index}
+      onClick={() => {
+        if (isSidebarOpen) {
+          handleCollapse(listItem.name);
+        }
+        if (!listItem.items?.length) {
+          history.push(listItem.link);
+        }
+      }}
+      id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
+    >
+      <span
+        className={cn(
+          '-z-10',
+          isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
+          isSidebarOpen ? 'left-3 right-3' : 'left-[18px] h-[40px] w-[45px]'
+        )}
+      ></span>
+      <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
+      <ListItemText
+        primary={listItem.name}
+        className={cn(`wordWrap [&>span]:!font-normal`, isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]')}
+      />
+      {hasChild && (
+        <span className={cn('expand-icon mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
+          {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
+        </span>
+      )}
+    </ListItemButton>
+  );
+});
