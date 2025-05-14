@@ -14,30 +14,30 @@ import { CustomToastContext } from '../StateProvider/CustomToastContext/CustomTo
 import { CustomDialogTransition, entity } from '../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export default function ResourceTransferDialog(props) {
-  const { resource = '', open, onClose, allResourceData, fromResource, handleDelete, selectedRecords = [] } = props;
+export default function ResourceTransferDialog({ resource = '', open, onClose, allResourceData, fromResource, handleDelete, selectedRecords = [] }) {
+
   const [loading, setLoading] = useState(false);
   const [toResource, setToResource] = useState(undefined);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const { entityResource, entityApi } = entity;
+  const { entityApi } = entity;
 
   const handleTransfer = () => {
     setLoading(true);
     let tempData = null;
-    if (fromResource.length > 0) {
+    if (fromResource?.length > 0) {
       tempData = {
-        users: fromResource.map((d) => d._id)
+        users: fromResource?.map((d) => d?._id)
       };
     }
 
-    let api =
-      resource === 'User'
-        ? `user/resource-change/${toResource?.optionValue}`
-        : `entity/entity-change/${fromResource?._id}/${toResource?.optionValue}`;
-    if (fromResource && toResource?.optionValue) {
+    let api = resource === 'User' ? `user/resource-change/${toResource?.optionValue}`
+      : `entity/entity-change/${fromResource?._id}/${toResource?.optionValue}`;
+
+    const canCallApi = resource === 'User' && fromResource?.length > 0 ? true : resource === 'Entity' && fromResource ? true : false;
+    if (canCallApi && toResource?.optionValue) {
       axiosInstance()
         .put(api, tempData)
         .then((data) => {
@@ -58,26 +58,29 @@ export default function ResourceTransferDialog(props) {
         : selectedRecords[0]?._id
           ? selectedRecords[0]?._id
           : '';
+    const data: any = {}
+    data.ids = Array.isArray(deleteId) ? deleteId : [deleteId]
+    if (resource === 'User') {
+      data.toUserId = toResource?.optionValue
+    }
     let api = resource === 'Entity' ? `${entityApi}/remove` : `/user/remove`;
     if (deleteId && api) {
       setDeleteLoading(true);
-      axiosInstance(api)
-        .put(api, { ids: Array.isArray(deleteId) ? deleteId : [deleteId] })
-        .then(({ data }) => {
-          setDeleteLoading(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          handleDelete();
-        })
-        .catch((error) => {
-          setDeleteLoading(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance(api).put(api, data).then(({ data }) => {
+        setDeleteLoading(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        handleDelete();
+      }).catch((error) => {
+        setDeleteLoading(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -118,18 +121,20 @@ export default function ResourceTransferDialog(props) {
         </Box>
       </DialogContent>
       <CustomDialogFooter>
-        <ThemeButton
-          onClick={onClose}
-          buttonType='transparent'
-        >
+        <ThemeButton onClick={onClose} buttonType="transparent">
           Cancel
         </ThemeButton>
         <ThemeButton
-          onClick={handleTransfer}
+          onClick={() => {
+            if (resource === 'Entity') {
+              handleTransfer()
+            } else {
+              setShowConfirmDialog(true);
+            }
+          }}
           disabled={loading || !toResource}
           isLoading={loading}
-          buttonType='theme'
-        >
+          buttonType="theme">
           Submit
         </ThemeButton>
       </CustomDialogFooter>
