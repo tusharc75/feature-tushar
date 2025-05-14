@@ -685,7 +685,7 @@ const WorkOrderTechnician = () => {
           setFilterTerm={setFilterTerm}
         />
       )}
-      {showDrawingDialog.open && permissions?.attachment?.isRead && (
+      {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog.workOrder}
           handleClose={() => {

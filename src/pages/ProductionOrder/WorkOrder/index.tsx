@@ -1092,7 +1092,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       {openUploadDrawingDialog && (
         <UploadDrawingDialog productionOrderData={productionOrderData} handleClose={() => setOpenUploadDrawingDialog(false)} />
       )}
-      {showDrawingDialog.open && permissions?.attachment?.isRead && (
+      {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog?.workOrder}
           resource={ACTIVITY_RESOURCE.workOrder}

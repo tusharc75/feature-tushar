@@ -370,7 +370,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           loading={isAssigning}
         />
       )}
-      {showDiagramDialog.open && permissions?.attachment?.isRead && (
+      {showDiagramDialog.open && (
         <DiagramDialog
           referenceId={packageId}
           uniqueId={showDiagramDialog?._id}

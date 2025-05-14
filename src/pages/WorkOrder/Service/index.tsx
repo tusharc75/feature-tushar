@@ -1188,7 +1188,7 @@ const Service = ({
         />
       )}
 
-      {attchmentsDialog.open && permissions?.attachment?.isRead && (
+      {attchmentsDialog.open && (
         <DiagramDialog
           referenceId={workOrderId}
           handleClose={() => {
