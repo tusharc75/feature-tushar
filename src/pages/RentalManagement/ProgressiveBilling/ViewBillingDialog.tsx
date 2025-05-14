@@ -87,9 +87,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
       setAllowedToDelete(
         permissions?.invoice?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
-        data?.canDelete &&
-        allowCreateInvoice
+          checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
+          data?.canDelete &&
+          allowCreateInvoice
       );
       setInvoiceData(data);
     } catch (error) {
@@ -203,7 +203,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
         Cell: ({ row }) => (
           <div className="flex items-center gap-1">
             {row.original['type'] !== MATERIAL_TYPE.other && row.original.isEditable && row.original.qty > 1 && (
-              <HtmlTooltip title='Edit'>
+              <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"
                   aria-label="Details"
@@ -216,7 +216,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
               </HtmlTooltip>
             )}
             {row.original['type'] !== MATERIAL_TYPE.other && (
-              <HtmlTooltip title='Delete'>
+              <HtmlTooltip title="Delete">
                 <IconButton
                   disabled={!isLatestInvoice}
                   size="small"
@@ -248,20 +248,20 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceId}`);
     data = response?.data?.data;
 
-    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceId}/additional-cost`);
-    let additionalCostData = responseAdditionalCostData?.data?.data;
-
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.type === MATERIAL_TYPE.service
+                ? parent.serviceDetail?.serviceName
+                : parent.detail || ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -271,23 +271,14 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === MATERIAL_TYPE.serializedAsset
                 ? `${parent.serializedAssetDetail?.product?.optionLabel}-${parent.serializedAssetDetail?.product?.productDescription || ''}`
-                : '';
+                : parent.description || '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
       parent.qtyDisplay = parent.qty;
+      if (parent?.type === MATERIAL_TYPE.manualEntry) {
+        parent.materialId = parent?._id;
+      }
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (additionalCostData?.length > 0) {
-      additionalCostData?.forEach((element) => {
-        element.index = rows.length + 1;
-        element.detail = element.detail;
-        element.description = element.description;
-        element.type = MATERIAL_TYPE.manualEntry;
-        element.qtyDisplay = element.qty;
-        element.materialId = element?._id;
-        element.parentId = null;
-        rows.push(element);
-      });
-    }
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -297,18 +288,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.type === MATERIAL_TYPE.service
-              ? _subRow?.serviceDetail?.serviceName
-              : _subRow?.type === MATERIAL_TYPE.other
-                ? _subRow.detail
-                : ''
-        }`;
+      _subRow.detail = `${
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : _subRow?.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.type === MATERIAL_TYPE.service
+                ? _subRow?.serviceDetail?.serviceName
+                : _subRow?.type === MATERIAL_TYPE.other
+                  ? _subRow.detail
+                  : ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -482,7 +474,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
         </CustomDialogContent>
         <CustomDialogFooter>
           <ThemeButton
-            buttonType='transparent'
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}

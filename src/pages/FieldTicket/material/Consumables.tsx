@@ -5,6 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
@@ -49,6 +50,9 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+
 
 const Consumables = ({
   allowedToEdit,
@@ -87,6 +91,7 @@ const Consumables = ({
   const [addRentalJobDataDialog, setAddRentalJobDataDialog] = useState(false);
   const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
   const [addFieldServiceOrderDataDialog, setAddFieldServiceOrderDataDialog] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -235,20 +240,20 @@ const Consumables = ({
       ...newColumns,
       ...(!resourcePolicy?.hideInventoryConsume
         ? [
-            {
-              accessor: 'requestedQty',
-              Header: 'Requested Qty',
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-            },
-            {
-              accessor: 'consumedQty',
-              Header: 'Consumed Qty',
-              primaryField: true,
-              width: 150,
-              cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-            }
-          ]
+          {
+            accessor: 'requestedQty',
+            Header: 'Requested Qty',
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+          },
+          {
+            accessor: 'consumedQty',
+            Header: 'Consumed Qty',
+            primaryField: true,
+            width: 150,
+            cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+          }
+        ]
         : []),
       {
         accessor: 'action',
@@ -273,6 +278,19 @@ const Consumables = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {!isOffline &&
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            }
             {row.original?.isqtyRequestLog && !isOffline && (
               <HtmlTooltip title="View Requests">
                 <IconButton
@@ -955,6 +973,17 @@ const Consumables = ({
           materialType={MATERIAL_TYPE.product}
           onSuccess={(rows) => {
             handleSubmit(rows);
+          }}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={fieldTicketData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.fieldTicket}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}
         />
       )}
