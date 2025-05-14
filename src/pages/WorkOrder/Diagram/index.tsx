@@ -435,7 +435,7 @@ const Diagram = ({
     <Box>
       <Box className={cn(showContainer ? 'container-with-border p-[20px]' : '')}>
         {!disableEdit && (
-          <div className={`flex items-center justify-between gap-2`}>
+          <div className={`flex flex-wrap items-center justify-between gap-2`}>
             {rowData?.length > 0 && (
               <FormControlLabel
                 control={<Checkbox checked={isAllSelected} size="small" onChange={toggleSelectAll} />}
@@ -469,21 +469,19 @@ const Diagram = ({
                 )}
               />
             )}
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-2">
               {rowData?.length > 0 && (
                 <>
-                  <Box className="flex flex-wrap items-center justify-between gap-2 min-[600px]:justify-end">
-                    <ThemeButton
-                      buttonType="theme"
-                      onClick={() => {
-                        setAttachemntDialog({ open: true, file: null, isClone: false });
-                      }}
-                      iconForMobile={<Add />}
-                      mobileTooltip="Add"
-                    >
-                      <Add /> Add
-                    </ThemeButton>
-                  </Box>
+                  <ThemeButton
+                    buttonType="theme"
+                    onClick={() => {
+                      setAttachemntDialog({ open: true, file: null, isClone: false });
+                    }}
+                    iconForMobile={<Add />}
+                    mobileTooltip="Add"
+                  >
+                    <Add /> Add
+                  </ThemeButton>
                   <ActionButtonWithMenu
                     disabled={
                       selectedFiles?.length === 0 ||
