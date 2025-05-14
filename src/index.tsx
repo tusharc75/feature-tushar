@@ -27,6 +27,7 @@ import './styles/rbc-calender.scss';
 import './styles/responsive-styles.scss';
 import './styles/safari.scss';
 import './styles/vis-network/vis-network.min.css';
+import { InfoSidebarProvider } from 'src/components/InfoSidebar/store';
 
 // @ts-ignore
 if (VITE_APP_ENV !== 'local' && navigator.onLine) {
@@ -54,9 +55,11 @@ ReactDOM.render(
                 <MsalProvider instance={AzureInstance}>
                   <CustomOfflineProvider>
                     <NewAddressOptionListProvider>
-                      <TimezoneLocalizationProvider>
-                        <App />
-                      </TimezoneLocalizationProvider>
+                      <InfoSidebarProvider>
+                        <TimezoneLocalizationProvider>
+                          <App />
+                        </TimezoneLocalizationProvider>
+                      </InfoSidebarProvider>
                     </NewAddressOptionListProvider>
                   </CustomOfflineProvider>
                 </MsalProvider>

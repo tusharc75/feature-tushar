@@ -15,6 +15,7 @@ import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDeep } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Save, Update } from '@mui/icons-material';
 
 export const PreviewDialog = ({
   type,
@@ -110,7 +111,13 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}), ...(e?.alignment ? { alignment: e.alignment } : {}) };
+            if (col)
+              return {
+                ...col,
+                ...(e?.width ? { width: e.width } : {}),
+                ...(e?.customLabel ? { customLabel: e.customLabel } : {}),
+                ...(e?.alignment ? { alignment: e.alignment } : {})
+              };
           })
           .filter((col) => col !== undefined)
       );
@@ -247,8 +254,22 @@ export const PreviewDialog = ({
                   onClick={() => {
                     setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
                   }}
-                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
+                  disabled={visibleColumnsPdf?.length === 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
                   buttonType="yellow"
+                  mobileTooltip={type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+                  iconForMobile={
+                    type === 'Excel' ? (
+                      selectedExcelView ? (
+                        <Update fontSize="small" />
+                      ) : (
+                        <Save fontSize="small" />
+                      )
+                    ) : selectedPdfView ? (
+                      <Update fontSize="small" />
+                    ) : (
+                      <Save fontSize="small" />
+                    )
+                  }
                 >
                   {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
                 </ThemeButton>
