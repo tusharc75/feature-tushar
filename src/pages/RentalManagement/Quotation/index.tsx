@@ -185,14 +185,15 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
-        ? _subRow?.serializedAssetDetail?.assetNumber
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.serializedAsset
+          ? _subRow?.serializedAssetDetail?.assetNumber
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceName
+              : _subRow?.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -226,33 +227,24 @@ const Quotation = ({
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
-    const additionalCost = await axiosInstance().get(
-      `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
-    );
-    const additionalCostData = additionalCost?.data?.data?.map((e) => {
-      return {
-        ...e,
-        type: MATERIAL_TYPE.manualEntry,
-        parentId: null
-      };
-    });
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rowsMaterial = data.material.filter((e) => e.parentId === null);
-    const rows = [...rowsMaterial, ...additionalCostData];
+    const rows = rowsMaterial;
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.serializedAsset
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent.detail
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -343,7 +335,7 @@ const Quotation = ({
         {allowedToEdit && (
           <>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <ThemeButton
                 disabled={material.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`]) ? false : true}
                 onClick={handleSendToCustomer}
