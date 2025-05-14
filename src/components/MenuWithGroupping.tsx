@@ -11,7 +11,7 @@ type ActionMenuWithGrouppingProps = {
   getItemId: (data: Item) => string;
   anchorEl: HTMLElement;
   handleClose: (event: {}, reason: 'backdropClick' | 'escapeKeyDown') => void;
-  horizontal: 'left' | 'right';
+  horizontal?: 'left' | 'right';
   children: ReactElement<typeof ActionMenuItem> | ReactElement<typeof ActionMenuItem>[];
 } & Omit<PopoverProps, 'onClose' | 'open' | 'children'>;
 
@@ -208,48 +208,48 @@ const MenuWithGroupping = ({
           )}
           {grouppedItmemKeys.length > 0
             ? grouppedItmemKeys.map((key) => {
-                const items = grouppedItems[key];
-                if (items.length === 0) return null;
-                return (
-                  <div className="pb-2">
-                    <p className="my-2 px-4 text-xs font-semibold text-gray-400 dark:text-gray-500" key={key}>
-                      {key}
-                    </p>
-                    {items.map((item) => {
-                      const { id, onClick, ...rest } = item;
-                      return (
-                        <MenuItem
-                          sx={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                          key={id ? id : getItemId(item)}
-                          onClick={(e) => {
-                            handleClickItem(item);
-                            if (typeof onClick === 'function') {
-                              onClick(e);
-                            }
-                          }}
-                          {...rest}
-                        />
-                      );
-                    })}
-                  </div>
-                );
-              })
+              const items = grouppedItems[key];
+              if (items.length === 0) return null;
+              return (
+                <div className="pb-2">
+                  <p className="my-2 px-4 text-xs font-semibold text-gray-400 dark:text-gray-500" key={key}>
+                    {key}
+                  </p>
+                  {items.map((item) => {
+                    const { id, onClick, ...rest } = item;
+                    return (
+                      <MenuItem
+                        sx={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                        key={id ? id : getItemId(item)}
+                        onClick={(e) => {
+                          handleClickItem(item);
+                          if (typeof onClick === 'function') {
+                            onClick(e);
+                          }
+                        }}
+                        {...rest}
+                      />
+                    );
+                  })}
+                </div>
+              );
+            })
             : filteredItems.map((item) => {
-                const { id, onClick, ...rest } = item;
-                return (
-                  <MenuItem
-                    sx={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}
-                    key={id ? id : getItemId(item)}
-                    onClick={(e) => {
-                      handleClickItem(item);
-                      if (typeof onClick === 'function') {
-                        onClick(e);
-                      }
-                    }}
-                    {...rest}
-                  />
-                );
-              })}
+              const { id, onClick, ...rest } = item;
+              return (
+                <MenuItem
+                  sx={{ fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                  key={id ? id : getItemId(item)}
+                  onClick={(e) => {
+                    handleClickItem(item);
+                    if (typeof onClick === 'function') {
+                      onClick(e);
+                    }
+                  }}
+                  {...rest}
+                />
+              );
+            })}
         </div>
       </Popover>
     </>

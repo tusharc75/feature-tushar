@@ -270,45 +270,45 @@ const Material = ({
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-            {
-              accessor: 'competencyType',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencyType',
-                    lookupResource: sidebarResource.competencyType
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencyType')
-            }
-          ]
+          {
+            accessor: 'competencyType',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencyType',
+                  lookupResource: sidebarResource.competencyType
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencyType')
+          }
+        ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-            {
-              accessor: 'competencies',
-              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-              width: 250,
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'competencies',
-                    lookupResource: sidebarResource.competencies
-                  }}
-                  original={row?.original}
-                />
-              ),
-              accessorFn: (original) => AccessorFunction(original, 'competencies')
-            }
-          ]
+          {
+            accessor: 'competencies',
+            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+            width: 250,
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'competencies',
+                  lookupResource: sidebarResource.competencies
+                }}
+                original={row?.original}
+              />
+            ),
+            accessorFn: (original) => AccessorFunction(original, 'competencies')
+          }
+        ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -337,7 +337,7 @@ const Material = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            {row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"
