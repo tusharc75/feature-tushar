@@ -2776,6 +2776,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'technicianSchedule',
     section: REPORT_SECTIONS.technician
+  },
+  {
+    title: sidebarResource.fieldServiceOrder,
+    permission: 'fieldServiceOrder',
+    key: 'fieldServiceOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.fieldTicket
   }
 ];
 
