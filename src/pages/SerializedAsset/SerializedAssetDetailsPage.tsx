@@ -53,6 +53,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
+import ServiceHistory from 'src/pages/SerializedAsset/ServiceHistory';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -581,11 +582,12 @@ const SerializedAssetDetailsPage = () => {
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Volume Data</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={5}>Status</CustomTab>}
           {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
-          <CustomTab value={tabIndexValue(resourceData, 6)}>History</CustomTab>
+          <CustomTab value={tabIndexValue(resourceData, 6)}>Status History</CustomTab>
+          <CustomTab value={tabIndexValue(resourceData, 7)}>Service History</CustomTab>
           {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <CustomTab value={tabIndexValue(resourceData, 7)}>Certification History</CustomTab>
+            <CustomTab value={tabIndexValue(resourceData, 8)}>Certification History</CustomTab>
           )}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 8)}>Depreciation History</CustomTab>}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 9)}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails?.currentLocationNotMatchWithGps && (
@@ -649,6 +651,12 @@ const SerializedAssetDetailsPage = () => {
           <AssetHistory id={id} refresh={refreshAssetHistory} resourceData={resourceData} fields={fields} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
+          <ServiceHistory
+            id={id}
+            refresh={refreshAssetHistory}
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 8)}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -657,7 +665,7 @@ const SerializedAssetDetailsPage = () => {
             fetchAssetData={fetchData}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 8)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 9)}>
           <DepreciationHistory id={id} />
         </TabPanel>
       </Box>

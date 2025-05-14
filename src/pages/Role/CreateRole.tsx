@@ -50,7 +50,11 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       } = await axiosInstance().get(`/role/${roleId}`);
       setValues({ name: '', description: data.description, tier: data?.tier || ROLE_TIER.tier1 });
       setCloneHeading(data.name);
-      setField(data.field);
+      const field = data.field
+      field?.forEach((e) => {
+        delete e?.isDelete
+      })
+      setField(field);
       setResource(data.resource);
       setChildrenResource(data.childrenResource);
       setLoading(false);
