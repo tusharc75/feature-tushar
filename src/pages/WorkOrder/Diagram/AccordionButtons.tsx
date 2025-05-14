@@ -17,23 +17,6 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
 
   const buttonProps = [
     {
-      tooltip: (
-        <div className="flex flex-col p-2">
-          <p>
-            Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
-          </p>
-          <p>
-            Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
-          </p>
-        </div>
-      ),
-      label: 'Info',
-      onClick: () => {},
-      disable: false,
-      visible: true,
-      icon: InfoIcon
-    },
-    {
       tooltip: 'Download',
       label: 'Download',
       onClick: (e: any) => {
@@ -82,7 +65,7 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
 
   if (mobileMedia) {
     return (
-      <div className="pointer-events-auto flex gap-2">
+      <div className="pointer-events-auto flex gap-1">
         {!disableEdit && (
           <DeleteRequest
             file={file}
@@ -91,6 +74,22 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
             }}
           />
         )}
+        <HtmlTooltip
+          title={
+            <div className="flex flex-col p-2">
+              <p>
+                Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
+              </p>
+              <p>
+                Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
+              </p>
+            </div>
+          }
+        >
+          <IconButton size="small">
+            <InfoIcon fontSize="small" color="primary" />
+          </IconButton>
+        </HtmlTooltip>
         <IconButton size="small" color="primary" onClick={(e) => setAnchorEl(e.currentTarget)}>
           <MoreVert fontSize="small" />
         </IconButton>
@@ -128,7 +127,7 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
               element={MenuItem}
             >
               <ListItemIcon>
-                <Delete color="error" />
+                <Delete color="error" fontSize="small" />
               </ListItemIcon>
               Delete
             </AttachmentDeleteButton>
@@ -139,7 +138,23 @@ const AccordionButtons = ({ file, downloadZip, setSendMail, handleMail, disableE
   }
 
   return (
-    <div className="pointer-events-auto flex gap-2">
+    <div className="pointer-events-auto flex gap-1">
+      <HtmlTooltip
+        title={
+          <div className="flex flex-col p-2">
+            <p>
+              Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
+            </p>
+            <p>
+              Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
+            </p>
+          </div>
+        }
+      >
+        <IconButton size="small">
+          <InfoIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
       {buttonProps.map(({ visible, tooltip, icon: Icon, ...rest }) => {
         if (!visible) return null;
         return (
