@@ -4,7 +4,20 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import InfoIcon from '@mui/icons-material/Info';
 import SendIcon from '@mui/icons-material/Send';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Autocomplete, Box, Checkbox, Collapse, Dialog, FormControlLabel, IconButton, MenuItem, Popover, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  Box,
+  Checkbox,
+  Collapse,
+  Dialog,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Popover,
+  TextField,
+  Typography,
+  useMediaQuery
+} from '@mui/material';
 import { isEmpty } from 'lodash';
 import mime from 'mime';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -28,6 +41,7 @@ import PdfEditor from './ShowPdf/PdfEditor';
 import { getFileIcon, getFileNameWithExtension } from './utils';
 import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
+import AccordionButtons from 'src/pages/WorkOrder/Diagram/AccordionButtons';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
@@ -471,11 +485,16 @@ const Diagram = ({
                     </ThemeButton>
                   </Box>
                   <ActionButtonWithMenu
-                    disabled={selectedFiles?.length === 0
-                      || selectedFiles?.find((e) => !isEmpty(e?.deleteRequest)
-                        || (!selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id)
-                          && !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
-                        ? true : false)}
+                    disabled={
+                      selectedFiles?.length === 0 ||
+                      selectedFiles?.find((e) =>
+                        !isEmpty(e?.deleteRequest) ||
+                        (!selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
+                          !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
+                          ? true
+                          : false
+                      )
+                    }
                     actionMenuItems={
                       <>
                         <AttachmentDeleteButton
@@ -510,10 +529,11 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
-                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                          }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
+                          expended[file?._id]
+                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                        }`}
                       >
                         <button
                           className="absolute inset-0 -z-[1] cursor-pointer rounded-md border-none bg-transparent focus:outline-none focus-visible:[box-shadow:inset_0px_0px_0px_2px_var(--new-theme-color)]"
@@ -530,88 +550,16 @@ const Diagram = ({
                           </Typography>
                         </div>
                         <div className="pointer-events-none flex items-center gap-2">
-                          <div className="pointer-events-auto flex gap-2">
-                            <HtmlTooltip
-                              title={
-                                <div className="flex flex-col p-2">
-                                  <p>
-                                    Uploaded By: <span>{file?.createdBy?.user?.concatedName}</span>
-                                  </p>
-                                  <p>
-                                    Uploaded Date: <span>{displayDate(file?.createdBy?.date)}</span>
-                                  </p>
-                                </div>
-                              }
-                            >
-                              <IconButton size="small" color="inherit">
-                                <InfoIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                            <HtmlTooltip title={'Download'}>
-                              <IconButton
-                                size="small"
-                                color="inherit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  downloadZip(file?._id, file?.name);
-                                }}
-                              >
-                                <GetAppIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                            <HtmlTooltip title={'Send Email'}>
-                              <IconButton
-                                size="small"
-                                color="inherit"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSendMail(true);
-                                  handleMail(file);
-                                }}
-                              >
-                                <SendIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                            {!disableEdit && (
-                              <>
-                                <HtmlTooltip title="Edit" placement="top" arrow>
-                                  <IconButton
-                                    size="small"
-                                    color="inherit"
-                                    aria-label="edit"
-                                    disabled={!file?.canEdit}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setAttachemntDialog({ open: true, file: file, isClone: false });
-                                    }}
-                                  >
-                                    <EditIcon fontSize="small" color="primary" />
-                                  </IconButton>
-                                </HtmlTooltip>
-                                <HtmlTooltip title="Clone" placement="top" arrow>
-                                  <IconButton
-                                    size="small"
-                                    color="inherit"
-                                    aria-label="clone"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setAttachemntDialog({ open: true, file: file, isClone: true });
-                                    }}
-                                  >
-                                    <FileCopyIcon fontSize="small" color="primary" />
-                                  </IconButton>
-                                </HtmlTooltip>
-                                <AttachmentDeleteButton
-                                  attachments={[file]}
-                                  onSuccess={() => {
-                                    setSelectedAttachment(null);
-                                    fetchData();
-                                  }}
-                                />
-                                <DeleteRequest file={file} handleSucess={() => { fetchData() }} />
-                              </>
-                            )}
-                          </div>
+                          <AccordionButtons
+                            disableEdit={disableEdit}
+                            downloadZip={downloadZip}
+                            fetchData={fetchData}
+                            file={file}
+                            handleMail={handleMail}
+                            setAttachemntDialog={setAttachemntDialog}
+                            setSelectedAttachment={setSelectedAttachment}
+                            setSendMail={setSendMail}
+                          />
                           <span className="pointer-events-none p-1">
                             <KeyboardArrowDown
                               className={cn('origin-center !transition-all duration-300', expended[file?._id] && '[transform:rotate(-180deg)]')}
