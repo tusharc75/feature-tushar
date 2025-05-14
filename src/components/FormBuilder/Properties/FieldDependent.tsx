@@ -31,7 +31,7 @@ function FieldDependent({ fields, values, fieldSet }) {
         <Grid item xs={6} sm={6} md={6}>
           <Autocomplete
             id="lookup-dependent-on"
-            options={fields && fields.filter((_f) => _f._id !== values['_id'] && _f.type === 'dropDown' && _f?.lookup)}
+            options={fields && fields.filter((_f) => _f._id !== values['_id'] && ['dropDown', 'multiSelect']?.includes(_f.type) && _f?.lookup)}
             getOptionLabel={(option: any) => (option ? option.fieldLabel || '' : '')}
             isOptionEqualToValue={(option: any, val) => option.fieldName === val}
             value={
