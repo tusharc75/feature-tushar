@@ -56,11 +56,11 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
 };
 
 type WorkSpaceProps = {
-  refrenceId?: string | null;
+  referenceId?: string | null;
   fromSidebar?: boolean;
 };
 
-export const useWorkSpace = ({ refrenceId = '', fromSidebar = false }: WorkSpaceProps = {}) => {
+export const useWorkSpace = ({ referenceId = '', fromSidebar = false }: WorkSpaceProps = {}) => {
   const location = useLocation();
   const parsedParams = queryString.parse(location.search);
   const history = useHistory();
@@ -131,15 +131,15 @@ export const useWorkSpace = ({ refrenceId = '', fromSidebar = false }: WorkSpace
       if (state.selectedResource) {
         api = `${api}?resource=${state.selectedResource}`;
       }
-      if (refrenceId) {
-        api = `${api}?refrenceId=${refrenceId}`;
+      if (referenceId) {
+        api = `${api}?referenceId=${referenceId}`;
       }
       const {
         data: { data }
       } = await axiosInstance().get(api);
 
       setAllChannels(data);
-      if (refrenceId && data?.length) {
+      if (referenceId && data?.length) {
         setSelectedChannel(data[0], data);
       } else if (setActiveChannel) {
         const queryParam = new URLSearchParams(window.location.search);
