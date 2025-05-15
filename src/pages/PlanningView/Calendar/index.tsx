@@ -25,6 +25,8 @@ import './calendarView.scss';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import InfoIcon from '@mui/icons-material/Info';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
+import Filter from 'src/components/Filter';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -32,22 +34,13 @@ const formats = {
 
 const localizer = dayjsLocalizer(dayjs);
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy, showFilters, setShowFilters }, ref) {
   const {
     state: { permissions, resources }
   }: any = useData();
 
   const FILTERS = useMemo(
     () => [
-      ...(permissions?.warehouse?.isRead
-        ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
-        : []),
       ...(permissions?.product?.isRead
         ? [
             {
@@ -75,15 +68,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
           ]
         : []),
-      ...(permissions?.customerAccount?.isRead
-        ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
-        : []),
       ...(permissions?.competencies?.isRead
         ? [
             {
@@ -96,17 +80,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     ],
     [
       permissions?.competencies?.isRead,
-      permissions?.customerAccount?.isRead,
       permissions?.product?.isRead,
       permissions?.serializedAsset?.isRead,
       permissions?.serviceMaster?.isRead,
-      permissions?.warehouse?.isRead,
       resources?.competencies?.titlePlural,
-      resources?.customerAccount?.titlePlural,
       resources?.product?.titlePlural,
       resources?.serializedAsset?.titlePlural,
-      resources?.serviceMaster?.titlePlural,
-      resources?.warehouse?.titlePlural
+      resources?.serviceMaster?.titlePlural
     ]
   );
 
@@ -165,26 +145,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
-  const RENTAL_JOB_FILTERS = useMemo(
-    () => [
-      {
-        label: resources?.rentalManagement?.titlePlural,
-        value: 'Rental Management',
-        key: 'rentalJob'
-      },
-      ...(resources?.padMaster
-        ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
-        : [])
-    ],
-    [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
-  );
-
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
@@ -220,6 +180,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [customerColorCodeMap, setCustomerColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
   const [supplierColorCodeMap, setSupplierColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
 
+  const [filteredColumns, setFilteredColumns] = useState([]);
+  const [deepFilters, setDeepFilters] = useState([]);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`)
@@ -241,7 +206,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   useEffect(() => {
     const lookupResource = [
-      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value))
+      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS]?.map((e) => e.value))
     ]?.toString();
     if (lookupResource) {
       setLookupLoading(true);
@@ -262,29 +227,27 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     if (selectedResource) {
       (async () => {
         if (selectedResource.resource === sidebarResource.planning) {
-          const fieldData = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
-          const categoryField = fieldData?.data?.data?.find((e) => e.fieldData.fieldName === 'category')?.fieldData;
-          if (categoryField) {
-            setFilters([
-              ...FILTERS?.filter((e) => e.key !== 'asset'),
-              {
-                label: 'Category',
-                value: 'Category',
-                key: 'category'
-              }
-            ]);
-            setLookUpResource((prevState) => ({ ...prevState, Category: categoryField?.option }));
-          } else {
-            setFilters(FILTERS?.filter((e) => e.key !== 'asset'));
-          }
+          // const fieldData = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
+          // const categoryField = fieldData?.data?.data?.find((e) => e.fieldData.fieldName === 'category')?.fieldData;
+          // if (categoryField) {
+          //   setFilters([
+          //     ...FILTERS?.filter((e) => e.key !== 'asset'),
+          //     {
+          //       label: 'Category',
+          //       value: 'Category',
+          //       key: 'category'
+          //     }
+          //   ]);
+          //   setLookUpResource((prevState) => ({ ...prevState, Category: categoryField?.option }));
+          // } else {
+          setFilters(FILTERS?.filter((e) => e.key !== 'asset'));
+          // }
         } else if (selectedResource.resource === sidebarResource.serializedAsset) {
           setFilters(ASSET_FILTERS);
         } else if (selectedResource.resource === sidebarResource.product) {
           setFilters(PRODUCT_FILTERS);
         } else if (selectedResource.resource === sidebarResource.employeeMaster) {
           setFilters(EMPLOYEE_MASTER_FILTERS);
-        } else if (selectedResource.resource === sidebarResource.rentalManagement) {
-          setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
         } else {
           setFilters(FILTERS);
         }
@@ -304,30 +267,111 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
 
-  const getQueryString = useCallback(() => {
-    const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
-    let query = `?date=${date}`;
-    if (selectedResource) {
-      query = `${query}&resource=${selectedResource.resource}`;
-    }
-    if (selectedLookUpResourceData) {
-      Object.keys(selectedLookUpResourceData).forEach((d) => {
-        let data = [];
-        if (d === 'technician') {
-          data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-        } else {
-          data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+  const getQueryString = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+      const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
+      let query = `?date=${date}`;
+      if (selectedResource) {
+        query = `${query}&resource=${selectedResource.resource}`;
+      }
+      if (selectedLookUpResourceData) {
+        Object.keys(selectedLookUpResourceData).forEach((d) => {
+          let data = [];
+          if (d === 'technician') {
+            data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
+          } else {
+            data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+          }
+          query = `${query}&${d}=${data}`;
+        });
+      }
+      if (filterByIdsP?.length > 0) {
+        const filterById = filterByIdsP
+          ?.filter((f) => {
+            if (typeof f?.term === 'object') return !isEmpty(f?.term);
+            return Array.isArray(f?.term) && f?.term?.length > 0;
+          })
+          ?.map((f) => {
+            const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+            if (Array.isArray(f?.term)) {
+              return {
+                field: f?.field,
+                term: {
+                  [term]: f?.term?.map?.((d: any) => d.optionValue)
+                }
+              };
+            }
+            if (term === '$nin') {
+              return {
+                field: f?.field,
+                term: {
+                  ['$nin']: [f?.term?.optionValue]
+                }
+              };
+            }
+            return {
+              field: f?.field,
+              term: f?.term?.optionValue
+            };
+          });
+        if (filterById?.length > 0) {
+          query = `${query}&filterById=${JSON.stringify(filterById)}`;
         }
-        query = `${query}&${d}=${data}`;
-      });
-    }
-    return query;
-  }, [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource]);
+      }
+      let deepFilter = [];
+      if (deepFiltersP?.length > 0) {
+        deepFilter = [
+          ...deepFilter,
+          ...deepFiltersP
+            ?.filter((d) => {
+              if (d?.type === 'date') {
+                if (d?.duration === 'custom')
+                  return (
+                    (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date) || (dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date)
+                  );
+                else
+                  return (
+                    dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date
+                  );
+              }
+              return d?.term?.length ? true : false;
+            })
+            ?.map((d) => {
+              if (d?.type === 'date') {
+                return {
+                  field: d?.field,
+                  term: {
+                    ...(d?.term?.from ? { from: d?.term?.from } : {}),
+                    ...(d?.term?.to ? { to: d?.term?.to } : {})
+                  }
+                };
+              }
+              if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
+                return {
+                  field: d?.field,
+                  term: { $nin: d?.term }
+                };
+              }
+              return {
+                field: d?.field,
+                term: d?.term
+              };
+            })
+        ];
+      }
+      if (deepFilter?.length) {
+        query = `${query}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}`;
+      }
+      query = `${query}&filterType=and`;
+      return query;
+    },
+    [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource, deepFilters, filterByIds, filterTerm]
+  );
 
   const fetchData = useCallback(
-    (cancelToken?: CancelToken) => {
+    (cancelToken?: CancelToken, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
       setIsDataFetching(true);
-      const queryString = getQueryString();
+      const queryString = getQueryString(deepFiltersP, filterByIdsP);
       setQueryString(queryString);
       axiosInstance()
         .get(`/planning-view${queryString}`, { cancelToken })
@@ -500,7 +544,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       selectedResource?.resource,
       selectedResource?.start,
       setQueryString,
-      toastConfig
+      toastConfig,
+      deepFilters,
+      filterByIds
     ]
   );
 
@@ -744,6 +790,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   );
 
   useEffect(() => {
+    setFilteredColumns([]);
+    setDeepFilters([]);
+    setFilterByIds([]);
+    setFilterTerm({});
     if (selectedResource) {
       setFields([]);
       if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
@@ -751,6 +801,24 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           .get(`/field?resource=${selectedResource?.resource}`)
           .then(({ data }) => {
             setFields(data.data);
+            setFilteredColumns(
+              data?.data?.filter(
+                (e) =>
+                  ![
+                    'fileUpload',
+                    'multiFileUpload',
+                    'imageUpload',
+                    'multiImageUpload',
+                    'richTextEditor',
+                    'signature',
+                    'groupSignature',
+                    'colorPicker',
+                    'counter',
+                    'description',
+                    'switch'
+                  ].includes(e?.fieldData?.type)
+              )
+            );
           });
       }
     }
@@ -857,6 +925,21 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 );
               })}
           </Box>
+          <div className="mb-2">
+            <DisplayFilterChip
+              filterTerm={filterTerm}
+              resourceColumns={filteredColumns}
+              deepFilters={deepFilters}
+              filterByIds={filterByIds}
+              fetchResourceData={(deepFilter, filterById) => {
+                const cancelTokenSource = axios.CancelToken.source();
+                const cancelToken = cancelTokenSource.token;
+                fetchData(cancelToken, deepFilter, filterById);
+              }}
+              setDeepFilters={setDeepFilters}
+              setFilterByIds={setFilterByIds}
+            />
+          </div>
         </Box>
         <div className={cn('relative')}>
           {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
@@ -956,6 +1039,27 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             products={selectedLookUpResourceData['product']}
             warehouses={selectedLookUpResourceData['warehouse']}
             resourceList={resourceList}
+          />
+        )}
+        {showFilters && (
+          <Filter
+            onClose={() => {
+              setShowFilters(false);
+            }}
+            loading={false}
+            filterTitle={resources?.[selectedResource?.key]?.titleSingular}
+            resource={selectedResource?.resource}
+            columns={filteredColumns}
+            onApplyFilter={() => {
+              setShowFilters(false);
+              fetchData();
+            }}
+            deepFilters={deepFilters}
+            setDeepFilters={setDeepFilters}
+            filterByIds={filterByIds}
+            setFilterByIds={setFilterByIds}
+            filterTerm={filterTerm}
+            setFilterTerm={setFilterTerm}
           />
         )}
       </div>

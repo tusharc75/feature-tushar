@@ -32,6 +32,7 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import { MdFilterList } from 'react-icons/md';
 
 function PlanningView() {
   const {
@@ -54,6 +55,7 @@ function PlanningView() {
   const [createDialog, setCreateDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [resourcePolicy, setResourcePolicy] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   const ref: any = useRef();
 
@@ -205,7 +207,7 @@ function PlanningView() {
   ];
 
   useEffect(() => {
-    fetchPolicy()
+    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -257,8 +259,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -266,7 +268,22 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource && permissions[selectedResource?.key]?.isCreate &&
+            {view === 'calendar' &&
+              selectedResource &&
+              ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
+                <ThemeButton
+                  className="mr-2"
+                  iconForMobile={<MdFilterList />}
+                  onClick={() => {
+                    setShowFilters(true);
+                  }}
+                  startIcon={<MdFilterList />}
+                >
+                  Show Filters
+                </ThemeButton>
+              )}
+            {selectedResource &&
+              permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
                   className="mr-2"
@@ -313,6 +330,8 @@ function PlanningView() {
               setQueryString={setQueryString}
               ref={ref}
               resourcePolicy={resourcePolicy}
+              showFilters={showFilters}
+              setShowFilters={setShowFilters}
             />
           )}
           {view === 'list' && (
@@ -423,7 +442,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => { }}
+          fetchData={() => {}}
           onSuccess={() => {
             onClickRefreshIcon();
           }}
