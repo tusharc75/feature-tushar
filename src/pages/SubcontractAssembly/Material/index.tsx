@@ -28,13 +28,16 @@ import {
 } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = `${camelCase(sidebarResource?.subcontractAssembly)}_Material`;
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
-
+  const {
+    state: { permissions }
+  }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -164,17 +167,18 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
                   <EditIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-              <HtmlTooltip title="Attachments">
-                <IconButton
-                  size="small"
-                  aria-label="Attachment"
-                  onClick={(e) => {
-                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
-                  }}
-                >
-                  <AttachFileIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
+              {permissions?.attachment?.isRead && (
+                <HtmlTooltip title="Attachments">
+                  <IconButton
+                    size="small"
+                    aria-label="Attachment"
+                    onClick={(e) => {
+                      setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
+                    }}
+                  >
+                    <AttachFileIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>)}
               <HtmlTooltip title={'Delete'}>
                 <span>
                   <IconButton

@@ -257,7 +257,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
                 <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type != 'Manual Entry' && (
+            {permissions?.attachment?.isRead && row?.original?.type != 'Manual Entry' && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"

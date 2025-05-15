@@ -1237,7 +1237,7 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, 
         size="small"
         color="primary"
         aria-label="menu"
-        disabled={data?.status === WORKORDER_SERVICE_STATUS.completed}
+        disabled={[WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(data?.status)}
         onClick={(event) => {
           handleOpenMenu(event);
         }}
