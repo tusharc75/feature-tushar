@@ -15,6 +15,7 @@ import { isEqual } from 'lodash';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import dayjs from 'dayjs';
 
 function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
   const toastConfig = useContext(CustomToastContext);
@@ -60,10 +61,8 @@ function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
 
   const handleSave = (values: any) => {
     if (id) {
-      values._id = id;
-      values.technician = masterId;
       axiosInstance()
-        .put(`${routes?.employeeMaster?.path}/unavailability`, values)
+        .put(`${routes?.employeeMaster?.path}/unavailability/${id}`, values)
         .then(({ data }) => {
           onSuccess();
           toastConfig.setToastConfig({
@@ -76,9 +75,7 @@ function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
           toastConfig.setToastConfig(error);
         });
     } else {
-      values.technician = masterId;
-      axiosInstance()
-        .post(`${routes?.employeeMaster?.path}/unavailability`, values)
+      axiosInstance().post(`${routes?.employeeMaster?.path}/unavailability/${masterId}`, values)
         .then(({ data }) => {
           onSuccess();
           toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
@@ -88,6 +85,16 @@ function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
         });
     }
   };
+
+  function validate(values) {
+    const errors = {};
+    let startDate = dayjs(values?.startDate);
+    let endDate = dayjs(values?.endDate);
+    if (endDate.diff(startDate, 'day') < 0) {
+      errors['endDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
 
   return (
     <Dialog
@@ -110,6 +117,7 @@ function ManageUnavailability({ onClose, onSuccess, id, masterId }) {
           validateOnMount
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSave}
+          validate={validate}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
