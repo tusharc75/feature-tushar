@@ -82,7 +82,7 @@ const VirtualSwipableList = ({
 
               return (
                 <div
-                  key={`${virtualRow.key}`}
+                  key={`${virtualRow.key}${row?._id}`}
                   data-index={virtualRow.index}
                   ref={(node) => {
                     const cb = throttle(() => {
@@ -123,20 +123,9 @@ const VirtualSwipableList = ({
                     <div className={`flex items-center gap-2`}>
                       <RenderExpander {...{ expander, expanderCol, expanderCell }} />
                       <RenderSelection allowSelection={allowSelection} row={row} isSelected={row.getIsSelected()} />
-                      {/* {allowSelection && !row.original.hideSelection && (
-                        <div>
-                          <IndeterminateCheckbox
-                            {...{
-                              checked: row.getIsSelected(),
-                              indeterminate: row.getIsSomeSelected(),
-                              onChange: row.getToggleSelectedHandler()
-                            }}
-                          />
-                        </div>
-                      )} */}
                       <div className="flex-grow">
                         <div className="flex items-center justify-between gap-2">
-                          <RenderPrimaryField primaryField={primaryField} row={row} table={table} />
+                          <RenderPrimaryField key={row?._id} primaryField={primaryField} row={row} table={table} />
                           <div className="icon-layout  d-flex align-items-center gap-2">
                             <RenderAction actionField={actionField} row={row} table={table} />
                             <RenderCollapseIcon
@@ -157,7 +146,7 @@ const VirtualSwipableList = ({
                         {defaultDisplay.map((field) => {
                           return (
                             <RenderCellWithHeader
-                              key={field.id}
+                              key={`${field.id}${row._id}`}
                               field={field}
                               row={row}
                               submitInput={submitInput}
@@ -170,24 +159,6 @@ const VirtualSwipableList = ({
                         })}
                       </div>
                       <RenderHiddenFields {...{ compareCollapse, row, collapsibleFields, submitInput, cellValue, setCellValue, state, dispatch }} />
-                      {/* <Collapse in={compareCollapse(row.id)} unmountOnExit>
-                        <div className="grid w-full gap-2">
-                          {collapsibleFields.map((field) => {
-                            return (
-                              <RenderCellWithHeader
-                                key={field.id}
-                                field={field}
-                                row={row}
-                                submitInput={submitInput}
-                                cellValue={cellValue}
-                                setCellValue={setCellValue}
-                                state={state}
-                                dispatch={dispatch}
-                              />
-                            );
-                          })}
-                        </div>
-                      </Collapse> */}
                     </div>
                     {expander && (
                       <Collapse in={row.getIsExpanded()} unmountOnExit>
@@ -248,27 +219,24 @@ const VirtualSwipableList = ({
 
 export default VirtualSwipableList;
 
-const RenderPrimaryField = memo(
-  ({ primaryField, row, table }: any) => {
-    if (!primaryField) return null;
-    return (
-      <div className="line-clamp-1">
-        <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.header}:</h6>
-        <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
-          {primaryField.cell({ row, table })}
-        </h4>
-      </div>
-    );
-  },
-  (prev, next) => prev.primaryField?.header === next.primaryField?.header
-);
+const RenderPrimaryField = memo(({ primaryField, row, table }: any) => {
+  if (!primaryField) return null;
+  return (
+    <div className="line-clamp-1">
+      <h6 className="line-clamp-1 text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{primaryField.header}:</h6>
+      <h4 className="quote-name line-clamp-1 [&>*]:[font-weight:700_!important] [&_*:not(.flex)]:line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:[white-space:unset_!important]">
+        {primaryField.cell({ row, table })}
+      </h4>
+    </div>
+  );
+});
 
 const RenderAction = memo(
   ({ actionField, row, table }: any) => {
     if (!actionField) return null;
     return actionField?.cell?.({ row, table });
   },
-  (prev, next) => prev.row === next.row
+  (prev, next) => prev.row?._id === next.row?._id
 );
 
 const RenderCollapseIcon = memo(
