@@ -103,7 +103,6 @@ const EmployeeMasterDetail = () => {
         .put(`${routes?.employeeMaster?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -206,8 +205,8 @@ const EmployeeMasterDetail = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          <CustomTab value={1} label={'History'} />
-          {unavailabilityFields?.length > 0 && <CustomTab value={2} label={'Unavailability'} />}
+          {unavailabilityFields?.length > 0 && <CustomTab value={1} label={'Unavailability'} />}
+          <CustomTab value={2} label={'History'} />
           {resourceData &&
             resourceData?.tabs?.length > 0 &&
             resourceData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
@@ -222,10 +221,10 @@ const EmployeeMasterDetail = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <History id={id} />
+          <Unavailability id={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Unavailability id={id} />
+          <History id={id} />
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&

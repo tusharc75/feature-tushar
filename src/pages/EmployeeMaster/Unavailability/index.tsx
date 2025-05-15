@@ -3,7 +3,7 @@ import { Box, IconButton } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase } from 'lodash';
 import { employeeMaster, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,9 +18,11 @@ import axios, { CancelTokenSource } from 'axios';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 
 let employeeUnavailabilityTimeout;
-const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_Unavaiability`;
+
 
 const Unavailability = ({ id }) => {
+  const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_Unavaiability`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions, selectedEntity }
@@ -45,7 +47,7 @@ const Unavailability = ({ id }) => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.technicianUnavailability}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data);
-    setColumns([...newColumns, ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -69,22 +71,22 @@ const Unavailability = ({ id }) => {
                 setShowUnavailibilityDialog({ open: true, id: row.original._id });
               }}
             >
-              <EditIcon fontSize="small" color={permissions?.employeeMaster?.isCreate ? 'primary' : 'disabled'} />
+              <EditIcon fontSize="small" color={permissions?.employeeMaster?.isUpdate ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={permissions?.employeeMaster?.isDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={permissions?.employeeMaster?.isUpdate ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={permissions?.employeeMaster?.isDelete ? false : true}
+              disabled={permissions?.employeeMaster?.isUpdate ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={permissions?.employeeMaster?.isDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={permissions?.employeeMaster?.isUpdate ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>

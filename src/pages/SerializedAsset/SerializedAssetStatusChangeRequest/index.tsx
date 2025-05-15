@@ -170,8 +170,7 @@ const SerializedAssetStatusChangeRequest = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['originalStatus'] = finalObject['status'];
-          finalObject['canPerform'] =
-            permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          finalObject['canPerform'] = permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
           if (finalObject['doa_status']) {
             finalObject['canPerform'] =
               finalObject['status'] === ASSET_APPROVAL_STATUS.pending &&
@@ -183,11 +182,13 @@ const SerializedAssetStatusChangeRequest = () => {
                 finalObject['status'] = `${finalObject['status']} - Awaiting for (${users?.map((u) => u?.name)?.join(', ')})`;
               }
             }
+            if (u?.doaUsers?.length) {
+              const doaComment = finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
+                ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
+                : '';
+              finalObject['doaComment'] = doaComment;
+            }
           }
-          const doaComment = finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
-            ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
-            : '';
-          finalObject['doaComment'] = doaComment;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
