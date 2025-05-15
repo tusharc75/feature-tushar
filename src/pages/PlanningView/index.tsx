@@ -56,7 +56,6 @@ function PlanningView() {
   const [createDialog, setCreateDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [resourcePolicy, setResourcePolicy] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   const ref: any = useRef();
 
@@ -270,20 +269,6 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {view === 'calendar' &&
-              selectedResource &&
-              ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
-                <ThemeButton
-                  className="mr-2"
-                  iconForMobile={<MdFilterList />}
-                  onClick={() => {
-                    setShowFilters(true);
-                  }}
-                  startIcon={<MdFilterList />}
-                >
-                  Show Filters
-                </ThemeButton>
-              )}
             {selectedResource &&
               permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
@@ -332,8 +317,6 @@ function PlanningView() {
               setQueryString={setQueryString}
               ref={ref}
               resourcePolicy={resourcePolicy}
-              showFilters={showFilters}
-              setShowFilters={setShowFilters}
             />
           )}
           {view === 'list' && (
