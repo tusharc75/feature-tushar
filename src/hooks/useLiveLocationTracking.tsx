@@ -21,23 +21,13 @@ export const useLiveLocationTracking = (user: any, isOffline: boolean) => {
       const locationChanged = latitude !== lastLatitude || longitude !== lastLongitude;
 
       try {
-        if (locationChanged || forceUpdate) {
-          if (locationChanged) {
-            // INSERT new record
-            await axiosInstance().post('user/live-location', {
-              latitude,
-              longitude,
-            });
-            lastLatitude = latitude;
-            lastLongitude = longitude;
-          } else if (forceUpdate && currentTime - lastUpdateTime >= TIME_INTERVAL) {
-            // UPDATE time of same location
-            await axiosInstance().put('user/live-location', {
-              latitude,
-              longitude,
-            });
-          }
-
+        if (locationChanged || forceUpdate || currentTime - lastUpdateTime > TIME_INTERVAL) {
+          await axiosInstance().post('user/live-location', {
+            latitude,
+            longitude,
+          });
+          lastLatitude = latitude;
+          lastLongitude = longitude;
           lastUpdateTime = currentTime;
         }
       } catch (err) {
