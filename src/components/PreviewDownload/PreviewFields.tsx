@@ -76,14 +76,15 @@ export const PreviewFields = ({
         data.columns
           ?.map((e) => {
             const temp = allColumn.find((col) => col.fieldName === e.name);
-            if (temp) return {
-              ...temp,
-              width: e.width,
-              customLabel: e?.customLabel,
-              showBelowRow: e?.showBelowRow,
-              alignment: e?.alignment,
-              fontWeight: e?.fontWeight
-            };
+            if (temp)
+              return {
+                ...temp,
+                width: e.width,
+                customLabel: e?.customLabel,
+                showBelowRow: e?.showBelowRow,
+                alignment: e?.alignment,
+                fontWeight: e?.fontWeight
+              };
           })
           .filter((col) => col !== undefined)
       );
@@ -95,7 +96,6 @@ export const PreviewFields = ({
       setOrderBy(data?.orderBy);
     }
   };
-
 
   return (
     <>
@@ -115,14 +115,19 @@ export const PreviewFields = ({
                 <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
                   <span style={{ width: 'calc(100% - 71px)' }}>{ownerState.getOptionLabel(option)}</span>
                   <div className="flex items-center gap-2">
-                    {option?.createdBy?.user?.firstName &&
+                    {option?.createdBy?.user?.firstName && (
                       <HtmlTooltip title={`Created By : ${option?.createdBy?.user?.firstName} ${option?.createdBy?.user?.lastName}`}>
                         <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
                           size={'small'}
                         >
                           <InfoIcon fontSize="small" color={'primary'} />
                         </IconButton>
-                      </HtmlTooltip>}
+                      </HtmlTooltip>
+                    )}
                     <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only edit' : 'Edit'}>
                       <IconButton
                         size="small"
@@ -132,7 +137,7 @@ export const PreviewFields = ({
                           e.stopPropagation();
                         }}
                       >
-                        <EditIcon fontSize='small' color={user?._id === option?.user ? 'primary' : 'disabled'} />
+                        <EditIcon fontSize="small" color={user?._id === option?.user ? 'primary' : 'disabled'} />
                       </IconButton>
                     </HtmlTooltip>
                     <HtmlTooltip title={user?._id !== option?.user ? 'View owner can only delete' : 'Delete'}>
@@ -145,7 +150,7 @@ export const PreviewFields = ({
                         }}
                         disabled={user?._id !== option?.user}
                       >
-                        <DeleteIcon fontSize='small' color={user?._id === option?.user ? 'error' : 'disabled'} />
+                        <DeleteIcon fontSize="small" color={user?._id === option?.user ? 'error' : 'disabled'} />
                       </IconButton>
                     </HtmlTooltip>
                   </div>
@@ -169,10 +174,10 @@ export const PreviewFields = ({
                 if (
                   val.find((e) => e.fieldName === 'Select All') &&
                   ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !==
-                  val
-                    ?.map((e) => e?.fieldName)
-                    .sort()
-                    .toString()
+                    val
+                      ?.map((e) => e?.fieldName)
+                      .sort()
+                      .toString()
                 ) {
                   setVisibleColumns(allColumn);
                 } else if (
@@ -207,7 +212,7 @@ export const PreviewFields = ({
                       style={{ marginRight: 8 }}
                       checked={
                         ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
-                          ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
+                        ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
                           ? true
                           : state.selected
                       }

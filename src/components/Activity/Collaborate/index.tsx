@@ -2,7 +2,7 @@ import MessagePanel from 'src/pages/WorkSpace/MessagePanel';
 import { useWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 
 const Collaborate = ({ resource, resourceLabel, resourceData }) => {
-  const state = useWorkSpace({ refrenceId: resourceData?._id, fromSidebar: true });
+  const state = useWorkSpace({ referenceId: resourceData?._id, fromSidebar: true });
 
   return (
     <div

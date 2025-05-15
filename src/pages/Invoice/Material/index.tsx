@@ -211,7 +211,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry  && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
@@ -251,14 +251,8 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
     var data: any = [];
     let assignedAssets = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
-    const additionalData = await axiosInstance().get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`);
-    let additionalCost = additionalData?.data?.data || [];
-    additionalCost = additionalCost?.map((e: any) => {
-      return { ...e, type: MATERIAL_TYPE.manualEntry };
-    });
     data = response?.data?.data;
     let rows = data.material.filter((e) => !e.parentId);
-    rows = [...rows, ...additionalCost];
     assignedAssets = data.material.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.parentId);
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     rows.forEach((parent, i) => {
@@ -678,6 +672,17 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
               onSaveEdit={onSaveInlineEdit}
               hideSelection={!allowedToEdit}
               hideAction={!allowedToEdit}
+              resource={sidebarResource.invoice}
+              arrangeRowField={{
+                keys: [
+                  {
+                    key: 'material',
+                    filterType: [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]
+                  },
+                  { key: 'additionalCost', filterType: [MATERIAL_TYPE.manualEntry] }
+                ],
+                _id: invoiceData?._id
+              }}
             />
           </Box>
         </>

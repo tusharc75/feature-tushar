@@ -136,14 +136,14 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data?.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data?.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
@@ -402,7 +402,10 @@ const ServiceOrderDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <OnField rentalId={serviceOrderData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldServiceOrder} />
+          <OnField
+            referenceData={serviceOrderData}
+            rentalJob={serviceOrderData?.rentalJob?.optionValue}
+            referenceFrom={sidebarResource?.fieldServiceOrder} />
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>{serviceOrderData && <FieldServiceOrderView fieldServiceOrderData={serviceOrderData} />}</Box>

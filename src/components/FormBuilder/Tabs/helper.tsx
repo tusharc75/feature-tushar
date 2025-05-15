@@ -267,6 +267,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'allowOnFieldUpdateFieldJobTicket',
+        fieldLabel: 'Allow On Field Update In Field Job/Ticket',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
