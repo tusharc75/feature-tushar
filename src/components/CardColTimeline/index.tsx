@@ -105,6 +105,7 @@ const CardColTimeline = <D,>({
     if (containerRef.current) setContainerHeight(containerRef.current.clientHeight - 125);
   }, [containerRef]);
 
+
   return (
     <div className={cn(`${styles.container}`, className)} style={{ height, ...others.style }} {...others} ref={containerRef}>
       <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">

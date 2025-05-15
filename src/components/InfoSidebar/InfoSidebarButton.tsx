@@ -21,7 +21,6 @@ const InfoSidebarButton = ({
   const [, setStore] = useInforSidebar((state) => state.data);
 
   const handleClick = useCallback(() => {
-    console.log({ actionId, resource });
     setStore({ data: { actionId, resource } });
   }, [actionId, resource, setStore]);
 

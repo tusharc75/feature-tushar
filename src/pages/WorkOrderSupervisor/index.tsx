@@ -59,7 +59,8 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.planned
   | typeof WORKORDER_SERVICE_STATUS.pending
   | typeof WORKORDER_SERVICE_STATUS.inProgress
-  | typeof WORKORDER_SERVICE_STATUS.completed;
+  | typeof WORKORDER_SERVICE_STATUS.completed
+  | typeof WORKORDER_SERVICE_STATUS.skipped;
 
 const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
@@ -74,11 +75,6 @@ const WorkOrderSupervisor = () => {
   const selectedRecordsP = useMemo(() => [...selectedRecords?.filter((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
   const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
 
-  const resetSelectedRecords = () => {
-    dispatch({ type: 'selection', selectedRecords: [] });
-    tableDispatch({ type: 'selection', selectedRecords: [] });
-  };
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -90,7 +86,7 @@ const WorkOrderSupervisor = () => {
   const workOrderListRef = useRef<WorkOrderListRef>();
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
-  const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>('Pending');
+  const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>(WORKORDER_SERVICE_STATUS.pending);
 
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
@@ -100,15 +96,23 @@ const WorkOrderSupervisor = () => {
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, multiple: false });
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
 
+  const resetSelectedRecords = () => {
+    setTableViewStatus(WORKORDER_SERVICE_STATUS.pending)
+    dispatch({ type: 'selection', selectedRecords: [] });
+    tableDispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   const [globalFilters, setGlobalFilters] = useState<DateRange>({
     from: dayjs.tz().startOf('year').toDate(),
     to: dayjs.tz().endOf('year').toDate()
   });
+
   const [resourceType, setResourceType] = useState({
     label: resources?.workOrder?.titlePlural,
     selected: true,
     value: sidebarResource.workOrder
   });
+
   const [isOpen, setOpen] = useState({ open: false, id: null });
   const [showFilter, setShowFilter] = useState(false);
   const [filterByIds, setFilterByIds] = useState([]);
@@ -215,9 +219,7 @@ const WorkOrderSupervisor = () => {
         }
       ]
       : []),
-    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(
-      viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value
-    )
+    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value)
       ? [
         {
           fieldData: {
@@ -392,7 +394,8 @@ const WorkOrderSupervisor = () => {
       ...tempvisibleColumns,
       WORKORDER_SERVICE_STATUS.pending,
       WORKORDER_SERVICE_STATUS.inProgress,
-      WORKORDER_SERVICE_STATUS.completed
+      WORKORDER_SERVICE_STATUS.completed,
+      WORKORDER_SERVICE_STATUS.skipped
     ];
 
     dispatch({
@@ -582,7 +585,6 @@ const WorkOrderSupervisor = () => {
   const handleAddConsumables = (rows, records = []) => {
     const data: any = [];
     const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record?.workOrder);
-
     records?.forEach((s) => {
       rows?.forEach((e) => {
         data.push({
@@ -636,7 +638,7 @@ const WorkOrderSupervisor = () => {
 
   const assignTechnicianButton = {
     label: 'Assign Technicians',
-    disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
+    disabled: selectedRecordsS?.some((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status)) || selectedRecordsS?.length === 0,
     onClick: () => {
       if (viewType === 'table-view') {
         workOrderListRef.current?.setAssignTechnicianDialog(true);
@@ -648,7 +650,7 @@ const WorkOrderSupervisor = () => {
 
   const assignWorkStationButton = {
     label: `Assign ${resources?.workStations?.titlePlural}`,
-    disabled: selectedRecordsS?.some((r) => r?.status === WORKORDER_SERVICE_STATUS.completed) || selectedRecordsS?.length === 0,
+    disabled: selectedRecordsS?.some((r) => [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(r?.status)) || selectedRecordsS?.length === 0,
     onClick: () => {
       if (viewType === 'table-view') {
         workOrderListRef.current?.setWorkStationAssignDialog(true);
@@ -705,7 +707,6 @@ const WorkOrderSupervisor = () => {
 
   const newActionButtonProps: NewActionButtonProps<string, any> = useMemo(() => {
     const canShowWorkStationButton = permissions?.workStations?.isRead;
-
     const data: NewActionButtonProps<string, any> = {
       disabled: selectedRecords?.length === 0,
       horizontal: 'right',
@@ -760,6 +761,12 @@ const WorkOrderSupervisor = () => {
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
         value: WORKORDER_SERVICE_STATUS.completed,
         startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
+      },
+      {
+        label: WORKORDER_SERVICE_STATUS.skipped,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.skipped,
+        value: WORKORDER_SERVICE_STATUS.skipped,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.skipped]
       }
     ] as NewActionButtonProps<string, any>['items'];
   }, [tableViewStatus, selectedResource]);
@@ -906,16 +913,17 @@ const WorkOrderSupervisor = () => {
                       </span>
                     </ButtonMenu>
                   )}
-                  <ButtonMenu
-                    showChevron={true}
-                    disabled={tableViewStatus === WORKORDER_SERVICE_STATUS.planned}
-                    items={resourceItems}
-                    onItemClick={(e, item: any) => {
-                      setSelectedResource(item);
-                    }}
-                  >
-                    <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.label}</span>
-                  </ButtonMenu>
+                  {tableViewStatus !== WORKORDER_SERVICE_STATUS.planned &&
+                    <ButtonMenu
+                      showChevron={true}
+                      items={resourceItems}
+                      onItemClick={(e, item: any) => {
+                        setSelectedResource(item);
+                      }}
+                    >
+                      <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.label}</span>
+                    </ButtonMenu>
+                  }
                 </>
               ) : (
                 <ButtonMenu
