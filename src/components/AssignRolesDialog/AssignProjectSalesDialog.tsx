@@ -24,7 +24,7 @@ import { ListingPageHeader } from '../PageHeaders';
 const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleCloseDialog, assignedProjectSales, type }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
   const [projectSales, setProjectSales] = useState([]);
   const [loadingProjectSales, setLoadingProjectSales] = useState(false);
@@ -159,10 +159,10 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
       onClose={handleCloseDialog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title="Assign Project List" />
+      <CustomDialogHeader onClose={handleCloseDialog} title={`Assign ${resources?.projectSales?.titlePlural}`} />
       <CustomDialogContent>
         {loadingProjectSales ? (
-          <Loader text="Loading Project List" />
+          <Loader text="Loading" />
         ) : projectSalesConst.length ? (
           <>
             <ListingPageHeader
@@ -174,7 +174,6 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
               isAddButtonVisible={false}
               setQueryString={false}
             />
-
             <List style={{ padding: 0 }}>
               {projectSales.map((projectSale) => (
                 <ListItem divider key={projectSale._id}>
@@ -197,7 +196,7 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
             </List>
           </>
         ) : (
-          <Typography>All Project List has been assigned</Typography>
+          <Typography>{`No ${resources?.projectSales?.titlePlural} are currently available for assignment.`}</Typography>
         )}
       </CustomDialogContent>
       <CustomDialogFooter>
