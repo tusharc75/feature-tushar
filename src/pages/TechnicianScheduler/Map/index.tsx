@@ -1,8 +1,10 @@
 import React, { useContext, useEffect } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Avatar, Box, CircularProgress } from '@mui/material';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { AccountCircle } from '@mui/icons-material';
+import { displayDateTime } from 'src/constants/helpers';
 
 
 const MapView = ({ userIds }) => {
@@ -125,8 +127,14 @@ const MapView = ({ userIds }) => {
 
                     position={new google.maps.LatLng(data?.latitude, data?.longitude)}
                   >
-                    <div style={{ backgroundColor: 'white', color: 'black', minWidth: 100 }}>
-                      <h4 style={{ margin: 0 }}>{data?.user?.optionLabel}</h4>
+                    <div className="flex items-center bg-white text-black min-w-[100px] px-2 py-1 rounded">
+                      <Avatar alt="Remy Sharp" src={data?.user?.avatar} className="h-9 w-9 mr-2">
+                        <AccountCircle className="text-[20px]" />
+                      </Avatar>
+                      <div className="flex flex-col leading-[1.2]">
+                        <span className="text-[13px] font-semibold">{data?.user?.optionLabel}</span>
+                        <span className="pt-[2px] text-[11px] font-light text-[#333]">{`Last Updated : ${displayDateTime(data?.date)}`}</span>
+                      </div>
                     </div>
                   </InfoWindow>
                 </>
