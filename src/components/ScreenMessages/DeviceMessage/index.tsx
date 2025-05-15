@@ -8,6 +8,7 @@ interface DeviceMessageProps {
   devices?: TDevices[];
   message?: string;
   description?: string;
+  backPath?: string
 }
 
 type TDevices = 'mobile' | 'tablet' | 'desktop';
@@ -15,7 +16,8 @@ type TDevices = 'mobile' | 'tablet' | 'desktop';
 const DeviceMessage: FC<DeviceMessageProps> = ({
   devices = ['mobile'],
   message = 'Mobile device not supported',
-  description = `Kindly open this page in Laptop/Desktop browser.`
+  description = `Kindly open this page in Laptop/Desktop browser.`,
+  backPath = ''
 }) => {
   const history = useHistory();
   const [isVisible, setIsVisible] = useState(false);
@@ -57,7 +59,12 @@ const DeviceMessage: FC<DeviceMessageProps> = ({
           <p className="mb-3 text-[14px]">{description}</p>
           <ThemeButton
             onClick={() => {
-              history.replace(prvPathname);
+              if (backPath) {
+                history.push(backPath);
+              }
+              else {
+                history.replace(prvPathname);
+              }
             }}
             buttonType="theme"
             className="no-shadow"
