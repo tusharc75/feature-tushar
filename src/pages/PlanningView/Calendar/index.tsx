@@ -23,6 +23,7 @@ import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
@@ -133,107 +134,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869152396b1',
-                fieldName: 'product',
-                fieldLabel: resources?.product?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.product,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 100,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869152396b1',
+              fieldName: 'product',
+              fieldLabel: resources?.product?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.product,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 100,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869252396b1',
-                fieldName: 'asset',
-                fieldLabel: resources?.serializedAsset?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serializedAsset,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 101,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869252396b1',
+              fieldName: 'asset',
+              fieldLabel: resources?.serializedAsset?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serializedAsset,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 101,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869352396b1',
-                fieldName: 'service',
-                fieldLabel: resources?.serviceMaster?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serviceMaster,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 102,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869352396b1',
+              fieldName: 'service',
+              fieldLabel: resources?.serviceMaster?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serviceMaster,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 102,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869452396b1',
-                fieldName: 'competencies',
-                fieldLabel: resources?.competencies?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.competencies,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 103,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869452396b1',
+              fieldName: 'competencies',
+              fieldLabel: resources?.competencies?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.competencies,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 103,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : [])
     ],
     [
@@ -911,7 +912,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                     </span>
-                    <HtmlTooltip title={'Pending Planned/Incoming'}>
+                    <HtmlTooltip title={'Warning: Unfulfilled Past Jobs Detected'}>
                       <IconButton
                         size={'small'}
                         onClick={() => {
@@ -922,6 +923,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       </IconButton>
                     </HtmlTooltip>
                   </span>
+                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                 </Box>
               )}
           </div>

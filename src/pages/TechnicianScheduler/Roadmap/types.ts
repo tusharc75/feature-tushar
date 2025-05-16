@@ -17,6 +17,7 @@ export interface TActivity {
   competencies?: Address[];
   competencyType?: Address;
   technicianHistory?: PokedexFieldTicket[];
+  technicianUnavailability?: TechnicianUnavailability[];
   warehouse?: Warehouse;
   child?: TActivity[];
   user?: {
@@ -49,6 +50,15 @@ export interface PokedexFieldTicket {
   fieldTicket?: FieldTicketFieldTicket[];
   serviceDetail?: ServiceDetail;
   reference?: Reference;
+}
+export interface TechnicianUnavailability {
+  _id: string;
+  brand: string;
+  title: string;
+  technician: string;
+  reason?: string;
+  startdate: Date;
+  endDate: Date;
 }
 export type Reference = {
   estimateStartDate?: string;
