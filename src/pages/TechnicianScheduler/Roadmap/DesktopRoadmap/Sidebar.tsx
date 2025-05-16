@@ -113,7 +113,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
     const { data: hoverdIemData } = activeItemData;
     const dataStartDate = dayjs(hoverdIemData?.service?.estimateStartDate || hoverdIemData?.estimateStartDate);
     const dataEndDate = dayjs(hoverdIemData?.service?.estimateEndDate || hoverdIemData?.estimateEndDate);
-    const isBlocked = hasDateOverlap(data?.technicianHistory, dataStartDate, dataEndDate);
+    const isBlocked = hasDateOverlap([...data?.technicianHistory, ...data?.technicianUnavailability], dataStartDate, dataEndDate);
     return { showColor: !!activeItemData, isBlocked };
   }, [activeItemData, data]);
 
