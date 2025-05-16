@@ -1,6 +1,6 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Button, IconButton, Skeleton } from '@mui/material';
+import { Box, Button, IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
@@ -61,7 +61,7 @@ const TechnicianList = ({
             <RowSkeleton key={i} isMobile={isMobile} />
           ))}
         </div>
-      ) : (
+      ) : (state?.dataRows?.length ?
         <List
           ref={listRef}
           height={isMobile ? containerSize.height - 32 : containerSize.height - 32}
@@ -86,6 +86,9 @@ const TechnicianList = ({
             </div>
           )}
         </List>
+        : <><Box p={1}>
+          <p>No Data Found</p>
+        </Box></>
       )}
     </div>
   );
@@ -190,29 +193,29 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       },
       ...(viewType === 'service'
         ? [
-            {
-              id: 'serviceName',
-              head: 'Service',
-              cell:
-                row.serviceName && row.serviceId ? (
-                  <div className="flex items-center">
-                    <p title={row.serviceName} className="line-clamp-1">
-                      {row.serviceName}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            id: 'serviceName',
+            head: 'Service',
+            cell:
+              row.serviceName && row.serviceId ? (
+                <div className="flex items-center">
+                  <p title={row.serviceName} className="line-clamp-1">
+                    {row.serviceName}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         id: 'estimateStartDate',

@@ -3,12 +3,14 @@ import { AccountCircle, CalendarMonth, ExpandLess, ExpandMore, Map } from '@mui/
 import { Avatar, Collapse, IconButton, ListItemButton, Typography } from '@mui/material';
 import { memo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { cn, displayDate } from 'src/constants/helpers';
+import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
 import MapImpl from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/MapImpl';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { getColorFromPriority, getPriority } from '../helperFunctions';
 import type { TActivity } from '../types';
+import routes from 'src/components/Helpers/Routes';
+import { FiExternalLink } from 'react-icons/fi';
 
 const SingleMobileTechnician = memo(({ handleMapClick, item, index, handleChange, compareCollapse, handleSelect }: any) => {
   const { setNodeRef, isOver, active } = useDroppable({
@@ -88,7 +90,7 @@ const CalendarData = memo(({ services, handleSelect, compareCollapse, index }: C
     <Collapse in={compareCollapse(index)} unmountOnExit>
       <ul className="space-y-2 border-t p-4">
         {(!services || !services.length) && <p className=" text-center text-sm">No Data found</p>}
-        {services?.map((service) => {
+        {services?.map((service: any) => {
           const priority = getPriority(service.status);
           const bgColor = getColorFromPriority(priority);
           return (
@@ -111,12 +113,38 @@ const CalendarData = memo(({ services, handleSelect, compareCollapse, index }: C
                   }}
                   className="flex h-[--data-h] flex-col justify-center p-[14px]"
                 >
-                  <p className="mb-2 line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
-                  <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
-                    <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
+                  <div className="mb-1 flex items-center gap-1">
+                    <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (service?.referenceType === sidebarResource?.fieldServiceOrder) {
+                          window.open(`${routes.fieldServiceOrderDetail.path}/${service?.reference?.optionValue}`);
+                        } else if (service?.referenceType === sidebarResource?.fieldTicket) {
+                          window.open(`${routes.fieldTicketDetail.path}/${service?.reference?.optionValue}`);
+                        } else if (service?.referenceType === sidebarResource?.rentalManagement) {
+                          window.open(`${routes.rentalManagementDetail.path}/${service?.reference?.optionValue}`);
+                        }
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                  {service?.serviceDetail?.serviceName && (
+                    <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
+                      Service : {service?.serviceDetail?.serviceName}
+                    </p>
+                  )}
+                  <p className="mb-2 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                    Customer : {service?.reference?.customerAccount?.optionLabel}
                   </p>
-                  <p className="{styles.chip} {styles[priority]} text-[10px] font-medium leading-[16px] text-[#777575]">{service.status}</p>
+                  <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate || service?.estimateStartDate)}-
+                    <span className="line-clamp-1 ">{displayDate(service?.endDate || service?.estimateEndDate)}</span>
+                  </p>
                 </div>
               </HtmlTooltip>
             </li>
