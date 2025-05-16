@@ -42,7 +42,7 @@ const Activity = (props) => {
     resourceLabel = '',
     resourceData = null,
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -286,7 +286,7 @@ const Activity = (props) => {
                     <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
-                    <Attachments relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                    <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
