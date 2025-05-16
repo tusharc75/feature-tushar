@@ -33,7 +33,7 @@ import mime from 'mime';
 import { PreviewFile } from 'src/components/PreviewFile';
 import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
 
-export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
+export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount, resourceLabel, resource }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
   const [sendMail, setSendMail] = useState(false);
   const [emailAttachment, setEmailAttachment] = useState(null);
@@ -59,7 +59,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
 
   const {
-    state: { permissions }
+    state: { permissions, resources }
   }: any = useData();
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -372,6 +372,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
             <CreateEmail
               emailId={null}
               relatedTo={relatedTo}
+              subject={resource && resourceLabel ? `${resources?.[resource]?.titleSingular}-${resourceLabel}` : ''}
               handleClose={() => {
                 setSendMail(false);
                 setFullScreen(false);
