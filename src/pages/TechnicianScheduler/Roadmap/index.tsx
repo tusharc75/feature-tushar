@@ -139,6 +139,8 @@ function Roadmap({
                 setCreateDialog(true);
               }}
               startIcon={<AddOutlined />}
+              mobileTooltip='Create'
+              iconForMobile={<AddOutlined />}
             >
               Create
             </ThemeButton>
