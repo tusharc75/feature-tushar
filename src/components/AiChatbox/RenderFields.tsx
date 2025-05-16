@@ -1,10 +1,11 @@
 import { Form, Formik } from 'formik';
-import { Dispatch, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { isEmpty } from 'lodash';
+import { Dispatch, Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { TChatboxActions, TInitialChatboxState } from 'src/components/AiChatbox/chatboxReducer';
 import { Field } from 'src/components/AiChatbox/types';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
-import { cn, dateFormatToSend, yupSchema } from 'src/constants/helpers';
+import { cn, dateFormatToSend, fieldTicketSteps, yupSchema } from 'src/constants/helpers';
 
 function validate(values: any) {
   const errors = {};
@@ -20,10 +21,39 @@ type RenderFieldsProps = {
   isDefaultMode: boolean;
 };
 
+
+const RenderConform = ({data, onSubmit, onCancel}) => {
+  return (
+    <div>
+      <p><b>Please confirm the following details</b></p>
+      <div>
+        {Object.keys(data).map((key) => (
+          <div key={key}>
+            <p> <b>{key} : </b> {data[key]}</p>
+          </div>
+        ))}
+      </div>
+      <div className='flex gap-2 mt-5'>
+        <ThemeButton onClick={() => onSubmit(data)} buttonType='theme'>Confirm</ThemeButton>
+        <ThemeButton onClick={() => onCancel()} buttonType='red'>Cancel</ThemeButton>
+      </div>
+    </div>
+  );
+};
+
 const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state, isDefaultMode }: RenderFieldsProps) => {
   const { fullScreen } = state;
   const extractData = useRef({});
-  const updatedFields = useMemo(() => {
+  const [shouldUpdateFields, setShouldUpdateFields] = useState(true);
+  const [updatedFields, setUpdatedFields] = useState<Field[]>([]);
+
+  useEffect(() => {
+    setShouldUpdateFields(true);
+  }, [fields]);
+
+  useEffect(() => {
+    if(!shouldUpdateFields) return;
+    
     const preFillData = {};
     const newFields = fields
       ?.filter((f) => {
@@ -45,9 +75,23 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
         return true;
       })
       .map((d) => ({ ...d, ...(d.option ? { option: d.option.map((o) => ({ ...o, optionValue: o.optionLabel })) } : {}) }));
+    
     extractData.current = preFillData;
-    return newFields;
+    setUpdatedFields(newFields);
+    setShouldUpdateFields(false);
+  }, [fields, shouldUpdateFields]);
+
+
+  const onCancel = useCallback(() => {
+    fields.forEach((field) => {
+      if (field.field) {
+        field.value = null;
+      }
+    });
+    setShouldUpdateFields(true);
   }, [fields]);
+
+
   const [fieldTypes, setFieldType] = useState({});
 
   useEffect(() => {
@@ -66,9 +110,9 @@ const RenderFields = ({ fields, handleSubmit, disabled = false, setState, state,
     }
     handleSubmit(formattedData);
   };
-
-  if (!updatedFields || updatedFields.length === 0) return null;
+  if (!updatedFields?.length && isEmpty(extractData.current)) return null;
   return (
+    !updatedFields?.length ? <RenderConform data={extractData.current} onSubmit={handleSubmitWithFormattedData} onCancel={onCancel} /> :
     <div
       className={cn(
         'my-[18px] ml-[50px] flex max-w-[800px] flex-col gap-2 rounded-md  shadow-md [border:1px_solid_var(--common-border-color)]',
