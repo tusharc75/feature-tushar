@@ -217,6 +217,10 @@
   --mui-overlays-24: unset;
 }
 
+body {
+  --fc-border-color: var(--common-border-color);
+}
+
 [data-mode='dark'] {
   .MuiOutlinedInput-notchedOutline {
     border-color: var(--dark-primary) !important;
