@@ -254,7 +254,7 @@ function PlanningView() {
           <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
-          {/* <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} /> */}
+          <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} />
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}

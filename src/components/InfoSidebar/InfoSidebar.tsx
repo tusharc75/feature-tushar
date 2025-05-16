@@ -1,16 +1,39 @@
 import { Close } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import { useCallback } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import { useInforSidebar } from 'src/components/InfoSidebar';
 import useLockBodyScroll from 'src/hooks/useLockBodyScroll';
 import { useWindowScroll } from 'src/hooks/useWindowScroll';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const InfoSidebar = () => {
-  const [, setStore] = useInforSidebar((store) => store.data);
-  const title = 'Info will be dynamic';
+  const [store, setStore] = useInforSidebar((store) => store.data);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [{ y }] = useWindowScroll();
+  const toastConfig = useContext(CustomToastContext);
 
   useLockBodyScroll();
+
+  useEffect(() => {
+    if (store) {
+      axiosInstance()
+        .get(`/resource-information/actions?resource=${store.resource}&actionId=${store.actionId}`)
+        .then(({ data: { data } }) => {
+        if (data.length) {
+          setTitle(data.actionName);
+          setContent(data.content);
+        } else {
+          setTitle('No information found');
+          setContent('<p>No content available.</p>');
+        }
+        })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+    }
+  }, [store]);
 
   const handleClose = useCallback(() => {
     setStore({ data: null });
@@ -24,11 +47,7 @@ const InfoSidebar = () => {
           <Close />
         </IconButton>
       </div>
-      <div className="content px-[--px] py-[--py]">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus fugiat veritatis earum! Porro delectus ullam saepe placeat impedit velit
-        veritatis dolorem perferendis, eaque sunt repellendus tenetur maxime magni dignissimos nulla, hic suscipit ipsa, error esse officia. Doloribus
-        ullam odit, similique totam maiores voluptas magni ratione sapiente cupiditate earum repudiandae accusamus.
-      </div>
+      <div className="content px-[--px] py-[--py]" dangerouslySetInnerHTML={{ __html: content }} />
     </div>
   );
 };
