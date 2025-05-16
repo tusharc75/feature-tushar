@@ -1,7 +1,7 @@
-import { Info } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import React, { useCallback } from 'react';
 import { InfoSidebarState, useInforSidebar } from 'src/components/InfoSidebar';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 type InfoSidebarButtonProps = {
   resource: InfoSidebarState['data']['resource'];
@@ -14,7 +14,7 @@ type InfoSidebarButtonProps = {
 const InfoSidebarButton = ({
   actionId,
   resource,
-  children = <Info fontSize="small" />,
+  children = <HelpOutlineIcon fontSize="small" />,
   element = IconButton,
   tooltip = ''
 }: InfoSidebarButtonProps) => {
