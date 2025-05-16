@@ -19,7 +19,11 @@ import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceO
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 
-export type HandleSelect = (event: React.SyntheticEvent, data: TActivity | string[], type: 'technician' | 'map' | '') => void;
+export type HandleSelect = (
+  event: React.SyntheticEvent,
+  data: TActivity | string[],
+  type: 'map' | 'assign' | 'un-assign' | 'dispatch' | 'return'
+) => void;
 
 function Roadmap({
   filter,
@@ -36,7 +40,6 @@ function Roadmap({
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [activity, setActivity] = useState(null);
-  const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState<string[] | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
@@ -64,14 +67,8 @@ function Roadmap({
       });
   };
 
-  const handleToggle = (event, nodeIds) => {
-    setExpanded(nodeIds);
-  };
-
-  const handleSelect = (event, data, type) => {
-    if (type === 'map') {
-      setSelected(data);
-    } else if (type === 'assign') {
+  const handleSelect = (event: any, data: any, type: 'assign' | 'un-assign' | 'dispatch' | 'return') => {
+    if (type === 'assign') {
       setAssignServiceDialog({ open: true, data: data });
     } else if (type === 'un-assign') {
       handleUnAssignTechnician(data);
@@ -130,8 +127,8 @@ function Roadmap({
   return (
     <>
       {headerSlot && (
-        <div className="mb-4 flex items-center gap-2">
-          <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {!isMobile && <ToggleSidebar leftSidebar={leftSidebar} setIsSidebarOpen={setIsSidebarOpen} />}
           {headerSlot}
           <div className="ml-auto flex gap-1">
             <ThemeButton
@@ -142,6 +139,8 @@ function Roadmap({
                 setCreateDialog(true);
               }}
               startIcon={<AddOutlined />}
+              mobileTooltip='Create'
+              iconForMobile={<AddOutlined />}
             >
               Create
             </ThemeButton>
@@ -173,16 +172,7 @@ function Roadmap({
       )}
       <Box bgcolor="var(--dark-secondary, white)">
         {isMobile ? (
-          <MobileRoadmap
-            activity={activity}
-            expanded={expanded}
-            leftSidebar={leftSidebar}
-            selected={selected}
-            handleToggle={handleToggle}
-            handleSelect={handleSelect}
-            setSelected={setSelected}
-            loading={!activity}
-          />
+          <MobileRoadmap activity={activity} leftSidebar={leftSidebar} handleSelect={handleSelect} loading={!activity} />
         ) : (
           <DesktopRoadmap
             loading={!activity}
