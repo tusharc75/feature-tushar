@@ -21,15 +21,12 @@ const InfoSidebar = () => {
       axiosInstance()
         .get(`/resource-information/actions?resource=${store.resource}&actionId=${store.actionId}`)
         .then(({ data: { data } }) => {
-        if (data.length) {
           setTitle(data.actionName);
           setContent(data.content);
-        } else {
-          setTitle('No information found');
-          setContent('<p>No content available.</p>');
-        }
         })
       .catch((err) => {
+        setTitle('Error');
+        setContent('<p>Information not found.</p>');
         toastConfig.setToastConfig(err);
       });
     }
