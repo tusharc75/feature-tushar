@@ -665,7 +665,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const handleClick = useCallback(
     (args: EventClickArg) => {
-      const data = { ...args.event, ...args.event.extendedProps } as any;
+      const data = { ...args.event, ...args.event._def, ...args.event.extendedProps, start: args.event.start, end: args.event.end } as any;
       if (selectedResource.resource === sidebarResource.product) {
         if (data?.type === 'assetStatus') {
           let query = `?assetStatus=${data?.status}`;
