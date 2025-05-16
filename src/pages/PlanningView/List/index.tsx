@@ -126,7 +126,6 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
           hideSelection={true}
           hideAction={true}
           showFilters={true}
