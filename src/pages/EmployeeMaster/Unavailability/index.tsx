@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -16,9 +16,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 let employeeUnavailabilityTimeout;
-
 
 const Unavailability = ({ id }) => {
   const renderedFrom = `${camelCase(sidebarResource.employeeMaster)}_Unavaiability`;
@@ -29,7 +29,7 @@ const Unavailability = ({ id }) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [showUnavailbiltyDialog, setShowUnavailibilityDialog] = useState({ open: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -134,8 +134,11 @@ const Unavailability = ({ id }) => {
 
   const handleDelete = async () => {
     let recordsToDelete = [];
-    recordsToDelete.push(deleteRecord?._id);
-
+    if (deleteRecord) {
+      recordsToDelete.push(deleteRecord?._id);
+    } else if (selectedRecords?.length) {
+      recordsToDelete = selectedRecords?.map((r) => r?._id);
+    }
     if (recordsToDelete.length > 0) {
       setDeleteLoading(true);
       axiosInstance()
@@ -150,7 +153,7 @@ const Unavailability = ({ id }) => {
           });
           setShowDeleteConfirmBox(false);
           setDeleteLoading(false);
-          if (deleteRecord) setDeleteRecord({});
+          setDeleteRecord(null);
           fetchData();
         })
         .catch((error) => {
@@ -161,24 +164,48 @@ const Unavailability = ({ id }) => {
     }
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          Delete
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
-    <Box>
-      <Box pt={2}>
-        <ThemeButton startIcon={<AddIcon fontSize="small" />} onClick={() => setShowUnavailibilityDialog({ open: true, id: null })}>
-          Add
-        </ThemeButton>
-      </Box>
+    <>
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        addButtonProps={{
+          onClick: () => {
+            setShowUnavailibilityDialog({ open: true, id: null });
+          }
+        }}
+        isActionButtonVisible={true}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{
+          disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)
+        }}
+        hasXpadding
+      />
       {columns ? (
-        <CustomReactTable
-          height={'calc(100vh - 200px)'}
-          columns={columns}
-          state={state}
-          dispatch={dispatch}
-          renderedFrom={renderedFrom}
-          refreshGrid={fetchData}
-          hideSelection={true}
-          isClientSideGrid={true}
-        />
+        <Box zIndex={5} width={'100%'}>
+          <CustomReactTable
+            height={'calc(100vh - 200px)'}
+            columns={columns}
+            state={state}
+            dispatch={dispatch}
+            renderedFrom={renderedFrom}
+            refreshGrid={fetchData}
+            isClientSideGrid={true}
+          />
+        </Box>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -198,7 +225,7 @@ const Unavailability = ({ id }) => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the record ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? deleteRecord?.title : 'selected records'} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -207,7 +234,7 @@ const Unavailability = ({ id }) => {
           okBtnLoading={deleteLoading}
         />
       ) : null}
-    </Box>
+    </>
   );
 };
 
