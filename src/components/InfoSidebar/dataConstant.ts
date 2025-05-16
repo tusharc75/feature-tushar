@@ -1,3 +1,3 @@
 export const planningViewActions = {
-  planningViewInformation: 'planningViewInformation'
+  warningUnfulfilledPastJobsDetected: 'warningUnfulfilledPastJobsDetected'
 };
