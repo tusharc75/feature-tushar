@@ -43,8 +43,6 @@ const InfoSidebar = () => {
     setStore({ data: null });
   }, [setStore]);
 
-  console.log(resourceData)
-
   return (
     <div className="max-h-[calc(100vh-111px)] flex-grow [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
       <div className="flex items-center justify-between gap-2 border-b px-[--px] py-[--py]">

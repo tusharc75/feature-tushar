@@ -131,6 +131,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, isBulkUp
                           onChange={(date) => {
                             setFieldValue('manualStartDate', date);
                           }}
+                          maxDate={new Date()}
                           {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
                           {...(minStartDate ? { minDate: minStartDate } : {})}
                         />
