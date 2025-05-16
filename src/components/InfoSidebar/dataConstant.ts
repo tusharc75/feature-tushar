@@ -1,3 +1,3 @@
 export const planningViewActions = {
-  generalInformation: 'planningViewInformation'
+  planningViewInformation: 'planningViewInformation'
 };
