@@ -260,8 +260,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => {}}
-              onExportToExcelSuccess={() => {}}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -289,14 +289,14 @@ function PlanningView() {
               items={
                 [
                   {
-                    value: 'list',
-                    icon: <TfiLayoutListThumbAlt />,
-                    tooltip: 'List View'
-                  },
-                  {
                     value: 'calendar',
                     icon: <FaRegCalendar />,
                     tooltip: 'Calendar View'
+                  },
+                  {
+                    value: 'list',
+                    icon: <TfiLayoutListThumbAlt />,
+                    tooltip: 'List View'
                   }
                 ] as const
               }
@@ -427,7 +427,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => {}}
+          fetchData={() => { }}
           onSuccess={() => {
             onClickRefreshIcon();
           }}

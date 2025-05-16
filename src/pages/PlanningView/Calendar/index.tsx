@@ -29,6 +29,7 @@ import Filter from 'src/components/Filter';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { MdFilterList } from 'react-icons/md';
+import { createFilterSetData } from 'src/components/CustomReactTable';
 
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
@@ -135,112 +136,114 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
+  const [userFilters, setUserFilters] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(null);
 
   const CUSTOM_FILTERS = useMemo(
     () => [
       ...(permissions?.product?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869152396b1',
-                fieldName: 'product',
-                fieldLabel: resources?.product?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.product,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 100,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869152396b1',
+              fieldName: 'product',
+              fieldLabel: resources?.product?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.product,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 100,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869252396b1',
-                fieldName: 'asset',
-                fieldLabel: resources?.serializedAsset?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serializedAsset,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 101,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869252396b1',
+              fieldName: 'asset',
+              fieldLabel: resources?.serializedAsset?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serializedAsset,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 101,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869352396b1',
-                fieldName: 'service',
-                fieldLabel: resources?.serviceMaster?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serviceMaster,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 102,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869352396b1',
+              fieldName: 'service',
+              fieldLabel: resources?.serviceMaster?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serviceMaster,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 102,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869452396b1',
-                fieldName: 'competencies',
-                fieldLabel: resources?.competencies?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.competencies,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 103,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869452396b1',
+              fieldName: 'competencies',
+              fieldLabel: resources?.competencies?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.competencies,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 103,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : [])
     ],
     [
@@ -305,7 +308,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [selectedResource]);
 
   const getQueryString = useCallback(
-    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds, filterTermP = filterTerm) => {
       const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
       let query = `?date=${date}`;
       if (selectedResource) {
@@ -406,9 +409,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   );
 
   const fetchData = useCallback(
-    (cancelToken?: CancelToken, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+    (cancelToken?: CancelToken, deepFiltersP = deepFilters, filterByIdsP = filterByIds, filterTermP = filterTerm) => {
       setIsDataFetching(true);
-      const queryString = getQueryString(deepFiltersP, filterByIdsP);
+      const queryString = getQueryString(deepFiltersP, filterByIdsP, filterTermP);
       setQueryString(queryString);
       axiosInstance()
         .get(`/planning-view${queryString}`, { cancelToken })
@@ -586,19 +589,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       filterByIds
     ]
   );
-
-  useEffect(() => {
-    const cancelTokenSource = axios.CancelToken.source();
-    const cancelToken = cancelTokenSource.token;
-    if (selectedResource) {
-      fetchData(cancelToken);
-    } else {
-      setEvents([]);
-    }
-    return () => {
-      cancelTokenSource.cancel('Operation canceled due to new request.');
-    };
-  }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
   useImperativeHandle(ref, () => ({
     fetchData
@@ -870,6 +860,52 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     setShowDetail({ open: true, data: data, anchor: event });
   }, []);
 
+  const fetchUserFilters = () => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
+    axiosInstance()
+      .get(`/user-resource-filter?resource=${selectedResource?.resource}_planningView`)
+      .then(({ data: { data } }) => {
+        setUserFilters(data);
+        const defaultFilter = data.find((d) => d.default);
+        if (defaultFilter) {
+          const { filterById, deepFilter } = createFilterSetData(defaultFilter, filteredColumns);
+          setSelectedFilter(defaultFilter);
+          setFilterByIds(filterById);
+          setDeepFilters(deepFilter);
+          setFilterTerm(defaultFilter?.filterTerm || {});
+          fetchData(cancelToken, deepFilter, filterById, defaultFilter?.filterTerm || {});
+        } else {
+          fetchData(cancelToken, [], [], {});
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
+    if (selectedResource && selectedResource?.resource) {
+      if (
+        ![sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource) &&
+        filteredColumns?.length > 0
+      ) {
+        fetchUserFilters();
+      } else if (
+        [sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource)
+      ) {
+        fetchData(cancelToken);
+      }
+    } else {
+      setEvents([]);
+    }
+    return () => {
+      cancelTokenSource.cancel('Operation canceled due to new request.');
+    };
+  }, [selectedResource, selectedResource?.resource, filteredColumns?.length, selectedLookUpResourceData, dateRange]);
+
   return (
     <>
       <div>
@@ -1057,7 +1093,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }}
             loading={false}
             filterTitle={resources?.[selectedResource?.key]?.titleSingular}
-            resource={selectedResource?.resource}
+            resource={`${selectedResource?.resource}_planningView`}
             columns={filteredColumns}
             onApplyFilter={() => {
               setShowFilters(false);
@@ -1069,6 +1105,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             setFilterByIds={setFilterByIds}
             filterTerm={filterTerm}
             setFilterTerm={setFilterTerm}
+            isVisibleFilterSet={true}
+            fetchUserFilters={fetchUserFilters}
+            userFilters={userFilters}
+            selectedFilter={selectedFilter}
           />
         )}
       </div>
