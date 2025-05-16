@@ -21,7 +21,6 @@ import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
-import './calendarView.scss';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import InfoIcon from '@mui/icons-material/Info';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
@@ -30,10 +29,7 @@ import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { MdFilterList } from 'react-icons/md';
 import { createFilterSetData } from 'src/components/CustomReactTable';
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
+import { EventClickArg } from '@fullcalendar/core';
 
 const localizer = dayjsLocalizer(dayjs);
 
@@ -97,7 +93,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
-  const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
 
@@ -109,7 +104,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [selectedFilters, setSelectedFilters] = useState([]);
 
   const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => dayjs().toDate(), []);
 
   const [staticEvents, setStaticEvents] = useState([]);
 
@@ -143,107 +137,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869152396b1',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 100,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869252396b1',
-              fieldName: 'asset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 101,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869352396b1',
-              fieldName: 'service',
-              fieldLabel: resources?.serviceMaster?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serviceMaster,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 102,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869452396b1',
-              fieldName: 'competencies',
-              fieldLabel: resources?.competencies?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.competencies,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 103,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : [])
     ],
     [
@@ -406,6 +400,64 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       return query;
     },
     [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource, deepFilters, filterByIds, filterTerm]
+  );
+
+  const setEventStyle = useCallback(
+    (obj, themeMode: 'dark' | 'light') => {
+      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+      let color = '#000';
+
+      if (obj?.resource === sidebarResource.planning) {
+        if (obj?.fulfillStatus === 'Yes') {
+          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
+          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+        } else if (obj?.fulfillStatus === 'No') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
+          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+        } else if (obj?.fulfillStatus === 'Partially') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+        }
+      }
+      if (obj?.resource === sidebarResource.product) {
+        if (obj?.type === 'credit') {
+          backgroundColor = 'var(--success-light) ';
+        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+        } else if (obj?.type === 'debit') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        }
+      }
+
+      if (
+        (obj?.customerAccount || obj?.supplierAccount) &&
+        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
+      ) {
+        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+        }
+      }
+      if (obj?.resource === sidebarResource.rentalManagement) {
+        if (obj?.fulfillStatus === 'ERROR') {
+          backgroundColor = 'rgb(220, 53, 69)';
+          color = 'white';
+        }
+      }
+
+      return {
+        backgroundColor,
+        color,
+        border: 0,
+        borderColor: 'var(--common-border-color)'
+      };
+    },
+    [customerColorCodeMap, supplierColorCodeMap]
   );
 
   const fetchData = useCallback(
@@ -631,7 +683,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   };
 
   const handleClick = useCallback(
-    (data, target) => {
+    (args: EventClickArg) => {
+      const data = args.event as any;
       if (selectedResource.resource === sidebarResource.product) {
         if (data?.type === 'assetStatus') {
           let query = `?assetStatus=${data?.status}`;
@@ -656,7 +709,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.serializedAsset.path}${query}`);
         } else if (data?.type === 'availableByPlanning') {
         } else if (data?.type) {
-          setAnchor(target.target);
+          setAnchor(args.el);
           const newData: OnSelectDataType[] = data.data;
           setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
         }
@@ -671,7 +724,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
         }
       } else {
-        setShowDetail({ open: true, data: data, anchor: target });
+        setShowDetail({ open: true, data: data, anchor: args.el });
       }
     },
     [mapObjectToList, selectedLookUpResourceData?.product, selectedLookUpResourceData?.warehouse, selectedResource?.resource]
@@ -755,67 +808,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [view]
   );
 
-  const setEventStyle = useCallback(
-    (obj) => {
-      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
-      let color = '#000';
-
-      if (obj?.resource === sidebarResource.planning) {
-        if (obj?.fulfillStatus === 'Yes') {
-          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
-          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
-        } else if (obj?.fulfillStatus === 'No') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
-          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
-        } else if (obj?.fulfillStatus === 'Partially') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
-        }
-      }
-      if (obj?.resource === sidebarResource.product) {
-        if (obj?.type === 'credit') {
-          backgroundColor = 'var(--success-light) ';
-        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-        }
-      }
-
-      if (
-        (obj?.customerAccount || obj?.supplierAccount) &&
-        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
-      ) {
-        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
-        if (assignedColor) {
-          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
-          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
-        }
-      }
-      if (obj?.resource === sidebarResource.rentalManagement) {
-        if (obj?.fulfillStatus === 'ERROR') {
-          backgroundColor = 'rgb(220, 53, 69)';
-          color = 'white';
-        }
-      }
-
-      return {
-        style: {
-          backgroundColor,
-          color,
-          borderRadius: '4px',
-          border: 'none',
-          padding: '8px 16px'
-        }
-      };
-    },
-    [themeMode, customerColorCodeMap, supplierColorCodeMap]
-  );
-
   useEffect(() => {
     setFilteredColumns([]);
     setDeepFilters([]);
@@ -856,8 +848,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   }, [selectedResource]);
 
-  const dragAndDropOnSelectEvent = useCallback((data: any, event: any) => {
-    setShowDetail({ open: true, data: data, anchor: event });
+  const dragAndDropOnSelectEvent = useCallback((args: EventClickArg) => {
+    console.log(args.event._def);
+    setShowDetail({ open: true, data: args.event, anchor: args.el });
   }, []);
 
   const fetchUserFilters = () => {
@@ -990,37 +983,29 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
             <>
               <CustomCalendar
-                dragAndDrop={true}
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
                 onEventDrop={moveEvent}
-                loading={isDataFetching}
+                isLoading={isDataFetching}
+                getEventStyle={setEventStyle}
                 onEventResize={resizeEvent}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
                 resizable
-                views={['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={dragAndDropOnSelectEvent}
+                eventClick={dragAndDropOnSelectEvent}
               />
             </>
           ) : (
             <div className="relative min-h-[500px] ">
               <CustomCalendar
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
-                loading={isDataFetching}
+                getEventStyle={setEventStyle}
+                isLoading={isDataFetching}
                 popup={!mobileView}
                 messages={{
                   agenda: 'List'
@@ -1030,7 +1015,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 view={view}
                 eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={handleClick}
+                eventClick={handleClick}
               />
             </div>
           )}
@@ -1066,6 +1051,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </Box>
           </Popover>
         )}
+
         {showDetail.open && (
           <DetailsPopover
             fields={fields}
