@@ -1,3 +1,4 @@
+import { DatesSetArg } from '@fullcalendar/core';
 import { ExpandMore } from '@mui/icons-material';
 import {
   Box,
@@ -13,25 +14,18 @@ import {
   TableRow
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { View, dayjsLocalizer } from 'react-big-calendar';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import { View } from 'src/components/CustomCalendar/types';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, sidebarResource, workOrderSupervisor } from 'src/constants/helpers';
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
-
-const localizer = dayjsLocalizer(dayjs);
 
 function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   const {
@@ -39,14 +33,10 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   }: any = useData();
 
   const [themeMode] = useAppTheme();
-  const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
 
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
-
-  const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => dayjs().toDate(), []);
+  const [view, setView] = useState<View>(mobileView ? 'timeGridDay' : 'dayGridMonth');
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
@@ -113,35 +103,27 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
       .finally(() => setIsDataFetching(false));
   };
 
-  useEffect(() => {
-    if (renderCount !== 0) {
-      onNavigate(new Date());
-    } else {
-      setRenderCount(renderCount + 1);
-    }
-  }, [view]);
-
   const onNavigate = useCallback(
-    (date) => {
-      if (view === 'month') {
+    (dateInfo: DatesSetArg) => {
+      if (view === 'dayGridMonth') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
         });
-      } else if (view === 'week') {
+      } else if (view === 'timeGridWeek') {
         setDateRange({
-          estimateStartDate: dayjs(date).startOf('week').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).endOf('week').format('MM/DD/YYYY')
+          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
         });
-      } else if (view === 'day') {
+      } else if (view === 'timeGridDay') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).format('MM/DD/YYYY')
+          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
         });
       } else if (view === 'agenda') {
         setDateRange({
-          estimateStartDate: dayjs(date).format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(date).add(1, 'month').format('MM/DD/YYYY')
+          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+          estimateEndDate: dayjs(dateInfo.end).tz().add(1, 'month').format('MM/DD/YYYY')
         });
       }
     },
@@ -150,16 +132,14 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
 
   const eventStyle = useMemo(() => {
     let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
-    let color = '#000';
+    let color = '#000000';
+    let textColor = '#000000';
 
     return {
-      style: {
-        backgroundColor,
-        color,
-        borderRadius: '4px',
-        border: 'none',
-        padding: '8px 16px'
-      }
+      backgroundColor,
+      color,
+      borderColor: 'transparent',
+      textColor
     };
   }, [themeMode]);
 
@@ -167,33 +147,24 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
     <>
       <div className={cn('relative min-h-[400px] [&_.rbc-toolbar]:pt-0')}>
         <CustomCalendar
-          defaultDate={defaultDate}
-          defaultView={'month'}
           events={events}
-          formats={formats}
-          localizer={localizer}
-          popup={!(isMobile || isTablet)}
-          messages={{
-            agenda: 'List'
-          }}
-          views={['month', 'week', 'day', 'agenda']}
-          onView={setView}
+          setView={setView}
           view={view}
-          eventPropGetter={(obj: any) => {
+          getEventStyle={() => {
             return eventStyle;
           }}
-          components={{
-            agenda: {
-              event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
-            }
-          }}
+          // components={{
+          //   agenda: {
+          //     event: ({ event }) => <EventAgenda event={event} setOpen={setOpen} />
+          //   }
+          // }}
           onNavigate={onNavigate}
-          onSelectEvent={(data: any, event: any) => {
+          eventClick={(arg) => {
             if ([sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder]?.includes(reference)) {
-              fetchCompetencies(data.id);
-              setAnchor(event.nativeEvent.target);
+              fetchCompetencies(arg.event.id);
+              setAnchor(arg.el);
             } else {
-              setOpen({ open: true, id: data.id });
+              setOpen({ open: true, id: arg.event.id });
             }
           }}
         />

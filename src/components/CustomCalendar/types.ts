@@ -8,3 +8,5 @@ export type Event = {
   resource?: string;
   [key: string]: any;
 };
+
+export type View = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';

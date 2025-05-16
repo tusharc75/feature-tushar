@@ -2,23 +2,47 @@ import React, { useEffect, useRef, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin!
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { Event } from 'src/components/CustomCalendar/types';
-import { CalendarOptions, EventContentArg } from '@fullcalendar/core';
+import { Event, View } from 'src/components/CustomCalendar/types';
+import { CalendarOptions, DatesSetArg, EventContentArg } from '@fullcalendar/core';
 import { CircularProgress, Popover } from '@mui/material';
 import { StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import './index.scss';
 import { useAppTheme } from 'src/constants/AppConfig';
+import interactionPlugin from '@fullcalendar/interaction';
+import { useData } from 'src/StateProvider/Provider';
 
 type CustomCalednerProps = {
   events: Event[];
   isLoading?: boolean;
-  initialView?: 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay';
-  getEventStyle: (data: Event, themeMode: 'dark' | 'light') => Partial<{ color: string; backgroundColor: string; borderColor: string }>;
+  initialView?: View;
+  getEventStyle?: (
+    data: Event,
+    themeMode: 'dark' | 'light'
+  ) => Partial<{ color: string; backgroundColor: string; borderColor: string; textColor: string }>;
+  view?: View;
+  setView?: (view: View) => void;
+  onNavigate?: (dateInfo: DatesSetArg) => void;
 } & Omit<CalendarOptions, 'views' | 'events'>;
 
 const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
-  ({ events, isLoading, initialView = 'dayGridMonth', getEventStyle, ...rest }, ref) => {
+  (
+    {
+      events,
+      isLoading,
+      initialView = 'dayGridMonth',
+      getEventStyle,
+      view,
+      setView,
+      onNavigate,
+      height = 'max(calc(100vh - 250px), 700px)',
+      ...rest
+    },
+    ref
+  ) => {
+    const {
+      state: { user }
+    }: any = useData();
     const [themeMode] = useAppTheme();
     const [stateEvents, setStateEvents] = useState(events);
     const calenderRef = useRef<FullCalendar>(null);
@@ -31,7 +55,14 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
       } else {
         setStateEvents(events);
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [events, themeMode]);
+
+    useEffect(() => {
+      if (view) {
+        calenderRef.current?.getApi().changeView(view);
+      }
+    }, [view]);
 
     return (
       <div className="relative">
@@ -44,12 +75,20 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
               calenderRef.current = node;
             }
           }}
-          plugins={[dayGridPlugin, timeGridPlugin]}
+          height={height}
+          expandRows={true}
+          timeZone={user?.user?.timezone || 'America/New_York'}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView={initialView}
           weekends={true}
           events={stateEvents}
           eventContent={(eventInfo) => renderEventContent(eventInfo)}
-          dayMaxEventRows={4}
+          dayMaxEventRows={3}
+          datesSet={function (dateInfo) {
+            const view = dateInfo.view;
+            onNavigate?.(dateInfo);
+            setView?.(view.type as View);
+          }}
           customButtons={{
             dateSelectorButton: {
               text: calenderRef.current?.getApi().view.title,
@@ -68,7 +107,7 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
           {...rest}
         />
         {isLoading && (
-          <div className="absolute inset-0 z-[1] flex items-center justify-center bg-white/60">
+          <div className="absolute -inset-2 z-10 flex items-center justify-center rounded-md bg-white/60 [backdrop-filter:blur(2px)] dark:bg-black/60">
             <CircularProgress />
           </div>
         )}
