@@ -16,7 +16,7 @@ const totalDay = endDate.diff(startDate, 'day');
 
 type DesktopRoadmapProps = {
   activity: TActivity[] | null;
-  selected: string[] | [];
+  selected: string[] | null;
   handleSelect: HandleSelect;
   setSelected: React.Dispatch<React.SetStateAction<string[]>>;
   leftSidebar?: (isMobile: boolean) => React.ReactNode;
@@ -38,6 +38,8 @@ const DesktopRoadmapImpl = ({
   loading
 }: DesktopRoadmapProps) => {
   const [technicianSearchValue] = useRoadMapStore((state) => state.technicianSearchValue);
+  const [mapData] = useRoadMapStore((state) => state.mapData);
+
   const [scrollPosition, setScrollPosition] = useState(0);
   const filteredActivity = useMemo(() => {
     const searchFor = (technicianSearchValue || '').trim().toLowerCase();
@@ -60,7 +62,7 @@ const DesktopRoadmapImpl = ({
       ref={setContainer}
       className={cn(
         'grid h-[--container-h] grid-cols-[auto_1fr_300px] overflow-auto border  [--container-h:calc(100vh-200px)] [--data-h:90px] [--header-h:50px] ',
-        selected ? 'overflow-hidden' : 'overflow-auto scroll-smooth'
+        mapData ? 'overflow-hidden' : 'overflow-auto scroll-smooth'
       )}
     >
       {leftSidebar ? (
@@ -68,7 +70,7 @@ const DesktopRoadmapImpl = ({
           {leftSidebar(false)}
         </LeftSidebar>
       ) : null}
-      {!selected?.length ? (
+      {!mapData ? (
         <Calendar
           dayPixel={dayPixel}
           endDate={endDate}
@@ -81,7 +83,7 @@ const DesktopRoadmapImpl = ({
         />
       ) : (
         <div className="mt-[400px]" style={{ scrollbarWidth: 'none', marginTop: `${scrollPosition}px` }}>
-          <MapImpl selected={selected} setSelected={setSelected} />
+          <MapImpl />
         </div>
       )}
       <Sidebar selectedResource={selectedResource} activity={filteredActivity} loading={loading} handleSelect={handleSelect} />
