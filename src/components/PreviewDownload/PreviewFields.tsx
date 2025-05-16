@@ -132,10 +132,6 @@ export const PreviewFields = ({
                       <IconButton
                         size="small"
                         disabled={user?._id !== option?.user}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
                       >
                         <EditIcon fontSize="small" color={user?._id === option?.user ? 'primary' : 'disabled'} />
                       </IconButton>
@@ -174,10 +170,10 @@ export const PreviewFields = ({
                 if (
                   val.find((e) => e.fieldName === 'Select All') &&
                   ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() !==
-                    val
-                      ?.map((e) => e?.fieldName)
-                      .sort()
-                      .toString()
+                  val
+                    ?.map((e) => e?.fieldName)
+                    .sort()
+                    .toString()
                 ) {
                   setVisibleColumns(allColumn);
                 } else if (
@@ -212,7 +208,7 @@ export const PreviewFields = ({
                       style={{ marginRight: 8 }}
                       checked={
                         ['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() ===
-                        ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
+                          ['Select All', ...visibleColumns?.map((e) => e?.fieldName)].sort().toString()
                           ? true
                           : state.selected
                       }
