@@ -103,7 +103,7 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           moreLinkClick={'popover'}
-          moreLinkClassNames={'bg-[#32324f] text-white w-full text-center py-1 mt-1 dark:hover:!bg-gray-600 hover:!bg-gray-500'}
+          moreLinkClassNames={'bg-[#32324f] text-white w-full text-center py-1 mt-1 dark:hover:!bg-gray-600 hover:!bg-gray-500 font-semibold'}
           {...rest}
         />
         {isLoading && (
@@ -135,7 +135,7 @@ function renderEventContent(eventInfo: EventContentArg) {
   return (
     <>
       <b>{eventInfo.timeText}</b>
-      <p>{eventInfo.event.title}</p>
+      <p className="px-[5px] py-[2px] text-xs font-medium">{eventInfo.event.title}</p>
     </>
   );
 }
