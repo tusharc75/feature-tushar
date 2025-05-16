@@ -456,7 +456,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
-                      //data: d?.debit
+                      data: d?.debit
                     });
                   }
                 } else if (property === 'credit') {
@@ -468,7 +468,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
-                      //data: d?.credit
+                      data: d?.credit
                     });
                   }
                 } else if (property === 'availableByPlanning') {
