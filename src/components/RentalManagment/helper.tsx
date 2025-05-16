@@ -438,7 +438,7 @@ export const checkProductInside = (item, material) => {
         return true;
     }
     const child = material?.filter((e) => e.parentId === item?._id);
-    if (child?.some((e) => e?.type === MATERIAL_TYPE.product)) {
+    if (child?.some((e) => e?.type === MATERIAL_TYPE.product && e?.consumableType !== 'Internal')) {
         return true;
     }
     if (child?.filter((e) => e?.type === MATERIAL_TYPE.package)?.some((ele) => checkProductInside(ele, material))) {
