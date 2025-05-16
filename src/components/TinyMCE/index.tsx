@@ -285,11 +285,7 @@ export default function TinyMCE(props) {
                           />
                           <label htmlFor="avatar">
                             <IconButton title="Add picture" size="small" aria-label="upload picture" component="span">
-                              <ThemeButton
-                                component="span"
-                                disabled={disabledEditor || isImageLoading}
-                                startIcon={<HiOutlinePhotograph />}
-                              >
+                              <ThemeButton component="span" disabled={disabledEditor || isImageLoading} startIcon={<HiOutlinePhotograph />}>
                                 Upload Image
                               </ThemeButton>
                             </IconButton>
@@ -339,7 +335,8 @@ export default function TinyMCE(props) {
                             label="Width"
                             variant="outlined"
                             defaultValue={imageDetails.width}
-                            onChange={handleChange} />
+                            onChange={handleChange}
+                          />
                         </Grid>
                         <Grid size={{ xs: 6 }}>
                           <TextField
@@ -354,14 +351,7 @@ export default function TinyMCE(props) {
                           />
                         </Grid>
                         <Grid size={{ xs: 12 }}>
-                          <TextField
-                            id="alt"
-                            name="Alternative Text"
-                            size="small"
-                            label="alt"
-                            fullWidth
-                            variant="outlined"
-                            onChange={handleChange} />
+                          <TextField id="alt" name="Alternative Text" size="small" label="alt" fullWidth variant="outlined" onChange={handleChange} />
                         </Grid>
                       </Grid>
                     </div>
@@ -398,11 +388,7 @@ export default function TinyMCE(props) {
                           accept=".docx,.doc"
                         />
                         <label htmlFor={`${id}file`}>
-                          <ThemeButton
-                            disabled={disabledEditor || isImgUploading}
-                            startIcon={<AiOutlineFileAdd />}
-                            component="span"
-                          >
+                          <ThemeButton disabled={disabledEditor || isImgUploading} startIcon={<AiOutlineFileAdd />} component="span">
                             Upload File
                           </ThemeButton>
                         </label>
@@ -411,11 +397,7 @@ export default function TinyMCE(props) {
                   )}
                   <span>
                     <Box display="flex" alignItems="center">
-                      <ThemeButton
-                        disabled={disabledEditor}
-                        onClick={() => setIsUploadImage(true)}
-                        startIcon={<HiOutlinePhotograph />}
-                      >
+                      <ThemeButton disabled={disabledEditor} onClick={() => setIsUploadImage(true)} startIcon={<HiOutlinePhotograph />}>
                         Upload Image
                       </ThemeButton>
                     </Box>
@@ -423,10 +405,7 @@ export default function TinyMCE(props) {
                   <span>
                     {showVariableDropdown ? (
                       <Box ml={1}>
-                        <ThemeButton
-                          onClick={openActions}
-                          endIcon={<ExpandMore />}
-                        >
+                        <ThemeButton onClick={openActions} endIcon={<ExpandMore />}>
                           Variables
                         </ThemeButton>
                         <Menu
@@ -487,7 +466,7 @@ export default function TinyMCE(props) {
                 toolbar:
                   'undo redo | formatselect  | ' +
                   'bold italic backcolor | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | hrStyled',
+                  'alignright alignjustify | bullist numlist outdent indent | hrStyled | fullscreen',
                 content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
                 content_css: themeColor === 'dark' ? 'dark' : 'default',
