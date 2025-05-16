@@ -146,6 +146,7 @@ const Unavailability = ({ id }) => {
           ids: recordsToDelete
         })
         .then(({ data }) => {
+          dispatch({ type: 'selection', selectedRecords: [] });
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
