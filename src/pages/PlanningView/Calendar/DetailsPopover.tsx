@@ -8,7 +8,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { sidebarResource } from 'src/constants/helpers';
-import './calendarView.scss';
 
 const DetailsPopover = ({ setShowDetail, showDetail, resourceList, selectedResource, fields, resourceDatas }) => {
   return (
