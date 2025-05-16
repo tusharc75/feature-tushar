@@ -32,8 +32,6 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
-import { MdFilterList } from 'react-icons/md';
-import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 
 function PlanningView() {
   const {
@@ -254,7 +252,6 @@ function PlanningView() {
           <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
-          {/* <InfoSidebarButton actionId={planningViewActions.planningViewInformation} resource={sidebarResource.planningView} /> */}
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
