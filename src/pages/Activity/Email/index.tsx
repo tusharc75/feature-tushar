@@ -475,7 +475,6 @@ const Email = () => {
                   access: true
                 }
               ]}
-              options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);

@@ -48,7 +48,7 @@ export default function ManageAttachment({
   parentFolder = null,
   type = 'file',
   attachmentType = null,
-  customhandleAdd = null,
+  customhandleAdd = null
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -68,7 +68,9 @@ export default function ManageAttachment({
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [attachmentData, setAttachmentData] = useState(null);
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchAttachmentData();
@@ -78,7 +80,7 @@ export default function ManageAttachment({
     try {
       setIsFetching(true);
       if (type === 'file') {
-        let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);      
+        let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);
         if (attachmentId) {
           const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
           const data = attachmentResponce?.data?.data;
@@ -93,9 +95,15 @@ export default function ManageAttachment({
           if (fieldsDataForUpdate?.length) {
             initialValue = { ...initialValue, ...getObjKeysWithValues(data, fieldsDataAll) };
           }
-          setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
+          setAllowedToEdit(
+            isClone
+              ? true
+              : user?.user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner
+                ? data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
+                : data?.canEdit
+          );
           if (!isClone) {
-            setAttachmentData(data)
+            setAttachmentData(data);
           }
           setInitialData({
             fields: fieldsDataForUpdate,
@@ -113,7 +121,7 @@ export default function ManageAttachment({
             fields: fieldsDataForCreate,
             values: initialValue
           });
-          setAllowedToEdit(true)
+          setAllowedToEdit(true);
           setIsFetching(false);
         }
       } else if (type === 'folder') {
@@ -126,7 +134,13 @@ export default function ManageAttachment({
                 values: data
               });
               parentFolder = data?.parentFolder;
-              setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
+              setAllowedToEdit(
+                isClone
+                  ? true
+                  : user?.user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner
+                    ? data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
+                    : data?.canEdit
+              );
               setIsFetching(false);
             })
             .catch((error) => {
@@ -138,7 +152,7 @@ export default function ManageAttachment({
             fields: [],
             values: { name: '' }
           });
-          setAllowedToEdit(true)
+          setAllowedToEdit(true);
           setIsFetching(false);
         }
       }
@@ -247,15 +261,17 @@ export default function ManageAttachment({
 
   const onUploadFile = (files) => {
     if (isArray(files)) {
-      setAllAttachments((prevState) => [...files?.map((e) => {
-        return {
-          name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
-          url: e?.fileName,
-          date: new Date()
-        }
-      }), ...prevState]);
-    }
-    else if (isString(files)) {
+      setAllAttachments((prevState) => [
+        ...files?.map((e) => {
+          return {
+            name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
+            url: e?.fileName,
+            date: new Date()
+          };
+        }),
+        ...prevState
+      ]);
+    } else if (isString(files)) {
       setAllAttachments((prevState) => [{ name: files?.split('_OMS_TS_')?.pop() || files, url: files, date: new Date() }, ...prevState]);
     }
   };
@@ -384,11 +400,7 @@ export default function ManageAttachment({
                                   }}
                                 />
                               </div>
-                              <ThemeButton
-                                buttonType="theme"
-                                component="span"
-                                disabled={!allowedToEdit}
-                                onClick={() => setDocumentScanDialog(true)}>
+                              <ThemeButton buttonType="theme" component="span" disabled={!allowedToEdit} onClick={() => setDocumentScanDialog(true)}>
                                 Scan Document
                               </ThemeButton>
                             </div>
@@ -417,11 +429,10 @@ export default function ManageAttachment({
                               <DeleteRequest
                                 file={attachmentData}
                                 handleSucess={() => {
-                                  fetchData()
-                                  handleClose()
+                                  fetchData();
+                                  handleClose();
                                 }}
                                 showWithoutPopOver={true}
-
                               />
                             </Grid>
                           </>
