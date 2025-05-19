@@ -487,7 +487,8 @@ const Diagram = ({
                       selectedFiles?.length === 0 ||
                       selectedFiles?.find((e) =>
                         !isEmpty(e?.deleteRequest) ||
-                        (!selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
+                        (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner &&
+                          !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
                           !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
                           ? true
                           : false
@@ -504,7 +505,9 @@ const Diagram = ({
                           }}
                           element={MenuItem}
                         >
-                          {selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id) ? `Delete Request` : `Delete`}
+                          {user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner && selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id)
+                            ? `Delete Request`
+                            : `Delete`}
                         </AttachmentDeleteButton>
                       </>
                     }
