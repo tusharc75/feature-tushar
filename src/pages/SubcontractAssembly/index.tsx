@@ -37,6 +37,10 @@ const SubcontractAssembly = () => {
     {
       key: `All ${resources?.subcontractAssembly?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.subcontractAssembly?.titlePlural}`,
+      value: 3
     }
   ];
   const history = useHistory();
@@ -159,7 +163,13 @@ const SubcontractAssembly = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
+    
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

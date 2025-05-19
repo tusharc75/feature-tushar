@@ -651,12 +651,12 @@ const WorkOrder = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent?.serializedAssetDetail?.assetNumber
-              : parent?.packageDetail?.packageName
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -1440,10 +1440,10 @@ const WorkOrder = ({
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
               message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                  ? 'complete'
-                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                    ? 'skip'
-                    : 'revert'
+                ? 'complete'
+                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                  ? 'skip'
+                  : 'revert'
                 } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
@@ -1503,10 +1503,10 @@ const WorkOrder = ({
                   }) || []
               }
               title={`Arrange Services (${selectedRecords
-                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                  ?.map((d) => {
-                    return d.serializedAssetDetail.assetNumber;
-                  })[0]
+                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                ?.map((d) => {
+                  return d.serializedAssetDetail.assetNumber;
+                })[0]
                 })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}

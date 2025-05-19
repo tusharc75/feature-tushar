@@ -309,7 +309,6 @@ const SendMessage = ({
             </div>
           ))}
         </div>
-
         <div className="editor [&_.tox-tinymce]:border-b-0" key={themeColor}>
           <Editor
             key={themeColor}
@@ -327,15 +326,18 @@ const SendMessage = ({
                 editor.setContent(initialMessage);
               }
             }}
-            initialValue=""
+            initialValue={''}
             disabled={disabled || !(channelId || resourceData)}
             init={{
+              placeholder: 'Type a message',
+              auto_focus: editorId ? editorId : 'default',
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
               height: 100,
               menubar: false,
               paste_as_text: true,
               plugins: [
+                'placeholder',
                 'advlist',
                 'paste',
                 'autolink',

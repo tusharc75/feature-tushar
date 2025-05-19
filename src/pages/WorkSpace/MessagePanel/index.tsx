@@ -14,6 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { Groups } from '@mui/icons-material';
+import { FiExternalLink } from 'react-icons/fi';
 
 const MessagePanel = ({
   state,
@@ -65,7 +66,7 @@ const MessagePanel = ({
     return {
       members: members,
       title: resourceLabel,
-      resource: resource
+      relatedTo: [{ type: resource, referenceId: resourceData?._id }]
     };
   }, [resource, resourceData, resourceLabel]);
 
@@ -169,6 +170,17 @@ const MessageHeader = ({
             <div className="flex gap-2 p-2">
               <Chip label="Chats" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
               <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
+              {selectedChannel?.relatedTo?.length > 0 && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    const relatedTo = selectedChannel?.relatedTo[0];
+                    window.open(`${routes[relatedTo?.type].path}/detail/${relatedTo?.referenceId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
             </div>
           </div>
         )}

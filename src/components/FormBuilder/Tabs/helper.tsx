@@ -255,6 +255,24 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'showFieldJobs',
+        fieldLabel: 'Show Field Jobs',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'showFieldTickets',
+        fieldLabel: 'Show Field Tickets',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'allowOnFieldUpdateFieldJobTicket',
+        fieldLabel: 'Allow On Field Update In Field Job/Ticket',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
@@ -429,6 +447,12 @@ export const resourcePolicy = [
       {
         fieldName: 'hideAssetStatusForFutureDates',
         fieldLabel: 'Hide Asset Status For Future Dates',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'plannedAvailableCountFromCurrentDate',
+        fieldLabel: 'Planned Available Count From Current Date',
         type: 'checkBox',
         defaultValue: false
       }

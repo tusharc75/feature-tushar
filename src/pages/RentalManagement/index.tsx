@@ -57,6 +57,9 @@ const RentalManagement = () => {
     {
       key: `All ${resources?.rentalManagement?.titlePlural}`,
       value: 2
+    }, {
+      key: `Closed ${resources?.rentalManagement?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -174,19 +177,18 @@ const RentalManagement = () => {
                 </IconButton>
               </span>
             </HtmlTooltip>
-
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.rentalJobName });
-                }}
-              >
-                <AttachFileIcon fontSize="small" color='primary' />
-              </IconButton>
-            </HtmlTooltip>
-
+            {permissions?.attachment?.isRead && (
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.rentalJobName });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color='primary' />
+                </IconButton>
+              </HtmlTooltip>)}
             <HtmlTooltip title={row?.original.canDelete ? 'Delete' : deleteDisable} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton
@@ -266,6 +268,12 @@ const RentalManagement = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     if (showFilteredRecordsOnly) {

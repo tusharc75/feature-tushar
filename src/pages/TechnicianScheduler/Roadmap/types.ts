@@ -17,11 +17,13 @@ export interface TActivity {
   competencies?: Address[];
   competencyType?: Address;
   technicianHistory?: PokedexFieldTicket[];
+  technicianUnavailability?: TechnicianUnavailability[];
+  warehouse?: Warehouse;
   child?: TActivity[];
   user?: {
     optionValue?: string;
     optionLabel?: string;
-  }
+  };
 }
 
 export interface Address {
@@ -47,7 +49,28 @@ export interface PokedexFieldTicket {
   endDate?: Date;
   fieldTicket?: FieldTicketFieldTicket[];
   serviceDetail?: ServiceDetail;
+  reference?: Reference;
 }
+export interface TechnicianUnavailability {
+  _id: string;
+  brand: string;
+  title: string;
+  technician: string;
+  reason?: string;
+  startdate: Date;
+  endDate: Date;
+}
+export type Reference = {
+  estimateStartDate?: string;
+  estimateEndDate?: string;
+  optionValue?: string;
+  optionLabel?: string;
+  customerAccount?: CustomerAccount;
+};
+export type CustomerAccount = {
+  optionValue?: string;
+  optionLabel?: string;
+};
 
 export interface FieldTicketFieldTicket {
   _id?: string;
@@ -157,3 +180,12 @@ export interface Step {
   isAddStepsOnFail?: boolean;
   stepDataCloneFromService?: string;
 }
+
+export type Warehouse = {
+  entity?: string[];
+  address?: string;
+  manager?: string[];
+  materialHandlers?: any[];
+  optionValue?: string;
+  optionLabel?: string;
+};

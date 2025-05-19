@@ -418,7 +418,7 @@ export const sidebarResource = {
   technicianUnavailability: 'Technician Unavailability',
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping'
-};
+} as const;
 
 export const primaryFields = {
   serializedAsset: 'assetNumber',
@@ -1167,19 +1167,15 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       }
 
       // Adding validation for invalid dates
-      dateValidation = dateValidation.test(
-        'is-valid-date',
-        `Please enter valid ${input?.fieldLabel}`,
-        function (value) {
-          try {
-            const dateObj = dayjs(value);
-            if (!dateObj.isValid()) return false;
-            return true;
-          } catch (error) {
-            return false;
-          }
+      dateValidation = dateValidation.test('is-valid-date', `Please enter valid ${input?.fieldLabel}`, function (value) {
+        try {
+          const dateObj = dayjs(value);
+          if (!dateObj.isValid()) return false;
+          return true;
+        } catch (error) {
+          return false;
         }
-      );
+      });
 
       if (input?.dateValidation && input?.dateValidation?.length > 0) {
         input?.dateValidation?.forEach((d) => {
@@ -2463,7 +2459,7 @@ export const REPORT_SECTIONS = {
   inventory: 'Inventory',
   asset: 'Asset',
   purchase: 'Purchase',
-  fieldTicket: 'Field Ticket',
+  field: 'Field',
   production: 'Production',
   workOrder: 'Work Order',
   deals: 'Deals',
@@ -2615,11 +2611,18 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
+    title: sidebarResource.fieldServiceOrder,
+    permission: 'fieldServiceOrder',
+    key: 'fieldServiceOrder',
+    type: 'dynamic',
+    section: REPORT_SECTIONS.field
+  },
+  {
     title: sidebarResource.fieldTicket,
     permission: 'fieldTicket',
     key: 'fieldTicket',
     type: 'dynamic',
-    section: REPORT_SECTIONS.fieldTicket
+    section: REPORT_SECTIONS.field
   },
   {
     title: sidebarResource.workOrder,

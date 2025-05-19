@@ -5,6 +5,7 @@ export type TChannel = {
   description: string;
   access: string;
   members: Member[];
+  relatedTo?: RelatedTo[];
   createdBy: CreatedBy;
   notifications?: number;
   isOwner?: boolean;
@@ -41,6 +42,11 @@ export type Member = {
   optionValue: string;
   optionLabel: string;
   avatar: string;
+};
+
+export type RelatedTo = {
+  type: string;
+  referenceId: string;
 };
 
 export type Message = {

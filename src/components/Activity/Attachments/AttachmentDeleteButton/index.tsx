@@ -55,7 +55,16 @@ const AttachmentDeleteButton = ({
     }
   };
   const isDeleteRequestSent = useMemo(() => attachments?.some((attachment) => !isEmpty(attachment?.deleteRequest)), [attachments]);
-  const allAttachmentsAreFromUser = useMemo(() => attachments?.every((attachment) => attachment?.createdBy?.user?._id === user?._id), [attachments, user]);
+  const allAttachmentsAreFromUser = useMemo(
+    () =>
+      attachments?.every((attachment) => {
+        if (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner) {
+          return attachment?.createdBy?.user?._id === user?._id;
+        }
+        return true;
+      }),
+    [attachments, user]
+  );
 
   if (!permissions['attachment']?.isDelete) return null;
 

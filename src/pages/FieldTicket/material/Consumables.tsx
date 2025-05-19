@@ -5,6 +5,7 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
@@ -36,7 +37,7 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import ConsumablesQtyDialog from 'src/pages/WorkOrder/Consumables/ConsumablesQtyDialog';
 import History from '../../ProductInventory/LedgerHistory';
 import QtyRequestLog from 'src/pages/WorkOrder/Consumables/QtyRequestLog';
-import { camelCase } from 'lodash';
+import { camelCase, orderBy } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -49,6 +50,9 @@ import AddQuotationDataDialog from './AddQuotationDataDialog';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFieldServiceOrderDataDialog';
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+
 
 const Consumables = ({
   allowedToEdit,
@@ -87,6 +91,7 @@ const Consumables = ({
   const [addRentalJobDataDialog, setAddRentalJobDataDialog] = useState(false);
   const [addQuotationDataDialog, setAddQuotationDataDialog] = useState(false);
   const [addFieldServiceOrderDataDialog, setAddFieldServiceOrderDataDialog] = useState(false);
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -273,6 +278,19 @@ const Consumables = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
+            {!isOffline &&
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.productName });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            }
             {row.original?.isqtyRequestLog && !isOffline && (
               <HtmlTooltip title="View Requests">
                 <IconButton
@@ -809,7 +827,10 @@ const Consumables = ({
                   hideAction={allowedToEdit ? false : true}
                   refreshGrid={fetchData}
                   resource={sidebarResource.fieldTicket}
-                  arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
+                  arrangeRowField={{
+                    keys: [{ key: 'material', filterType: [MATERIAL_TYPE.product] }],
+                    _id: fieldTicketData?._id
+                  }}
                 />
               ) : (
                 <Box p={2} height={300}>
@@ -952,6 +973,17 @@ const Consumables = ({
           materialType={MATERIAL_TYPE.product}
           onSuccess={(rows) => {
             handleSubmit(rows);
+          }}
+        />
+      )}
+      {showAttachmentDialog.open && (
+        <DiagramDialog
+          referenceId={fieldTicketData?._id}
+          uniqueId={showAttachmentDialog?._id}
+          referenceLabel={showAttachmentDialog.label}
+          resource={ACTIVITY_RESOURCE.fieldTicket}
+          handleClose={() => {
+            setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}
         />
       )}

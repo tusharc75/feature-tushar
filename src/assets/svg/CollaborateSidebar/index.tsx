@@ -1,24 +1,22 @@
 import { AttachmentIcon, CalendarIcon, CaseIcon, EmailIcon, EventIcon, NoteIcon, ReminderIcon, TaskIcon, WorkSpaceIcon } from './icons';
 
 export const IconEventMap = {
-  Task: <TaskIcon />,
-  Event: <EventIcon />,
-  Case: <CaseIcon />,
-  Note: <NoteIcon />,
-  Email: <EmailIcon />,
-  Attachment: <AttachmentIcon />,
-  Calendar: <CalendarIcon />,
-  Collaborate: <WorkSpaceIcon />,
-  Reminder: <ReminderIcon />
+  'task tasks': <TaskIcon />,
+  'event events': <EventIcon />,
+  'case cases': <CaseIcon />,
+  'note notes': <NoteIcon />,
+  'email emails': <EmailIcon />,
+  'attachment attachments': <AttachmentIcon />,
+  'calendar calendars ': <CalendarIcon />,
+  'collaborate work space': <WorkSpaceIcon />,
+  'reminder reminders': <ReminderIcon />
 } as const;
 
 export const getCollaborateIconBasedOnName = (name: string) => {
   if (!name) return;
-  let icon = null;
+  let icon = IconEventMap['collaborate work space'];
   Object.keys(IconEventMap).forEach((key) => {
-    const lowercase = key.toLocaleLowerCase();
-    const singularAndPlural = [`${lowercase}`, `${lowercase}s`];
-    if (singularAndPlural.includes(name.toLocaleLowerCase())) {
+    if (key.includes(name.toLocaleLowerCase())) {
       icon = IconEventMap[key];
     }
   });

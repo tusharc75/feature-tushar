@@ -1,177 +1,141 @@
-import { CircularProgress, useMediaQuery } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid'; // a plugin!
+import timeGridPlugin from '@fullcalendar/timegrid';
+import { Event, View } from 'src/components/CustomCalendar/types';
+import { CalendarOptions, DatesSetArg, EventContentArg } from '@fullcalendar/core';
+import { CircularProgress, Popover } from '@mui/material';
+import { StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-import { Calendar, CalendarProps, Navigate } from 'react-big-calendar';
-import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
-import { isMobile, isTablet } from 'react-device-detect';
-import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
-import CustomToolbar from 'src/components/CustomCalendar/Toolbar';
-import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
-import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
+import './index.scss';
+import { useAppTheme } from 'src/constants/AppConfig';
+import interactionPlugin from '@fullcalendar/interaction';
+import { useData } from 'src/StateProvider/Provider';
 
-interface DragAndDropCalendarProps<TEvent extends object = Event, TResource extends object = object>
-  extends Omit<CalendarProps<TEvent, TResource>, 'views'>,
-    withDragAndDropProps<TEvent, TResource> {}
+type CustomCalednerProps = {
+  events: Event[];
+  isLoading?: boolean;
+  initialView?: View;
+  getEventStyle?: (
+    data: Event,
+    themeMode: 'dark' | 'light'
+  ) => Partial<{ color: string; backgroundColor: string; borderColor: string; textColor: string }>;
+  view?: View;
+  setView?: (view: View) => void;
+  onNavigate?: (dateInfo: DatesSetArg) => void;
+} & Omit<CalendarOptions, 'views' | 'events'>;
 
-const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
+  (
+    {
+      events,
+      isLoading,
+      initialView = 'dayGridMonth',
+      getEventStyle,
+      view,
+      setView,
+      onNavigate,
+      height = 'max(calc(100vh - 250px), 700px)',
+      ...rest
+    },
+    ref
+  ) => {
+    const {
+      state: { user }
+    }: any = useData();
+    const [themeMode] = useAppTheme();
+    const [stateEvents, setStateEvents] = useState(events);
+    const calenderRef = useRef<FullCalendar>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-export type ViewType = 'month' | 'week' | 'day' | 'agenda';
+    useEffect(() => {
+      if (events && getEventStyle && typeof getEventStyle === 'function') {
+        const newEvents = events.map((d) => ({ ...d, ...getEventStyle(d, themeMode) }));
+        setStateEvents(newEvents);
+      } else {
+        setStateEvents(events);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [events, themeMode]);
 
-type CommonProps = {
-  views: ViewType[];
-  loading?: boolean;
-};
-type NormalCalendarProps = {
-  dragAndDrop?: false;
-} & Omit<CalendarProps<any, any>, 'views'>;
+    useEffect(() => {
+      if (view) {
+        calenderRef.current?.getApi().changeView(view);
+      }
+    }, [view]);
 
-type DraggableCalendarProps = {
-  dragAndDrop?: true;
-} & DragAndDropCalendarProps;
-
-export type CustomCalendarProps = NormalCalendarProps | DraggableCalendarProps;
-
-const CustomCalendar = ({
-  events,
-  onRangeChange,
-  view,
-  defaultView,
-  onView,
-  views,
-  onSelectEvent,
-  loading = false,
-  dragAndDrop = false,
-  defaultDate,
-  date,
-  onNavigate,
-  ...rest
-}: CustomCalendarProps & CommonProps) => {
-  const [stateDate, setStateDate] = useState(date || defaultDate || dayjs());
-  const isMobileView = useMediaQuery('(max-width: 767px)');
-  const mobileView = (isMobile && !isTablet) || isMobileView;
-  const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
-  const [mobileEvents, setMobileEvents] = useState([]);
-  const [mobileViewData, setMobileViewData] = useState<{ open: boolean; date: string }>({ open: false, date: '' });
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day' || view === 'agenda') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-    onRangeChange?.(dates, view);
-  };
-
-  const handleView = (view: ViewType) => {
-    setStateView(view);
-    onView?.(view);
-  };
-
-  useEffect(() => {
-    if (mobileView) {
-      setMobileEvents(parseEventForMobile(events));
-    }
-  }, [events, mobileView]);
-
-  const handleOpenMobileDayView = (data) => {
-    setMobileViewData({ open: true, date: data.start });
-  };
-
-  const handleCloseMobileDayView = () => {
-    setMobileViewData({ open: false, date: '' });
-  };
-
-  const Component = useMemo(() => (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any, [dragAndDrop, mobileView]);
-
-  const components = useMemo(
-    () => ({
-      month: {
-        header: (props: any) => {
-          const { label } = props;
-          return (
-            <div>
-              <span className="sr-only max-md:not-sr-only">{label[0]}</span>
-              <span className="not-sr-only max-md:sr-only">{label}</span>
-            </div>
-          );
-        },
-        ...(mobileView
-          ? {
-              event: (props) => {
-                const { event } = props;
-                return (
-                  <div className="flex min-h-2 flex-col rounded-md ">
-                    <span
-                      className={cn('text-sm ', stateView === 'month' ? 'max-md:sr-only' : '')}
-                      {...rest.eventPropGetter(event, event.start, event.end, undefined)}
-                    >
-                      {event.title}
-                    </span>
-                  </div>
-                );
+    return (
+      <div className="relative">
+        <FullCalendar
+          ref={(node) => {
+            if (node) {
+              if (ref && typeof ref === 'object' && 'current' in ref) {
+                ref.current = node;
+              }
+              calenderRef.current = node;
+            }
+          }}
+          height={height}
+          expandRows={true}
+          timeZone={user?.user?.timezone || 'America/New_York'}
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          initialView={initialView}
+          weekends={true}
+          events={stateEvents}
+          eventContent={(eventInfo) => renderEventContent(eventInfo)}
+          dayMaxEventRows={3}
+          datesSet={function (dateInfo) {
+            const view = dateInfo.view;
+            onNavigate?.(dateInfo);
+            setView?.(view.type as View);
+          }}
+          customButtons={{
+            dateSelectorButton: {
+              text: calenderRef.current?.getApi().view.title,
+              click: function (e) {
+                setAnchorEl(e.currentTarget as HTMLButtonElement);
               }
             }
-          : {})
-      }
-    }),
-    [mobileView, rest, stateView]
-  );
-
-  return (
-    <div className="relative min-h-[300px] [&_.rbc-agenda-empty]:hidden">
-      <Component
-        date={stateDate}
-        onNavigate={(date: Date, view: ViewType, action: 'PREV' | 'NEXT' | 'TODAY' | 'DATE') => {
-          setStateDate(date);
-          onNavigate?.(date, view, action);
-        }}
-        view={stateView}
-        events={mobileView ? mobileEvents : events}
-        onView={handleView}
-        onRangeChange={handleRangeChange}
-        views={views}
-        components={{
-          ...components,
-          toolbar: (props: any) => <CustomToolbar {...props} parentOnNavigate={onNavigate} setStateDate={setStateDate} />
-        }}
-        onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
-        {...rest}
-      />
-
-      {!isDataPresent && (
-        <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-          No data available for the selected date range.
-        </div>
-      )}
-      {loading && (
-        <div className="absolute inset-0 z-20  flex select-none items-center justify-center text-center [backdrop-filter:blur(3px)]">
-          <div className="rounded-md bg-[var(--dark-primary,white)] p-8 shadow-md">
+          }}
+          headerToolbar={{
+            left: 'prev,today,next',
+            center: 'dateSelectorButton',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }}
+          moreLinkClick={'popover'}
+          moreLinkClassNames={'bg-[#32324f] text-white w-full text-center py-1 mt-1 dark:hover:!bg-gray-600 hover:!bg-gray-500 font-semibold'}
+          {...rest}
+        />
+        {isLoading && (
+          <div className="absolute -inset-2 z-10 flex items-center justify-center rounded-md bg-white/60 [backdrop-filter:blur(2px)] dark:bg-black/60">
             <CircularProgress />
-            <p className="text-center">Loading...</p>
           </div>
-        </div>
-      )}
-
-      {mobileViewData.open && (
-        <>
-          <MobileDayView
-            Component={Component}
-            calnedarProps={{
-              onSelectEvent,
-              events,
-              view: 'day',
-              views: ['day'],
-              date: mobileViewData.date,
-              ...rest
+        )}
+        <Popover open={!!anchorEl} onClose={() => setAnchorEl(null)} anchorEl={anchorEl}>
+          <StaticDatePicker
+            defaultValue={dayjs(calenderRef.current?.getApi().getDate())}
+            views={calenderRef.current?.getApi().view.type === 'dayGridMonth' ? ['month', 'year'] : ['year', 'month', 'day']}
+            shouldDisableDate={(date) =>
+              calenderRef.current?.getApi().view.type === 'timeGridWeek' ? !dayjs(date).startOf('week').isSame(date, 'day') : false
+            }
+            onAccept={(date) => {
+              calenderRef.current?.getApi().gotoDate(date.toDate());
+              setAnchorEl(null);
             }}
-            date={mobileViewData.date}
-            onClose={handleCloseMobileDayView}
           />
-        </>
-      )}
-    </div>
-  );
-};
+        </Popover>
+      </div>
+    );
+  }
+);
 
 export default CustomCalendar;
+
+function renderEventContent(eventInfo: EventContentArg) {
+  return (
+    <>
+      <b>{eventInfo.timeText}</b>
+      <p className="px-[5px] py-[2px] text-xs font-medium">{eventInfo.event.title}</p>
+    </>
+  );
+}

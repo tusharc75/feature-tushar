@@ -12,7 +12,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 function AssignTechnicianDialog({ technicianData, selectedResource, selectedServiceOrder, handleClose, handleSucess }) {
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, message: '' });
 
   const handleAssign = (skipDateValidation = false) => {
     const data = selectedServiceOrder?.map((ele) => {
@@ -23,7 +23,7 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
         warehouse: ele?.warehouse,
         referenceId: ele?.resourceId,
         estimateStartDate: ele?.service?.estimateStartDate || ele?.estimateStartDate,
-        estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate,
+        estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
       };
     });
     setIsSubmitting(true);
@@ -32,14 +32,13 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
       .then(() => {
         handleSucess();
         setIsSubmitting(false);
-        setShowConfirmBox(false)
+        setShowConfirmBox({ open: false, message: '' });
       })
       .catch((error) => {
         if (skipDateValidation) {
           toastConfig.setToastConfig(error);
-        }
-        else {
-          setShowConfirmBox(true)
+        } else {
+          setShowConfirmBox({ open: true, message: error?.message });
         }
         setIsSubmitting(false);
       });
@@ -65,21 +64,23 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
           isLoading={isSubmitting}
           buttonType="theme"
           onClick={() => {
-            handleAssign()
+            handleAssign();
           }}
-          disabled={isSubmitting}>
+          disabled={isSubmitting}
+        >
           Assign
         </ThemeButton>
       </CustomDialogFooter>
       {showConfirmBox && (
         <ConfirmationDialog
-          open={showConfirmBox}
-          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          open={showConfirmBox.open}
+          // message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
+          message={`${showConfirmBox?.message}. Do you still wish to proceed with this assignment?`}
           onClose={() => {
-            setShowConfirmBox(false);
+            setShowConfirmBox({ open: false, message: '' });
           }}
           onOk={() => {
-            handleAssign(true)
+            handleAssign(true);
           }}
         />
       )}

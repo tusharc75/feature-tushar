@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isArray, isObject, startCase } from 'lodash';
+import { camelCase, isArray, isObject, orderBy, startCase } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -233,7 +233,7 @@ const Material = ({
               <>
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}  >
+                  <HtmlTooltip title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}>
                     <IconButton
                       onClick={() => {
                         setMaterialDialog({
@@ -337,7 +337,7 @@ const Material = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+            {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && !isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"
@@ -385,12 +385,7 @@ const Material = ({
       );
     } else {
       const response = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material?type=${MATERIAL_TYPE.service}`);
-      const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
-      let costData = costResponse?.data?.data;
-      costData = costData?.map((e: any) => {
-        return { ...e, type: MATERIAL_TYPE.manualEntry };
-      });
-      data = [...response?.data?.data?.material, ...costData];
+      data = response?.data?.data?.material;
     }
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
@@ -429,6 +424,7 @@ const Material = ({
         setNextStep(true);
       }
     }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     setRefreshChild(!refreshChild);
@@ -1077,7 +1073,13 @@ const Material = ({
             refreshGrid={fetchMaterial}
             expander={resourcePolicy?.showAddPackages ? true : false}
             resource={sidebarResource.fieldTicket}
-            arrangeRowField={{ key: 'material', _id: fieldTicketData?._id, materialKey: '_id' }}
+            arrangeRowField={{
+              keys: [
+                { key: 'material', filterType: [MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset] },
+                { key: 'cost', filterType: [MATERIAL_TYPE.manualEntry] }
+              ],
+              _id: fieldTicketData?._id
+            }}
           />
         </Box>
       ) : (

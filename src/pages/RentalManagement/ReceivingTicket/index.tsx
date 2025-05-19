@@ -1758,7 +1758,7 @@ const ReceivingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      cell: ({ row }) => {
+      Cell: ({ row }) => {
         return (
           <>
             {allowedToEdit ? (
@@ -1792,6 +1792,7 @@ const ReceivingTicket = ({
     });
     setColumns(column);
   };
+
 
   const getFilterSelectedRecords = (materialType = null, record = selectedRecords) => {
     if (materialType) {
@@ -2582,7 +2583,7 @@ const ReceivingTicket = ({
       <TabPanel value={tabValue} index={0}>
         <DetailsPageHeader
           isAddButtonVisible={false}
-          isActionButtonVisible={true}
+          isActionButtonVisible={allowedToEdit}
           actionButtonMenuItems={
             <ActionButtonMenuItems
               {...{

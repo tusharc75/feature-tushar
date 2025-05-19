@@ -49,6 +49,8 @@ const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, ma
       imageEditor.on('addText', (pos, ...rest) => {
         setStore({ newTextPosition: pos.originPosition });
       });
+      imageEditor.on('click', (...args) => {
+      });
       imageEditor.on('objectActivated', (obj) => {
         if (!obj) {
           setStore({ activeObjectId: null, currentSelectedShapeType: null, newTextPosition: null });

@@ -12,7 +12,6 @@ import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import { useContext, useEffect, useState } from 'react';
-import { AiOutlineSend } from 'react-icons/ai';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -559,7 +558,6 @@ export const ViewEmail = ({
                                     imageOrFileUploadCompletePercentage={(completePercentage) => {
                                       setUploadingImageOrFileProgress(completePercentage);
                                     }}
-                                    doNotShowUploadFile={false}
                                     onUploadFile={onUploadFile}
                                     onUploadImage={handleUploadImage}
                                     usePublicUrlforFileUpload={true}

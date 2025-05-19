@@ -205,7 +205,7 @@ function PlanningView() {
   ];
 
   useEffect(() => {
-    fetchPolicy()
+    fetchPolicy();
   }, []);
 
   useEffect(() => {
@@ -249,7 +249,7 @@ function PlanningView() {
     <>
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
+          <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
@@ -266,7 +266,8 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource && permissions[selectedResource?.key]?.isCreate &&
+            {selectedResource &&
+              permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
                   className="mr-2"
@@ -285,14 +286,14 @@ function PlanningView() {
               items={
                 [
                   {
-                    value: 'list',
-                    icon: <TfiLayoutListThumbAlt />,
-                    tooltip: 'List View'
-                  },
-                  {
                     value: 'calendar',
                     icon: <FaRegCalendar />,
                     tooltip: 'Calendar View'
+                  },
+                  {
+                    value: 'list',
+                    icon: <TfiLayoutListThumbAlt />,
+                    tooltip: 'List View'
                   }
                 ] as const
               }

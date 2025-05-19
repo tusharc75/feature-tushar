@@ -268,17 +268,18 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title="Attachments">
-            <IconButton
-              size="small"
-              aria-label="Attachment"
-              onClick={(e) => {
-                setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-              }}
-            >
-              <AttachFileIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
+          {permissions?.attachment?.isRead && (
+            <HtmlTooltip title="Attachments">
+              <IconButton
+                size="small"
+                aria-label="Attachment"
+                onClick={(e) => {
+                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                }}
+              >
+                <AttachFileIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>)}
           <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Deletion not allowed - Work Order Created'}>
             <span>
               <IconButton
@@ -578,7 +579,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 }}
                 id="add-new-package-menu-item"
               >
-                {`Add Existing ${resources?.packages?.titleSingular}`}
+                {`Add Existing ${resources?.packages?.titlePlural}`}
               </MenuItem>
             )}
           </>
