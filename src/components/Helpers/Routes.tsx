@@ -774,6 +774,9 @@ const routes = {
   technicianUnavailability: {
     path: '/technician-unavailability'
   },
+  technicianUnavailabilityDetail: {
+    path: '/technician-unavailability/detail'
+  }
 };
 
 export default routes;
