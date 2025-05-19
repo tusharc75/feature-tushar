@@ -1,58 +1,56 @@
+import { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
+import { EventResizeDoneArg } from '@fullcalendar/interaction';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
+import { Box, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Event, View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
+import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import { View } from 'src/components/CustomCalendar/types';
+import { createFilterSetData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Filter from 'src/components/Filter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { useAppTheme } from 'src/constants/AppConfig';
+import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
-import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
-import './calendarView.scss';
-import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
-import InfoIcon from '@mui/icons-material/Info';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
-import Filter from 'src/components/Filter';
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
+import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { MdFilterList } from 'react-icons/md';
-import { createFilterSetData } from 'src/components/CustomReactTable';
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
-
-const localizer = dayjsLocalizer(dayjs);
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
     state: { user, permissions, resources }
   }: any = useData();
 
-  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-    for (const key in obj) {
-      data.push({
-        items: obj[key],
-        key: key,
-        heading: resources?.[camelCase(key)]?.titlePlural || key
-      });
-    }
-    return data;
-  };
+  const mapObjectToList = useCallback(
+    (obj: { [key: string]: OnSelectDataType[] }) => {
+      const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+      for (const key in obj) {
+        data.push({
+          items: obj[key],
+          key: key,
+          heading: resources?.[camelCase(key)]?.titlePlural || key
+        });
+      }
+      return data;
+    },
+    [resources]
+  );
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -97,20 +95,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
-  const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
-
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
+  const [view, setView] = useState<View>(mobileView ? 'timeGridDay' : 'dayGridMonth');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
-
   const [selectedFilters, setSelectedFilters] = useState([]);
-
-  const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => dayjs().toDate(), []);
-
   const [staticEvents, setStaticEvents] = useState([]);
 
   const [dateRange, setDateRange] = useState({
@@ -143,107 +134,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869152396b1',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 100,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869252396b1',
-              fieldName: 'asset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 101,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869352396b1',
-              fieldName: 'service',
-              fieldLabel: resources?.serviceMaster?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serviceMaster,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 102,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869452396b1',
-              fieldName: 'competencies',
-              fieldLabel: resources?.competencies?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.competencies,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 103,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : [])
     ],
     [
@@ -406,6 +397,73 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       return query;
     },
     [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource, deepFilters, filterByIds, filterTerm]
+  );
+
+  const setEventStyle = useCallback(
+    (obj, themeMode: 'dark' | 'light') => {
+      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+      let color = '#000000',
+        textColor = '#000000';
+
+      if (obj?.resource === sidebarResource.planning) {
+        if (obj?.fulfillStatus === 'Yes') {
+          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
+          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+        } else if (obj?.fulfillStatus === 'No') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
+          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+        } else if (obj?.fulfillStatus === 'Partially') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+        }
+      }
+      if (obj?.resource === sidebarResource.product) {
+        if (obj?.type === 'credit') {
+          backgroundColor = 'var(--success-light) ';
+        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+          textColor = 'white';
+        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+          textColor = 'white';
+        } else if (obj?.type === 'debit') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        }
+      }
+
+      if (
+        (obj?.customerAccount || obj?.supplierAccount) &&
+        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
+      ) {
+        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+          textColor = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+        }
+      }
+      if (obj?.resource === sidebarResource.rentalManagement) {
+        if (obj?.fulfillStatus === 'ERROR') {
+          backgroundColor = 'rgb(220, 53, 69)';
+          color = 'white';
+          textColor = 'white';
+        }
+      }
+
+      return {
+        backgroundColor,
+        textColor,
+        color,
+        border: 0,
+        borderColor: 'var(--common-border-color)'
+      };
+    },
+    [customerColorCodeMap, supplierColorCodeMap]
   );
 
   const fetchData = useCallback(
@@ -605,33 +663,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   }, [selectedFilters]);
 
-  const clickableEventInListView = () => {
-    const header = document.getElementsByClassName('rbc-header')[2];
-    if (header) {
-      header.innerHTML = selectedResource.title;
-    }
-
-    const element: any = document.getElementsByClassName('rbc-agenda-event-cell');
-    for (let i = 0; i < element?.length; i++) {
-      const spanElement = document.createElement('span');
-
-      const content = element[i].textContent;
-      element[i].textContent = '';
-
-      spanElement.style.cursor = 'pointer';
-
-      spanElement.textContent = content;
-      element[i].appendChild(spanElement);
-
-      element[i].onclick = (clickEvent) => {
-        const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent);
-      };
-    }
-  };
-
   const handleClick = useCallback(
-    (data, target) => {
+    (args: EventClickArg) => {
+      const data = { ...args.event, ...args.event._def, ...args.event.extendedProps, start: args.event.start, end: args.event.end } as any;
       if (selectedResource.resource === sidebarResource.product) {
         if (data?.type === 'assetStatus') {
           let query = `?assetStatus=${data?.status}`;
@@ -656,7 +690,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.serializedAsset.path}${query}`);
         } else if (data?.type === 'availableByPlanning') {
         } else if (data?.type) {
-          setAnchor(target.target);
+          setAnchor(args.el);
           const newData: OnSelectDataType[] = data.data;
           setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
         }
@@ -671,25 +705,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
         }
       } else {
-        setShowDetail({ open: true, data: data, anchor: target });
+        setShowDetail({ open: true, data: data, anchor: args.jsEvent });
       }
     },
     [mapObjectToList, selectedLookUpResourceData?.product, selectedLookUpResourceData?.warehouse, selectedResource?.resource]
   );
-
-  useEffect(() => {
-    if (view === 'agenda') {
-      clickableEventInListView();
-    }
-  }, [events]);
-
-  useEffect(() => {
-    if (renderCount !== 0) {
-      onNavigate(dayjs.tz().toDate());
-    } else {
-      setRenderCount(renderCount + 1);
-    }
-  }, [view]);
 
   const updateData = (event, start, end) => {
     axiosInstance()
@@ -705,7 +725,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           type: 'success',
           message: data.message
         });
-        fetchData();
+        // fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -713,108 +733,44 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
   };
 
-  const resize = (event, start, end) => {
+  const resize = (event: EventResizeDoneArg['event'] | EventDropArg['event'], start, end) => {
     const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
     const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
     setEvents([...filterEvents, { ...existing, start, end }]);
-    updateData(event, start, end);
+    updateData({ id: event.id, start: event.start, end: event.end, resource: event.extendedProps.resource }, start, end);
   };
 
-  const moveEvent = ({ event, start, end }) => {
-    resize(event, start, end);
+  const moveEvent = (arg: EventDropArg) => {
+    resize(arg.event, arg.event.start, arg.event.end);
   };
 
-  const resizeEvent = ({ event, start, end }) => {
-    resize(event, start, end);
+  const resizeEvent = (arg: EventResizeDoneArg) => {
+    resize(arg.event, arg.event.start, arg.event.end);
   };
 
-  const onNavigate = useCallback(
-    (date) => {
-      if (view === 'month') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().startOf('month').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().endOf('month').format('MM/DD/YYYY')
-        });
-      } else if (view === 'week') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().startOf('week').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().endOf('week').format('MM/DD/YYYY')
-        });
-      } else if (view === 'day') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().format('MM/DD/YYYY')
-        });
-      } else if (view === 'agenda') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().add(1, 'month').format('MM/DD/YYYY')
-        });
-      }
-    },
-    [view]
-  );
-
-  const setEventStyle = useCallback(
-    (obj) => {
-      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
-      let color = '#000';
-
-      if (obj?.resource === sidebarResource.planning) {
-        if (obj?.fulfillStatus === 'Yes') {
-          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
-          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
-        } else if (obj?.fulfillStatus === 'No') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
-          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
-        } else if (obj?.fulfillStatus === 'Partially') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
-        }
-      }
-      if (obj?.resource === sidebarResource.product) {
-        if (obj?.type === 'credit') {
-          backgroundColor = 'var(--success-light) ';
-        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-        }
-      }
-
-      if (
-        (obj?.customerAccount || obj?.supplierAccount) &&
-        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
-      ) {
-        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
-        if (assignedColor) {
-          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
-          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
-        }
-      }
-      if (obj?.resource === sidebarResource.rentalManagement) {
-        if (obj?.fulfillStatus === 'ERROR') {
-          backgroundColor = 'rgb(220, 53, 69)';
-          color = 'white';
-        }
-      }
-
-      return {
-        style: {
-          backgroundColor,
-          color,
-          borderRadius: '4px',
-          border: 'none',
-          padding: '8px 16px'
-        }
-      };
-    },
-    [themeMode, customerColorCodeMap, supplierColorCodeMap]
-  );
+  const onNavigate = useCallback((data: DatesSetArg) => {
+    if (data?.view?.type === 'dayGridMonth') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'timeGridWeek') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'timeGridDay') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'agenda') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    }
+  }, []);
 
   useEffect(() => {
     setFilteredColumns([]);
@@ -856,8 +812,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   }, [selectedResource]);
 
-  const dragAndDropOnSelectEvent = useCallback((data: any, event: any) => {
-    setShowDetail({ open: true, data: data, anchor: event });
+  const dragAndDropOnSelectEvent = useCallback((args: EventClickArg) => {
+    setShowDetail({ open: true, data: args.event, anchor: args.jsEvent });
   }, []);
 
   const fetchUserFilters = () => {
@@ -956,7 +912,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                     </span>
-                    <HtmlTooltip title={'Pending Planned/Incoming'}>
+                    <HtmlTooltip title={'Warning: Unfulfilled Past Jobs Detected'}>
                       <IconButton
                         size={'small'}
                         onClick={() => {
@@ -967,6 +923,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       </IconButton>
                     </HtmlTooltip>
                   </span>
+                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                 </Box>
               )}
           </div>
@@ -990,47 +947,33 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
             <>
               <CustomCalendar
-                dragAndDrop={true}
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
-                onEventDrop={moveEvent}
-                loading={isDataFetching}
-                onEventResize={resizeEvent}
-                popup={!mobileView}
-                messages={{
-                  agenda: 'List'
-                }}
-                resizable
-                views={['month', 'week', 'day', 'agenda']}
-                onView={setView}
+                editable={true}
+                droppable={true}
+                eventDrop={moveEvent}
+                eventResize={resizeEvent}
+                isLoading={isDataFetching}
+                getEventStyle={setEventStyle}
+                // popup={!mobileView}
+                setView={setView}
                 view={view}
-                eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={dragAndDropOnSelectEvent}
+                eventClick={dragAndDropOnSelectEvent}
               />
             </>
           ) : (
             <div className="relative min-h-[500px] ">
               <CustomCalendar
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
-                loading={isDataFetching}
-                popup={!mobileView}
-                messages={{
-                  agenda: 'List'
-                }}
-                views={['month', 'week', 'day', 'agenda']}
-                onView={setView}
+                getEventStyle={setEventStyle}
+                isLoading={isDataFetching}
+                // messages={{
+                //   agenda: 'List'
+                // }}
+                setView={setView}
                 view={view}
-                eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={handleClick}
+                eventClick={handleClick}
               />
             </div>
           )}
@@ -1066,6 +1009,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </Box>
           </Popover>
         )}
+
         {showDetail.open && (
           <DetailsPopover
             fields={fields}

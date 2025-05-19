@@ -551,7 +551,7 @@ const LoadingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      cell: ({ row }) =>
+      Cell: ({ row }) =>
         user?.user?.brandPolicy?.assetDeliveredStatus &&
           [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
             row?.original?.rentalAssetStatus

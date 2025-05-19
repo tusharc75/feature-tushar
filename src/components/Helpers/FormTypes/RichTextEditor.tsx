@@ -49,12 +49,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
 
   const fileInputRef = useRef(null);
 
-  const handleUploadFileClick = (e) => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
       const file = event.target.files[0];
@@ -170,6 +164,53 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   return (
     <Box>
       {label}
+      <Editor
+        id={name}
+        onInit={(evt, editor) => (editorRef.current = editor)}
+        initialValue={isUpdate && value}
+        onChange={(content: any) => {
+          setIsUpdate(false);
+          setFieldValue(name, content?.level?.content);
+        }}
+        init={{
+          height: '150px',
+          width: '100%',
+          table_default_attributes: {
+            border: '0'
+          },
+          block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+          font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+          plugins: [
+            'advlist autolink lists link charmap print preview anchor ',
+            ' searchreplace visualblocks code fullscreen  ',
+            'insertdatetime media table paste code wordcount hr'
+          ],
+          menubar: true,
+          toolbar:
+            'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent ',
+          content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
+          setup: (editor) => {
+            editor.ui.registry.addButton('uploadImage', {
+              text: 'Upload Image',
+              onAction: () => setIsUploadImage(true)
+            });
+          },
+          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+          content_css: themeColor === 'dark' ? 'dark' : 'default'
+        }}
+      />
+      <input
+        id={`file`}
+        name={`file`}
+        onChange={handleUploadFile}
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onClick={(e: any) => (e.target.value = null)}
+        type="file"
+        accept=".docx,.doc"
+      />
       {isUploadImage ? (
         <Dialog
           onClose={(event, reason) => {
@@ -184,7 +225,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           maxWidth="xs"
         >
           <CustomDialogHeader onClose={() => setIsUploadImage(false)} title="Upload Image"></CustomDialogHeader>
-
           <CustomDialogContent>
             <div>
               <Grid container spacing={3}>
@@ -302,59 +342,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           </CustomDialogFooter>
         </Dialog>
       ) : null}
-      <Editor
-        id={name}
-        onInit={(evt, editor) => (editorRef.current = editor)}
-        initialValue={isUpdate && value}
-        onChange={(content: any) => {
-          setIsUpdate(false);
-          setFieldValue(name, content?.level?.content);
-        }}
-        init={{
-          height: '150px',
-          width: '100%',
-          table_default_attributes: {
-            border: '0'
-          },
-          block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-          font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-          plugins: [
-            'advlist autolink lists link charmap print preview anchor ',
-            ' searchreplace visualblocks code fullscreen  ',
-            'insertdatetime media table paste code wordcount hr'
-          ],
-          menubar: true,
-          toolbar:
-            'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent ',
-          content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
-          setup: (editor) => {
-            editor.ui.registry.addButton('uploadImage', {
-              text: 'Upload Image',
-              onAction: () => setIsUploadImage(true)
-            });
-            editor.ui.registry.addButton('uploadDocument', {
-              text: 'Upload Document',
-              onAction: (e) => handleUploadFileClick(e)
-            });
-          },
-
-          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
-          content_css: themeColor === 'dark' ? 'dark' : 'default'
-        }}
-      />
-
-      <input
-        id={`file`}
-        name={`file`}
-        onChange={handleUploadFile}
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onClick={(e: any) => (e.target.value = null)}
-        type="file"
-        accept=".docx,.doc"
-      />
     </Box>
   );
 }

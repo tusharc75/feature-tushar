@@ -19,7 +19,6 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import './tinymce.scss';
-
 import { startCase } from 'lodash';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -373,7 +372,7 @@ export default function TinyMCE(props) {
                   </CustomDialogFooter>
                 </Dialog>
               ) : null}
-              {isInitiated ? (
+              {isInitiated && (showVariableDropdown || !doNotShowUploadFile) ? (
                 <div style={{ width: width }} className={classes.buttonContainer}>
                   {doNotShowUploadFile ? null : (
                     <Fragment>
@@ -395,13 +394,6 @@ export default function TinyMCE(props) {
                       </Box>
                     </Fragment>
                   )}
-                  <span>
-                    <Box display="flex" alignItems="center">
-                      <ThemeButton disabled={disabledEditor} onClick={() => setIsUploadImage(true)} startIcon={<HiOutlinePhotograph />}>
-                        Upload Image
-                      </ThemeButton>
-                    </Box>
-                  </span>
                   <span>
                     {showVariableDropdown ? (
                       <Box ml={1}>
@@ -452,7 +444,6 @@ export default function TinyMCE(props) {
               init={{
                 height: height,
                 width: '100%',
-                // menubar: false,
                 table_default_attributes: {
                   border: '0'
                 },
@@ -464,9 +455,9 @@ export default function TinyMCE(props) {
                   'insertdatetime media table paste code wordcount'
                 ],
                 toolbar:
-                  'undo redo | formatselect  | ' +
+                  'fullscreen | uploadImage | undo redo | formatselect  | ' +
                   'bold italic backcolor | alignleft aligncenter ' +
-                  'alignright alignjustify | bullist numlist outdent indent | hrStyled | fullscreen',
+                  'alignright alignjustify | bullist numlist outdent indent | hrStyled | ',
                 content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                 skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
                 content_css: themeColor === 'dark' ? 'dark' : 'default',
@@ -535,6 +526,10 @@ export default function TinyMCE(props) {
                         }
                       });
                     }
+                  });
+                  editor.ui.registry.addButton('uploadImage', {
+                    text: 'Upload Image',
+                    onAction: () => setIsUploadImage(true)
                   });
                 }
               }}
