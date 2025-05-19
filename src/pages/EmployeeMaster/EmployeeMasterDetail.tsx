@@ -20,7 +20,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
-import Unavailability from 'src/pages/EmployeeMaster/Unavailability';
+import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -221,7 +221,7 @@ const EmployeeMasterDetail = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Unavailability id={id} />
+          <TechnicianUnavailability id={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={id} />
