@@ -521,6 +521,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                      suffixComponent: (
+                        <InfoSidebarButton
+                          actionId={planningViewActions.warningUnfulfilledPastJobsDetected}
+                          resource={sidebarResource.planningView}
+                          props={{
+                            className: '!bg-transparent cursor-pointer !p-0'
+                          }}
+                        />
+                      ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
