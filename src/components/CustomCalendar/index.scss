@@ -1,3 +1,31 @@
+body {
+  --fc-border-color: var(--common-border-color);
+  --fc-button-border-color: var(--common-border-color);
+  --fc-button-active-bg-color: var(--new-theme-color);
+  --fc-button-active-border-color: var(--common-border-color);
+  --fc-button-hover-bg-color: hsl(var(--new-theme-color-hsl) / 80%);
+  --fc-button-hover-border-color: var(--common-border-color);
+  --fc-button-bg-color: transparent;
+  --fc-button-text-color: var(--primary-text);
+  .fc-button-active {
+    --fc-button-text-color: white;
+  }
+}
 .fc-event-main {
   cursor: pointer;
+}
+.fc .fc-button {
+  text-transform: capitalize;
+  &:hover {
+    --fc-button-text-color: white;
+  }
+
+  &:focus {
+    outline: transparent !important;
+    box-shadow: none !important;
+  }
+
+  &:focus-visible {
+    outline: transparent;
+  }
 }
