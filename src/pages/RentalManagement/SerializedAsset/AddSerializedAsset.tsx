@@ -492,7 +492,7 @@ const AddSerializedAsset = ({
       >
         <CustomDialogHeader
           showRequiredLabel={false}
-          title={`${replaceAssets ? 'Replace' : 'Add'} ${resources?.serializedAsset?.titleSingular}`}
+          title={`${replaceAssets ? 'Replace' : 'Add'} ${resources?.serializedAsset?.titlePlural}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
@@ -636,9 +636,9 @@ const AddSerializedAsset = ({
             {['Rental Job', 'RentalJobReplaceAsset', 'RentalJobSwapAsset'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                  <CustomTab value={0} label={'Assets'} />
-                  {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
-                  {['Rental Job'].includes(referenceType) && <CustomTab value={2} label={'In Use Assets'} />}
+                  <CustomTab value={0} label={resources?.serializedAsset?.titlePlural} />
+                  {permissions?.sublease && <CustomTab value={1} label={`Sublease ${resources?.serializedAsset?.titlePlural}`} />}
+                  {['Rental Job'].includes(referenceType) && <CustomTab value={2} label={`In Use ${resources?.serializedAsset?.titlePlural}`} />}
                 </CustomTabs>
               </Box>
             )}

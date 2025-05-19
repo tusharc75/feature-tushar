@@ -31,7 +31,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, resources, selectedEntity }
   }: any = useData();
 
   const [tabValue, setTabValue] = useState(itemTab ? parseInt(itemTab) : 0);
@@ -195,9 +195,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
         />
       </Box>
       <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-4">
-        <ContainedTab value={0} label={'Product Category'} />
-        <ContainedTab value={1} label={'Products'} />
-        <ContainedTab value={2} label={'Assets'} />
+        <ContainedTab value={0} label={resources?.productCategory?.titlePlural} />
+        <ContainedTab value={1} label={resources?.product?.titlePlural} />
+        <ContainedTab value={2} label={resources?.serializedAsset?.titlePlural} />
       </ContainedTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
@@ -213,7 +213,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
                 }
               }}
             >
-              Add {tabValue === 0 ? 'Product Category' : tabValue === 1 ? 'Product' : 'Asset'}
+              Add {tabValue === 0 ? resources?.productCategory?.titlePlural : tabValue === 1 ? resources?.product?.titlePlural : resources?.serializedAsset?.titlePlural}
             </ThemeButton>
             <ThemeButton
               onClick={openActions}

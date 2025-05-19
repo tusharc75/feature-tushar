@@ -215,7 +215,7 @@ const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, materialType, isSub
             ? `Add Rental Consumables`
             : materialType === MATERIAL_TYPE.package
               ? `Add Rental ${resources?.packages?.titlePlural}`
-              : `Add Rental Assets`
+              : `Add Rental ${resources?.serializedAsset?.titlePlural}`
         }
         showManimizeMaximize={false}
         showRequiredLabel={false}
