@@ -136,7 +136,8 @@ function renderEventContent(eventInfo: EventContentArg) {
     <>
       {eventInfo.timeText && <b>{eventInfo.timeText}</b>}
       <p className="px-[5px] py-[2px] text-xs font-medium">
-        {eventInfo.event.extendedProps.prefixConponent ? eventInfo.event.extendedProps.prefixConponent : null} {eventInfo.event.title}{' '}
+        {eventInfo.event.extendedProps.prefixConponent ? eventInfo.event.extendedProps.prefixConponent : null}{' '}
+        <span className=" align-middle">{eventInfo.event.title} </span>
         {eventInfo.event.extendedProps.suffixComponent ? eventInfo.event.extendedProps.suffixComponent : null}
       </p>
     </>
