@@ -487,9 +487,9 @@ const Diagram = ({
                       selectedFiles?.length === 0 ||
                       selectedFiles?.find((e) =>
                         !isEmpty(e?.deleteRequest) ||
-                        (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
+                          (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner &&
+                            !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
+                            !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
                           ? true
                           : false
                       )
@@ -530,11 +530,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           title={file?.name}
