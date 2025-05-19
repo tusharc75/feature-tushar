@@ -32,7 +32,6 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
-import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 
 function PlanningView() {
   const {
@@ -253,7 +252,6 @@ function PlanningView() {
           <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
-          {/* <InfoSidebarButton actionId={planningViewActions.generalInformation} resource={sidebarResource.planningView} /> */}
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
@@ -288,14 +286,14 @@ function PlanningView() {
               items={
                 [
                   {
-                    value: 'list',
-                    icon: <TfiLayoutListThumbAlt />,
-                    tooltip: 'List View'
-                  },
-                  {
                     value: 'calendar',
                     icon: <FaRegCalendar />,
                     tooltip: 'Calendar View'
+                  },
+                  {
+                    value: 'list',
+                    icon: <TfiLayoutListThumbAlt />,
+                    tooltip: 'List View'
                   }
                 ] as const
               }

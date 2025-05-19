@@ -24,6 +24,7 @@ type SidebarProps = {
 
 const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: SidebarProps) => {
   const [technicianSearchValue, setStore] = useRoadMapStore((state) => state.technicianSearchValue);
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
@@ -33,14 +34,14 @@ const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: Sid
         <div className="flex">
           <SearchButton value={technicianSearchValue} setValue={(val) => setStore({ technicianSearchValue: val })} onOpenToggle={setIsSearchOpen} />
           <div className={cn('flex items-center overflow-hidden transition-all', isSearchOpen ? 'w-0' : 'w-[30px] ')}>
-            <HtmlTooltip title='Map'>
+            <HtmlTooltip title="Map">
               <IconButton
                 size="small"
                 color="primary"
                 onClick={(e) => {
                   e.stopPropagation();
                   const userIds = activity?.map((d) => d?.user?.optionValue)?.filter(Boolean);
-                  handleSelect(e, userIds, 'map');
+                  setStore({ mapData: userIds });
                 }}
               >
                 <Map fontSize="small" />
@@ -95,8 +96,9 @@ const Sidebar = memo(({ activity, selectedResource, handleSelect, loading }: Sid
 export default Sidebar;
 
 export const SingleTechnician = memo(({ data, handleSelect, index, selectedResource, className = '' }: any) => {
+  const [, setStore] = useRoadMapStore((state) => state.mapData);
   const [activeItemData] = useRoadMapStore((state) => state.activeItemData);
-  const { attributes, listeners, setNodeRef, transform, isDragging, over } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: data._id,
     data: {
       index: index,
@@ -111,7 +113,7 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
     const { data: hoverdIemData } = activeItemData;
     const dataStartDate = dayjs(hoverdIemData?.service?.estimateStartDate || hoverdIemData?.estimateStartDate);
     const dataEndDate = dayjs(hoverdIemData?.service?.estimateEndDate || hoverdIemData?.estimateEndDate);
-    const isBlocked = hasDateOverlap(data?.technicianHistory, dataStartDate, dataEndDate);
+    const isBlocked = hasDateOverlap([...data?.technicianHistory, ...data?.technicianUnavailability], dataStartDate, dataEndDate);
     return { showColor: !!activeItemData, isBlocked };
   }, [activeItemData, data]);
 
@@ -179,19 +181,20 @@ export const SingleTechnician = memo(({ data, handleSelect, index, selectedResou
               <AddCircleOutline fontSize="small" className={cn(textColorClass)} />
             </IconButton>
           </HtmlTooltip>
-          {data?.user?.optionValue &&
-            <HtmlTooltip title='Map'>
+          {data?.user?.optionValue && (
+            <HtmlTooltip title="Map">
               <IconButton
                 color="primary"
                 size="small"
                 onClick={(event) => {
                   event.stopPropagation();
-                  handleSelect(event, [data?.user?.optionValue], 'map');
+                  setStore({ mapData: [data?.user?.optionValue] });
                 }}
               >
                 <Map fontSize="small" className={cn(textColorClass)} />
               </IconButton>
-            </HtmlTooltip>}
+            </HtmlTooltip>
+          )}
         </div>
       </ListItem>
     </li>

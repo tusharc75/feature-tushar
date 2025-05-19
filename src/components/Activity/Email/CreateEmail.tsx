@@ -630,7 +630,6 @@ export const CreateEmail = ({
                               imageOrFileUploadCompletePercentage={(completePercentage) => {
                                 setUploadingImageOrFileProgress(completePercentage);
                               }}
-                              doNotShowUploadFile={false}
                               onUploadFile={onUploadFile}
                               onUploadImage={handleUploadImage}
                               usePublicUrlforFileUpload={true}

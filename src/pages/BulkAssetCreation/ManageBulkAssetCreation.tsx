@@ -23,7 +23,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, permissions, resources }
+    state: { user, resources }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -35,11 +35,9 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
 
   const fetchFields = async () => {
     try {
-      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource, ['rentalJob']);
-
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.bulkAssetCreation, ['rentalJob']);
       if (bulkAssetCreationId) {
-        axiosInstance()
-          .get(`${bulkAssetCreation.api}/` + bulkAssetCreationId)
+        axiosInstance().get(`${bulkAssetCreation.api}/` + bulkAssetCreationId)
           .then(({ data: { data } }) => {
             setBulkAssetCreationData(data);
             if (isClone) {

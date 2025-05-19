@@ -203,7 +203,6 @@ const AskSupplierPriceDialog = (props) => {
                       setContantValue(value);
                     }}
                     initialValue={''}
-                    doNotShowUploadFile={false}
                     onUploadFile={onUploadFile}
                     onUploadImage={handleUploadImage}
                     usePublicUrlforFileUpload={true}

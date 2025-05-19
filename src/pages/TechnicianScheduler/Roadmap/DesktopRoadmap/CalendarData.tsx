@@ -33,6 +33,7 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
             item={item}
             key={item._id}
             services={item?.technicianHistory || []}
+            unavailability={item?.technicianUnavailability?.map((u) => ({ ...u, type: 'technicianUnavailability', status: 'UnAvailable' })) || []}
             handleSelect={handleSelect}
             startDate={startDate}
             dayPixel={dayPixel}
@@ -43,17 +44,18 @@ export default function CalendarData({ activity, handleSelect, startDate, dayPix
   );
 }
 
-const Services = memo(({ startDate, services, handleSelect, dayPixel, item, index }: any) => {
+const Services = memo(({ startDate, services, unavailability, handleSelect, dayPixel, item, index }: any) => {
   const { setNodeRef, isOver, active } = useDroppable({
     id: item._id,
     data: {
       index: index,
       item,
       accepts: ['sidebar'],
-      services
+      services,
+      unavailability
     }
   });
-  const newServices = useMemo(() => addOverlapCount(services), [services]);
+  const newServices = useMemo(() => addOverlapCount([...services, ...unavailability]), [services, unavailability]);
 
   return (
     <>
@@ -158,7 +160,9 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               ref={buttonRef}
               key={service._id}
               onClick={handleClick}
-              onMouseEnter={handleMouseEnter}
+              onMouseEnter={() => {
+                handleMouseEnter();
+              }}
               onMouseMove={handleMouseMove}
               // onMouseLeave={handleMouseLeve}
               style={{ height: `${height}px` }}
@@ -174,9 +178,13 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
               >
                 <>
                   <p className={cn('line-clamp-1 text-[13px] font-semibold leading-[16px]', service.overlapCount > 0 ? '' : 'mb-1')}>
-                    {service?.reference?.optionLabel}
+                    {service?.type === 'technicianUnavailability' ? (
+                      <span style={{ color: 'white' }}>{`${service?.title}${service?.reason ? ` - ${service?.reason}` : ''}`}</span>
+                    ) : (
+                      service?.reference?.optionLabel
+                    )}
                   </p>
-                  {service.overlapCount === 0 && (
+                  {service.overlapCount === 0 && service?.type != 'technicianUnavailability' && (
                     <>
                       <p className="flex items-center gap-1 text-[10px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
                         <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
@@ -237,77 +245,94 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
             </RippleButton>
             {isPopupOpened && (
               <div className="pointer-events-auto absolute bottom-full z-10" ref={popupRef}>
-                <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
-                  <div className="mb-1 flex items-center gap-1">
-                    <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
-                    <IconButton
-                      size="small"
-                      aria-label="Details"
-                      onClick={() => {
-                        if (service?.referenceType === sidebarResource?.fieldServiceOrder) {
-                          window.open(`${routes.fieldServiceOrderDetail.path}/${service?.reference?.optionValue}`);
-                        } else if (service?.referenceType === sidebarResource?.fieldTicket) {
-                          window.open(`${routes.fieldTicketDetail.path}/${service?.reference?.optionValue}`);
-                        } else if (service?.referenceType === sidebarResource?.rentalManagement) {
-                          window.open(`${routes.rentalManagementDetail.path}/${service?.reference?.optionValue}`);
-                        }
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                  {service?.serviceDetail?.serviceName && (
+                {service?.type === 'technicianUnavailability' ?
+                  <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
                     <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
-                      Service : {service?.serviceDetail?.serviceName}
+                      {service?.title}
                     </p>
-                  )}
-                  <p className="flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                    Customer : {service?.reference?.customerAccount?.optionLabel}
-                  </p>
-                  <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
-                    <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
-                    <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
-                      <ThemeButton
-                        buttonType="theme"
-                        onClick={() => {
-                          handleSelect(null, service, 'dispatch');
-                          handleClosePopup();
-                        }}
-                      >
-                        Dispatch
-                      </ThemeButton>
-                    )}
-                    {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
-                      <ThemeButton
-                        buttonType="theme"
-                        onClick={() => {
-                          handleSelect(null, service, 'return');
-                          handleClosePopup();
-                        }}
-                      >
-                        Return
-                      </ThemeButton>
-                    )}
-                    {service?.status === TECHNICIAN_STATUS.reserved && (
-                      <ThemeButton
-                        onClick={() => {
-                          handleSelect(null, { _id: service?._id }, 'un-assign');
-                          handleClosePopup();
-                        }}
-                      >
-                        Un-Assign
-                      </ThemeButton>
-                    )}
+                    {service?.reason &&
+                      <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
+                        Reason : {service?.reason}
+                      </p>
+                    }
+                    <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                      <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+                      <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
+                    </p>
                   </div>
-                </div>
+                  :
+                  <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
+                    <div className="mb-1 flex items-center gap-1">
+                      <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
+                      <IconButton
+                        size="small"
+                        aria-label="Details"
+                        onClick={() => {
+                          if (service?.referenceType === sidebarResource?.fieldServiceOrder) {
+                            window.open(`${routes.fieldServiceOrderDetail.path}/${service?.reference?.optionValue}`);
+                          } else if (service?.referenceType === sidebarResource?.fieldTicket) {
+                            window.open(`${routes.fieldTicketDetail.path}/${service?.reference?.optionValue}`);
+                          } else if (service?.referenceType === sidebarResource?.rentalManagement) {
+                            window.open(`${routes.rentalManagementDetail.path}/${service?.reference?.optionValue}`);
+                          }
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                    {service?.serviceDetail?.serviceName && (
+                      <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
+                        Service : {service?.serviceDetail?.serviceName}
+                      </p>
+                    )}
+                    <p className="flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                      Customer : {service?.reference?.customerAccount?.optionLabel}
+                    </p>
+                    <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
+                      <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
+                      <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
+                        <ThemeButton
+                          buttonType="theme"
+                          onClick={() => {
+                            handleSelect(null, service, 'dispatch');
+                            handleClosePopup();
+                          }}
+                        >
+                          Dispatch
+                        </ThemeButton>
+                      )}
+                      {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
+                        <ThemeButton
+                          buttonType="theme"
+                          onClick={() => {
+                            handleSelect(null, service, 'return');
+                            handleClosePopup();
+                          }}
+                        >
+                          Return
+                        </ThemeButton>
+                      )}
+                      {service?.status === TECHNICIAN_STATUS.reserved && (
+                        <ThemeButton
+                          onClick={() => {
+                            handleSelect(null, { _id: service?._id }, 'un-assign');
+                            handleClosePopup();
+                          }}
+                        >
+                          Un-Assign
+                        </ThemeButton>
+                      )}
+                    </div>
+                  </div>
+                }
               </div>
             )}
           </div>
-        </ClickAwayListener>
-      </div>
+        </ClickAwayListener >
+      </div >
     </>
   );
 });

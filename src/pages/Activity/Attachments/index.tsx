@@ -781,7 +781,6 @@ export default function Attachment() {
           >
             <CreateEmail
               emailId={null}
-              // relatedTo={relatedTo}
               handleClose={() => {
                 setSendMail(false);
                 setFullScreen(false);

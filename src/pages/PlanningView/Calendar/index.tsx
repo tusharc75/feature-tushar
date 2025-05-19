@@ -1,126 +1,56 @@
+import { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
+import { EventResizeDoneArg } from '@fullcalendar/interaction';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Checkbox, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
+import { Box, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import { Event, View, dayjsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
+import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
+import { View } from 'src/components/CustomCalendar/types';
+import { createFilterSetData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import Filter from 'src/components/Filter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { useAppTheme } from 'src/constants/AppConfig';
+import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
-import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
-import './calendarView.scss';
-import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
-import InfoIcon from '@mui/icons-material/Info';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
-
-const localizer = dayjsLocalizer(dayjs);
+import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
+import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
+import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
-  const FILTERS = useMemo(
-    () => [
-      ...(permissions?.warehouse?.isRead
-        ? [
-            {
-              label: resources?.warehouse?.titlePlural,
-              value: 'Warehouse',
-              key: 'warehouse'
-            }
-          ]
-        : []),
-      ...(permissions?.product?.isRead
-        ? [
-            {
-              label: resources?.product?.titlePlural,
-              value: 'Product',
-              key: 'product'
-            }
-          ]
-        : []),
-      ...(permissions?.serializedAsset?.isRead
-        ? [
-            {
-              label: resources?.serializedAsset?.titlePlural,
-              value: 'Serialized Asset',
-              key: 'asset'
-            }
-          ]
-        : []),
-      ...(permissions?.serviceMaster?.isRead
-        ? [
-            {
-              label: resources?.serviceMaster?.titlePlural,
-              value: 'Service Master',
-              key: 'service'
-            }
-          ]
-        : []),
-      ...(permissions?.customerAccount?.isRead
-        ? [
-            {
-              label: resources?.customerAccount?.titlePlural,
-              value: 'Customer Account',
-              key: 'customerAccount'
-            }
-          ]
-        : []),
-      ...(permissions?.competencies?.isRead
-        ? [
-            {
-              label: resources?.competencies?.titlePlural,
-              value: 'Competencies',
-              key: 'competencies'
-            }
-          ]
-        : [])
-    ],
-    [
-      permissions?.competencies?.isRead,
-      permissions?.customerAccount?.isRead,
-      permissions?.product?.isRead,
-      permissions?.serializedAsset?.isRead,
-      permissions?.serviceMaster?.isRead,
-      permissions?.warehouse?.isRead,
-      resources?.competencies?.titlePlural,
-      resources?.customerAccount?.titlePlural,
-      resources?.product?.titlePlural,
-      resources?.serializedAsset?.titlePlural,
-      resources?.serviceMaster?.titlePlural,
-      resources?.warehouse?.titlePlural
-    ]
+  const mapObjectToList = useCallback(
+    (obj: { [key: string]: OnSelectDataType[] }) => {
+      const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+      for (const key in obj) {
+        data.push({
+          items: obj[key],
+          key: key,
+          heading: resources?.[camelCase(key)]?.titlePlural || key
+        });
+      }
+      return data;
+    },
+    [resources]
   );
-
-  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
-    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
-    for (const key in obj) {
-      data.push({
-        items: obj[key],
-        key: key,
-        heading: resources?.[camelCase(key)]?.titlePlural || key
-      });
-    }
-    return data;
-  };
 
   const ASSET_FILTERS = useMemo(
     () => [
@@ -165,41 +95,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     [resources?.product?.titlePlural, resources?.warehouse?.titlePlural]
   );
 
-  const RENTAL_JOB_FILTERS = useMemo(
-    () => [
-      {
-        label: resources?.rentalManagement?.titlePlural,
-        value: 'Rental Management',
-        key: 'rentalJob'
-      },
-      ...(resources?.padMaster
-        ? [
-            {
-              label: resources?.padMaster?.titlePlural,
-              value: 'Pad Master',
-              key: 'padMaster'
-            }
-          ]
-        : [])
-    ],
-    [resources?.padMaster?.titlePlural, resources?.rentalManagement?.titlePlural]
-  );
-
-  const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
-
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
+  const [view, setView] = useState<View>(mobileView ? 'timeGridDay' : 'dayGridMonth');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
-
-  const [filters, setFilters] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState([]);
-
-  const [renderCount, setRenderCount] = useState(0);
-  const defaultDate = useMemo(() => dayjs().toDate(), []);
-
   const [staticEvents, setStaticEvents] = useState([]);
 
   const [dateRange, setDateRange] = useState({
@@ -219,6 +121,134 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [customerColorCodeMap, setCustomerColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
   const [supplierColorCodeMap, setSupplierColorCodeMap] = useState<Map<string, SingleColor>>(new Map());
+
+  const [showFilters, setShowFilters] = useState(false);
+  const [filteredColumns, setFilteredColumns] = useState([]);
+  const [deepFilters, setDeepFilters] = useState([]);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [userFilters, setUserFilters] = useState([]);
+  const [selectedFilter, setSelectedFilter] = useState(null);
+
+  const CUSTOM_FILTERS = useMemo(
+    () => [
+      ...(permissions?.product?.isRead
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
+        : []),
+      ...(permissions?.serializedAsset?.isRead
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
+        : []),
+      ...(permissions?.serviceMaster?.isRead
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
+        : []),
+      ...(permissions?.competencies?.isRead
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
+        : [])
+    ],
+    [
+      permissions?.competencies?.isRead,
+      permissions?.product?.isRead,
+      permissions?.serializedAsset?.isRead,
+      permissions?.serviceMaster?.isRead,
+      resources?.competencies?.titlePlural,
+      resources?.product?.titlePlural,
+      resources?.serializedAsset?.titlePlural,
+      resources?.serviceMaster?.titlePlural,
+      selectedResource?.resource
+    ]
+  );
 
   useEffect(() => {
     axiosInstance()
@@ -240,9 +270,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, []);
 
   useEffect(() => {
-    const lookupResource = [
-      ...new Set([...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value))
-    ]?.toString();
+    const lookupResource = [...new Set([...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS]?.map((e) => e.value))]?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
@@ -259,40 +287,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, []);
 
   useEffect(() => {
-    if (selectedResource) {
-      (async () => {
-        if (selectedResource.resource === sidebarResource.planning) {
-          const fieldData = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
-          const categoryField = fieldData?.data?.data?.find((e) => e.fieldData.fieldName === 'category')?.fieldData;
-          if (categoryField) {
-            setFilters([
-              ...FILTERS?.filter((e) => e.key !== 'asset'),
-              {
-                label: 'Category',
-                value: 'Category',
-                key: 'category'
-              }
-            ]);
-            setLookUpResource((prevState) => ({ ...prevState, Category: categoryField?.option }));
-          } else {
-            setFilters(FILTERS?.filter((e) => e.key !== 'asset'));
-          }
-        } else if (selectedResource.resource === sidebarResource.serializedAsset) {
-          setFilters(ASSET_FILTERS);
-        } else if (selectedResource.resource === sidebarResource.product) {
-          setFilters(PRODUCT_FILTERS);
-        } else if (selectedResource.resource === sidebarResource.employeeMaster) {
-          setFilters(EMPLOYEE_MASTER_FILTERS);
-        } else if (selectedResource.resource === sidebarResource.rentalManagement) {
-          setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
-        } else {
-          setFilters(FILTERS);
-        }
-      })();
-    }
-  }, [selectedResource]);
-
-  useEffect(() => {
     setSelectedFilters([]);
     if (selectedResource?.resource === sidebarResource.serializedAsset) {
       setSelectedFilters(ASSET_FILTERS);
@@ -304,30 +298,178 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     setSelectedLookUpResourceData(null);
   }, [selectedResource]);
 
-  const getQueryString = useCallback(() => {
-    const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
-    let query = `?date=${date}`;
-    if (selectedResource) {
-      query = `${query}&resource=${selectedResource.resource}`;
-    }
-    if (selectedLookUpResourceData) {
-      Object.keys(selectedLookUpResourceData).forEach((d) => {
-        let data = [];
-        if (d === 'technician') {
-          data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-        } else {
-          data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+  const getQueryString = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds, filterTermP = filterTerm) => {
+      const date = `{"from": "${dateRange.estimateStartDate}", "to": "${dateRange.estimateEndDate}"}`;
+      let query = `?date=${date}`;
+      if (selectedResource) {
+        query = `${query}&resource=${selectedResource.resource}`;
+      }
+      if (selectedLookUpResourceData) {
+        Object.keys(selectedLookUpResourceData).forEach((d) => {
+          let data = [];
+          if (d === 'technician') {
+            data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
+          } else {
+            data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
+          }
+          query = `${query}&${d}=${data}`;
+        });
+      }
+      if (filterByIdsP?.length > 0) {
+        const filterById = filterByIdsP
+          ?.filter((f) => {
+            if (typeof f?.term === 'object') return !isEmpty(f?.term);
+            return Array.isArray(f?.term) && f?.term?.length > 0;
+          })
+          ?.map((f) => {
+            const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
+            if (Array.isArray(f?.term)) {
+              return {
+                field: f?.field,
+                term: {
+                  [term]: f?.term?.map?.((d: any) => d.optionValue)
+                }
+              };
+            }
+            if (term === '$nin') {
+              return {
+                field: f?.field,
+                term: {
+                  ['$nin']: [f?.term?.optionValue]
+                }
+              };
+            }
+            return {
+              field: f?.field,
+              term: f?.term?.optionValue
+            };
+          });
+        if (filterById?.length > 0) {
+          query = `${query}&filterById=${JSON.stringify(filterById)}`;
         }
-        query = `${query}&${d}=${data}`;
-      });
-    }
-    return query;
-  }, [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource]);
+      }
+      let deepFilter = [];
+      if (deepFiltersP?.length > 0) {
+        deepFilter = [
+          ...deepFilter,
+          ...deepFiltersP
+            ?.filter((d) => {
+              if (d?.type === 'date') {
+                if (d?.duration === 'custom')
+                  return (
+                    (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date) || (dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date)
+                  );
+                else
+                  return (
+                    dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date
+                  );
+              }
+              return d?.term?.length ? true : false;
+            })
+            ?.map((d) => {
+              if (d?.type === 'date') {
+                return {
+                  field: d?.field,
+                  term: {
+                    ...(d?.term?.from ? { from: d?.term?.from } : {}),
+                    ...(d?.term?.to ? { to: d?.term?.to } : {})
+                  }
+                };
+              }
+              if (filterTerm[d?.field] === '$nin' && Array.isArray(d?.term)) {
+                return {
+                  field: d?.field,
+                  term: { $nin: d?.term }
+                };
+              }
+              return {
+                field: d?.field,
+                term: d?.term
+              };
+            })
+        ];
+      }
+      if (deepFilter?.length) {
+        query = `${query}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}`;
+      }
+      query = `${query}&filterType=and`;
+      return query;
+    },
+    [dateRange?.estimateEndDate, dateRange?.estimateStartDate, selectedLookUpResourceData, selectedResource, deepFilters, filterByIds, filterTerm]
+  );
+
+  const setEventStyle = useCallback(
+    (obj, themeMode: 'dark' | 'light') => {
+      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
+      let color = '#000000',
+        textColor = '#000000';
+
+      if (obj?.resource === sidebarResource.planning) {
+        if (obj?.fulfillStatus === 'Yes') {
+          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
+          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
+        } else if (obj?.fulfillStatus === 'No') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
+          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
+        } else if (obj?.fulfillStatus === 'Partially') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+          textColor = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
+        }
+      }
+      if (obj?.resource === sidebarResource.product) {
+        if (obj?.type === 'credit') {
+          backgroundColor = 'var(--success-light) ';
+        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+          textColor = 'white';
+        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
+          backgroundColor = 'var(--danger-light)';
+          color = 'white';
+          textColor = 'white';
+        } else if (obj?.type === 'debit') {
+          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        }
+      }
+
+      if (
+        (obj?.customerAccount || obj?.supplierAccount) &&
+        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
+      ) {
+        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
+        if (assignedColor) {
+          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
+          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+          textColor = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
+        }
+      }
+      if (obj?.resource === sidebarResource.rentalManagement) {
+        if (obj?.fulfillStatus === 'ERROR') {
+          backgroundColor = 'rgb(220, 53, 69)';
+          color = 'white';
+          textColor = 'white';
+        }
+      }
+
+      return {
+        backgroundColor,
+        textColor,
+        color,
+        border: 0,
+        borderColor: 'var(--common-border-color)'
+      };
+    },
+    [customerColorCodeMap, supplierColorCodeMap]
+  );
 
   const fetchData = useCallback(
-    (cancelToken?: CancelToken) => {
+    (cancelToken?: CancelToken, deepFiltersP = deepFilters, filterByIdsP = filterByIds, filterTermP = filterTerm) => {
       setIsDataFetching(true);
-      const queryString = getQueryString();
+      const queryString = getQueryString(deepFiltersP, filterByIdsP, filterTermP);
       setQueryString(queryString);
       axiosInstance()
         .get(`/planning-view${queryString}`, { cancelToken })
@@ -500,22 +642,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       selectedResource?.resource,
       selectedResource?.start,
       setQueryString,
-      toastConfig
+      toastConfig,
+      deepFilters,
+      filterByIds
     ]
   );
-
-  useEffect(() => {
-    const cancelTokenSource = axios.CancelToken.source();
-    const cancelToken = cancelTokenSource.token;
-    if (selectedResource) {
-      fetchData(cancelToken);
-    } else {
-      setEvents([]);
-    }
-    return () => {
-      cancelTokenSource.cancel('Operation canceled due to new request.');
-    };
-  }, [selectedResource, selectedLookUpResourceData, dateRange]);
 
   useImperativeHandle(ref, () => ({
     fetchData
@@ -532,33 +663,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   }, [selectedFilters]);
 
-  const clickableEventInListView = () => {
-    const header = document.getElementsByClassName('rbc-header')[2];
-    if (header) {
-      header.innerHTML = selectedResource.title;
-    }
-
-    const element: any = document.getElementsByClassName('rbc-agenda-event-cell');
-    for (let i = 0; i < element?.length; i++) {
-      const spanElement = document.createElement('span');
-
-      const content = element[i].textContent;
-      element[i].textContent = '';
-
-      spanElement.style.cursor = 'pointer';
-
-      spanElement.textContent = content;
-      element[i].appendChild(spanElement);
-
-      element[i].onclick = (clickEvent) => {
-        const data = events.filter((event) => event.title === element[i].innerText)[0];
-        handleClick(data, clickEvent);
-      };
-    }
-  };
-
   const handleClick = useCallback(
-    (data, target) => {
+    (args: EventClickArg) => {
+      const data = { ...args.event, ...args.event._def, ...args.event.extendedProps, start: args.event.start, end: args.event.end } as any;
       if (selectedResource.resource === sidebarResource.product) {
         if (data?.type === 'assetStatus') {
           let query = `?assetStatus=${data?.status}`;
@@ -583,7 +690,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.serializedAsset.path}${query}`);
         } else if (data?.type === 'availableByPlanning') {
         } else if (data?.type) {
-          setAnchor(target.target);
+          setAnchor(args.el);
           const newData: OnSelectDataType[] = data.data;
           setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), eventData: data });
         }
@@ -598,25 +705,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
         }
       } else {
-        setShowDetail({ open: true, data: data, anchor: target });
+        setShowDetail({ open: true, data: data, anchor: args.jsEvent });
       }
     },
     [mapObjectToList, selectedLookUpResourceData?.product, selectedLookUpResourceData?.warehouse, selectedResource?.resource]
   );
-
-  useEffect(() => {
-    if (view === 'agenda') {
-      clickableEventInListView();
-    }
-  }, [events]);
-
-  useEffect(() => {
-    if (renderCount !== 0) {
-      onNavigate(dayjs.tz().toDate());
-    } else {
-      setRenderCount(renderCount + 1);
-    }
-  }, [view]);
 
   const updateData = (event, start, end) => {
     axiosInstance()
@@ -632,7 +725,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           type: 'success',
           message: data.message
         });
-        fetchData();
+        // fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -640,110 +733,50 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
   };
 
-  const resize = (event, start, end) => {
+  const resize = (event: EventResizeDoneArg['event'] | EventDropArg['event'], start, end) => {
     const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
     const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
     setEvents([...filterEvents, { ...existing, start, end }]);
-    updateData(event, start, end);
+    updateData({ id: event.id, start: event.start, end: event.end, resource: event.extendedProps.resource }, start, end);
   };
 
-  const moveEvent = ({ event, start, end }) => {
-    resize(event, start, end);
+  const moveEvent = (arg: EventDropArg) => {
+    resize(arg.event, arg.event.start, arg.event.end);
   };
 
-  const resizeEvent = ({ event, start, end }) => {
-    resize(event, start, end);
+  const resizeEvent = (arg: EventResizeDoneArg) => {
+    resize(arg.event, arg.event.start, arg.event.end);
   };
 
-  const onNavigate = useCallback(
-    (date) => {
-      if (view === 'month') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().startOf('month').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().endOf('month').format('MM/DD/YYYY')
-        });
-      } else if (view === 'week') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().startOf('week').format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().endOf('week').format('MM/DD/YYYY')
-        });
-      } else if (view === 'day') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().format('MM/DD/YYYY')
-        });
-      } else if (view === 'agenda') {
-        setDateRange({
-          estimateStartDate: dayjs.utc(date).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs.utc(date).tz().add(1, 'month').format('MM/DD/YYYY')
-        });
-      }
-    },
-    [view]
-  );
-
-  const setEventStyle = useCallback(
-    (obj) => {
-      let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
-      let color = '#000';
-
-      if (obj?.resource === sidebarResource.planning) {
-        if (obj?.fulfillStatus === 'Yes') {
-          backgroundColor = themeMode === 'light' ? 'rgb(207, 244, 168)' : '#048e0a';
-          color = themeMode === 'light' ? 'rgb(7, 61, 1)' : 'white';
-        } else if (obj?.fulfillStatus === 'No') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255, 204, 204)' : 'rgb(156 1 22)';
-          color = themeMode === 'light' ? 'rgb(203 0 0)' : 'white';
-        } else if (obj?.fulfillStatus === 'Partially') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-          color = themeMode === 'light' ? 'rgb(255 92 0)' : 'white';
-        }
-      }
-      if (obj?.resource === sidebarResource.product) {
-        if (obj?.type === 'credit') {
-          backgroundColor = 'var(--success-light) ';
-        } else if (obj?.type === 'availableByPlanning' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit' && obj?.isRedAlert) {
-          backgroundColor = 'var(--danger-light)';
-          color = 'white';
-        } else if (obj?.type === 'debit') {
-          backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
-        }
-      }
-
-      if (
-        (obj?.customerAccount || obj?.supplierAccount) &&
-        ![sidebarResource.planning, sidebarResource.product, sidebarResource.serializedAsset]?.includes(obj?.resource)
-      ) {
-        const assignedColor = obj?.customerAccount ? customerColorCodeMap.get(obj?.customerAccount) : supplierColorCodeMap.get(obj?.supplierAccount);
-        if (assignedColor) {
-          backgroundColor = themeMode === 'light' ? assignedColor.light.bg : assignedColor.dark.bg;
-          color = themeMode === 'light' ? assignedColor.light.text : assignedColor.dark.text;
-        }
-      }
-      if (obj?.resource === sidebarResource.rentalManagement) {
-        if (obj?.fulfillStatus === 'ERROR') {
-          backgroundColor = 'rgb(220, 53, 69)';
-          color = 'white';
-        }
-      }
-
-      return {
-        style: {
-          backgroundColor,
-          color,
-          borderRadius: '4px',
-          border: 'none',
-          padding: '8px 16px'
-        }
-      };
-    },
-    [themeMode, customerColorCodeMap, supplierColorCodeMap]
-  );
+  const onNavigate = useCallback((data: DatesSetArg) => {
+    if (data?.view?.type === 'dayGridMonth') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'timeGridWeek') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'timeGridDay') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (data?.view?.type === 'agenda') {
+      setDateRange({
+        estimateStartDate: dayjs.utc(data.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs.utc(data.end).tz().format('MM/DD/YYYY')
+      });
+    }
+  }, []);
 
   useEffect(() => {
+    setFilteredColumns([]);
+    setDeepFilters([]);
+    setFilterByIds([]);
+    setFilterTerm({});
     if (selectedResource) {
       setFields([]);
       if (![sidebarResource?.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource)) {
@@ -751,20 +784,89 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           .get(`/field?resource=${selectedResource?.resource}`)
           .then(({ data }) => {
             setFields(data.data);
+            const filters: any =
+              selectedResource?.resource === sidebarResource.planning
+                ? CUSTOM_FILTERS?.filter((f) => f?.fieldData?.fieldName != 'asset')
+                : CUSTOM_FILTERS;
+            setFilteredColumns([
+              ...data?.data?.filter(
+                (e) =>
+                  ![
+                    'fileUpload',
+                    'multiFileUpload',
+                    'imageUpload',
+                    'multiImageUpload',
+                    'richTextEditor',
+                    'signature',
+                    'groupSignature',
+                    'colorPicker',
+                    'counter',
+                    'description',
+                    'switch'
+                  ].includes(e?.fieldData?.type)
+              ),
+              ...filters
+            ]);
           });
       }
     }
   }, [selectedResource]);
 
-  const dragAndDropOnSelectEvent = useCallback((data: any, event: any) => {
-    setShowDetail({ open: true, data: data, anchor: event });
+  const dragAndDropOnSelectEvent = useCallback((args: EventClickArg) => {
+    setShowDetail({ open: true, data: args.event, anchor: args.jsEvent });
   }, []);
+
+  const fetchUserFilters = () => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
+    axiosInstance()
+      .get(`/user-resource-filter?resource=${selectedResource?.resource}_planningView`)
+      .then(({ data: { data } }) => {
+        setUserFilters(data);
+        const defaultFilter = data.find((d) => d.default);
+        if (defaultFilter) {
+          const { filterById, deepFilter } = createFilterSetData(defaultFilter, filteredColumns);
+          setSelectedFilter(defaultFilter);
+          setFilterByIds(filterById);
+          setDeepFilters(deepFilter);
+          setFilterTerm(defaultFilter?.filterTerm || {});
+          fetchData(cancelToken, deepFilter, filterById, defaultFilter?.filterTerm || {});
+        } else {
+          fetchData(cancelToken, [], [], {});
+        }
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    const cancelToken = cancelTokenSource.token;
+    if (selectedResource && selectedResource?.resource) {
+      if (
+        ![sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource) &&
+        filteredColumns?.length > 0
+      ) {
+        fetchUserFilters();
+      } else if (
+        [sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource)
+      ) {
+        fetchData(cancelToken);
+      }
+    } else {
+      setEvents([]);
+    }
+    return () => {
+      cancelTokenSource.cancel('Operation canceled due to new request.');
+    };
+  }, [selectedResource, selectedResource?.resource, filteredColumns?.length, selectedLookUpResourceData, dateRange]);
 
   return (
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex flex-wrap gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
+          <div className="flex flex-wrap items-center gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
@@ -776,38 +878,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               size="small"
               renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
             />
-            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) && (
-              <Autocomplete
-                multiple
-                options={filters}
-                disableCloseOnSelect
-                style={{ width: '300px' }}
-                getOptionLabel={(option) => option?.label}
-                renderOption={(props, option, state, ownerState) => {
-                  const { key, ...optionProps } = props;
-                  return (
-                    <Box
-                      component="li"
-                      key={key}
-                      {...optionProps}
-                      display={'flex'}
-                      alignItems={'center'}
-                      justifyContent={'space-between'}
-                      width={'100%'}
-                    >
-                      <Checkbox style={{ marginRight: 8 }} checked={selectedFilters?.some((_s) => _s.key === option.key)} />
-                      {ownerState.getOptionLabel(option)}
-                    </Box>
-                  );
-                }}
-                size="small"
-                renderInput={(params) => <TextField {...params} label="Filters" variant="outlined" />}
-                value={selectedFilters}
-                onChange={(event: any, newValue: any) => {
-                  setSelectedFilters(newValue);
-                }}
-              />
-            )}
+            {selectedResource &&
+              ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
+                <ThemeButton
+                  className="mr-2"
+                  iconForMobile={<MdFilterList />}
+                  onClick={() => {
+                    setShowFilters(true);
+                  }}
+                  startIcon={<MdFilterList />}
+                >
+                  Show Filters
+                </ThemeButton>
+              )}
             {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
               selectedFilters?.map((filtered) => {
                 return (
@@ -829,7 +912,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                     </span>
-                    <HtmlTooltip title={'Pending Planned/Incoming'}>
+                    <HtmlTooltip title={'Warning: Unfulfilled Past Jobs Detected'}>
                       <IconButton
                         size={'small'}
                         onClick={() => {
@@ -840,69 +923,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       </IconButton>
                     </HtmlTooltip>
                   </span>
+                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                 </Box>
               )}
           </div>
-          <Box display="flex" flexDirection="row" className="gap-1" mr={1} mt={2} mb={1}>
-            {![sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
-              selectedFilters?.map((filtered) => {
-                return (
-                  <RenderFilter
-                    filtered={filtered}
-                    lookupResource={lookupResource}
-                    selectedLookUpResourceData={selectedLookUpResourceData}
-                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
-                    lookupLoading={lookupLoading}
-                  />
-                );
-              })}
-          </Box>
+          <div className="mb-2 mt-2">
+            <DisplayFilterChip
+              filterTerm={filterTerm}
+              resourceColumns={filteredColumns}
+              deepFilters={deepFilters}
+              filterByIds={filterByIds}
+              fetchResourceData={(deepFilter, filterById) => {
+                const cancelTokenSource = axios.CancelToken.source();
+                const cancelToken = cancelTokenSource.token;
+                fetchData(cancelToken, deepFilter, filterById);
+              }}
+              setDeepFilters={setDeepFilters}
+              setFilterByIds={setFilterByIds}
+            />
+          </div>
         </Box>
         <div className={cn('relative')}>
           {[sidebarResource.rentalManagement, sidebarResource.planning, sidebarResource.fieldServiceOrder]?.includes(selectedResource?.resource) ? (
             <>
               <CustomCalendar
-                dragAndDrop={true}
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
-                onEventDrop={moveEvent}
-                loading={isDataFetching}
-                onEventResize={resizeEvent}
-                popup={!mobileView}
-                messages={{
-                  agenda: 'List'
-                }}
-                resizable
-                views={['month', 'week', 'day', 'agenda']}
-                onView={setView}
+                editable={true}
+                droppable={true}
+                eventDrop={moveEvent}
+                eventResize={resizeEvent}
+                isLoading={isDataFetching}
+                getEventStyle={setEventStyle}
+                // popup={!mobileView}
+                setView={setView}
                 view={view}
-                eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={dragAndDropOnSelectEvent}
+                eventClick={dragAndDropOnSelectEvent}
               />
             </>
           ) : (
             <div className="relative min-h-[500px] ">
               <CustomCalendar
-                defaultDate={defaultDate}
-                defaultView={'month'}
                 events={events}
-                formats={formats}
-                localizer={localizer}
-                loading={isDataFetching}
-                popup={!mobileView}
-                messages={{
-                  agenda: 'List'
-                }}
-                views={['month', 'week', 'day', 'agenda']}
-                onView={setView}
+                getEventStyle={setEventStyle}
+                isLoading={isDataFetching}
+                // messages={{
+                //   agenda: 'List'
+                // }}
+                setView={setView}
                 view={view}
-                eventPropGetter={setEventStyle}
                 onNavigate={onNavigate}
-                onSelectEvent={handleClick}
+                eventClick={handleClick}
               />
             </div>
           )}
@@ -938,6 +1009,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             </Box>
           </Popover>
         )}
+
         {showDetail.open && (
           <DetailsPopover
             fields={fields}
@@ -956,6 +1028,31 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             products={selectedLookUpResourceData['product']}
             warehouses={selectedLookUpResourceData['warehouse']}
             resourceList={resourceList}
+          />
+        )}
+        {showFilters && (
+          <Filter
+            onClose={() => {
+              setShowFilters(false);
+            }}
+            loading={false}
+            filterTitle={resources?.[selectedResource?.key]?.titleSingular}
+            resource={`${selectedResource?.resource}_planningView`}
+            columns={filteredColumns}
+            onApplyFilter={() => {
+              setShowFilters(false);
+              fetchData();
+            }}
+            deepFilters={deepFilters}
+            setDeepFilters={setDeepFilters}
+            filterByIds={filterByIds}
+            setFilterByIds={setFilterByIds}
+            filterTerm={filterTerm}
+            setFilterTerm={setFilterTerm}
+            isVisibleFilterSet={true}
+            fetchUserFilters={fetchUserFilters}
+            userFilters={userFilters}
+            selectedFilter={selectedFilter}
           />
         )}
       </div>

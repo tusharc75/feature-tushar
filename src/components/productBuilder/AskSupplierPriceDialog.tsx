@@ -129,7 +129,7 @@ const AskSupplierPriceDialog = (props) => {
           {otherAttachments.map((attachment, i) => {
             return (
               <>
-                <Grid key={i} size={{sm:3, xs:3, md:3, xl:3}}>
+                <Grid key={i} size={{ sm: 3, xs: 3, md: 3, xl: 3 }}>
                   <Paper className={emailStyles.fileContainer}>
                     <img src={getFileIconSrc(attachment)} className={emailStyles.file} alt="attchment" />
                     <Typography noWrap variant="body2">
@@ -190,7 +190,7 @@ const AskSupplierPriceDialog = (props) => {
         <CustomDialogContent>
           <Box padding={1}>
             <Grid container spacing={1}>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -227,7 +227,7 @@ const AskSupplierPriceDialog = (props) => {
                   />
                 )}
               </Grid>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 <Box>
                   {otherAttachments && otherAttachments.length > 0 && renderFileThumbnails}
                   {otherAttachments && otherAttachments.length > 0 && (
@@ -262,7 +262,6 @@ const AskSupplierPriceDialog = (props) => {
                     imageOrFileUploadCompletePercentage={(completePercentage) => {
                       setUploadingImageOrFileProgress(completePercentage);
                     }}
-                    doNotShowUploadFile={false}
                     onUploadFile={onUploadFile}
                     onUploadImage={handleUploadImage}
                     usePublicUrlforFileUpload={true}
@@ -270,7 +269,7 @@ const AskSupplierPriceDialog = (props) => {
                   />
                 </Box>
               </Grid>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -301,7 +300,7 @@ const AskSupplierPriceDialog = (props) => {
                   />
                 )}
               </Grid>
-              <Grid size={{xs:12}}>
+              <Grid size={{ xs: 12 }}>
                 {from != 'SupplierAskPrice' && (
                   <Autocomplete
                     multiple
@@ -320,12 +319,12 @@ const AskSupplierPriceDialog = (props) => {
                     onChange={(e, val: any) => {
                       val?.some((d) => d?.fieldName === 'All')
                         ? setSelectedFields(
-                            fields
-                              ?.filter(
-                                (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
-                              )
-                              .map((d) => d?.fieldName)
-                          )
+                          fields
+                            ?.filter(
+                              (d) => d.sectionName === 'Cost Calculation' && (d.formula === undefined || d.formula === null || d.formula === '')
+                            )
+                            .map((d) => d?.fieldName)
+                        )
                         : setSelectedFields(val && val?.map((d) => d?.fieldName));
                     }}
                     renderInput={(params) => (

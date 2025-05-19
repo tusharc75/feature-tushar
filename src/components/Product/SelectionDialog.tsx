@@ -162,6 +162,7 @@ const SelectionDialog = (props) => {
           .then((response) => {
             const fileName = response.headers['content-disposition'].split('filename=')[1];
             downloadExcel(response.data, fileName);
+            handleClose();
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);

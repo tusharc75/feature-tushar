@@ -1,11 +1,14 @@
-import React, { useContext, useEffect } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import React, { memo, useCallback, useContext, useEffect } from 'react';
+import { Avatar, Box, CircularProgress } from '@mui/material';
 import { GoogleMap, Marker, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { AccountCircle } from '@mui/icons-material';
+import { displayDateTime } from 'src/constants/helpers';
+import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 
-
-const MapView = ({ userIds }) => {
+const MapView = memo(() => {
+  const [userIds] = useRoadMapStore((state) => state.mapData);
 
   const [locationData, setLocationData] = React.useState([]);
   const [loadingData, setLoadingData] = React.useState(false);
@@ -20,19 +23,37 @@ const MapView = ({ userIds }) => {
   };
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (!userIds || userIds?.length === 0) return;
+      setLoadingData(true);
+      setLocationData([]);
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/user/live-location?userIds=${JSON.stringify(userIds)}`);
+        if (data?.length > 0) {
+          setLocationData(data);
+          calculateMapCenter(data);
+        }
+        setLoadingData(false);
+      } catch (error) {
+        setLoadingData(false);
+        toastConfig.setToastConfig(error);
+      }
+    };
     fetchData();
-  }, [userIds]);
+  }, [toastConfig, userIds]);
 
   const calculateMapCenter = (locations) => {
     if (!locations || locations.length === 0) return;
     if (locations?.length === 1) {
       setMapCenter({ lat: locations[0].latitude, lng: locations[0].longitude });
-      return
+      return;
     }
     let totalLat = 0;
     let totalLng = 0;
     let validLocations = 0;
-    locations.forEach(location => {
+    locations.forEach((location) => {
       if (location?.latitude && location?.longitude) {
         totalLat += parseFloat(location.latitude);
         totalLng += parseFloat(location.longitude);
@@ -43,24 +64,6 @@ const MapView = ({ userIds }) => {
       const centerLat = totalLat / validLocations;
       const centerLng = totalLng / validLocations;
       setMapCenter({ lat: centerLat, lng: centerLng });
-    }
-  };
-
-  const fetchData = async () => {
-    setLoadingData(true);
-    setLocationData([]);
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/user/live-location?userIds=${JSON.stringify(userIds)}`);
-      if (data?.length > 0) {
-        setLocationData(data);
-        calculateMapCenter(data);
-      }
-      setLoadingData(false);
-    } catch (error) {
-      setLoadingData(false);
-      toastConfig.setToastConfig(error);
     }
   };
 
@@ -98,7 +101,6 @@ const MapView = ({ userIds }) => {
         center={mapCenter}
         zoom={4}
       >
-
         <MarkerClusterer>
           {(clusterer) => (
             <>
@@ -120,13 +122,18 @@ const MapView = ({ userIds }) => {
                     options={{
                       headerDisabled: true,
                       disableAutoPan: true,
-                      pixelOffset: new window.google.maps.Size(0, -30),
+                      pixelOffset: new window.google.maps.Size(0, -30)
                     }}
-
                     position={new google.maps.LatLng(data?.latitude, data?.longitude)}
                   >
-                    <div style={{ backgroundColor: 'white', color: 'black', minWidth: 100 }}>
-                      <h4 style={{ margin: 0 }}>{data?.user?.optionLabel}</h4>
+                    <div className="flex min-w-[100px] items-center rounded bg-white px-2 py-1 text-black">
+                      <Avatar alt="Remy Sharp" src={data?.user?.avatar} className="mr-2 h-9 w-9">
+                        <AccountCircle className="text-[20px]" />
+                      </Avatar>
+                      <div className="flex flex-col leading-[1.2]">
+                        <span className="text-[13px] font-semibold">{data?.user?.optionLabel}</span>
+                        <span className="pt-[2px] text-[11px] font-light text-[#333]">{`Last Updated : ${displayDateTime(data?.date)}`}</span>
+                      </div>
                     </div>
                   </InfoWindow>
                 </>
@@ -137,10 +144,10 @@ const MapView = ({ userIds }) => {
       </GoogleMap>
     </Box>
   ) : (
-    <Box width={'100%'} height={'100%'} display="flex" justifyContent="center" alignItems="center">
+    <Box width={'100%'} height={'100%'} display="flex" justifyContent="center" className="min-h-[300px]" alignItems="center">
       <CircularProgress />
     </Box>
   );
-};
+});
 
 export default MapView;
