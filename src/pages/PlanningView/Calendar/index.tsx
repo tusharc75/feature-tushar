@@ -509,6 +509,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
+                      suffixComponent: (
+                        <InfoSidebarButton
+                          actionId={planningViewActions.planned}
+                          resource={sidebarResource.planningView}
+                          props={{
+                            className: '!bg-transparent cursor-pointer !p-0'
+                          }}
+                        />
+                      ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
@@ -523,7 +532,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
                       suffixComponent: (
                         <InfoSidebarButton
-                          actionId={planningViewActions.warningUnfulfilledPastJobsDetected}
+                          actionId={planningViewActions.incoming}
                           resource={sidebarResource.planningView}
                           props={{
                             className: '!bg-transparent cursor-pointer !p-0'
@@ -932,7 +941,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       </IconButton>
                     </HtmlTooltip>
                   </span>
-                  <InfoSidebarButton actionId={planningViewActions.incoming} resource={sidebarResource.planningView} />
+                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                 </Box>
               )}
           </div>

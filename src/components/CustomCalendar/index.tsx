@@ -7,7 +7,6 @@ import { CalendarOptions, DatesSetArg, EventContentArg } from '@fullcalendar/cor
 import { CircularProgress, Popover } from '@mui/material';
 import { StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import './index.scss';
 import { useAppTheme } from 'src/constants/AppConfig';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useData } from 'src/StateProvider/Provider';
