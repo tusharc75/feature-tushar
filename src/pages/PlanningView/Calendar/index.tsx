@@ -932,7 +932,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       </IconButton>
                     </HtmlTooltip>
                   </span>
-                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
+                  <InfoSidebarButton actionId={planningViewActions.incoming} resource={sidebarResource.planningView} />
                 </Box>
               )}
           </div>
