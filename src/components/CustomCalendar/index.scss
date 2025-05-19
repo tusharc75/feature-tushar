@@ -16,7 +16,7 @@ body {
 }
 .fc .fc-button {
   text-transform: capitalize;
-  &:hover {
+  &:hover:not(:disabled) {
     --fc-button-text-color: white;
   }
 
