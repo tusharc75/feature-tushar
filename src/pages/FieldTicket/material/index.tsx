@@ -948,7 +948,7 @@ const Material = ({
                 setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
               }}
             >
-              Add Rental Assets
+              {`Add Rental ${resources?.serializedAsset?.titlePlural}`}
             </MenuItem>
             <MenuItem
               onClick={() => {

@@ -1073,7 +1073,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           tooltip={!allowedToEdit ? ownerAndColaborator : ``}
           buttonType="theme"
         >
-          {`Assign ${resources?.serializedAsset?.titleSingular}`}
+          {`Assign ${resources?.serializedAsset?.titlePlural}`}
         </ThemeButton>
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore />}>
@@ -1184,7 +1184,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setShowConfirmBox(true);
           }}
         >
-          {`Remove Asset/Serial Number`}
+          {`Remove ${resources?.serializedAsset?.titlePlural}/Serial Numbers`}
         </MenuItem>
       </>
     );

@@ -28,7 +28,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions }
+    state: { user, resources }
   }: any = useData();
 
   const [addProductDialog, setAddProductDialog] = useState({ open: false, parentId: null });
@@ -138,7 +138,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
       Cell: ({ row }) => {
         return allowedToEdit && (row.original.type === 'product' || row.original.type === 'Manual Entry') ? (
           <>
-            <HtmlTooltip title={'Assign Assets'}>
+            <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural}`}>
               <span>
                 <IconButton
                   size="small"
