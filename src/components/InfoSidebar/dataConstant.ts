@@ -1,5 +1,5 @@
 export const planningViewActions = {
   warningUnfulfilledPastJobsDetected: 'warningUnfulfilledPastJobsDetected',
-  incoming: 'incoming',
-  planned: 'planned'
+  planned: 'planned',
+  incoming: 'incoming'
 };

@@ -6,7 +6,7 @@ import { Box, IconButton, Popover, Table, TableBody, TableCell, TableContainer, 
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
-import { camelCase, groupBy, isEmpty } from 'lodash';
+import { camelCase, groupBy, isEmpty, orderBy } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdFilterList } from 'react-icons/md';
@@ -31,6 +31,7 @@ import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import { FaRegQuestionCircle } from 'react-icons/fa';
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
@@ -434,6 +435,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           textColor = 'white';
         } else if (obj?.type === 'debit') {
           backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        } else if (obj?.type === 'assetStatusTotal') {
+          backgroundColor = '#89CFF0';
         }
       }
 
@@ -476,7 +479,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         .get(`/planning-view${queryString}`, { cancelToken })
         .then(({ data: { data } }) => {
           setResourceDatas(data);
-          const otherData = [];
+          let otherData = [];
           let rows = data?.map((d: any) => {
             if (selectedResource.resource === sidebarResource.serializedAsset) {
               return {
@@ -514,6 +517,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         <InfoSidebarButton
                           actionId={planningViewActions.planned}
                           resource={sidebarResource.planningView}
+                          children={<FaRegQuestionCircle fontSize={16} />}
                           props={{
                             className: '!bg-transparent cursor-pointer !p-0'
                           }}
@@ -524,7 +528,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
-                      data: d?.debit
+                      data: d?.debit,
+                      order: 1
                     });
                   }
                 } else if (property === 'credit') {
@@ -535,6 +540,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         <InfoSidebarButton
                           actionId={planningViewActions.incoming}
                           resource={sidebarResource.planningView}
+                          children={<FaRegQuestionCircle fontSize={16} />}
                           props={{
                             className: '!bg-transparent cursor-pointer !p-0'
                           }}
@@ -545,7 +551,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
-                      data: d?.credit
+                      data: d?.credit,
+                      order: 2
                     });
                   }
                 } else if (property === 'availableByPlanning') {
@@ -556,7 +563,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
-                    isRedAlert: d?.availableByPlanning < 0 ? true : false
+                    isRedAlert: d?.availableByPlanning < 0 ? true : false,
+                    order: 3
                   });
                 } else if (property === 'inventory') {
                   if (d?.inventory) {
@@ -565,7 +573,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
-                      resource: selectedResource.resource
+                      resource: selectedResource.resource,
+                      order: 4
                     });
                   }
                 } else if (['date']?.includes(property)) {
@@ -578,9 +587,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         start: dayjs.utc(d['date']).tz().toDate(),
                         end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                         allDay: true,
-                        type: 'assetCount',
-                        status: property,
-                        resource: selectedResource.resource
+                        type: 'assetStatusTotal',
+                        status: null,
+                        resource: selectedResource.resource,
+                        order: 5
                       });
                     }
                   }
@@ -594,7 +604,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       type: 'assetStatus',
                       status: property,
-                      resource: selectedResource.resource
+                      resource: selectedResource.resource,
+                      order: 6
                     });
                   }
                 }
@@ -686,8 +697,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     (args: EventClickArg) => {
       const data = { ...args.event, ...args.event._def, ...args.event.extendedProps, start: args.event.start, end: args.event.end } as any;
       if (selectedResource.resource === sidebarResource.product) {
-        if (data?.type === 'assetStatus') {
-          let query = `?assetStatus=${data?.status}`;
+        if (data?.type === 'assetStatus' || data?.type === 'assetStatusTotal') {
+          let query = data?.status ? `?assetStatus=${data?.status}` : `?`;
           if (selectedLookUpResourceData?.product) {
             query += `&product=${encodeURIComponent(
               JSON.stringify(

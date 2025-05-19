@@ -31,7 +31,7 @@ const InfoSidebarButton = ({
   resource,
   children = <HelpOutlineIcon fontSize="small" />,
   element = IconButton,
-  tooltip = '',
+  tooltip = 'Information',
   props
 }: InfoSidebarButtonProps) => {
   const [, setStore] = useInforSidebar((state) => state.data);

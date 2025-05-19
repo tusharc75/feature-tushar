@@ -449,6 +449,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Asset Status For Future Dates',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'plannedAvailableCountFromCurrentDate',
+        fieldLabel: 'Planned Available Count From Current Date',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   }

@@ -101,6 +101,7 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
             onNavigate?.(dateInfo);
             setView?.(view.type as View);
           }}
+          eventOrder={'order'}
           customButtons={{
             dateSelectorButton: {
               text: calenderRef.current?.getApi().view.title,
