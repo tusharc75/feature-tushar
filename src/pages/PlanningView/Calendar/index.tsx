@@ -517,11 +517,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         <InfoSidebarButton
                           actionId={planningViewActions.planned}
                           resource={sidebarResource.planningView}
-                          children={<FaRegQuestionCircle fontSize={16} />}
                           props={{
                             className: '!bg-transparent cursor-pointer !p-0'
                           }}
-                        />
+                        >
+                          <FaRegQuestionCircle fontSize={14} />
+                        </InfoSidebarButton>
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
@@ -540,11 +541,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         <InfoSidebarButton
                           actionId={planningViewActions.incoming}
                           resource={sidebarResource.planningView}
-                          children={<FaRegQuestionCircle fontSize={16} />}
                           props={{
                             className: '!bg-transparent cursor-pointer !p-0'
                           }}
-                        />
+                        >
+                          <FaRegQuestionCircle fontSize={14} />
+                        </InfoSidebarButton>
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
