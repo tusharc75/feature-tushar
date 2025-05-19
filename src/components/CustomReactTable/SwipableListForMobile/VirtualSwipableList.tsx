@@ -231,13 +231,10 @@ const RenderPrimaryField = memo(({ primaryField, row, table }: any) => {
   );
 });
 
-const RenderAction = memo(
-  ({ actionField, row, table }: any) => {
-    if (!actionField) return null;
-    return actionField?.cell?.({ row, table }) || null;
-  },
-  (prev, next) => prev.row?._id === next.row?._id
-);
+const RenderAction = memo(({ actionField, row, table }: any) => {
+  if (!actionField) return null;
+  return actionField?.cell?.({ row, table }) || null;
+});
 
 const RenderCollapseIcon = memo(
   ({ compareCollapse, handleCollapse, collapsibleFields, row }: any) => {
