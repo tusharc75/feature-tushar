@@ -719,14 +719,9 @@ const ReceivingTicket = ({
 
       if (view === 'flat') {
         newRows = [...productAssets];
-
-        material
-          ?.filter(
-            (ele) =>
-              ele.type === MATERIAL_TYPE.product &&
-              ele?.consumableType !== 'Internal' &&
-              (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
-          )
+        material?.filter((ele) => ele.type === MATERIAL_TYPE.product &&
+          ele?.consumableType !== 'Internal' && (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
+        )
           ?.forEach((element) => {
             const subProductRows = processProduct(
               '',
@@ -769,8 +764,7 @@ const ReceivingTicket = ({
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = [];
         rows.forEach((parent, i) => {
-          if (
-            parent.type === MATERIAL_TYPE.product &&
+          if (parent.type === MATERIAL_TYPE.product &&
             (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
           ) {
             const subProductRows = processProduct(
@@ -788,6 +782,27 @@ const ReceivingTicket = ({
               invoiceData
             );
             newRows = [...newRows, ...subProductRows];
+            if (parent?.productDetail?.serializedProduct && productAssets?.filter((e) => e.uniqueId === parent._id)?.length) {
+              parent.index = i + 1;
+              parent.type = parent?.type;
+              parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+              parent.detail = parent?.productDetail?.productName;
+              parent.description = parent?.productDetail?.productDescription;
+              parent.qty = productAssets?.filter((e) => e.uniqueId === parent._id)?.length;
+              parent.subRows = generateNestedData(
+                parent,
+                material,
+                productAssets,
+                loadingTicketProducts,
+                receiveTicketProducts,
+                returnTicketProducts,
+                consumeProducts,
+                nonSerializedInventory,
+                nonSerializeAsset,
+                productSerialNumbers
+              );
+              newRows.push(parent);
+            }
           } else {
             parent.index = i + 1;
             parent.type = parent?.type;
