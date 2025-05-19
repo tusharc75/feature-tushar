@@ -14,7 +14,7 @@ import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import NewSearchbar from 'src/components/Header/SearchBar';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn } from 'src/constants/helpers';
+import { cn, EQUIPT_BE_CONNECTED_WINDOW, handleClearLocalStore } from 'src/constants/helpers';
 import { deleteDatabase } from 'src/constants/indexdbhelper';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import { userManual } from 'src/pages/Home';
@@ -226,7 +226,8 @@ const Header = () => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-          localStorage.clear();
+
+          handleClearLocalStore();
           history.push('/login');
         })
         .catch((error) => {

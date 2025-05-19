@@ -5,6 +5,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
 import useLocalStorage from 'src/hooks/useLocalStore';
+import { EQUIPT_BE_CONNECTED_WINDOW } from 'src/constants/helpers';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -46,7 +47,7 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 
 const useUIDesktopDm = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [storeValue, setStoreValue] = useLocalStorage<WindowOpenState | 'null'>('equipt-beConnected-window', 'partial');
+  const [storeValue, setStoreValue] = useLocalStorage<WindowOpenState | 'null'>(EQUIPT_BE_CONNECTED_WINDOW, 'partial');
   const [_, setStore] = useStore((state) => state[HANDLE_OPEN_CHAT]);
   const {
     state: {

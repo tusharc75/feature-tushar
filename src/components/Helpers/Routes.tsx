@@ -770,7 +770,10 @@ const routes = {
   },
   customerAccountsAndProductsDataMapping: {
     path: '/customer-accounts-and-products-data-mapping'
-  }
+  },
+  technicianUnavailability: {
+    path: '/technician-unavailability'
+  },
 };
 
 export default routes;
