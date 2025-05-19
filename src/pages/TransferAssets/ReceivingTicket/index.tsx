@@ -390,7 +390,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             setShowConfirmBoxReceive(true);
           }}
         >
-          Receive Assets
+          {`Receive ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
       </>
     );
@@ -413,7 +413,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: `Assets Received Successfully`
+            message: `${resources?.serializedAsset?.titlePlural} Received Successfully`
           });
         })
         .catch((error) => {
