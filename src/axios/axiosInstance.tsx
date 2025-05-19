@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { backendApi } from './../config';
+import { handleClearLocalStore} from 'src/constants/helpers';
 
 const ERROR_CODE = { permissionError: '1001', forbiddenError: '1002' };
 Object.freeze(ERROR_CODE);
@@ -77,7 +78,7 @@ export default (history = null, passedHeaders = null) => {
                 });
             }
             else if (error.response.status === 511) {
-                localStorage.clear();
+                handleClearLocalStore();
                 //@ts-ignore
                 window.location = "/";
             } else if (error.response.data && error.response.data.code && error.response.data.code === "1005") {

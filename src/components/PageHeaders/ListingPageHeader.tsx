@@ -192,8 +192,9 @@ const ListingPageHeader = ({
           </>
         ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex flex-grow ${shouldNotFlexWrap && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
