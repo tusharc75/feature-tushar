@@ -1,0 +1,149 @@
+import { Box } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { useContext, useEffect, useState } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import routes from 'src/components/Helpers/Routes';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
+import ManageTechnicianUnavailability from './Manage';
+
+const TechnicianUnavailability = () => {
+  const { id } = useParams();
+  const history = useHistory();
+  const toastConfig = useContext(CustomToastContext);
+  const [data, setData] = useState(null);
+  const [editDialog, setEditDialog] = useState(false);
+  const [fields, setFields] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const {
+    state: { permissions, user, resources }
+  }: any = useData();
+  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
+    { ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }
+  ]);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+
+  useEffect(() => {
+    if (id) {
+      fetchFields();
+      fetchData();
+    }
+  }, [id]);
+
+  const fetchFields = async () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.technicianUnavailability}`)
+      .then(({ data }) => {
+        setFields(data.data?.filter((field) => field.isRead));
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/employee-master-unavailability/${id}`);
+
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.technicianUnavailability, data));
+      setAllowedToDelete(
+        permissions?.technicianUnavailability?.isDelete && checkIsAllowedToDelete(user, sidebarResource.technicianUnavailability, data?.owner?.optionValue)
+      );
+
+      setData(data);
+      setCustomizedRoutes([{ ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }, { title: data?.title }]);
+      setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleDelete = () => {
+    setDeleting(true);
+    axiosInstance()
+      .put(`/employee-master-unavailability/remove`, { ids: [id] })
+      .then(({ data }) => {
+        setShowConfirmBox(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        history.push(routes.technicianUnavailability.path);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+      .finally(() => {
+        setDeleting(false);
+      });
+  };
+
+  return (
+    <Box className="main-container-v1">
+      <Box className="headerbox-v1">
+        <Box className="nav-v1">
+          <CustomBreadCrumbs routes={customizedRoutes} />
+        </Box>
+        <Box className="controls-v1">
+          <Box className="control-buttons-v1">
+            {permissions?.technicianUnavailability?.isUpdate && allowedToEdit && (
+              <ThemeButton iconForMobile={<EditIcon />} onClick={() => setEditDialog(true)} mobileTooltip={'Edit'}>
+                {'Edit'}
+              </ThemeButton>
+            )}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+          </Box>
+        </Box>
+      </Box>
+      <Box className="detail-container-v1">
+        <Box>
+          {loading || !fields?.length ? (
+            <div className="p-2">
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </div>
+          ) : (
+            <DetailsPage data={data} fields={fields} />
+          )}
+        </Box>
+      </Box>
+      {showConfirmBox && (
+        <ConfirmationDialog
+          open={showConfirmBox}
+          message={`Are you sure you want to delete ${resources?.technicianUnavailability?.titleSingular?.toLowerCase()} : ${data.title} ?`}
+          onClose={() => {
+            setShowConfirmBox(false);
+          }}
+          onOk={handleDelete}
+          okBtnLoading={deleting}
+        />
+      )}
+      {editDialog && (
+        <ManageTechnicianUnavailability
+          id={id}
+          isClone={false}
+          onClose={() => setEditDialog(false)}
+          onSuccess={() => {
+            setEditDialog(false);
+            fetchData();
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default TechnicianUnavailability;
