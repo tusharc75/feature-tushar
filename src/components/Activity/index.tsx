@@ -396,7 +396,6 @@ const Activity = (props) => {
                 setFullScreen(false);
               }}
               relatedTo={addRelatedTo}
-              options={emailUsersOptions}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
