@@ -7,10 +7,10 @@ import { CalendarOptions, DatesSetArg, EventContentArg } from '@fullcalendar/cor
 import { CircularProgress, Popover } from '@mui/material';
 import { StaticDatePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
-import './index.scss';
 import { useAppTheme } from 'src/constants/AppConfig';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useData } from 'src/StateProvider/Provider';
+import { useInforSidebar } from 'src/components/InfoSidebar';
 
 type CustomCalednerProps = {
   events: Event[];
@@ -43,6 +43,7 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
     const {
       state: { user }
     }: any = useData();
+    const [storeData] = useInforSidebar((state) => state.data);
     const [themeMode] = useAppTheme();
     const [stateEvents, setStateEvents] = useState(events);
     const calenderRef = useRef<FullCalendar>(null);
@@ -63,6 +64,17 @@ const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
         calenderRef.current?.getApi().changeView(view);
       }
     }, [view]);
+
+    useEffect(() => {
+      // recalculate calendar size after open or closing sidebar
+      const SIDEBAR_ANIMATION_DURATION = 350;
+      const id = setTimeout(() => {
+        calenderRef.current.getApi().updateSize();
+      }, SIDEBAR_ANIMATION_DURATION);
+      return () => {
+        clearTimeout(id);
+      };
+    }, [storeData]);
 
     return (
       <div className="relative">

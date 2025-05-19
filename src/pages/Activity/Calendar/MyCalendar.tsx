@@ -25,7 +25,7 @@ const MyCalendar = ({ activities, setActivityData, loading }: Props) => {
   }, []);
 
   return (
-    <div className="relative">
+    <div className="relative mt-4">
       <CustomCalendar
         events={activities}
         isLoading={loading}

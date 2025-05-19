@@ -8,7 +8,6 @@ import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty, orderBy } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,10 +27,11 @@ import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
-import { FaRegQuestionCircle } from "react-icons/fa";
+import { FaRegQuestionCircle } from 'react-icons/fa';
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
@@ -111,6 +111,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   });
 
   const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
+
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -135,107 +136,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869152396b1',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 100,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869252396b1',
-              fieldName: 'asset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 101,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869352396b1',
-              fieldName: 'service',
-              fieldLabel: resources?.serviceMaster?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serviceMaster,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 102,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869452396b1',
-              fieldName: 'competencies',
-              fieldLabel: resources?.competencies?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.competencies,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 103,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : [])
     ],
     [
@@ -484,8 +485,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
-                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
+                start: dayjs
+                  .utc(d['estimateStartDate'] || d['startDate'])
+                  .tz()
+                  .toDate(),
+                end: dayjs
+                  .utc(d['estimateEndDate'] || d['endDate'])
+                  .tz()
+                  .endOf('day')
+                  .toDate(),
                 allDay: true,
                 resource: d.resource,
                 fulfillStatus: d?.fulfillStatus
@@ -495,7 +503,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               const today = dayjs.tz();
               for (const property in d) {
                 const ledgerDate = dayjs.utc(d['date']).tz();
-                if (resourcePolicy?.hideBackDatedPlanning && ledgerDate.isBefore(today, 'day') && ['debit', 'credit', 'availableByPlanning']?.includes(property)) {
+                if (
+                  resourcePolicy?.hideBackDatedPlanning &&
+                  ledgerDate.isBefore(today, 'day') &&
+                  ['debit', 'credit', 'availableByPlanning']?.includes(property)
+                ) {
                 } else if (property === 'debit') {
                   if (d?.debit?.length) {
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
@@ -517,7 +529,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       resource: selectedResource.resource,
                       type: 'debit',
                       data: d?.debit,
-                      order: 1,
+                      order: 1
                     });
                   }
                 } else if (property === 'credit') {
@@ -540,7 +552,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       resource: selectedResource.resource,
                       type: 'credit',
                       data: d?.credit,
-                      order: 2,
+                      order: 2
                     });
                   }
                 } else if (property === 'availableByPlanning') {
@@ -997,35 +1009,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           )}
         </div>
         {isOpen.open && (
-          <Popover
-            open={isOpen.open}
-            anchorEl={anchor}
-            onClose={() => {
-              setOpen({ open: false, data: [], eventData: null });
-            }}
-            style={{ minWidth: '300px' }}
-          >
-            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
-              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${displayDate(isOpen?.eventData?.start)}`}</h5>
-                <HtmlTooltip title="Close">
-                  <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-              {isOpen.data?.map((d) => (
-                <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary>
-                    <h6 className=" text-sm font-semibold">{d.heading}</h6>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <RenderTable data={d.items} resources={resources} resourceList={resourceList} />
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Box>
-          </Popover>
+          <>
+            <ResourcePopover
+              anchorEl={anchor}
+              data={isOpen.data}
+              eventData={isOpen.eventData}
+              onClose={() => setOpen({ open: false, data: [], eventData: null })}
+              open={true}
+              resourceList={resourceList}
+            />
+          </>
         )}
 
         {showDetail.open && (
@@ -1079,55 +1072,3 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 }
 
 export default forwardRef(CalendarView);
-
-const RenderTable = ({ data, resources, resourceList }) => {
-  return (
-    <TableContainer>
-      <Table className="min-w-[530px]" aria-label="simple table" size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Reference</TableCell>
-            <TableCell>Qty</TableCell>
-            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
-            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
-            {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row) => (
-            <TableRow key={row.referenceId}>
-              <TableCell component="th" scope="row">
-                <p
-                  onClick={() => {
-                    const resource = resourceList?.find((r) => r.resource === row?.resource);
-                    if (resource) {
-                      window.open(`${resource.path}/${row?.referenceId}`);
-                    }
-                  }}
-                  className="link text-truncate"
-                  title={row?.resourceLabel}
-                >
-                  {row.resourceLabel}
-                </p>
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row.qty}
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row?.warehouse?.optionLabel}
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
-              </TableCell>
-              {data?.find((e) => e?.padName) && (
-                <TableCell component="th" scope="row">
-                  {row?.padName?.optionLabel ? row?.padName?.optionLabel : <NoDataCell />}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};
