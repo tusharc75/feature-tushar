@@ -69,7 +69,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
     if (id) {
       data = data?.filter((d) => d?.fieldData?.fieldName !== 'technician');
     }
-    const newColumns = generateColumns(renderedFrom, data);
+    let newColumns = generateColumns(renderedFrom, data, routes.technicianUnavailabilityDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
