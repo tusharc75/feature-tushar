@@ -942,7 +942,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                     </span>
-                    <HtmlTooltip title={'Warning: Unfulfilled Past Jobs Detected'}>
+                    <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
                       <IconButton
                         size={'small'}
                         onClick={() => {

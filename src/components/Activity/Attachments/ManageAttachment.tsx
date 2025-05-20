@@ -18,7 +18,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isArray, isEqual, isString } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
+import { ATTACHMENT_TYPE, checkSuperAdminAccess, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
@@ -97,10 +97,8 @@ export default function ManageAttachment({
           }
           setAllowedToEdit(
             isClone
-              ? true
-              : user?.user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner
-                ? data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
-                : data?.canEdit
+              ? true : checkSuperAdminAccess(user, sidebarResource.attachment) ?
+                data?.canEdit : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
           );
           if (!isClone) {
             setAttachmentData(data);
@@ -135,11 +133,10 @@ export default function ManageAttachment({
               });
               parentFolder = data?.parentFolder;
               setAllowedToEdit(
-                isClone
-                  ? true
-                  : user?.user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner
-                    ? data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
-                    : data?.canEdit
+                isClone ? true
+                  : checkSuperAdminAccess(user, sidebarResource.attachment)
+                    ? data?.canEdit
+                    : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
               );
               setIsFetching(false);
             })
