@@ -136,107 +136,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869152396b1',
-                fieldName: 'product',
-                fieldLabel: resources?.product?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.product,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 100,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869152396b1',
+              fieldName: 'product',
+              fieldLabel: resources?.product?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.product,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 100,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869252396b1',
-                fieldName: 'asset',
-                fieldLabel: resources?.serializedAsset?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serializedAsset,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 101,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869252396b1',
+              fieldName: 'asset',
+              fieldLabel: resources?.serializedAsset?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serializedAsset,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 101,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869352396b1',
-                fieldName: 'service',
-                fieldLabel: resources?.serviceMaster?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.serviceMaster,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 102,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869352396b1',
+              fieldName: 'service',
+              fieldLabel: resources?.serviceMaster?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.serviceMaster,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 102,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-            {
-              fieldData: {
-                _id: '630dc2429ec41869452396b1',
-                fieldName: 'competencies',
-                fieldLabel: resources?.competencies?.titlePlural,
-                lookup: true,
-                lookupResource: sidebarResource.competencies,
-                resource: selectedResource?.resource,
-                type: 'dropDown',
-                order: 103,
-                required: false,
-                sectionName: 'Material Handeling Filter',
-                isTooltip: false,
-                editAble: false,
-                brand: user?.user?.brand,
-                roleType: 0,
-                sectionProperties: ''
-              },
-              isRead: true,
-              isCreate: true,
-              isUpdate: true
-            }
-          ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869452396b1',
+              fieldName: 'competencies',
+              fieldLabel: resources?.competencies?.titlePlural,
+              lookup: true,
+              lookupResource: sidebarResource.competencies,
+              resource: selectedResource?.resource,
+              type: 'dropDown',
+              order: 103,
+              required: false,
+              sectionName: 'Material Handeling Filter',
+              isTooltip: false,
+              editAble: false,
+              brand: user?.user?.brand,
+              roleType: 0,
+              sectionProperties: ''
+            },
+            isRead: true,
+            isCreate: true,
+            isUpdate: true
+          }
+        ]
         : [])
     ],
     [
@@ -485,18 +485,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return {
                 id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs
-                  .utc(d['estimateStartDate'] || d['startDate'])
-                  .tz()
-                  .toDate(),
-                end: dayjs
-                  .utc(d['estimateEndDate'] || d['endDate'])
-                  .tz()
-                  .endOf('day')
-                  .toDate(),
+                start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
+                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
                 allDay: true,
-                resource: d.resource,
-                fulfillStatus: d?.fulfillStatus
+                referenceType: d.resource,
+                referenceId: d?._id
               };
             }
             if (selectedResource.resource === sidebarResource.product) {
@@ -735,6 +728,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
         } else if (data?.referenceType === sidebarResource.workOrder) {
           window.open(`${routes.workOrderDetail.path}/${data?.referenceId}`);
+        }
+      } else if (selectedResource.resource === sidebarResource.serializedAsset) {
+        if (data?.referenceType === sidebarResource.quotation) {
+          window.open(`${routes.quotationDetail.path}/${data?.referenceId}`);
+        } else if (data?.referenceType === sidebarResource.rentalManagement) {
+          window.open(`${routes.rentalManagementDetail.path}/${data?.referenceId}`);
+        } else if (data?.referenceType === sidebarResource.planning) {
+          window.open(`${routes.planningDetail.path}/${data?.referenceId}`);
         }
       } else {
         setShowDetail({ open: true, data: data, anchor: args.jsEvent });
