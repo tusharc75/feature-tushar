@@ -160,7 +160,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       });
     } else if (canFulfil === false) {
       setModalContent({
-        title: `Unable to fulfill ${resources?.serializedAsset?.titleSingular} requirement(s) from this ${resources?.warehouse?.titleSingular}.`,
+        title: `Unable to fulfill ${resources?.serializedAsset?.titlePlural} requirement(s) from this ${resources?.warehouse?.titleSingular}.`,
         icon: <ErrorIcon color="error" />
       });
     } else {

@@ -17,7 +17,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
-import { ACTIVITY_RESOURCE, cn, CustomDialogTransition, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkSuperAdminAccess, cn, CustomDialogTransition, sidebarResource, WORK_ORDER_TYPE, workOrder } from 'src/constants/helpers';
 import AccordionButtons from 'src/pages/WorkOrder/Diagram/AccordionButtons';
 import RenderSingleFile from 'src/pages/WorkOrder/Diagram/RenderSingleFile';
 import ImageEditor from './ImageEditor';
@@ -44,7 +44,7 @@ const Diagram = ({
 
   const {
     state: {
-      user: { user }
+      user
     }
   }: any = useData();
   const [rowData, setRowData] = useState(null);
@@ -390,13 +390,12 @@ const Diagram = ({
                   <ActionButtonWithMenu
                     disabled={
                       selectedFiles?.length === 0 ||
-                      selectedFiles?.find((e) =>
-                        !isEmpty(e?.deleteRequest) ||
-                        (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?._id) &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id))
-                          ? true
-                          : false
+                      selectedFiles?.find((e) => !isEmpty(e?.deleteRequest) ||
+                        (!checkSuperAdminAccess(user, sidebarResource.attachment) &&
+                          !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?.user?._id) &&
+                          !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))
+                        ? true
+                        : false
                       )
                     }
                     actionMenuItems={
@@ -410,7 +409,7 @@ const Diagram = ({
                           }}
                           element={MenuItem}
                         >
-                          {user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner && selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?._id)
+                          {!checkSuperAdminAccess(user, sidebarResource.attachment) && selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id)
                             ? `Delete Request`
                             : `Delete`}
                         </AttachmentDeleteButton>
@@ -435,11 +434,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           title={file?.name}
@@ -502,13 +500,12 @@ const Diagram = ({
                   <span className="mx-auto block">
                     <ThemeButton
                       buttonType="theme"
-                      iconForMobile={<Add />}
-                      mobileTooltip="Add"
+                      startIcon={<Add />}
                       onClick={() => {
                         setAttachemntDialog({ open: true, file: null, isClone: false });
                       }}
                     >
-                      <Add /> Add
+                      Add
                     </ThemeButton>
                   </span>
                   <p className="mb-5 mt-2 text-center text-sm text-gray-500 dark:text-gray-300">Click Add to upload files</p>

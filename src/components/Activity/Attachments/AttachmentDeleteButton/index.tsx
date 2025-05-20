@@ -9,6 +9,7 @@ import { Attachment } from 'src/components/Activity/Attachments/AttachmentDelete
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { isEmpty } from 'lodash';
 import DeleteRequestDialog from 'src/components/Activity/Attachments/AttachmentDeleteButton/DeleteRequestDialog';
+import { checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
 
 type AttachmentDeleteButtonProps = {
   attachments: Attachment[];
@@ -28,10 +29,7 @@ const AttachmentDeleteButton = ({
   props
 }: AttachmentDeleteButtonProps) => {
   const {
-    state: {
-      user: { user },
-      permissions
-    }
+    state: { user, permissions }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false });
@@ -58,10 +56,10 @@ const AttachmentDeleteButton = ({
   const allAttachmentsAreFromUser = useMemo(
     () =>
       attachments?.every((attachment) => {
-        if (user?.brandPolicy?.attachmentOnlyUpdateDeleteByOwner) {
-          return attachment?.createdBy?.user?._id === user?._id;
+        if (checkSuperAdminAccess(user, sidebarResource.attachment)) {
+          return true;
         }
-        return true;
+        return attachment?.createdBy?.user?._id === user?.user?._id;
       }),
     [attachments, user]
   );
