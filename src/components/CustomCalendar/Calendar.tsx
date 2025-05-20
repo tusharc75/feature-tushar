@@ -32,7 +32,7 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
     const [storeData] = useInforSidebar((state) => state.data);
     const [themeMode] = useAppTheme();
     const [stateEvents, setStateEvents] = useState(events);
-    const calenderRef = useRef<FullCalendar>(null);
+    const calenderRef = useRef<any>();
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
     useEffect(() => {
@@ -56,6 +56,8 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
       };
     }, [storeData]);
 
+    console.log(calenderRef?.current?.getApi()?.currentData?.currentViewType)
+
     return (
       <div className="relative">
         <FullCalendar
@@ -77,7 +79,7 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
           weekends={true}
           events={stateEvents}
           eventContent={renderEventContent}
-          dayMaxEventRows={3}
+          dayMaxEventRows={calenderRef?.current?.getApi()?.currentData?.currentViewType === 'dayGridMonth' ? 3 : 50}
           datesSet={onNavigate}
           eventOrder={'order'}
           customButtons={{
