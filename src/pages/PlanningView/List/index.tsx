@@ -5,7 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
-import { dateFormatToSend, displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDate, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -137,8 +137,8 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
           Cell: ({ row }) => (
             <div>
               {row?.original?.startDate ? (
-                <h5 className="text-truncate" title={displayDateTime(row?.original?.startDate)}>
-                  {displayDateTime(row?.original?.startDate)}
+                <h5 className="text-truncate" title={displayDate(row?.original?.startDate)}>
+                  {displayDate(row?.original?.startDate)}
                 </h5>
               ) : (
                 <NoDataCell />
@@ -154,8 +154,8 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
           Cell: ({ row }) => (
             <div>
               {row?.original?.endDate ? (
-                <h5 className="text-truncate" title={displayDateTime(row?.original?.endDate)}>
-                  {displayDateTime(row?.original?.endDate)}
+                <h5 className="text-truncate" title={displayDate(row?.original?.endDate)}>
+                  {displayDate(row?.original?.endDate)}
                 </h5>
               ) : (
                 <NoDataCell />
@@ -187,7 +187,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
     if (selectedResource) {
       fetchData();
     }
-  }, [selectedResource, page, filters, limit, sorting, search, selectedAssets]);
+  }, [selectedResource, page, filters, limit, sorting, search, selectedAssets, selectedDate]);
 
   useImperativeHandle(ref, () => ({
     fetchData
