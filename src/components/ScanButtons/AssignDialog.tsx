@@ -119,7 +119,7 @@ const AssignDialog = ({ onSuccess, onClose, selectedProducts, referenceData, typ
       <Dialog TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} maxWidth="xs" fullWidth>
         <CustomDialogHeader
           showRequiredLabel={false}
-          title={`Scan ${type === 'qr' ? 'QR' : 'RFID'}`}
+          title={`Scan ${type === 'qr' ? 'QR/Barcode' : 'RFID'}`}
           onClose={() => {
             if (assetAssigned) {
               onSuccess();

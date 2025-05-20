@@ -19,7 +19,7 @@ const ScanButtons = ({ referenceData, disabled, products, fetchData }) => {
           <Contactless />
         </IconButton>
       </HtmlTooltip>
-      <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through QR`}>
+      <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through QR/Barcode`}>
         <IconButton color="primary" onClick={() => setRfidQrDialogOpen({ open: true, type: 'qr' })} disabled={disabled}>
           <QrCode />
         </IconButton>
