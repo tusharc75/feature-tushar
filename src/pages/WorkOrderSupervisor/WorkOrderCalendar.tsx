@@ -1,4 +1,5 @@
 import { DatesSetArg } from '@fullcalendar/core';
+import FullCalendar from '@fullcalendar/react';
 import { ExpandMore } from '@mui/icons-material';
 import {
   Box,
@@ -14,15 +15,13 @@ import {
   TableRow
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
-import { View } from 'src/components/CustomCalendar/types';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, sidebarResource, workOrderSupervisor } from 'src/constants/helpers';
@@ -33,10 +32,8 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   }: any = useData();
 
   const [themeMode] = useAppTheme();
-  const mobileView = isMobile && !isTablet;
 
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(mobileView ? 'timeGridDay' : 'dayGridMonth');
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
@@ -103,32 +100,29 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
       .finally(() => setIsDataFetching(false));
   };
 
-  const onNavigate = useCallback(
-    (dateInfo: DatesSetArg) => {
-      if (view === 'dayGridMonth') {
-        setDateRange({
-          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
-        });
-      } else if (view === 'timeGridWeek') {
-        setDateRange({
-          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
-        });
-      } else if (view === 'timeGridDay') {
-        setDateRange({
-          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
-        });
-      } else if (view === 'agenda') {
-        setDateRange({
-          estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
-          estimateEndDate: dayjs(dateInfo.end).tz().add(1, 'month').format('MM/DD/YYYY')
-        });
-      }
-    },
-    [view]
-  );
+  const onNavigate = useCallback((dateInfo: DatesSetArg) => {
+    if (dateInfo.view.type === 'dayGridMonth') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridWeek') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridDay') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'agenda') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().add(1, 'month').format('MM/DD/YYYY')
+      });
+    }
+  }, []);
 
   const eventStyle = useMemo(() => {
     let backgroundColor = themeMode === 'light' ? 'rgb(234, 239, 254)' : 'rgb(185, 183, 219)';
@@ -148,8 +142,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
       <div className={cn('relative min-h-[400px] [&_.rbc-toolbar]:pt-0')}>
         <CustomCalendar
           events={events}
-          setView={setView}
-          view={view}
+          // ref={calendarRef}
           getEventStyle={() => {
             return eventStyle;
           }}

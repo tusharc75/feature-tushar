@@ -32,3 +32,14 @@ body {
     outline: transparent;
   }
 }
+.fc .fc-toolbar {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fc-timeGridWeek-view {
+  a.fc-col-header-cell-cushion {
+    font-size: 13px;
+    font-weight: 600;
+  }
+}
