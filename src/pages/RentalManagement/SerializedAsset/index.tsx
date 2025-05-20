@@ -1,6 +1,6 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import { Delete, ExpandMore, QrCode, Contactless, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
+import { Delete, ExpandMore, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
 import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -1044,17 +1044,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
-        {rentalPolicyData?.assignAssetUsingRfidQr && (
-          <>
-            <ScanButtons
-              referenceData={rentalManagementData}
-              disabled={disableAssignSerializedAssets(selectedRecords)}
-              assignedProducts={assetAssignedProduct}
-              setAssignedProducts={setAssetAssignedProduct}
-              fetchData={fetchData}
-            />
-          </>
-        )}
+        <ScanButtons
+          referenceData={rentalManagementData}
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          products={assetAssignedProduct?.map((e) => ({
+            _id: e.materialId,
+            uniqueId: e._id,
+            realAssetQty: e.realAssetQty,
+            realAssetAssignedQty: e.realAssetAssignedQty
+          }))}
+          fetchData={fetchData}
+        />
         <ThemeButton
           id="assign-serialized-asset-button"
           disabled={disableAssignSerializedAssets(selectedRecords)}

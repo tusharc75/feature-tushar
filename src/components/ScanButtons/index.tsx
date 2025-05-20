@@ -5,7 +5,7 @@ import { useData } from '../../StateProvider/Provider';
 import AssignDialog from './AssignDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const ScanButtons = ({ referenceData, disabled, assignedProducts, setAssignedProducts, fetchData }) => {
+const ScanButtons = ({ referenceData, disabled, products, fetchData }) => {
   const {
     state: { resources }
   }: any = useData();
@@ -19,22 +19,20 @@ const ScanButtons = ({ referenceData, disabled, assignedProducts, setAssignedPro
           <Contactless />
         </IconButton>
       </HtmlTooltip>
-      <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through QR`}>
+      <HtmlTooltip title={`Assign ${resources?.serializedAsset?.titlePlural} through QR/Barcode`}>
         <IconButton color="primary" onClick={() => setRfidQrDialogOpen({ open: true, type: 'qr' })} disabled={disabled}>
           <QrCode />
         </IconButton>
       </HtmlTooltip>
       {rfidQrDialogOpen?.open && (
         <AssignDialog
-          selectedProducts={assignedProducts}
+          selectedProducts={products}
           onSuccess={() => {
             setRfidQrDialogOpen({ open: false, type: null });
             fetchData();
-            setAssignedProducts([]);
           }}
           onClose={() => {
             setRfidQrDialogOpen({ open: false, type: null });
-            setAssignedProducts([]);
           }}
           referenceData={referenceData}
           type={rfidQrDialogOpen?.type}
