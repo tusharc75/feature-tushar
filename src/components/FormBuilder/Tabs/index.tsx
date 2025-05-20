@@ -2,10 +2,8 @@ import { Box, Collapse, IconButton } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
-import BuildIcon from '@mui/icons-material/Build';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import PolicyIcon from '@mui/icons-material/Policy';
 import SettingIcon from '@mui/icons-material/Settings';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ManageTabs from 'src/components/FormBuilder/Tabs/ManageTabs';
@@ -22,11 +20,9 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
-import { resourcePolicy } from 'src/components/FormBuilder/Tabs/helper';
 import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
-import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
 import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
 import UpdateIcon from '@mui/icons-material/Update';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -44,7 +40,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
-  const [openPolicy, setOpenPolicy] = useState(false);
   const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
   const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState(false);
@@ -146,20 +141,8 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
         >
           Add Tab
         </ThemeButton>
-        {!workflowId &&
+        {!workflowId && (
           <Box>
-            {resourcePolicy.find((e) => e.resource === resource) && (
-              <HtmlTooltip title={'Resource Policy'}>
-                <IconButton
-                  aria-label="Policy"
-                  onClick={() => {
-                    setOpenPolicy(true);
-                  }}
-                >
-                  <PolicyIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            )}
             <HtmlTooltip title={'Resource Setting'}>
               <IconButton
                 aria-label="Setting"
@@ -180,7 +163,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <AddCircleOutlineIcon fontSize="small" color={'primary'} />
               </IconButton>
             </HtmlTooltip>
-            {[sidebarResource.serializedAsset]?.includes(resource) &&
+            {[sidebarResource.serializedAsset]?.includes(resource) && (
               <HtmlTooltip title={'Update Resource Actions'}>
                 <IconButton
                   aria-label="Actions"
@@ -191,7 +174,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                   <UpdateIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-            }
+            )}
             <HtmlTooltip title={'Notifications'}>
               <IconButton
                 aria-label="Notifications"
@@ -203,7 +186,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
               </IconButton>
             </HtmlTooltip>
           </Box>
-        }
+        )}
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
@@ -241,20 +224,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             onClose={() => setDeleteData(null)}
             onOk={() => handleDelete(deleteData)}
             okBtnLoading={isDeleting}
-          />
-        )}
-
-        {openPolicy && (
-          <PolicyDialog
-            onClose={() => {
-              setOpenPolicy(false);
-            }}
-            onSuccess={() => {
-              fetchData();
-              setOpenPolicy(false);
-            }}
-            resource={resource}
-            resourceData={resourceData}
           />
         )}
 

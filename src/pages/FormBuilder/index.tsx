@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import queryString from 'query-string';
@@ -18,6 +18,9 @@ import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
 import SectionMaster from './sectionMaster';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
 const renderedFrom = 'form-builder';
 
@@ -35,6 +38,10 @@ const FormBuilder = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
+
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -84,6 +91,35 @@ const FormBuilder = () => {
         Header: 'Dynamic Resource',
         accessorFn: (data) => (data?.dynamicResource ? 'Yes' : 'No'),
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.dynamicResource ? 'Yes' : 'No'}</p>
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.dynamicResource && (
+              <HtmlTooltip title={'Delete'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Delete"
+                    onClick={() => {
+                      setDeleteRecord(row.original);
+                      setShowDeleteConfirmBox(true);
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" color={'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )}
+          </>
+        )
       }
     ];
     setColumns(columns);
@@ -144,6 +180,22 @@ const FormBuilder = () => {
     );
   };
 
+  const handleDelete = () => {
+    setIsDeleting(true);
+    axiosInstance()
+      .put(`/sa-formbuilder/remove`, { resourceName: deleteRecord?.resource })
+      .then(() => {
+        setIsDeleting(false);
+        setDeleteRecord(null);
+        setShowDeleteConfirmBox(false);
+        fetchGetBrandResource();
+      })
+      .catch((error) => {
+        setIsDeleting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -192,6 +244,18 @@ const FormBuilder = () => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
+        )}
+        {showDeleteConfirmBox && (
+          <ConfirmationDialog
+            open={showDeleteConfirmBox}
+            message={`Are you sure you want to delete ${deleteRecord?.resourceLabel} ?`}
+            okBtnLoading={isDeleting}
+            onClose={() => {
+              setDeleteRecord(null);
+              setShowDeleteConfirmBox(false);
+            }}
+            onOk={handleDelete}
+          />
         )}
       </CustomContainer>
     </section>

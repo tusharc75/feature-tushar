@@ -206,8 +206,8 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} label={'Pending Planned'} />
-                    <CustomTab value={1} label={'Pending Incoming'} />
+                    <CustomTab value={0} label={'Planned (Pending)'} />
+                    <CustomTab value={1} label={'Incoming (Pending)'} />
                   </CustomTabs>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
