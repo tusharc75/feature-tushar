@@ -26,7 +26,6 @@ export const MobileCalendar = React.forwardRef<FullCalendar, CustomCalednerProps
 
     const handleEventClick = (arg: EventClickArg) => {
       if (navigationData.view.type === 'dayGridMonth') {
-        console.log(arg.event.start, calenderRef.current);
         calenderRef.current?.getApi().changeView('timeGridDay' as View, arg.event.start);
       } else {
         eventClick(arg);
