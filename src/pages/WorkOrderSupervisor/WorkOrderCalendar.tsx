@@ -17,7 +17,6 @@ import {
 import dayjs from 'dayjs';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
-import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -35,15 +34,6 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   const [themeMode] = useAppTheme();
 
   const [events, setEvents] = useState([]);
-  const calendarRef = useRef<FullCalendar>(null);
-
-  // useEffect(() => {
-  //   if (mobileView) {
-  //     calendarRef.current?.getApi().changeView('timeGridDay');
-  //   } else {
-  //     calendarRef.current?.getApi().changeView('dayGridMonth');
-  //   }
-  // }, [mobileView]);
 
   const [dateRange, setDateRange] = useState({
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),

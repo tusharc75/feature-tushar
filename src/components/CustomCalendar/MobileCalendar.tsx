@@ -5,7 +5,7 @@ import { CustomCalednerProps } from 'src/components/CustomCalendar';
 import { Calendar } from 'src/components/CustomCalendar/Calendar';
 import { renderEventContent, renderEventContentForMonthViewMobile } from 'src/components/CustomCalendar/Components';
 import { View } from 'src/components/CustomCalendar/types';
-import { parseEventForMobile1 } from 'src/components/CustomCalendar/utils';
+import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
 
 export const MobileCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
   (
@@ -35,7 +35,7 @@ export const MobileCalendar = React.forwardRef<FullCalendar, CustomCalednerProps
 
     useEffect(() => {
       if ((navigationData?.view?.type as View) === 'dayGridMonth' && navigationData?.end) {
-        const newData = parseEventForMobile1(events, navigationData?.start, navigationData?.end);
+        const newData = parseEventForMobile(events, navigationData?.start, navigationData?.end);
         setStateEvents(newData);
       } else {
         setStateEvents(events);
