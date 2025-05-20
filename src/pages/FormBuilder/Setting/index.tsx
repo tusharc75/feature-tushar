@@ -148,7 +148,12 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <EntityResource values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} entities={entities} />
+                <EntityResource
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  errors={errors}
+                  touched={touched}
+                  entities={entities} />
                 <Policy
                   values={values}
                   setFieldValue={setFieldValue}

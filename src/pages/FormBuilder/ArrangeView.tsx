@@ -1,5 +1,5 @@
 import { Box, Dialog, IconButton, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
-import { DragHandle, DragIndicator, ExpandMore } from '@mui/icons-material';
+import { DragIndicator, ExpandMore } from '@mui/icons-material';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -8,7 +8,6 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, changeItemIndex, generateId, reorder } from './../../constants/helpers';
-
 import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -166,26 +165,6 @@ const ArrangeView = (props) => {
           return item;
         });
         setData(newItems);
-        // } else if (destinationType === 'Section') {
-        //   const activeItemParent = activeSection.id;
-        //   const overItemParent = over.data.current.props.section.id;
-        //   const isInSameSection = activeItemParent === overItemParent;
-        //   if (isInSameSection) return;
-
-        //   let newSourceSubItems = [...sourceSubItems];
-        //   const [item] = newSourceSubItems.splice(active.data.current.index, 1);
-        //   let newDestSubItems = [...over.data.current.props.section.subItems];
-        //   newDestSubItems.splice(newDestSubItems.length, 0, { ...item, section: overItemParent });
-        //   newItems = newItems.map((item) => {
-        //     if (item.id === activeItemParent) {
-        //       item.subItems = newSourceSubItems;
-        //     } else if (item.id === over.data.current.props.section.id) {
-        //       item.subItems = newDestSubItems;
-        //     }
-        //     return item;
-        //   });
-        //   setData(newItems);
-        // }
       }
     }
   };
@@ -296,7 +275,7 @@ const RenderSection = ({ section, index }) => {
       >
         <Accordion TransitionProps={{ unmountOnExit: true }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <IconButton size="small" {...attributes} {...listeners} className={` !cursor-grab`}>
                 <DragIndicator />
               </IconButton>
@@ -333,19 +312,14 @@ const RenderSubItems = ({ itemData, index, section }: ItemProps) => {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      //
-      style={style}
-    >
+    <div ref={setNodeRef} style={style}  >
       <ListItem
         divider={true}
-        className={`${
-          isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : ''
-        } rounded-md bg-[var(--dark-secondary,white)] transition-colors`}
+        className={`${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : ''
+          } rounded-md bg-[var(--dark-secondary,white)] transition-colors`}
       >
         <ListItemIcon className={` cursor-grab`} {...attributes} {...listeners}>
-          <DragHandle />
+          <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={itemData.resourceLabel} />
       </ListItem>
