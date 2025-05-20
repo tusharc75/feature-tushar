@@ -569,7 +569,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   return initialValues && pdfResourceOption ? (
     <>
-      <DeviceMessage backPath={routes.quotePdfTemplate.path} />
+      <DeviceMessage backPath={queryParams.quotation ? `${routes.quotationDetail.path}/${quoteData._id}` : routes.quotePdfTemplate.path} />
       <Formik
         innerRef={(ref) => ref && setFormValues(ref.values)}
         initialValues={initialValues}
