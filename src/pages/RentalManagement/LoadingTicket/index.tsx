@@ -719,11 +719,12 @@ const LoadingTicket = ({
       } else {
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = [];
+        let extraIndexCount = 0;
         rows.forEach((parent, i) => {
           if (parent.type === MATERIAL_TYPE.product && (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)) {
             const subProductRows = processProduct(
               '',
-              newRows?.length,
+              newRows?.length + extraIndexCount,
               parent,
               material,
               nonSerializedInventory,
@@ -735,7 +736,8 @@ const LoadingTicket = ({
             newRows = [...newRows, ...subProductRows];
 
             if (parent?.productDetail?.serializedProduct && productAssets?.filter((e) => e.uniqueId === parent._id)?.length) {
-              parent.index = i + 1;
+              extraIndexCount++;
+              parent.index = i + 1 + extraIndexCount;
               parent.type = parent?.type;
               parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
               parent.detail = parent?.productDetail?.productName;

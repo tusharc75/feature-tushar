@@ -988,7 +988,7 @@ const Productpackage = ({
     return (
       <>
         {flattenArray(dataRows)?.filter((e) => e?.serializedProduct)?.length > 0 && (
-          <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+          <HtmlTooltip title={`Check ${resources?.serializedAsset?.titlePlural} Availability`} arrow placement="top">
             <IconButton
               size="small"
               aria-label="Details"
