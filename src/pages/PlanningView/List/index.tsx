@@ -5,12 +5,14 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
-import { displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { dateFormatToSend, displayDateTime, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { FiExternalLink } from 'react-icons/fi';
 import { camelCase } from 'lodash';
+import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
+import dayjs from 'dayjs';
 
 function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
   const toastConfig = useContext(CustomToastContext);
@@ -29,6 +31,10 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
   const [lookupLoading, setLookupLoading] = useState(false);
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedAssets, setSelectedAssets] = useState([]);
+  const [selectedDate, setSelectedDate] = useState<DateRange>({
+    from: dayjs.tz().startOf('month').toDate(),
+    to: dayjs.tz().endOf('month').toDate()
+  });
 
   const fetchGridColumns = async () => {
     if (selectedResource?.resource === sidebarResource.serializedAsset) {
@@ -207,7 +213,8 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
 
   const getQueryString = () => {
     if (selectedResource?.resource === sidebarResource?.serializedAsset) {
-      let query = `?resource=${sidebarResource?.serializedAsset}&listView=true`;
+      const date = `{"from": "${dateFormatToSend(selectedDate.from)}", "to": "${dateFormatToSend(selectedDate.to)}"}`;
+      let query = `?resource=${sidebarResource?.serializedAsset}&date=${date}`;
       if (selectedAssets?.length) {
         query = `${query}&assetIds=${selectedAssets?.map((a) => a?.optionValue)?.toString()}`;
       }
@@ -299,36 +306,39 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
           renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
         />
         {selectedResource?.resource === sidebarResource?.serializedAsset && (
-          <Autocomplete
-            options={lookupResource ? lookupResource[sidebarResource?.serializedAsset] : []}
-            multiple
-            disableCloseOnSelect
-            style={{ width: '300px' }}
-            getOptionLabel={(option: any) => option?.optionLabel}
-            value={selectedAssets}
-            onChange={(event, newValue) => {
-              setSelectedAssets(newValue);
-            }}
-            size="small"
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={`Select ${resources?.serializedAsset?.titlePlural}`}
-                variant="outlined"
-                slotProps={{
-                  input: {
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    )
-                  }
-                }}
-              />
-            )}
-          />
+          <>
+            <DateRangePicker horizontal="left" date={selectedDate} setDate={setSelectedDate} />
+            <Autocomplete
+              options={lookupResource ? lookupResource[sidebarResource?.serializedAsset] : []}
+              multiple
+              disableCloseOnSelect
+              style={{ width: '300px' }}
+              getOptionLabel={(option: any) => option?.optionLabel}
+              value={selectedAssets}
+              onChange={(event, newValue) => {
+                setSelectedAssets(newValue);
+              }}
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={`Select ${resources?.serializedAsset?.titlePlural}`}
+                  variant="outlined"
+                  slotProps={{
+                    input: {
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      )
+                    }
+                  }}
+                />
+              )}
+            />
+          </>
         )}
       </div>
       {columns ? (
