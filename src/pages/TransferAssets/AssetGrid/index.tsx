@@ -254,7 +254,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
             setRemoveData(selectedRecords.map((asset: any) => asset?._id));
           }}
         >
-          Remove Assets
+          {`Remove ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
       </>
     );

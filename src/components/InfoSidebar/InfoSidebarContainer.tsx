@@ -12,7 +12,9 @@ const InfoSidebarContainer = () => {
         infoSidebarData ? 'w-[--info-sidebar-w]' : 'w-0'
       )}
     >
-      <div className="sticky top-0 z-10 flex w-[--info-sidebar-w] flex-grow border bg-white">{infoSidebarData && <InfoSidebar />}</div>
+      <div className="sticky top-0 z-10 flex w-[--info-sidebar-w] flex-grow border bg-[var(--dark-primary,white)]">
+        {infoSidebarData && <InfoSidebar />}
+      </div>
     </div>
   );
 };

@@ -193,7 +193,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -295,7 +295,7 @@ const FieldServiceTechnician = () => {
       }
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.canEdit = checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, u);
+        finalObject.canEdit = permissions?.fieldTicket?.isCreate;
         finalObject.orignalData = u;
         return finalObject;
       });
@@ -375,8 +375,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -453,10 +453,10 @@ const FieldServiceTechnician = () => {
                         <FieldTicket
                           serviceOrderData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
-                          handleChangeStatus={() => {}}
+                          handleChangeStatus={() => { }}
                           resource={sidebarResource.fieldServiceTechnician}
                           enableGlobalSearch={false}
-                          fetchServiceOrderData={() => {}}
+                          fetchServiceOrderData={() => { }}
                         />
                       )
                     ) : (

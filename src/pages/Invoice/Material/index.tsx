@@ -211,7 +211,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry  && (
+          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"

@@ -6,6 +6,8 @@ export type Event = {
   customerAccount?: string;
   allDay?: boolean;
   resource?: string;
+  suffixComponent?: React.ReactNode;
+  prefixConponent?: React.ReactNode;
   [key: string]: any;
 };
 

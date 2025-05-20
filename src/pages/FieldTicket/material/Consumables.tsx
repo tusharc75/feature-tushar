@@ -751,7 +751,7 @@ const Consumables = ({
           )}
         {!isOffline &&
           resourcePolicy?.showFieldServiceOrderAddMaterial &&
-          fieldTicketData?.isServiceInFieldServiceOrder &&
+          fieldTicketData?.isProductInFieldServiceOrder &&
           fieldTicketData?.fieldServiceOrder?.optionValue && (
             <>
               <MenuItem

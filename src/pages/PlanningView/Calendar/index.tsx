@@ -6,9 +6,8 @@ import { Box, IconButton, Popover, Table, TableBody, TableCell, TableContainer, 
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
-import { camelCase, groupBy, isEmpty } from 'lodash';
+import { camelCase, groupBy, isEmpty, orderBy } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import { isMobile, isTablet } from 'react-device-detect';
 import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -28,9 +27,11 @@ import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
+import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
+import { FaRegQuestionCircle } from 'react-icons/fa';
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
@@ -110,6 +111,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   });
 
   const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
+
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
@@ -433,6 +435,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           textColor = 'white';
         } else if (obj?.type === 'debit') {
           backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+        } else if (obj?.type === 'assetStatusTotal') {
+          backgroundColor = '#89CFF0';
         }
       }
 
@@ -475,7 +479,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         .get(`/planning-view${queryString}`, { cancelToken })
         .then(({ data: { data } }) => {
           setResourceDatas(data);
-          const otherData = [];
+          let otherData = [];
           let rows = data?.map((d: any) => {
             if (selectedResource.resource === sidebarResource.serializedAsset) {
               return {
@@ -509,24 +513,48 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
+                      suffixComponent: (
+                        <InfoSidebarButton
+                          actionId={planningViewActions.planned}
+                          resource={sidebarResource.planningView}
+                          props={{
+                            className: '!bg-transparent cursor-pointer !p-0'
+                          }}
+                        >
+                          <FaRegQuestionCircle fontSize={14} />
+                        </InfoSidebarButton>
+                      ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
-                      data: d?.debit
+                      data: d?.debit,
+                      order: 1
                     });
                   }
                 } else if (property === 'credit') {
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
+                      suffixComponent: (
+                        <InfoSidebarButton
+                          actionId={planningViewActions.incoming}
+                          resource={sidebarResource.planningView}
+                          props={{
+                            className: '!bg-transparent cursor-pointer !p-0'
+                          }}
+                        >
+                          <FaRegQuestionCircle fontSize={14} />
+                        </InfoSidebarButton>
+                      ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
-                      data: d?.credit
+                      data: d?.credit,
+                      order: 2
                     });
                   }
                 } else if (property === 'availableByPlanning') {
@@ -537,7 +565,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     allDay: true,
                     type: 'availableByPlanning',
                     resource: selectedResource.resource,
-                    isRedAlert: d?.availableByPlanning < 0 ? true : false
+                    isRedAlert: d?.availableByPlanning < 0 ? true : false,
+                    order: 3
                   });
                 } else if (property === 'inventory') {
                   if (d?.inventory) {
@@ -546,7 +575,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       allDay: true,
-                      resource: selectedResource.resource
+                      resource: selectedResource.resource,
+                      order: 4
                     });
                   }
                 } else if (['date']?.includes(property)) {
@@ -559,9 +589,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         start: dayjs.utc(d['date']).tz().toDate(),
                         end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                         allDay: true,
-                        type: 'assetCount',
-                        status: property,
-                        resource: selectedResource.resource
+                        type: 'assetStatusTotal',
+                        status: null,
+                        resource: selectedResource.resource,
+                        order: 5
                       });
                     }
                   }
@@ -575,7 +606,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       allDay: true,
                       type: 'assetStatus',
                       status: property,
-                      resource: selectedResource.resource
+                      resource: selectedResource.resource,
+                      order: 6
                     });
                   }
                 }
@@ -667,8 +699,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     (args: EventClickArg) => {
       const data = { ...args.event, ...args.event._def, ...args.event.extendedProps, start: args.event.start, end: args.event.end } as any;
       if (selectedResource.resource === sidebarResource.product) {
-        if (data?.type === 'assetStatus') {
-          let query = `?assetStatus=${data?.status}`;
+        if (data?.type === 'assetStatus' || data?.type === 'assetStatusTotal') {
+          let query = data?.status ? `?assetStatus=${data?.status}` : `?`;
           if (selectedLookUpResourceData?.product) {
             query += `&product=${encodeURIComponent(
               JSON.stringify(
@@ -979,35 +1011,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           )}
         </div>
         {isOpen.open && (
-          <Popover
-            open={isOpen.open}
-            anchorEl={anchor}
-            onClose={() => {
-              setOpen({ open: false, data: [], eventData: null });
-            }}
-            style={{ minWidth: '300px' }}
-          >
-            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
-              <div className="flex items-center justify-between pb-1 pr-1 pt-1">
-                <h5 className="text-sm">{`${isOpen?.eventData?.title} - ${displayDate(isOpen?.eventData?.start)}`}</h5>
-                <HtmlTooltip title="Close">
-                  <IconButton size="small" onClick={() => setOpen({ open: false, data: [], eventData: null })} className="close-icon-v1">
-                    <CloseIcon fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
-              </div>
-              {isOpen.data?.map((d) => (
-                <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary>
-                    <h6 className=" text-sm font-semibold">{d.heading}</h6>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <RenderTable data={d.items} resources={resources} resourceList={resourceList} />
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Box>
-          </Popover>
+          <>
+            <ResourcePopover
+              anchorEl={anchor}
+              data={isOpen.data}
+              eventData={isOpen.eventData}
+              onClose={() => setOpen({ open: false, data: [], eventData: null })}
+              open={true}
+              resourceList={resourceList}
+            />
+          </>
         )}
 
         {showDetail.open && (
@@ -1061,55 +1074,3 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 }
 
 export default forwardRef(CalendarView);
-
-const RenderTable = ({ data, resources, resourceList }) => {
-  return (
-    <TableContainer>
-      <Table className="min-w-[530px]" aria-label="simple table" size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Reference</TableCell>
-            <TableCell>Qty</TableCell>
-            <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
-            <TableCell>{resources?.customerAccount?.titleSingular}</TableCell>
-            {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.map((row) => (
-            <TableRow key={row.referenceId}>
-              <TableCell component="th" scope="row">
-                <p
-                  onClick={() => {
-                    const resource = resourceList?.find((r) => r.resource === row?.resource);
-                    if (resource) {
-                      window.open(`${resource.path}/${row?.referenceId}`);
-                    }
-                  }}
-                  className="link text-truncate"
-                  title={row?.resourceLabel}
-                >
-                  {row.resourceLabel}
-                </p>
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row.qty}
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row?.warehouse?.optionLabel}
-              </TableCell>
-              <TableCell component="th" scope="row">
-                {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
-              </TableCell>
-              {data?.find((e) => e?.padName) && (
-                <TableCell component="th" scope="row">
-                  {row?.padName?.optionLabel ? row?.padName?.optionLabel : <NoDataCell />}
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  );
-};

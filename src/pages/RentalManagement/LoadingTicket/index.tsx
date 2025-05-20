@@ -720,10 +720,7 @@ const LoadingTicket = ({
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = [];
         rows.forEach((parent, i) => {
-          if (
-            parent.type === MATERIAL_TYPE.product &&
-            (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
-          ) {
+          if (parent.type === MATERIAL_TYPE.product && (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)) {
             const subProductRows = processProduct(
               '',
               newRows?.length,
@@ -736,6 +733,26 @@ const LoadingTicket = ({
               productSerialNumbers
             );
             newRows = [...newRows, ...subProductRows];
+
+            if (parent?.productDetail?.serializedProduct && productAssets?.filter((e) => e.uniqueId === parent._id)?.length) {
+              parent.index = i + 1;
+              parent.type = parent?.type;
+              parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+              parent.detail = parent?.productDetail?.productName;
+              parent.description = parent?.productDetail?.productDescription;
+              parent.qty = productAssets?.filter((e) => e.uniqueId === parent._id)?.length;
+              parent.subRows = generateNestedData(
+                parent,
+                material,
+                productAssets,
+                loadingTicketProducts,
+                consumeProducts,
+                nonSerializedInventory,
+                nonSerializeAsset,
+                productSerialNumbers
+              );
+              newRows.push(parent);
+            }
           } else {
             parent.index = i + 1;
             parent.type = parent?.type;

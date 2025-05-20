@@ -60,7 +60,7 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative mt-2">
       <CustomCalendar
         events={activities}
         getEventStyle={(obj) => ({
