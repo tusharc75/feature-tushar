@@ -1062,6 +1062,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.header}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>
@@ -1081,6 +1082,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.aboveTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         variables={variables}
+                        doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
                     </Box>
@@ -1100,6 +1102,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.belowTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         variables={variables}
+                        doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
                     </Box>
@@ -1119,6 +1122,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.footer}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>
@@ -1138,6 +1142,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.tabelSummaryLeftSide}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>

@@ -82,7 +82,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     const walkmeData = generateAddExistingSerializedAsset(
       false,
       repairOrderData?.type === REPAIR_ORDER_TYPE.external
-        ? `Add Existing Customer Assets`
+        ? `Add Existing Customer ${resources?.serializedAsset?.titlePlural}`
         : `Add Existing ${resources?.serializedAsset?.titlePlural}`
     );
     setWalkmeData([walkmeData]);
@@ -524,7 +524,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           id="add-existing-serialized-asset-menu-item"
         >
           {repairOrderData?.type === REPAIR_ORDER_TYPE.external
-            ? `Add Existing Customer Assets`
+            ? `Add Existing Customer ${resources?.serializedAsset?.titlePlural}`
             : `Add Existing ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
@@ -542,7 +542,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             }}
           >
             {repairOrderData?.type === REPAIR_ORDER_TYPE.external
-              ? `Add New Customer Assets`
+              ? `Add New Customer ${resources?.serializedAsset?.titleSingular}`
               : `Add New ${resources?.serializedAsset?.titleSingular}`}
           </MenuItem>
         )}
@@ -603,7 +603,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               });
             }}
           >
-            Assign Assets
+            {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
         <MenuItem

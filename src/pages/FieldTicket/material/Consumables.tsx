@@ -98,9 +98,9 @@ const Consumables = ({
   useEffect(() => {
     setServiceOption([
       { optionLabel: 'All', optionValue: 'All' },
-      ...services?.map((s) => {
+      ...services?.filter((e) => e.type === MATERIAL_TYPE.service)?.map((s) => {
         return {
-          optionLabel: s?.detail,
+          optionLabel: `${s?.detail}${services?.find((e) => e._id === s.parentId) ? ` (${services?.find((e) => e._id === s.parentId)?.detail})` : ''} `,
           optionValue: s?.materialId,
           _id: s?._id
         };
@@ -751,7 +751,7 @@ const Consumables = ({
           )}
         {!isOffline &&
           resourcePolicy?.showFieldServiceOrderAddMaterial &&
-          fieldTicketData?.isServiceInFieldServiceOrder &&
+          fieldTicketData?.isProductInFieldServiceOrder &&
           fieldTicketData?.fieldServiceOrder?.optionValue && (
             <>
               <MenuItem

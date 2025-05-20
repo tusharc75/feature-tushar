@@ -1597,7 +1597,6 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
       }
       return { permissions, resources };
     } catch (e) {
-      console.log(e);
     }
   }
 };
@@ -4224,4 +4223,13 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
     emails.push(data?.[field]?.email);
   }
   return emails;
+};
+
+export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
+export const handleClearLocalStore = () => {
+  const beConnectedWindowData = localStorage.getItem(EQUIPT_BE_CONNECTED_WINDOW);
+  localStorage.clear();
+  if (beConnectedWindowData) {
+    localStorage.setItem(EQUIPT_BE_CONNECTED_WINDOW, beConnectedWindowData);
+  }
 };

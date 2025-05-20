@@ -199,10 +199,10 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -422,7 +422,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
             setAddSerializedAssetDialog(true);
           }}
         >
-          {`Assign ${resources?.serializedAsset?.titleSingular}`}
+          {`Assign ${resources?.serializedAsset?.titlePlural}`}
         </ThemeButton>
       </>
     );

@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isArray, isObject, orderBy, startCase } from 'lodash';
+import { camelCase, isArray, isObject, startCase } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -233,7 +233,7 @@ const Material = ({
               <>
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}>
+                  <HtmlTooltip title={row.original.type === MATERIAL_TYPE.package ? `Add Existing ${resources?.packages?.titlePlural}` : `Perform ${resources?.serviceMaster?.titlePlural}`}>
                     <IconButton
                       onClick={() => {
                         setMaterialDialog({
@@ -948,7 +948,7 @@ const Material = ({
                 setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
               }}
             >
-              Add Rental Assets
+              {`Add Rental ${resources?.serializedAsset?.titlePlural}`}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -1001,44 +1001,40 @@ const Material = ({
   const ActionButtonMenuItms = () => {
     return (
       <>
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-          <MenuItem
-            disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-            onClick={() => {
-              setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-              setIsBulkEdit(true);
-            }}
-          >
-            Bulk Edit
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          onClick={() => {
+            setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+            setIsBulkEdit(true);
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
         {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
           <MenuItem
             onClick={() => {
               setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: true });
             }}
           >
-            Add Existing Service
+            {`Perform ${resources?.serviceMaster?.titlePlural}`}
           </MenuItem>
         )}
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-            onClick={() => {
-              const obj: any = [];
-              const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
-              dataToDelete?.forEach((ele) => {
-                obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-              });
-              dataToDelete?.forEach((ele) => {
-                getNestedSubRows(obj, ele);
-              });
-              setDeleteData(obj);
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+          onClick={() => {
+            const obj: any = [];
+            const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+            dataToDelete?.forEach((ele) => {
+              obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+            });
+            dataToDelete?.forEach((ele) => {
+              getNestedSubRows(obj, ele);
+            });
+            setDeleteData(obj);
+          }}
+        >
+          Delete
+        </MenuItem>
       </>
     );
   };
@@ -1071,8 +1067,8 @@ const Material = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
-            expander={resourcePolicy?.showAddPackages ? true : false}
             resource={sidebarResource.fieldTicket}
+            expander={true}
             arrangeRowField={{
               keys: [
                 { key: 'material', filterType: [MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset] },
@@ -1090,7 +1086,7 @@ const Material = ({
       <Box mt={3}>
         <Consumables
           allowedToEdit={allowedToEdit}
-          services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
+          services={flattenArray(dataRows)}
           fieldTicketData={fieldTicketData}
           fieldTicketFields={fieldTicketFields}
           fetchMaterial={fetchMaterial}
