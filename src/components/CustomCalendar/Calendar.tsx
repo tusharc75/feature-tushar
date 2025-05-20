@@ -56,7 +56,6 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
       };
     }, [storeData]);
 
-    console.log(calenderRef?.current?.getApi()?.currentData?.currentViewType)
 
     return (
       <div className="relative">
