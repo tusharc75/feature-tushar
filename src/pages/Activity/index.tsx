@@ -9,7 +9,6 @@ import Roadmap from '../../components/Activity/Report/Roadmap';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
 import CustomAntTabs from '../../components/Helpers/CustomAntTabs';
-import routes from '../../components/Helpers/Routes';
 import { SearchFilter } from '../../components/SearchFilter';
 import './style.scss';
 

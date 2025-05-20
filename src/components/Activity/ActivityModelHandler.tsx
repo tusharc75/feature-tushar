@@ -4,7 +4,6 @@ import { CreateCase } from './Case/CreateCase';
 import { CreateNote } from './Note/CreateNote';
 import { CreateEmail } from './Email/CreateEmail';
 import ManageAttachment from './Attachments/ManageAttachment';
-
 import Dialog from '@mui/material/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from './../../constants/helpers';
