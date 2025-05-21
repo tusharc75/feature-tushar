@@ -74,7 +74,7 @@ const useArrangeView = ({
       search: '',
       sortedColumns: data?.order ? [...allowedColumns].sort((a, b) => data?.order?.indexOf(a.id) - data?.order?.indexOf(b.id)) : allowedColumns,
       activeItem: null,
-      isSidebarOpen: true
+      isSidebarOpen: false
     }),
     [allowedColumns, data?.order]
   );
