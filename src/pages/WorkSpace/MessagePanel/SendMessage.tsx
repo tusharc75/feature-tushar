@@ -422,7 +422,7 @@ const SendMessage = ({
                     opacity: 0.5
                   }
                 }}
-                disabled={disabled || !message || isLoading}
+                disabled={disabled || (!message && files.length === 0 && audioBlobs.length === 0) || isLoading}
                 size="small"
                 className="send-button !ml-auto !block"
                 onClick={postMessage}
