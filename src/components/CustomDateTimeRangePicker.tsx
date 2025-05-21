@@ -1,10 +1,11 @@
 import { Box, IconButton } from '@mui/material';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import dayjs from 'dayjs';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { dateTimeFormat } from 'src/constants/helpers';
 import { useEffect, useState } from 'react';
+import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
+import { camelCase } from 'lodash';
 
 export interface DateTimeRange {
   startDateTime: Date | null;
@@ -26,7 +27,6 @@ interface CustomDateTimeRangePickerProps {
   minDateTime?: Date;
   maxDateTime?: Date;
   disablePast?: boolean;
-  disabled?: boolean;
   size?: 'small' | 'medium';
   margin?: 'dense' | 'normal' | 'none';
   startPlaceholder?: string;
@@ -43,7 +43,6 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
     minDateTime,
     maxDateTime,
     disablePast = false,
-    disabled = false,
     size = 'small',
     margin = 'normal',
     startPlaceholder = 'Start Date & Time',
@@ -169,54 +168,40 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
 
     const startError = errors.find((error) => error.index === index && error.field === 'startDateTime');
     const endError = errors.find((error) => error.index === index && error.field === 'endDateTime');
-    const startHelperText = startError ? startError?.message : '';
-    const endHelperText = endError ? endError?.message : '';
-    
+
     return (
       <Box key={index} mb={2} display="flex" gap={2} width={fullWidth ? '100%' : 'auto'}>
-        <DateTimePicker
-          label={startPlaceholder}
-          value={startValue}
-          onChange={(date) => update(index, 'startDateTime', date)}
+        <CustomDateTimePicker
+          fullWidth={fullWidth}
+          required={true}
           disablePast={disablePast}
-          disabled={disabled}
-          slotProps={{
-            textField: {
-              required: true,
-              fullWidth: true,
-              size: size,
-              margin: margin,
-              placeholder: startPlaceholder,
-              variant: 'outlined',
-              error: startError ? true : false,
-              helperText: startHelperText
-            }
-          }}
+          value={startValue}
+          name={`${camelCase(startPlaceholder)}`}
+          label={startPlaceholder}
+          onChange={(date) => update(index, 'startDateTime', date)}
+          size={size}
+          margin={margin}
+          placeholder={startPlaceholder}
           {...(minStartDateTime ? { minDateTime: minStartDateTime } : {})}
-          format={dateTimeFormat}
+          error={startError ? true : false}
+          helperText={startError ? startError?.message : ''}
         />
 
-        <DateTimePicker
-          label={endPlaceholder}
-          value={endValue}
-          onChange={(date) => update(index, 'endDateTime', date)}
+        <CustomDateTimePicker
+          fullWidth={fullWidth}
+          required={true}
           disablePast={disablePast}
-          disabled={disabled}
-          slotProps={{
-            textField: {
-              required: true,
-              fullWidth: true,
-              size: size,
-              margin: margin,
-              placeholder: endPlaceholder,
-              variant: 'outlined',
-              error: endError ? true : false,
-              helperText: endHelperText
-            }
-          }}
+          value={endValue}
+          name={`${camelCase(endPlaceholder)}`}
+          label={endPlaceholder}
+          onChange={(date) => update(index, 'endDateTime', date)}
+          size={size}
+          margin={margin}
+          placeholder={endPlaceholder}
           {...(range.startDateTime ? { minDateTime: dayjs.tz(new Date(range.startDateTime)) } : {})}
           {...(maxEndDateTime ? { maxDateTime: maxEndDateTime } : {})}
-          format={dateTimeFormat}
+          error={endError ? true : false}
+          helperText={endError ? endError?.message : ''}
         />
       </Box>
     );
@@ -233,7 +218,7 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
                 onChange(value?.slice(0, -1));
               }
             }}
-            disabled={value?.length === 1 || disabled}
+            disabled={value?.length === 1}
             aria-label="Remove range"
           >
             <RemoveIcon fontSize="small" />
@@ -249,7 +234,6 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
                 }
               ]);
             }}
-            disabled={disabled}
             aria-label="Add range"
           >
             <AddIcon fontSize="small" />
@@ -258,8 +242,8 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
       )}
       {Array.isArray(value)
         ? value?.map((range, index) =>
-          renderDateTimeRange(index, range, index !== 0 ? value[index - 1] : null, index !== value.length - 1 ? value[index + 1] : null)
-        )
+            renderDateTimeRange(index, range, index !== 0 ? value[index - 1] : null, index !== value.length - 1 ? value[index + 1] : null)
+          )
         : renderDateTimeRange(0, value)}
     </Box>
   );
