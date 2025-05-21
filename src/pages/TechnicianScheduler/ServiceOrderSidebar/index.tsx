@@ -7,7 +7,7 @@ import { cn, rentalManagement } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
+import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialogWithDateTime';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { isArray, isObject } from 'lodash';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
