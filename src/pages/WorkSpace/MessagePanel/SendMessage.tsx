@@ -360,6 +360,10 @@ const SendMessage = ({
               ],
               toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              toolbar_mode: 'floating',
+              mobile: {
+                toolbar_mode: 'floating'
+              },
               setup: (editor) => {
                 editor.on('BeforeSetContent', (e) => {
                   // Adding 'link' class to <a> tags

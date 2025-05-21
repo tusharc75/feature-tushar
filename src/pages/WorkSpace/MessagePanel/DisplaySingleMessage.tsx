@@ -47,7 +47,7 @@ export const DisplaySingleMessage = ({
   channelData,
   type = 'messages'
 }: DisplaySingleMessageProps) => {
-  const [theme] = useAppTheme();
+  // const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
   const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
   const [themeColor] = useAppTheme();
