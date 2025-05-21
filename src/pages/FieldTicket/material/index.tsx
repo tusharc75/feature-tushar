@@ -76,7 +76,7 @@ const Material = ({
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null, serializedAssetService: false });
+  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null, parentType: null, serializedAssetService: false });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -240,6 +240,7 @@ const Material = ({
                           open: true,
                           type: row.original.type === MATERIAL_TYPE.package ? MATERIAL_TYPE.package : MATERIAL_TYPE.service,
                           parentId: row.original._id,
+                          parentType: row.original.type,
                           serializedAssetService: row.original.type === MATERIAL_TYPE.package ? false : true
                         });
                       }}
@@ -518,7 +519,7 @@ const Material = ({
         material.push(element);
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         fetchMaterial();
-        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+        setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
@@ -626,7 +627,7 @@ const Material = ({
         }
         fetchMaterial();
         fetchData();
-        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+        setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setAddFieldServiceOrderDataDialog(false);
@@ -905,7 +906,7 @@ const Material = ({
       <>
         <MenuItem
           onClick={() => {
-            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: '', serializedAssetService: false });
           }}
           id={'add-existing-service-menu-item'}
         >
@@ -914,7 +915,7 @@ const Material = ({
         {permissions?.serviceMaster?.isCreate && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: 'newService', parentId: null, serializedAssetService: false });
+              setMaterialDialog({ open: true, type: 'newService', parentId: null, parentType: '', serializedAssetService: false });
             }}
             id={'add-new-service-menu-item'}
           >
@@ -924,7 +925,7 @@ const Material = ({
         {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, serializedAssetService: false });
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, parentType: '', serializedAssetService: false });
             }}
             id={'add-existing-package-menu-item'}
           >
@@ -1013,7 +1014,7 @@ const Material = ({
         {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: true });
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: MATERIAL_TYPE.serializedAsset, serializedAssetService: true });
             }}
           >
             {`Perform ${resources?.serviceMaster?.titlePlural}`}
@@ -1102,12 +1103,13 @@ const Material = ({
             handleAdd(rows, MATERIAL_TYPE.service);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
           currency={fieldTicketData.currency}
+          headerLabel={materialDialog.parentType === MATERIAL_TYPE.serializedAsset ? 'Perform' : 'Add'}
         />
       )}
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
@@ -1116,7 +1118,7 @@ const Material = ({
             handleAdd(rows, MATERIAL_TYPE.package);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           ids={[]}
           isSubmitting={isSubmitting}
@@ -1126,13 +1128,13 @@ const Material = ({
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
-          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false })}
+          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false })}
           onSuccess={(data) => {
             const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row], MATERIAL_TYPE.service);
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           isRedirectToDetailPage={false}
           referenceData={{ serviceType: SERVICE_TYPE.fieldService }}
