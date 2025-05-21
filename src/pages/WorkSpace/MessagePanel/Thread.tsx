@@ -41,7 +41,7 @@ const Thread = ({ message, onClose, socket, channelId, open, channelData, state 
     <>
       <div
         className={cn(
-          'thread absolute bottom-0 right-0 top-0 z-10 flex min-w-[var(--thread-bar-width)] max-w-[var(--thread-bar-width)] flex-grow flex-col rounded-md bg-[var(--dark-primary,white)] shadow-lg transition-transform duration-300 [border:1px_solid_var(--common-border-color)] [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
+          'thread absolute bottom-0 right-0 top-0 z-[1] flex min-w-[var(--thread-bar-width)] max-w-[var(--thread-bar-width)] flex-grow flex-col rounded-md bg-[var(--dark-primary,white)] shadow-lg transition-transform duration-300 [border:1px_solid_var(--common-border-color)] [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
           open && '[transform:translateX(0)]'
         )}
       >

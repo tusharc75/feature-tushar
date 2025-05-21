@@ -196,7 +196,7 @@ const Steps = ({
   isMobile,
   fetchWorkOrderData = null,
   headerPadding = true,
-  resourceData = null,
+  resourceData = null
 }) => {
   const workOrderId = workOrderData?._id;
   const classes = useStyles();
@@ -308,9 +308,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                ?.filter((_f) => _f?.required)
-                ?.map((f) => f?.fieldName)
-                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                  ?.filter((_f) => _f?.required)
+                  ?.map((f) => f?.fieldName)
+                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -977,9 +977,9 @@ const Steps = ({
               <ThemeButton
                 disabled={
                   allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                     ? false
                     : true
                 }
@@ -999,9 +999,9 @@ const Steps = ({
           <ThemeButton
             disabled={
               allowedToEdit &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              )
                 ? false
                 : true
             }
@@ -1030,7 +1030,7 @@ const Steps = ({
         <MenuItem
           disabled={
             (allowedToEdit &&
-              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true) || selectedSteps.length === 0
           }
@@ -1090,9 +1090,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true,
                     placement: 'right'
@@ -1108,8 +1108,9 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
-                } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
+              className={`w-full ${
+                minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
+              } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1126,10 +1127,11 @@ const Steps = ({
                       head={
                         <Box
                           key={step._id}
-                          className={`${classes.accordionHeading} ${!stepData?.status ? '' : 'cursor-pointer'
-                            } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                          className={`${classes.accordionHeading} ${
+                            !stepData?.status ? '' : 'cursor-pointer'
+                          } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                         >
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 ">
                             {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                               <Checkbox
                                 name={`checkbox_${step._id}`}
@@ -1155,16 +1157,16 @@ const Steps = ({
                               className={`mr-auto flex basis-[calc(100%-56px)] flex-wrap items-center justify-between gap-[8px] sm:basis-[calc(100%-155px)]`}
                             >
                               <Box className="flex flex-grow items-center gap-2 text-[var(--primary-text)]">
-                                <div className="flex w-full items-start gap-2">
+                                <div className="flex w-full items-start gap-2 max-md:flex-wrap">
                                   <h6
                                     title={step.stepName}
-                                    className={`${classes.heading} flex-grow [word-break:break-all] max-md:line-clamp-[1]`}
+                                    className={`${classes.heading} flex-grow [word-break:break-all] max-md:line-clamp-[1] max-md:w-full max-md:!text-[14px]`}
                                     style={{ fontWeight: '600' }}
                                   >
                                     {step.stepName}
                                   </h6>
                                   {mobScreen && (
-                                    <div className="flex min-w-fit flex-wrap items-center md:gap-2">
+                                    <div className="flex min-w-fit flex-wrap items-center max-md:ml-auto md:gap-2">
                                       {stepData?.status && (
                                         <IconButton
                                           aria-label="info"
@@ -1232,12 +1234,12 @@ const Steps = ({
                                           <DeleteOutline
                                             color={
                                               allowedToEdit &&
-                                                ![
-                                                  WORKORDER_SERVICE_STEP_STATUS.passed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.failed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.completed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.skipped
-                                                ].includes(stepData?.passFailStatus)
+                                              ![
+                                                WORKORDER_SERVICE_STEP_STATUS.passed,
+                                                WORKORDER_SERVICE_STEP_STATUS.failed,
+                                                WORKORDER_SERVICE_STEP_STATUS.completed,
+                                                WORKORDER_SERVICE_STEP_STATUS.skipped
+                                              ].includes(stepData?.passFailStatus)
                                                 ? 'error'
                                                 : 'disabled'
                                             }
@@ -1245,24 +1247,44 @@ const Steps = ({
                                           />
                                         </IconButton>
                                       </HtmlTooltip>
+                                      {step?.assignedUsers?.length > 0 && (
+                                        <HtmlTooltip enterTouchDelay={0} arrow title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                          <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
+                                        </HtmlTooltip>
+                                      )}
+                                      {step?.assignedWorkStations?.length > 0 && (
+                                        <HtmlTooltip
+                                          enterTouchDelay={0}
+                                          title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                          arrow
+                                        >
+                                          <span>
+                                            <WorkStations className=" align-text-top" />
+                                          </span>
+                                        </HtmlTooltip>
+                                      )}
                                     </div>
                                   )}
                                 </div>
-                                {step?.assignedUsers?.length > 0 && (
-                                  <HtmlTooltip enterTouchDelay={0} arrow title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
-                                    <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
-                                  </HtmlTooltip>
-                                )}
-                                {step?.assignedWorkStations?.length > 0 && (
-                                  <HtmlTooltip
-                                    enterTouchDelay={0}
-                                    title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
-                                    arrow
-                                  >
-                                    <span>
-                                      <WorkStations className=" align-text-top" />
-                                    </span>
-                                  </HtmlTooltip>
+                                {!mobScreen && (
+                                  <>
+                                    {step?.assignedUsers?.length > 0 && (
+                                      <HtmlTooltip enterTouchDelay={0} arrow title={step?.assignedUsers?.map((e) => e?.optionLabel)?.toString()}>
+                                        <People style={{ color: 'var(--primary-text)', maxWidth: '22px' }} />
+                                      </HtmlTooltip>
+                                    )}
+                                    {step?.assignedWorkStations?.length > 0 && (
+                                      <HtmlTooltip
+                                        enterTouchDelay={0}
+                                        title={`Work Stations-${step?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString()}`}
+                                        arrow
+                                      >
+                                        <span>
+                                          <WorkStations className=" align-text-top" />
+                                        </span>
+                                      </HtmlTooltip>
+                                    )}
+                                  </>
                                 )}
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', flexBasis: mobScreen ? '100%' : 'unset', flexWrap: 'wrap' }}>
@@ -1372,10 +1394,10 @@ const Steps = ({
                                     ) : null
                                   ) : null}
                                   {stepData?.status &&
-                                    step?.isAllowToPerform &&
-                                    ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                                    // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                                    isStepsAllowToPerform ? (
+                                  step?.isAllowToPerform &&
+                                  ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                                  // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                                  isStepsAllowToPerform ? (
                                     [
                                       WORKORDER_SERVICE_STEP_STATUS.passed,
                                       WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1488,12 +1510,12 @@ const Steps = ({
                                     <DeleteOutline
                                       color={
                                         allowedToEdit &&
-                                          ![
-                                            WORKORDER_SERVICE_STEP_STATUS.passed,
-                                            WORKORDER_SERVICE_STEP_STATUS.failed,
-                                            WORKORDER_SERVICE_STEP_STATUS.completed,
-                                            WORKORDER_SERVICE_STEP_STATUS.skipped
-                                          ].includes(stepData?.passFailStatus)
+                                        ![
+                                          WORKORDER_SERVICE_STEP_STATUS.passed,
+                                          WORKORDER_SERVICE_STEP_STATUS.failed,
+                                          WORKORDER_SERVICE_STEP_STATUS.completed,
+                                          WORKORDER_SERVICE_STEP_STATUS.skipped
+                                        ].includes(stepData?.passFailStatus)
                                           ? 'error'
                                           : 'disabled'
                                       }
@@ -1508,7 +1530,10 @@ const Steps = ({
                       }
                     >
                       {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-                        <CustomCollapsible head={<span className="text-base font-normal text-sm">Products/Consumables</span>} className="border-b-0 border-t">
+                        <CustomCollapsible
+                          head={<span className="text-sm font-normal md:text-base">Products/Consumables</span>}
+                          className="border-b-0 border-t"
+                        >
                           <div className="p-4">
                             <Consumables
                               hideServiceFilter={true}
@@ -1520,7 +1545,7 @@ const Steps = ({
                                       : allowedToEdit
                                     : false
                                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-                                    !workOrderData?.deleted
+                                      !workOrderData?.deleted
                                     ? false
                                     : resource === sidebarResource?.workOrderTechnician
                                       ? true
@@ -1544,7 +1569,11 @@ const Steps = ({
                           </div>
                         </CustomCollapsible>
                       )}
-                      <CustomCollapsible head={<span className="text-base font-normal text-sm">Drawings</span>} element="li" className="border-b-0 border-t">
+                      <CustomCollapsible
+                        head={<span className="text-base text-sm font-normal">Drawings</span>}
+                        element="li"
+                        className="border-b-0 border-t"
+                      >
                         <div className="p-4">
                           <Diagram
                             fullHeight={false}
@@ -1641,16 +1670,16 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                        isStepsAllowToPerform &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) &&
-                        ![
-                          WORKORDER_SERVICE_STEP_STATUS.skipped,
-                          WORKORDER_SERVICE_STEP_STATUS.completed,
-                          WORKORDER_SERVICE_STEP_STATUS.end,
-                          WORKORDER_SERVICE_STEP_STATUS.passed
-                        ]?.includes(getFields(selectedStep)?.stepData?.status)
+                      isStepsAllowToPerform &&
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      ) &&
+                      ![
+                        WORKORDER_SERVICE_STEP_STATUS.skipped,
+                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                        WORKORDER_SERVICE_STEP_STATUS.end,
+                        WORKORDER_SERVICE_STEP_STATUS.passed
+                      ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
@@ -1939,9 +1968,9 @@ const Steps = ({
                 <ThemeButton
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }
