@@ -276,7 +276,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${rentalManagement.api}/technician?rentalJobId=${rentalManagementData?._id}`;
+    let api = `/technician?referenceId=${rentalManagementData?._id}&referenceType=${sidebarResource.rentalManagement}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
@@ -313,7 +313,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/technician`, { ids: rows })
+      .put(`/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -362,12 +362,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+      element.referenceId = rentalManagementData?._id;
+      element.referenceType = sidebarResource.rentalManagement;
       Object.assign(element, calValues);
       delete element.materialId;
     });
 
     axiosInstance()
-      .post(`${rentalManagement.api}/technician`, { technician: tempMaterial })
+      .post(`/technician`, { technician: tempMaterial })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

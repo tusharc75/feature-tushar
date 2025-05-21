@@ -387,7 +387,7 @@ const Technicians = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
+    let api = `/technician?referenceId=${serviceOrderData?._id}&referenceType=${sidebarResource.fieldServiceOrder}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&uniqueId=${selectedService?._id}`;
     }
@@ -459,7 +459,7 @@ const Technicians = ({
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician`, { ids: rows })
+      .put(`/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -485,6 +485,7 @@ const Technicians = ({
       const element: any = {};
       element.technician = d?._id;
       element.referenceId = serviceOrderData?._id;
+      element.referenceType = sidebarResource.fieldServiceOrder;
       element.warehouse = serviceOrderData?.warehouse?.optionValue;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
@@ -493,7 +494,7 @@ const Technicians = ({
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician`, { technician, skipDateValidation })
+      .post(`/technician`, { technician, skipDateValidation })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -522,7 +523,7 @@ const Technicians = ({
   const handleUpdateTechnician = async (rows: any) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician/${serviceOrderData._id}`, { technician: rows })
+      .put(`${fieldServiceOrder.api}/${serviceOrderData._id}/material/technician`, { technician: rows })
       .then(() => {
         setIsSubmitting(false);
         fetchData();
@@ -641,6 +642,7 @@ const Technicians = ({
     let value: any = {
       type: type,
       referenceId: serviceOrderData?._id,
+      referenceType: sidebarResource.fieldServiceOrder,
       _id: _id ? [_id] : selectedRecords?.map((r) => r?._id)
     };
     if (values?.notes) value.notes = values?.notes;
@@ -654,7 +656,7 @@ const Technicians = ({
     }
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician/start-end-date`, value)
+      .put(`/technician/start-end-date`, value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

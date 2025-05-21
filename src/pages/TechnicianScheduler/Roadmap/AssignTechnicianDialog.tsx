@@ -22,13 +22,14 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
         technician: technicianData?._id,
         warehouse: ele?.warehouse,
         referenceId: ele?.resourceId,
+        referenceType: selectedResource?.resource,
         estimateStartDate: ele?.service?.estimateStartDate || ele?.estimateStartDate,
         estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
       };
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${selectedResource.api}/technician`, { technician: data, skipDateValidation })
+      .post(`/technician`, { technician: data, skipDateValidation })
       .then(() => {
         handleSucess();
         setIsSubmitting(false);

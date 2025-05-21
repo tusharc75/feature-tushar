@@ -97,6 +97,7 @@ function Roadmap({
     let value: any = {
       type: startEndDateConfermationDialog.type,
       referenceId: startEndDateConfermationDialog.referenceId,
+      referenceType: selectedResource?.resource,
       _id: [startEndDateConfermationDialog._id]
     };
     if (startEndDateConfermationDialog.type !== 'stop') {
@@ -107,7 +108,7 @@ function Roadmap({
     if (values?.notes) value.notes = values?.notes;
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${selectedResource.api}/technician/start-end-date`, value)
+      .put(`/technician/start-end-date`, value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
