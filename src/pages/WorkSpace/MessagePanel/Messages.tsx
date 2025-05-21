@@ -187,7 +187,7 @@ const Messages = ({
         )}
       >
         {messages && !isLoading ? (
-          <ul className="mt-8 list-none">
+          <ul className={cn('mt-8 list-none', threadDialogOpen.open && 'pointer-events-none')}>
             {Object.keys(messages).map((date) => (
               <li key={date} className="mb- list-none">
                 <div className="relative mx-auto my-[20px] h-[1px] w-[calc(100%-30px)] bg-[var(--common-border-color)]">
