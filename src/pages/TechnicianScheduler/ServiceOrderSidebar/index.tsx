@@ -120,7 +120,7 @@ const ServiceOrderSidebarImpl = ({
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?._id }] })
+      .put(`/technician`, { ids: [unAssignTechnicianDialog?.data?._id ] })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();
