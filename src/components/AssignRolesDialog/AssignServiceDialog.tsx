@@ -35,7 +35,8 @@ const AssignServiceDialog = ({
   hideQty = false,
   extraFilterById = null,
   pricingCondition = null,
-  currency = null
+  currency = null,
+  headerLabel = 'Add',
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -303,7 +304,7 @@ const AssignServiceDialog = ({
       aria-labelledby="assign-roles-dialog"
     >
       <CustomDialogHeader
-        title={`Add ${resources?.serviceMaster?.titlePlural}`}
+        title={`${headerLabel} ${resources?.serviceMaster?.titlePlural}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={handleClose}
@@ -319,7 +320,8 @@ const AssignServiceDialog = ({
             loading: isSubmitting,
             iconsEnabled: false,
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
-            textAddShow: true
+            textAddShow: true,
+            customTextAdd: headerLabel
           }}
           addButtonOnclick={() => {
             onSuccess(selectedRecords);
