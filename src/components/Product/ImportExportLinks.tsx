@@ -30,9 +30,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
-      display: 'none'
-    }
   },
   delBtn: {
     color: 'red'
@@ -49,14 +46,14 @@ export default function ImportExportLinks({
   onSuccessfulImport,
   recordsToExport = 0,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => {},
+  onExportToExcelSuccess = () => { },
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
   small = false,
   isCustomImport = false,
-  onSuccessCustomImport = () => {},
+  onSuccessCustomImport = () => { },
   currency = 'USD'
 }) {
   const classes = useStyles();
@@ -182,7 +179,6 @@ export default function ImportExportLinks({
               message: `Found some issue(s) while importing ${module}`
             });
           }
-          // handleExtraClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -284,9 +280,7 @@ export default function ImportExportLinks({
   );
 
   return (
-    <div
-      className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`}
-    >
+    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`}  >
       {!isCustomImport ? (
         <div className={classes.linksContainer}>
           {ImportInput}
@@ -305,7 +299,7 @@ export default function ImportExportLinks({
                 }}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
-                <span>Import from Excel</span>
+                {!isMobile && <span>Import from Excel</span>}
                 <ImportIcon />
               </label>
             </>
@@ -320,8 +314,11 @@ export default function ImportExportLinks({
             }}
             className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
-            Export to Excel
-            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
+            {!isMobile &&
+              <span>
+                Export to Excel{' '}
+                {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+              </span>}
             <ExportIcon />
           </label>
           <label
@@ -334,7 +331,8 @@ export default function ImportExportLinks({
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
-            Download Template
+            {!isMobile &&
+              <span>Download Template</span>}
             <DownloadIcon />
           </label>
           {extraImportExportLinks?.length > 0 && (
@@ -423,12 +421,6 @@ export default function ImportExportLinks({
           Import/Export
         </ThemeButton>
       )}
-      {isMobile && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-          <IoIosArrowDropdown />
-        </IconButton>
-      )}
-
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
