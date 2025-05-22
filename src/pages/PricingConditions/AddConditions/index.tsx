@@ -248,7 +248,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                     }
                   }}
                 >
-                  <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />
+                  {row?.original?.conditionType !== '' && <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />}
                 </IconButton>
               </HtmlTooltip>
             </div>
