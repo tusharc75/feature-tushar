@@ -283,13 +283,21 @@ import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineCont
 import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
 import ResourceDataMapping from 'src/pages/ResourceDataMapping';
-import {useLiveLocationTracking} from './hooks/useLiveLocationTracking';
+import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
+import { useFirebaseNotifications } from 'src/hooks/useFirebaseNotifications';
 
-var notificationInterval: any = null;    
+var notificationInterval: any = null;
 
 function App() {
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/firebase-messaging-sw.js")
+          .then((registration) => {
+          })
+      });
       registerSW();
     }
   }, []);
@@ -306,6 +314,8 @@ function App() {
     state: { user, permissions, resources },
     dispatch
   }: any = useData();
+
+  useFirebaseNotifications(user?.user)
 
   //location tracking
   useLiveLocationTracking(user, isOffline);
@@ -341,7 +351,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
