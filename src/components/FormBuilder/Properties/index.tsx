@@ -127,6 +127,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         if (!values.additionalInfoSection) {
           values.additionalInfoSection = '';
         }
+        if (!values.operationOnLineItems) {
+          values.operationOnLineItems = '';
+        }
         setInitialValues(values);
       }
       return () => setInitialValues(null);
@@ -204,6 +207,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
+            ele.operationOnLineItems = values?.operationOnLineItems || '';
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
