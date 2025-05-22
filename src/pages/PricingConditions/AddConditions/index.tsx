@@ -702,11 +702,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 <thead>
                   <tr>
                     <th className="border border-gray-300 px-4 py-2"></th>
-                    {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
-                      <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                      <th className="whitespace-nowrap border border-gray-300 px-4 py-2">
                         Rate
                       </th>
-                    ))}
                   </tr>
                 </thead>
                 <tbody>
