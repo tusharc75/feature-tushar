@@ -1,13 +1,17 @@
-import { Box, IconButton, MenuItem, TextField } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { Delete } from '@mui/icons-material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
+import { Box, IconButton, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
-import { capitalize, map, orderBy, uniq } from 'lodash';
+import Grid from '@mui/material/Grid2';
+import { capitalize, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { AiOutlineUserAdd } from 'react-icons/ai';
+import { BsCart2 } from 'react-icons/bs';
 import { FiExternalLink } from 'react-icons/fi';
+import { PiBuildingOfficeThin, PiChecksLight, PiFileArchiveLight, PiPlusLight, PiSkipForwardLight } from 'react-icons/pi';
+import { RiFileHistoryLine } from 'react-icons/ri';
 import { useParams } from 'react-router-dom';
 import { AutoCompleteWorkOrder, PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -18,6 +22,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import MenuWithGroupping, { ActionMenuItem } from 'src/components/MenuWithGroupping';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
@@ -108,6 +113,7 @@ const WorkOrder = ({
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -656,14 +662,15 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -1105,236 +1112,23 @@ const WorkOrder = ({
     return data?.some((e) => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e.workOrderStatus));
   };
 
-  const actionButtonMenuItems = () => {
-    return (
-      <>
-        {!resourcePolicy?.hideAddExistingServices && (
-          <MenuItem
-            disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
-            onClick={() => {
-              setAddServicesDialog({ open: true, new: false });
-            }}
-            id="add-existing-services"
-          >
-            Add Existing Services
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideAddNewService && (
-          <MenuItem
-            disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
-            onClick={() => {
-              setAddServicesDialog({ open: true, new: true });
-            }}
-            id="add-new-services"
-          >
-            Add New Service
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideAssignTechnician && (
-          <MenuItem
-            disabled={
-              selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 &&
-                !selectedRecords?.find(
-                  (d) => d.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(d.status)
-                ) &&
-                !isWorkOrderCompleted(selectedRecords)
-                ? false
-                : true
-            }
-            onClick={() => {
-              setUserAssignDialog(true);
-            }}
-            id="assign-technician"
-          >
-            Assign Technician
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideAssignWorkstation && allowedToEdit && permissions?.workStations?.isRead && (
-          <MenuItem
-            disabled={
-              selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 &&
-                !selectedRecords?.find(
-                  (d) => d.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(d.status)
-                ) &&
-                !isWorkOrderCompleted(selectedRecords)
-                ? false
-                : true
-            }
-            onClick={() => {
-              setWorkStationAssignDialog(true);
-            }}
-            id="assign-workstation"
-          >
-            Assign Work Station
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
-          <MenuItem
-            disabled={
-              selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
-                ? false
-                : true
-            }
-            onClick={() => {
-              var ids = [];
-              if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                ids = flattenArray(dataRows)
-                  ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
-                  ?.map((e) => e.materialId);
-              } else {
-                const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                ids = flattenArray(dataRows)
-                  ?.filter((e) => serviceIds?.includes(e?.parentId))
-                  ?.map((e) => e.materialId);
-              }
-              setConsumablesDialog({ open: true, ids: ids, data: null });
-            }}
-            id="add-consumables"
-          >
-            Add Products/Consumables
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideArrangeServices && (
-          <MenuItem
-            onClick={() => {
-              const ids = selectedRecords.filter((s) => s.type === MATERIAL_TYPE.service).map((s) => s.workOrder._id);
-              const uniqueIds = [...new Set(ids)];
-              setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
-            }}
-            disabled={
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords) ? false : true
-            }
-            id="arrange-services"
-          >
-            Arrange Services
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideAutoCompleteWorkOrder && (
-          <MenuItem
-            onClick={() => {
-              setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
-              setCompleteConfirmBox(true);
-            }}
-            disabled={
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
-                ? false
-                : true
-            }
-            id="auto-complete-work-order"
-          >
-            Auto Complete Work Order(s)
-          </MenuItem>
-        )}
-        <MenuItem
-          onClick={() => {
-            setShowDrawingDialog({ open: true, workOrder: selectedRecords[0]?.workOrder?._id });
-          }}
-          id="upload-drawing"
-        >
-          Upload Drawing
-        </MenuItem>
-        {!resourcePolicy?.hideCompleteSkipRevertService && (
-          <MenuItem
-            onClick={() => {
-              setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
-            }}
-            disabled={isDisabledCompleteService()}
-            id="complete-service"
-          >
-            Complete Service
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideCompleteSkipRevertService && (
-          <MenuItem
-            onClick={() => {
-              setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
-            }}
-            disabled={isDisabledCompleteService()}
-            id="skip-service"
-          >
-            Skip Service
-          </MenuItem>
-        )}
-        {!resourcePolicy?.hideCompleteSkipRevertService && (
-          <MenuItem
-            disabled={
-              selectedRecords?.length &&
-                selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
-                !isWorkOrderCompleted(selectedRecords)
-                ? false
-                : true
-            }
-            onClick={() => {
-              setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
-            }}
-            id="revert-service"
-          >
-            Revert Service
-          </MenuItem>
-        )}
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) && (
-            <MenuItem
-              onClick={() => {
-                setShowCloseReopenConfirmation({ open: true, type: 'Close' });
-              }}
-              id="close-work-order"
-            >
-              Close Work Order(s)
-            </MenuItem>
-          )}
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
-          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) && (
-            <MenuItem
-              onClick={() => {
-                setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
-              }}
-              id="reopen-work-order"
-            >
-              Re-Open Work Order(s)
-            </MenuItem>
-          )}
-        <MenuItem
-          onClick={() => {
-            setIsBulkEdit(true);
-            setUpdateDialog({
-              open: true,
-              data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
-            });
-          }}
-          disabled={
-            selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true
-          }
-          id="bulk-edit"
-        >
-          Bulk Edit
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
-            setShowConfirmBox(true);
-          }}
-          disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
-          id="delete"
-        >
-          Delete
-        </MenuItem>
-      </>
-    );
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
   };
 
   return (
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        // addButtonMenuItems
-        // addButtonProps
         isActionButtonVisible={allowedToEdit}
-        actionButtonMenuItems={actionButtonMenuItems()}
         leftSideContents={leftSideContents()}
-        actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+        actionButtonProps={{
+          disabled: selectedRecords?.length === 0,
+          onClick: (e) => {
+            e.preventDefault();
+            setAnchorEl(e.currentTarget);
+          }
+        }}
         hasXpadding
       />
 
@@ -1445,12 +1239,13 @@ const WorkOrder = ({
             <ConfirmationDialog
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
-              message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                ? 'complete'
-                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                  ? 'skip'
-                  : 'revert'
-                } this Service(s)`}
+              message={`Are you sure you want to ${
+                showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+                  ? 'complete'
+                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                    ? 'skip'
+                    : 'revert'
+              } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
               }}
@@ -1508,12 +1303,13 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={`Arrange Services (${selectedRecords
-                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                ?.map((d) => {
-                  return d.serializedAssetDetail.assetNumber;
-                })[0]
-                })`}
+              title={`Arrange Services (${
+                selectedRecords
+                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                  ?.map((d) => {
+                    return d.serializedAssetDetail.assetNumber;
+                  })[0]
+              })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
@@ -1572,6 +1368,275 @@ const WorkOrder = ({
               attachmentType={ATTACHMENT_TYPE.drawing}
             />
           )}
+          <MenuWithGroupping
+            horizontal="left"
+            anchorEl={anchorEl}
+            getItemId={(item) => item.id}
+            keepMounted
+            handleClose={handleCloseMenu}
+            uniqueId="work-order-menu"
+          >
+            {!resourcePolicy?.hideAddExistingServices && (
+              <ActionMenuItem
+                id="add-existing-services"
+                group="Add Services"
+                disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+                onClick={() => {
+                  setAddServicesDialog({ open: true, new: false });
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Existing Services"
+              >
+                <PiPlusLight /> Add Existing Services
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideAddNewService && (
+              <ActionMenuItem
+                id="add-new-services"
+                group="Add Services"
+                disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+                onClick={() => {
+                  setAddServicesDialog({ open: true, new: true });
+                  setAnchorEl(null);
+                }}
+                searchKey="Add New Service"
+              >
+                <PiPlusLight /> Add New Service
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideAssignTechnician && (
+              <ActionMenuItem
+                id="assign-technician"
+                group="Assign"
+                disabled={
+                  selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 &&
+                  !selectedRecords?.find(
+                    (d) =>
+                      d.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(d.status)
+                  ) &&
+                  !isWorkOrderCompleted(selectedRecords)
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setUserAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Technician"
+              >
+                <AiOutlineUserAdd /> Assign Technician
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideAssignWorkstation && allowedToEdit && permissions?.workStations?.isRead && (
+              <ActionMenuItem
+                id="assign-workstation"
+                group="Assign"
+                disabled={
+                  selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 &&
+                  !selectedRecords?.find(
+                    (d) =>
+                      d.type === MATERIAL_TYPE.service && [WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(d.status)
+                  ) &&
+                  !isWorkOrderCompleted(selectedRecords)
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setWorkStationAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Work Station"
+              >
+                <PiBuildingOfficeThin /> Assign Work Station
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
+              <ActionMenuItem
+                id="add-consumables"
+                group="Products"
+                disabled={
+                  selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  var ids = [];
+                  if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
+                    ids = flattenArray(dataRows)
+                      ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
+                      ?.map((e) => e.materialId);
+                  } else {
+                    const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                    ids = flattenArray(dataRows)
+                      ?.filter((e) => serviceIds?.includes(e?.parentId))
+                      ?.map((e) => e.materialId);
+                  }
+                  setConsumablesDialog({ open: true, ids: ids, data: null });
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Products/Consumables"
+              >
+                <BsCart2 /> Add Products/Consumables
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideArrangeServices && (
+              <ActionMenuItem
+                id="arrange-services"
+                group="Services"
+                onClick={() => {
+                  const ids = selectedRecords.filter((s) => s.type === MATERIAL_TYPE.service).map((s) => s.workOrder._id);
+                  const uniqueIds = [...new Set(ids)];
+                  setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
+                  setAnchorEl(null);
+                }}
+                disabled={
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords) ? false : true
+                }
+                searchKey="Arrange Services"
+              >
+                <RiFileHistoryLine /> Arrange Services
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideAutoCompleteWorkOrder && (
+              <ActionMenuItem
+                id="auto-complete-work-order"
+                group="Work Order"
+                onClick={() => {
+                  setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
+                  setCompleteConfirmBox(true);
+                  setAnchorEl(null);
+                }}
+                disabled={
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+                  selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
+                    ? false
+                    : true
+                }
+                searchKey="Auto Complete Work Order"
+              >
+                <PiChecksLight /> Auto Complete Work Order(s)
+              </ActionMenuItem>
+            )}
+            <ActionMenuItem
+              id="upload-drawing"
+              group="Work Order"
+              onClick={() => {
+                setShowDrawingDialog({ open: true, workOrder: selectedRecords[0]?.workOrder?._id });
+                setAnchorEl(null);
+              }}
+              searchKey="Upload Drawing"
+            >
+              <PiFileArchiveLight /> Upload Drawing
+            </ActionMenuItem>
+            {!resourcePolicy?.hideCompleteSkipRevertService && (
+              <ActionMenuItem
+                id="complete-service"
+                group="Service Actions"
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+                  setAnchorEl(null);
+                }}
+                disabled={isDisabledCompleteService()}
+                searchKey="Complete Service"
+              >
+                <PiChecksLight /> Complete Service
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideCompleteSkipRevertService && (
+              <ActionMenuItem
+                id="skip-service"
+                group="Service Actions"
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+                  setAnchorEl(null);
+                }}
+                disabled={isDisabledCompleteService()}
+                searchKey="Skip Service"
+              >
+                <PiSkipForwardLight /> Skip Service
+              </ActionMenuItem>
+            )}
+            {!resourcePolicy?.hideCompleteSkipRevertService && (
+              <ActionMenuItem
+                id="revert-service"
+                group="Service Actions"
+                disabled={
+                  selectedRecords?.length &&
+                  selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
+                  !isWorkOrderCompleted(selectedRecords)
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+                  setAnchorEl(null);
+                }}
+                searchKey="Revert Service"
+              >
+                <RiFileHistoryLine /> Revert Service
+              </ActionMenuItem>
+            )}
+            {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) && (
+                <ActionMenuItem
+                  id="close-work-order"
+                  group="Work Order"
+                  onClick={() => {
+                    setShowCloseReopenConfirmation({ open: true, type: 'Close' });
+                    setAnchorEl(null);
+                  }}
+                  searchKey="Close Work Order"
+                >
+                  <PiFileArchiveLight /> Close Work Order(s)
+                </ActionMenuItem>
+              )}
+            {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
+              selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) && (
+                <ActionMenuItem
+                  id="reopen-work-order"
+                  group="Work Order"
+                  onClick={() => {
+                    setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
+                    setAnchorEl(null);
+                  }}
+                  searchKey="Re-Open Work Order"
+                >
+                  <PiFileArchiveLight /> Re-Open Work Order(s)
+                </ActionMenuItem>
+              )}
+            <ActionMenuItem
+              id="bulk-edit"
+              group="Edit"
+              onClick={() => {
+                setIsBulkEdit(true);
+                setUpdateDialog({
+                  open: true,
+                  data: selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)
+                });
+                setAnchorEl(null);
+              }}
+              disabled={
+                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true
+              }
+              searchKey="Bulk Edit"
+            >
+              <PiPlusLight /> Bulk Edit
+            </ActionMenuItem>
+            <ActionMenuItem
+              id="delete"
+              group="Edit"
+              onClick={() => {
+                setDeleteData(selectedRecords?.filter((e) => e?.canDelete));
+                setShowConfirmBox(true);
+                setAnchorEl(null);
+              }}
+              disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+              searchKey="Delete"
+            >
+              <PiFileArchiveLight /> Delete
+            </ActionMenuItem>
+          </MenuWithGroupping>
         </Grid>
       </Grid>
     </Fragment>

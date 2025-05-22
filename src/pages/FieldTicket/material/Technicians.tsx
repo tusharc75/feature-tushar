@@ -262,7 +262,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${fieldTicket.api}/technician?fieldTicketId=${fieldTicketData?._id}`;
+    let api = `/technician?referenceId=${fieldTicketData?._id}&referenceType=${sidebarResource.fieldTicket}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
@@ -289,7 +289,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${fieldTicket.api}/technician`, { ids: rows })
+      .put(`/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -312,6 +312,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     rows.forEach((d) => {
       const element: any = {};
       element.referenceId = fieldTicketData?._id;
+      element.referenceType = sidebarResource.fieldTicket;
       element.technician = d?._id;
       element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
@@ -321,7 +322,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       technician.push(element);
     });
     axiosInstance()
-      .post(`${fieldTicket.api}/technician`, { technician, skipDateValidation })
+      .post(`/technician`, { technician, skipDateValidation })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -349,6 +350,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       value = {
         type: type,
         referenceId: fieldTicketData?._id,
+        referenceType: sidebarResource.fieldTicket,
         _id: selectedRecords?.map((r) => r?._id)
       };
     }
@@ -362,7 +364,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     }
     setIsSubmitting(true)
     axiosInstance()
-      .put(`${fieldTicket.api}/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
+      .put(`/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
