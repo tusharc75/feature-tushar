@@ -840,7 +840,7 @@ const Consumables = ({
                 </Box>
               )}
             </Grid>
-            <FinalPriceBox resource={sidebarResource.fieldTicket} data={fieldTicketData} />
+            <FinalPriceBox allFields={fieldTicketFields} data={fieldTicketData} />
           </Grid>
         </Box>
       </TabPanel>
