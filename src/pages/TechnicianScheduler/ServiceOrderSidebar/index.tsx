@@ -7,10 +7,11 @@ import { cn } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialogWithDateTime';
+import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { isArray, isObject } from 'lodash';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -47,6 +48,7 @@ const ServiceOrderSidebarImpl = ({
   const [container, setContainer] = useState<HTMLDivElement>(null);
   const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
   const [leftSearchValue] = useRoadMapStore((state) => state.leftSearchValue);
+  const [assignTechnician, setAssignTechnician] = useState({ open: false, type: null });
 
   const fetchData = (selectedResource: TechnicianResource, search?: string, cancelToken?: CancelToken) => {
     dispatch({ type: 'loading', loading: true });
@@ -120,7 +122,7 @@ const ServiceOrderSidebarImpl = ({
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`/technician`, { ids: [unAssignTechnicianDialog?.data?._id ] })
+      .put(`/technician`, { ids: [unAssignTechnicianDialog?.data?._id] })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();
@@ -162,18 +164,34 @@ const ServiceOrderSidebarImpl = ({
           setOpenTechnicianDialog={setOpenTechnicianDialog}
         />
       </div>
-      {assignTechnicianDialog.open && (
+      {assignTechnician.open && (
         <AssignTechnicianDialog
           selectedResource={selectedResource}
           technicianData={assignTechnicianDialog.technicianData}
           selectedServiceOrder={[assignTechnicianDialog.service]}
+          type={assignTechnician.type}
           handleSucess={() => {
             fetchData(selectedResource);
+            setAssignTechnician({ open: false, type: null });
             handleSucess();
           }}
           handleClose={() => {
+            setAssignTechnician({ open: false, type: null });
+          }}
+        />
+      )}
+      {assignTechnicianDialog.open && (
+        <SelectionConfirmationDialog
+          open={assignTechnicianDialog.open}
+          message={`Would you like to assign ${assignTechnicianDialog.service?.serviceName || ''} (${assignTechnicianDialog.service?.fieldTicketNumber || assignTechnicianDialog.service?.rentalJobName || assignTechnicianDialog.service?.fieldServiceOrderNumber}) to ${assignTechnicianDialog.technicianData?.firstName} ${assignTechnicianDialog?.technicianData?.lastName} using ActualDate or EstimateDate?`}
+          onOk={(type) => {
+            setAssignTechnician({ open: true, type: type });
+          }}
+          onClose={() => {
             handleClose();
           }}
+          selection1={'ActualDate'}
+          selection2={'EstimateDate'}
         />
       )}
       {openTechnicianDialog.open && (
