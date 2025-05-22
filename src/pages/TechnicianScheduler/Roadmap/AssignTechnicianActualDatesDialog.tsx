@@ -1,4 +1,4 @@
-import { Box, Dialog, Typography } from '@mui/material';
+import { Dialog, Typography } from '@mui/material';
 import { useContext, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -11,7 +11,8 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import CustomDateTimeRangePicker, { DateTimeRange, DateValidationError } from 'src/components/CustomDateTimeRangePicker';
 import { isMobile, isTablet } from 'react-device-detect';
 
-function AssignTechnicianDialog({ technicianData, selectedResource, selectedServiceOrder, handleClose, handleSucess, type }) {
+function AssignTechnicianActualDatesDialog({ technicianData, selectedResource, selectedServiceOrder, handleClose, handleSucess }) {
+
   const toastConfig = useContext(CustomToastContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, message: '' });
@@ -26,36 +27,20 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
 
   const handleAssign = (skipDateValidation = false) => {
     let data = [];
-    if (type === 'EstimateDate') {
-      data = selectedServiceOrder?.map((ele) => {
-        return {
+    selectedServiceOrder?.map((ele) => {
+      dateTimeRanges?.map((range) => {
+        data.push({
           uniqueId: ele?.service?.uniqueId,
           service: ele?.serviceId,
           technician: technicianData?._id,
           warehouse: ele?.warehouse,
           referenceId: ele?.resourceId,
           referenceType: selectedResource?.resource,
-          estimateStartDate: ele?.service?.estimateStartDate || ele?.estimateStartDate,
-          estimateEndDate: ele?.service?.estimateEndDate || ele?.estimateEndDate
-        };
-      });
-    } else {
-      selectedServiceOrder?.map((ele) => {
-        dateTimeRanges?.map((range) => {
-          data.push({
-            uniqueId: ele?.service?.uniqueId,
-            service: ele?.serviceId,
-            technician: technicianData?._id,
-            warehouse: ele?.warehouse,
-            referenceId: ele?.resourceId,
-            referenceType: selectedResource?.resource,
-            startDate: range?.startDateTime,
-            endDate: range?.endDateTime
-          });
+          startDate: range?.startDateTime,
+          endDate: range?.endDateTime
         });
       });
-    }
-
+    });
     setIsSubmitting(true);
     axiosInstance()
       .post(`/technician`, { technician: data, skipDateValidation })
@@ -86,26 +71,15 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
         }}
       />
       <CustomDialogContent>
-        <>
-          {type === 'EstimateDate' ? (
-            <Box p={2}>
-              <Typography variant="body1" color="textPrimary">
-                Do you want to assign{' '}
-                {`${selectedServiceOrder[0]?.service?.serviceName || ''} (${selectedServiceOrder[0]?.fieldTicketNumber || selectedServiceOrder[0]?.rentalJobName || selectedServiceOrder[0]?.fieldServiceOrderNumber})`}{' '}
-                to {technicianData?.firstName || ''} {technicianData?.lastName || ''}?
-              </Typography>
-            </Box>
-          ) : (
-            <CustomDateTimeRangePicker
-              value={dateTimeRanges}
-              onChange={(value) => setDateTimeRanges(value as DateTimeRange[])}
-              multipleRanges={true}
-              startPlaceholder="Start Date & Time"
-              endPlaceholder="End Date & Time"
-              setValidationErrors={setValidationErrors}
-            />
-          )}
-        </>
+        <Typography>Please enter the actual dates on technician worked</Typography>
+        <CustomDateTimeRangePicker
+          value={dateTimeRanges}
+          onChange={(value) => setDateTimeRanges(value as DateTimeRange[])}
+          multipleRanges={true}
+          startPlaceholder="Start Date & Time"
+          endPlaceholder="End Date & Time"
+          setValidationErrors={setValidationErrors}
+        />
       </CustomDialogContent>
       <CustomDialogFooter>
         <ThemeButton buttonType="transparent" onClick={handleClose}>
@@ -125,7 +99,6 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox.open}
-          // message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
           message={`${showConfirmBox?.message}. Do you still wish to proceed with this assignment?`}
           onClose={() => {
             setShowConfirmBox({ open: false, message: '' });
@@ -139,4 +112,4 @@ function AssignTechnicianDialog({ technicianData, selectedResource, selectedServ
   );
 }
 
-export default AssignTechnicianDialog;
+export default AssignTechnicianActualDatesDialog;
