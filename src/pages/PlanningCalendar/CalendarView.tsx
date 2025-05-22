@@ -3,7 +3,6 @@ import { makeStyles } from '@mui/styles';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
-import { View } from 'src/components/CustomCalendar/types';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -38,7 +37,6 @@ const CalendarView = () => {
   //   estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
   //   estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   // });
-  const [view, setView] = useState<View>('dayGridMonth');
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
   const toastConfig = useContext(CustomToastContext);
 
@@ -112,8 +110,6 @@ const CalendarView = () => {
                 data: arg.event.extendedProps
               });
             }}
-            setView={setView}
-            view={view}
           />
         </div>
       </div>

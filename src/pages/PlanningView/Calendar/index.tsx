@@ -1,29 +1,26 @@
 import { DatesSetArg, EventClickArg, EventDropArg } from '@fullcalendar/core';
 import { EventResizeDoneArg } from '@fullcalendar/interaction';
-import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
-import { Box, IconButton, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { Box, IconButton, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
-import { camelCase, groupBy, isEmpty, orderBy } from 'lodash';
-import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import { camelCase, groupBy, isEmpty } from 'lodash';
+import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FaRegQuestionCircle } from 'react-icons/fa';
 import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import CustomCalendar from 'src/components/CustomCalendar';
-import { View } from 'src/components/CustomCalendar/types';
 import { createFilterSetData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
-import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
@@ -31,7 +28,6 @@ import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
-import { FaRegQuestionCircle } from 'react-icons/fa';
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
   const {
@@ -99,7 +95,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const toastConfig = useContext(CustomToastContext);
   const mobileView = isMobile && !isTablet;
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(mobileView ? 'timeGridDay' : 'dayGridMonth');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -109,6 +104,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
+
+  const prevDateRangeRef = useRef(dateRange);
 
   const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
 
@@ -136,107 +133,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869152396b1',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 100,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869252396b1',
-              fieldName: 'asset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 101,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869352396b1',
-              fieldName: 'service',
-              fieldLabel: resources?.serviceMaster?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serviceMaster,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 102,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869452396b1',
-              fieldName: 'competencies',
-              fieldLabel: resources?.competencies?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.competencies,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 103,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : [])
     ],
     [
@@ -484,9 +481,17 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             if (selectedResource.resource === sidebarResource.serializedAsset) {
               return {
                 id: d._id,
+                _id: d._id,
                 title: d?.quotationNumber || d?.planningNumber || d?.rentalJobName,
-                start: dayjs.utc(d['estimateStartDate'] || d['startDate']).tz().toDate(),
-                end: dayjs.utc(d['estimateEndDate'] || d['endDate']).tz().endOf('day').toDate(),
+                start: dayjs
+                  .utc(d['estimateStartDate'] || d['startDate'])
+                  .tz()
+                  .toDate(),
+                end: dayjs
+                  .utc(d['estimateEndDate'] || d['endDate'])
+                  .tz()
+                  .endOf('day')
+                  .toDate(),
                 allDay: true,
                 referenceType: d.resource,
                 referenceId: d?._id
@@ -519,6 +524,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      _id: d._id,
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'debit',
@@ -543,6 +549,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
+                      _id: d._id,
                       allDay: true,
                       resource: selectedResource.resource,
                       type: 'credit',
@@ -876,12 +883,21 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     const cancelToken = cancelTokenSource.token;
+    const prevDateRange = prevDateRangeRef.current;
+
     if (selectedResource && selectedResource?.resource) {
       if (
         ![sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource) &&
         filteredColumns?.length > 0
       ) {
-        fetchUserFilters();
+        if (
+          dayjs(prevDateRange?.estimateStartDate).isSame(dayjs(dateRange?.estimateStartDate)) &&
+          dayjs(prevDateRange?.estimateEndDate).isSame(dayjs(dateRange?.estimateEndDate))
+        ) {
+          fetchUserFilters();
+        } else {
+          fetchData(cancelToken);
+        }
       } else if (
         [sidebarResource?.employeeMaster, sidebarResource?.product, sidebarResource?.serializedAsset]?.includes(selectedResource?.resource)
       ) {
@@ -890,6 +906,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     } else {
       setEvents([]);
     }
+    prevDateRangeRef.current = dateRange;
+
     return () => {
       cancelTokenSource.cancel('Operation canceled due to new request.');
     };
@@ -899,7 +917,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex flex-wrap items-center gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
+          <div className="flex flex-wrap items-center gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[200px]">
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
@@ -914,7 +932,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             {selectedResource &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
-                  className="mr-2"
                   iconForMobile={<MdFilterList />}
                   onClick={() => {
                     setShowFilters(true);
@@ -945,7 +962,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
                       <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
                     </span>
-                    <HtmlTooltip title={'Warning: Unfulfilled Past Jobs Detected'}>
+                    <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
                       <IconButton
                         size={'small'}
                         onClick={() => {
@@ -988,8 +1005,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 isLoading={isDataFetching}
                 getEventStyle={setEventStyle}
                 // popup={!mobileView}
-                setView={setView}
-                view={view}
+
                 onNavigate={onNavigate}
                 eventClick={dragAndDropOnSelectEvent}
               />
@@ -1003,8 +1019,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 // messages={{
                 //   agenda: 'List'
                 // }}
-                setView={setView}
-                view={view}
+
                 onNavigate={onNavigate}
                 eventClick={handleClick}
               />

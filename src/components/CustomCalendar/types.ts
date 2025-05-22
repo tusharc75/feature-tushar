@@ -1,8 +1,8 @@
 export type Event = {
   id?: string;
   title?: string;
-  start?: Date;
-  end?: Date;
+  start: Date;
+  end: Date;
   customerAccount?: string;
   allDay?: boolean;
   resource?: string;

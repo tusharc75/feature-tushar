@@ -880,6 +880,13 @@ body::-webkit-scrollbar-thumb {
   & div[role='group'] {
     margin-left: 0 !important;
   }
+  .MuiToggleButtonGroup-root {
+    flex-wrap: wrap;
+    gap: 8px;
+    & button {
+      margin-left: 0 !important;
+    }
+  }
 }
 
 .listingHeader {

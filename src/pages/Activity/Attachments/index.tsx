@@ -31,7 +31,7 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
+import { checkSuperAdminAccess, CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
@@ -591,7 +591,7 @@ export default function Attachment() {
           }}
           element={MenuItem}
         >
-          {selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id) ? `Delete Request` : `Delete`}
+          {checkSuperAdminAccess(user, sidebarResource.attachment) ? `Delete` : selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id) ? `Delete Request` : `Delete`}
         </AttachmentDeleteButton>
       </>
     );

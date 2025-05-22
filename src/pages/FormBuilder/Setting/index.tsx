@@ -1,5 +1,6 @@
-import { Dialog } from '@mui/material';
+import { Autocomplete, Box, Checkbox, Dialog, FormControlLabel, TextField } from '@mui/material';
 import { Form, Formik } from 'formik';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -8,7 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { resourcePolicy } from 'src/components/FormBuilder/Tabs/helper';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import EntityResource from 'src/pages/FormBuilder/Setting/EntityResource';
 import Policy from 'src/pages/FormBuilder/Setting/Policy';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -17,9 +18,21 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [initialValues, setInitialValues] = useState({ entityWiseResourceName: false, entityResources: [], policies: [] });
+  const [initialValues, setInitialValues] = useState({
+    entityWiseResourceName: false,
+    entityResources: [],
+    policies: [],
+    collaborateTools: false,
+    collaborateToolsField: ''
+  });
   const [resourceData, setResourceData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fields, setFields] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+    fetchFields()
+  }, [resource]);
 
   const fetchData = async () => {
     axiosInstance()
@@ -32,14 +45,21 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
       });
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [resource]);
+  const fetchFields = async () => {
+    const response = await axiosInstance().get(`/field?resource=${resource}`);
+    setFields(
+      response?.data?.data
+        ? response?.data?.data
+          ?.filter((d) => d?.fieldData?.primaryField)
+          ?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName }))
+        : []
+    );
+  };
 
   useEffect(() => {
     if (resourceData) {
       let currentPolicy = resourceData?.policy || {};
-      let defaultPolicy = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
+      let defaultPolicy: any = resourcePolicy.find((e) => e.resource === resource)?.policy || [];
       setInitialValues({
         ...initialValues,
         entityWiseResourceName: resourceData?.entityResources?.length > 0 ? true : false,
@@ -57,19 +77,25 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
             data: currentPolicy && currentPolicy?.hasOwnProperty(e.fieldName) ? currentPolicy[e.fieldName] : e.defaultValue,
             fields: e?.fields || []
           };
-        })
+        }),
+        collaborateTools: resourceData?.collaborateTools,
+        collaborateToolsField: resourceData?.collaborateToolsField
       });
     }
   }, [resourceData]);
 
   const handleSave = (values) => {
     setIsSubmitting(true);
-    let updatedPolicy = values?.policies?.reduce((acc, { fieldName, data }) => {
-      return { ...acc, [fieldName]: data };
-    }, {});
+    let updatedPolicy = values?.policies?.reduce((acc, { fieldName, data }) => { return { ...acc, [fieldName]: data } }, {});
     let data = {
-      policy: { ...updatedPolicy },
-      entityResources: [...values?.entityResources]
+      policy: {
+        ...updatedPolicy,
+      },
+      entityResources: [...values?.entityResources],
+      otherData: {
+        collaborateTools: values?.collaborateTools,
+        collaborateToolsField: values?.collaborateTools ? values?.collaborateToolsField : ''
+      }
     };
     axiosInstance()
       .put(`/sa-formbuilder/tabs/policy/${resource}`, data)
@@ -99,6 +125,9 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
           errors[`entityResources.${idx}.homePageLabel`] = 'Required';
         }
       });
+    }
+    if (values.collaborateTools && !values?.collaborateToolsField) {
+      errors['collaborateToolsField'] = 'Please Select Workspace Tools Field';
     }
     if (resource === sidebarResource.serializedAsset) {
       const validationFields = initialValues[`policies`]?.[0]?.fields?.filter((e) => e.required);
@@ -148,7 +177,59 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <EntityResource values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} entities={entities} />
+                <EntityResource
+                  values={values}
+                  setFieldValue={setFieldValue}
+                  errors={errors}
+                  touched={touched}
+                  entities={entities} />
+                {!ACTIVITY_RESOURCE?.hasOwnProperty(camelCase(resource)) &&
+                  <Box>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="collaborateTools"
+                          checked={values['collaborateTools']}
+                          onChange={(e) => {
+                            setFieldValue('collaborateTools', e.target.checked);
+                          }}
+                        />
+                      }
+                      label="Workspace Tools"
+                    />
+                    {values['collaborateTools'] && (
+                      <Box>
+                        <Autocomplete
+                          id="collaborateToolsField"
+                          options={fields}
+                          getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                          value={
+                            fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])?.length
+                              ? fields && fields?.filter((data) => data.optionValue === values['collaborateToolsField'])[0]
+                              : ''
+                          }
+                          onChange={(e: any, value) => {
+                            setFieldValue('collaborateToolsField', value && value?.optionValue ? value.optionValue : '');
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              margin="dense"
+                              size="small"
+                              variant="outlined"
+                              label="Workspace Tools Field"
+                              placeholder="Workspace Tools Field"
+                              name="collaborateToolsField"
+                              required
+                              error={touched['collaborateToolsField'] && Boolean(errors['collaborateToolsField'])}
+                              helperText={touched['collaborateToolsField'] && errors['collaborateToolsField']}
+                            />
+                          )}
+                        />
+                      </Box>
+                    )}
+                  </Box>}
                 <Policy
                   values={values}
                   setFieldValue={setFieldValue}

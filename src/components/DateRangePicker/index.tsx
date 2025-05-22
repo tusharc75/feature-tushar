@@ -44,14 +44,20 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
   const open = Boolean(anchorEl);
   const id = open ? 'date-range-popover' : undefined;
 
-  const handleDateChange = useCallback(
-    (date: DateRange, changeToCustom: Boolean = false) => {
-      if (changeToCustom) setTimeFrame(timeframeList[0]);
-      setInternalDate(date);
-      setDate({ from: date.from, to: date.to });
-    },
-    [setDate]
-  );
+  const handleDateChange = useCallback((date: DateRange, changeToCustom: Boolean = false) => {
+    if (changeToCustom) setTimeFrame(timeframeList[0]);
+    setInternalDate(date);
+  }, []);
+
+  const handleApply = () => {
+    const newDate = { from: internalDate.from, to: internalDate.to };
+    if (timeFrame?.label === 'Custom') {
+      newDate['from'] = dayjs(newDate.from).add(1, 'day').toDate();
+      newDate['to'] = dayjs(newDate.to).add(1, 'day').toDate();
+    }
+    setDate(newDate);
+    handleClose();
+  };
 
   const handleTimeframe = (timeFrame: TimeFrameList) => {
     setTimeFrame(timeFrame);
@@ -178,19 +184,29 @@ function DateRangePicker({ className, date, setDate, horizontal = 'center' }: Da
               />
             </Menu>
           </div>
-          <Calendar
-            month={month}
-            showBorder={false}
-            onMonthChange={setMonth}
-            autoFocus
-            mode="range"
-            className="rounded-l-none border-none max-sm:rounded-none"
-            defaultMonth={date?.from}
-            selected={internalDate}
-            disabled={timeFrame.value !== 'custom'}
-            onSelect={(date) => handleDateChange(date, true)}
-            numberOfMonths={2}
-          />
+          <div>
+            <Calendar
+              month={month}
+              showBorder={false}
+              onMonthChange={setMonth}
+              autoFocus
+              mode="range"
+              className="rounded-l-none border-none max-sm:rounded-none"
+              defaultMonth={date?.from}
+              selected={internalDate}
+              disabled={timeFrame.value !== 'custom'}
+              onSelect={(date) => handleDateChange(date, true)}
+              numberOfMonths={2}
+            />
+            <div className="flex justify-end gap-2 border-t p-2">
+              <ThemeButton buttonType="transparent" onClick={handleClose}>
+                Cancel
+              </ThemeButton>
+              <ThemeButton buttonType="theme" onClick={handleApply}>
+                Apply
+              </ThemeButton>
+            </div>
+          </div>
         </div>
       </Popover>
     </div>

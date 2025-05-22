@@ -11,7 +11,10 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
     (timeFrame) => {
       let fromDate: any = '';
       let toDate: any = '';
-      if (timeFrame === '1-month') {
+      if (timeFrame === '1-week') {
+        fromDate = dayjs.tz().subtract(1, 'week').startOf('week').toDate();
+        toDate = dayjs.tz().subtract(1, 'week').endOf('week').toDate();
+      } else if (timeFrame === '1-month') {
         fromDate = dayjs.tz().subtract(1, 'month').toDate();
         toDate = dayjs.tz().toDate();
       } else if (timeFrame === '3-months') {
@@ -23,7 +26,19 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
       } else if (timeFrame === '1-year') {
         fromDate = dayjs.tz().subtract(1, 'year').toDate();
         toDate = dayjs.tz().toDate();
-      } else if (timeFrame === 'current-year') {
+      } else if (timeFrame === 'today') {
+        fromDate = dayjs.tz().startOf('day').toDate();
+        toDate = dayjs.tz().endOf('day').toDate();
+      } else if (timeFrame === 'yesterday') {
+        fromDate = dayjs.tz().subtract(1, 'day').startOf('day').toDate();
+        toDate = dayjs.tz().subtract(1, 'day').endOf('day').toDate();
+      } else if (timeFrame === 'current-week') {
+        fromDate = dayjs.tz().startOf('week').toDate();
+        toDate = dayjs.tz().endOf('week').toDate();
+      } else if (timeFrame === 'current-month') {
+        fromDate = dayjs.tz().startOf('month').toDate();
+        toDate = dayjs.tz().endOf('month').toDate();
+      }  else if (timeFrame === 'current-year') {
         fromDate = dayjs.tz().startOf('year').toDate();
         toDate = dayjs.tz().endOf('year').toDate();
       }
@@ -93,7 +108,12 @@ const DateTime = ({ fieldData, deepFilters, setDeepFilters, required = false, si
               <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
               <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
               <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+              <MenuItem value={'1-week'}>Last 1 Week</MenuItem>
               <MenuItem value={'current-year'}>Current Year</MenuItem>
+              <MenuItem value={'current-month'}>Current Month</MenuItem>
+              <MenuItem value={'current-week'}>Current Week</MenuItem>
+              <MenuItem value={'yesterday'}>Yesterday</MenuItem>
+              <MenuItem value={'today'}>Today</MenuItem>
               <MenuItem value={'custom'}>Custom</MenuItem>
             </Select>
           </FormControl>

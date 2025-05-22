@@ -4,7 +4,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@mui/icons-material/AddAlert';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import SettingIcon from '@mui/icons-material/Settings';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import ManageTabs from 'src/components/FormBuilder/Tabs/ManageTabs';
 import axios, { CancelTokenSource } from 'axios';
@@ -20,7 +19,6 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
-import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
@@ -40,7 +38,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
-  const [openSetting, setOpenSetting] = useState(false);
   const [openAction, setOpenAction] = useState(false);
   const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
@@ -143,16 +140,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
         </ThemeButton>
         {!workflowId && (
           <Box>
-            <HtmlTooltip title={'Resource Setting'}>
-              <IconButton
-                aria-label="Setting"
-                onClick={() => {
-                  setOpenSetting(true);
-                }}
-              >
-                <SettingIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
             <HtmlTooltip title={'Create Resource Actions'}>
               <IconButton
                 aria-label="Actions"
@@ -226,21 +213,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             okBtnLoading={isDeleting}
           />
         )}
-
-        {openSetting && (
-          <Setting
-            onClose={() => {
-              setOpenSetting(false);
-            }}
-            onSuccess={() => {
-              fetchData();
-              setOpenSetting(false);
-            }}
-            resource={resource}
-            resourceData={resourceData}
-          />
-        )}
-
         {openAction && (
           <Actions
             onClose={() => {
@@ -254,7 +226,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             resourceData={resourceData}
           />
         )}
-
         {openUpdateResourceActions && (
           <UpdateResourceActions
             onClose={() => {

@@ -84,7 +84,7 @@ const WorkOrder = ({
   const { id } = useParams();
 
   const {
-    state: { user, permissions }
+    state: { user, permissions, resources }
   } = useData();
 
   const [columns, setColumns] = useState(null);
@@ -484,12 +484,18 @@ const WorkOrder = ({
                   </IconButton>
                 </HtmlTooltip>
               )}
-            <HtmlTooltip title="Delete">
+            <HtmlTooltip
+              title={
+                row?.original?.canDelete && row?.original?.workOrder && row?.original?.type === MATERIAL_TYPE.serializedAsset
+                  ? `You can delete this ${resources?.workOrder?.titleSingular}, to remove the asset from the ${resources?.repairOrder?.titleSingular} or to change the Work Order Number`
+                  : 'Delete'
+              }
+            >
               <span>
                 <IconButton
                   disabled={row?.original?.canDelete ? false : true}
                   size="small"
-                  aria-label="Details"
+                  aria-label="Delete"
                   onClick={() => {
                     setDeleteData([row.original]);
                     setShowConfirmBox(true);
@@ -571,7 +577,7 @@ const WorkOrder = ({
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Deleted Successfully'
+        message: 'The service(s) and the consumables have been successfully deleted.'
       });
     } else {
       if (deleteData?.filter((e: any) => !e?.subRows?.length && e?.serviceStatus !== WORK_ORDER_STATUS.completed)?.length) {
