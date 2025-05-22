@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
-import { MenuItem, Box, IconButton, Menu } from '@mui/material';
+import { MenuItem, Box, IconButton, Menu, Popover } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Add from '@mui/icons-material/Add';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -7,7 +7,7 @@ import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
+import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE, formatAmountWithCurrency } from '../../../constants/helpers';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -15,7 +15,7 @@ import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/compone
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
-import { ExpandMore } from '@mui/icons-material';
+import { ExpandMore, Info } from '@mui/icons-material';
 import { isMobile, isTablet } from 'react-device-detect';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -44,6 +44,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null });
 
   useEffect(() => {
     fetchCondition();
@@ -204,32 +205,53 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       disabled: true,
       Cell: ({ row }) =>
         row?.original?.detail ? (
-          <div className="flex items-center gap-2">
-            <h5
-              className="link text-truncate"
-              onClick={() => {
-                handleOpen(row?.original._id);
-              }}
-            >
-              {row?.original?.detail}
-            </h5>
-            <IconButton
-              size="small"
-              onClick={() => {
-                window.open(
-                  `${row?.original?.materialType === 'Product'
-                    ? routes.productDetail.path
-                    : row?.original?.materialType === 'Service'
-                      ? routes.serviceMasterDetail.path
-                      : row?.original?.materialType === 'Package'
-                        ? routes.packagesDetail.path
-                        : routes?.competenciesDetail.path
-                  }/${row?.original?.materialId}`
-                );
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
+          <div>
+            <div className="flex items-center gap-2">
+              <h5
+                className="link text-truncate"
+                onClick={() => {
+                  handleOpen(row?.original._id);
+                }}
+              >
+                {row?.original?.detail}
+              </h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${
+                      row?.original?.materialType === 'Product'
+                        ? routes.productDetail.path
+                        : row?.original?.materialType === 'Service'
+                          ? routes.serviceMasterDetail.path
+                          : row?.original?.materialType === 'Package'
+                            ? routes.packagesDetail.path
+                            : routes?.competenciesDetail.path
+                    }/${row?.original?.materialId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+            <div>
+              <HtmlTooltip title={'Pricing Information'}>
+                <IconButton
+                  aria-label="info"
+                  size="small"
+                  color="primary"
+                  disabled={false}
+                  onClick={(e) => {
+                    const matchedPricingCondition = condition?.find((ele) => ele._id === row?.original?._id);
+                    if (matchedPricingCondition && matchedPricingCondition?.unit?.length && matchedPricingCondition?.pricingMethod?.length) {
+                      setOpenConditionDetails({ anchorEl: e.currentTarget, materialCondition: matchedPricingCondition });
+                    }
+                  }}
+                >
+                  {row?.original?.pricingMethod !== undefined && <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />}
+                </IconButton>
+              </HtmlTooltip>
+            </div>
           </div>
         ) : (
           <NoDataCell />
@@ -614,6 +636,99 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           onOk={handleDelete}
         />
       )}
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        id={openConditionDetails.materialCondition?.materialId}
+        open={Boolean(openConditionDetails.anchorEl)}
+        anchorEl={openConditionDetails.anchorEl}
+        onClose={() => {
+          setOpenConditionDetails({ anchorEl: null, materialCondition: null });
+        }}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <div className="overflow-auto border-b p-3">
+          {openConditionDetails?.materialCondition?.conditionType?.includes('Rent') && (
+            <div className="mb-4">
+              <h4 className="mb-2 font-semibold text-center">Rent</h4>
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2"></th>
+                    {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
+                      <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                        {method}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
+                        <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                          <p>
+                            {formatAmountWithCurrency(
+                              detailData?.currency,
+                              openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                            )?.fullFormatAmount || ''}
+                          </p>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
+          {openConditionDetails?.materialCondition?.conditionType?.includes('Price') && (
+            <div>
+              <h4 className="mb-2 font-semibold text-center">Sell</h4>
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2"></th>
+                      <th className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                        Rate
+                      </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
+                        <td key={colIndex} className="border border-gray-300 px-4 py-2">
+                          <p>
+                            {formatAmountWithCurrency(
+                              detailData?.currency,
+                              openConditionDetails?.materialCondition[`mrp_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                            )?.fullFormatAmount || ''}
+                          </p>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </Popover>
     </Fragment>
   );
 };
