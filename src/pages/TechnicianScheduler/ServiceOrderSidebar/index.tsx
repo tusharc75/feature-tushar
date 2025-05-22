@@ -3,7 +3,7 @@ import { memo, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import { cn, rentalManagement } from 'src/constants/helpers';
+import { cn } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -97,13 +97,14 @@ const ServiceOrderSidebarImpl = ({
       element.service = resourceData?.service?._id;
       element.warehouse = resourceData?.warehouse;
       element.referenceId = resourceData?.resourceId;
+      element.referenceType = selectedResource?.resource;
       element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
       element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
       technician.push(element);
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${selectedResource.api}/technician`, { technician: technician })
+      .post(`/technician`, { technician: technician })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();
@@ -119,7 +120,7 @@ const ServiceOrderSidebarImpl = ({
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?._id }] })
+      .put(`/technician`, { ids: [unAssignTechnicianDialog?.data?._id ] })
       .then(() => {
         fetchData(selectedResource);
         handleSucess();

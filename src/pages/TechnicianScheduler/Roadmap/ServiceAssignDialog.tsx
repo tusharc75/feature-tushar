@@ -189,13 +189,14 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
       element.service = d?.serviceId;
       element.warehouse = d?.warehouse;
       element.referenceId = d?.resourceId;
+      element.referenceType = selectedResource?.resource;
       element.estimateStartDate = d?.estimateStartDate;
       element.estimateEndDate = d?.estimateEndDate;
       data.push(element);
     });
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${selectedResource.api}/technician`, { technician: data })
+      .post(`/technician`, { technician: data })
       .then(() => {
         handleSucess();
         setIsSubmitting(false);
