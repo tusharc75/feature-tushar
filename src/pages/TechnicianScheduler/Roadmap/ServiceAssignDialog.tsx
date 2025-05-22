@@ -13,7 +13,7 @@ import { CustomDialogTransition, displayDate } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handleSucess, viewType }) => {
+const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewType }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'technician_to_service_dialog';
@@ -26,7 +26,6 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
   const { selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (selectedResource) {
@@ -180,33 +179,6 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
       });
   };
 
-  const handleAssign = () => {
-    const data: any = [];
-    selectedRecords.forEach((d) => {
-      const element: any = {};
-      element.technician = technician?._id;
-      element.uniqueId = d?._id;
-      element.service = d?.serviceId;
-      element.warehouse = d?.warehouse;
-      element.referenceId = d?.resourceId;
-      element.referenceType = selectedResource?.resource;
-      element.estimateStartDate = d?.estimateStartDate;
-      element.estimateEndDate = d?.estimateEndDate;
-      data.push(element);
-    });
-    setIsSubmitting(true);
-    axiosInstance()
-      .post(`/technician`, { technician: data })
-      .then(() => {
-        handleSucess();
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -225,12 +197,11 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, technician, handle
               isActionButtonVisible={false}
               addButtonProps={{
                 iconsEnabled: false,
-                disabled: isSubmitting || selectedRecords?.length === 0,
-                loading: isSubmitting,
+                disabled: selectedRecords?.length === 0,
                 text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : '',
                 customTextAdd: 'Assign'
               }}
-              addButtonOnclick={handleAssign}
+              addButtonOnclick={() => handleAdd(selectedRecords)}
               isAddButtonVisible
             />
             <CustomReactTable
