@@ -33,16 +33,18 @@ function Roadmap({
   selectedResource = null,
   headerSlot = null,
   refreshRoadMap,
-  handleSucess,
   setViewType,
   viewType,
-  refreshAll
+  refreshAll,
+  setAssignTechnicianDialog,
+  activity,
+  fetchRoadmap,
+  assignServiceDialog,
+  setAssignServiceDialog
 }) {
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const [activity, setActivity] = useState(null);
   const [selected, setSelected] = React.useState<string[] | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
   const [startEndDateConfermationDialog, setStartEndDateConfermationDialog] = useState({
     open: false,
     type: null,
@@ -58,14 +60,6 @@ function Roadmap({
   useEffect(() => {
     filter.view === 'Technician View' && fetchRoadmap();
   }, [filter.view, refreshRoadMap, selectedResource]);
-
-  const fetchRoadmap = async () => {
-    await axiosInstance()
-      .get(`/technician-scheduler/get-schedule?resource=${selectedResource.resource}`)
-      .then(({ data: { data } }) => {
-        setActivity(data);
-      });
-  };
 
   const handleSelect = (event: any, data: any, type: 'assign' | 'un-assign' | 'dispatch' | 'return') => {
     if (type === 'assign') {
@@ -194,11 +188,8 @@ function Roadmap({
             setAssignServiceDialog({ open: false, data: null });
           }}
           selectedResource={selectedResource}
-          technician={assignServiceDialog.data}
-          handleSucess={() => {
-            handleSucess();
-            fetchRoadmap();
-            setAssignServiceDialog({ open: false, data: null });
+          handleAdd={(resourceData) => {
+            setAssignTechnicianDialog({ open: true, technicians: [assignServiceDialog.data], services: resourceData });
           }}
           viewType={viewType}
         />
