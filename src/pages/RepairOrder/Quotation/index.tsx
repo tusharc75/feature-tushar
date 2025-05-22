@@ -25,6 +25,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
+  MATERIAL_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
   quotation,
@@ -35,6 +36,7 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import { flattenArray } from 'src/constants/columns';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -78,6 +80,9 @@ const Quotation = ({
   const [currentVersion, setCurrentVersion] = useState(null);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
+  const [quotationFields, setQuotationFields] = useState(null);
+
+
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -155,6 +160,9 @@ const Quotation = ({
       setNextStep(true);
     }
 
+    let { fieldsDataAll } = await fetch_resource_fields(sidebarResource.quotation);
+    setQuotationFields(fieldsDataAll)
+
     var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
@@ -183,7 +191,7 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -211,11 +219,11 @@ const Quotation = ({
             <IconButton
               size="small"
               onClick={() => {
-                if (row.original.type === 'service') {
+                if (row.original.type === MATERIAL_TYPE.service) {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
+                } else if (row.original.type === MATERIAL_TYPE.product) {
                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'serializedAsset') {
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                   window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                 } else {
                   window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -294,6 +302,7 @@ const Quotation = ({
                   }}
                 >
                   <EditIcon
+                    fontSize="small"
                     color={
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationInfo?.versions[tempCurrentVersion]?.status
@@ -370,20 +379,20 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
@@ -395,10 +404,10 @@ const Quotation = ({
       _subRow.subRows = generateNestedData(material, _subRow);
     });
 
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -768,6 +777,7 @@ const Quotation = ({
               setIsInlineEdit(false);
             }
           }}
+          quotationFields={quotationFields}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
           quotationData={quotationData}
