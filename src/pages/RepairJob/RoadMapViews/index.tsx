@@ -165,12 +165,10 @@ const RepairJobViews = (props) => {
                   title={
                     <>
                       <p>
-                        <Typography variant="body2">From:</Typography>
-                        <Typography variant="subtitle2">{item?.pickupFrom}</Typography>
+                        <Typography variant="subtitle2">From - {item?.pickupFrom}</Typography>
                       </p>
                       <p>
-                        <Typography variant="body2">To:</Typography>
-                        <Typography variant="subtitle2">{item?.deliveryTo}</Typography>
+                        <Typography variant="subtitle2">To - {item?.deliveryTo}</Typography>
                       </p>
                     </>
                   }
