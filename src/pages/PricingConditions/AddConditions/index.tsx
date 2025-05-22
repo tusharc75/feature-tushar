@@ -44,7 +44,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, materialCondition: null });
+  const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
 
   useEffect(() => {
     fetchCondition();
@@ -219,14 +219,13 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row?.original?.materialType === 'Product'
-                        ? routes.productDetail.path
-                        : row?.original?.materialType === 'Service'
-                          ? routes.serviceMasterDetail.path
-                          : row?.original?.materialType === 'Package'
-                            ? routes.packagesDetail.path
-                            : routes?.competenciesDetail.path
+                    `${row?.original?.materialType === 'Product'
+                      ? routes.productDetail.path
+                      : row?.original?.materialType === 'Service'
+                        ? routes.serviceMasterDetail.path
+                        : row?.original?.materialType === 'Package'
+                          ? routes.packagesDetail.path
+                          : routes?.competenciesDetail.path
                     }/${row?.original?.materialId}`
                   );
                 }}
@@ -235,22 +234,23 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               </IconButton>
             </div>
             <div>
-              <HtmlTooltip title={'Pricing Information'}>
-                <IconButton
-                  aria-label="info"
-                  size="small"
-                  color="primary"
-                  disabled={false}
-                  onClick={(e) => {
-                    const matchedPricingCondition = condition?.find((ele) => ele._id === row?.original?._id);
-                    if (matchedPricingCondition && matchedPricingCondition?.unit?.length && matchedPricingCondition?.pricingMethod?.length) {
-                      setOpenConditionDetails({ anchorEl: e.currentTarget, materialCondition: matchedPricingCondition });
-                    }
-                  }}
-                >
-                  {row?.original?.pricingMethod !== undefined && <Info fontSize="small" style={{ fontSize: 17, marginLeft: '4px' }} />}
-                </IconButton>
-              </HtmlTooltip>
+              {row?.original?.conditionType &&
+                <HtmlTooltip title={'Pricing Information'}>
+                  <IconButton
+                    aria-label="info"
+                    size="small"
+                    color="primary"
+                    onClick={(e) => {
+                      const data = condition?.find((ele) => ele._id === row?.original?._id);
+                      if (data) {
+                        setOpenConditionDetails({ anchorEl: e.currentTarget, data: data });
+                      }
+                    }}
+                  >
+                    <Info fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
+              }
             </div>
           </div>
         ) : (
@@ -644,11 +644,11 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
           }
         }}
-        id={openConditionDetails.materialCondition?.materialId}
+        id={openConditionDetails.data?.materialId}
         open={Boolean(openConditionDetails.anchorEl)}
         anchorEl={openConditionDetails.anchorEl}
         onClose={() => {
-          setOpenConditionDetails({ anchorEl: null, materialCondition: null });
+          setOpenConditionDetails({ anchorEl: null, data: null });
         }}
         anchorOrigin={{
           vertical: 'top',
@@ -660,14 +660,44 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         }}
       >
         <div className="overflow-auto border-b p-3">
-          {openConditionDetails?.materialCondition?.conditionType?.includes('Rent') && (
-            <div className="mb-4">
-              <h4 className="mb-2 font-semibold text-center">Rent</h4>
+          {openConditionDetails?.data?.conditionType?.includes('Price') && (
+            <div>
+              <h4 className="mb-2 font-semibold">Sell</h4>
               <table className="min-w-full table-auto border-collapse border border-gray-300">
                 <thead>
                   <tr>
                     <th className="border border-gray-300 px-4 py-2"></th>
-                    {openConditionDetails?.materialCondition?.pricingMethod?.map((method, index) => (
+                    <th className="whitespace-nowrap border border-gray-300 px-4 py-2">
+                      Rate
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {openConditionDetails?.data?.unit?.map((unit, rowIndex) => (
+                    <tr key={rowIndex}>
+                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
+                      <td className="border border-gray-300 px-4 py-2">
+                        <p>
+                          {formatAmountWithCurrency(
+                            detailData?.currency,
+                            openConditionDetails?.data[`mrp_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                          )?.fullFormatAmount || ''}
+                        </p>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {openConditionDetails?.data?.conditionType?.includes('Rent') && (
+            <div className="mt-3">
+              <h4 className="mb-2 font-semibold">Rent</h4>
+              <table className="min-w-full table-auto border-collapse border border-gray-300">
+                <thead>
+                  <tr>
+                    <th className="border border-gray-300 px-4 py-2"></th>
+                    {openConditionDetails?.data?.pricingMethod?.map((method, index) => (
                       <th key={index} className="whitespace-nowrap border border-gray-300 px-4 py-2">
                         {method}
                       </th>
@@ -675,48 +705,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
+                  {openConditionDetails?.data?.unit?.map((unit, rowIndex) => (
                     <tr key={rowIndex}>
                       <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
-                      {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
+                      {openConditionDetails?.data?.pricingMethod?.map((method, colIndex) => (
                         <td key={colIndex} className="border border-gray-300 px-4 py-2">
                           <p>
                             {formatAmountWithCurrency(
                               detailData?.currency,
-                              openConditionDetails?.materialCondition[`rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
-                            )?.fullFormatAmount || ''}
-                          </p>
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {openConditionDetails?.materialCondition?.conditionType?.includes('Price') && (
-            <div>
-              <h4 className="mb-2 font-semibold text-center">Sell</h4>
-              <table className="min-w-full table-auto border-collapse border border-gray-300">
-                <thead>
-                  <tr>
-                    <th className="border border-gray-300 px-4 py-2"></th>
-                      <th className="whitespace-nowrap border border-gray-300 px-4 py-2">
-                        Rate
-                      </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {openConditionDetails?.materialCondition?.unit?.map((unit, rowIndex) => (
-                    <tr key={rowIndex}>
-                      <td className="border border-gray-300 px-4 py-2 font-bold">{unit}</td>
-                      {openConditionDetails?.materialCondition?.pricingMethod?.map((method, colIndex) => (
-                        <td key={colIndex} className="border border-gray-300 px-4 py-2">
-                          <p>
-                            {formatAmountWithCurrency(
-                              detailData?.currency,
-                              openConditionDetails?.materialCondition[`mrp_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
+                              openConditionDetails?.data[`rent_${camelCase(method)}_${detailData?.currency?.toLowerCase()}_${unit.toLowerCase()}`]
                             )?.fullFormatAmount || ''}
                           </p>
                         </td>
