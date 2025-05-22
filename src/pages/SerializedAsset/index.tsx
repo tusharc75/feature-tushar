@@ -784,7 +784,7 @@ const SerializedAsset = () => {
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={true}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true, tooltip: "Change Status" }}
+          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonProps={{ disabled: !permissions?.serializedAsset?.isCreate }}
           addButtonOnclick={() => {
