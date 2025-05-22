@@ -1,11 +1,12 @@
 import { Box, IconButton } from '@mui/material';
 import dayjs from 'dayjs';
-import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { dateTimeFormat } from 'src/constants/helpers';
 import { useEffect, useState } from 'react';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import { camelCase } from 'lodash';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 export interface DateTimeRange {
   startDateTime: Date | null;
@@ -20,7 +21,7 @@ export interface DateValidationError {
 
 //Pass value as array of DateTimeRange to allow multiple ranges with multipleRanges prop as true or single DateTimeRange
 interface CustomDateTimeRangePickerProps {
-  value: DateTimeRange[] | DateTimeRange;
+  value: any
   onChange: (value: DateTimeRange[] | DateTimeRange) => void;
   required?: boolean;
   fullWidth?: boolean;
@@ -36,6 +37,7 @@ interface CustomDateTimeRangePickerProps {
 }
 
 const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
+
   const {
     value,
     onChange,
@@ -149,7 +151,8 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
     index: number,
     range: DateTimeRange,
     prevRange: DateTimeRange | null = null,
-    nextRange: DateTimeRange | null = null
+    nextRange: DateTimeRange | null = null,
+    removeRows: any = null
   ) => {
     const startValue = range.startDateTime ? dayjs.tz(new Date(range.startDateTime)) : null;
     const endValue = range.endDateTime ? dayjs.tz(new Date(range.endDateTime)) : null;
@@ -186,7 +189,6 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
           error={startError ? true : false}
           helperText={startError ? startError?.message : ''}
         />
-
         <CustomDateTimePicker
           fullWidth={fullWidth}
           required={true}
@@ -203,28 +205,49 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
           error={endError ? true : false}
           helperText={endError ? endError?.message : ''}
         />
+        <Box pt={2}>
+          <HtmlTooltip title='Remove'>
+            <IconButton
+              size="small"
+              onClick={() => {
+                removeRows(index)
+              }}
+              disabled={index === 0}
+              aria-label="Remove range"
+            >
+              <RemoveIcon fontSize="small" color={index === 0 ? 'disabled' : 'error'} />
+            </IconButton>
+          </HtmlTooltip>
+        </Box>
       </Box>
+
     );
   };
 
+  const removeRows = (index) => {
+    const newData = [
+      ...value.slice(0, index),
+      ...value.slice(index + 1)
+    ]
+    onChange(newData);
+  }
+
   return (
     <Box width={fullWidth ? '100%' : 'auto'}>
+      {Array.isArray(value)
+        ? value?.map((range, index) =>
+          renderDateTimeRange(index, range, index !== 0 ? value[index - 1] : null, index !== value.length - 1 ? value[index + 1] : null, removeRows)
+        )
+        : renderDateTimeRange(0, value)}
       {multipleRanges && Array.isArray(value) && (
-        <Box>
-          <IconButton
-            size="small"
-            onClick={() => {
-              if (value?.length > 1) {
-                onChange(value?.slice(0, -1));
-              }
-            }}
-            disabled={value?.length === 1}
-            aria-label="Remove range"
-          >
-            <RemoveIcon fontSize="small" />
-          </IconButton>
-          <IconButton
-            size="small"
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-end',
+        }}>
+          <ThemeButton
+            buttonType="themeBorder"
             onClick={() => {
               onChange([
                 ...value,
@@ -234,17 +257,12 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
                 }
               ]);
             }}
-            aria-label="Add range"
           >
-            <AddIcon fontSize="small" />
-          </IconButton>
+            Add More Dates
+          </ThemeButton>
         </Box>
       )}
-      {Array.isArray(value)
-        ? value?.map((range, index) =>
-            renderDateTimeRange(index, range, index !== 0 ? value[index - 1] : null, index !== value.length - 1 ? value[index + 1] : null)
-          )
-        : renderDateTimeRange(0, value)}
+
     </Box>
   );
 };
