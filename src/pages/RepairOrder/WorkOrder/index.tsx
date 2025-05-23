@@ -839,6 +839,11 @@ const WorkOrder = ({
         axiosInstance()
           .post(`${repairOrder.api}/${repairOrderData._id}/work-order/create-many`, data)
           .then(({ data }) => {
+            toastConfig.setToastConfig({
+              open: true,
+              message: `Automatic ${resources?.workOrder?.titlePlural} has been successfully generated.`,
+              type: 'success'
+            });
             fetchData();
             fetchRepairOrderData();
           })
