@@ -1,14 +1,17 @@
+import { camelCase } from 'lodash';
 import { useMemo } from 'react';
 import FieldList from 'src/components/FormBuilder/FieldList';
 import { OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 import { formatAmountWithCurrency } from 'src/constants/helpers';
 
 const FinalPriceBox = ({ allFields, data }) => {
-
-
   const fields = useMemo(() => {
-    return allFields?.filter((f) => f?.fieldData?.type === FieldList.PERCENT.type
-      && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems));
+    return allFields?.filter(
+      (f) =>
+        f?.fieldData?.type === FieldList.PERCENT.type &&
+        Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems) &&
+        data[`${camelCase(f?.fieldData?.fieldName)}Amount`]
+    );
   }, [allFields]);
 
   return (
@@ -24,7 +27,7 @@ const FinalPriceBox = ({ allFields, data }) => {
               return (
                 <div className="flex items-center justify-between">
                   <p>{f?.fieldData?.fieldLabel} : </p>
-                  <p>{formatAmountWithCurrency(data?.currency, data[`${f?.fieldData?.fieldName}Amount`] || 0)?.fullFormatAmount || ''}</p>
+                  <p>{formatAmountWithCurrency(data?.currency, data[`${camelCase(f?.fieldData?.fieldName)}Amount`])?.fullFormatAmount || ''}</p>
                 </div>
               );
             })}
