@@ -6,8 +6,15 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { TechnicianAssignProps } from './types';
 
-const TechnicianAssign = ({ resourceData, handleClose, handleSuccess, technicians, resource }: TechnicianAssignProps) => {
-
+const TechnicianAssign = ({
+  resourceData,
+  handleClose,
+  handleSuccess,
+  technicians,
+  resource,
+  allData = null,
+  onlyEstimateDates = false
+}: TechnicianAssignProps) => {
   const [assignDialog, setAssignDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, message: '', dateTimeRanges: null });
@@ -45,6 +52,10 @@ const TechnicianAssign = ({ resourceData, handleClose, handleSuccess, technician
         }
       });
     });
+
+    if (allData?.length > 0) {
+      data = allData?.map(({ referenceNumber, ...rest }) => rest);
+    }
 
     setIsSubmitting(true);
     axiosInstance()
@@ -85,21 +96,31 @@ const TechnicianAssign = ({ resourceData, handleClose, handleSuccess, technician
         />
       )}
 
-      <SelectionConfirmationDialog
-        open={true}
-        message={assignMessage()}
-        onOk={(type) => {
-          if (type === 'Actual Dates') {
-            setAssignDialog(true);
-          } else {
-            handleAssign();
-          }
-        }}
-        onClose={handleClose}
-        selection1={'Actual Dates'}
-        selection2={'Estimate Dates'}
-        okBtnLoading={isSubmitting}
-      />
+      {!onlyEstimateDates ? (
+        <SelectionConfirmationDialog
+          open={true}
+          message={assignMessage()}
+          onOk={(type) => {
+            if (type === 'Actual Dates') {
+              setAssignDialog(true);
+            } else {
+              handleAssign();
+            }
+          }}
+          onClose={handleClose}
+          selection1={'Actual Dates'}
+          selection2={'Estimate Dates'}
+          okBtnLoading={isSubmitting}
+        />
+      ) : (
+        <ConfirmationDialog
+          open={true}
+          message={`Would you like to assign (${allData?.[0]?.referenceNumber}) to Technician(s) on the estimated dates?`}
+          onClose={handleClose}
+          onOk={() => handleAssign()}
+          okBtnLoading={isSubmitting}
+        />
+      )}
       {showConfirmBox?.open && (
         <ConfirmationDialog
           open={showConfirmBox.open}
