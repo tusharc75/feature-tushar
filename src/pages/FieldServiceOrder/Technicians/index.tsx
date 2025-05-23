@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, isObject } from 'lodash';
-import { ReactNode, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -35,9 +35,8 @@ import ConsumablesDialog from './ConsumablesDialog';
 import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { Visibility } from '@mui/icons-material';
-import { RiUserShared2Fill } from 'react-icons/ri';
-import { RiUserReceived2Fill } from 'react-icons/ri';
-import PreviewDownload from 'src/components/PreviewDownload';
+import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 const Technicians = ({
   allowedToEdit,
@@ -51,11 +50,17 @@ const Technicians = ({
 }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [technicianAssign, setTechnicianAssign] = useState({ open: false, technicians: null, data: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -77,7 +82,6 @@ const Technicians = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   useEffect(() => {
     fetchColumns();
@@ -478,48 +482,6 @@ const Technicians = ({
       });
   };
 
-  const handleAssign = (rows, skipDateValidation = false) => {
-    setIsSubmitting(true);
-    const technician: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.technician = d?._id;
-      element.referenceId = serviceOrderData?._id;
-      element.referenceType = sidebarResource.fieldServiceOrder;
-      element.warehouse = serviceOrderData?.warehouse?.optionValue;
-      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
-      element.estimateStartDate = serviceOrderData?.estimateStartDate;
-      element.estimateEndDate = serviceOrderData?.estimateEndDate;
-      technician.push(element);
-    });
-    axiosInstance()
-      .post(`/technician`, { technician, skipDateValidation })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-          handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
-        }
-        setTechnicianDialog(false);
-        fetchData();
-        fetchserviceOrderData();
-        setIsSubmitting(false);
-        setShowConfirmBox({ open: false, rows: [] });
-      })
-      .catch((error) => {
-        if (skipDateValidation) {
-          toastConfig.setToastConfig(error);
-        } else {
-          setShowConfirmBox({ open: true, rows: rows });
-        }
-        setIsSubmitting(false);
-      });
-  };
-
   const handleUpdateTechnician = async (rows: any) => {
     setIsSubmitting(true);
     axiosInstance()
@@ -736,7 +698,21 @@ const Technicians = ({
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
-            handleAssign(data);
+            setTechnicianAssign({
+              open: true,
+              technicians: data?.map((d) => ({ _id: d?._id, name: d?.firstName + ' ' + d?.lastName })),
+              data: [
+                {
+                  resourceId: serviceOrderData?._id,
+                  warehouse: serviceOrderData?.warehouse?.optionValue,
+                  serviceId: selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null,
+                  uniqueId: selectedService?.optionValue !== 'All' ? selectedService?._id : null,
+                  estimateStartDate: serviceOrderData?.estimateStartDate,
+                  estimateEndDate: serviceOrderData?.estimateEndDate,
+                  resourceNumber: serviceOrderData?.fieldServiceOrderNumber
+                }
+              ]
+            });
           }}
           handleClose={() => {
             setTechnicianDialog(false);
@@ -817,15 +793,26 @@ const Technicians = ({
           resource={sidebarResource.fieldServiceOrder}
         />
       )}
-      {showConfirmBox.open && (
-        <ConfirmationDialog
-          open={showConfirmBox.open}
-          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
-          onClose={() => {
-            setShowConfirmBox({ open: false, rows: [] });
+      {technicianAssign.open && (
+        <TechnicianAssign
+          resource={{
+            resource: sidebarResource.fieldServiceOrder,
+            titleSingular: resources?.fieldServiceOrder?.titleSingular,
+            titlePlural: resources?.fieldServiceOrder?.titlePlural
           }}
-          onOk={() => {
-            handleAssign(showConfirmBox.rows, true);
+          technicians={technicianAssign?.technicians}
+          resourceData={technicianAssign?.data}
+          handleSuccess={() => {
+            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+            }
+            setTechnicianDialog(false);
+            fetchData();
+            fetchserviceOrderData();
+            setTechnicianAssign({ open: false, technicians: null, data: null });
+          }}
+          handleClose={() => {
+            setTechnicianAssign({ open: false, technicians: null, data: null });
           }}
         />
       )}
