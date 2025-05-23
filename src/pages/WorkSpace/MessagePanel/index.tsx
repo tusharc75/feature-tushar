@@ -173,11 +173,6 @@ const MessageHeader = ({
             </h5>
             {selectedChannel?.relatedTo?.length > 0 && (
               <>
-                <Chip
-                  label={`${resources[selectedChannel?.relatedTo[0]?.type]?.titleSingular || startCase(selectedChannel?.relatedTo[0]?.type)} `}
-                  size="medium"
-                  color='info'
-                />
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -187,6 +182,11 @@ const MessageHeader = ({
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
+                <Chip
+                  label={`${resources[selectedChannel?.relatedTo[0]?.type]?.titleSingular || startCase(selectedChannel?.relatedTo[0]?.type)} `}
+                  size="medium"
+                  color='info'
+                />
               </>
             )}
             <div className="flex gap-2 p-2">
