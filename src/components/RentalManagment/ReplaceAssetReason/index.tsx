@@ -8,6 +8,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import { Formik } from 'formik';
 import { object, string } from 'yup';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const schema = object().shape({
   reason: string().required('Please enter the reason for replacement').min(3, 'Too Short')
@@ -24,27 +25,13 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
           <Fragment>
             <CustomDialogContent>
               <Box className="my-2">
-                <TextField
-                  variant="outlined"
-                  type="text"
+                <MultiLine
                   label={`Reason For Replacement`}
-                  required={true}
-                  name="reason"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  margin="dense"
-                  size="small"
                   value={values['reason']}
+                  required={true}
                   error={touched['reason'] && Boolean(errors['reason'])}
-                  helperText={touched['reason'] && errors['reason']}
+                  touched={Boolean(touched['reason']) && errors['reason']}
                   onChange={(e) => setFieldValue('reason', e.target.value)}
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto',
-                    },
-                  }}
                 />
               </Box>
             </CustomDialogContent>

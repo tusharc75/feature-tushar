@@ -5,6 +5,7 @@ import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { find, result } from 'lodash';
 import { ClipboardEvent } from 'react';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
+import MultiLine from '../Helpers/FormTypes/MultiLine';
 
 const FormTypes = (props) => {
   const {
@@ -86,28 +87,16 @@ const FormTypes = (props) => {
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
     />
   ) : fieldData?.type === 'multiLine' ? (
-    <TextField
+    <MultiLine
       {...rest}
-      variant="outlined"
-      type="text"
-      multiline
-      name={name}
-      autoComplete="off"
+      label={name}
       required={required}
       disabled={disabled}
-      rows={1}
-      value={values[name]}
-      margin="dense"
-      size="small"
-      error={Boolean(errors[`${values._id}_${name}`])}
-      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      name={name}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
-      sx={{
-        '& .MuiInputBase-root textarea': {
-          resize: 'vertical',
-          overflow: 'auto',
-        },
-      }}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      touched={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
     />
   ) : fieldData?.type === 'dropDown' ? (
     <Autocomplete
@@ -235,7 +224,7 @@ const FormTypes = (props) => {
       slotProps={{
         input: {
           inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+          readOnly: fieldData && fieldData.isUneditable ? true : false
         },
       }}
     />
@@ -263,7 +252,7 @@ const FormTypes = (props) => {
       slotProps={{
         input: {
           inputProps: { min: 0 },
-        readOnly: fieldData && fieldData.isUneditable ? true : false
+          readOnly: fieldData && fieldData.isUneditable ? true : false
         },
       }}
     />

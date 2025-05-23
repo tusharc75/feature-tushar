@@ -9,6 +9,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -153,23 +154,10 @@ const DispatchDialog = ({ handleClose, handleSucess, fleet, job }) => {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <TextField
-                variant="outlined"
-                type="text"
+              <MultiLine
                 label="Comment"
-                multiline
-                fullWidth
-                rows={3}
-                margin="dense"
-                size="small"
                 value={comment}
                 onChange={(e: any) => setComment(e.target.value)}
-                sx={{
-                  '& .MuiInputBase-root textarea': {
-                    resize: 'vertical',
-                    overflow: 'auto',
-                  },
-                }}
               />
             </Grid>
           </Grid>

@@ -68,6 +68,7 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import { flattenArray } from 'src/constants/columns';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -1798,22 +1799,11 @@ const LoadingTicket = ({
               {statusToUpdate.status === 'Repair' ? (
                 <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               ) : (
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label={`Please enter the reason for ${statusToUpdate.status}`}
-                  multiline
-                  fullWidth
-                  rows={4}
                   value={statusToUpdate.message}
-                  variant="outlined"
                   onChange={(e) => {
                     setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
-                  }}
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto'
-                    }
                   }}
                 />
               )}

@@ -1,7 +1,7 @@
 
 import { TextField } from '@mui/material';
 
-function MultiLine({ value, label, required, onChange, name = '', rest = {}, error = false, touched = '', type = 'text' }) {
+function MultiLine({ value, label, required = false, onChange, name = '', rest = {}, error = false, touched = '', type = 'text' }) {
 
   return (
     <TextField

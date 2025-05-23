@@ -25,6 +25,7 @@ import { get_activity_resource } from '../Helpers/utils';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -403,24 +404,10 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       variant="outlined"
                       onChange={(e) => setFieldValue('location', e.target.value.trimStart())}
                     />
-                    <TextField
-                      fullWidth
-                      margin="dense"
-                      type="text"
-                      size="small"
-                      multiline
-                      rows={3}
+                     <MultiLine
                       label="Description"
-                      value={values['description']}
-                      name="description"
-                      variant="outlined"
                       onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
-                      sx={{
-                        '& .MuiInputBase-root textarea': {
-                          resize: 'vertical',
-                          overflow: 'auto',
-                        },
-                      }}
+                      value={values['description']}
                     />
                     {eventId && (
                       <Fragment>
