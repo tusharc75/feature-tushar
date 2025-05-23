@@ -170,6 +170,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       label="Due Date"
                       name="dueDate"
                       fullWidth
+                      size='small'
                       margin="dense"
                       minDate={values.startDate}
                       value={values.dueDate}
