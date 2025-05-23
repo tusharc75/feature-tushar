@@ -12,7 +12,7 @@ export const useLiveLocationTracking = (user: any, isOffline: boolean) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!user || isOffline || !localStorage.getItem('token')) return;
+    if (!user?.user?.employeeMaster?._id || isOffline || !localStorage.getItem('token')) return;
 
     const now = () => new Date().getTime();
 

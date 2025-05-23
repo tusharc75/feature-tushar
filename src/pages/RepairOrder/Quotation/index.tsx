@@ -1,6 +1,7 @@
 import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { capitalize, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -37,6 +38,7 @@ import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/
 import { flattenArray } from 'src/constants/columns';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -79,11 +81,10 @@ const Quotation = ({
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
+  const [pendingManualEntries, setPendingManualEntries] = useState([]);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [quotationFields, setQuotationFields] = useState(null);
-
-
-
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false, parentId: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -191,7 +192,7 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : row.original.type === MATERIAL_TYPE.manualEntry ? 'Manual Entry' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -314,6 +315,22 @@ const Quotation = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {row?.original?.parentId === null && row?.original?.type !== "manualEntry" && (
+              <HtmlTooltip title="Add Manual Entry">
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setRecordToUpdate(null);
+                    setShowCostDialog({ open: true, showSaveAndNext: false, parentId: row?.original?._id });
+                  }}
+                  aria-label="Add Manual Entry"
+                >
+                  <AddCircleOutlineIcon
+                    fontSize="small"
+                    color={'primary'}
+                  />
+                </IconButton>
+              </HtmlTooltip>)}
           </>
         );
       }
@@ -340,7 +357,6 @@ const Quotation = ({
     });
 
     const rows = data.material.filter((e) => e.parentId === null);
-
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -376,7 +392,6 @@ const Quotation = ({
 
   const generateNestedData = (material, parent) => {
     var subRows: any = material?.filter((e) => e.parentId === parent._id);
-
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
@@ -385,7 +400,8 @@ const Quotation = ({
           ? _subRow.productDetail?.productName
           : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.manualEntry
+              ? _subRow?.detail : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
@@ -394,7 +410,8 @@ const Quotation = ({
             ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+              : _subRow.type === MATERIAL_TYPE.manualEntry
+                ? _subRow?.description : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -440,17 +457,66 @@ const Quotation = ({
             const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
             setRecordToUpdate(allSubRowData[subRowIdx + 1]);
-            setIsProductEdit({
-              open: true,
-              isBulkedit: false,
-              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
-            });
+            if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                isBulkedit: false,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: allSubRowData[subRowIdx + 1]?.parentId });
+            } else {
+              setIsProductEdit({
+                open: true,
+                isBulkedit: false,
+                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+              });
+            }
           }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
         fetchData();
         setUpdating(false);
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleSaveCostData = async (rows: any, saveAndNext = false) => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    setUpdating(true);
+    axiosInstance()
+      .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setShowCostDialog({
+              open: true,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false,
+              parentId: dataRows[rowIndex + 1]?.parentId
+            });
+          } else {
+            setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
+        } else {
+          setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+        }
+        fetchData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -484,11 +550,16 @@ const Quotation = ({
           ? true
           : false;
     }
-    setIsProductEdit({
-      open: true,
-      isBulkedit: false,
-      showSaveAndNext: saveAndNext
-    });
+    if (rowData?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, showSaveAndNext: rowData?.index < rows?.length - 1 ? true : false, parentId: rowData?.original?.parentId });
+    } else {
+      setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+      setIsProductEdit({
+        open: true,
+        isBulkedit: false,
+        showSaveAndNext: saveAndNext
+      });
+    }
     setRecordToUpdate(rowData?.original);
   };
 
@@ -508,6 +579,42 @@ const Quotation = ({
         toastConfig.setToastConfig(error);
       });
   };
+
+  const handleAddCost = (rows) => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    const parentId = showCostDialog?.parentId;
+    const data = rows.map((item) => ({ ...item, parentId }));
+    setUpdating(true);
+    axiosInstance()
+      .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: data })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message,
+        });
+        setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+        if (pendingManualEntries?.length > 0) {
+          const nextEntries = pendingManualEntries.slice(1);
+          const hasMore = nextEntries.length > 0;
+          setPendingManualEntries(nextEntries);
+          setRecordToUpdate(null);
+          setShowCostDialog({
+            open: hasMore,
+            showSaveAndNext: hasMore,
+            parentId: hasMore ? nextEntries[0]?._id : null,
+          });
+        } else {
+          setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+        }
+        setUpdating(false);
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+  };
+
 
   const handleSendToCustomer = () => {
     axiosInstance()
@@ -702,6 +809,19 @@ const Quotation = ({
                 >
                   Bulk Edit
                 </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    closeActions();
+                    const selectedRows = selectedRecords.filter((e) => e.parentId === null);
+                    if (selectedRows.length > 0) {
+                      setPendingManualEntries(selectedRows);
+                      setRecordToUpdate(null);
+                      setShowCostDialog({ open: true, showSaveAndNext: selectedRows.length > 1, parentId: selectedRows[0]._id });
+                    }
+                  }}
+                >
+                  Add Manual Entry
+                </MenuItem>
               </Menu>
             </Box>
           )}
@@ -829,6 +949,23 @@ const Quotation = ({
           onClose={() => {
             setShowConfirmationDialog({ open: false, data: {} });
           }}
+        />
+      )}
+      {showCostDialog.open && (
+        <AdditionalCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+            setRecordToUpdate(null);
+            setPendingManualEntries([]);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleSaveCostData}
+          currency={quotationData?.currency}
+          costData={recordToUpdate}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
+          quotationData={quotationData}
+          quotationFields={quotationFields}
         />
       )}
     </Fragment>

@@ -77,7 +77,7 @@ export const Comment = ({ referenceId }) => {
         setComment(data.comment);
         setCurrentUser(data.currentUser);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const postComment = () => {
@@ -93,7 +93,7 @@ export const Comment = ({ referenceId }) => {
         setValue('');
         fetchComment();
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const classes = useStyles();
@@ -138,9 +138,11 @@ export const Comment = ({ referenceId }) => {
               onChange={handleChange}
               variant="outlined"
             />
-            <ThemeButton buttonType="theme" onClick={postComment}>
-              Send
-            </ThemeButton>
+            <Box>
+              <ThemeButton buttonType="theme" onClick={postComment}>
+                Send
+              </ThemeButton>
+            </Box>
           </div>
         </div>
       </Box>
