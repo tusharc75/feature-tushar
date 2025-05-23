@@ -1,9 +1,13 @@
 import { Box } from '@mui/material';
-import routes from '../../Helpers/Routes';
 import { startCase } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
   let filter = originRelatedTo.filter((_relatedTo) => _relatedTo.access === true);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   return filter.length ? (
     <Box>
@@ -14,10 +18,10 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
               <Box className="flex flex-wrap gap-[8px]" key={index}>
                 <p
                   style={{ borderStyle: 'solid' }}
-                  title={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
+                  title={`${resources[_element?.type]?.titleSingular || startCase(_element?.type)} - ${_element.name}`}
                   className="max-w-max truncate rounded-3xl border border-[#B8CCFE] bg-[#F2F6FF] px-[12px] py-[4px] text-[12px] font-semibold text-[#2A3042] dark:bg-[var(--dark-secondary)] dark:text-[var(--dark-secondary-text)] "
                 >
-                  {`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
+                  {`${resources[_element?.type]?.titleSingular || startCase(_element?.type)} - ${_element.name}`}
                 </p>
               </Box>
             )
@@ -30,10 +34,10 @@ export const ListRelatedTo = ({ relatedTo, originRelatedTo }) => {
           <Box className="flex flex-wrap gap-[8px]" key={index}>
             <p
               style={{ borderStyle: 'solid' }}
-              title={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
+              title={`${resources[_element?.type]?.titleSingular || startCase(_element?.type)} - ${_element.name}`}
               className="max-w-max truncate rounded-3xl border border-[#B8CCFE] bg-[#F2F6FF] px-[12px] py-[4px] text-[12px] font-semibold text-[#2A3042] dark:bg-[var(--dark-secondary)] dark:text-[var(--dark-secondary-text)] "
             >
-              {`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
+              {`${resources[_element?.type]?.titleSingular || startCase(_element?.type)} - ${_element.name}`}
             </p>
           </Box>
         ))}
