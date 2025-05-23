@@ -713,7 +713,7 @@ const Productpackage = ({
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
           >
-            {`Add Existing ${resources?.serializedAsset?.titlePlural}`}
+            {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
         )}
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
