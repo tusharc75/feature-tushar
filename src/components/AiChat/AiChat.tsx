@@ -109,7 +109,6 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
         const charsToAdd = Math.min(5, buffer.length);
         const newChars = buffer.substring(0, charsToAdd);
         buffer = buffer.slice(charsToAdd);
-        console.log("Buffer : ---", buffer);
         fullResponse += newChars;
 
         setResponses(prev => {
@@ -123,7 +122,6 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
         });
 
         if (buffer.length > 0) {
-          console.log("Hello sample for checking")
           setTimeout(processBuffer, 5);
         } else {
           isStreaming = false;
@@ -136,18 +134,18 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
 
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
-        
+
         for (const line of lines) {
           const jsonString = line.replace(/^data:\s*/, '');
-        
+
           try {
             const parsedChunk = JSON.parse(jsonString);
             const newContent = parsedChunk.content || '';
-            
+
             if (newContent.length > fullResponse.length) {
               const newText = newContent.slice(fullResponse.length);
               buffer = newText;
-              
+
               if (!isStreaming) {
                 isStreaming = true;
                 processBuffer();
@@ -209,16 +207,16 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
       console.warn('Editor reference not available');
       return;
     }
-    
+
     const editor = editorRef.current;
     editor.focus();
-    
+
     const htmlContent = `
       <div style="white-space: pre-wrap;">
         ${content.replace(/\n/g, '<br>')}
       </div>
     `;
-    
+
     editor.insertContent(htmlContent);
     handleClose();
   };
@@ -245,10 +243,10 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
         <DialogTitle
           style={{ cursor: 'move' }}
           id="draggable-dialog-title"
-          sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
             m: '-10px',
             p: '12px',
             borderBottom: `1px solid ${theme.palette.divider}`,
@@ -322,7 +320,7 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
                         }
                       }}
                     >
-                      <Typography variant="body2" fontWeight={600} sx={{color: theme.palette.grey[600]}}>
+                      <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.grey[600] }}>
                         {chat.prompt}
                       </Typography>
                       <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
@@ -335,7 +333,7 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
                           color="primary"
                           size="small"
                           onClick={() => handleInsert(chat.response)}
-                          sx={{ 
+                          sx={{
                             mr: 1,
                             fontSize: '0.75rem',
                             textTransform: 'none',
@@ -363,8 +361,8 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
             ) : (
               <Box sx={{ p: 1 }}>
                 {responses.length === 0 && (
-                  <Typography variant="body2" color="textSecondary" sx={{ 
-                    textAlign: 'center', 
+                  <Typography variant="body2" color="textSecondary" sx={{
+                    textAlign: 'center',
                     mt: 4,
                     fontFamily: '"Inter", sans-serif',
                     fontSize: '0.875rem',
@@ -388,7 +386,7 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
                       }
                     }}
                   >
-                    <Typography variant="body2" fontWeight={600} sx={{ 
+                    <Typography variant="body2" fontWeight={600} sx={{
                       fontFamily: '"Inter", sans-serif',
                       fontSize: '0.875rem',
                       // color: theme.palette.text.primary,
@@ -397,7 +395,7 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
                     }}>
                       {item.prompt}
                     </Typography>
-                    
+
                     {item.isLoading ? (
                       <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                         <CircularProgress size={24} />
@@ -426,21 +424,21 @@ const AiChatComponent: React.FC<AiChatComponentProps> = ({ editorRef }) => {
                           <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
                         </Box>
 
-                        <Box sx={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          alignItems: 'center', 
+                        <Box sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
                           mt: 2,
                           pt: 1,
                         }}>
-                          <Box sx={{ display: 'flex'}}>
+                          <Box sx={{ display: 'flex' }}>
                             <Button
                               className="insert-btn"
                               variant="outlined"
                               color="primary"
                               size="small"
                               onClick={() => handleInsert(item.content)}
-                              sx={{ 
+                              sx={{
                                 mr: 1,
                                 fontSize: '0.75rem',
                                 textTransform: 'none',
