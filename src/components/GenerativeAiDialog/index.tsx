@@ -46,33 +46,27 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
       const headers: any = {
         'Content-Type': 'application/json',
       };
-
       const token = localStorage.getItem('token');
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-
       const entityId = localStorage.getItem('selectedEntity');
       if (entityId) {
         headers['entity'] = entityId;
       }
-
       const response = await fetch(`${backendApi}/generative-ai/assistant/ask`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ prompt: currentPrompt }),
       });
-
       if (!response.ok || !response.body) {
         throw new Error('Network response was not ok.');
       }
-
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let fullResponse = '';
       let buffer = '';
       let isStreaming = false;
-
       const processBuffer = () => {
         if (buffer.length === 0) {
           isStreaming = false;
@@ -83,7 +77,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
         const newChars = buffer.substring(0, charsToAdd);
         buffer = buffer.slice(charsToAdd);
         fullResponse += newChars;
-
         setResponses(prev => {
           const updated = [...prev];
           updated[updated.length - 1] = {
@@ -93,14 +86,12 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
           };
           return updated;
         });
-
         if (buffer.length > 0) {
           setTimeout(processBuffer, 5);
         } else {
           isStreaming = false;
         }
       };
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -187,12 +178,12 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
       anchorEl={anchorEl}
       onClose={handleClose}
       anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
+        vertical: 'center',
+        horizontal: 'center',
       }}
       transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: 'center',
+        horizontal: 'center',
       }}
     >
       <div className="flex justify-between items-center w-full border-b p-2">
@@ -275,6 +266,9 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
                   <div className="ai-response pt-1">
                     <Markdown remarkPlugins={[remarkGfm]}>{item?.content}</Markdown>
                   </div>
+                  {item?.isLoading && <div className='pt-2'>
+                    <CircularProgress size="12px" /><span className="text-gray-500 pl-2 text-sm">Working on it...</span>
+                  </div>}
                   {!item?.isLoading &&
                     <div className="flex justify-between items-center w-full border-b pb-2 pt-2">
                       <div className="text-left">
