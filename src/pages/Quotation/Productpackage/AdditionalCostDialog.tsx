@@ -64,7 +64,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
         e.option = taxCodeOptions;
       }
     });
-    if (costData) {
+    if (costData !== null) {
       setInitialData({
         fields: poFields,
         values: getObjKeysWithValues(costData, poFields)
