@@ -951,7 +951,9 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           value={values[name]}
           required={required}
-          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
+          onChange={(value) => {
+            handleChange(name, value)
+          }}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
           fromFilter={fromFilter}

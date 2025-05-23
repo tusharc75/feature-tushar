@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { Avatar, Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -14,7 +14,8 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
-import AiChatComponent from 'src/components/AiChat/AiChat';
+import GenerativeAiDialog from 'src/components/GenerativeAiDialog';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -47,6 +48,8 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const [uploadError, setUploadError] = useState(false);
   const [imageDetails, setImageDetails] = useState({ width: 0, height: 0, alt: '' });
   const { setToastConfig } = useContext(CustomToastContext);
+
+  const [generativeAiDialogOpen, setGenerativeAiDialogOpen] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -210,7 +213,12 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           right="10px"
           zIndex={10}
         >
-          <AiChatComponent editorRef={editorRef} />
+          <IconButton
+            size="small"
+            onClick={() => setGenerativeAiDialogOpen(true)}
+          >
+            <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
+          </IconButton>
         </Box>
       </Box>
       <input
@@ -354,6 +362,19 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           </CustomDialogFooter>
         </Dialog>
       ) : null}
+      {generativeAiDialogOpen &&
+        <GenerativeAiDialog
+          handleInsert={(content) => {
+            const editor = editorRef.current;
+            editor.focus();
+            const htmlContent = `<div style="white-space: pre-wrap;">${content.replace(/\n/g, '<br>')}</div>`;
+            editor.insertContent(htmlContent);
+            setGenerativeAiDialogOpen(false)
+          }}
+          handleClose={() => {
+            setGenerativeAiDialogOpen(false)
+          }}
+        />}
     </Box>
   );
 }

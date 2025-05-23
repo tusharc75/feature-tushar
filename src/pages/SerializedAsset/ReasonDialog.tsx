@@ -12,8 +12,8 @@ import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) {
   const [value, setValue] = React.useState('');
 
-  const handleChange = (event) => {
-    setValue(event.target.value.trimStart());
+  const handleChange = (value) => {
+    setValue(value);
   };
 
   return (
