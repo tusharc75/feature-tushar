@@ -14,8 +14,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import EditIcon from '@mui/icons-material/Edit';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
-const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, stepName=null, userId }) => {
+const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, stepName = null, userId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [data, setData] = useState(null);
   const [comment, setComment] = useState('');
@@ -189,21 +190,10 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, ste
         )}
         <Grid container justifyContent="center" alignItems="center" spacing={2}>
           <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              value={comment}
+            <MultiLine
+              label="Comment"
+              value={comment || ''}
               onChange={(e) => setComment(e.target.value)}
-              variant="outlined"
-              placeholder="Comment"
-              label={'Comment'}
-              multiline
-              rows={2}
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto',
-                },
-              }}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>

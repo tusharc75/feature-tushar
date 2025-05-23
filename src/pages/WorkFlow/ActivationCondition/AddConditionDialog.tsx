@@ -11,6 +11,8 @@ import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import { string } from 'prop-types';
 
 const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -198,27 +200,14 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                         )}
                       />
                     ) : (
-                      <TextField
-                        variant="outlined"
-                        type="text"
+                      <MultiLine
                         label="Field Value"
-                        name="fieldValue"
-                        rows={4}
-                        fullWidth
-                        margin="dense"
-                        size="small"
                         value={values?.value}
                         onChange={(e) => {
                           setFieldValue('fieldValue', e.target.value.trimStart());
                         }}
                         error={touched['fieldValue'] && Boolean(errors['fieldValue'])}
-                        helperText={touched['fieldValue'] && errors['fieldValue']}
-                        sx={{
-                          '& .MuiInputBase-root textarea': {
-                            resize: 'vertical',
-                            overflow: 'auto',
-                          },
-                        }}
+                        touched={touched['fieldValue'] && errors['fieldValue'] ? String(errors['fieldValue']) : 'Required Value'}
                       />
                     ))}
                 </Box>
