@@ -619,6 +619,7 @@ const Consumables = ({
       }
       if (!next) {
         fetchData();
+        fetchFieldTicketData();
       }
       if (saveAndNext || next) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);

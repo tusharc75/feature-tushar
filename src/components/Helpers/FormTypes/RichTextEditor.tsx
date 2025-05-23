@@ -14,6 +14,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
+import AiChatComponent from 'src/components/AiChat/AiChat';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -164,43 +165,54 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   return (
     <Box>
       {label}
-      <Editor
-        id={name}
-        onInit={(evt, editor) => (editorRef.current = editor)}
-        initialValue={isUpdate && value}
-        onChange={(content: any) => {
-          setIsUpdate(false);
-          setFieldValue(name, content?.level?.content);
-        }}
-        init={{
-          height: '150px',
-          width: '100%',
-          table_default_attributes: {
-            border: '0'
-          },
-          block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-          font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-          plugins: [
-            'advlist autolink lists link charmap print preview anchor ',
-            ' searchreplace visualblocks code fullscreen  ',
-            'insertdatetime media table paste code wordcount hr'
-          ],
-          menubar: true,
-          toolbar:
-            'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent ',
-          content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
-          setup: (editor) => {
-            editor.ui.registry.addButton('uploadImage', {
-              text: 'Upload Image',
-              onAction: () => setIsUploadImage(true)
-            });
-          },
-          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
-          content_css: themeColor === 'dark' ? 'dark' : 'default'
-        }}
-      />
+      <Box position="relative" width="100%">
+        <Editor
+          ref={editorRef}
+          id={name}
+          onInit={(evt, editor) => (editorRef.current = editor)}
+          initialValue={isUpdate && value}
+          onChange={(content: any) => {
+            setIsUpdate(false);
+            setFieldValue(name, content?.level?.content);
+          }}
+          init={{
+            height: '150px',
+            width: '100%',
+            table_default_attributes: {
+              border: '0'
+            },
+            block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+            font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+            plugins: [
+              'advlist autolink lists link charmap print preview anchor ',
+              ' searchreplace visualblocks code fullscreen  ',
+              'insertdatetime media table paste code wordcount hr'
+            ],
+            menubar: true,
+            toolbar:
+              'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
+              'bold italic backcolor | alignleft aligncenter ' +
+              'alignright alignjustify | bullist numlist outdent indent ',
+            content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
+            setup: (editor) => {
+              editor.ui.registry.addButton('uploadImage', {
+                text: 'Upload Image',
+                onAction: () => setIsUploadImage(true)
+              });
+            },
+            skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+            content_css: themeColor === 'dark' ? 'dark' : 'default'
+          }}
+        />
+        <Box
+          position="absolute"
+          bottom="10px"
+          right="10px"
+          zIndex={10}
+        >
+          <AiChatComponent editorRef={editorRef} />
+        </Box>
+      </Box>
       <input
         id={`file`}
         name={`file`}

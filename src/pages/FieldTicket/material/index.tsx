@@ -233,7 +233,13 @@ const Material = ({
               <>
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title={row.original.type === MATERIAL_TYPE.package ? `Add Existing ${resources?.packages?.titlePlural}` : `Perform ${resources?.serviceMaster?.titlePlural}`}>
+                  <HtmlTooltip
+                    title={
+                      row.original.type === MATERIAL_TYPE.package
+                        ? `Add Existing ${resources?.packages?.titlePlural}`
+                        : `Perform ${resources?.serviceMaster?.titlePlural}`
+                    }
+                  >
                     <IconButton
                       onClick={() => {
                         setMaterialDialog({
@@ -271,45 +277,45 @@ const Material = ({
       },
       ...(serviceFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(serviceFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: serviceFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : [])
     ];
     column = [...column, ...newColumns];
@@ -723,6 +729,7 @@ const Material = ({
       }
       setUpdating(false);
       fetchMaterial();
+      fetchData();
       if (saveAndNext) {
         const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
         if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -852,6 +859,7 @@ const Material = ({
         }
       }
       fetchMaterial();
+      fetchData();
       if (saveAndNext) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
         if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -1014,7 +1022,13 @@ const Material = ({
         {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: MATERIAL_TYPE.serializedAsset, serializedAssetService: true });
+              setMaterialDialog({
+                open: true,
+                type: MATERIAL_TYPE.service,
+                parentId: null,
+                parentType: MATERIAL_TYPE.serializedAsset,
+                serializedAssetService: true
+              });
             }}
           >
             {`Perform ${resources?.serviceMaster?.titlePlural}`}

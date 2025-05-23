@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { isArray, isObject } from 'lodash';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
-import AssignTechnicianDialog from 'src/components/TechnicianAssign';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -136,9 +136,13 @@ const ServiceOrderSidebarImpl = ({
         />
       </div>
       {assignTechnicianDialog.open && (
-        <AssignTechnicianDialog
-          selectedResource={selectedResource}
-          technicians={assignTechnicianDialog?.technicians}
+        <TechnicianAssign
+          resource={{
+            resource: selectedResource?.resource,
+            titleSingular: selectedResource?.titleSingular,
+            titlePlural: selectedResource?.title
+          }}
+          technicians={assignTechnicianDialog?.technicians?.map((d) => ({ _id: d?._id, name: d?.firstName + ' ' + d?.lastName }))}
           resourceData={assignTechnicianDialog?.services}
           handleSuccess={() => {
             fetchData(selectedResource);

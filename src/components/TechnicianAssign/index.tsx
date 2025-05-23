@@ -1,11 +1,12 @@
 import { useCallback, useContext, useState } from 'react';
 import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import AssignTechnicianActualDatesDialog from 'src/components/TechnicianAssign/AssignTechnicianActualDatesDialog';
+import AssignTechnicianActualDatesDialog from './AssignTechnicianActualDatesDialog';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { TechnicianAssignProps } from './types';
 
-const AssignTechnician = ({ resourceData, handleClose, handleSuccess, technicians, selectedResource }) => {
+const TechnicianAssign = ({ resourceData, handleClose, handleSuccess, technicians, resource }: TechnicianAssignProps) => {
 
   const [assignDialog, setAssignDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,24 +21,24 @@ const AssignTechnician = ({ resourceData, handleClose, handleSuccess, technician
         if (dateTimeRanges?.length > 0) {
           dateTimeRanges?.map((range) => {
             data.push({
-              uniqueId: ele?.service?.uniqueId,
+              uniqueId: ele?.uniqueId,
               service: ele?.serviceId,
               technician: technician?._id,
               warehouse: ele?.warehouse,
               referenceId: ele?.resourceId,
-              referenceType: selectedResource?.resource,
+              referenceType: resource?.resource,
               startDate: range?.startDateTime,
               endDate: range?.endDateTime
             });
           });
         } else {
           data.push({
-            uniqueId: ele?.service?.uniqueId,
+            uniqueId: ele?.uniqueId,
             service: ele?.serviceId,
             technician: technician?._id,
             warehouse: ele?.warehouse,
             referenceId: ele?.resourceId,
-            referenceType: selectedResource?.resource,
+            referenceType: resource?.resource,
             estimateStartDate: ele?.estimateStartDate,
             estimateEndDate: ele?.estimateEndDate
           });
@@ -64,10 +65,10 @@ const AssignTechnician = ({ resourceData, handleClose, handleSuccess, technician
   };
 
   const assignMessage = useCallback(() => {
-    const resourceName = resourceData?.length === 1 ? `${selectedResource.titleSingular}-${resourceData[0]?.resourceNumber}` : selectedResource.title;
-    const technicianName = technicians?.length === 1 ? `${technicians[0]?.firstName} ${technicians[0]?.lastName}` : 'Technicians';
+    const resourceName = resourceData?.length === 1 ? `${resource?.titleSingular}-${resourceData[0]?.resourceNumber}` : resource?.titlePlural;
+    const technicianName = technicians?.length === 1 ? `${technicians[0]?.name}` : 'Technicians';
     return `Would you like to assign (${resourceName}) to ${technicianName} on the actual dates or the estimated dates? Please confirm your preference.`;
-  }, [resourceData, technicians, selectedResource]);
+  }, [resourceData, technicians, resource]);
 
   return (
     <>
@@ -116,4 +117,4 @@ const AssignTechnician = ({ resourceData, handleClose, handleSuccess, technician
   );
 };
 
-export default AssignTechnician;
+export default TechnicianAssign;
