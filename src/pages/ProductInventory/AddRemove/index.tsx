@@ -22,6 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, storageLocation = null }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -462,27 +463,13 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                     ) : null}
                   </Box>
                   <Box m={1}>
-                    <TextField
-                      margin="dense"
-                      size="small"
-                      type="text"
+                    <MultiLine
                       label="Comment"
-                      name="comment"
-                      fullWidth
-                      multiline
-                      rows={2}
-                      variant="outlined"
                       value={values['comment']}
                       error={touched['comment'] && Boolean(errors['comment'])}
-                      helperText={touched['comment'] && errors['comment']}
+                      touched={touched['comment'] && errors['comment'] ? String(errors['comment']) : 'Comment is required'}
                       onChange={(e) => {
                         setFieldValue('comment', e.target.value);
-                      }}
-                      sx={{
-                        '& .MuiInputBase-root textarea': {
-                          resize: 'vertical',
-                          overflow: 'auto',
-                        },
                       }}
                     />
                   </Box>

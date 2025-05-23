@@ -4,6 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { useEffect, useState } from 'react';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import MultiLine from '../Helpers/FormTypes/MultiLine';
 
 const FormTypes = (props) => {
   const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
@@ -39,27 +40,14 @@ const FormTypes = (props) => {
       {...others}
     />
   ) : fieldData?.type === 'multiLine' ? (
-    <TextField
-      style={{ paddingRight: 1 }}
-      variant="outlined"
-      type="text"
-      multiline
+    <MultiLine
       label={fieldData?.label}
       name={`${fieldData?.fieldName}`}
-      required={fieldData?.required}
-      rows={3}
-      value={values[fieldData?.fieldName]}
-      margin="dense"
-      size="small"
-      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
-      helperText={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
       onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
-      sx={{
-        '& .MuiInputBase-root textarea': {
-          resize: 'vertical',
-          overflow: 'auto',
-        },
-      }}
+      value={values[fieldData?.fieldName]}
+      error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
+      touched={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}
+      required={fieldData?.required}
       {...others}
     />
   ) : fieldData?.type === 'percent' ? (
