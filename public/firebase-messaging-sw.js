@@ -16,14 +16,7 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(payload => {
-  const title   = payload?.notification?.title ?? 'New message';
-  const options = {
-    body : payload?.notification?.body  ?? 'You have a notification.',
-    icon : payload?.notification?.icon  ?? '/logo-24x24.png',
-    data : payload?.data                ?? {},                 // pass custom data
-    badge: '/logo-24x24.png'                                   
-  };
-
-  // Show notification System Notification
-  self.registration.showNotification(title, options);
+  // Firebase automatically displays notifications sent via the 'notification' key from the backend.
+  // If you need to customize the notification UI or handle data-only messages,
+  // you can manually display notifications using self.registration.showNotification().
 });
