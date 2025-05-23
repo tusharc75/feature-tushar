@@ -155,7 +155,7 @@ export const PreviewFields = ({
             }}
             id="controllable-states-demo"
             options={views}
-            renderInput={(params) => <TextField {...params} fullWidth label={`Select View ${type}`} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} fullWidth label={`Select ${type} View`} variant="outlined" />}
           />
         </Box>
         <Box display="flex" justifyContent="space-between" alignItems="center">
