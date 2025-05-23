@@ -581,7 +581,6 @@ const Quotation = ({
   };
 
   const handleAddCost = (rows) => {
-    console.log(pendingManualEntries);
     const versionId = quotationData?.versions[currentVersion]?._id;
     const parentId = showCostDialog?.parentId;
     const data = rows.map((item) => ({ ...item, parentId }));
@@ -599,7 +598,7 @@ const Quotation = ({
           const nextEntries = pendingManualEntries.slice(1);
           const hasMore = nextEntries.length > 0;
           setPendingManualEntries(nextEntries);
-          setRecordToUpdate(null); 
+          setRecordToUpdate(null);
           setShowCostDialog({
             open: hasMore,
             showSaveAndNext: hasMore,

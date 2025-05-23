@@ -520,13 +520,13 @@ const Details = (props: DetailProps) => {
     const generateFormDataWithFollowUps = () => {
       if (formsData.length === 0) return [];
       const newFormData = [...formsData];
-      if (!taskData || taskData?.length === 0) return newFormData;
-      formsData?.forEach((ele) => {
+      newFormData?.forEach((ele) => {
         ele.followUpData = [];
         ele?.sectionFields?.forEach((e) => {
           e.followUpData = [];
         });
       });
+      if (!taskData || taskData?.length === 0) return newFormData;
       taskData?.forEach((task, i) => {
         const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
         const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
@@ -647,6 +647,7 @@ const Details = (props: DetailProps) => {
                                     data={field.followUpData}
                                     columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
                                     setOpenTask={setOpenTask}
+                                    handleRefresh={fetchTaskData}
                                   />
                                 )}
                               </div>
