@@ -35,7 +35,7 @@ function AssignTechnicianActualDatesDialog({ handleAssign, handleClose, resource
         }}
       />
       <CustomDialogContent>
-        <Typography>Please enter the actual dates on technician(s) worked</Typography>
+        <Typography>{`Please enter the actual dates on technician(s) worked`}</Typography>
         <CustomDateTimeRangePicker
           value={dateTimeRanges}
           onChange={(value) => setDateTimeRanges(value as DateTimeRange[])}

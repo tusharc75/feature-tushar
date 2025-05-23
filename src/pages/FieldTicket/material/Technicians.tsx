@@ -12,7 +12,7 @@ import CustomReactTable, { AccessorFunction, useTableReducer } from 'src/compone
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { displayDateTime, fieldTicket, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDateTime, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
@@ -21,16 +21,21 @@ import StartStopLogsDialog, { formatDurationInHrs } from './StartStopLogsDialog'
 import StartStopDateDialog from './StartStopDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
-
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Technicians`;
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [technicianAssign, setTechnicianAssign] = useState({ open: false, technicians: null, data: null });
   const [startEndDateConfermationDialog, setStartEndDateConfermationDialog] = useState({
     open: false,
     type: null,
@@ -41,7 +46,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [viewStartStopLog, setViewStartStopLog] = useState({ open: false, technicianId: null });
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   const {
     state: { permissions }
@@ -66,7 +70,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         }
       ]
     });
-    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
+    const technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || [];
     const column: any = [
       {
         accessor: 'index',
@@ -128,40 +132,48 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
-        accessor: 'competencyType',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencyType',
-              lookupResource: sidebarResource.competencyType
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencyType')
-      }] : []),
-      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
-        accessor: 'competencies',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencies',
-              lookupResource: sidebarResource.competencies
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencies')
-      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
+        ? [
+            {
+              accessor: 'competencyType',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
+        : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies')
+        ? [
+            {
+              accessor: 'competencies',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
+        : []),
       {
         accessor: 'startDate',
         Header: 'Start Date',
@@ -266,21 +278,23 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
-    axiosInstance().get(api).then(({ data: { data } }) => {
-      let rows = data?.technician?.map((u, i) => {
-        let res: any = {
-          ...prepareDataForGrid(u)
-        };
-        res.index = i + 1;
-        res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
-        res.technicianId = u?.technician['_id'];
-        res.competencyType = u?.technician?.competencyType;
-        res.competencies = u?.technician?.competencies;
-        return res;
-      });
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      dispatch({ type: 'loading', loading: false });
-    })
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data } }) => {
+        let rows = data?.technician?.map((u, i) => {
+          let res: any = {
+            ...prepareDataForGrid(u)
+          };
+          res.index = i + 1;
+          res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
+          res.technicianId = u?.technician['_id'];
+          res.competencyType = u?.technician?.competencyType;
+          res.competencies = u?.technician?.competencies;
+          return res;
+        });
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'loading', loading: false });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -307,41 +321,6 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       });
   };
 
-  const handleAssign = (rows, skipDateValidation = false) => {
-    const technician: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.referenceId = fieldTicketData?._id;
-      element.referenceType = sidebarResource.fieldTicket;
-      element.technician = d?._id;
-      element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;;
-      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.warehouse = fieldTicketData?.warehouse?.optionValue;
-      element.estimateStartDate = fieldTicketData?.estimateStartDate;
-      element.estimateEndDate = fieldTicketData?.estimateEndDate;
-      technician.push(element);
-    });
-    axiosInstance()
-      .post(`/technician`, { technician, skipDateValidation })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setTechnicianDialog(false);
-        setShowConfirmBox({ open: false, rows: [] })
-        fetchData();
-      }).catch((error) => {
-        if (skipDateValidation) {
-          toastConfig.setToastConfig(error);
-        }
-        else {
-          setShowConfirmBox({ open: true, rows: rows })
-        }
-      });
-  };
-
   const handleUpdateStartEndDate = (values, type) => {
     let value: any;
     if (type === 'updateLog') {
@@ -362,7 +341,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       value.endDate = values?.endDate;
       if (values?.notes) value.notes = values?.notes;
     }
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .put(`/technician/${type === 'updateLog' ? 'update-log' : 'start-end-date'}`, value)
       .then(({ data }) => {
@@ -372,11 +351,11 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           message: data?.message
         });
         setStartEndDateConfermationDialog({ open: false, type: null, minDateTime: null, data: null, notes: '' });
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         fetchData();
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -474,9 +453,9 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{
-              disabled: !Boolean(selectedRecords?.length),
+              disabled: !Boolean(selectedRecords?.length)
             }}
-            addButtonText='Assign'
+            addButtonText="Assign"
             hasXpadding
           />
         )}
@@ -506,7 +485,21 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
-            handleAssign(data);
+            setTechnicianAssign({
+              open: true,
+              technicians: data?.map((d) => ({ _id: d?._id, name: d?.firstName + ' ' + d?.lastName })),
+              data: [
+                {
+                  resourceId: fieldTicketData?._id,
+                  warehouse: fieldTicketData?.warehouse?.optionValue,
+                  serviceId: selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null,
+                  uniqueId: selectedService?.optionValue !== 'All' ? selectedService?._id : null,
+                  estimateStartDate: fieldTicketData?.estimateStartDate,
+                  estimateEndDate: fieldTicketData?.estimateEndDate,
+                  resourceNumber: fieldTicketData?.fieldTicketNumber
+                }
+              ]
+            });
           }}
           handleClose={() => {
             setTechnicianDialog(false);
@@ -559,15 +552,22 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
         />
       )}
 
-      {showConfirmBox.open && (
-        <ConfirmationDialog
-          open={showConfirmBox.open}
-          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
-          onClose={() => {
-            setShowConfirmBox({ open: false, rows: [] });
+      {technicianAssign.open && (
+        <TechnicianAssign
+          resource={{
+            resource: sidebarResource.fieldTicket,
+            titleSingular: resources?.fieldTicket?.titleSingular,
+            titlePlural: resources?.fieldTicket?.titlePlural
           }}
-          onOk={() => {
-            handleAssign(showConfirmBox.rows, true)
+          technicians={technicianAssign?.technicians}
+          resourceData={technicianAssign?.data}
+          handleSuccess={() => {
+            setTechnicianDialog(false);
+            setTechnicianAssign({ open: false, technicians: null, data: null });
+            fetchData();
+          }}
+          handleClose={() => {
+            setTechnicianAssign({ open: false, technicians: null, data: null });
           }}
         />
       )}
