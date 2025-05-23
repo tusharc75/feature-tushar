@@ -1,5 +1,4 @@
 import React from 'react';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
 import { CustomDialogTransition, ASSET_STATUS } from '../../constants/helpers';
@@ -8,6 +7,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) {
   const [value, setValue] = React.useState('');
@@ -37,24 +37,11 @@ export default function ReasonDialog({ onClose, status, onAddReason, ...rest }) 
           <Box pt={3} pb={3}>
             <Grid container spacing={3}>
               <Grid size={{ xs: 12, sm: 12, md: 12 }}>
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label={status === ASSET_STATUS.scrap ? 'Scrapping Reason' : status === ASSET_STATUS.lost ? 'Lost Reason' : 'Comment'}
-                  placeholder={status === ASSET_STATUS.scrap ? 'Scrapping Reason' : status === ASSET_STATUS.lost ? 'Lost Reason' : 'Comment'}
-                  fullWidth
-                  value={value}
-                  required
                   onChange={handleChange}
-                  variant="outlined"
-                  multiline={true}
-                  rows={3}
-                  size="small"
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto',
-                    },
-                  }}
+                  value={value}
+                  required={true}
                 />
               </Grid>
             </Grid>
