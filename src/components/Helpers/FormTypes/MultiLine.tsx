@@ -7,6 +7,7 @@ import { useState } from 'react';
 function MultiLine({ value, label, required, onChange, name = '', rest = {}, error = false, touched = '', type = 'text' }) {
 
   const [generativeAiDialogOpen, setGenerativeAiDialogOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   return (
     <Box sx={{ position: 'relative', width: '100%' }}>
@@ -41,7 +42,10 @@ function MultiLine({ value, label, required, onChange, name = '', rest = {}, err
           right: 8,
           zIndex: 1,
         }}
-        onClick={() => setGenerativeAiDialogOpen(true)}
+        onClick={(event) => {
+          setAnchorEl(event.currentTarget);
+          setGenerativeAiDialogOpen(true)
+        }}
       >
         <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
       </IconButton>
@@ -49,13 +53,17 @@ function MultiLine({ value, label, required, onChange, name = '', rest = {}, err
         <GenerativeAiDialog
           handleInsert={(content) => {
             onChange(content.trimStart())
+            setAnchorEl(null);
             setGenerativeAiDialogOpen(false)
           }}
           handleClose={() => {
+            setAnchorEl(null);
             setGenerativeAiDialogOpen(false)
           }}
-        />}
-    </Box>
+          anchorEl={anchorEl}
+        />
+      }
+    </Box >
   );
 }
 

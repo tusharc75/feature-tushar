@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, IconButton, Avatar,
-  Typography, Box, TextField, Tooltip, useTheme, Paper, Button, CircularProgress
+  IconButton, Avatar,
+  Typography, Box, TextField, useTheme, CircularProgress,
+  Popover,
 } from '@mui/material';
 import {
   ContentCopy as CopyIcon,
@@ -9,13 +10,16 @@ import {
   History as HistoryIcon
 } from '@mui/icons-material';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
-import Draggable from 'react-draggable';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
 import remarkGfm from 'remark-gfm';
 import Markdown from 'react-markdown';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CloseIcon from '@mui/icons-material/Close';
+import Draggable from 'react-draggable';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose }: any) => {
+const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl }: any) => {
   const theme = useTheme();
   const [prompt, setPrompt] = useState('');
   const [responses, setResponses] = useState<any[]>([]);
@@ -30,25 +34,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose }: any) =
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [responses]);
 
-  const PaperComponent = useMemo(() => (props: any) => (
-    <Draggable
-      handle="#draggable-dialog-title"
-      cancel={'[class*="MuiDialogContent-root"]'}
-      bounds="parent"
-    >
-      <Paper {...props} sx={{
-        width: '450px',
-        height: '600px',
-        borderRadius: '8px',
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: '0px 8px 28px rgba(0, 0, 0, 0.28)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        border: `1px solid ${theme.palette.divider}`,
-      }} />
-    </Draggable>
-  ), [theme]);
 
   const handleSubmit = async (customPrompt: string | null = null) => {
     const currentPrompt = customPrompt || prompt;
@@ -182,324 +167,216 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose }: any) =
 
   const showSubmitButton = isInputFocused || prompt.trim().length > 0;
 
-  return (<Dialog
-    open={true}
-    onClose={handleClose}
-    PaperComponent={PaperComponent}
-    aria-labelledby="draggable-dialog-title"
-    maxWidth={false}
+  return (<Draggable
+    handle="#draggable-paper"
+    cancel={'[class*="MuiDialogContent-root"]'}
   >
-    <DialogTitle
-      style={{ cursor: 'move' }}
-      id="draggable-dialog-title"
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        m: '-10px',
-        p: '12px',
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-        backgroundColor: theme.palette.background.paper,
-        position: 'relative',
-        zIndex: 1,
+    <Popover
+      slotProps={{
+        paper: {
+          sx: {
+            minWidth: 400,
+            minHeight: 500,
+            maxWidth: 400,
+            maxHeight: 500,
+          }
+        },
+      }}
+      id="draggable-paper"
+      open={true}
+      anchorEl={anchorEl}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
       }}
     >
-      <Box display="flex" alignItems="center">
-        <Avatar src={genieImage} sx={{ width: 30, height: 30, ml: 1 }} />
-      </Box>
-      <Box>
-        <Tooltip title={showHistory ? "Hide History" : "Show History"}>
-          <IconButton
-            onClick={() => {
-              if (!showHistory) {
-                fetchChatHistory();
-              } else {
-                setShowHistory(false);
-              }
-            }}
-            sx={{ mr: 1 }}
-          >
-            <HistoryIcon color={showHistory ? "primary" : "inherit"} />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Close">
-          <IconButton onClick={handleClose}>×</IconButton>
-        </Tooltip>
-      </Box>
-    </DialogTitle>
-    <DialogContent
-      sx={{
-        p: 0,
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        backgroundColor: theme.palette.background.default,
-      }}>
-      <Box sx={{
-        flex: 1,
-        overflowY: 'auto',
-        p: 2,
-        '&::-webkit-scrollbar': {
-          width: '6px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: theme.palette.action.disabled,
-          borderRadius: '3px',
-        },
-      }}>
+      <div className="flex justify-between items-center w-full border-b p-2">
+        <div className="text-left">
+          <Avatar src={genieImage} sx={{ width: 30, height: 30 }} />
+        </div>
+        <div className="text-right">
+          <HtmlTooltip title={showHistory ? "Hide History" : "Show History"}>
+            <IconButton
+              onClick={() => {
+                if (!showHistory) {
+                  fetchChatHistory();
+                } else {
+                  setShowHistory(false);
+                }
+              }}
+              sx={{ mr: 1 }}
+            >
+              <HistoryIcon fontSize='small' color={"primary"} />
+            </IconButton>
+          </HtmlTooltip>
+          <HtmlTooltip title="Close">
+            <IconButton onClick={handleClose}>
+              <CloseIcon fontSize='small' color={"primary"} />
+            </IconButton>
+          </HtmlTooltip>
+        </div>
+      </div>
+      <Box sx={{ p: 2 }}>
         {showHistory ? (
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 2, color: theme.palette.text.primary }}>Chat History</Typography>
-            {chatHistory.length > 0 ? (
-              chatHistory.map((chat: any, index: number) => (
-                <Box
-                  key={index}
-                  sx={{
-                    mb: 2,
-                    p: 2,
-                    backgroundColor: theme.palette.background.paper,
-                    borderBottom: `1px solid ${theme.palette.divider}`,
-                    position: 'relative',
-                    '&:hover .insert-btn': {
-                      color: 'white',
-                      borderColor: 'text.secondary',
-                      backgroundColor: 'text.secondary',
-                    }
-                  }}
-                >
-                  <Typography variant="body2" fontWeight={600} sx={{ color: theme.palette.grey[600] }}>
-                    {chat.prompt}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
-                    {chat.response}
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Button
-                      className="insert-btn"
-                      variant="outlined"
-                      color="primary"
-                      size="small"
-                      onClick={() => handleInsert(chat.response)}
-                      sx={{
-                        mr: 1,
-                        fontSize: '0.75rem',
-                        textTransform: 'none',
-                        padding: '4px 8px'
-                      }}
+            {chatHistory.length > 0 ? (chatHistory?.map((item: any, index: number) => (
+              <div key={index} className='pb-2'>
+                <p className="text-gray-500">
+                  {item?.prompt}
+                </p>
+                <div className="ai-response pt-1">
+                  <Markdown remarkPlugins={[remarkGfm]}>{item?.response}</Markdown>
+                </div>
+                <div className="flex justify-between items-center w-full border-b pb-2 pt-2">
+                  <div className="text-left">
+                    <ThemeButton
+                      buttonType='themeBorder'
+                      onClick={() => handleInsert(item?.response)}
                     >
                       Insert
-                    </Button>
-                    <Tooltip title="Copy">
+                    </ThemeButton>
+                  </div>
+                  <div className="text-right">
+                    <HtmlTooltip title='Copy'>
                       <IconButton
-                        onClick={() => copyToClipboard(chat.response)}
+                        onClick={() => copyToClipboard(item?.response)}
                         size="small"
-                        sx={{ color: theme.palette.text.secondary }}
                       >
-                        <CopyIcon fontSize="inherit" sx={{ fontSize: '0.9rem' }} />
+                        <CopyIcon fontSize="small" color='primary' />
                       </IconButton>
-                    </Tooltip>
-                  </Box>
-                </Box>
-              ))
+                    </HtmlTooltip>
+                  </div>
+                </div>
+              </div>
+            ))
             ) : (
               <Typography variant="body2" color="textSecondary">No chat history available</Typography>
             )}
           </Box>
         ) : (
-          <Box sx={{ p: 1 }}>
-            {responses.length === 0 && (
-              <Typography variant="body2" color="textSecondary" sx={{
-                textAlign: 'center',
-                mt: 4,
-                fontFamily: '"Inter", sans-serif',
-                fontSize: '0.875rem',
-              }}>
-                Ask me anything about your document...
-              </Typography>
-            )}
-            {responses.map((item, index) => (
-              <Box
-                key={index}
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  backgroundColor: theme.palette.background.paper,
-                  position: 'relative',
-                  borderBottom: `1px solid ${theme.palette.divider}`,
-                  '&:hover .insert-btn': {
-                    color: 'white',
-                    borderColor: 'text.secondary',
-                    backgroundColor: 'text.secondary',
-                  }
-                }}
-              >
-                <Typography variant="body2" fontWeight={600} sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: '0.875rem',
-                  // color: theme.palette.text.primary,
-                  mb: 1,
-                  color: theme.palette.grey[600],
-                }}>
-                  {item.prompt}
-                </Typography>
-
-                {item.isLoading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : (
-                  <>
-                    <Box sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: '0.875rem',
-                      lineHeight: '1.5',
-                      color: theme.palette.text.primary,
-                      '& p': {
-                        margin: '0.5em 0',
-                      },
-                      '& pre': {
-                        backgroundColor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
-                        padding: '12px',
-                        borderRadius: '4px',
-                        overflowX: 'auto',
-                      },
-                      '& code': {
-                        fontFamily: '"Fira Code", monospace',
-                        fontSize: '0.85em',
-                      },
-                    }}>
-                      <Markdown remarkPlugins={[remarkGfm]}>{item.content}</Markdown>
-                    </Box>
-
-                    <Box sx={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      mt: 2,
-                      pt: 1,
-                    }}>
-                      <Box sx={{ display: 'flex' }}>
-                        <Button
-                          className="insert-btn"
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                          onClick={() => handleInsert(item.content)}
-                          sx={{
-                            mr: 1,
-                            fontSize: '0.75rem',
-                            textTransform: 'none',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          Insert
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          size="small"
-                          onClick={() => handleRetry(item.prompt)}
-                          disabled={isLoading}
-                          sx={{
-                            fontSize: '0.75rem',
-                            textTransform: 'none',
-                            padding: '4px 8px'
-                          }}
-                        >
-                          Retry
-                        </Button>
-                      </Box>
-                      <Tooltip title="Copy">
-                        <IconButton
-                          onClick={() => copyToClipboard(item.content)}
-                          size="small"
-                          sx={{ color: theme.palette.text.secondary }}
-                        >
-                          <CopyIcon fontSize="inherit" sx={{ fontSize: '0.9rem' }} />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </>
-                )}
+          <Box>
+            {responses?.length === 0 && (
+              <Box sx={{ paddingTop: 10, textAlign: 'center' }}    >
+                <span>Ask anything to EGenie</span>
               </Box>
-            ))}
-            <div ref={messagesEndRef} />
+            )}
+            <Box sx={{ height: 350, overflow: 'auto' }}>
+              {responses.map((item, index) => (
+                <div key={index} className='pb-2'>
+                  <p className="text-gray-500">
+                    {item?.prompt}
+                  </p>
+                  <div className="ai-response pt-1">
+                    <Markdown remarkPlugins={[remarkGfm]}>{item?.content}</Markdown>
+                  </div>
+                  {!item?.isLoading &&
+                    <div className="flex justify-between items-center w-full border-b pb-2 pt-2">
+                      <div className="text-left">
+                        <div className="flex space-x-2">
+                          <ThemeButton
+                            buttonType='themeBorder'
+                            onClick={() => handleInsert(item?.content)}
+                          >
+                            Insert
+                          </ThemeButton>
+                          <ThemeButton
+                            buttonType='themeBorder'
+                            disabled={isLoading}
+                            onClick={() => handleRetry(item?.prompt)}
+                          >
+                            Retry
+                          </ThemeButton>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <HtmlTooltip title='Copy'>
+                          <IconButton
+                            onClick={() => copyToClipboard(item?.content)}
+                            size="small"
+                          >
+                            <CopyIcon fontSize="small" color='primary' />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </div>
+                    </div>
+                  }
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </Box>
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: 10,
+                left: 10,
+                right: 10,
+              }}
+            >
+              <div className={`${isInputFocused ? '' : `ai-active`}`}>
+                <TextField
+                  inputRef={textFieldRef}
+                  fullWidth
+                  multiline
+                  minRows={1}
+                  maxRows={4}
+                  variant="outlined"
+                  placeholder="Ask anything..."
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      border: '0px',
+                      borderRadius: '0px',
+                    },
+                  }}
+                  InputProps={{
+                    endAdornment: showSubmitButton && (
+                      <IconButton
+                        onClick={() => handleSubmit()}
+                        disabled={!prompt.trim() || isLoading}
+                        sx={{
+                          position: 'absolute',
+                          right: 8,
+                          bottom: 8,
+                          color: theme.palette.primary.main,
+                          '&:hover': {
+                            backgroundColor: 'transparent',
+                          },
+                          '&:disabled': {
+                            color: theme.palette.action.disabled,
+                          }
+                        }}
+                      >
+                        {isLoading ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <SendIcon fontSize="small" color='primary' />
+                        )}
+                      </IconButton>
+                    ),
+                  }}
+                />
+              </div>
+            </Box>
           </Box>
         )}
       </Box>
-
-      {!showHistory ? (
-        <Box sx={{
-          p: 1,
-          borderTop: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-        }}>
-          <TextField
-            inputRef={textFieldRef}
-            fullWidth
-            multiline
-            minRows={1}
-            maxRows={4}
-            variant="outlined"
-            placeholder="Ask me anything..."
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onFocus={() => setIsInputFocused(true)}
-            onBlur={() => setIsInputFocused(false)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '8px',
-                paddingRight: '40px',
-                fontFamily: '"Inter", sans-serif',
-                fontSize: '0.875rem',
-              },
-            }}
-            InputProps={{
-              endAdornment: showSubmitButton && (
-                <IconButton
-                  onClick={() => handleSubmit()}
-                  disabled={!prompt.trim() || isLoading}
-                  sx={{
-                    position: 'absolute',
-                    right: 8,
-                    bottom: 8,
-                    color: theme.palette.primary.main,
-                    '&:hover': {
-                      backgroundColor: 'transparent',
-                    },
-                    '&:disabled': {
-                      color: theme.palette.action.disabled,
-                    }
-                  }}
-                >
-                  {isLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <SendIcon fontSize="small" />
-                  )}
-                </IconButton>
-              ),
-            }}
-          />
-        </Box>
-      ) : (
-        <Box sx={{
-          p: 2,
-          borderTop: `1px solid ${theme.palette.divider}`,
-          backgroundColor: theme.palette.background.paper,
-        }}></Box>
-      )}
-    </DialogContent>
-  </Dialog>
-
+    </Popover >
+  </Draggable >
   );
 };
 
