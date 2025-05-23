@@ -1,30 +1,61 @@
 
-import { TextField } from '@mui/material';
+import { Avatar, Box, IconButton, TextField } from '@mui/material';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import GenerativeAiDialog from 'src/components/GenerativeAiDialog';
+import { useState } from 'react';
 
 function MultiLine({ value, label, required, onChange, name = '', rest = {}, error = false, touched = '', type = 'text' }) {
 
+  const [generativeAiDialogOpen, setGenerativeAiDialogOpen] = useState(false);
+
   return (
-    <TextField
-      {...rest}
-      variant="outlined"
-      type={type}
-      multiline
-      label={label}
-      fullWidth
-      name={name}
-      required={required}
-      rows={3}
-      value={value}
-      error={error}
-      helperText={touched}
-      onChange={onChange}
-      sx={{
-        '& .MuiInputBase-root textarea': {
-          resize: 'vertical',
-          overflow: 'auto',
-        },
-      }}
-    />
+    <Box sx={{ position: 'relative', width: '100%' }}>
+      <TextField
+        {...rest}
+        variant="outlined"
+        type={type}
+        multiline
+        label={label}
+        fullWidth
+        name={name}
+        required={required}
+        rows={3}
+        value={value}
+        error={error}
+        helperText={touched}
+        onChange={(e) => {
+          onChange(e.target.value.trimStart())
+        }}
+        sx={{
+          '& .MuiInputBase-root textarea': {
+            resize: 'vertical',
+            overflow: 'auto',
+          },
+        }}
+      />
+      <IconButton
+        size="small"
+        sx={{
+          position: 'absolute',
+          bottom: 8,
+          right: 8,
+          zIndex: 1,
+        }}
+        onClick={() => setGenerativeAiDialogOpen(true)}
+      >
+        <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
+      </IconButton>
+      {generativeAiDialogOpen &&
+        <GenerativeAiDialog
+          handleInsert={(content) => {
+            onChange(content.trimStart())
+            setGenerativeAiDialogOpen(false)
+          }}
+          handleClose={() => {
+            setGenerativeAiDialogOpen(false)
+          }}
+        />}
+    </Box>
   );
 }
 
