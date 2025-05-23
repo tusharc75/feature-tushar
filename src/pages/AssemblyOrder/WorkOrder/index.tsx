@@ -93,6 +93,11 @@ const WorkOrder = ({
     try {
       setIsAutoCreating(true);
       await axiosInstance().post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}`);
+      toastConfig.setToastConfig({
+        open: true,
+        message: `Automatic ${resources?.workOrder?.titlePlural} has been successfully generated.`,
+        type: 'success'
+      });
       setIsAutoCreating(false);
       fetchData();
     } catch (error) {
