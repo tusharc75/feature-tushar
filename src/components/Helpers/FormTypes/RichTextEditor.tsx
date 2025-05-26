@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import { Avatar, Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -16,6 +16,33 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
 import GenerativeAiDialog from 'src/components/GenerativeAiDialog';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import ReactDOM from 'react-dom';
+
+const Portal = ({ children }: { children: React.ReactNode }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  const fullscreenContainer = document.querySelector('.tox-fullscreen');
+  if (!fullscreenContainer) return null;
+
+  return ReactDOM.createPortal(
+    <div style={{
+      position: 'fixed',
+      bottom: '10px',
+      right: '10px',
+      zIndex: 10000
+    }}>
+      {children}
+    </div>,
+    fullscreenContainer
+  );
+};
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -50,7 +77,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const [generativeAiDialogOpen, setGenerativeAiDialogOpen] = useState(false);
-
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleUploadImage = (event) => {
@@ -165,6 +192,23 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
     setImageDetails((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleFullscreenChange = (state: boolean) => {
+    setIsFullscreen(state);
+  };
+
+  const GenieButton = ({ onClick }: { onClick: () => void }) => (
+    <Box
+      position="absolute"
+      bottom="10px"
+      right="10px"
+      zIndex={10}
+    >
+      <IconButton size="small" onClick={onClick}>
+        <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
+      </IconButton>
+    </Box>
+  );
+
   return (
     <Box>
       {label}
@@ -172,7 +216,10 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         <Editor
           ref={editorRef}
           id={name}
-          onInit={(evt, editor) => (editorRef.current = editor)}
+          onInit={(evt, editor) => {
+            editorRef.current = editor;
+            editor.on('FullscreenStateChanged', handleFullscreenChange);
+          }}
           initialValue={isUpdate && value}
           onChange={(content: any) => {
             setIsUpdate(false);
@@ -207,19 +254,12 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             content_css: themeColor === 'dark' ? 'dark' : 'default'
           }}
         />
-        <Box
-          position="absolute"
-          bottom="10px"
-          right="10px"
-          zIndex={10}
-        >
-          <IconButton
-            size="small"
-            onClick={() => setGenerativeAiDialogOpen(true)}
-          >
-            <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
-          </IconButton>
-        </Box>
+        {isFullscreen && (
+          <Portal>
+            <GenieButton onClick={() => setGenerativeAiDialogOpen(true)} />
+          </Portal>
+        )}
+        <GenieButton onClick={() => setGenerativeAiDialogOpen(true)} />
       </Box>
       <input
         id={`file`}

@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -128,7 +128,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         day: new Date().getDay().toString(),
         hour: '',
         fileType: 'xslx',
-        status: ''
+        status: 'active'
       });
     }
   }, [id]);
@@ -637,7 +637,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           options={['active', 'pause']}
                           fullWidth
                           size="small"
-                          getOptionLabel={(option) => option}
+                          getOptionLabel={(option) => startCase(option)}
                           isOptionEqualToValue={(option, value) => option === value}
                           value={values.status}
                           onChange={(_, newVal) => setFieldValue('status', newVal)}

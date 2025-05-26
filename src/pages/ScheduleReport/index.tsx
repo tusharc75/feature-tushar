@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@mui/material';
+import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -55,16 +55,18 @@ const ScheduleReport = () => {
         Header: 'Schedule Name',
         Cell: ({ row }) =>
           row?.original?.scheduleName ? (
-            <p
-              className="text-truncate link"
-              onClick={() => {
-                if (permissions?.scheduleReport?.isUpdate) {
-                  setShowManageDialog({ open: true, id: row?.original?._id });
-                }
-              }}
-            >
-              {row.original.scheduleName}
-            </p>
+            <div>
+              <p
+                className="text-truncate link"
+                onClick={() => {
+                  if (permissions?.scheduleReport?.isUpdate) {
+                    setShowManageDialog({ open: true, id: row?.original?._id });
+                  }
+                }}
+              >
+                {row.original.scheduleName}
+              </p>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -92,19 +94,9 @@ const ScheduleReport = () => {
       {
         accessor: 'status',
         Header: 'Status',
-        width: 250,
-        disableFilters: true,
         Cell: ({ row }) => (
-          <div> {row?.original?.status === 'active' ? (
-            <Chip size='small' label={'Active'} className='bg-primary' variant='outlined' style={{ color: 'white' }} />
-          ) : (
-            <Chip
-              size='small'
-              label={'Pause'}
-              className='bg-danger' 
-              variant='outlined'
-            />
-          )}
+          <div>
+            {startCase(row?.original?.status)}
           </div>
         ),
       },
@@ -136,6 +128,18 @@ const ScheduleReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {permissions?.scheduleReport?.isUpdate &&
+          <HtmlTooltip title={'Edit'}>
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setShowManageDialog({ open: true, id: row?.original?._id })
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>}
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -150,18 +154,6 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {permissions?.scheduleReport?.isUpdate &&
-          <HtmlTooltip title={'Edit'}>
-            <IconButton
-              size="small"
-              aria-label="Edit"
-              onClick={() => {
-                setShowManageDialog({ open: true, id: row?.original?._id })
-              }}
-            >
-              <EditIcon fontSize="small" color={'primary'} />
-            </IconButton>
-          </HtmlTooltip>}
       </>
     )
   };
@@ -281,6 +273,7 @@ const ScheduleReport = () => {
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}
             resource={sidebarResource.scheduleReport}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>
