@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -129,25 +130,12 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                     />
                   </Grid>
                   <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
-                    <TextField
-                      fullWidth
+                    <MultiLine
                       label="Description"
-                      variant="outlined"
-                      type="text"
-                      size="small"
-                      name="description"
-                      multiline
-                      rows={4}
-                      value={values?.description}
                       onChange={(e) => {
-                        setFieldValue('description', e?.target?.value);
+                        setFieldValue('description', e.target.value);
                       }}
-                      sx={{
-                        '& .MuiInputBase-root textarea': {
-                          resize: 'vertical',
-                          overflow: 'auto',
-                        },
-                      }}
+                      value={values?.description}
                     />
                   </Grid>
                   <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
@@ -170,6 +158,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                       label="Due Date"
                       name="dueDate"
                       fullWidth
+                      size='small'
                       margin="dense"
                       minDate={values.startDate}
                       value={values.dueDate}

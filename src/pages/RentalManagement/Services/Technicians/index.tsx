@@ -28,15 +28,21 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import dayjs from 'dayjs';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [technicianAssign, setTechnicianAssign] = useState({ open: false, data: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -171,45 +177,45 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       },
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : []),
       {
         accessor: 'startDate',
@@ -345,6 +351,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       const element: any = {};
       element.referenceId = rentalManagementData?._id;
       element.technician = d?._id;
+      element.referenceNumber = `${resources?.rentalManagement?.titleSingular}-${rentalManagementData?.rentalJobName}`;
       element.uniqueId = selectedService?._id || null;
       element.materialId = d?.competenciesId;
       element.type = 'competency';
@@ -376,20 +383,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       delete element.materialId;
     });
 
-    axiosInstance()
-      .post(`/technician`, { technician: tempMaterial })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setTechnicianDialog(false);
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    setTechnicianAssign({ open: true, data: tempMaterial });
   };
 
   return (
@@ -504,6 +498,20 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           loadingEdit={isUpdating}
           bulkEdit={isBulkEdit}
           showSaveAndNext={technicianEdit.showSaveAndNext}
+        />
+      )}
+      {technicianAssign.open && (
+        <TechnicianAssign
+          allData={technicianAssign?.data}
+          onlyEstimateDates={true}
+          handleSuccess={() => {
+            setTechnicianDialog(false);
+            fetchData();
+            setTechnicianAssign({ open: false, data: null });
+          }}
+          handleClose={() => {
+            setTechnicianAssign({ open: false, data: null });
+          }}
         />
       )}
     </>

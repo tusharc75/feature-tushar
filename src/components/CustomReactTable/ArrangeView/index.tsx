@@ -79,7 +79,11 @@ const ArrangeView = ({
   const contextGridViews = useMemo(() => (user?.gridViews || []) as GridViewSavedData[], [user?.gridViews]);
 
   const savedDataForThisGrid = useMemo(() => contextGridViews.filter((d) => d.key === renderedFrom), [contextGridViews, renderedFrom]);
-  const defaultView = useMemo(() => savedDataForThisGrid.find((d) => d.default), [savedDataForThisGrid]);
+  const defaultView = useMemo(() => {
+    let userDefaultView = savedDataForThisGrid.find((d) => d.default && d?.user === user?.user?._id);
+    if (userDefaultView) return userDefaultView;
+    return savedDataForThisGrid.find((d) => d.default);
+  }, [savedDataForThisGrid]);
 
   const toastConfig = useContext(CustomToastContext);
   const [savedData, setSavedData] = useState<GridViewSavedData[]>(savedDataForThisGrid);
@@ -193,7 +197,6 @@ const ArrangeView = ({
     setConfirmationDialog({ open: true, data: data });
   };
 
-
   return (
     <>
       {!isOffline && (
@@ -272,14 +275,13 @@ const ArrangeView = ({
                                   )}
                                 </span>
                                 <div className="flex cursor-auto gap-2">
-                                  {d?.createdBy?.user?.firstName &&
+                                  {d?.createdBy?.user?.firstName && (
                                     <HtmlTooltip title={`Created By : ${d?.createdBy?.user?.firstName} ${d?.createdBy?.user?.lastName}`}>
-                                      <IconButton
-                                        size={'small'}
-                                      >
+                                      <IconButton size={'small'}>
                                         <InfoIcon fontSize="small" color={'primary'} />
                                       </IconButton>
-                                    </HtmlTooltip>}
+                                    </HtmlTooltip>
+                                  )}
                                   <HtmlTooltip title={d?.user === user?.user?._id ? 'Edit' : 'You have not permission to edit'}>
                                     <IconButton
                                       size={'small'}

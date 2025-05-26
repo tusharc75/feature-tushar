@@ -8,6 +8,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { CustomDialogTransition, productInventory, sidebarResource } from 'src/constants/helpers';
 
 function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId, serialNumber = [] }) {
@@ -126,27 +127,13 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                   />
                 </Box>
               ) : null}
-              <TextField
-                margin="dense"
-                size="small"
-                type="text"
+              <MultiLine
                 label="Comment"
-                name="comment"
-                fullWidth
-                multiline
-                rows={2}
-                variant="outlined"
                 value={values['comment']}
                 error={touched['comment'] && Boolean(errors['comment'])}
-                helperText={touched['comment'] && errors['comment']}
+                touched={touched['comment'] && errors['comment'] ? String(errors['comment']) : 'Comment is required'}
                 onChange={(e) => {
                   setFieldValue('comment', e.target.value);
-                }}
-                sx={{
-                  '& .MuiInputBase-root textarea': {
-                    resize: 'vertical',
-                    overflow: 'auto',
-                  },
                 }}
               />
             </CustomDialogContent>

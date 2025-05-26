@@ -20,9 +20,11 @@ interface Resource {
 }
 
 export interface TechnicianAssignProps {
-  resourceData: ResourceData[];
+  resourceData?: ResourceData[];
   handleClose: () => void;
   handleSuccess: () => void;
-  technicians: Technician[];
-  resource: Resource;
+  technicians?: Technician[];
+  resource?: Resource;
+  allData?: any;
+  onlyEstimateDates?: boolean;
 }
