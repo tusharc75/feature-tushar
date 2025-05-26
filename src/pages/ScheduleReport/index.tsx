@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Chip, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -17,6 +17,8 @@ import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -88,6 +90,25 @@ const ScheduleReport = () => {
         Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
       },
       {
+        accessor: 'status',
+        Header: 'Status',
+        width: 250,
+        disableFilters: true,
+        Cell: ({ row }) => (
+          <div> {row?.original?.status === 'active' ? (
+            <Chip size='small' label={'Active'} className='bg-primary' variant='outlined' style={{ color: 'white' }} />
+          ) : (
+            <Chip
+              size='small'
+              label={'Pause'}
+              className='bg-danger' 
+              variant='outlined'
+            />
+          )}
+          </div>
+        ),
+      },
+      {
         accessor: 'reportAction',
         Header: 'Report Action',
         Cell: ({ row }) =>
@@ -129,6 +150,18 @@ const ScheduleReport = () => {
             </IconButton>
           </HtmlTooltip>
         )}
+        {permissions?.scheduleReport?.isUpdate &&
+          <HtmlTooltip title={'Edit'}>
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setShowManageDialog({ open: true, id: row?.original?._id })
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>}
       </>
     )
   };
