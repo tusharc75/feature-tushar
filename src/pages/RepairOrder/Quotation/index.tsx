@@ -2,7 +2,7 @@ import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import { capitalize, isArray } from 'lodash';
+import { capitalize } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
@@ -39,6 +39,7 @@ import { flattenArray } from 'src/constants/columns';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -81,7 +82,6 @@ const Quotation = ({
   const [quotationData, setQuotationData] = useState(null);
   const [currentVersion, setCurrentVersion] = useState(null);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
-  const [pendingManualEntries, setPendingManualEntries] = useState([]);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [quotationFields, setQuotationFields] = useState(null);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false, parentId: null });
@@ -217,22 +217,24 @@ const Quotation = ({
                 {row.original?.detail}
               </p>
             )}
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === MATERIAL_TYPE.service) {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === MATERIAL_TYPE.product) {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
+            {row.original.type !== MATERIAL_TYPE.manualEntry &&
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            }
           </div>
         )
       },
@@ -289,48 +291,64 @@ const Quotation = ({
         return (
           <>
             {allowedToEdit && (
-              <HtmlTooltip title="Edit">
-                <IconButton
-                  size="small"
-                  disabled={
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationInfo?.versions[tempCurrentVersion]?.status
-                    ) || invoiceStep
-                  }
-                  aria-label="Edit"
-                  onClick={() => {
-                    handleOpen(row, table.getRowModel().rows);
-                  }}
-                >
-                  <EditIcon
-                    fontSize="small"
-                    color={
+              <>
+                <HtmlTooltip title="Edit">
+                  <IconButton
+                    size="small"
+                    disabled={
                       [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationInfo?.versions[tempCurrentVersion]?.status
                       ) || invoiceStep
-                        ? 'disabled'
-                        : 'primary'
                     }
-                  />
-                </IconButton>
-              </HtmlTooltip>
+                    aria-label="Edit"
+                    onClick={() => {
+                      handleOpen(row, table.getRowModel().rows);
+                    }}
+                  >
+                    <EditIcon
+                      fontSize="small"
+                      color={
+                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                          quotationInfo?.versions[tempCurrentVersion]?.status
+                        ) || invoiceStep
+                          ? 'disabled'
+                          : 'primary'
+                      }
+                    />
+                  </IconButton>
+                </HtmlTooltip>
+
+                {[QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status) && !invoiceStep &&
+                  <>
+                    {row?.original?.parentId === null && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+                      <HtmlTooltip title="Add Manual Entry">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setRecordToUpdate(null);
+                            setShowCostDialog({ open: true, showSaveAndNext: false, parentId: row?.original?._id });
+                          }}
+                          aria-label="Add Manual Entry"
+                        >
+                          <AddCircleOutlineIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </HtmlTooltip>)}
+                    {row.original.type === MATERIAL_TYPE.manualEntry && (
+                      <HtmlTooltip title={'Delete'}>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          onClick={() => {
+                            setDeleteData([row.original?._id]);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                      </HtmlTooltip >
+                    )}
+                  </>}
+              </>
             )}
-            {row?.original?.parentId === null && row?.original?.type !== "manualEntry" && (
-              <HtmlTooltip title="Add Manual Entry">
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setRecordToUpdate(null);
-                    setShowCostDialog({ open: true, showSaveAndNext: false, parentId: row?.original?._id });
-                  }}
-                  aria-label="Add Manual Entry"
-                >
-                  <AddCircleOutlineIcon
-                    fontSize="small"
-                    color={'primary'}
-                  />
-                </IconButton>
-              </HtmlTooltip>)}
           </>
         );
       }
@@ -360,21 +378,21 @@ const Quotation = ({
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
-        parent.type === 'serializedAsset'
+        parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent.productDetail?.productName
-            : parent.type === 'service'
+            : parent.type === MATERIAL_TYPE.service
               ? parent.serviceDetail?.serviceName
               : parent.packageDetail?.packageName;
       parent.description =
-        parent.type === 'serializedAsset'
+        parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.product?.productDescription
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
-            : parent.type === 'product'
+            : parent.type === MATERIAL_TYPE.product
               ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
+              : parent.type === MATERIAL_TYPE.package
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
@@ -440,44 +458,42 @@ const Quotation = ({
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
-      .then(() => {
-        if (saveAndNext) {
-          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
-          if (!row?.parentId) {
-            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-            setRecordToUpdate(dataRows[rowIndex + 1]);
+    axiosInstance().put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows }).then(() => {
+      if (saveAndNext) {
+        const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+        if (!row?.parentId) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          setIsProductEdit({
+            open: true,
+            isBulkedit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+          });
+        } else {
+          const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+          const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+          setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+          if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setIsProductEdit({
+              open: false,
+              isBulkedit: false,
+              showSaveAndNext: false
+            });
+            setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: allSubRowData[subRowIdx + 1]?.parentId });
+          } else {
             setIsProductEdit({
               open: true,
               isBulkedit: false,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
             });
-          } else {
-            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
-            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
-            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
-            if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
-              setIsProductEdit({
-                open: false,
-                isBulkedit: false,
-                showSaveAndNext: false
-              });
-              setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: allSubRowData[subRowIdx + 1]?.parentId });
-            } else {
-              setIsProductEdit({
-                open: true,
-                isBulkedit: false,
-                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
-              });
-            }
           }
-        } else {
-          setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
-        fetchData();
-        setUpdating(false);
-      })
+      } else {
+        setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+      }
+      fetchData();
+      setUpdating(false);
+    })
       .catch((error) => {
         setUpdating(false);
         toastConfig.setToastConfig(error);
@@ -527,16 +543,21 @@ const Quotation = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
-      .then(() => {
+      .post(`${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message,
+        });
         setDeleting(false);
         fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
         setDeleting(false);
-        toastConfig.setToastConfig(error);
         setDeleteData(null);
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -570,51 +591,38 @@ const Quotation = ({
 
   const cloneVersion = () => {
     const versionId = quotationData?.versions[currentVersion]?._id;
-    axiosInstance()
-      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
-      .then(() => {
-        fetchFields();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().post(`/quotation/clone-version/${quotationData._id}/${versionId}`).then(() => {
+      fetchFields();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleAddCost = (rows) => {
     const versionId = quotationData?.versions[currentVersion]?._id;
-    const parentId = showCostDialog?.parentId;
-    const data = rows.map((item) => ({ ...item, parentId }));
+    let data = []
+    if (showCostDialog?.parentId) {
+      data = rows.map((item) => ({ ...item, parentId: showCostDialog?.parentId }));
+    }
+    else if (selectedRecords?.length) {
+      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.forEach((e) => {
+        data = [...data, ...rows.map((item) => ({ ...item, parentId: e?._id }))]
+      })
+    }
     setUpdating(true);
-    axiosInstance()
-      .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: data })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message,
-        });
-        setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
-        if (pendingManualEntries?.length > 0) {
-          const nextEntries = pendingManualEntries.slice(1);
-          const hasMore = nextEntries.length > 0;
-          setPendingManualEntries(nextEntries);
-          setRecordToUpdate(null);
-          setShowCostDialog({
-            open: hasMore,
-            showSaveAndNext: hasMore,
-            parentId: hasMore ? nextEntries[0]?._id : null,
-          });
-        } else {
-          setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
-        }
-        setUpdating(false);
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
+    axiosInstance().post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: data }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message,
+      });
+      setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+      setUpdating(false);
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
   };
-
 
   const handleSendToCustomer = () => {
     axiosInstance()
@@ -812,16 +820,20 @@ const Quotation = ({
                 <MenuItem
                   onClick={() => {
                     closeActions();
-                    const selectedRows = selectedRecords.filter((e) => e.parentId === null);
-                    if (selectedRows.length > 0) {
-                      setPendingManualEntries(selectedRows);
-                      setRecordToUpdate(null);
-                      setShowCostDialog({ open: true, showSaveAndNext: selectedRows.length > 1, parentId: selectedRows[0]._id });
-                    }
+                    setShowCostDialog({ open: true, showSaveAndNext: false, parentId: null });
                   }}
                 >
                   Add Manual Entry
                 </MenuItem>
+                {selectedRecords?.length > 0 && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.manualEntry) &&
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setDeleteData(selectedRecords?.map((e) => e._id))
+                    }}
+                  >
+                    Delete
+                  </MenuItem>}
               </Menu>
             </Box>
           )}
@@ -868,6 +880,7 @@ const Quotation = ({
               )
             }
             hideAction={invoiceStep}
+            hideExportTable={repairOrderData?.addQuotationStep && !invoiceStep ? true : false}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
@@ -956,7 +969,6 @@ const Quotation = ({
           onClose={() => {
             setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
             setRecordToUpdate(null);
-            setPendingManualEntries([]);
           }}
           handleAddCost={handleAddCost}
           handleUpdateCost={handleSaveCostData}
