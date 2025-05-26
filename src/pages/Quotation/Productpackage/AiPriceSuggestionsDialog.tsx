@@ -18,7 +18,6 @@ const AiPriceSuggestionsDialog = (props) => {
   const [aiPriceSuggestions, setAiPriceSuggestions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
-  const theme = useTheme();
   const [themeColor] = useAppTheme();
 
   const toastConfig = useContext(CustomToastContext);
