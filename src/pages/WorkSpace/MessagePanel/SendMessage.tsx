@@ -126,6 +126,9 @@ const SendMessage = ({
       setMessage('');
       setFiles([]);
       setAudioBlobs([]);
+      if(editorRef.current){
+        editorRef.current.setContent('');
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -222,8 +225,17 @@ const SendMessage = ({
       setIsRecording(false);
     } else {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Audio recording is not supported in this browser');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+
+        const recorder = new MediaRecorder(stream, { mimeType });
 
         recorderRef.current = recorder;
         chunks.current = [];
@@ -233,15 +245,24 @@ const SendMessage = ({
         };
 
         recorder.onstop = () => {
-          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          const blob = new Blob(chunks.current, { type: mimeType });
           setAudioBlobs((prev) => [...prev, blob]);
           stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.onerror = (event) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Error during recording: ' + event.error
+          });
+          setIsRecording(false);
         };
 
         recorder.start();
         setIsRecording(true);
       } catch (e) {
-        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+        toastConfig.setToastConfig({ open: true, type: 'error', message: e.message || 'Error accessing microphone' });
       }
     }
   };
@@ -274,7 +295,7 @@ const SendMessage = ({
                       )}
                     >
                       <IconButton size="small" onClick={() => removeFile(index)}>
-                        <Close fontSize="small" />
+                        <Close fontSize="small" />  
                       </IconButton>
                     </span>
                     <p
@@ -319,7 +340,6 @@ const SendMessage = ({
               }
             }}
             onKeyDown={handleKeyDown}
-            value={message ? message : '<span></span>'}
             onInit={(_evt, editor) => {
               editorRef.current = editor;
               if (initialMessage) {
