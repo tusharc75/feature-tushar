@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
 import { CustomDialogTransition } from 'src/constants/helpers';
@@ -11,12 +11,15 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const AiPriceSuggestionsDialog = (props) => {
   const { setAiPriceSuggestionDialog, aiPriceSuggestionDialog, quoteData } = props;
   const [aiPriceSuggestions, setAiPriceSuggestions] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
+  const theme = useTheme();
+  const [themeColor] = useAppTheme();
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -71,8 +74,8 @@ const AiPriceSuggestionsDialog = (props) => {
           {!loading ? (
             <Box padding={1}>
               <Grid container spacing={1}>
-                <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400 rtl:text-right">
-                  <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+                <table className="w-full text-left text-sm rtl:text-right">
+                  <thead className={`text-xs uppercase ${themeColor === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
                     <tr>
                       <th scope="col" className="px-6 py-3">
                         Product name
@@ -90,13 +93,25 @@ const AiPriceSuggestionsDialog = (props) => {
                   </thead>
                   <tbody>
                     {aiPriceSuggestions.map((suggestion) => (
-                      <tr key={suggestion.id} className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <th scope="row" className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+                      <tr 
+                        key={suggestion.id} 
+                        className={`border-b ${themeColor === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
+                      >
+                        <th 
+                          scope="row" 
+                          className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                        >
                           {suggestion?.product?.optionLabel}
                         </th>
-                        <td className="px-6 py-4">{suggestion.maxPrice}</td>
-                        <td className="px-6 py-4">{suggestion.averagePrice}</td>
-                        <td className="px-6 py-4">{suggestion.minPrice}</td>
+                        <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {suggestion.maxPrice}
+                        </td>
+                        <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {suggestion.averagePrice}
+                        </td>
+                        <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {suggestion.minPrice}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
