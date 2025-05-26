@@ -73,7 +73,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         loading={loading}
         options={options}
         autoHighlight
-        value={value ? value : multiple ? [] : ''}
+        value={value ? value : multiple ? [] : null}
         getOptionLabel={(option: any) => option?.optionLabel}
         isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
         onChange={onChange}
