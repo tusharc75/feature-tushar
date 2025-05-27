@@ -74,7 +74,9 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.resource ? <div>
+          <p className="text-truncate">{row.original.resource}</p>
+        </div> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
