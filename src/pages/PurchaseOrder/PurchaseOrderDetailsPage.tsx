@@ -316,6 +316,7 @@ const PurchaseOrderDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
                       checkReceivedProduct={checkReceivedProduct}
+                      purchaseOrderFields={purchaseOrderFields}
                     />
                   )}
                 </Grid>
