@@ -159,7 +159,7 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                           <MultiLine
                             label="Comment"
                             value={comment}
-                            onChange={(e: any) => setComment(e.target.value)}
+                            onChange={(value) => setComment(value)}
                           />
                         </Box>
                         <Box pt={2}>

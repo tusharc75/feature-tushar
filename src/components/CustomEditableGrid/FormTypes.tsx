@@ -43,7 +43,7 @@ const FormTypes = (props) => {
     <MultiLine
       label={fieldData?.label}
       name={`${fieldData?.fieldName}`}
-      onChange={(e) => onChange(fieldData?.fieldName, e.target.value)}
+      onChange={(value) => onChange(fieldData?.fieldName,value)}
       value={values[fieldData?.fieldName]}
       error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
       touched={touched[`${values._id}_${fieldData?.fieldName}`] && errors[`${values._id}_${fieldData?.fieldName}`]}

@@ -18,8 +18,8 @@ const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => voi
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (event) => {
-    setComment(event.target.value.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
   };
 
   const handleSubmit = () => {

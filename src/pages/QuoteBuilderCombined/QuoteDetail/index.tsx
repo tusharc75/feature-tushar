@@ -483,8 +483,8 @@ export default function QuoteDetail() {
       });
   };
 
-  const handleReopenReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setReopenReason(event.target.value);
+  const handleReopenReasonChange = (value) => {
+    setReopenReason(value);
   };
 
   const deleteVersion = () => {
