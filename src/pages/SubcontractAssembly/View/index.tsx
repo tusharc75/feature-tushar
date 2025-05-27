@@ -144,12 +144,10 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
               title={
                 <>
                   <p>
-                    <Typography variant="body2">From:</Typography>
-                    <Typography variant="subtitle2">{obj?.pickupFrom?.optionLabel}</Typography>
+                    <Typography variant="subtitle2">From - {obj?.pickupFrom?.optionLabel}</Typography>
                   </p>
                   <p>
-                    <Typography variant="body2">To:</Typography>
-                    <Typography variant="subtitle2">{obj?.deliveryTo?.optionLabel}</Typography>
+                    <Typography variant="subtitle2">To - {obj?.deliveryTo?.optionLabel}</Typography>
                   </p>
                 </>
               }

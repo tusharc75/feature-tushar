@@ -40,6 +40,7 @@ const CustomDateTimePicker = (props) => {
       onError={onError ? onError : console.error}
       slotProps={{
         textField: {
+          required: required ? true : false,
           helperText: helperText,
           error: error ? error : false,
           variant: 'outlined',

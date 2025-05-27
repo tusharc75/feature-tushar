@@ -8,6 +8,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { isMobile, isTablet } from 'react-device-detect';
+import MultiLine from '../Helpers/FormTypes/MultiLine';
 
 type FeedbackDialogProps = {
   handleClose: () => void;
@@ -50,7 +51,7 @@ const FeedbackDialog = ({ handleClose, chatData, chatId }: FeedbackDialogProps) 
   return (
     <Dialog
       maxWidth="sm"
-      fullScreen={ fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
       open={true}
@@ -70,21 +71,10 @@ const FeedbackDialog = ({ handleClose, chatData, chatId }: FeedbackDialogProps) 
         showManimizeMaximize={true}
       />
       <CustomDialogContent>
-      <TextField
-          fullWidth
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          variant="outlined"
-          placeholder="Feedback"
+        <MultiLine
           label={'Feedback'}
-          multiline
-          rows={2}
-          sx={{
-            '& .MuiInputBase-root textarea': {
-              resize: 'vertical',
-              overflow: 'auto',
-            },
-          }}
+          onChange={(e) => setComment(e.target.value)}
+          value={comment}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

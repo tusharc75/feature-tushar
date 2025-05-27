@@ -167,7 +167,7 @@ export const PreviewDialog = ({
         TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
-          title={`Visible Columns in ${type}`}
+          title={`Select Column(s) to view in the ${type}`}
           onClose={() => {
             handleClose();
           }}

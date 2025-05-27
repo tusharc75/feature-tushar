@@ -24,6 +24,7 @@ import { UserDropdown } from '../Helpers/userDropdown';
 import { SubCase } from './SubCase';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const CaseSchema = object().shape({
   name: string().required('Please enter case name'),
@@ -185,26 +186,12 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                           }}
                         />
                         <Box pt={1}>
-                          <TextField
-                            fullWidth
-                            margin="dense"
-                            size="small"
-                            type="text"
-                            multiline
-                            rows={3}
+                          <MultiLine
                             label="Description"
-                            value={values['description']}
-                            name="description"
-                            variant="outlined"
                             onChange={(e) => {
                               setFieldValue('description', e.target.value);
                             }}
-                            sx={{
-                              '& .MuiInputBase-root textarea': {
-                                resize: 'vertical',
-                                overflow: 'auto',
-                              },
-                            }}
+                            value={values['description']}
                           />
                         </Box>
                         {id && (
@@ -306,7 +293,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                             maxDate={initialValues.parentData && initialValues.parentData.dueDate}
                           />
                         </Box>
-                        
+
                         <Box pt={1}>
                           <CustomDatePicker
                             label="Due Date"

@@ -14,6 +14,7 @@ import DoaStepUsers from './DOAStepUsers';
 import Steps1 from 'src/components/Steps';
 import { cn, CustomDialogTransition, QUOTE_PROCESS_STATUS, QUOTE_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const useStyles = makeStyles((theme: Theme) => ({
   rejected: {
@@ -156,7 +157,7 @@ const Steps = (props) => {
         isPrevStep={currentStep >= 0 && !loading && !globalLoading && isPrevStep}
         isStepEnded={isStepEnded || currentStep === steps.length}
         steps={steps}
-        setCurrentStep={() => {}}
+        setCurrentStep={() => { }}
         handleNext={() => {
           if (versionStatus.includes(QUOTE_STATUS.sentToCustomer) && steps[currentStep]?.key === QUOTE_PROCESS_STATUS.sendToCustomer) {
             setShowManualCustomerActionDialog(true);
@@ -252,23 +253,12 @@ const Steps = (props) => {
               </List>
               {(selectedOption === 'Others' || selectedOption === 'Not Booked') && (
                 <Box my={2}>
-                  <TextField
-                    fullWidth
-                    id="outlined-multiline-static"
+                  <MultiLine
                     label="Comment"
-                    multiline
-                    value={comment}
+                    value={comment || ''}
                     onChange={handleChange}
-                    rows={4}
-                    variant="outlined"
                     error={Boolean(commentError)}
-                    helperText={Boolean(commentError) && commentError}
-                    sx={{
-                      '& .MuiInputBase-root textarea': {
-                        resize: 'vertical',
-                        overflow: 'auto',
-                      },
-                    }}
+                    touched={Boolean(commentError) && commentError}
                   />
                 </Box>
               )}

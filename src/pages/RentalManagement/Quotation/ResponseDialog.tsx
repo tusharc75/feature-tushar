@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -56,7 +57,7 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
       onClose={closeManualDiaog}
       aria-labelledby="assign-roles-dialog"
     >
-      <CustomDialogHeader title={`Response By Customer`} />
+      <CustomDialogHeader title={`Response By Customer`} onClose={onClose}/>
       <CustomDialogContent>
         <List style={{ padding: 0 }}>
           {Object.keys(options).map((option) => (
@@ -79,23 +80,12 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
         </List>
         {selectedOption && (
           <Box my={2}>
-            <TextField
-              fullWidth
-              id="outlined-multiline-static"
+            <MultiLine
               label="Comment"
-              multiline
-              value={comment}
+              value={comment || ''}
               onChange={handleChange}
-              rows={4}
-              variant="outlined"
               error={Boolean(commentError)}
-              helperText={Boolean(commentError) && commentError}
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto',
-                },
-              }}
+              touched={Boolean(commentError) && commentError}
             />
           </Box>
         )}

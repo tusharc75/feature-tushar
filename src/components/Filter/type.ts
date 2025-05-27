@@ -36,6 +36,7 @@ export type ColumnData = {
   minValueServiceAdd?: string;
   warningTooltipMessage?: string;
   addBulkOptions?: boolean;
+  operationOnLineItems?: string;
   columnSize?: number;
   dataList?: boolean;
   dataListId?: string;

@@ -7,21 +7,22 @@ import { cn } from 'src/constants/helpers';
 import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialogWithDateTime';
 import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { isArray, isObject } from 'lodash';
 import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
-  assignTechnicianDialog: { open: boolean; technicianData: any; service: any };
+  assignTechnicianDialog: { open: boolean; technicians: any; services: any };
   unAssignTechnicianDialog: DialogData;
-  handleSucess: () => void;
+  handleSuccess: () => void;
   handleClose: () => void;
   setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
   isMobile: boolean;
   refreshServiceData: boolean;
   viewType: string;
+  setAssignTechnicianDialogData: React.Dispatch<React.SetStateAction<{ open: boolean; technicians: any; services: any }>>;
 };
 type DialogData = {
   open: boolean;
@@ -34,12 +35,13 @@ const ServiceOrderSidebarImpl = ({
   selectedResource,
   assignTechnicianDialog,
   handleClose,
-  handleSucess,
+  handleSuccess,
   setSelectedRecords,
   isMobile,
   unAssignTechnicianDialog,
   refreshServiceData,
-  viewType
+  viewType,
+  setAssignTechnicianDialogData
 }: ServiceOrderSidebarProps) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -88,42 +90,13 @@ const ServiceOrderSidebarImpl = ({
       });
   };
 
-  const handleAssign = (technicians, resourceData) => {
-    const technician: any = [];
-    technicians.forEach((d) => {
-      const element: any = {};
-      element.technician = d?._id;
-      element.uniqueId = resourceData?._id;
-      element.service = resourceData?.service?._id;
-      element.warehouse = resourceData?.warehouse;
-      element.referenceId = resourceData?.resourceId;
-      element.referenceType = selectedResource?.resource;
-      element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
-      element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
-      technician.push(element);
-    });
-    setIsSubmitting(true);
-    axiosInstance()
-      .post(`/technician`, { technician: technician })
-      .then(() => {
-        fetchData(selectedResource);
-        handleSucess();
-        setOpenTechnicianDialog({ open: false, data: null });
-        setIsSubmitting(false);
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const handleUnAssign = () => {
     setIsSubmitting(true);
     axiosInstance()
       .put(`/technician`, { ids: [unAssignTechnicianDialog?.data?._id] })
       .then(() => {
         fetchData(selectedResource);
-        handleSucess();
+        handleSuccess();
         setIsSubmitting(false);
       })
       .catch((error) => {
@@ -163,13 +136,18 @@ const ServiceOrderSidebarImpl = ({
         />
       </div>
       {assignTechnicianDialog.open && (
-        <AssignTechnicianDialog
-          selectedResource={selectedResource}
-          technicianData={assignTechnicianDialog.technicianData}
-          selectedServiceOrder={[assignTechnicianDialog.service]}
-          handleSucess={() => {
+        <TechnicianAssign
+          resource={{
+            resource: selectedResource?.resource,
+            titleSingular: selectedResource?.titleSingular,
+            titlePlural: selectedResource?.title
+          }}
+          technicians={assignTechnicianDialog?.technicians?.map((d) => ({ _id: d?._id, name: d?.firstName + ' ' + d?.lastName }))}
+          resourceData={assignTechnicianDialog?.services}
+          handleSuccess={() => {
             fetchData(selectedResource);
-            handleSucess();
+            handleSuccess();
+            setOpenTechnicianDialog({ open: false, data: null });
           }}
           handleClose={() => {
             handleClose();
@@ -179,7 +157,7 @@ const ServiceOrderSidebarImpl = ({
       {openTechnicianDialog.open && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
-            handleAssign(data, openTechnicianDialog.data);
+            setAssignTechnicianDialogData({ open: true, technicians: data, services: [openTechnicianDialog.data] });
           }}
           handleClose={() => {
             setOpenTechnicianDialog({ open: false, data: null });

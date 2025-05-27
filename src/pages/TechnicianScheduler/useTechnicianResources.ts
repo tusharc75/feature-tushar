@@ -4,7 +4,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fieldServiceOrder, fieldTicket, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContextType } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-export type TechnicianResource = { key: string; resource: string; title: string; api: string };
+export type TechnicianResource = { key: string; resource: string; title: string; titleSingular: string; api: string };
 
 export const useTechnicianResources = (toastConfig: CustomToastContextType, setSelectedResource: (data: TechnicianResource) => void) => {
   const {
@@ -19,6 +19,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
         key: 'fieldTicket',
         resource: sidebarResource.fieldTicket,
         title: resources?.fieldTicket?.titlePlural,
+        titleSingular: resources?.fieldTicket?.titleSingular,
         api: fieldTicket.api
       });
     }
@@ -27,6 +28,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
         key: 'rentalManagement',
         resource: sidebarResource.rentalManagement,
         title: resources?.rentalManagement?.titlePlural,
+        titleSingular: resources?.rentalManagement?.titleSingular,
         api: rentalManagement.api
       });
     }
@@ -44,6 +46,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
           key: 'fieldServiceOrder',
           resource: sidebarResource.fieldServiceOrder,
           title: resources?.fieldServiceOrder?.titlePlural,
+          titleSingular: resources?.fieldServiceOrder?.titleSingular,
           api: fieldServiceOrder.api
         });
       }

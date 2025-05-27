@@ -9,6 +9,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Attachment } from './type';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => void; files: Attachment[]; onSuccess?: () => void }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,22 +63,10 @@ const DeleteRequestDialog = ({ onClose, files, onSuccess }: { onClose: () => voi
         />
         <CustomDialogContent>
           <Box>
-            <TextField
-              id="outlined-multiline-static"
+            <MultiLine
               label="Comment"
-              placeholder={`Comment`}
-              fullWidth
-              multiline
-              rows={2}
-              value={comment}
               onChange={handleChange}
-              variant="outlined"
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto'
-                }
-              }}
+              value={comment}
             />
           </Box>
         </CustomDialogContent>

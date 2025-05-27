@@ -4,6 +4,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setComment, status = WORK_ORDER_STATUS.completed }) => {
   return (
@@ -30,21 +31,10 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
             {`, do you want to mark it ${status === WORK_ORDER_STATUS.completed ? 'complete' : 'skip'}?`}
           </Typography>
           <Box mt={2}>
-            <TextField
-              multiline
+            <MultiLine
               label="Comment"
-              fullWidth
-              rows={3}
-              maxRows={4}
-              value={comment}
+              value={comment || ''}
               onChange={(e) => setComment(e.target.value)}
-              variant="outlined"
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto',
-                },
-              }}
             />
           </Box>
         </Box>

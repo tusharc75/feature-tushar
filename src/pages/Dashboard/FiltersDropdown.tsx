@@ -155,7 +155,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   multiple={filter?.multiple}
                   errors={false}
                   touched={false}
-                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
+                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : null}
                   fieldLabel={resources[filter.key] ? resources[filter.key]?.titlePlural : filter.title}
                   onChange={(e, val) => {
                     handleChange(filter.key, val);

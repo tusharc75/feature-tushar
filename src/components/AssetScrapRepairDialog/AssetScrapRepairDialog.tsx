@@ -9,6 +9,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, serializedAsset } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { makeStyles } from '@mui/styles';
+import MultiLine from '../Helpers/FormTypes/MultiLine';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -46,23 +47,12 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
           {statusToUpdate.status === 'Repair' ? (
             <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
           ) : (
-            <TextField
-              id="outlined-multiline-static"
+            <MultiLine
               label={`Please enter the reason for ${statusToUpdate.status}`}
-              multiline
-              fullWidth
-              rows={4}
-              value={statusToUpdate.message}
-              variant="outlined"
               onChange={(e) => {
                 setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
               }}
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto',
-                },
-              }}
+              value={statusToUpdate.message}
             />
           )}
         </Box>

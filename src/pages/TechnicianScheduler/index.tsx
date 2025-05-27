@@ -13,6 +13,7 @@ import { RoadMapProvider, useRoadMapStore } from 'src/pages/TechnicianScheduler/
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
 import Timeline from 'src/pages/TechnicianScheduler/Vis';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
@@ -22,15 +23,16 @@ function TechnicianSchedulerImpl() {
   const toastConfig = useContext(CustomToastContext);
   const [selectedResource, setSelectedReSource] = useState<TechnicianResource | null>(null);
   const technicianResources = useTechnicianResources(toastConfig, setSelectedReSource);
-  const [assignTechnicianDialogData, setAssignTechnicianDialogData] = useState({ open: false, technicianData: null, service: null });
+  const [assignTechnicianDialogData, setAssignTechnicianDialogData] = useState({ open: false, technicians: null, services: null });
   const [unAssignTechnicianDialog, setUnAssignTechnicianDialog] = useState({ open: false, data: null });
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [activeItem, setActiveItem] = useState(null);
   const [refreshRoadMap, setRefreshRoadMap] = useState(false);
   const [refreshServiceData, setRefreshServiceData] = useState(false);
   const [viewType, setViewType] = useState<any>('job');
-
+  const [activity, setActivity] = useState(null);
   const sensors = useDndSensors();
+  const [assignServiceDialog, setAssignServiceDialog] = useState({ open: false, data: null });
 
   const onDragStart = (event: DragStartEvent) => {
     if (!event.active) return;
@@ -55,7 +57,7 @@ function TechnicianSchedulerImpl() {
         service = active.data.current.row;
       }
 
-      setAssignTechnicianDialogData({ open: true, service, technicianData });
+      setAssignTechnicianDialogData({ open: true, technicians: [technicianData], services: [service] });
     }
   };
 
@@ -81,6 +83,14 @@ function TechnicianSchedulerImpl() {
     return null;
   }, [selectedResource?.key, selectedResource?.title, technicianResources]);
 
+  const fetchRoadmap = async () => {
+    await axiosInstance()
+      .get(`/technician-scheduler/get-schedule?resource=${selectedResource.resource}`)
+      .then(({ data: { data } }) => {
+        setActivity(data);
+      });
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -93,13 +103,15 @@ function TechnicianSchedulerImpl() {
         <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <Roadmap
             filter={filter}
+            assignServiceDialog={assignServiceDialog}
+            setAssignServiceDialog={setAssignServiceDialog}
             refreshRoadMap={refreshRoadMap}
             selectedRecords={selectedRecords}
+            setAssignTechnicianDialog={setAssignTechnicianDialogData}
+            activity={activity}
+            fetchRoadmap={fetchRoadmap}
             handleUnAssignTechnician={(data) => {
               setUnAssignTechnicianDialog({ open: true, data: data });
-            }}
-            handleSucess={() => {
-              setRefreshServiceData((prev) => !prev);
             }}
             setViewType={setViewType}
             viewType={viewType}
@@ -114,14 +126,17 @@ function TechnicianSchedulerImpl() {
                 viewType={viewType}
                 selectedResource={selectedResource}
                 assignTechnicianDialog={assignTechnicianDialogData}
+                setAssignTechnicianDialogData={setAssignTechnicianDialogData}
                 unAssignTechnicianDialog={unAssignTechnicianDialog}
-                handleSucess={() => {
+                handleSuccess={() => {
                   setRefreshRoadMap((prev) => !prev);
-                  setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
+                  setAssignTechnicianDialogData({ open: false, technicians: null, services: null });
                   setUnAssignTechnicianDialog({ open: false, data: null });
+                  setRefreshServiceData((prev) => !prev);
+                  setAssignServiceDialog({ open: false, data: null });
                 }}
                 handleClose={() => {
-                  setAssignTechnicianDialogData({ open: false, technicianData: null, service: null });
+                  setAssignTechnicianDialogData({ open: false, technicians: null, services: null });
                   setUnAssignTechnicianDialog({ open: false, data: null });
                 }}
                 setSelectedRecords={setSelectedRecords}

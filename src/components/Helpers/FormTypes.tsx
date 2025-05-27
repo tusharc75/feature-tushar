@@ -67,6 +67,7 @@ import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 type MultiFileType = {
   fileName: string;
@@ -946,25 +947,18 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <TextField
-          {...rest}
-          variant="outlined"
-          type={fromFilter ? 'search' : 'text'}
-          multiline
+        <MultiLine
           label={getLabel(label)}
-          name={name}
-          required={required}
-          rows={3}
           value={values[name]}
+          required={required}
+          onChange={(value) => {
+            handleChange(name, value)
+          }}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-          sx={{
-            '& .MuiInputBase-root textarea': {
-              resize: 'vertical',
-              overflow: 'auto',
-            },
-          }}
+          fromFilter={fromFilter}
+          type={fromFilter ? 'search' : 'text'}
+          {...rest}
         />
       </InfoLabel>
     ) : type === 'number' ? (
