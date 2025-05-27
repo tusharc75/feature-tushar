@@ -4,12 +4,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fieldServiceOrder, fieldTicket, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContextType } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-export type TechnicianResource = { key: string; resource: string; title: string, api: string };
+export type TechnicianResource = { key: string; resource: string; title: string; api: string };
 
-export const useTechnicianResources = (
-  toastConfig: CustomToastContextType,
-  setSelectedResource: React.Dispatch<React.SetStateAction<TechnicianResource>>
-) => {
+export const useTechnicianResources = (toastConfig: CustomToastContextType, setSelectedResource: (data: TechnicianResource) => void) => {
   const {
     state: { permissions, resources, user }
   }: any = useData();

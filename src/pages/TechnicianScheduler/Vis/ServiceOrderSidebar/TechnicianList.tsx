@@ -1,19 +1,19 @@
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, Button, IconButton, Skeleton } from '@mui/material';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
 import { TActios, TInitialState } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
-import { throttle } from 'src/hooks/useThrottle';
-import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 
 type TechnicianListProps = {
   state: TInitialState;
+  setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
   dispatch: React.Dispatch<TActios>;
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
@@ -22,28 +22,26 @@ type TechnicianListProps = {
   setOpenTechnicianDialog: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const TechnicianList = ({ dispatch, state, selectedResource, container, isMobile, viewType, setOpenTechnicianDialog }: TechnicianListProps) => {
+const TechnicianList = ({
+  dispatch,
+  setSelectedRecords,
+  state,
+  selectedResource,
+  container,
+  isMobile,
+  viewType,
+  setOpenTechnicianDialog
+}: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
-  const [containerSize, setContainerSize] = useState({ width: 300 - 16, height: isMobile ? 150 : 600 });
-
-  useEffect(() => {
-    const throttledCalc = throttle(() => {
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        setContainerSize({ width: rect.width, height: rect.height });
-      }
-    }, 2000);
-
-    const handleResize = () => {
-      throttledCalc();
-    };
-    handleResize();
-    container?.addEventListener('resize', handleResize);
-    return () => {
-      container?.addEventListener('resize', handleResize);
-    };
-  }, [container]);
+  const containerSize = useMemo(() => {
+    if (container) {
+      const rect = container.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    } else {
+      return { width: 300 - 16, height: isMobile ? 150 : 600 };
+    }
+  }, [container, isMobile]);
 
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
@@ -54,8 +52,8 @@ const TechnicianList = ({ dispatch, state, selectedResource, container, isMobile
 
   return (
     <div
-      style={{ height: isMobile ? 'auto' : containerSize.height }}
-      className={cn(state.loading ? 'overflow-hidden' : '', isMobile ? 'overflow-y-hidden' : '')}
+      style={{ height: isMobile ? 'auto' : containerSize.height - 32 }}
+      className={cn('py-4', state.loading ? 'overflow-hidden' : '', isMobile ? 'overflow-y-hidden' : '')}
     >
       {state.loading ? (
         <div className={cn('flex', isMobile ? 'flex-row' : 'flex-col')}>
@@ -66,7 +64,7 @@ const TechnicianList = ({ dispatch, state, selectedResource, container, isMobile
       ) : state?.dataRows?.length ? (
         <List
           ref={listRef}
-          height={isMobile ? containerSize.height : containerSize.height}
+          height={isMobile ? containerSize.height - 32 : containerSize.height - 32}
           width={containerSize.width}
           itemCount={state.dataRows?.length}
           layout={isMobile ? 'horizontal' : 'vertical'}
@@ -121,7 +119,7 @@ const RowSkeleton = ({ isMobile }) => {
 };
 
 export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
-  const [activeItemData, setStore] = useRoadMapStore((state) => state.activeItemData);
+  const [activeItemData, setStore] = useTimelineStore((state) => state.activeItemData);
   const rowRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: row._id,

@@ -56,7 +56,6 @@ const Services = memo(({ startDate, services, unavailability, handleSelect, dayP
     }
   });
   const newServices = useMemo(() => addOverlapCount([...services, ...unavailability]), [services, unavailability]);
-
   return (
     <>
       <div
@@ -227,6 +226,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                             <IconButton
                               onClick={(e) => {
                                 e.stopPropagation();
+                                console.log(service);
                                 handleSelect(null, { _id: service?._id }, 'un-assign');
                                 handleClosePopup();
                               }}
@@ -245,22 +245,20 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
             </RippleButton>
             {isPopupOpened && (
               <div className="pointer-events-auto absolute bottom-full z-10" ref={popupRef}>
-                {service?.type === 'technicianUnavailability' ?
+                {service?.type === 'technicianUnavailability' ? (
                   <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
-                    <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
-                      {service?.title}
-                    </p>
-                    {service?.reason &&
+                    <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">{service?.title}</p>
+                    {service?.reason && (
                       <p className="{styles.chip} {styles[priority]} text-[12px] font-medium leading-[16px] text-[#777575]">
                         Reason : {service?.reason}
                       </p>
-                    }
+                    )}
                     <p className="mt-1 flex items-center gap-1 text-[12px] font-medium leading-[16px] text-[#777575] dark:text-gray-100">
                       <CalendarMonth className="!h-[12px] !w-[12px]" /> {displayDate(service?.startDate)}-
                       <span className="line-clamp-1 ">{displayDate(service?.endDate)}</span>
                     </p>
                   </div>
-                  :
+                ) : (
                   <div className="w-[260px] rounded-md border bg-[--dark-primary,white] p-3 shadow-md">
                     <div className="mb-1 flex items-center gap-1">
                       <p className="line-clamp-1 text-[13px] font-semibold leading-[16px]">{service?.reference?.optionLabel}</p>
@@ -318,6 +316,7 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                       {service?.status === TECHNICIAN_STATUS.reserved && (
                         <ThemeButton
                           onClick={() => {
+                            console.log(service);
                             handleSelect(null, { _id: service?._id }, 'un-assign');
                             handleClosePopup();
                           }}
@@ -327,12 +326,12 @@ const SingleService = memo(({ service, handleSelect, startDate, dayPixel }: any)
                       )}
                     </div>
                   </div>
-                }
+                )}
               </div>
             )}
           </div>
-        </ClickAwayListener >
-      </div >
+        </ClickAwayListener>
+      </div>
     </>
   );
 });

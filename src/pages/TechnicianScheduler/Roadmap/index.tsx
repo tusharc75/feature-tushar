@@ -71,6 +71,7 @@ function Roadmap({
     if (type === 'assign') {
       setAssignServiceDialog({ open: true, data: data });
     } else if (type === 'un-assign') {
+      console.log(data);
       handleUnAssignTechnician(data);
     } else if (type === 'dispatch') {
       setStartEndDateConfermationDialog({
@@ -140,7 +141,7 @@ function Roadmap({
                 setCreateDialog(true);
               }}
               startIcon={<AddOutlined />}
-              mobileTooltip='Create'
+              mobileTooltip="Create"
               iconForMobile={<AddOutlined />}
             >
               Create
@@ -188,6 +189,7 @@ function Roadmap({
           />
         )}
       </Box>
+      {console.log(assignServiceDialog)}
       {assignServiceDialog.open && (
         <ServiceAssignDialog
           handleClose={() => {

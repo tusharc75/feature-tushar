@@ -28,6 +28,7 @@ import './styles/responsive-styles.scss';
 import './styles/safari.scss';
 import './styles/vis-network/vis-network.min.css';
 import './components/CustomCalendar/index.scss';
+import 'vis-timeline/styles/vis-timeline-graph2d.min.css';
 import { InfoSidebarProvider } from 'src/components/InfoSidebar/store';
 
 // @ts-ignore

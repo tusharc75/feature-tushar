@@ -12,6 +12,7 @@ import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/Tec
 import { RoadMapProvider, useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import Roadmap from './Roadmap';
+import Timeline from 'src/pages/TechnicianScheduler/Vis';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
@@ -88,6 +89,7 @@ function TechnicianSchedulerImpl() {
         </Box>
       </Box>
       <Box className="detail-container-v1">
+        <Timeline />
         <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <Roadmap
             filter={filter}

@@ -4730,3 +4730,24 @@ td.google-visualization-orgchart-node {
     @apply text-gray-500;
   }
 }
+.vis-item-content {
+  width: 100%;
+  padding: 0px !important;
+}
+.vis-item {
+  border: 0px !important;
+}
+.vis-inner {
+  display: flex !important;
+  min-height: calc(100% - 2px) !important;
+  background-color: var(--dark-primary, white) !important;
+}
+.vis-labelset .vis-label {
+  border-bottom: 0 !important;
+}
+.vis-timeline {
+  border-color: var(--common-border-color) !important;
+  * {
+    border-color: var(--common-border-color) !important;
+  }
+}
