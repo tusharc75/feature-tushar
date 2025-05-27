@@ -159,7 +159,7 @@ const WarehouseDetailsPage = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={warehouseData} fields={warehouseFields} />
+            <DetailsPage data={warehouseData} fields={warehouseFields} resource={sidebarResource?.warehouse} referenceId={warehouseData?._id} />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

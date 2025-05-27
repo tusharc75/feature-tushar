@@ -141,7 +141,7 @@ const IrtTicketDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={irtTicketData} fields={fields} />
+              <DetailsPage data={irtTicketData} fields={fields} resource={sidebarResource?.irtTicket} referenceId={irtTicketData?._id} />
             )}
           </Box>
         </TabPanel>

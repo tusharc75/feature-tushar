@@ -271,7 +271,12 @@ const PurchaseOrderDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
+              <DetailsPage
+                data={purchaseOrderData}
+                fields={purchaseOrderFields}
+                resource={sidebarResource?.purchaseOrder}
+                referenceId={purchaseOrderData?._id}
+              />
             )}
           </Box>
         </TabPanel>
@@ -305,6 +310,8 @@ const PurchaseOrderDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
                       checkReceivedProduct={checkReceivedProduct}
+                      purchaseOrderFields={purchaseOrderFields}
+                      fetchPurchaseOrderData={fetchPurchaseOrderData}
                     />
                   )}
                   {currentStep === 1 && (
@@ -314,6 +321,7 @@ const PurchaseOrderDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
                       checkReceivedProduct={checkReceivedProduct}
+                      purchaseOrderFields={purchaseOrderFields}
                     />
                   )}
                 </Grid>

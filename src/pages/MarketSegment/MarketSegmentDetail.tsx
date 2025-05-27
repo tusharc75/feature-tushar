@@ -122,7 +122,7 @@ const MarketSegmentDetail = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </div>
         ) : (
-          <DetailsPage data={marketSegmentData} fields={fields} />
+          <DetailsPage data={marketSegmentData} fields={fields} resource={sidebarResource?.marketSegment} referenceId={marketSegmentData?._id} />
         )}
       </Box>
       {openUpdateDialog && (

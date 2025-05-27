@@ -217,7 +217,7 @@ const EmployeeMasterDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={employeeMasterData} fields={fields} />
+            <DetailsPage data={employeeMasterData} fields={fields} resource={sidebarResource?.employeeMaster} referenceId={employeeMasterData?._id} />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

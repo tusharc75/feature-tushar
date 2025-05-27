@@ -96,7 +96,7 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    if (!material?.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
+    if (!material?.filter((e) => !e.parentId).every((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
       setNextStepToolTip(rentalManagementMessage.validPrice);
     } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
       setNextStepToolTip(rentalManagementMessage.processQuotation);

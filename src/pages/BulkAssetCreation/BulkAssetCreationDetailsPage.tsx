@@ -172,7 +172,12 @@ const BulkAssetCreationDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={bulkAssetCreationData} fields={bulkAssetCreationFields} />
+              <DetailsPage
+                data={bulkAssetCreationData}
+                fields={bulkAssetCreationFields}
+                resource={sidebarResource?.bulkAssetCreation}
+                referenceId={bulkAssetCreationData?._id}
+              />
             )}
           </Box>
         </TabPanel>

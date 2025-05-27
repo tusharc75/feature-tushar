@@ -579,6 +579,8 @@ export default function DeliveryTicketDetail(props) {
                     }
                   }
                 ]}
+                resource={sidebarResource?.deliveryTicket}
+                referenceId={deliveryTicketData?._id}
               />
             ) : (
               <div className="p-2">

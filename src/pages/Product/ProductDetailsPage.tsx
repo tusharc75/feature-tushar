@@ -282,7 +282,13 @@ const ProductDetailsPage = () => {
               </div>
             ) : (
               <div className="pb-3">
-                <DetailsPage data={productData} fields={productFields} fullHeight={false} />
+                <DetailsPage
+                  data={productData}
+                  fields={productFields}
+                  fullHeight={false}
+                  resource={sidebarResource?.product}
+                  referenceId={productData?._id}
+                />
                 <Box mt={3}>
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} className={'form-v1'}>
                     <Grid container spacing={2}>

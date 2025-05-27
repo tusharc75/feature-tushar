@@ -233,7 +233,7 @@ const TruckMasterDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={truckMasterData} fields={fields} />
+            <DetailsPage data={truckMasterData} fields={fields} resource={sidebarResource?.truckMaster} referenceId={truckMasterData?._id} />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
