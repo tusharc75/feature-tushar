@@ -153,7 +153,12 @@ const CompetencyMasterDetail = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={competencyMasterData} fields={fields} />
+              <DetailsPage
+                data={competencyMasterData}
+                fields={fields}
+                resource={sidebarResource?.competencyType}
+                referenceId={competencyMasterData?._id}
+              />
             )}
           </Box>
         </TabPanel>

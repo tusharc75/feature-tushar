@@ -271,7 +271,12 @@ const PurchaseOrderDetailsPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={purchaseOrderData} fields={purchaseOrderFields} />
+              <DetailsPage
+                data={purchaseOrderData}
+                fields={purchaseOrderFields}
+                resource={sidebarResource?.purchaseOrder}
+                referenceId={purchaseOrderData?._id}
+              />
             )}
           </Box>
         </TabPanel>

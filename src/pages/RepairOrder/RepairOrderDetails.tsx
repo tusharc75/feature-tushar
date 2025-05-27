@@ -403,7 +403,12 @@ const RepairOrderDetails = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {repairOrderData && repairOrderFields.length ? (
-              <DetailsPage data={repairOrderData} fields={repairOrderFields} />
+              <DetailsPage
+                data={repairOrderData}
+                fields={repairOrderFields}
+                resource={sidebarResource?.repairOrder}
+                referenceId={repairOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -426,13 +431,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status
-                  )
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                  quotationVersionData?.status
+                )
                   ? () => {
-                    setShowQuotationConfirmBox(true);
-                  }
+                      setShowQuotationConfirmBox(true);
+                    }
                   : null
               }
               updateStatus={(step: number) => {
@@ -470,8 +475,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }
@@ -494,7 +499,6 @@ const RepairOrderDetails = () => {
                 invoiceStep={false}
                 updateOrderStatus={updateOrderStatus}
                 setNextStepToolTip={setNextStepToolTip}
-
               />
             )}
             {stepNames[currentStep] === 'Loading Ticket' && repairOrderData && (

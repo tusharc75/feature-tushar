@@ -239,7 +239,12 @@ const SubcontractAssemblyDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={subcontractAssemblyData} fields={fields} />
+            <DetailsPage
+              data={subcontractAssemblyData}
+              fields={fields}
+              resource={sidebarResource?.subcontractAssembly}
+              referenceId={subcontractAssemblyData?._id}
+            />
           )}
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>

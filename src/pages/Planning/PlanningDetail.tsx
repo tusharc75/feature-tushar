@@ -193,7 +193,7 @@ const PlanningDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={planningData} fields={fields} />
+              <DetailsPage data={planningData} fields={fields} resource={sidebarResource?.planning} referenceId={planningData?._id} />
             )}
           </Box>
         </TabPanel>

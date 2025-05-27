@@ -418,7 +418,12 @@ const LeadDetailsPage = () => {
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
                   </Box>
                 ) : (
-                  <DetailsPage data={leadData} fields={showAtLast ? fields : filteredLeadFields} />
+                  <DetailsPage
+                    data={leadData}
+                    fields={showAtLast ? fields : filteredLeadFields}
+                    resource={sidebarResource?.lead}
+                    referenceId={leadData?._id}
+                  />
                 )}
               </div>
               <Box pt={3}>

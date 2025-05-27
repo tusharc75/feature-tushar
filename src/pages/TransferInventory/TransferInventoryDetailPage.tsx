@@ -271,7 +271,12 @@ const TransferInventoryDetailPage = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={transferInventoryData} fields={transferInventoryFields} />
+              <DetailsPage
+                data={transferInventoryData}
+                fields={transferInventoryFields}
+                resource={sidebarResource?.transferInventory}
+                referenceId={transferInventoryData?._id}
+              />
             )}
           </Box>
         </TabPanel>

@@ -201,7 +201,7 @@ const ExpenseReportDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {expenseReportData && fields ? (
-              <DetailsPage data={expenseReportData} fields={fields} />
+              <DetailsPage data={expenseReportData} fields={fields} resource={sidebarResource?.expenseReport} referenceId={expenseReportData?._id} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
