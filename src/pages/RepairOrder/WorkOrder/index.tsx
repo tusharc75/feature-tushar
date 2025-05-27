@@ -56,6 +56,7 @@ import {
   workOrder
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -112,8 +113,9 @@ const WorkOrder = ({
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
-  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, workOrder: null, label: '', uniqueId: null, type: null });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -129,10 +131,6 @@ const WorkOrder = ({
         toastConfig.setToastConfig(error);
       });
   }, []);
-
-  // useEffect(() => {
-  //   setWalkmeData([]);
-  // }, []);
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (!rows || !rows.length) return;
@@ -455,6 +453,24 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+            {permissions?.attachment?.isRead && (
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({
+                      open: true,
+                      workOrder: row?.original?.workOrder?._id,
+                      label: row?.original?.type === MATERIAL_TYPE.serializedAsset ? row?.original?.workOrder?.workOrderNumber : row?.original?.detail,
+                      uniqueId: row?.original?.type === MATERIAL_TYPE.serializedAsset ? null : row?.original?._id,
+                      type: row?.original?.type
+                    });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color="primary" />
+                </IconButton>
+              </HtmlTooltip>)}
             {row?.original?.workOrder &&
               [MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) &&
               !user?.user?.brandPolicy?.workOrderConsumableHide && (
@@ -1360,14 +1376,16 @@ const WorkOrder = ({
               okBtnLoading={isSubmitting}
             />
           )}
-          {showDrawingDialog.open && (
+          {showAttachmentDialog.open && (
             <DiagramDialog
-              referenceId={showDrawingDialog.workOrder}
+              referenceId={showAttachmentDialog.workOrder}
               handleClose={() => {
-                setShowDrawingDialog({ open: false, workOrder: null });
+                setShowAttachmentDialog({ open: false, workOrder: null, label: '', uniqueId: null, type: null });
               }}
               resource={ACTIVITY_RESOURCE.workOrder}
-              attachmentType={ATTACHMENT_TYPE.drawing}
+              uniqueId={showAttachmentDialog.uniqueId}
+              referenceLabel={showAttachmentDialog?.label}
+              showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showAttachmentDialog?.type) ? false : true}
             />
           )}
           <MenuWithGroupping
@@ -1486,12 +1504,18 @@ const WorkOrder = ({
               id="upload-drawing"
               group="Documentation"
               onClick={() => {
-                setShowDrawingDialog({ open: true, workOrder: selectedRecords[0]?.workOrder?._id });
+                setShowAttachmentDialog({
+                  open: true,
+                  workOrder: selectedRecords[0]?.workOrder?._id,
+                  label: selectedRecords[0]?.type === MATERIAL_TYPE.serializedAsset ? selectedRecords[0]?.workOrder?.workOrderNumber : selectedRecords[0]?.detail,
+                  uniqueId: selectedRecords[0]?.type === MATERIAL_TYPE.serializedAsset ? null : selectedRecords[0]?._id,
+                  type: selectedRecords[0]?.type
+                });
                 setAnchorEl(null);
               }}
-              searchKey="Upload Drawing"
+              searchKey="Upload Attachments"
             >
-              <PiFileArchiveLight /> Upload Drawing
+              <PiFileArchiveLight /> Upload Attachments
             </ActionMenuItem>
             {!resourcePolicy?.hideAutoCompleteWorkOrder && (
               <ActionMenuItem
