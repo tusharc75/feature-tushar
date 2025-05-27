@@ -31,7 +31,7 @@ const ReplaceAssetReason = ({ handleClose, loading, handleSucess }) => {
                   required={true}
                   error={touched['reason'] && Boolean(errors['reason'])}
                   touched={Boolean(touched['reason']) && errors['reason']}
-                  onChange={(e) => setFieldValue('reason', e.target.value)}
+                  onChange={(e) => setFieldValue('reason', e)}
                 />
               </Box>
             </CustomDialogContent>

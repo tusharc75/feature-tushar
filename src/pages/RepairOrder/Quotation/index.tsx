@@ -40,6 +40,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -57,7 +58,8 @@ const Quotation = ({
   setQuotationVersionData,
   updateOrderStatus,
   invoiceStep,
-  currentStepName = 'Quotation'
+  currentStepName = 'Quotation',
+  setNextStepToolTip
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -92,6 +94,19 @@ const Quotation = ({
   useEffect(() => {
     setWalkmeData([]);
   }, []);
+
+  useEffect(() => {
+    if (!material?.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
+      setNextStepToolTip(rentalManagementMessage.validPrice);
+    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
+      setNextStepToolTip(rentalManagementMessage.processQuotation);
+    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
+      setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
+    } else {
+      setNextStepToolTip(null);
+    }
+  }, [material, quotationData?.versions[currentVersion]?._id, quotationData?.versions[currentVersion]?.status]);
+
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (walkmeInstance && walkmeInstance.type === 'flow' && rows.length) {
