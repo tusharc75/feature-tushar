@@ -188,8 +188,8 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                         <Box pt={1}>
                           <MultiLine
                             label="Description"
-                            onChange={(e) => {
-                              setFieldValue('description', e.target.value);
+                            onChange={(value) => {
+                              setFieldValue('description', value);
                             }}
                             value={values['description']}
                           />

@@ -406,7 +406,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                     />
                      <MultiLine
                       label="Description"
-                      onChange={(e) => setFieldValue('description', e.target.value.trimStart())}
+                      onChange={(value) => setFieldValue('description', value)}
                       value={values['description']}
                     />
                     {eventId && (

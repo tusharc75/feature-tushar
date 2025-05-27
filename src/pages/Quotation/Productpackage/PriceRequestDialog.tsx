@@ -32,8 +32,8 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (event) => {
-    setComment(event.target.value.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
   };
   useEffect(() => {
     fetchProductGridData();
