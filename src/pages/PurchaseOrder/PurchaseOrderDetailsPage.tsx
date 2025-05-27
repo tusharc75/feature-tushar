@@ -305,6 +305,8 @@ const PurchaseOrderDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
                       checkReceivedProduct={checkReceivedProduct}
+                      purchaseOrderFields={purchaseOrderFields}
+                      fetchPurchaseOrderData={fetchPurchaseOrderData}
                     />
                   )}
                   {currentStep === 1 && (
