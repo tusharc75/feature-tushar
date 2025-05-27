@@ -110,7 +110,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={costData ? 'Edit' : 'Add'}
+                title={costData ? 'Edit Manual Entry' : 'Add Manual Entry'}
                 onClose={() => {
                   if (!isEqual(ref?.current?.values, initialData.values)) {
                     setShowConfirmDialog(true);
