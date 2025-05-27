@@ -662,7 +662,11 @@ const Details = (props: DetailProps) => {
             )
           );
         })}
-        <ShowModificationData data={data} containerPadding={containerPadding} />
+        <ShowModificationData
+          data={data}
+          containerPadding={containerPadding}
+          resource={resource}
+        />
         {dialogData && dialogData.open && (
           <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
         )}
