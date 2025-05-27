@@ -7,11 +7,9 @@ import Grid from '@mui/material/Grid2';
 import { capitalize, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AiOutlineUserAdd } from 'react-icons/ai';
-import { BsCart2 } from 'react-icons/bs';
+import { AiOutlineDelete, AiOutlineUserAdd } from 'react-icons/ai';
 import { FiExternalLink } from 'react-icons/fi';
-import { PiBuildingOfficeThin, PiChecksLight, PiFileArchiveLight, PiPlusLight, PiSkipForwardLight } from 'react-icons/pi';
-import { RiFileHistoryLine } from 'react-icons/ri';
+import { PiBuildingOfficeThin, PiChecksLight, PiFileArchiveLight, PiPlusLight, PiSkipForwardLight, PiUploadSimpleLight } from 'react-icons/pi';
 import { useParams } from 'react-router-dom';
 import { AutoCompleteWorkOrder, PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -41,7 +39,6 @@ import routes from '../../../components/Helpers/Routes';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
-  ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
@@ -57,6 +54,9 @@ import {
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { GrRevert } from "react-icons/gr";
+import { GoListUnordered } from "react-icons/go";
+import { MdEdit } from "react-icons/md";
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -76,7 +76,7 @@ const WorkOrder = ({
   setCurrentStep,
   createNewVersionQuote,
   currentStepName = 'Work Order',
-  resourcePolicy
+  resourcePolicy,
 }) => {
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
@@ -1424,6 +1424,36 @@ const WorkOrder = ({
                 <PiPlusLight /> Add New Service
               </ActionMenuItem>
             )}
+            {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
+              <ActionMenuItem
+                id="add-consumables"
+                group="Add/Assign"
+                disabled={
+                  selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  var ids = [];
+                  if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
+                    const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
+                    ids = flattenArray(dataRows)
+                      ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
+                      ?.map((e) => e.materialId);
+                  } else {
+                    const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
+                    ids = flattenArray(dataRows)
+                      ?.filter((e) => serviceIds?.includes(e?.parentId))
+                      ?.map((e) => e.materialId);
+                  }
+                  setConsumablesDialog({ open: true, ids: ids, data: null });
+                  setAnchorEl(null);
+                }}
+                searchKey="Add Products/Consumables"
+              >
+                <PiPlusLight /> Add Products/Consumables
+              </ActionMenuItem>
+            )}
             {!resourcePolicy?.hideAssignTechnician && (
               <ActionMenuItem
                 id="assign-technician"
@@ -1470,36 +1500,6 @@ const WorkOrder = ({
                 <PiBuildingOfficeThin /> Assign Work Station
               </ActionMenuItem>
             )}
-            {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
-              <ActionMenuItem
-                id="add-consumables"
-                group="Add/Assign"
-                disabled={
-                  selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  var ids = [];
-                  if (selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset)) {
-                    const asset = selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset);
-                    ids = flattenArray(dataRows)
-                      ?.filter((e) => e?.workOrder?._id === asset?.workOrder?._id)
-                      ?.map((e) => e.materialId);
-                  } else {
-                    const serviceIds = selectedRecords?.filter((d) => d?.type === MATERIAL_TYPE.service)?.map((e) => e._id);
-                    ids = flattenArray(dataRows)
-                      ?.filter((e) => serviceIds?.includes(e?.parentId))
-                      ?.map((e) => e.materialId);
-                  }
-                  setConsumablesDialog({ open: true, ids: ids, data: null });
-                  setAnchorEl(null);
-                }}
-                searchKey="Add Products/Consumables"
-              >
-                <BsCart2 /> Add Products/Consumables
-              </ActionMenuItem>
-            )}
             <ActionMenuItem
               id="upload-drawing"
               group="Documentation"
@@ -1515,7 +1515,7 @@ const WorkOrder = ({
               }}
               searchKey="Upload Attachments"
             >
-              <PiFileArchiveLight /> Upload Attachments
+              <PiUploadSimpleLight /> Upload Attachments
             </ActionMenuItem>
             {!resourcePolicy?.hideAutoCompleteWorkOrder && (
               <ActionMenuItem
@@ -1582,7 +1582,7 @@ const WorkOrder = ({
                 }}
                 searchKey="Revert Service"
               >
-                <RiFileHistoryLine /> Revert Service
+                <GrRevert /> Revert Service
               </ActionMenuItem>
             )}
             {!resourcePolicy?.hideArrangeServices && (
@@ -1600,7 +1600,7 @@ const WorkOrder = ({
                 }
                 searchKey="Arrange Services"
               >
-                <RiFileHistoryLine /> Arrange Services
+                <GoListUnordered /> Arrange Services
               </ActionMenuItem>
             )}
             {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
@@ -1647,7 +1647,7 @@ const WorkOrder = ({
               }
               searchKey="Bulk Edit"
             >
-              <PiPlusLight /> Bulk Edit
+              <MdEdit /> Bulk Edit
             </ActionMenuItem>
             <ActionMenuItem
               id="delete"
@@ -1660,7 +1660,8 @@ const WorkOrder = ({
               disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
               searchKey="Delete"
             >
-              <PiFileArchiveLight /> Delete
+              <AiOutlineDelete className="text-gray-500" />
+              Delete
             </ActionMenuItem>
           </MenuWithGroupping>
         </Grid>

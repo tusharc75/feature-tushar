@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
@@ -89,6 +88,7 @@ const RepairOrderDetails = () => {
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
   const [resourceData, setResourceData] = useState(null);
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -417,6 +417,7 @@ const RepairOrderDetails = () => {
               isNextStep={false}
               nextStep={nextStep}
               isPrevStep={prevStep}
+              nextStepToolTip={nextStepToolTip}
               steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -492,6 +493,8 @@ const RepairOrderDetails = () => {
                 setQuotationVersionData={setQuotationVersionData}
                 invoiceStep={false}
                 updateOrderStatus={updateOrderStatus}
+                setNextStepToolTip={setNextStepToolTip}
+
               />
             )}
             {stepNames[currentStep] === 'Loading Ticket' && repairOrderData && (
@@ -517,6 +520,7 @@ const RepairOrderDetails = () => {
                 invoiceStep={true}
                 setQuotationVersionData={setQuotationVersionData}
                 updateOrderStatus={updateOrderStatus}
+                setNextStepToolTip={setNextStepToolTip}
               />
             )}
           </TabPanel>
