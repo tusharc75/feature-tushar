@@ -898,10 +898,10 @@ const Service = ({
                 setAnchorEl(null);
               }}
               disabled={!isAllowedToServiceEdit}
-              searchKey="Upload Documents"
+              searchKey="Upload Attachments"
             >
               <PiUploadSimpleLight />
-              Upload Documents
+              Upload Attachments
             </ActionMenuItem>
 
             <ActionMenuItem

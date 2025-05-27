@@ -1176,7 +1176,7 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Upload Documents
+        Upload Attachments
       </MenuItem>
       <MenuItem
         onClick={() => {
