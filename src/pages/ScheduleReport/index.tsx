@@ -74,12 +74,19 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.resource ? <div>
+          <p className="text-truncate">{row.original.resource}</p>
+        </div> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'emails',
+        Header: 'Emails',
+        Cell: ({ row }) => (row?.original?.emails?.length ? <p className="text-truncate">{row.original.emails}</p> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
