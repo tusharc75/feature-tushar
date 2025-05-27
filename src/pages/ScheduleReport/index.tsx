@@ -82,6 +82,11 @@ const ScheduleReport = () => {
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
       },
       {
+        accessor: 'emails',
+        Header: 'Emails',
+        Cell: ({ row }) => (row?.original?.emails?.length ? <p className="text-truncate">{row.original.emails}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'frequency',
         Header: 'Frequency',
         Cell: ({ row }) => (row?.original?.frequency ? <p className="text-truncate">{row.original.frequency}</p> : <NoDataCell />)
