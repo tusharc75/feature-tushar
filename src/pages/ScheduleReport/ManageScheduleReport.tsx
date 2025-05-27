@@ -670,7 +670,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                                   name="emails"
                                   type='email'
                                   variant="outlined"
-                                  placeholder='Add emails & press Enter'
+                                  placeholder='Add email & press enter'
                                 />
                               )}
                             />
