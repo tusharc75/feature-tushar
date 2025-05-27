@@ -17,8 +17,8 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
   const [commentError, setCommentError] = useState(null);
   const [submitting, setSubmitting] = useState(null);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target?.value?.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
     setCommentError(null);
   };
 

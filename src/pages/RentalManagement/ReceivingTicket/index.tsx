@@ -2964,8 +2964,8 @@ const ReceivingTicket = ({
                 <MultiLine
                   label={`Please enter the reason for ${statusToUpdate.status}`}
                   value={statusToUpdate.message}
-                  onChange={(e) => {
-                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
+                  onChange={(value) => {
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: value }));
                   }}
                 />
               )}

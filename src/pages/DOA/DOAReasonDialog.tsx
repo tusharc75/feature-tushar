@@ -14,8 +14,8 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
   const reasons = ['Price Too High', 'Price Too Low', 'Incorrect Data', 'Not Needed', 'DOA', 'Others'];
   const [value, setValue] = React.useState('');
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
+  const handleChange = (value) => {
+    setValue(value);
   };
 
   return (

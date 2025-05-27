@@ -468,8 +468,8 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                       value={values['comment']}
                       error={touched['comment'] && Boolean(errors['comment'])}
                       touched={touched['comment'] && errors['comment'] ? String(errors['comment']) : 'Comment is required'}
-                      onChange={(e) => {
-                        setFieldValue('comment', e.target.value);
+                      onChange={(value) => {
+                        setFieldValue('comment', value);
                       }}
                     />
                   </Box>

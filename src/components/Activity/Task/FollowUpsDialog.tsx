@@ -132,8 +132,8 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess })
                   <Grid size={{ md: 12, lg: 12, xs: 12, sm: 12 }}>
                     <MultiLine
                       label="Description"
-                      onChange={(e) => {
-                        setFieldValue('description', e.target.value);
+                      onChange={(value) => {
+                        setFieldValue('description', value);
                       }}
                       value={values?.description}
                     />

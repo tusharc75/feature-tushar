@@ -29,7 +29,7 @@ export default function QCcomment({ onClose, onSubmit, type }) {
           label="Comment"
           value={comment || ''}
           required={true}
-          onChange={(e: any) => setComment(e.target.value)}
+          onChange={(value) => setComment(value)}
         />
       </CustomDialogContent>
       <CustomDialogFooter>
