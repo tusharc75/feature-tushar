@@ -46,6 +46,8 @@ import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AiPriceSuggestionsDialog from 'src/pages/Quotation/Productpackage/AiPriceSuggestionsDialog';
 
 const Productpackage = ({
   quotationData,
@@ -89,6 +91,7 @@ const Productpackage = ({
   const [allFields, setAllFields] = useState([]);
   const [requestDialog, setRequestDialog] = useState(false);
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
+  const [aiPriceSuggestionDialog, setAiPriceSuggestionDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
@@ -864,6 +867,16 @@ const Productpackage = ({
       });
   };
 
+  const RightSideContents = () => {
+    return (
+      <ThemeButton
+        buttonType="theme"
+        onClick={() => setAiPriceSuggestionDialog(true)}>
+        AI Price Suggestions
+      </ThemeButton>
+    );
+  };
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -872,6 +885,7 @@ const Productpackage = ({
         isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: dataRows?.length > 0 ? false : true }}
+        rightSideContents={dataRows?.length > 0 ? <RightSideContents /> : null}
         hasXpadding
       />
       {columns ? (
@@ -1036,6 +1050,14 @@ const Productpackage = ({
           handelAskPriceToSupplier={handelAskPriceToSupplier}
           supplierContactData={supplierContactData}
           fields={allFields}
+        />
+      )}
+      {aiPriceSuggestionDialog && (
+        <AiPriceSuggestionsDialog
+          handleClose={() => {
+            setAiPriceSuggestionDialog(false)
+          }}
+          quotationData={quotationData}
         />
       )}
       {leadTimeDialog.open && (

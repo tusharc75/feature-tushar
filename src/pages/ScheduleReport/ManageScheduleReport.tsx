@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef, Fragment } from 'react';
-import { Dialog, Box, TextField, Typography } from '@mui/material';
+import { Dialog, Box, TextField, Typography, FormControlLabel, Checkbox } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -34,6 +34,7 @@ type ValueTypes = {
   sharepointclientId?: string;
   sharepointclientSecret?: string;
   fileType?: string;
+  status: string;
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
@@ -105,7 +106,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             subscribeUsers: data?.subscribeUsers || [],
             reportAction: data?.reportAction,
             sharepointSite: data?.sharepointSite,
-            fileType: data?.fileType || 'xslx'
+            fileType: data?.fileType || 'xslx',
+            status: data?.status
           };
           setScheduleData(newData);
         } catch (err) {
@@ -125,7 +127,8 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         week: '',
         day: new Date().getDay().toString(),
         hour: '',
-        fileType: 'xslx'
+        fileType: 'xslx',
+        status: 'active'
       });
     }
   }, [id]);
@@ -136,7 +139,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       const deepFilter: any = [];
 
       const column: any = [];
-      if(filterColumns?.length){
+      if (filterColumns?.length) {
         scheduleData?.filters?.forEach((_f) => {
           const col = filterColumns?.find((c) => c?.fieldData?.fieldName === _f?.term)?.fieldData;
           if (col?.lookup) {
@@ -280,6 +283,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     let errors = {};
     if (!values.scheduleName || values.scheduleName === '') {
       errors['scheduleName'] = 'Schedule name is required';
+    }
+    if (!values.status) {
+      errors['status'] = 'Status is required';
     }
     if (!values.resource) {
       errors['resource'] = 'Report is required';
@@ -577,7 +583,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv']}
+                          options={['xslx', 'csv', 'pdf']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
@@ -626,6 +632,28 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           />
                         </Grid>
                       )}
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Autocomplete
+                          options={['active', 'pause']}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => startCase(option)}
+                          isOptionEqualToValue={(option, value) => option === value}
+                          value={values.status}
+                          onChange={(_, newVal) => setFieldValue('status', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['status'] && Boolean(errors['status'])}
+                              helperText={touched['status'] && errors['status']}
+                              label="Status"
+                              name="status"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>
                       {values?.reportAction === 'Sharepoint Upload' && sharepointOptions && (
                         <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete

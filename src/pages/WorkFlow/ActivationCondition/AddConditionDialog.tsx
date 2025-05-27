@@ -203,8 +203,8 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                       <MultiLine
                         label="Field Value"
                         value={values?.value}
-                        onChange={(e) => {
-                          setFieldValue('fieldValue', e.target.value.trimStart());
+                        onChange={(value) => {
+                          setFieldValue('fieldValue', value);
                         }}
                         error={touched['fieldValue'] && Boolean(errors['fieldValue'])}
                         touched={touched['fieldValue'] && errors['fieldValue'] ? String(errors['fieldValue']) : 'Required Value'}

@@ -173,7 +173,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
           }
         },
       }}
-      id="draggable-paper"
       open={true}
       anchorEl={anchorEl}
       onClose={handleClose}
@@ -186,7 +185,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
         horizontal: 'center',
       }}
     >
-      <div className="flex justify-between items-center w-full border-b p-2">
+      <div id="draggable-paper" className="flex justify-between items-center w-full border-b p-2">
         <div className="text-left">
           <Avatar src={genieImage} sx={{ width: 30, height: 30 }} />
         </div>
@@ -217,7 +216,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 2, color: theme.palette.text.primary }}>Chat History</Typography>
             {chatHistory.length > 0 ? (chatHistory?.map((item: any, index: number) => (
-              <div key={index} className='pb-2'>
+              <div key={index} className='pb-2 ml-3'>
                 <p className="text-gray-500">
                   {item?.prompt}
                 </p>

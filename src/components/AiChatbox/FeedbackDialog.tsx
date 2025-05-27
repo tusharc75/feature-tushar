@@ -73,7 +73,7 @@ const FeedbackDialog = ({ handleClose, chatData, chatId }: FeedbackDialogProps) 
       <CustomDialogContent>
         <MultiLine
           label={'Feedback'}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(value) => setComment(value)}
           value={comment}
         />
       </CustomDialogContent>

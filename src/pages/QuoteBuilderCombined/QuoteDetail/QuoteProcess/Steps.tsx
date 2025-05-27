@@ -66,8 +66,8 @@ const Steps = (props) => {
   const [comment, setComment] = useState('');
   const [commentError, setCommentError] = useState(null);
   const [submitting, setSubmitting] = useState(null);
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target.value.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
   };
 
   const handleNext = () => {

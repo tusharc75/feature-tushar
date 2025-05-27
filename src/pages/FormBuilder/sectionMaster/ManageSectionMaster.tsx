@@ -112,7 +112,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                     <Grid size={{ xs: 12, sm: 12 }}>
                       <MultiLine
                         label="Description"
-                        onChange={(e) => setFieldValue('description', e.target.value)}
+                        onChange={(value) => setFieldValue('description', value)}
                         value={values['description']}
                       />
                     </Grid>
