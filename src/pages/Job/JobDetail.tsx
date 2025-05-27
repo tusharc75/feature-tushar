@@ -165,7 +165,7 @@ const JobDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={jobData} fields={fields} />
+              <DetailsPage data={jobData} fields={fields} resource={sidebarResource?.job} referenceId={jobData?._id} />
             )}
           </Box>
         </TabPanel>

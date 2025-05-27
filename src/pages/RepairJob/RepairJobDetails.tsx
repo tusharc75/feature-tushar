@@ -243,7 +243,7 @@ const RepairJobDetails = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {repairJobData && repairJobFields.length ? (
-              <DetailsPage data={repairJobData} fields={repairJobFields} />
+              <DetailsPage data={repairJobData} fields={repairJobFields} resource={sidebarResource?.repairJob} referenceId={repairJobData?._id} />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

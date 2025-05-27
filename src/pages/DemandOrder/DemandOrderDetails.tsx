@@ -243,7 +243,7 @@ const DemandOrderDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={demandOrderData} fields={fields} />
+                <DetailsPage data={demandOrderData} fields={fields} resource={sidebarResource?.demandOrder} referenceId={demandOrderData?._id} />
               </>
             )}
           </Box>

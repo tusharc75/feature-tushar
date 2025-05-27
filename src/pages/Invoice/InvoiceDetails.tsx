@@ -385,7 +385,7 @@ const InvoiceDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={invoiceData} fields={invoiceFields} />
+                <DetailsPage data={invoiceData} fields={invoiceFields} resource={sidebarResource?.invoice} referenceId={invoiceData?._id} />
               </>
             )}
           </Box>

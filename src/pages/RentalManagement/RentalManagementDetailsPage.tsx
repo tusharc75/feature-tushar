@@ -510,7 +510,12 @@ const RentalManagementDetailsPage = () => {
           <TabPanel value={tabValue} index={0}>
             <Box>
               {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
-                <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                <DetailsPage
+                  data={rentalManagementData}
+                  fields={rentalManagementFields}
+                  resource={sidebarResource?.rentalManagement}
+                  referenceId={rentalManagementData?._id}
+                />
               ) : null}
             </Box>
           </TabPanel>

@@ -250,7 +250,7 @@ const FieldTicketDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={fieldTicketData} fields={fields} />
+            <DetailsPage data={fieldTicketData} fields={fields} resource={sidebarResource?.fieldTicket} referenceId={fieldTicketData?._id} />
           )}
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>

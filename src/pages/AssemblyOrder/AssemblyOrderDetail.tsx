@@ -231,7 +231,12 @@ const AssemblyOrderDetail = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {assemblyOrderData && allFields.length ? (
-              <DetailsPage data={assemblyOrderData} fields={allFields} />
+              <DetailsPage
+                data={assemblyOrderData}
+                fields={allFields}
+                resource={sidebarResource?.assemblyOrder}
+                referenceId={assemblyOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

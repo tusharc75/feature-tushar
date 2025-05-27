@@ -6,7 +6,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
-import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource, wellMaster } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -124,7 +124,12 @@ const WellMasterDetailsPage = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={wellMasterData} fields={wellMasterFields} />
+            <DetailsPage
+              data={wellMasterData}
+              fields={wellMasterFields}
+              resource={sidebarResource?.wellMaster}
+              referenceId={wellMasterData?._id}
+            />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

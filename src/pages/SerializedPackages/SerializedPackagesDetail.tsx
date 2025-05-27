@@ -152,7 +152,12 @@ const SerializedPackagesDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={serializedPackagesData} fields={fields} />
+              <DetailsPage
+                data={serializedPackagesData}
+                fields={fields}
+                resource={sidebarResource?.serializedPackages}
+                referenceId={serializedPackagesData?._id}
+              />
             )}
           </Box>
         </TabPanel>

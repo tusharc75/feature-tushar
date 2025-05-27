@@ -5,7 +5,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
-import { ACTIVITY_RESOURCE } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -139,7 +139,12 @@ const ProductCategoryDetailPage = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={productCategoryData} fields={productCategoryFields} />
+            <DetailsPage
+              data={productCategoryData}
+              fields={productCategoryFields}
+              resource={sidebarResource?.productCategory}
+              referenceId={productCategoryData?._id}
+            />
           )}
         </Box>
       </Box>
