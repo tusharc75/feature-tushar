@@ -19,7 +19,6 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
       isLoading,
       initialView = 'dayGridMonth',
       getEventStyle,
-
       onNavigate,
       height = 'max(calc(100vh - 250px), 700px)',
       ...rest
@@ -55,6 +54,7 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
         clearTimeout(id);
       };
     }, [storeData]);
+
 
     return (
       <div className="relative">
