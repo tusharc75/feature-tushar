@@ -307,7 +307,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, fieldTicketFields, allowedToE
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            expander={resourcePolicy?.showAddPackages ? true : false}
+            expander={true}
           />
           <FinalPriceBox allFields={fieldTicketFields} data={fieldTicketData} />
         </Box>
