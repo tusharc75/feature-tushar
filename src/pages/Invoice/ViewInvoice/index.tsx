@@ -308,7 +308,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     ]
   };
 
-  console.log(dataRows)
 
   const leftSideContents = () => {
     return (
