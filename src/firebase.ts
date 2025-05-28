@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getMessaging } from 'firebase/messaging';
 import { firebaseConfigKey } from './config';
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: firebaseConfigKey.apiKey,
   authDomain: firebaseConfigKey.authDomain,
   projectId: firebaseConfigKey.projectId,

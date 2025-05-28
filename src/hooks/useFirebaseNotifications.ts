@@ -43,20 +43,4 @@ export const useFirebaseNotifications = (user: AnyObject) => {
 
     requestAndSyncToken();
   }, [user?._id, user?.fcmToken]);
-
-  // Handle incoming messages, When the app is in the foreground
-  // useEffect(() => {
-  //   const unsubscribe = onMessage(messaging, async (payload) => {
-  //     const registration = await navigator.serviceWorker.getRegistration();
-  //     if (registration) {
-  //       registration.showNotification(payload.notification?.title ?? 'Notification', {
-  //         body: payload.notification?.body,
-  //         icon: '/logo-24x24.png',
-  //         data: payload.data
-  //       });
-  //     }
-  //   });
-
-  //   return () => unsubscribe();
-  // }, []);
 };

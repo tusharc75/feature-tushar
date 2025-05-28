@@ -3,20 +3,55 @@
 importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-messaging-compat.js');
 
-firebase.initializeApp({
-  apiKey: 'AIzaSyBk4ZK0jrQNxRcJkOE5IylpVRvlohm7dBw',
-  authDomain: 'oms-notification-push.firebaseapp.com',
-  projectId: 'oms-notification-push',
-  storageBucket: 'oms-notification-push.firebasestorage.app',
-  messagingSenderId: '806532589288',
-  appId: '1:806532589288:web:85ffd60f0e6a0fa8484b5d',
-  measurementId: 'G-89TEFFHZD4'
+let messaging;
+
+// Initialize Firebase when config is received
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'INIT_FIREBASE') {
+    try {
+      const config = event.data.config;
+      if (!config?.apiKey) throw new Error('Invalid Firebase config');
+      
+      firebase.initializeApp(config);
+      messaging = firebase.messaging();
+    } catch (error) {
+      console.error('Firebase initialization failed:', error);
+    }
+  }
 });
 
-const messaging = firebase.messaging();
+// Handle push notifications
+self.addEventListener('push', (event) => {
+  try {
+    const payload = event.data?.json();
+    if (!payload) return;
 
-messaging.onBackgroundMessage(payload => {
-  // Firebase automatically displays notifications sent via the 'notification' key from the backend.
-  // If you need to customize the notification UI or handle data-only messages,
-  // you can manually display notifications using self.registration.showNotification().
+    const { notification, data } = payload;
+    const notificationData = notification || data;
+    
+    if (notificationData) {
+      const { title, body, icon, data: customData } = notificationData;
+      self.registration.showNotification(title || 'Notification', {
+        body: body || 'No message provided',
+        icon: icon || '/logo-24x24.ico',
+        data: customData || {}
+      });
+    }
+  } catch (error) {
+    console.error('Error handling push notification:', error);
+  }
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((windowClients) => {
+        const client = windowClients.find(c => c.url === url);
+        return client?.focus() || clients.openWindow(url);
+      })
+  );
 });

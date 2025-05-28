@@ -285,21 +285,30 @@ import DesktopDM from 'src/components/DesktopDM';
 import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
 import { useFirebaseNotifications } from 'src/hooks/useFirebaseNotifications';
+import { firebaseConfig } from './firebase';
 
 var notificationInterval: any = null;
 
 function App() {
 
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/firebase-messaging-sw.js")
-          .then((registration) => {
-          })
-      });
-      registerSW();
-    }
+    const registerServiceWorker = async () => {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+        // Send Firebase config to service worker
+        registration.active?.postMessage({
+          type: 'INIT_FIREBASE',
+          config: firebaseConfig
+        });
+      } catch (error) {
+        console.error('Service Worker registration failed:', error);
+      }
+    };
+    window.addEventListener('load', registerServiceWorker);
+    registerSW();
+    return () => window.removeEventListener('load', registerServiceWorker);
   }, []);
 
   const toast = useContext(CustomToastContext);
