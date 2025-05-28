@@ -15,8 +15,9 @@ import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, getEmailsFromContacts, i
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
+const Invoice = ({ invoiceData, invoiceFields, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -227,6 +228,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
             />
+            <FinalPriceBox allFields={invoiceFields} data={invoiceData} />
           </Box>
         ) : (
           <Box p={2} height={500}>
