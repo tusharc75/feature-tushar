@@ -11,6 +11,7 @@ import { sidebarResource } from 'src/constants/helpers';
 import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
+import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAssignDialog';
 import { useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import DesktopTimeline from 'src/pages/TechnicianScheduler/Vis/DesktopTimeline';
 import ServiceOrderSidebar, { ServiceOrderSidebarRef } from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar';
@@ -24,8 +25,10 @@ const TimelineElementImpl = () => {
   const serviceOrderSidebarRef = useRef<ServiceOrderSidebarRef>(null);
   const [viewType, setViewType] = useState<'job' | 'service'>('job');
   const [selectedResource, setStore] = useTimelineStore((store) => store.selectedResource);
+  const [assignServiceDialog] = useTimelineStore((store) => store.assignServiceDialog);
   const [createDialog, setCreateDialog] = useState(false);
   const technicianResources = useTechnicianResources(toastConfig, (resource) => setStore({ selectedResource: resource }));
+  const [loading, setLoading] = useState(false);
 
   const [timelineData, setTimelineData] = useState<{ groups: DataSet<any, 'id'> | null; items: DataSet<any, 'id'> | null }>({
     groups: null,
@@ -33,8 +36,10 @@ const TimelineElementImpl = () => {
   });
 
   const fetchRoadmap = useCallback(async () => {
+    if (!selectedResource?.resource) return;
+    setLoading(true);
     await axiosInstance()
-      .get<{ data: Activity[] }>(`/technician-scheduler/get-schedule?resource=${selectedResource.resource}`)
+      .get<{ data: Activity[] }>(`/technician-scheduler/get-schedule?resource=${selectedResource?.resource}`)
       .then(({ data: { data } }) => {
         let itemList = [];
         let groupList = [];
@@ -52,7 +57,7 @@ const TimelineElementImpl = () => {
               start = dayjs(start).tz().startOf('day').toDate();
               end = dayjs(end).tz().endOf('day').toDate();
             }
-            const singleItem: DataItem & { itemType: string } = {
+            const singleItem: DataItem & { itemType: string; status: string } = {
               ...technician,
               id: technician._id,
               group: item._id,
@@ -72,7 +77,7 @@ const TimelineElementImpl = () => {
               start = dayjs(start).tz().startOf('day').toDate();
               end = dayjs(end).tz().endOf('day').toDate();
             }
-            const singleItem: DataItem & { itemType: string } = {
+            const singleItem: DataItem & { itemType: string; status: string } = {
               ...technician,
               id: technician._id,
               group: item._id,
@@ -91,6 +96,9 @@ const TimelineElementImpl = () => {
         const groups = new DataSet(groupList);
         const items = new DataSet(itemList);
         setTimelineData({ groups, items });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [selectedResource?.resource]);
 
@@ -112,7 +120,7 @@ const TimelineElementImpl = () => {
           items={technicianResources}
           getSelectedMenuItem={(item) => item.key === selectedResource.key}
           onItemClick={(e, item) => {
-            setSelectedReSource(item);
+            setStore({ selectedResource: item });
           }}
         >
           <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.title}</span>
@@ -156,7 +164,7 @@ const TimelineElementImpl = () => {
         </div>
       </div>
       <div className="mt-4 grid h-[calc(100vh-200px)] min-h-[500px] grid-cols-[1fr_300px]">
-        <DesktopTimeline key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
+        <DesktopTimeline loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
         <ServiceOrderSidebar
           ref={serviceOrderSidebarRef}
           selectedResource={selectedResource}
@@ -193,6 +201,18 @@ const TimelineElementImpl = () => {
           onClose={() => setCreateDialog(false)}
           onSuccess={() => setCreateDialog(false)}
           isAutomated={true}
+        />
+      )}
+      {assignServiceDialog.open && (
+        <ServiceAssignDialog
+          handleClose={() => {
+            setStore({ assignServiceDialog: { open: false, data: null } });
+          }}
+          selectedResource={selectedResource}
+          handleAdd={(resourceData) => {
+            setStore({ assignTechnicianDialog: { open: true, technicianData: assignServiceDialog.data, service: resourceData } });
+          }}
+          viewType={viewType}
         />
       )}
     </div>

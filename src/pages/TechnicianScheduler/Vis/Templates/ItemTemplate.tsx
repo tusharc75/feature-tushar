@@ -43,8 +43,12 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
     }
   };
 
+  if (!service) {
+    return <div className="min-h-[52px]"></div>;
+  }
+
   return (
-    <>
+    <div className="min-h-[52px] ">
       <TooltipPopover
         title={
           <div className="">
@@ -137,7 +141,7 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
       >
         <div
           key={service._id}
-          className={cn(`singlePriority  flex w-full cursor-pointer rounded-md border bg-gray-100 text-left dark:bg-gray-900`, bgColor)}
+          className={cn(`singlePriority flex min-h-[52px] w-full cursor-pointer rounded-md border bg-gray-100 text-left dark:bg-gray-900`, bgColor)}
         >
           <div className={cn('block min-w-0 max-w-full flex-grow overflow-hidden', service.overlapCount > 0 ? 'flex items-center pl-2' : 'p-2')}>
             <>
@@ -205,6 +209,6 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
           </div>
         </div>
       </TooltipPopover>
-    </>
+    </div>
   );
 });

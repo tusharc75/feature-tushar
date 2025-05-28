@@ -6,11 +6,11 @@ import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmploye
 import { useTableReducer } from 'src/components/CustomReactTable';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { cn } from 'src/constants/helpers';
-import TechnicianList from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
+import TechnicianList from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import AssignTechnicianDialog from '../../Roadmap/AssignTechnicianDialogWithDateTime';
+// import AssignTechnicianDialog from '../../Roadmap/AssignTechnicianDialogWithDateTime';
 
 type ServiceOrderSidebarProps = {
   selectedResource: TechnicianResource;
@@ -169,7 +169,7 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
             setOpenTechnicianDialog={setOpenTechnicianDialog}
           />
         </div>
-        {assignTechnicianDialog.open && (
+        {/* {assignTechnicianDialog.open && (
           <AssignTechnicianDialog
             selectedResource={selectedResource}
             technicianData={assignTechnicianDialog.technicianData}
@@ -181,7 +181,7 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
               handleClose();
             }}
           />
-        )}
+        )} */}
         {openTechnicianDialog.open && (
           <AssignEmployeeDialog
             onSuccess={(data) => {

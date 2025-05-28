@@ -9,7 +9,7 @@ const TooltipWithStyle = styled(({ className, ...props }: TooltipProps) => <Tool
       backgroundColor: '#121212',
       color: '#ffffff',
       maxWidth: 300,
-      fontSize: theme.typography.pxToRem(15),
+      fontSize: '0.938rem',
       fontWeight: 'normal'
     }
   })

@@ -4734,20 +4734,34 @@ td.google-visualization-orgchart-node {
   width: 100%;
   padding: 0px !important;
 }
-.vis-item {
-  border: 0px !important;
-}
+
 .vis-inner {
   display: flex !important;
-  min-height: calc(100% - 2px) !important;
+  min-height: calc(100%) !important;
   background-color: var(--dark-primary, white) !important;
 }
-.vis-labelset .vis-label {
-  border-bottom: 0 !important;
+.vis-label {
+  border-bottom: 0px !important;
+  box-shadow: 0px -1px 0px 0px var(--common-border-color) !important; //border
 }
+
+.vis-time-axis .vis-grid.vis-minor,
+.vis-panel.vis-center,
+.vis-panel.vis-left,
+.vis-panel.vis-right,
+.vis-panel.vis-top,
+.vis-panel.vis-bottom,
+.vis-foreground .vis-group,
 .vis-timeline {
   border-color: var(--common-border-color) !important;
-  * {
-    border-color: var(--common-border-color) !important;
-  }
+}
+// .vis-item-visible-frame {
+//   display: none;
+// }
+.vis-item {
+  background-color: transparent !important;
+  overflow: hidden !important;
+  border: 0px !important;
+  color: inherit !important;
+  display: block !important;
 }

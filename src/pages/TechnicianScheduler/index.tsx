@@ -1,19 +1,15 @@
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { Box } from '@mui/material';
 import { useContext, useMemo, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import ButtonMenu from 'src/components/ButtonMenu';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useDndSensors } from 'src/hooks';
-import { SingleTechnician } from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/Sidebar';
-import ServiceOrderSidebar from 'src/pages/TechnicianScheduler/ServiceOrderSidebar';
-import { SingleRow } from 'src/pages/TechnicianScheduler/ServiceOrderSidebar/TechnicianList';
 import { RoadMapProvider, useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
-import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
-import Roadmap from './Roadmap';
 import Timeline from 'src/pages/TechnicianScheduler/Vis';
-import axiosInstance from 'src/axios/axiosInstance';
+import { TechnicianResource, useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 
 const filter = { view: 'Technician View', resource: '', fieldTicket: '' };
 
@@ -100,7 +96,7 @@ function TechnicianSchedulerImpl() {
       </Box>
       <Box className="detail-container-v1">
         <Timeline />
-        <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
+        {/* <DndContext sensors={sensors} onDragEnd={onDragEnd} onDragStart={onDragStart}>
           <Roadmap
             filter={filter}
             assignServiceDialog={assignServiceDialog}
@@ -152,7 +148,7 @@ function TechnicianSchedulerImpl() {
               <SingleRow {...activeItem} className="cursor-grabbing" />
             )}
           </DragOverlay>
-        </DndContext>
+        </DndContext> */}
       </Box>
     </Box>
   );
