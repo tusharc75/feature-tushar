@@ -23,10 +23,10 @@ const TechnicianAssign = ({
   const handleAssign = (skipDateValidation = false, dateTimeRanges = null) => {
     let data = [];
 
-    resourceData?.map((ele: any) => {
-      technicians?.map((technician) => {
+    resourceData?.forEach((ele: any) => {
+      technicians?.forEach((technician) => {
         if (dateTimeRanges?.length > 0) {
-          dateTimeRanges?.map((range) => {
+          dateTimeRanges?.forEach((range) => {
             data.push({
               uniqueId: ele?.uniqueId,
               service: ele?.serviceId,
