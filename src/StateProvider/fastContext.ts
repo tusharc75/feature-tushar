@@ -17,7 +17,7 @@ export const TEMP_USER_FILTER = 'tempUserFilter';
 export const ONLINE_USERS = 'onlineUsers';
 export const HANDLE_OPEN_CHAT = 'handleOpenChat';
 
-export type InitialStateFastContext = {
+const initialState: {
   searchQuery: string;
   themeColor: 'light' | 'dark';
   mobileUserFilter: IMobileUserFilter | null;
@@ -33,9 +33,7 @@ export type InitialStateFastContext = {
   tempUserFilter: { [key: string]: any };
   onlineUsers: string[];
   [HANDLE_OPEN_CHAT]: () => void;
-};
-
-const initialState: InitialStateFastContext = {
+} = {
   searchQuery: '',
   themeColor: 'light',
   mobileUserFilter: null,
