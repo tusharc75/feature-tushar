@@ -45,6 +45,8 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
             }}
             value={comment}
             required={required}
+            error={error}
+            touched={error}
           />
         </Box>
       </CustomDialogContent>

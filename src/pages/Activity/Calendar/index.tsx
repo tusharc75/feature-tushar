@@ -94,7 +94,6 @@ const BigCalendar = () => {
             allDay: true,
             type: d.type
           }));
-          console.log(newData)
           setActivities({ activities: newData, loading: false });
         })
         .catch(() => { });
