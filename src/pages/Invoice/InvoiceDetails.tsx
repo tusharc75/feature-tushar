@@ -421,6 +421,7 @@ const InvoiceDetails = () => {
                   {currentStep === 1 && invoiceData && (
                     <Invoice
                       invoiceData={invoiceData}
+                      invoiceFields={invoiceFields}
                       setNextStep={setNextStep}
                       handleChangeStatus={handleChangeStatus}
                       stepFullScreen={stepFullScreen}

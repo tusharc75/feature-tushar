@@ -30,6 +30,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
@@ -410,6 +411,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
+        fetchInvoiceData();
         setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         toastConfig.setToastConfig({
           open: true,
@@ -429,6 +431,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
       if (!showNext) {
         const { data } = await axiosInstance().put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows });
         fetchData();
+        fetchInvoiceData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -502,6 +505,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
           setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         }
         fetchData();
+        fetchInvoiceData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -533,6 +537,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
         .put(`${routes?.invoice?.path}/${invoiceData._id}/additional-cost/remove`, { ids: cost })
         .then(({ data }) => {
           fetchData();
+          fetchInvoiceData();
           setDeleteData(null);
           toastConfig.setToastConfig({
             open: true,
@@ -684,6 +689,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 _id: invoiceData?._id
               }}
             />
+            <FinalPriceBox allFields={invoiceFields} data={invoiceData} />
           </Box>
         </>
       ) : (
