@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
 
 type TPriority = 'low' | 'medium' | 'high' | 'UnAvailable';
 
@@ -11,7 +12,7 @@ export const getPriority = (status: string = ''): TPriority => {
   if (status) {
     return priority[priorityMap[status]] as TPriority;
   }
-  return priority[Math.floor(Math.random() * priority.length)];
+  return 'low';
 };
 
 export const getColorFromPriority = (priority): string => {
@@ -31,11 +32,14 @@ export const getColorFromPriority = (priority): string => {
   return `${color} ${priority}`;
 };
 
-export const getPositionOfDate = (taskStartDate, taskEndDate, rangeStartDate, singleDayWidth) => {
-  const startDate = dayjs(taskStartDate);
-  const endDate = dayjs(taskEndDate);
-  const rangeStart = dayjs(rangeStartDate);
-  const totalDuration = endDate.diff(startDate, 'day') + 1;
-  const leftPosition = startDate.diff(rangeStart, 'day') * singleDayWidth;
-  return { left: `${leftPosition}px`, width: `${Math.max(singleDayWidth * totalDuration, singleDayWidth)}px` };
+export const hasDateOverlap = (
+  schedules: Activity['technicianHistory'] | Activity['technicianUnavailability'],
+  startDate: Dayjs,
+  endDate: Dayjs
+): boolean => {
+  return schedules?.some((schedule) => {
+    const scheduleStart = dayjs(schedule.startDate || schedule.reference?.estimateStartDate);
+    const scheduleEnd = dayjs(schedule.endDate || schedule.reference?.estimateEndDate);
+    return startDate.isSameOrBefore(scheduleEnd) && endDate.isSameOrAfter(scheduleStart);
+  });
 };
