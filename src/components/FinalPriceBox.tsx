@@ -18,23 +18,24 @@ const FinalPriceBox = ({ allFields, data }) => {
     <>
       {fields && fields?.length > 0 && data?.finalAmount ? (
         <div className="flex w-full items-center justify-end">
-          <div className="p-2">
-            <div className="flex items-center justify-between">
-              <p>Sub Total : </p>
-              <p>{formatAmountWithCurrency(data?.currency, data?.subTotal || 0)?.fullFormatAmount || ''}</p>
+          <div className="w-96 p-3 rounded-lg shadow-lg dark:bg-gray-800"> <div className="text-right mb-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-medium text-gray-700 dark:text-gray-300">Sub Total</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100">{formatAmountWithCurrency(data?.currency, data?.subTotal || 0)?.fullFormatAmount || ''}</span>
             </div>
             {fields?.map((f) => {
-              return (
-                <div className="flex items-center justify-between">
-                  <p>{f?.fieldData?.fieldLabel} : </p>
-                  <p>{formatAmountWithCurrency(data?.currency, data[`${camelCase(f?.fieldData?.fieldName)}Amount`])?.fullFormatAmount || ''}</p>
-                </div>
+              return (<div className="flex justify-between items-center mb-2">
+                <span className="font-medium text-gray-700 dark:text-gray-300">{f?.fieldData?.fieldLabel} {`(${data[f?.fieldData?.fieldName]}%)`}</span>
+                <span className={`font-semibold ${f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.substract ? ` text-red-600` : ` text-gray-900 dark:text-gray-100`}`}>
+                  {f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.substract ? '- ' : ''}
+                  {formatAmountWithCurrency(data?.currency, data[`${camelCase(f?.fieldData?.fieldName)}Amount`])?.fullFormatAmount || ''}</span>
+              </div>
               );
             })}
-            <div className="flex items-center justify-between">
-              <p>Total : </p>
-              <p>{formatAmountWithCurrency(data?.currency, data?.finalAmount || 0)?.fullFormatAmount || ''}</p>
-            </div>
+            <div className="flex justify-between items-center pt-2 border-t">
+              <span className="font-bold text-gray-800 dark:text-gray-200">Total</span>
+              <span className="font-extrabold text-gray-900 dark:text-gray-100">{formatAmountWithCurrency(data?.currency, data?.finalAmount || 0)?.fullFormatAmount || ''}</span> </div>
+          </div>
           </div>
         </div>
       ) : null}
