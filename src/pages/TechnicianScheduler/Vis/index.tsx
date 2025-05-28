@@ -164,8 +164,7 @@ const TimelineElementImpl = () => {
           </HtmlTooltip>
         </div>
       </div>
-      <div className="mt-4 grid h-[calc(100vh-200px)] min-h-[500px] grid-cols-[1fr_300px]">
-        <DesktopTimeline onDragEnd={onDragEnd} loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
+      <div className="mt-4 grid h-[calc(100vh-200px)] min-h-[500px] grid-cols-[300px_1fr] gap-4">
         <ServiceOrderSidebar
           ref={serviceOrderSidebarRef}
           selectedResource={selectedResource}
@@ -173,6 +172,7 @@ const TimelineElementImpl = () => {
           isMobile={false}
           viewType={viewType}
         />
+        <DesktopTimeline onDragEnd={onDragEnd} loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
       </div>
 
       <Dialogs createDialog={createDialog} setCreateDialog={setCreateDialog} viewType={viewType} refreshAllData={handleRefreshAll} />
