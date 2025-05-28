@@ -454,10 +454,19 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           setIsColumnsLoading(false);
         }
 
-        data = data?.map((u: any) => {
-          let finalObject: any = prepareDataForGrid(u);
-          return finalObject;
-        });
+        if (resourceCamelCase === 'assetRepairCost') {
+          data = data?.map((u: any) => {
+            u.product = u?.asset?.product
+            let finalObject: any = prepareDataForGrid(u);
+            finalObject['repairCost'] = u?.[`finalPrice_${u?.currency?.toLowerCase()}`];
+            return finalObject;
+          });
+        } else {
+          data = data?.map((u: any) => {
+            let finalObject: any = prepareDataForGrid(u);
+            return finalObject;
+          });
+        }
         if ([`dailyVolumeReport`, 'volumeReport', 'monthlyRevenueReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
           data = data.filter((d) => {
             if (d?.isFooter) {
@@ -660,6 +669,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
                 'invoiceDetails',
                 'inventoryHistory',
                 'purchaseOrderDetails',
+                'assetRepairCost',
                 'purchaseOrderActualReceivedDetails',
                 'userSession',
                 'numberOfAssetsByStatus',
