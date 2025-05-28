@@ -192,7 +192,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
         headers,
         body: JSON.stringify({ 
           prompt: content,
-          type: "grammerCorrection"  // Fixed typo from "grammer" to "grammar"
+          type: "grammerCorrection"
         }),
       });
 
