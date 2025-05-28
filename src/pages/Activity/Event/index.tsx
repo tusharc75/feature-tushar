@@ -51,10 +51,9 @@ const Event = () => {
           const newData = data.map((d) => ({
             ...d,
             title: d.name,
-            start: d.startDate ? dayjs(d.startDate) : dayjs(),
-            end: d.dueDate ? dayjs(d.dueDate) : dayjs().add(20, 'day')
+            start: d.startDate ? dayjs.utc(d.startDate).tz().format() : dayjs().tz().format(),
+            end: d.dueDate ? dayjs.utc(d.dueDate).tz().format() : dayjs().add(20, 'day').tz().format()
           }));
-
           setEvents(newData);
         })
         .catch((err) => {
