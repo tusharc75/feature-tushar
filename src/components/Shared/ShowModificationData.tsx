@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 import { useMemo } from 'react';
-import { cn, displayDate } from 'src/constants/helpers';
+import { cn, displayDate, displayDateTime } from 'src/constants/helpers';
 
 type HandleGetUpdateDataProps = {
   date: string;
@@ -22,7 +22,7 @@ const handleGetUpdateData = (data: HandleGetUpdateDataProps, name: string) => {
   return newData;
 };
 
-const ShowModificationData = ({ data, containerPadding }: { data: Record<string, any>; containerPadding: string | number }) => {
+const ShowModificationData = ({ data, containerPadding, resource }: { data: Record<string, any>; containerPadding: string | number, resource: string }) => {
   const modificationData = useMemo(() => {
     const newData: HandleGetUpdateDataR[] = [];
     if (data?.createdBy?.user && (data?.createdBy?.user?.firstName || data?.createdBy?.user?.concatedName)) {
@@ -33,6 +33,9 @@ const ShowModificationData = ({ data, containerPadding }: { data: Record<string,
     }
     if (data?.completedBy?.user && (data?.completedBy?.user?.firstName || data?.completedBy?.user?.concatedName)) {
       newData.push(handleGetUpdateData(data.completedBy, 'Completed by'));
+    }
+    if (resource && data?.lastActivityBy?.user && (data?.lastActivityBy?.user?.firstName || data?.lastActivityBy?.user?.concatedName)) {
+      newData.push(handleGetUpdateData(data.lastActivityBy, 'Last Activity by'));
     }
     return newData;
   }, [data]);
@@ -57,7 +60,7 @@ const ShowModificationData = ({ data, containerPadding }: { data: Record<string,
                 >
                   <span className="text-[#5e5e5e] dark:text-[#e5e5e5]">{d.user}</span>{' '}
                   <span className="rounded-[2px] border bg-[var(--dark-secondary,#ebf9ff)] p-[0_6px] text-[13px] font-normal">
-                    {displayDate(d.date)}
+                    {displayDateTime(d.date)}
                   </span>
                 </Typography>
               </div>

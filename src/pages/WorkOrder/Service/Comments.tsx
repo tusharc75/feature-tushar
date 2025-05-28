@@ -193,7 +193,7 @@ const Comments = ({ handleClose, workOrderId, uniqueId, serviceName, stepId, ste
             <MultiLine
               label="Comment"
               value={comment || ''}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(value) => setComment(value)}
             />
           </Grid>
           <Grid size={{ xs: 12 }}>

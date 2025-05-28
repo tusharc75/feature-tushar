@@ -154,7 +154,7 @@ const ReceiverDialog = ({ handleClose, handleSucess, data }) => {
                <MultiLine
                 label="Comment"
                 value={comment}
-                onChange={(e: any) => setComment(e.target.value)}
+                onChange={(value) => setComment(value)}
               />
             </Grid>
           </Grid>

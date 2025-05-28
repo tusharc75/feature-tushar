@@ -13,7 +13,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, ATTACHMENT_TYPE, MATERIAL_TYPE, packages, sidebarResource } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import Packages from './Packages';
 import Products from './Products';
@@ -141,7 +141,7 @@ const PackageDetails = () => {
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 12, md: 12 }}>
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={packageData} fields={packageFields} />
+              <DetailsPage data={packageData} fields={packageFields} resource={sidebarResource?.packages} referenceId={packageData?._id} />
               {user?.user?.brandPolicy?.leadTime && (
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>

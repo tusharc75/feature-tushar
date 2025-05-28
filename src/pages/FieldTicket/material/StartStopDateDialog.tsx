@@ -118,8 +118,8 @@ export default function StartStopDate({ resource, onClose, type, loading, handle
                     <MultiLine
                       label="Notes"
                       value={values.notes}
-                      onChange={(e) => {
-                        setFieldValue('notes', e.target.value);
+                      onChange={(value) => {
+                        setFieldValue('notes',value);
                       }}
                       error={touched['notes'] && Boolean(errors['notes'])}
                       touched={touched['notes'] && String(errors['notes'])}

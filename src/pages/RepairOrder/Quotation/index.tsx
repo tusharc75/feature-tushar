@@ -40,6 +40,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -57,7 +58,8 @@ const Quotation = ({
   setQuotationVersionData,
   updateOrderStatus,
   invoiceStep,
-  currentStepName = 'Quotation'
+  currentStepName = 'Quotation',
+  setNextStepToolTip
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -92,6 +94,19 @@ const Quotation = ({
   useEffect(() => {
     setWalkmeData([]);
   }, []);
+
+  useEffect(() => {
+    if (!material?.filter((e) => !e.parentId).every((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
+      setNextStepToolTip(rentalManagementMessage.validPrice);
+    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
+      setNextStepToolTip(rentalManagementMessage.processQuotation);
+    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
+      setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
+    } else {
+      setNextStepToolTip(null);
+    }
+  }, [material, quotationData?.versions[currentVersion]?._id, quotationData?.versions[currentVersion]?.status]);
+
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (walkmeInstance && walkmeInstance.type === 'flow' && rows.length) {
@@ -317,8 +332,7 @@ const Quotation = ({
                     />
                   </IconButton>
                 </HtmlTooltip>
-
-                {[QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status) && !invoiceStep &&
+                {[QUOTATION_STATUS.buildingQuote, QUOTATION_STATUS.customerAcceptanceNotRequired].includes(quotationInfo?.versions[tempCurrentVersion]?.status) && !invoiceStep &&
                   <>
                     {row?.original?.parentId === null && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
                       <HtmlTooltip title="Add Manual Entry">
@@ -479,7 +493,7 @@ const Quotation = ({
               isBulkedit: false,
               showSaveAndNext: false
             });
-            setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: allSubRowData[subRowIdx + 1]?.parentId });
+            setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: null });
           } else {
             setIsProductEdit({
               open: true,
@@ -513,21 +527,37 @@ const Quotation = ({
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(dataRows[rowIndex + 1]);
-          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
             setShowCostDialog({
               open: true,
               showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false,
-              parentId: dataRows[rowIndex + 1]?.parentId
+              parentId: null
             });
           } else {
-            setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
-            setIsProductEdit({
-              open: true,
-              isBulkedit: false,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-            });
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                isBulkedit: false,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({
+                open: true,
+                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false,
+                parentId: null
+              });
+            } else {
+              setIsProductEdit({
+                open: true,
+                isBulkedit: false,
+                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+              });
+            }
           }
         } else {
           setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
@@ -572,7 +602,7 @@ const Quotation = ({
           : false;
     }
     if (rowData?.original?.type === MATERIAL_TYPE.manualEntry) {
-      setShowCostDialog({ open: true, showSaveAndNext: rowData?.index < rows?.length - 1 ? true : false, parentId: rowData?.original?.parentId });
+      setShowCostDialog({ open: true, showSaveAndNext: saveAndNext, parentId: null });
     } else {
       setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
       setIsProductEdit({

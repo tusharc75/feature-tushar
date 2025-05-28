@@ -12,7 +12,7 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import {  useSetWalkmeData } from 'src/components/CustomIntro';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddInvoice } from '../walkmeSteps';
 
 const renderedFrom = `po_invoice`;
@@ -144,7 +144,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
-         id={'add-invoice-button'}
+          id={'add-invoice-button'}
           onClick={() => {
             setAddOpen({ open: true, invoiceData: null });
           }}

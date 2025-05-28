@@ -170,7 +170,12 @@ const ServiceMasterDetailsPage = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={serviceMasterDetailData} fields={fields} />
+                <DetailsPage
+                  data={serviceMasterDetailData}
+                  fields={fields}
+                  resource={sidebarResource?.serviceMaster}
+                  referenceId={serviceMasterDetailData?._id}
+                />
                 {user?.user?.brandPolicy?.leadTime && (
                   <Box mb={2} mt={2}>
                     <Grid container spacing={2}>

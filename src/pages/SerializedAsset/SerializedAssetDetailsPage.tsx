@@ -95,34 +95,41 @@ const SerializedAssetDetailsPage = () => {
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
 
   const extraFields = [
-    ...(permissions?.rentalManagement?.isRead ? [{
-      fieldData: {
-        _id: '630dc2429ec41869032395b3',
-        fieldName: 'rentalJob',
-        fieldLabel: resources?.rentalManagement?.titleSingular,
-        lookup: true,
-        lookupResource: sidebarResource.rentalManagement,
-        resource: sidebarResource.serializedAsset,
-        type: 'dropDown',
-        sectionName: 'Other Information',
-      },
-      isRead: true,
-    }] : []),
-    ...(permissions?.repairOrder?.isRead ? [{
-      fieldData: {
-        _id: '630dc2429ec41869032395b5',
-        fieldName: 'repairOrder',
-        fieldLabel: resources?.repairOrder?.titleSingular,
-        lookup: true,
-        lookupResource: sidebarResource.repairOrder,
-        resource: sidebarResource.serializedAsset,
-        type: 'dropDown',
-        sectionName: 'Other Information',
-      },
-      isRead: true,
-    }] : []),
-  ]
-
+    ...(permissions?.rentalManagement?.isRead
+      ? [
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b3',
+              fieldName: 'rentalJob',
+              fieldLabel: resources?.rentalManagement?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.rentalManagement,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
+      : []),
+    ...(permissions?.repairOrder?.isRead
+      ? [
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b5',
+              fieldName: 'repairOrder',
+              fieldLabel: resources?.repairOrder?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.repairOrder,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
+      : [])
+  ];
 
   useEffect(() => {
     if (id) {
@@ -329,7 +336,7 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -611,6 +618,8 @@ const SerializedAssetDetailsPage = () => {
                       ? [...fields, customField, ...extraFields]
                       : [...fields, ...extraFields]
                   }
+                  resource={sidebarResource?.serializedAsset}
+                  referenceId={assetDetails?._id}
                 />
               </>
             )}
@@ -651,10 +660,7 @@ const SerializedAssetDetailsPage = () => {
           <AssetHistory id={id} refresh={refreshAssetHistory} resourceData={resourceData} fields={fields} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
-          <ServiceHistory
-            id={id}
-            refresh={refreshAssetHistory}
-          />
+          <ServiceHistory id={id} refresh={refreshAssetHistory} />
         </TabPanel>
         <TabPanel value={tabValue} index={tabIndexValue(resourceData, 8)}>
           <CertificationHistory

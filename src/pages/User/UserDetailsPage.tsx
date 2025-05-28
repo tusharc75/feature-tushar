@@ -450,7 +450,7 @@ const UserDetailsPage = () => {
                   </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
-                    <DetailsPage data={userData} fields={userFields} />
+                    <DetailsPage data={userData} fields={userFields} resource={sidebarResource?.user} referenceId={userData?._id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <OrgChartContainer
@@ -516,7 +516,9 @@ const UserDetailsPage = () => {
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                         <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
-                          <h6 className="text-sm font-semibold leading-[1.05] ">{`Assigned ${resources?.entity?.titlePlural}`} ({entities?.length || 0})</h6>
+                          <h6 className="text-sm font-semibold leading-[1.05] ">
+                            {`Assigned ${resources?.entity?.titlePlural}`} ({entities?.length || 0})
+                          </h6>
                           {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
                             <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
                               <HtmlTooltip title="Assign Entities">

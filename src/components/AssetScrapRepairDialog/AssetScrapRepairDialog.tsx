@@ -49,8 +49,8 @@ export default function AssetScrapRepairDialog({ statusToUpdate, setStatusToUpda
           ) : (
             <MultiLine
               label={`Please enter the reason for ${statusToUpdate.status}`}
-              onChange={(e) => {
-                setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
+              onChange={(value) => {
+                setStatusToUpdate((prevState) => ({ ...prevState, message: value }));
               }}
               value={statusToUpdate.message}
             />

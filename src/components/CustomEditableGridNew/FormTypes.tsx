@@ -93,7 +93,7 @@ const FormTypes = (props) => {
       required={required}
       disabled={disabled}
       name={name}
-      onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+      onChange={onChange ? onChange : (value) => handleChange(name,value)}
       value={values[name]}
       error={Boolean(errors[`${values._id}_${name}`])}
       touched={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}

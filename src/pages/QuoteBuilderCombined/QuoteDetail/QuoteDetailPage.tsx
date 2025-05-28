@@ -52,6 +52,8 @@ export default function QuoteDetailPage({ quoteData, selectedEntity, ifQuoteAppr
             <DetailsPage
               data={getCopyOfQuoteData}
               fields={!ifQuoteApprovedAapproved ? quoteFields.filter((_f) => _f.fieldData.sectionName !== 'Post-Quote Information') : quoteFields}
+              resource='Quotes'
+              referenceId={quoteData._id}
             />
           ) : (
             <Box p={2} height={500}>

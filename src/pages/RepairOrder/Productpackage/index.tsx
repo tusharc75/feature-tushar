@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { capitalize, sortBy, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -22,11 +21,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const dataAdded = {
   nextButtonAdded: false
@@ -65,7 +63,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   });
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
-  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -268,18 +265,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {permissions?.attachment?.isRead && (
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-                }}
-              >
-                <AttachFileIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>)}
           <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Deletion not allowed - Work Order Created'}>
             <span>
               <IconButton
@@ -742,17 +727,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             }
           }}
           selectedProducts={products}
-        />
-      )}
-      {showAttachmentDialog.open && (
-        <DiagramDialog
-          referenceId={repairOrderData?._id}
-          uniqueId={showAttachmentDialog?._id}
-          referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.repairOrder}
-          handleClose={() => {
-            setShowAttachmentDialog({ open: false, _id: null, label: '' });
-          }}
         />
       )}
       {addchildDialog.open && (

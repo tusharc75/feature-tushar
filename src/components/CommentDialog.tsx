@@ -40,8 +40,8 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
         <Box className="my-2">
           <MultiLine
             label="Comment"
-            onChange={(e) => {
-              setComment(e.target.value);
+            onChange={(value) => {
+              setComment(value);
             }}
             value={comment}
             required={required}

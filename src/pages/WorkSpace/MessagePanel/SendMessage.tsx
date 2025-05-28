@@ -1,5 +1,5 @@
-import { AttachFile, Cancel, Close, Mic, MicOff, Send } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { AttachFile, Cancel, Close, Mic, MicOff, Send, Square } from '@mui/icons-material';
+import { Button, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -33,7 +33,7 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => {},
+  onEditComplete = () => { },
   editorId = '',
   channelData,
   disabled = false,
@@ -116,7 +116,7 @@ const SendMessage = ({
                 socket.emit('joinChannel', data?._id);
               }
             })
-            .catch((error) => {});
+            .catch((error) => { });
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
@@ -126,6 +126,9 @@ const SendMessage = ({
       setMessage('');
       setFiles([]);
       setAudioBlobs([]);
+      if (editorRef.current) {
+        editorRef.current.setContent('');
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -187,7 +190,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => {}
+          toJSON: () => { }
         })
       });
     }
@@ -222,8 +225,17 @@ const SendMessage = ({
       setIsRecording(false);
     } else {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Audio recording is not supported in this browser');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+
+        const recorder = new MediaRecorder(stream, { mimeType });
 
         recorderRef.current = recorder;
         chunks.current = [];
@@ -233,15 +245,24 @@ const SendMessage = ({
         };
 
         recorder.onstop = () => {
-          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          const blob = new Blob(chunks.current, { type: mimeType });
           setAudioBlobs((prev) => [...prev, blob]);
           stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.onerror = (event) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Error during recording: ' + event.error
+          });
+          setIsRecording(false);
         };
 
         recorder.start();
         setIsRecording(true);
       } catch (e) {
-        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+        toastConfig.setToastConfig({ open: true, type: 'error', message: e.message || 'Error accessing microphone' });
       }
     }
   };
@@ -309,6 +330,51 @@ const SendMessage = ({
             </div>
           ))}
         </div>
+
+        {isRecording && (
+          <div className="relative flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm">
+            {/* Animated border glow */}
+            <div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                animation: 'glow 1.5s infinite alternate',
+                background: 'linear-gradient(90deg, #60a5fa22, #6366f122)'
+              }}
+            />
+            {/* Recording indicator */}
+            <div className="relative flex items-center gap-3">
+              {/* Mic icon with animated background */}
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 shadow-sm">
+                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                <Mic className="relative w-4 h-4 text-white" />
+              </div>
+
+              {/* Recording text and status */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-900 text-sm">Recording</span>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+                <span className="text-xs text-gray-600">Speak clearly into your microphone</span>
+              </div>
+            </div>
+            {/* Stop button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={getAudio}
+              className="ml-auto h-8 px-3 border-gray-300 hover:border-red-300 hover:bg-red-50 transition-colors"
+            >
+              <Square className="w-3 h-3 mr-1.5 fill-current" />
+              Stop
+            </Button>
+          </div>
+        )}
+
         <div className="editor [&_.tox-tinymce]:border-b-0" key={themeColor}>
           <Editor
             key={themeColor}
@@ -319,7 +385,6 @@ const SendMessage = ({
               }
             }}
             onKeyDown={handleKeyDown}
-            value={message ? message : '<span></span>'}
             onInit={(_evt, editor) => {
               editorRef.current = editor;
               if (initialMessage) {

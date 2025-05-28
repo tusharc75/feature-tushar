@@ -34,7 +34,7 @@ const CompleteDialog = ({ handleClose, serviceName, updateStatus, comment, setCo
             <MultiLine
               label="Comment"
               value={comment || ''}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(value) => setComment(value)}
             />
           </Box>
         </Box>
