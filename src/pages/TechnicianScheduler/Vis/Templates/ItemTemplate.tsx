@@ -1,6 +1,6 @@
 import { CalendarMonth, DeleteOutline } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { RiArrowGoBackFill, RiUserShared2Fill } from 'react-icons/ri';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -12,10 +12,12 @@ import { getColorFromPriority, getPriority } from '../utils';
 import { TimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 
 export const ItemTemplate = memo(({ service, setStore }: { service: any; setStore: (value: Partial<TimelineStore>) => void }) => {
-  const priority = getPriority(service.status || '');
-  const bgColor = getColorFromPriority(priority);
+  const priority = useMemo(() => getPriority(service.status || ''), [service.status]);
+  const bgColor = useMemo(() => getColorFromPriority(priority), [priority]);
 
-  const handleSelect = (event: any, data: any, type: 'un-assign' | 'dispatch' | 'return') => {
+  const handleSelect = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: any, type: 'un-assign' | 'dispatch' | 'return') => {
+    event.preventDefault();
+    event.stopPropagation();
     if (type === 'un-assign') {
       setStore({ unAssignTechnicianDialog: { open: true, id: service._id } });
     } else if (type === 'dispatch') {
@@ -48,7 +50,7 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
   }
 
   return (
-    <div className="min-h-[52px] ">
+    <div className="min-h-[52px]">
       <TooltipPopover
         title={
           <div className="">
@@ -107,8 +109,8 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                   {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.reserved && (
                     <ThemeButton
                       buttonType="theme"
-                      onClick={() => {
-                        handleSelect(null, service, 'dispatch');
+                      onClick={(e) => {
+                        handleSelect(e, service, 'dispatch');
                       }}
                     >
                       Dispatch
@@ -117,8 +119,8 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                   {service?.referenceType === sidebarResource.fieldServiceOrder && service?.status === TECHNICIAN_STATUS.dispatched && (
                     <ThemeButton
                       buttonType="theme"
-                      onClick={() => {
-                        handleSelect(null, service, 'return');
+                      onClick={(e) => {
+                        handleSelect(e, service, 'return');
                       }}
                     >
                       Return
@@ -126,8 +128,8 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                   )}
                   {service?.status === TECHNICIAN_STATUS.reserved && (
                     <ThemeButton
-                      onClick={() => {
-                        handleSelect(null, { _id: service?._id }, 'un-assign');
+                      onClick={(e) => {
+                        handleSelect(e, { _id: service?._id }, 'un-assign');
                       }}
                     >
                       Un-Assign
@@ -141,9 +143,12 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
       >
         <div
           key={service._id}
-          className={cn(`singlePriority flex min-h-[52px] w-full cursor-pointer rounded-md border bg-gray-100 text-left dark:bg-gray-900`, bgColor)}
+          className={cn(
+            `singlePriority pointer-events-auto flex min-h-[52px] w-full rounded-md border bg-gray-100 text-left dark:bg-gray-900`,
+            bgColor
+          )}
         >
-          <div className={cn('block min-w-0 max-w-full flex-grow overflow-hidden', service.overlapCount > 0 ? 'flex items-center pl-2' : 'p-2')}>
+          <div className={cn('block min-w-0 max-w-full flex-grow overflow-hidden ', service.overlapCount > 0 ? 'flex items-center pl-2' : 'p-2')}>
             <>
               <p className={cn('line-clamp-1 text-[13px] font-semibold leading-[16px]', service.overlapCount > 0 ? '' : 'mb-1')}>
                 {service?.itemType === 'technicianUnavailability' ? (
@@ -164,11 +169,11 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                         <HtmlTooltip title="Dispatch">
                           <IconButton
                             onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelect(null, service, 'dispatch');
+                              handleSelect(e, service, 'dispatch');
                             }}
                             size="small"
                             color="primary"
+                            className={cn('!text-[--primary] dark:!text-white')}
                           >
                             <RiUserShared2Fill size={18} />
                           </IconButton>
@@ -178,11 +183,11 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                       <HtmlTooltip title="Return">
                         <IconButton
                           onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelect(null, service, 'return');
+                            handleSelect(e, service, 'return');
                           }}
                           size="small"
                           color="primary"
+                          className={cn('!text-[--primary] dark:!text-white')}
                         >
                           <RiArrowGoBackFill size={18} />
                         </IconButton>
@@ -192,8 +197,7 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
                       <HtmlTooltip title="Un-Assign">
                         <IconButton
                           onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelect(null, { _id: service?._id }, 'un-assign');
+                            handleSelect(e, { _id: service?._id }, 'un-assign');
                           }}
                           size="small"
                           color="error"

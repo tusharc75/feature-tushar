@@ -1,5 +1,5 @@
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
-import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
+import { Activity, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import createFastContext from 'src/StateProvider/createFastContext';
 
 export type TimelineStore = {
@@ -7,8 +7,9 @@ export type TimelineStore = {
   leftSearchValue: string;
   technicianSearchValue: string;
   mapData: string[] | null;
-  assignTechnicianDialog: { open: boolean; technicianData: Activity | null; service: any | null };
+  assignTechnicianDialog: { open: boolean; technicianData: Activity[] | null; service: Service | null };
   unAssignTechnicianDialog: { open: boolean; id: string | null };
+  openTechnicianDialog: { open: boolean; data: Service | null };
   startEndDateConfirmationDialog: {
     open: boolean;
     type: 'stop' | 'start' | null;
@@ -29,7 +30,8 @@ const initialState: TimelineStore = {
   unAssignTechnicianDialog: { open: false, id: null },
   startEndDateConfirmationDialog: { open: false, type: null, referenceId: null, minDateTime: null, notes: '', _id: null },
   assignServiceDialog: { open: false, data: null },
-  selectedResource: null
+  selectedResource: null,
+  openTechnicianDialog: { open: false, data: null }
 };
 
 const { Provider, useStore } = createFastContext<TimelineStore>(initialState);

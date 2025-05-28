@@ -8,14 +8,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { sidebarResource } from 'src/constants/helpers';
-import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
-import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
-import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
-import ServiceAssignDialog from 'src/pages/TechnicianScheduler/Roadmap/ServiceAssignDialog';
+
 import { useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import DesktopTimeline from 'src/pages/TechnicianScheduler/Vis/DesktopTimeline';
+import Dialogs from 'src/pages/TechnicianScheduler/Vis/Dialogs';
 import ServiceOrderSidebar, { ServiceOrderSidebarRef } from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar';
-import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
+import { Activity, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { TimlineProvider, useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DataGroup, DataItem, DataSet } from 'vis-timeline/standalone';
@@ -25,7 +23,6 @@ const TimelineElementImpl = () => {
   const serviceOrderSidebarRef = useRef<ServiceOrderSidebarRef>(null);
   const [viewType, setViewType] = useState<'job' | 'service'>('job');
   const [selectedResource, setStore] = useTimelineStore((store) => store.selectedResource);
-  const [assignServiceDialog] = useTimelineStore((store) => store.assignServiceDialog);
   const [createDialog, setCreateDialog] = useState(false);
   const technicianResources = useTechnicianResources(toastConfig, (resource) => setStore({ selectedResource: resource }));
   const [loading, setLoading] = useState(false);
@@ -34,6 +31,10 @@ const TimelineElementImpl = () => {
     groups: null,
     items: null
   });
+
+  const onDragEnd = ({ service, technician }: { service: Service; technician: Activity }) => {
+    setStore({ assignTechnicianDialog: { open: true, service, technicianData: [technician] } });
+  };
 
   const fetchRoadmap = useCallback(async () => {
     if (!selectedResource?.resource) return;
@@ -61,8 +62,8 @@ const TimelineElementImpl = () => {
               ...technician,
               id: technician._id,
               group: item._id,
+              status: technician.status,
               content: technician?.reference?.optionLabel,
-              status: '',
               start,
               end,
               itemType: technician.type || 'technicianHistory',
@@ -108,7 +109,7 @@ const TimelineElementImpl = () => {
 
   const handleRefreshAll = () => {
     fetchRoadmap();
-    serviceOrderSidebarRef.current?.fetchServiceData();
+    serviceOrderSidebarRef.current?.fetchServiceData(selectedResource);
   };
 
   return (
@@ -164,7 +165,7 @@ const TimelineElementImpl = () => {
         </div>
       </div>
       <div className="mt-4 grid h-[calc(100vh-200px)] min-h-[500px] grid-cols-[1fr_300px]">
-        <DesktopTimeline loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
+        <DesktopTimeline onDragEnd={onDragEnd} loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
         <ServiceOrderSidebar
           ref={serviceOrderSidebarRef}
           selectedResource={selectedResource}
@@ -174,47 +175,7 @@ const TimelineElementImpl = () => {
         />
       </div>
 
-      {createDialog && selectedResource?.resource === sidebarResource.fieldServiceOrder && (
-        <ManageServiceOrderDialog
-          isClone={false}
-          serviceOrderId={null}
-          onClose={() => setCreateDialog(false)}
-          onSuccess={() => setCreateDialog(false)}
-          open={createDialog}
-          isRedirectTodetailPage={false}
-        />
-      )}
-      {createDialog && selectedResource?.resource === sidebarResource.fieldTicket && (
-        <ManageFieldTicket
-          id={null}
-          isClone={false}
-          onClose={() => setCreateDialog(false)}
-          onSuccess={() => setCreateDialog(false)}
-          isRedirectTodetailPage={false}
-        />
-      )}
-      {createDialog && selectedResource?.resource === sidebarResource.rentalManagement && (
-        <ManageRentalManagementDialog
-          isClone={false}
-          open={createDialog}
-          rentalManagementId={null}
-          onClose={() => setCreateDialog(false)}
-          onSuccess={() => setCreateDialog(false)}
-          isAutomated={true}
-        />
-      )}
-      {assignServiceDialog.open && (
-        <ServiceAssignDialog
-          handleClose={() => {
-            setStore({ assignServiceDialog: { open: false, data: null } });
-          }}
-          selectedResource={selectedResource}
-          handleAdd={(resourceData) => {
-            setStore({ assignTechnicianDialog: { open: true, technicianData: assignServiceDialog.data, service: resourceData } });
-          }}
-          viewType={viewType}
-        />
-      )}
+      <Dialogs createDialog={createDialog} setCreateDialog={setCreateDialog} viewType={viewType} refreshAllData={handleRefreshAll} />
     </div>
   );
 };

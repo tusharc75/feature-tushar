@@ -1,13 +1,10 @@
 import axios, { CancelToken } from 'axios';
-import { isArray, isObject } from 'lodash';
 import { forwardRef, memo, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmployeeDialog';
 import { useTableReducer } from 'src/components/CustomReactTable';
-import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import { cn } from 'src/constants/helpers';
-import TechnicianList from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar/TechnicianList';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import TechnicianList from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar/TechnicianList';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 // import AssignTechnicianDialog from '../../Roadmap/AssignTechnicianDialogWithDateTime';
@@ -22,20 +19,16 @@ type ServiceOrderSidebarProps = {
 const renderedFrom = `service_order_technician`;
 
 export type ServiceOrderSidebarRef = {
-  fetchServiceData: () => void;
+  fetchServiceData: (selectedResource: TechnicianResource, leftSearchValue?: string) => void;
 };
 
 const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderSidebarProps>(
   ({ selectedResource, isMobile, viewType, fetchRoadmap }, ref) => {
-    const [assignTechnicianDialog, setStore] = useTimelineStore((store) => store.assignTechnicianDialog);
-    const [unAssignTechnicianDialog] = useTimelineStore((store) => store.unAssignTechnicianDialog);
     const [leftSearchValue] = useTimelineStore((state) => state.leftSearchValue);
 
     const toastConfig = useContext(CustomToastContext);
     const { state, dispatch } = useTableReducer({ renderedFrom });
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [container, setContainer] = useState<HTMLDivElement>(null);
-    const [openTechnicianDialog, setOpenTechnicianDialog] = useState({ open: false, data: null });
 
     const fetchData = (selectedResource: TechnicianResource, search?: string, cancelToken?: CancelToken) => {
       dispatch({ type: 'loading', loading: true });
@@ -77,53 +70,9 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
         });
     };
 
-    const handleAssign = (technicians, resourceData) => {
-      const technician: any = [];
-      technicians.forEach((d) => {
-        const element: any = {};
-        element.technician = d?._id;
-        element.uniqueId = resourceData?._id;
-        element.service = resourceData?.service?._id;
-        element.warehouse = resourceData?.warehouse;
-        element.referenceId = resourceData?.resourceId;
-        element.referenceType = selectedResource?.resource;
-        element.estimateStartDate = resourceData?.service?.estimateStartDate || resourceData?.estimateStartDate;
-        element.estimateEndDate = resourceData?.service?.estimateEndDate || resourceData?.estimateEndDate;
-        technician.push(element);
-      });
-      setIsSubmitting(true);
-      axiosInstance()
-        .post(`/technician`, { technician: technician })
-        .then(() => {
-          fetchData(selectedResource);
-          handleSucess();
-          setOpenTechnicianDialog({ open: false, data: null });
-          setIsSubmitting(false);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    };
-
-    const handleUnAssign = () => {
-      setIsSubmitting(true);
-      axiosInstance()
-        .put(`/technician`, { ids: [unAssignTechnicianDialog?.id] })
-        .then(() => {
-          fetchData(selectedResource);
-          handleSucess();
-          setIsSubmitting(false);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    };
-
     useImperativeHandle(ref, () => {
       return {
-        fetchServiceData: () => {
+        fetchServiceData: (selectedResource, leftSearchValue) => {
           fetchData(selectedResource, leftSearchValue);
         }
       };
@@ -141,16 +90,6 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedResource, leftSearchValue, viewType]);
 
-    const handleClose = () => {
-      setStore({ assignTechnicianDialog: { open: null, service: null, technicianData: null }, unAssignTechnicianDialog: { data: null, open: null } });
-    };
-
-    const handleSucess = () => {
-      fetchData(selectedResource, leftSearchValue);
-      fetchRoadmap();
-      handleClose();
-    };
-
     return (
       <>
         <div
@@ -166,53 +105,8 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
             dispatch={dispatch}
             state={state}
             viewType={viewType}
-            setOpenTechnicianDialog={setOpenTechnicianDialog}
           />
         </div>
-        {/* {assignTechnicianDialog.open && (
-          <AssignTechnicianDialog
-            selectedResource={selectedResource}
-            technicianData={assignTechnicianDialog.technicianData}
-            selectedServiceOrder={[assignTechnicianDialog.service]}
-            handleSucess={() => {
-              handleSucess();
-            }}
-            handleClose={() => {
-              handleClose();
-            }}
-          />
-        )} */}
-        {openTechnicianDialog.open && (
-          <AssignEmployeeDialog
-            onSuccess={(data) => {
-              handleAssign(data, openTechnicianDialog.data);
-            }}
-            handleClose={() => {
-              setOpenTechnicianDialog({ open: false, data: null });
-            }}
-            defaultCompetencyType={
-              openTechnicianDialog?.data?.service?.competencyType
-                ? isObject(openTechnicianDialog?.data?.service?.competencyType)
-                  ? [openTechnicianDialog?.data?.service?.competencyType]
-                  : isArray(openTechnicianDialog?.data?.service?.competencyType)
-                    ? openTechnicianDialog?.data?.service?.competencyType
-                    : []
-                : []
-            }
-            warehouse={openTechnicianDialog.data?.warehouse}
-            ids={[]}
-            isSubmitting={isSubmitting}
-          />
-        )}
-        {unAssignTechnicianDialog.open && (
-          <ConfirmationDialogRaw
-            open={true}
-            message={`Are you sure you want to un-assign technician ?`}
-            okBtnLoading={isSubmitting}
-            onClose={handleClose}
-            onOk={handleUnAssign}
-          />
-        )}
       </>
     );
   }

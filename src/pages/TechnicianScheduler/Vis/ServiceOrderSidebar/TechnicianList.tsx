@@ -7,20 +7,18 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
 import { throttle } from 'src/hooks/useThrottle';
-import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 
 type TechnicianListProps = {
   state: TInitialState;
-  dispatch: React.Dispatch<TActios>;
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
   isMobile: boolean;
   viewType: string;
-  setOpenTechnicianDialog: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const TechnicianList = ({ dispatch, state, selectedResource, container, isMobile, viewType, setOpenTechnicianDialog }: TechnicianListProps) => {
+const TechnicianList = ({ state, selectedResource, container, isMobile, viewType }: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
   const [containerSize, setContainerSize] = useState({ width: 300 - 16, height: isMobile ? 150 : 600 });
@@ -80,7 +78,6 @@ const TechnicianList = ({ dispatch, state, selectedResource, container, isMobile
                 setSize={setSize}
                 isMobile={isMobile}
                 selectedType={selectedResource?.key}
-                setOpenTechnicianDialog={setOpenTechnicianDialog}
                 viewType={viewType}
               />
             </div>
@@ -118,8 +115,8 @@ const RowSkeleton = ({ isMobile }) => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
-  const [activeItemData, setStore] = useRoadMapStore((state) => state.activeItemData);
+export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, viewType }: any) => {
+  const [activeItemData, setStore] = useTimelineStore((state) => state.activeItemData);
   const rowRef = useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -216,21 +213,11 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
     event.dataTransfer.effectAllowed = 'move';
     const data = {
       id: row._id,
-      index: index,
-      row,
-      props: { row, index, setSize, selectedType, isMobile, type: 'sidebar' },
-      type: 'sidebar',
-      start: new Date(),
-      end: new Date(1000 * 60 * 10 + new Date().valueOf())
+      data: row,
+      from: 'sidebar'
     };
-    event.dataTransfer.setData('text', JSON.stringify(data));
-    // event.target.addEventListener('dragend', handleDragEnd.bind(this), false);
+    event.dataTransfer.setData('text/plain', JSON.stringify(data));
   }
-
-  // function handleDragEnd(event) {
-  //   // Last item that just been dragged, its ID is the same of event.target
-  //   console.log(event, event.target.id, event.dataTransfer);
-  // }
 
   return (
     <div
@@ -269,8 +256,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
               fullWidth
               className="text-sm"
               sx={{ fontSize: '11px' }}
-              onClick={() => {
-                setOpenTechnicianDialog({ open: true, data: row });
+              onClick={(e) => {
+                e.stopPropagation();
+                setStore({ openTechnicianDialog: { open: true, data: row } });
               }}
             >
               Assign Technicians

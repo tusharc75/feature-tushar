@@ -4765,3 +4765,9 @@ td.google-visualization-orgchart-node {
   color: inherit !important;
   display: block !important;
 }
+.vis-timeline {
+  background-color: var(--dark-primary, white);
+}
+.vis-text.vis-minor {
+  border-top: 1px solid var(--common-border-color);
+}

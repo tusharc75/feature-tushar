@@ -38,13 +38,20 @@ const GroupTemplate = ({
   const textColorClass = showColor ? (isBlocked ? 'text-white' : 'text-white') : '';
   const bgColorClass = showColor ? (isBlocked ? 'bg-red-500' : 'bg-green-500') : '';
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log(e);
+  };
+
   return (
     <div
       className={cn(
-        'flex  w-full max-w-[299px] cursor-grab items-center !justify-between bg-[--dark-primary,white] px-4 py-2 transition-colors',
+        'pointer-events-auto  flex w-full max-w-[299px] cursor-grab items-center !justify-between bg-[--dark-primary,white] px-4 py-2 transition-colors',
         textColorClass,
         bgColorClass
       )}
+      onDragStart={handleDragStart}
       draggable
     >
       <div className="flex min-w-0 items-center gap-4">

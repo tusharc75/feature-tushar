@@ -59,7 +59,6 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
       if (newTheme) {
         root.style.cssText = newTheme.join(';');
       }
-      console.log(theme);
       return () => {
         const root = document.getElementsByTagName('html')[0];
         root.removeAttribute('data-mode');

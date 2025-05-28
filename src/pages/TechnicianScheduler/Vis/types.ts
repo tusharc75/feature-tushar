@@ -1,3 +1,7 @@
+export type DNDFrom = 'sidebar';
+
+export type DNDData = { id: string; data: Service; from: DNDFrom };
+
 export type Activity = {
   _id?: string;
   photo?: string;
@@ -14,6 +18,7 @@ export type Activity = {
   competency?: string[];
   history?: CreatedBy[];
   updatedBy?: CreatedBy;
+  status?: any;
   competencies?: CompetencyType[];
   user?: CompetencyType;
   technicianUnavailability?: TechnicianUnavailability[];
@@ -94,6 +99,153 @@ export type Warehouse = {
   address?: string;
   manager?: string[];
   materialHandlers?: any[];
+  optionValue?: string;
+  optionLabel?: string;
+};
+
+export type Over = {
+  event?: DragEvent;
+  item?: null;
+  isCluster?: boolean;
+  items?: null;
+  group?: string;
+  customTime?: null;
+  what?: string;
+  pageX?: number;
+  pageY?: number;
+  x?: number;
+  y?: number;
+  time?: Date;
+  snappedTime?: Date;
+};
+
+export type Service = TService | TJob;
+
+export type TService = {
+  _id?: string;
+  fieldServiceOrderNumber?: string;
+  customerContact?: CustomerContact;
+  billingAddress?: IngAddress;
+  shippingAddress?: IngAddress;
+  currency?: string;
+  pdfTemplate?: PDFTemplate;
+  estimateStartDate?: Date;
+  estimateEndDate?: Date;
+  status?: string;
+  owner?: CustomerContact;
+  collaborator?: any[];
+  brand?: string;
+  createdBy?: CreatedBy;
+  processStatus?: string;
+  updatedBy?: CreatedBy;
+  warehouse?: string;
+  service?: SService;
+  wellNumber?: any[];
+  index?: number;
+  resourceId?: string;
+  serviceName?: string;
+  serviceId?: string;
+  competencies?: string;
+  resourceNumber?: string;
+};
+export type TJob = {
+  _id?: string;
+  fieldServiceOrderNumber?: string;
+  customerContact?: CustomerContact;
+  billingAddress?: IngAddress;
+  shippingAddress?: IngAddress;
+  currency?: string;
+  pdfTemplate?: PDFTemplate;
+  estimateStartDate?: Date;
+  estimateEndDate?: Date;
+  status?: string;
+  owner?: CustomerContact;
+  collaborator?: any[];
+  brand?: string;
+  createdBy?: AtedBy;
+  processStatus?: string;
+  updatedBy?: AtedBy;
+  warehouse?: string;
+  wellNumber?: any[];
+  index?: number;
+  resourceId?: string;
+  resourceNumber?: string;
+  service?: SService;
+};
+
+export type SService = {
+  materialId?: string;
+  type?: string;
+  unit?: string[];
+  pricingMethod?: string[];
+  qty?: number;
+  parentId?: null;
+  estimateStartDate?: Date;
+  estimateEndDate?: Date;
+  _id?: string;
+  price_usd?: number;
+  finalPrice_usd?: number;
+  description?: string;
+  qtyDisplay?: number;
+  serviceName?: string;
+  serviceDescription?: string;
+  serviceImage?: string;
+  preWork?: boolean;
+  customerNotificationOnComplete?: boolean;
+  costPrice?: number;
+  serviceType?: string;
+  listPrice?: number;
+  user?: string;
+  brand?: string;
+  entity?: string;
+  createdBy?: CreatedBy;
+  history?: CreatedBy[];
+  updatedBy?: CreatedBy;
+  steps?: Step[];
+  competencies?: any[];
+  uniqueId?: string;
+  competencyType?: any;
+};
+export type Step = {
+  _id?: string;
+  stepName?: string;
+  order?: number;
+  leadDay?: number;
+  costPrice?: number;
+  listPrice?: number;
+  isPassFail?: boolean;
+  isPassAddon?: boolean;
+  passAddon?: any[];
+  isFailAddon?: boolean;
+  failAddon?: any[];
+  isJumpStepPass?: boolean;
+  jumpStepsPass?: any[];
+  isJumpStepFail?: boolean;
+  jumpStepsFail?: any[];
+  isQuoteRevisionOnFail?: boolean;
+  returnToServiceOnFail?: string;
+  isReturnToServiceOnFail?: boolean;
+  isReturnToStepOnFail?: boolean;
+  returnToStepOnFail?: string;
+};
+export type IngAddress = {
+  city?: string;
+  zipCode?: string;
+  optionValue?: string;
+  optionLabel?: string;
+};
+export type AtedBy = {
+  user?: string;
+  date?: Date;
+};
+export type CustomerContact = {
+  email?: string;
+  optionValue?: string;
+  optionLabel?: string;
+};
+export type PDFTemplate = {
+  owner?: string;
+  collaborator?: any[];
   optionValue?: string;
   optionLabel?: string;
 };
