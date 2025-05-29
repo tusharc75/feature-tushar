@@ -6,7 +6,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Activity from '.';
 import HideWhenOffline from '../HideWhenOffline';
 
-const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceData = null, extraRelatedTo = null, handleClose = null }) => {
+const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceData = null, extraRelatedTo = null, handleClose = null, extraData = {} }) => {
   const [showActivity, setActivityShow] = useState(false);
 
   useEffect(() => {
@@ -47,20 +47,21 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceDat
                     {
                       type: resource,
                       referenceId: referenceId,
-                      access: true
+                      access: true,
+                      ...extraData
                     }
                   ]}
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                          type: extraRelatedTo?.resource,
-                          referenceId: extraRelatedTo?.referenceId,
-                          access: true
-                        }
+                        type: extraRelatedTo?.resource,
+                        referenceId: extraRelatedTo?.referenceId,
+                        access: true
+                      }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => {}}
+                  handleActivityRefresh={() => { }}
                   emails={[]}
                   resourceData={resourceData}
                 />
