@@ -326,7 +326,7 @@ const SendMessage = ({
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
             <div key={index} className="relative">
-              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '350px' }}></audio>
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
               <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
