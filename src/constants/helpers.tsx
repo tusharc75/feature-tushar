@@ -891,9 +891,9 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
-      obj[key.fieldName] = value ? value : new Date();
+      obj[key.fieldName] = value ? value : key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'dateTime') {
-      obj[key.fieldName] = new Date();
+      obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
