@@ -891,9 +891,9 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
-      obj[key.fieldName] = value ? value : new Date();
+      obj[key.fieldName] = value ? value : key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'dateTime') {
-      obj[key.fieldName] = new Date();
+      obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
@@ -2465,7 +2465,8 @@ export const REPORT_SECTIONS = {
   user: 'User',
   integration: 'Integration',
   iot: 'Iot',
-  technician: 'Technician'
+  technician: 'Technician',
+  repairOrder: 'Repair Order'
 };
 
 export const REPORT_LIST = [
@@ -2778,6 +2779,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'technicianSchedule',
     section: REPORT_SECTIONS.technician
+  },
+  {
+    title: 'Asset Repair Cost',
+    permission: 'repairOrder',
+    key: 'standardReport',
+    type: 'assetRepairCost',
+    section: REPORT_SECTIONS.repairOrder
   }
 ];
 

@@ -64,6 +64,7 @@ const SendMessage = ({
   const [audioBlobs, setAudioBlobs] = useState([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -74,6 +75,22 @@ const SendMessage = ({
       setFilesWithUrl([]);
     }
   }, [channelId]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if(isRecording){
+      setRecordingSeconds(0);
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if(!isRecording && interval) {
+      setRecordingSeconds(0);
+    }
+
+    return () => {
+      if(interval) clearInterval(interval);
+    };
+  }, [isRecording])
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -326,7 +343,7 @@ const SendMessage = ({
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
             <div key={index} className="relative">
-              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '350px' }}></audio>
               <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
@@ -363,7 +380,12 @@ const SendMessage = ({
               {/* Recording text and status */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 text-sm">Recording</span>
+                  <span className="font-semibold text-gray-900 text-sm">Recording
+                    <span className='ml-2 px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono text-xs'>
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:
+                      {String(recordingSeconds % 60).padStart(2, '0')}
+                    </span>
+                  </span>
                   <div className="flex gap-1">
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
