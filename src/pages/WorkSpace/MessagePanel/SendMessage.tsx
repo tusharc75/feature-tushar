@@ -64,6 +64,7 @@ const SendMessage = ({
   const [audioBlobs, setAudioBlobs] = useState([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -74,6 +75,22 @@ const SendMessage = ({
       setFilesWithUrl([]);
     }
   }, [channelId]);
+
+    useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if(isRecording){
+      setRecordingSeconds(0);
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if(!isRecording && interval) {
+      setRecordingSeconds(0);
+    }
+
+    return () => {
+      if(interval) clearInterval(interval);
+    };
+  }, [isRecording])
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -161,21 +178,22 @@ const SendMessage = ({
 
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = e.key;
+    const editor = editorRef.current;
 
     if (key === '@') {
       e.preventDefault();
       e.stopPropagation();
       numberOfMentions.current += 1;
-      if (!editorRef.current) return;
+      if (!editor) return;
       setSelectedIndex(0);
-      const elementRect = editorRef.current?.selection.getRng().getBoundingClientRect();
-      const frameRect = editorRef.current?.iframeElement?.getBoundingClientRect();
-      const range = editorRef.current?.selection.getRng();
+      const elementRect = editor?.selection.getRng().getBoundingClientRect();
+      const frameRect = editor?.iframeElement?.getBoundingClientRect();
+      const range = editor?.selection.getRng();
       const htmlElement = document.createElement('span');
       htmlElement.id = `mention-${numberOfMentions.current || 0}`;
       htmlElement.innerHTML = '@';
 
-      editorRef.current?.selection.setNode(htmlElement);
+      editor?.selection.setNode(htmlElement);
       setMentionInitialPosition({
         node: range.endContainer.parentElement,
         offsetIndex: range.endOffset,
@@ -215,7 +233,7 @@ const SendMessage = ({
     }
 
     if (key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-      const liElement = editorRef.current?.selection.getNode().closest('ul, ol');
+      const liElement = editor?.selection.getNode().closest('ul, ol');
 
       if (liElement) {
         return;
@@ -326,7 +344,7 @@ const SendMessage = ({
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
             <div key={index} className="relative">
-              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '350px' }}></audio>
               <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
@@ -363,8 +381,12 @@ const SendMessage = ({
               {/* Recording text and status */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 text-sm">Recording</span>
-                  <div className="flex gap-1">
+                  <span className="font-semibold text-gray-900 text-sm">Recording
+                    <span className='ml-2 px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono text-xs'>
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:
+                      {String(recordingSeconds % 60).padStart(2, '0')}
+                    </span>
+                  </span>                  <div className="flex gap-1">
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "300ms" }} />
