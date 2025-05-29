@@ -128,7 +128,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         prevOverGroup.current = target;
         prevOverGroup.current.classList.add(...GROUP_HIGHLIGHT_CLASSES);
       }
-      if (prevOverGroup.current !== target) {
+      if (prevOverGroup.current !== target || !target.classList.contains(GROUP_HIGHLIGHT_CLASSES[0])) {
         prevOverGroup.current.classList.remove(...GROUP_HIGHLIGHT_CLASSES);
         prevOverGroup.current = target;
         prevOverGroup.current.classList.add(...GROUP_HIGHLIGHT_CLASSES);
