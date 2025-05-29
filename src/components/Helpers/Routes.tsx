@@ -776,6 +776,9 @@ const routes = {
   },
   technicianUnavailabilityDetail: {
     path: '/technician-unavailability/detail'
+  },
+  operatorView: {
+    path: '/operator-view'
   }
 };
 
