@@ -162,7 +162,7 @@ export const DisplaySingleMessage = ({
                     <span
                       className={cn(
                         `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
-                        [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
+                       [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
                        [&_span:last-child]:text-gray-400`,
                         isSelf
                           ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'

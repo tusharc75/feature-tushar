@@ -213,9 +213,20 @@ const SendMessage = ({
         return;
       }
     }
-    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      if (message && message !== initialMessage && !isLoading) postMessage();
+
+    if (key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      const liElement = editorRef.current?.selection.getNode().closest('li');
+
+      if (liElement) {
+        return;
+      } else {
+        e.preventDefault();
+        if (message && message !== initialMessage && !isLoading) postMessage();
+      }
+    }
+
+    if (key === 'Enter' && (e.shiftKey || e.ctrlKey || e.metaKey)) {
+      return;
     }
   };
 
