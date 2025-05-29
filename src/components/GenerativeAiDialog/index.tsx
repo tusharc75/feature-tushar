@@ -19,7 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Draggable from 'react-draggable';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl }: any) => {
+const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl, existingContent }: any) => {
   const theme = useTheme();
   const [prompt, setPrompt] = useState('');
   const [responses, setResponses] = useState<any[]>([]);
@@ -27,13 +27,27 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  const [hasExistingContent, setHasExistingContent] = useState(false);
+  const [reviewResponse, setReviewResponse] = useState('');
+  const [isReviewLoading, setIsReviewLoading] = useState(false);
   const textFieldRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [responses]);
+  const sanitizeContent = (content: string): string => {
+    let sanitized = content.replace(/<[^>]*>?/gm, '');
+    sanitized = sanitized.replace(/<br\s*\/?>/gi, '\n');
+    sanitized = sanitized.replace(/&nbsp;/gi, ' ');
+    return sanitized.trim();
+  };
 
+  useEffect(() => {
+    if (existingContent && existingContent.trim().length > 0) {
+      setHasExistingContent(true);
+      const sanitized = sanitizeContent(existingContent);
+      getContentSuggestions(sanitized);
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [responses, existingContent]);
 
   const handleSubmit = async (customPrompt: string | null = null) => {
     const currentPrompt = customPrompt || prompt;
@@ -156,6 +170,106 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
     handleSubmit(retryPrompt);
   };
 
+  const getContentSuggestions = async (content?: string) => {
+    setIsReviewLoading(true);
+    setReviewResponse('');
+
+    try {
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+      const token = localStorage.getItem('token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const entityId = localStorage.getItem('selectedEntity');
+      if (entityId) {
+        headers['entity'] = entityId;
+      }
+
+      const response = await fetch(`${backendApi}/generative-ai/assistant/ask`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ 
+          prompt: content,
+          type: "grammerCorrection"
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error('Network response was not ok.');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let fullResponse = '';
+      let buffer = '';
+      let isStreaming = false;
+
+      const processBuffer = () => {
+        if (buffer.length === 0) {
+          isStreaming = false;
+          return;
+        }
+
+        const charsToAdd = Math.min(5, buffer.length);
+        const newChars = buffer.substring(0, charsToAdd);
+        buffer = buffer.slice(charsToAdd);
+        fullResponse += newChars;
+        setReviewResponse(fullResponse);
+        if (buffer.length > 0) {
+          setTimeout(processBuffer, 5);
+        } else {
+          isStreaming = false;
+        }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim().startsWith('data:'));
+
+        for (const line of lines) {
+          const jsonString = line.replace(/^data:\s*/, '');
+
+          try {
+            const parsedChunk = JSON.parse(jsonString);
+            const newContent = parsedChunk.content || '';
+
+            if (newContent.length > fullResponse.length) {
+              const newText = newContent.slice(fullResponse.length);
+              buffer = newText;
+
+              if (!isStreaming) {
+                isStreaming = true;
+                processBuffer();
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to parse SSE chunk:', e);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching suggestions:', error);
+    } finally {
+      setIsReviewLoading(false);
+      setReviewResponse('');
+    }
+  };
+
+  const acceptSuggestions = () => {
+    handleInsert(reviewResponse);
+    setHasExistingContent(false);
+  };
+
+  const dismissSuggestions = () => {
+    setHasExistingContent(false);
+    handleClose();
+  };
+
   const showSubmitButton = isInputFocused || prompt.trim().length > 0;
 
   return (<Draggable
@@ -170,6 +284,9 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
             minHeight: 500,
             maxWidth: 400,
             maxHeight: 500,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
           }
         },
       }}
@@ -211,7 +328,13 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
           </HtmlTooltip>
         </div>
       </div>
-      <Box sx={{ p: 2 }}>
+      <Box sx={{ 
+        p: 2,
+        overflow: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        }}
+      >
         {showHistory ? (
           <Box>
             <Typography variant="subtitle2" sx={{ mb: 2, color: theme.palette.text.primary }}>Chat History</Typography>
@@ -247,6 +370,38 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
             ))
             ) : (
               <Typography variant="body2" color="textSecondary">No chat history available</Typography>
+            )}
+          </Box>
+        ) : hasExistingContent ? (
+          <Box>
+            <Typography variant="subtitle1" sx={{ mb: 2, color: theme.palette.text.primary }}>
+              Review Suggestions
+            </Typography>
+            {isReviewLoading ? (
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <CircularProgress size={20} />
+                <Typography variant="body2" sx={{ mt: 1 }}>Generating suggestions...</Typography>
+              </Box>
+            ) : (
+              <Box sx={{ mb: 2 }}>
+                <Box sx={{ p: 1, border: '1px solid #eee', borderRadius: 1, mb: 2 }}>
+                  <Markdown remarkPlugins={[remarkGfm]}>{reviewResponse}</Markdown>
+                </Box>
+                <Box sx={{ display: 'flex-start', justifyContent: 'space-between', mt: 2 }}>
+                  <ThemeButton
+                    buttonType="theme"
+                    onClick={acceptSuggestions}
+                  >
+                    Accept
+                  </ThemeButton>
+                  <ThemeButton
+                    buttonType="transparent"
+                    onClick={dismissSuggestions}
+                  >
+                    Dismiss
+                  </ThemeButton>
+                </Box>
+              </Box>
             )}
           </Box>
         ) : (
