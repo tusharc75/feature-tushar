@@ -45,7 +45,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         updateGroup: true
       },
       orientation: {
-        item: 'bottom',
+        item: 'top',
         axis: 'top'
       },
       moment: function (date: Date) {
