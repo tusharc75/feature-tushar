@@ -431,13 +431,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -450,6 +450,7 @@ const RepairOrderDetails = () => {
                   fetchRepairOrderData={fetchRepairOrderData}
                   repairOrderData={repairOrderData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   setHasAssetsAdded={setHasAssetsAdded}
@@ -468,6 +469,7 @@ const RepairOrderDetails = () => {
                 fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
+                setNextStepToolTip={setNextStepToolTip}
                 currentStepName={stepNames[currentStep]}
                 stepFullScreen={stepFullScreen}
                 stepNames={stepNames}
@@ -475,8 +477,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }
@@ -506,6 +508,7 @@ const RepairOrderDetails = () => {
                 <LoadingTicket
                   repairOrderData={repairOrderData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-5`}
                   allowedToEdit={allowedToEdit}
                 />

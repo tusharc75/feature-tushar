@@ -96,13 +96,18 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    if (!material?.filter((e) => !e.parentId).every((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
-      setNextStepToolTip(rentalManagementMessage.validPrice);
-    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
-      setNextStepToolTip(rentalManagementMessage.processQuotation);
-    } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
-      setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
-    } else {
+    if (repairOrderData?.addQuotationStep) {
+      if (!material?.filter((e) => !e.parentId).every((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
+        setNextStepToolTip(rentalManagementMessage.validPrice);
+      } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
+        setNextStepToolTip(rentalManagementMessage.processQuotation);
+      } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
+        setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
+      } else {
+        setNextStepToolTip(null);
+      }
+    }
+    else {
       setNextStepToolTip(null);
     }
   }, [material, quotationData?.versions[currentVersion]?._id, quotationData?.versions[currentVersion]?.status]);
