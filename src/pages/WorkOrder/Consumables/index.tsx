@@ -791,6 +791,7 @@ const Consumables = ({
             serviceName={serviceName}
             consumeRequest={consumeRequest}
             serialNumberRequired={serialNumberRequired}
+            canChangeWarehouse={false}
           />
         )}
         {openLogDialog.open && (

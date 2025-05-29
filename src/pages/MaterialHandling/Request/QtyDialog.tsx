@@ -97,16 +97,18 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   />
                 </Box>
               ) : null}
-              <MultiLine
-                label="Comment"
-                value={values['comment']}
-                required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
-                error={touched['comment'] && Boolean(errors['comment'])}
-                touched={touched['comment'] && errors['comment'] ? String(errors['comment']) :  'Comment is required'}
-                onChange={(value) => {
-                  setFieldValue('comment', value);
-                }}
-              />
+              <Box pt={2}>
+                <MultiLine
+                  label="Comment"
+                  value={values['comment']}
+                  required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
+                  error={Boolean(errors['comment'])}
+                  touched={Boolean(errors['comment']) ? String(errors['comment']) : ''}
+                  onChange={(value) => {
+                    setFieldValue('comment', value);
+                  }}
+                />
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton
