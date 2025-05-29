@@ -85,7 +85,9 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       maxHeight: window.innerHeight - 200,
       selectable: false,
       groupHeightMode: 'auto',
-      dataAttributes: ['id']
+      dataAttributes: ['id'],
+      zoomMax: 31556952000,
+      zoomMin: 60000
     };
     return optionsData;
   }, [user?.user?.timezone, setStore, selectedResource]);

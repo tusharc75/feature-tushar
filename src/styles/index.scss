@@ -4782,6 +4782,13 @@ td.google-visualization-orgchart-node {
     border-left: 1px solid var(--common-border-color) !important;
   }
 }
+
+.vis-text.vis-major {
+  font-weight: 600;
+}
+.vis-text.vis-minor {
+  font-weight: 500;
+}
 .technician-group {
   -webkit-user-drag: element !important;
 }
