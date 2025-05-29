@@ -5,7 +5,6 @@ import createFastContext from 'src/StateProvider/createFastContext';
 export type TimelineStore = {
   activeItemData: { type: 'technician' | 'sidebar'; data: any };
   leftSearchValue: string;
-  technicianSearchValue: string;
   mapData: string[] | null;
   assignTechnicianDialog: { open: boolean; technicianData: Activity[] | null; service: Service | null };
   unAssignTechnicianDialog: { open: boolean; id: string | null };
@@ -24,7 +23,6 @@ export type TimelineStore = {
 const initialState: TimelineStore = {
   activeItemData: null,
   leftSearchValue: '',
-  technicianSearchValue: '',
   mapData: null,
   assignTechnicianDialog: { open: false, technicianData: null, service: null },
   unAssignTechnicianDialog: { open: false, id: null },

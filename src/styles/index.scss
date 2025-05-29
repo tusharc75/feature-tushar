@@ -4775,12 +4775,26 @@ td.google-visualization-orgchart-node {
 .vis-panel.vis-left {
   left: unset !important;
   right: -1px !important;
+  touch-action: auto !important;
+  user-select: auto !important;
+  -webkit-user-drag: auto !important;
   .vis-labelset {
     border-left: 1px solid var(--common-border-color) !important;
   }
+}
+.technician-group {
+  -webkit-user-drag: element !important;
 }
 .vis-panel.vis-background,
 .vis-panel.vis-top,
 .vis-panel.vis-center {
   left: 0px !important;
+}
+.vis-labelset .vis-label .vis-inner {
+  padding: 0px !important;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dragElement {
+    opacity: 1 !important;
+  }
 }

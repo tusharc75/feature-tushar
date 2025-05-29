@@ -2,13 +2,14 @@ import { Box, Button, IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
-import { TActios, TInitialState } from 'src/components/CustomReactTable';
+import { TInitialState } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
 import { throttle } from 'src/hooks/useThrottle';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
+import { classNamesCleanup, handleDragPreview } from 'src/pages/TechnicianScheduler/Vis/utils';
 
 type TechnicianListProps = {
   state: TInitialState;
@@ -117,6 +118,7 @@ const RowSkeleton = ({ isMobile }) => {
 
 export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, viewType }: any) => {
   const [activeItemData, setStore] = useTimelineStore((state) => state.activeItemData);
+
   const rowRef = useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
@@ -216,7 +218,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       data: row,
       from: 'sidebar'
     };
+    setStore({ activeItemData: { data: row, type: 'sidebar' } });
     event.dataTransfer.setData('text/plain', JSON.stringify(data));
+    handleDragPreview(event, () => setStore({ activeItemData: null }), { opacity: 1 });
   }
 
   return (
@@ -233,7 +237,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
         // isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : ''
       )}
     >
-      <div draggable onDragStart={handleDragStart} className={cn(isMobile ? '' : '')}>
+      <div draggable onDragStart={handleDragStart} className={cn('dragElement', isMobile ? '' : '')}>
         <div
           className={cn(
             'cursor-grab space-y-2 rounded-md border  p-3 shadow-lg transition-all duration-300',

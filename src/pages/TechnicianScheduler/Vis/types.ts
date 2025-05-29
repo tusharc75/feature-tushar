@@ -1,6 +1,7 @@
-export type DNDFrom = 'sidebar';
-
-export type DNDData = { id: string; data: Service; from: DNDFrom };
+export type DNDFrom = 'sidebar' | 'technician';
+type DNDFromSidebar = { data: Service; from: 'sidebar' };
+type DNDFromTechnician = { data: Activity; from: 'technician' };
+export type DNDData = { id: string } & (DNDFromSidebar | DNDFromTechnician);
 
 export type Activity = {
   _id?: string;

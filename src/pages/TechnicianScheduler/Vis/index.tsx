@@ -2,17 +2,19 @@ import { AddOutlined, FormatListBulleted, Refresh } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { FiSidebar } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import ButtonMenu from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import IconButtonTabs from 'src/components/IconButtonTabs';
-import { sidebarResource } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 
 import { useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import DesktopTimeline from 'src/pages/TechnicianScheduler/Vis/DesktopTimeline';
 import Dialogs from 'src/pages/TechnicianScheduler/Vis/Dialogs';
 import ServiceOrderSidebar, { ServiceOrderSidebarRef } from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar';
+import DesktopWrapper from 'src/pages/TechnicianScheduler/Vis/ServiceOrderSidebar/DesktopWrapper';
 import { Activity, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { TimlineProvider, useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -26,6 +28,7 @@ const TimelineElementImpl = () => {
   const [createDialog, setCreateDialog] = useState(false);
   const technicianResources = useTechnicianResources(toastConfig, (resource) => setStore({ selectedResource: resource }));
   const [loading, setLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [timelineData, setTimelineData] = useState<{ groups: DataSet<any, 'id'> | null; items: DataSet<any, 'id'> | null }>({
     groups: null,
@@ -49,7 +52,8 @@ const TimelineElementImpl = () => {
           const group: DataGroup = {
             ...item,
             id: item._id,
-            content: `${item.firstName} ${item.lastName}`
+            content: `${item.firstName} ${item.lastName}`,
+            visible: true
           };
           for (const technician of item.technicianHistory) {
             let start = technician.estimateStartDate;
@@ -115,17 +119,22 @@ const TimelineElementImpl = () => {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <ButtonMenu
-          showChevron={true}
-          getLabel={(d) => d.title}
-          items={technicianResources}
-          getSelectedMenuItem={(item) => item.key === selectedResource.key}
-          onItemClick={(e, item) => {
-            setStore({ selectedResource: item });
-          }}
-        >
-          <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.title}</span>
-        </ButtonMenu>
+        <div className="flex items-center gap-2">
+          <IconButton size={'small'} onClick={() => setIsSidebarOpen((prev) => !prev)}>
+            <FiSidebar />
+          </IconButton>
+          <ButtonMenu
+            showChevron={true}
+            getLabel={(d) => d.title}
+            items={technicianResources}
+            getSelectedMenuItem={(item) => item.key === selectedResource.key}
+            onItemClick={(e, item) => {
+              setStore({ selectedResource: item });
+            }}
+          >
+            <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.title}</span>
+          </ButtonMenu>
+        </div>
         <div className="flex gap-2">
           <ThemeButton
             buttonType="theme"
@@ -164,15 +173,21 @@ const TimelineElementImpl = () => {
           </HtmlTooltip>
         </div>
       </div>
-      <div className="mt-4 grid h-[calc(100vh-200px)] min-h-[500px] grid-cols-[300px_1fr] gap-4">
-        <ServiceOrderSidebar
-          ref={serviceOrderSidebarRef}
-          selectedResource={selectedResource}
-          fetchRoadmap={fetchRoadmap}
-          isMobile={false}
-          viewType={viewType}
-        />
-        <DesktopTimeline onDragEnd={onDragEnd} loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
+      <div className={cn('mt-4 flex h-[calc(100vh-200px)] min-h-[500px]')}>
+        <div className={cn('overflow-hidden transition-all duration-300', isSidebarOpen ? 'w-[314px]' : 'w-0')}>
+          <DesktopWrapper setIsSidebarOpen={setIsSidebarOpen}>
+            <ServiceOrderSidebar
+              ref={serviceOrderSidebarRef}
+              selectedResource={selectedResource}
+              fetchRoadmap={fetchRoadmap}
+              isMobile={false}
+              viewType={viewType}
+            />
+          </DesktopWrapper>
+        </div>
+        <div className="ml-[-1px] flex flex-grow">
+          <DesktopTimeline onDragEnd={onDragEnd} loading={loading} key={selectedResource?.key || 'timeline'} timelineData={timelineData} />
+        </div>
       </div>
 
       <Dialogs createDialog={createDialog} setCreateDialog={setCreateDialog} viewType={viewType} refreshAllData={handleRefreshAll} />

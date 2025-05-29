@@ -98,14 +98,7 @@ const ServiceOrderSidebarImpl = forwardRef<ServiceOrderSidebarRef, ServiceOrderS
             setContainer(div);
           }}
         >
-          <TechnicianList
-            isMobile={isMobile}
-            selectedResource={selectedResource}
-            container={container}
-            dispatch={dispatch}
-            state={state}
-            viewType={viewType}
-          />
+          <TechnicianList isMobile={isMobile} selectedResource={selectedResource} container={container} state={state} viewType={viewType} />
         </div>
       </>
     );
