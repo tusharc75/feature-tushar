@@ -54,6 +54,21 @@ const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
           label="Restrict Back Date"
         />
       </Box>
+      <Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="restrictCurrentDateAutoSelect"
+              checked={values['restrictCurrentDateAutoSelect']}
+              onChange={(e) => {
+                setFieldValue('restrictCurrentDateAutoSelect', e.target.checked);
+              }}
+              color="primary"
+            />
+          }
+          label="Restrict Current Date Auto Select"
+        />
+      </Box>
       <Box pl={0.5} mt={1}>
         <Typography variant="subtitle2">VALIDATION...</Typography>
       </Box>
