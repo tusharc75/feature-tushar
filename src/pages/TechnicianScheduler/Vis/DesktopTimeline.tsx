@@ -123,6 +123,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
 
     function handleDragOver(e: DragEvent) {
       const target = e.target as HTMLElement;
+      if (!target.classList.contains('vis-group')) return;
       if (!prevOverGroup.current) {
         prevOverGroup.current = target;
         prevOverGroup.current.classList.add(...GROUP_HIGHLIGHT_CLASSES);
