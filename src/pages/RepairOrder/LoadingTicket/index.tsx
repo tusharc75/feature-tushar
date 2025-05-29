@@ -28,9 +28,10 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import { repairOrderMessage } from 'src/constants/messageHelpers';
 
 
-const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
+const LoadingTicket = ({ repairOrderData, setNextStep, setNextStepToolTip, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
@@ -45,6 +46,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
 
   useEffect(() => {
     setNextStep(false);
+    setNextStepToolTip(repairOrderMessage.deliverLoadingTicketStep)
     getColumn();
     if (user.user.brandPolicy?.repairOrderAutoLoadingTicket) {
       createLoadingTicket();
@@ -117,6 +119,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
 
       if (material?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0) {
         setNextStep(true);
+        setNextStepToolTip(null)
       }
 
       dispatch({ type: 'initialize', data: material, count: material?.length });
