@@ -26,27 +26,26 @@ const ConsumablesQtyDialog = ({
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user }
+    state: { user, resources }
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(true);
-  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+  const [lookupResource, setLookupResource] = useState(null)
 
   useEffect(() => {
-    if (user?.user?.brandPolicy?.storageLocation) {
-      getStorageLocation();
-    }
+    getLookupResource();
   }, []);
 
-  const getStorageLocation = () => {
+  const getLookupResource = () => {
+    let lookupResource: string = sidebarResource.warehouse
+    if (user?.user?.brandPolicy?.storageLocation) {
+      lookupResource = `${lookupResource},${sidebarResource?.storageLocation}`
+    }
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
       .then(({ data: { data } }) => {
-        if (data[sidebarResource.storageLocation]) {
-          const storageLocationOption = data[sidebarResource.storageLocation]?.filter((e) => e.warehouse === warehouse?.optionValue);
-          setStorageLocationOptions(storageLocationOption);
-        }
+        setLookupResource(data)
       });
   };
 
@@ -59,6 +58,7 @@ const ConsumablesQtyDialog = ({
           _id: e?._id,
           product: e?.materialId,
           qty: parseInt(e?.consumedQty),
+          warehouse: e?.warehouse,
           storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null,
           serialNumber: e?.serialNumber
         });
@@ -100,6 +100,7 @@ const ConsumablesQtyDialog = ({
           _id: e?._id,
           product: e?.materialId,
           qty: parseInt(e?.consumedQty),
+          warehouse: e?.warehouse,
           storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null,
           serialNumber: e?.serialNumber
         });
@@ -130,6 +131,9 @@ const ConsumablesQtyDialog = ({
     let errors: any = {};
     if (values?.length > 0) {
       values.map((d) => {
+        if (!d?.warehouse) {
+          errors.warehouse = `${resources?.warehouse?.titleSingular} is required`;
+        }
         if (user?.user?.brandPolicy?.storageLocation) {
           if (!d.storageLocation) {
             errors.storageLocation = 'Storage Location is required';
@@ -187,6 +191,7 @@ const ConsumablesQtyDialog = ({
             qty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             consumedQty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             storageLocation: null,
+            warehouse: warehouse?.optionValue,
             serialNumber: []
           }))
         }}
@@ -212,6 +217,9 @@ const ConsumablesQtyDialog = ({
                                     <TableCell align="left" style={{ minWidth: 150 }}>
                                       Product
                                     </TableCell>
+                                    <TableCell align="left" style={{ minWidth: 250 }}>
+                                      {resources?.warehouse?.titleSingular}
+                                    </TableCell>
                                     {user?.user?.brandPolicy?.storageLocation && (
                                       <TableCell align="left" style={{ minWidth: 250 }}>
                                         Storage Location
@@ -235,15 +243,50 @@ const ConsumablesQtyDialog = ({
                                         {index + 1}
                                       </TableCell>
                                       <TableCell align="left">{value['product']}</TableCell>
+                                      <TableCell align="left">
+                                        <Autocomplete
+                                          options={lookupResource?.[sidebarResource?.warehouse] || []}
+                                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                                          value={
+                                            [...lookupResource?.[sidebarResource?.warehouse] || []].filter((data) => data.optionValue === value['warehouse']).length
+                                              ? [...lookupResource?.[sidebarResource?.warehouse] || []].filter((data) => data.optionValue === value['warehouse'])[0]
+                                              : ''
+                                          }
+                                          onChange={(e, val) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.products[index],
+                                              warehouse: val?.optionValue,
+                                              storageLocation: null
+                                            });
+                                          }}
+                                          renderInput={(params) => (
+                                            <TextField
+                                              {...params}
+                                              style={{ minWidth: '200px' }}
+                                              margin="dense"
+                                              size={'small'}
+                                              name="warehouse"
+                                              label={resources?.warehouse?.titleSingular}
+                                              placeholder={resources?.warehouse?.titleSingular}
+                                              variant="outlined"
+                                              fullWidth
+                                              required
+                                              error={validate([value])?.warehouse}
+                                              helperText={validate([value])?.warehouse ? `${resources?.warehouse?.titleSingular} is required` : ''}
+                                            />
+                                          )}
+                                        />
+                                      </TableCell>
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <TableCell align="left">
                                           <Autocomplete
-                                            options={storageLocationOptions}
+                                            options={[...lookupResource?.[sidebarResource?.storageLocation] || []]?.filter(o => o?.warehouse === value?.warehouse)}
                                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                             isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                             value={
-                                              storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
-                                                ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
+                                              [...lookupResource?.[sidebarResource?.storageLocation] || []].filter((data) => data.optionValue === value['storageLocation']).length
+                                                ? [...lookupResource?.[sidebarResource?.storageLocation] || []].filter((data) => data.optionValue === value['storageLocation'])[0]
                                                 : ''
                                             }
                                             onChange={(e, val) => {
@@ -361,17 +404,54 @@ const ConsumablesQtyDialog = ({
                                 <h5 className="text-[#aaa]">Product:</h5>
                                 <p className="pb-1">{value['product']}</p>
 
+                                <h5 className="mt-2 text-[#aaa]">{resources?.warehouse?.titleSingular}:</h5>
+                                <div>
+                                  <Autocomplete
+                                    options={lookupResource?.[sidebarResource?.warehouse] || []}
+                                    getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                                    value={
+                                      [...lookupResource?.[sidebarResource?.warehouse] || []].filter((data) => data.optionValue === value['warehouse']).length
+                                        ? [...lookupResource?.[sidebarResource?.warehouse] || []].filter((data) => data.optionValue === value['warehouse'])[0]
+                                        : ''
+                                    }
+                                    onChange={(e, val) => {
+                                      arrayHelpers.replace(index, {
+                                        ...values.products[index],
+                                        warehouse: val?.optionValue,
+                                        storageLocation: null
+                                      });
+                                    }}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        style={{ minWidth: '200px' }}
+                                        margin="none"
+                                        size={'small'}
+                                        name="warehouse"
+                                        label={resources?.warehouse?.titleSingular}
+                                        placeholder={resources?.warehouse?.titleSingular}
+                                        variant="outlined"
+                                        fullWidth
+                                        required
+                                        error={validate([value])?.warehouse}
+                                        helperText={validate([value])?.warehouse ? `${resources?.warehouse?.titleSingular} is required` : ''}
+                                      />
+                                    )}
+                                  />
+                                </div>
+
                                 {user?.user?.brandPolicy?.storageLocation && (
                                   <>
                                     <h5 className="mt-2 text-[#aaa]">Storage Location:</h5>
                                     <div>
                                       <Autocomplete
-                                        options={storageLocationOptions}
+                                        options={[...lookupResource?.[sidebarResource?.storageLocation] || []]?.filter(o => o?.warehouse === value?.warehouse)}
                                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                         isOptionEqualToValue={(option: any, val) => option.optionValue === val}
                                         value={
-                                          storageLocationOptions.filter((data) => data.optionValue === value['storageLocation']).length
-                                            ? storageLocationOptions.filter((data) => data.optionValue === value['storageLocation'])[0]
+                                          [...lookupResource?.[sidebarResource?.storageLocation] || []].filter((data) => data.optionValue === value['storageLocation']).length
+                                            ? [...lookupResource?.[sidebarResource?.storageLocation] || []].filter((data) => data.optionValue === value['storageLocation'])[0]
                                             : ''
                                         }
                                         onChange={(e, val) => {
@@ -490,7 +570,7 @@ const ConsumablesQtyDialog = ({
               )}
             </CustomDialogContent>
             <CustomDialogFooter>
-              <ThemeButton buttonType="transparent" disabled={isSubmitting}  onClick={onClose}>
+              <ThemeButton buttonType="transparent" disabled={isSubmitting} onClick={onClose}>
                 Cancel
               </ThemeButton>
               {consumeRequest ? (
