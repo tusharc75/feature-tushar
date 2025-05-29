@@ -404,9 +404,11 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
       ) : null}
       {generativeAiDialogOpen &&
         <GenerativeAiDialog
+          existingContent={value?.replace(/<p><br data-mce-bogus="1"><\/p>/g, '')}
           handleInsert={(content) => {
             const editor = editorRef.current;
             editor.focus();
+            editor.setContent('');
             const htmlContent = `<div style="white-space: pre-wrap;">${content.replace(/\n/g, '<br>')}</div>`;
             editor.insertContent(htmlContent);
             setGenerativeAiDialogOpen(false)
