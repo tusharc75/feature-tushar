@@ -247,7 +247,7 @@ const ServiceMaster = (props: Props) => {
                   });
                 }}
               >
-                <AddCircleOutlineIcon />
+                <AddCircleOutlineIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
           )}

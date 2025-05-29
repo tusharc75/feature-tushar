@@ -19,7 +19,7 @@ interface ColorContextInterface {
   toggle: () => void;
 }
 
-export const ColormodeContext = React.createContext<ColorContextInterface | null>(null);
+const ColormodeContext = React.createContext<ColorContextInterface | null>(null);
 
 interface ColorModeInterface {
   children: ReactNode;
@@ -44,28 +44,29 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   }, []);
 
   useEffect(() => {
-    const applyTheme = () => {
-      let newTheme;
-      const root = document.getElementsByTagName('html')[0];
-      if (theme === 'dark') {
-        setThemeToLocal('dark');
-        root.setAttribute('data-mode', 'dark');
-      }
-      if (theme === 'light') {
-        setThemeToLocal('light');
-        root.setAttribute('data-mode', 'light');
-      }
-
-      if (newTheme) {
-        root.style.cssText = newTheme.join(';');
-      }
-      return () => {
-        const root = document.getElementsByTagName('html')[0];
-        root.removeAttribute('data-mode');
-      };
-    };
     applyTheme();
   }, [theme]);
+
+  const applyTheme = () => {
+    let newTheme;
+    const root = document.getElementsByTagName('html')[0];
+    if (theme === 'dark') {
+      setThemeToLocal('dark');
+      root.setAttribute('data-mode', 'dark');
+    }
+    if (theme === 'light') {
+      setThemeToLocal('light');
+      root.setAttribute('data-mode', 'light');
+    }
+
+    if (newTheme) {
+      root.style.cssText = newTheme.join(';');
+    }
+    return () => {
+      const root = document.getElementsByTagName('html')[0];
+      root.removeAttribute('data-mode');
+    };
+  };
 
   const toggle = () => {
     setStore({ [THEME]: theme === 'dark' ? 'light' : 'dark' });
@@ -85,7 +86,7 @@ export default function ColorModeProvider({ children }: ColorModeInterface) {
   );
 }
 
-export const getDesignTokens = (mode: ThemeColor): CreateThemeT => ({
+const getDesignTokens = (mode: ThemeColor): CreateThemeT => ({
   typography: {
     fontFamily: [
       'Poppins',

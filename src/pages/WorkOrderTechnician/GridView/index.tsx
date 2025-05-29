@@ -17,6 +17,7 @@ type TableViewStatus =
   | typeof WORKORDER_SERVICE_STATUS.pending
   | typeof WORKORDER_SERVICE_STATUS.inProgress
   | typeof WORKORDER_SERVICE_STATUS.completed
+  | typeof WORKORDER_SERVICE_STATUS.skipped
   | typeof WORKORDER_SERVICE_STATUS.inProgressByOther;
 
 const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, dispatch, filterQuery, permissions, tableHead = null, columns }, ref) => {
@@ -42,6 +43,12 @@ const GridView = React.forwardRef<GridViewRef, any>(({ renderedFrom, state, disp
         selected: tableViewStatus === WORKORDER_SERVICE_STATUS.completed,
         value: WORKORDER_SERVICE_STATUS.completed,
         startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.completed]
+      },
+      {
+        label: WORKORDER_SERVICE_STATUS.skipped,
+        selected: tableViewStatus === WORKORDER_SERVICE_STATUS.skipped,
+        value: WORKORDER_SERVICE_STATUS.skipped,
+        startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.skipped]
       },
       {
         label: WORKORDER_SERVICE_STATUS.inProgressByOther,

@@ -51,6 +51,7 @@ function MultiLine({ value, label, required = false, onChange, name = '', rest =
       </IconButton>
       {generativeAiDialogOpen &&
         <GenerativeAiDialog
+          existingContent={value}
           handleInsert={(content) => {
             onChange(content.trimStart())
             setAnchorEl(null);

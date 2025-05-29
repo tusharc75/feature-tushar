@@ -34,7 +34,7 @@ function ProcessLogs({ onClose, logsData, productName, product, referenceType })
         primaryField: true,
         width: 150,
         Cell: ({ row }) => {
-          return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+          return <p className="text-truncate">{row?.original['qty'] || 0}</p>;
         }
       },
       {
@@ -43,7 +43,7 @@ function ProcessLogs({ onClose, logsData, productName, product, referenceType })
         primaryField: true,
         width: 150,
         Cell: ({ row }) => {
-          return row?.original['revertedQty'] ? <p className="text-truncate">{row?.original['revertedQty']}</p> : <NoDataCell />;
+          return <p className="text-truncate">{row?.original['revertedQty'] || 0}</p>;
         }
       },
       {
@@ -168,19 +168,17 @@ function ProcessLogs({ onClose, logsData, productName, product, referenceType })
       />
       <CustomDialogContent isFooterPresent={false}>
         {columns ? (
-          <Box p={2}>
-            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                refreshGrid={fetchData}
-                hideSelection={true}
-                renderedFrom={renderedFrom}
-                isClientSideGrid={true}
-              />
-            </Box>
+          <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+            <CustomReactTable
+              height={'calc(100vh - 200px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              refreshGrid={fetchData}
+              hideSelection={true}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+            />
           </Box>
         ) : (
           <Box p={2} height={500}>

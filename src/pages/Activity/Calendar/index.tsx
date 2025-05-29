@@ -21,6 +21,7 @@ import { SearchFilter } from '../../../components/SearchFilter';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import MyCalendar from './MyCalendar';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
@@ -88,8 +89,8 @@ const BigCalendar = () => {
           const newData = allActivities.map((d) => ({
             ...d,
             title: d.name,
-            start: new Date(d.startDate),
-            end: new Date(d.dueDate),
+            start: dayjs.utc(d.startDate).tz().format(),
+            end: dayjs.utc(d.dueDate).tz().tz().format(),
             allDay: true,
             type: d.type
           }));

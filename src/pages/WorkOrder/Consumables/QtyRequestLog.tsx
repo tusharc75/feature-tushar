@@ -44,7 +44,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         accessor: 'requestDate',
         Header: 'Requested Date',
         primaryField: true,
-        width: 200,
         Cell: ({ row }) => {
           return row?.original['requestDate'] ? (
             <p className="text-truncate">{displayDateTime(row?.original['requestDate'])}</p>
@@ -56,7 +55,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       {
         accessor: 'requestBy',
         Header: 'Requested By',
-        width: 200,
         Cell: ({ row }) => {
           return row?.original['requestBy'] ? (
             <a className="link text-truncate" href={`${routes.userDetail.path}/${row?.original['requestById']}`} target="_blank">
@@ -71,25 +69,22 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         accessor: 'qty',
         Header: 'Requested Qty',
         primaryField: true,
-        width: 150,
         Cell: ({ row }) => {
-          return row?.original['qty'] ? <p className="text-truncate">{row?.original['qty']}</p> : <NoDataCell />;
+          return <p className="text-truncate">{row?.original['qty'] || 0}</p>;
         }
       },
       {
         accessor: 'processedQty',
         Header: 'Processed Qty',
         primaryField: true,
-        width: 150,
         Cell: ({ row }) => {
-          return row?.original['processedQty'] ? <p className="text-truncate">{row?.original['processedQty']}</p> : <NoDataCell />;
+          return <p className="text-truncate">{row?.original['processedQty'] || 0}</p>;
         }
       },
       {
         accessor: 'status',
         Header: 'Status',
         primaryField: true,
-        width: 150,
         Cell: ({ row }) => {
           return row?.original['status'] ? <p className="text-truncate">{row?.original['status']}</p> : <NoDataCell />;
         }
@@ -99,7 +94,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           {
             accessor: 'storageLocation',
             Header: 'Storage Location',
-            width: 200,
             Cell: ({ row }) => {
               return row?.original['storageLocation'] ? (
                 <a
@@ -133,7 +127,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       {
         accessor: 'processDate',
         Header: 'Processed Date',
-        width: 200,
         Cell: ({ row }) => {
           return row?.original['processDate'] ? (
             <p className="text-truncate">{displayDateTime(row?.original['processDate'])}</p>
@@ -145,7 +138,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       {
         accessor: 'comment',
         Header: 'Comment',
-        width: 200,
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
         }
@@ -153,7 +145,6 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       {
         accessor: 'serialNumber',
         Header: 'Serial Number',
-        width: 200,
         Cell: ({ row }) => {
           return (
             <>
@@ -199,7 +190,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
                       setOpenProcessLogs({ open: true, logs: row.original['processesLogs'] });
                     }}
                   >
-                    <HistoryIcon />
+                    <HistoryIcon fontSize='small' color='primary' />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
@@ -261,20 +252,18 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         />
         <CustomDialogContent isFooterPresent={false}>
           {columns ? (
-            <Box p={2}>
-              <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
-                <CustomReactTable
-                  height={'calc(100vh - 200px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  refreshGrid={fetchData}
-                  hideSelection={true}
-                  hideAction={false}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                />
-              </Box>
+            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                refreshGrid={fetchData}
+                hideSelection={true}
+                hideAction={false}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+              />
             </Box>
           ) : (
             <Box p={2} height={500}>

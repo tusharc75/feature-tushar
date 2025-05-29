@@ -57,6 +57,7 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { GrRevert } from "react-icons/gr";
 import { GoListUnordered } from "react-icons/go";
 import { MdEdit } from "react-icons/md";
+import { repairJobMessage, repairOrderMessage } from 'src/constants/messageHelpers';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -70,6 +71,7 @@ const WorkOrder = ({
   stepNames,
   repairOrderData,
   setNextStep,
+  setNextStepToolTip,
   stepFullScreen,
   allowedToEdit,
   isPostWorkService,
@@ -728,8 +730,10 @@ const WorkOrder = ({
     if (isPostWorkService || (!repairOrderData.addQuotationStep && !user?.user?.brandPolicy?.repairOrderPrice)) {
       if (rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
+        setNextStepToolTip(null)
       } else {
         setNextStep(false);
+        setNextStepToolTip(repairOrderMessage.workOrderComplete)
       }
     } else {
       if (repairOrderData.addQuotationStep || user?.user?.brandPolicy?.repairOrderPrice) {
@@ -744,10 +748,12 @@ const WorkOrder = ({
           setNextStep(false);
         } else {
           setNextStep(true);
+          setNextStepToolTip(null)
         }
       } else {
         if (rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) {
           setNextStep(true);
+          setNextStepToolTip(null)
         } else {
           setNextStep(false);
         }

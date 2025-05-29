@@ -234,6 +234,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
+            ele.restrictCurrentDateAutoSelect = values?.restrictCurrentDateAutoSelect || false
             ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;

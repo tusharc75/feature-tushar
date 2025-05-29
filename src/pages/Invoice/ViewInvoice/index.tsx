@@ -47,7 +47,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [tabValue, setTabValue] = useState(0);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { dataRows } = state;
   const { generateColumns } = useColumns();
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
@@ -165,17 +165,16 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.type === MATERIAL_TYPE.service
-                ? parent.serviceDetail?.serviceName
-                : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -197,15 +196,14 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageName
-            : _subRow?.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow?.serviceDetail?.serviceName
-      }`;
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -290,7 +288,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
-    hideDetailButton: resource === sidebarResource.fieldTicket ? true : false,
+    hideDetailButton: resource === sidebarResource.fieldTicket ? dataRows?.find((e) => e?.subRows?.length) ? false : true : false,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(invoiceData),
     defaultColumns: [
@@ -309,6 +307,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
     ]
   };
+
 
   const leftSideContents = () => {
     return (
@@ -402,7 +401,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             isClientSideGrid={true}
-                            expander={resource === sidebarResource.fieldTicket ? false : true}
+                            expander={true}
                           />
                         </Box>
                       ) : (
@@ -433,7 +432,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
                         refreshGrid={fetchData}
-                        expander={resource === sidebarResource.fieldTicket ? false : true}
+                        expander={true}
                       />
                     </Box>
                   ) : (
