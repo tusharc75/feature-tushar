@@ -15,7 +15,7 @@ const DesktopWrapper = ({
 
   return (
     <div className="flex h-[calc(100vh-200px)] min-w-[300px] flex-col border">
-      <div className="head flex min-h-[60px] items-center justify-between border-b px-4">
+      <div className="head flex min-h-[61px] items-center justify-between border-b px-4">
         <h6 className="line-clamp-1 text-[1rem] font-semibold">Field Jobs</h6>
         <div className="flex">
           <SearchButton setValue={(value) => setStore({ leftSearchValue: value })} value={leftSearchValue} maxWidth="265px" />
