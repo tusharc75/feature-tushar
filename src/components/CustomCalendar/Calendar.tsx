@@ -94,6 +94,7 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
           }}
           moreLinkClick={'popover'}
+          now={() => dayjs().tz().format()}
           moreLinkClassNames={'bg-[#32324f] text-white w-full text-center py-1 mt-1 dark:hover:!bg-gray-600 hover:!bg-gray-500 font-semibold'}
           {...rest}
         />
