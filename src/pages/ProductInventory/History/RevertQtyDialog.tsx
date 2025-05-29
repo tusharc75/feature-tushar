@@ -127,15 +127,15 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                   />
                 </Box>
               ) : null}
-              <MultiLine
-                label="Comment"
-                value={values['comment']}
-                error={touched['comment'] && Boolean(errors['comment'])}
-                touched={touched['comment'] && errors['comment'] ? String(errors['comment']) : 'Comment is required'}
-                onChange={(value) => {
-                  setFieldValue('comment', value);
-                }}
-              />
+              <Box pt={1}>
+                <MultiLine
+                  label="Comment"
+                  value={values['comment']}
+                  onChange={(value) => {
+                    setFieldValue('comment', value);
+                  }}
+                />
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton

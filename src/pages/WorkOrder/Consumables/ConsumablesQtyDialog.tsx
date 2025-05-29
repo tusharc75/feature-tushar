@@ -21,7 +21,8 @@ const ConsumablesQtyDialog = ({
   selectedRecords,
   serviceName,
   consumeRequest,
-  serialNumberRequired
+  serialNumberRequired,
+  canChangeWarehouse
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -64,7 +65,6 @@ const ConsumablesQtyDialog = ({
         });
       }
     });
-
     data.products = products;
     data.referenceId = referenceId;
     data.referenceType = referenceType;
@@ -222,7 +222,7 @@ const ConsumablesQtyDialog = ({
                                     </TableCell>
                                     {user?.user?.brandPolicy?.storageLocation && (
                                       <TableCell align="left" style={{ minWidth: 250 }}>
-                                        Storage Location
+                                        {resources?.storageLocation?.titleSingular}
                                       </TableCell>
                                     )}
                                     <TableCell align="left" style={{ minWidth: 200 }}>
@@ -260,6 +260,7 @@ const ConsumablesQtyDialog = ({
                                               storageLocation: null
                                             });
                                           }}
+                                          disabled={!canChangeWarehouse}
                                           renderInput={(params) => (
                                             <TextField
                                               {...params}
