@@ -64,7 +64,6 @@ const SendMessage = ({
   const [audioBlobs, setAudioBlobs] = useState([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
-  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -75,22 +74,6 @@ const SendMessage = ({
       setFilesWithUrl([]);
     }
   }, [channelId]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if(isRecording){
-      setRecordingSeconds(0);
-      interval = setInterval(() => {
-        setRecordingSeconds((prev) => prev + 1);
-      }, 1000);
-    } else if(!isRecording && interval) {
-      setRecordingSeconds(0);
-    }
-
-    return () => {
-      if(interval) clearInterval(interval);
-    };
-  }, [isRecording])
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -232,7 +215,7 @@ const SendMessage = ({
     }
 
     if (key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-      const liElement = editorRef.current?.selection.getNode().closest('li');
+      const liElement = editorRef.current?.selection.getNode().closest('ul, ol');
 
       if (liElement) {
         return;
@@ -380,12 +363,7 @@ const SendMessage = ({
               {/* Recording text and status */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-gray-900 text-sm">Recording
-                    <span className='ml-2 px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono text-xs'>
-                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:
-                      {String(recordingSeconds % 60).padStart(2, '0')}
-                    </span>
-                  </span>
+                  <span className="font-semibold text-gray-900 text-sm">Recording</span>
                   <div className="flex gap-1">
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
                     <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
