@@ -30,7 +30,7 @@ const dataAdded = {
   nextButtonAdded: false
 };
 
-const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
+const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
@@ -302,7 +302,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-
+    setNextStepToolTip(null)
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
     data = response?.data?.data;
