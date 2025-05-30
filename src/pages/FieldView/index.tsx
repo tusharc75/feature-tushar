@@ -11,17 +11,17 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import routes from "src/components/Helpers/Routes";
 import IconButtonTabs from "src/components/IconButtonTabs";
 import { ListingPageHeader } from "src/components/PageHeaders";
-import { prepareDataForGrid, sidebarResource, wellMaster } from "src/constants/helpers";
-import CardView from "src/pages/OperatorView/CardView";
+import { sidebarResource } from "src/constants/helpers";
+import CardView from "src/pages/FieldView/CardView";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { IoAppsSharp } from "react-icons/io5";
 import { IoMapSharp } from "react-icons/io5";
 import { useParams, useLocation, useHistory } from 'react-router-dom'
-import MapView from "src/pages/OperatorView/MapView";
+import MapView from "src/pages/FieldView/MapView";
 
-const OperatorView = () => {
+const FieldView = () => {
   const {
     state: { resources }
   }: any = useData();
@@ -32,15 +32,16 @@ const OperatorView = () => {
   const { padId, wellId } = useParams();
   const { padName, wellName } = location.state || {};
 
-  const renderedFrom = camelCase(sidebarResource.operatorView);
+  const renderedFrom = camelCase(sidebarResource.fieldView);
 
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, search } = state;
+  const { search } = state;
 
   const [view, setView] = useState('card')
   const [loading, setLoading] = useState(false)
+  const [data, setData] = useState([])
 
   const resource = useMemo(() => {
     if (wellId) {
@@ -53,11 +54,11 @@ const OperatorView = () => {
 
   const breadCrumbs = useMemo(() => {
     if (resource === sidebarResource?.wellMaster) {
-      return [{ ...routes?.operatorView, title: resources?.operatorView?.titlePlural }, { title: padName }]
+      return [{ ...routes?.fieldView, title: resources?.fieldView?.titlePlural }, { title: padName }]
     } else if (resource === sidebarResource?.serializedAsset) {
-      return [{ ...routes?.operatorView, title: resources?.operatorView?.titlePlural }, { path: `${routes?.operatorView?.path}/${padId}`, title: padName }, { title: wellName }]
+      return [{ ...routes?.fieldView, title: resources?.fieldView?.titlePlural }, { path: `${routes?.fieldView?.path}/${padId}`, title: padName }, { title: wellName }]
     }
-    return [{ title: resources?.operatorView?.titlePlural }]
+    return [{ title: resources?.fieldView?.titlePlural }]
   }, [resource, padId, padName, wellName, wellId])
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
@@ -67,8 +68,13 @@ const OperatorView = () => {
       .get(`${routes[camelCase(resource)]?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = resource === sidebarResource?.padMaster ? data?.data : data
-
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        rows = rows?.map(d => ({
+          _id: d?._id,
+          ...(resource === sidebarResource?.padMaster ? { padName: d?.padName } : {}),
+          ...(resource === sidebarResource?.wellMaster ? { wellName: d?.wellName } : {}),
+          ...(resource === sidebarResource?.serializedAsset ? { assetNumber: d?.assetNumber } : {}),
+        }))
+        setData(rows)
         setLoading(false)
       })
       .catch((error) => {
@@ -168,7 +174,7 @@ const OperatorView = () => {
           isAddButtonVisible={false}
           rightSideContents={rightSideContents()}
         />
-        {loading ? (
+        {loading || !data?.length ? (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
@@ -176,7 +182,7 @@ const OperatorView = () => {
         ) : (
           <>
             {view === 'card' && (
-              <CardView resource={resource} data={dataRows} clickOnCard={(data) => {
+              <CardView resource={resource} data={data} clickOnCard={(data) => {
                 if (resource === sidebarResource?.serializedAsset) {
                 } else {
                   handleClick(data)
@@ -184,7 +190,7 @@ const OperatorView = () => {
               }} />
             )}
             {view === 'map' && (
-              <MapView data={dataRows} />
+              <MapView data={data} />
             )}
           </>
         )}
@@ -194,4 +200,4 @@ const OperatorView = () => {
   )
 }
 
-export default OperatorView;
+export default FieldView;

@@ -418,7 +418,7 @@ export const sidebarResource = {
   technicianUnavailability: 'Technician Unavailability',
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
-  operatorView: 'Operator View',
+  fieldView: 'Field View',
 } as const;
 
 export const primaryFields = {

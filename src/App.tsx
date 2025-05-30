@@ -286,7 +286,7 @@ import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
-import OperatorView from 'src/pages/OperatorView';
+import FieldView from 'src/pages/FieldView';
 
 var notificationInterval: any = null;
 
@@ -1262,14 +1262,14 @@ function App() {
             <PrivateRoute exact path={`${routes.technicianUnavailabilityDetail.path}/:id`}>
               <TechnicianUnavailabilityDetail />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.operatorView.path}`}>
-              <OperatorView />
+            <PrivateRoute exact path={`${routes.fieldView.path}`}>
+              <FieldView />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.operatorView.path}/:padId`}>
-              <OperatorView />
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId`}>
+              <FieldView />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.operatorView.path}/:padId/:wellId`}>
-              <OperatorView />
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
+              <FieldView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
