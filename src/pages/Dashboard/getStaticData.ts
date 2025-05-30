@@ -1,4 +1,4 @@
-import { formatAmountWithCurrency, displayDateTime } from 'src/constants/helpers';
+import { displayDateTime, formatAmountWithCurrencyNew } from 'src/constants/helpers';
 
 async function getStaticData(data: any, currency: any) {
   let dataObject: any;
@@ -70,7 +70,7 @@ async function getStaticData(data: any, currency: any) {
       },
       {
         ['Total Booked Value']: totalBookedValue
-          ? formatAmountWithCurrency(currency, totalBookedValue).fullFormatAmount
+          ? formatAmountWithCurrencyNew(currency, totalBookedValue)
           : 0,
         ['Hit Ratio']:
           totalBookedValue && totalOfferedValue
@@ -79,14 +79,14 @@ async function getStaticData(data: any, currency: any) {
               : (totalBookedValue / totalOfferedValue) * 100
             : 0,
         ['Total Offered Value']: totalOfferedValue
-          ? formatAmountWithCurrency(currency, totalOfferedValue).fullFormatAmount
+          ? formatAmountWithCurrencyNew(currency, totalOfferedValue)
           : 0
       },
       {
-        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrency(currency, grossMargin).fullFormatAmount : 0
+        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrencyNew(currency, grossMargin) : 0
           } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
         ['Hit Ratio']: grossMargin && offeredMargin ? (isNaN(grossMargin / offeredMargin) ? 0 : (grossMargin / offeredMargin) * 100) : 0,
-        ['Offered Gross Margin']: `${offeredMargin ? formatAmountWithCurrency(currency, offeredMargin).fullFormatAmount : 0
+        ['Offered Gross Margin']: `${offeredMargin ? formatAmountWithCurrencyNew(currency, offeredMargin) : 0
           } (${offeredMarginPercent > 0 ? offeredMarginPercent.toFixed(2) : 0}%)`
       }
     ],
@@ -99,16 +99,16 @@ async function getStaticData(data: any, currency: any) {
       },
       {
         ['Total Booked Value']: totalBookedValue
-          ? formatAmountWithCurrency(currency, totalBookedValue).fullFormatAmount
+          ? formatAmountWithCurrencyNew(currency, totalBookedValue)
           : 0,
         ['Hit Ratio']: totalBookedValue && totalBudget ? (isNaN(totalBookedValue / totalBudget) ? 0 : (totalBookedValue / totalBudget) * 100) : 0,
-        ['Total Budget']: totalBudget ? formatAmountWithCurrency(currency, totalBudget).fullFormatAmount : 0
+        ['Total Budget']: totalBudget ? formatAmountWithCurrencyNew(currency, totalBudget) : 0
       },
       {
-        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrency(currency, grossMargin).fullFormatAmount : 0
+        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrencyNew(currency, grossMargin) : 0
           } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
         ['Hit Ratio']: grossMargin && marginBudget ? (isNaN(grossMargin / marginBudget) ? 0 : (grossMargin / marginBudget) * 100) : 0,
-        ['Total Budget Gross Margin']: `${marginBudget ? formatAmountWithCurrency(currency, marginBudget).fullFormatAmount : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`
+        ['Total Budget Gross Margin']: `${marginBudget ? formatAmountWithCurrencyNew(currency, marginBudget) : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`
       }
     ]
   };
