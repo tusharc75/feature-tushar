@@ -79,7 +79,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile || isTablet ? undefined : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
         accessorFn: (original) => {
           return getMaterialLabel(original?.type);
@@ -91,7 +91,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         disabled: true,
         minWidth: 200,
         width: 200,
-        sticky: isMobile || isTablet ? 'none' : 'left',
+        sticky: isMobile || isTablet ? undefined : 'left',
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
             {allowedToEdit && ![MATERIAL_TYPE.serializedPackage]?.includes(row?.original?.type) ? (
