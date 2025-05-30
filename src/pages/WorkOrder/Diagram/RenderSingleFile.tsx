@@ -176,7 +176,9 @@ const RenderSingleFile = ({ f, setSelectedAttachment, file, selectedAttachment, 
         </div>
       </div>
       <Collapse in={open} unmountOnExit>
-        {imageExtensions.includes(extension) && <ImagePreview name={f.name} url={f.url} />}
+        {imageExtensions.includes(extension) && (
+          <ImagePreview name={f.name} url={f.url} onFileClick={() => setSelectedAttachment({ ...f, attachmentId: file?._id })} />
+        )}
       </Collapse>
     </Box>
   );
@@ -187,9 +189,10 @@ export default RenderSingleFile;
 type ImagePreviewProps = {
   name: string;
   url: string;
+  onFileClick: () => void;
 };
 
-const ImagePreview = ({ name, url }: ImagePreviewProps) => {
+const ImagePreview = ({ name, url, onFileClick }: ImagePreviewProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [src, setSrc] = useState(null);
   const [progress, setProgress] = useState(-1);
@@ -219,7 +222,14 @@ const ImagePreview = ({ name, url }: ImagePreviewProps) => {
   }, [url, toastConfig]);
 
   return (
-    <div className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]">
+    <div
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onFileClick();
+      }}
+      className="mb-[--py] flex h-[500px]  max-w-fit items-center justify-center overflow-hidden px-[--px]"
+    >
       {src ? <img src={src} alt={name} className="mr-auto max-h-full max-w-full" /> : <p>Loading...{progress >= 0 ? progress : 0}%</p>}
     </div>
   );
