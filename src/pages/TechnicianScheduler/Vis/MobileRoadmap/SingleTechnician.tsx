@@ -4,13 +4,12 @@ import { Avatar, Collapse, IconButton, ListItemButton, Typography } from '@mui/m
 import { memo } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cn, displayDate, sidebarResource } from 'src/constants/helpers';
-import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
-import MapImpl from 'src/pages/TechnicianScheduler/Roadmap/DesktopRoadmap/MapImpl';
-import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
-import { getColorFromPriority, getPriority } from '../helperFunctions';
-import type { TActivity } from '../types';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
+import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
+import { getColorFromPriority, getPriority } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
+import MapComp from 'src/pages/TechnicianScheduler/Vis/Map';
 
 const SingleMobileTechnician = memo(({ handleMapClick, item, index, handleChange, compareCollapse, handleSelect }: any) => {
   const { setNodeRef, isOver, active } = useDroppable({
@@ -71,19 +70,19 @@ const SingleMobileTechnician = memo(({ handleMapClick, item, index, handleChange
 export default SingleMobileTechnician;
 
 type CalendarDataProps = {
-  handleSelect: HandleSelect;
-  services: TActivity['technicianHistory'];
+  handleSelect: any;
+  services: Activity['technicianHistory'];
   compareCollapse: (index: number | string) => boolean;
   index: number;
 };
 
 const CalendarData = memo(({ services, handleSelect, compareCollapse, index }: CalendarDataProps) => {
-  const [mapData] = useRoadMapStore((state) => state.mapData);
+  const [mapData] = useTimelineStore((state) => state.mapData);
 
   if (mapData)
     return (
       <Collapse in={compareCollapse(index)} unmountOnExit>
-        <MapImpl className="relative min-h-[400px] w-full overflow-auto px-2" />
+        <MapComp className="relative min-h-[400px] w-full overflow-auto px-2" />
       </Collapse>
     );
   return (
@@ -119,8 +118,8 @@ const CalendarData = memo(({ services, handleSelect, compareCollapse, index }: C
                       size="small"
                       aria-label="Details"
                       onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
+                        e.preventDefault();
+                        e.stopPropagation();
                         if (service?.referenceType === sidebarResource?.fieldServiceOrder) {
                           window.open(`${routes.fieldServiceOrderDetail.path}/${service?.reference?.optionValue}`);
                         } else if (service?.referenceType === sidebarResource?.fieldTicket) {

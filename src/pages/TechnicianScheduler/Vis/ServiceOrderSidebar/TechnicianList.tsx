@@ -1,47 +1,46 @@
-import { useDraggable, useDroppable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
 import { Box, Button, IconButton, Skeleton } from '@mui/material';
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
-import { TActios, TInitialState } from 'src/components/CustomReactTable';
+import { TInitialState } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { cn, displayDate } from 'src/constants/helpers';
-import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
+import { throttle } from 'src/hooks/useThrottle';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
+import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
+import { classNamesCleanup, handleDragPreview } from 'src/pages/TechnicianScheduler/Vis/utils';
 
 type TechnicianListProps = {
   state: TInitialState;
-  setSelectedRecords: React.Dispatch<React.SetStateAction<any[]>>;
-  dispatch: React.Dispatch<TActios>;
   selectedResource: TechnicianResource;
   container: HTMLDivElement | null;
   isMobile: boolean;
   viewType: string;
-  setOpenTechnicianDialog: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const TechnicianList = ({
-  dispatch,
-  setSelectedRecords,
-  state,
-  selectedResource,
-  container,
-  isMobile,
-  viewType,
-  setOpenTechnicianDialog
-}: TechnicianListProps) => {
+const TechnicianList = ({ state, selectedResource, container, isMobile, viewType }: TechnicianListProps) => {
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
-  const containerSize = useMemo(() => {
-    if (container) {
-      const rect = container.getBoundingClientRect();
-      return { width: rect.width, height: rect.height };
-    } else {
-      return { width: 300 - 16, height: isMobile ? 150 : 600 };
-    }
-  }, [container, isMobile]);
+  const [containerSize, setContainerSize] = useState({ width: 300 - 16, height: isMobile ? 150 : 600 });
+
+  useEffect(() => {
+    const throttledCalc = throttle(() => {
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+      }
+    }, 2000);
+
+    const handleResize = () => {
+      throttledCalc();
+    };
+    handleResize();
+    container?.addEventListener('resize', handleResize);
+    return () => {
+      container?.addEventListener('resize', handleResize);
+    };
+  }, [container]);
 
   const setSize = useCallback((index, size) => {
     sizeMap.current = { ...sizeMap.current, [index]: size };
@@ -52,8 +51,8 @@ const TechnicianList = ({
 
   return (
     <div
-      style={{ height: isMobile ? 'auto' : containerSize.height - 32 }}
-      className={cn('py-4', state.loading ? 'overflow-hidden' : '', isMobile ? 'overflow-y-hidden' : '')}
+      style={{ height: isMobile ? 'auto' : containerSize.height }}
+      className={cn(state.loading ? 'overflow-hidden' : '', isMobile ? 'overflow-y-hidden' : '')}
     >
       {state.loading ? (
         <div className={cn('flex', isMobile ? 'flex-row' : 'flex-col')}>
@@ -61,10 +60,10 @@ const TechnicianList = ({
             <RowSkeleton key={i} isMobile={isMobile} />
           ))}
         </div>
-      ) : (state?.dataRows?.length ?
+      ) : state?.dataRows?.length ? (
         <List
           ref={listRef}
-          height={isMobile ? containerSize.height - 32 : containerSize.height - 32}
+          height={isMobile ? containerSize.height : containerSize.height}
           width={containerSize.width}
           itemCount={state.dataRows?.length}
           layout={isMobile ? 'horizontal' : 'vertical'}
@@ -80,15 +79,17 @@ const TechnicianList = ({
                 setSize={setSize}
                 isMobile={isMobile}
                 selectedType={selectedResource?.key}
-                setOpenTechnicianDialog={setOpenTechnicianDialog}
                 viewType={viewType}
               />
             </div>
           )}
         </List>
-        : <><Box p={1}>
-          <p>No Data Found</p>
-        </Box></>
+      ) : (
+        <>
+          <Box p={1}>
+            <p>No Data Found</p>
+          </Box>
+        </>
       )}
     </div>
   );
@@ -98,7 +99,7 @@ export default TechnicianList;
 
 const RowSkeleton = ({ isMobile }) => {
   return (
-    <div className={cn('', isMobile ? 'w-[300px] flex-shrink-0 px-1' : 'px-4 pb-3')}>
+    <div className={cn('', isMobile ? 'w-[300px] flex-shrink-0 px-1' : 'px-1 pb-3')}>
       <div className="space-y-2 rounded-md border p-3 shadow-lg">
         {[...Array(4).keys()].map((i) => (
           <div className="flex items-center justify-between " key={i}>
@@ -115,30 +116,10 @@ const RowSkeleton = ({ isMobile }) => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, setOpenTechnicianDialog, viewType }: any) => {
-  const [activeItemData, setStore] = useRoadMapStore((state) => state.activeItemData);
-  const rowRef = useRef<HTMLDivElement | null>(null);
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: row._id,
-    data: {
-      index: index,
-      row,
-      props: { row, index, setSize, selectedType, isMobile, type: 'sidebar' },
-      type: 'sidebar'
-    }
-  });
+export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, viewType }: any) => {
+  const [activeItemData, setStore] = useTimelineStore((state) => state.activeItemData);
 
-  const {
-    setNodeRef: setDroppableRef,
-    isOver,
-    active
-  } = useDroppable({
-    id: row._id,
-    data: {
-      accepts: ['technician'],
-      row
-    }
-  });
+  const rowRef = useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const rect = rowRef?.current.getBoundingClientRect();
@@ -193,29 +174,29 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       },
       ...(viewType === 'service'
         ? [
-          {
-            id: 'serviceName',
-            head: 'Service',
-            cell:
-              row.serviceName && row.serviceId ? (
-                <div className="flex items-center">
-                  <p title={row.serviceName} className="line-clamp-1">
-                    {row.serviceName}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              id: 'serviceName',
+              head: 'Service',
+              cell:
+                row.serviceName && row.serviceId ? (
+                  <div className="flex items-center">
+                    <p title={row.serviceName} className="line-clamp-1">
+                      {row.serviceName}
+                    </p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       {
         id: 'estimateStartDate',
@@ -230,35 +211,39 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
     ];
   }, [row, selectedType, viewType]);
 
-  const styleDnd = {
-    transform: CSS.Translate.toString(transform)
-  };
+  function handleDragStart(event: React.DragEvent<HTMLDivElement>) {
+    event.dataTransfer.effectAllowed = 'move';
+    const data = {
+      id: row._id,
+      data: row,
+      from: 'sidebar'
+    };
+    setStore({ activeItemData: { data: row, type: 'sidebar' } });
+    event.dataTransfer.setData('text/plain', JSON.stringify(data));
+    handleDragPreview(event, () => setStore({ activeItemData: null }), { opacity: 1 });
+  }
 
   return (
     <div
       ref={(div) => {
-        setDroppableRef(div);
+        // setDroppableRef(div);
         rowRef.current = div;
       }}
       onClick={() => {
         setStore({ activeItemData: activeItemData?.data?._id === row._id ? null : { data: row, type: 'sidebar' } });
       }}
-      className={cn(isMobile ? 'w-[300px] px-1' : 'px-4 pb-3', isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : '')}
+      className={cn(
+        isMobile ? 'w-[300px] px-1' : 'px-1 pb-3'
+        // isDragging ? (isMobile ? 'hidden' : '!w-0 overflow-hidden p-0') : ''
+      )}
     >
-      <div
-        {...attributes}
-        {...listeners}
-        ref={(div) => {
-          setNodeRef(div);
-        }}
-        style={{ ...styleDnd }}
-        className={cn(isMobile ? '' : 'w-[262px]')}
-      >
+      <div draggable onDragStart={handleDragStart} className={cn('dragElement', isMobile ? '' : '')}>
         <div
           className={cn(
             'cursor-grab space-y-2 rounded-md border  p-3 shadow-lg transition-all duration-300',
             activeItemData?.data?._id === row._id ? 'cursor-pointer [box-shadow:0px_0px_0px_2px_var(--new-theme-color)_inset]' : '',
-            isOver && active.data.current?.type === 'technician' ? 'bg-gray-300 dark:bg-gray-800' : 'bg-[--dark-secondary,white]',
+            'bg-[--dark-secondary,white]',
+            // isOver && active.data.current?.type === 'technician' ? 'bg-gray-300 dark:bg-gray-800' : 'bg-[--dark-secondary,white]',
             className
           )}
         >
@@ -275,8 +260,9 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
               fullWidth
               className="text-sm"
               sx={{ fontSize: '11px' }}
-              onClick={() => {
-                setOpenTechnicianDialog({ open: true, data: row });
+              onClick={(e) => {
+                e.stopPropagation();
+                setStore({ openTechnicianDialog: { open: true, data: row } });
               }}
             >
               Assign Technicians

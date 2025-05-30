@@ -417,7 +417,8 @@ export const sidebarResource = {
   serializedAssetsCertification: 'Serialized Assets Certification',
   technicianUnavailability: 'Technician Unavailability',
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
-  customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping'
+  customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
+  fieldView: 'Field View',
 } as const;
 
 export const primaryFields = {

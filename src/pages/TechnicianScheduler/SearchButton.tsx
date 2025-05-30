@@ -8,11 +8,13 @@ import { cn } from 'src/constants/helpers';
 const SearchButton = ({
   setValue,
   value,
-  onOpenToggle
+  onOpenToggle,
+  maxWidth = 'var(--sidebar-w,285px)'
 }: {
   value: string;
   setValue: (value: string) => void;
   onOpenToggle?: (open: boolean) => void;
+  maxWidth?: string;
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -25,10 +27,8 @@ const SearchButton = ({
   return (
     <div className="relative inline-flex min-h-[34px] items-center">
       <div
-        className={cn(
-          'absolute -top-[0] right-full mr-1 h-[calc(100%+2px)] overflow-hidden bg-[--dark-primary,white] transition-all',
-          open ? 'w-[calc(var(--sidebar-w,285px)-50px)]' : 'w-0'
-        )}
+        className={cn('absolute -top-[0] right-full mr-1 h-[calc(100%+2px)] overflow-hidden bg-[--dark-primary,white] transition-all')}
+        style={{ width: open ? `calc(${maxWidth} - 50px)` : 0 }}
       >
         <div className="p-[1px]">
           <SearchBox

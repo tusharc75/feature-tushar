@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react';
-import type { TActivity } from '../types';
-import SingleMobileTechnician from 'src/pages/TechnicianScheduler/Roadmap/MobileRoadmap/SingleTechnician';
-import { useRoadMapStore } from 'src/pages/TechnicianScheduler/Store';
+import SingleMobileTechnician from 'src/pages/TechnicianScheduler/Vis/MobileRoadmap/SingleTechnician';
+import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
+import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
 
 const COLLAPSIBLE_UNIQUE_NAME = '_fieldTicketInvoice';
 
 const Technicians = ({ activity, handleSelect }) => {
   const [open, setOpen] = useState<string | false>(false);
-  const [mapData, setStore] = useRoadMapStore((state) => state.mapData);
+  const [, setStore] = useTimelineStore((state) => state.mapData);
 
   const handleChange = useCallback((index: string | number) => {
     const newIndex = `${index}${COLLAPSIBLE_UNIQUE_NAME}`;
@@ -23,7 +23,7 @@ const Technicians = ({ activity, handleSelect }) => {
   );
 
   const handleMapClick = useCallback(
-    (index: number, item: TActivity) => {
+    (index: number, item: Activity) => {
       const newIndex = `${index}${COLLAPSIBLE_UNIQUE_NAME}`;
       setStore({ mapData: [item?.user?.optionValue] });
       setOpen(newIndex);
