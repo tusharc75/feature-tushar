@@ -1,10 +1,11 @@
 import axios, { CancelToken } from 'axios';
 import React, { useEffect, useMemo, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
 import { fieldServiceOrder, fieldTicket, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContextType } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-export type TechnicianResource = { key: string; resource: string; title: string; titleSingular: string; api: string };
+export type TechnicianResource = { key: string; resource: string; title: string; titleSingular: string; api: string, path: string };
 
 export const useTechnicianResources = (toastConfig: CustomToastContextType, setSelectedResource: (data: TechnicianResource) => void) => {
   const {
@@ -20,6 +21,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
         resource: sidebarResource.fieldTicket,
         title: resources?.fieldTicket?.titlePlural,
         titleSingular: resources?.fieldTicket?.titleSingular,
+        path: routes.fieldTicketDetail.path,
         api: fieldTicket.api
       });
     }
@@ -29,6 +31,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
         resource: sidebarResource.rentalManagement,
         title: resources?.rentalManagement?.titlePlural,
         titleSingular: resources?.rentalManagement?.titleSingular,
+        path: routes.rentalManagementDetail.path,
         api: rentalManagement.api
       });
     }
@@ -47,6 +50,7 @@ export const useTechnicianResources = (toastConfig: CustomToastContextType, setS
           resource: sidebarResource.fieldServiceOrder,
           title: resources?.fieldServiceOrder?.titlePlural,
           titleSingular: resources?.fieldServiceOrder?.titleSingular,
+          path: routes.fieldServiceOrderDetail.path,
           api: fieldServiceOrder.api
         });
       }
