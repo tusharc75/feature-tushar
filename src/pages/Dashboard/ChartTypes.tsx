@@ -181,7 +181,7 @@ const ChartTypes = ({
     const colorMap = {
       color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
       color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
-      color3: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 150, 132, 0.5)']
+      color3: ['rgba(0,128,0, 1)', 'rgba(0,128,0, 0.5)']
     };
     const obj = swapChartColors(colorMap);
     if (!obj) return;
