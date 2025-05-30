@@ -697,7 +697,7 @@ export const CellRenderer = ({
       key: cell.id,
       className: cn(
         `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
-  ${columnDef.sticky ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
+  ${['left', 'right'].includes(columnDef.sticky) ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
    ${stickyClassName}`,
         className,
         setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
