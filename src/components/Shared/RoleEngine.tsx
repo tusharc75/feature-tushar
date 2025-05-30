@@ -222,10 +222,18 @@ const RoleEngine = ({
       restOfTheResources = newResource.filter((d) => !d.isRead && !d.isCreate && !d.isUpdate);
     }
     availableResource.forEach((_resource) => {
+      let actualPermissionStateOnResource;
       if (isChecked === true) {
-        _resource[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && isChecked;
+        actualPermissionStateOnResource = !_resource[`${propertyToUpdate}Disabled`] && isChecked;
+        _resource[propertyToUpdate] = actualPermissionStateOnResource;
       } else {
-        _resource[propertyToUpdate] = isChecked;
+        actualPermissionStateOnResource = isChecked;
+        _resource[propertyToUpdate] = actualPermissionStateOnResource;
+      }
+      if (actualPermissionStateOnResource && (propertyToUpdate === 'isCreate' || propertyToUpdate === 'isUpdate')) {
+        if (!_resource.isReadDisabled) {
+          _resource['isRead'] = true;
+        }
       }
       if (['isRead', 'isCreate', 'isUpdate']?.includes(propertyToUpdate)) {
         newField
@@ -237,6 +245,9 @@ const RoleEngine = ({
               _field[propertyToUpdate] = isChecked;
             }
           });
+      }
+      if (!child && updateChildResource) {
+        updateChildResource(_resource.name, propertyToUpdate, actualPermissionStateOnResource);
       }
     });
     toggleAllChildResource?.(isChecked, propertyToUpdate);
