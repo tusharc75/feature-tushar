@@ -1,13 +1,12 @@
 import { Map } from '@mui/icons-material';
 import { IconButton, ListItemButton, Skeleton, Typography } from '@mui/material';
 import React from 'react';
-import { HandleSelect } from 'src/pages/TechnicianScheduler/Roadmap';
-import Technicians from 'src/pages/TechnicianScheduler/Roadmap/MobileRoadmap/Technicians';
-import type { TActivity } from '../types';
+import Technicians from 'src/pages/TechnicianScheduler/Vis/MobileRoadmap/Technicians';
+import { Activity } from 'src/pages/TechnicianScheduler/Vis/types';
 
 type TProps = {
-  activity: TActivity[];
-  handleSelect: HandleSelect;
+  activity: Activity[];
+  handleSelect: any;
   loading: boolean;
   leftSidebar: (isMobile: Boolean) => React.ReactNode;
 };
