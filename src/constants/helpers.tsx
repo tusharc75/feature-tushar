@@ -1638,6 +1638,18 @@ export const getUniqueCurrencies = () => {
   return uniqBy(currencies, 'currencyCode');
 };
 
+export const formatAmountWithCurrencyNew = (currency: string, amount: number) => {
+  if (!currency && !amount || isNaN(amount)) {
+    return ''
+  }
+
+  return new Intl.NumberFormat(undefined, {
+    style: 'currency',
+    currency,
+  }).format(amount).replace(/^(\D+)/, '$1 ');
+}
+
+
 export const formatAmountWithCurrency = (currencyCode, amount) => {
   if ((!currencyCode && !amount) || !amount || isNaN(amount)) {
     return {
