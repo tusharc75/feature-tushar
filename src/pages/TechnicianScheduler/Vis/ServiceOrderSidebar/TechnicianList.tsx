@@ -2,6 +2,7 @@ import { Box, Button, IconButton, Skeleton } from '@mui/material';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { VariableSizeList as List } from 'react-window';
+import axiosInstance from 'src/axios/axiosInstance';
 import { TInitialState } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -9,7 +10,7 @@ import { cn, displayDate } from 'src/constants/helpers';
 import { throttle } from 'src/hooks/useThrottle';
 import { TechnicianResource } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
-import { classNamesCleanup, handleDragPreview } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { handleDragPreview } from 'src/pages/TechnicianScheduler/Vis/utils';
 
 type TechnicianListProps = {
   state: TInitialState;
@@ -23,6 +24,8 @@ const TechnicianList = ({ state, selectedResource, container, isMobile, viewType
   const listRef = useRef<List<any>>(null);
   const sizeMap = useRef({});
   const [containerSize, setContainerSize] = useState({ width: 300 - 16, height: isMobile ? 150 : 600 });
+
+  const [fieldLabels, setFieldLabels] = useState([]);
 
   useEffect(() => {
     const throttledCalc = throttle(() => {
@@ -46,6 +49,24 @@ const TechnicianList = ({ state, selectedResource, container, isMobile, viewType
     sizeMap.current = { ...sizeMap.current, [index]: size };
     listRef?.current?.resetAfterIndex(index);
   }, []);
+
+  useEffect(() => {
+    fetchColumn()
+  }, [selectedResource]);
+
+  const fetchColumn = async () => {
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: selectedResource.resource,
+          fieldNames: ['customerAccount', 'estimateStartDate', 'estimateEndDate']
+        }
+      ]
+    });
+    if (data?.length) {
+      setFieldLabels(data[0]?.fieldNames)
+    }
+  }
 
   const getSize = useCallback((index) => sizeMap.current[index] || 50, []);
 
@@ -75,10 +96,11 @@ const TechnicianList = ({ state, selectedResource, container, isMobile, viewType
             <div style={style}>
               <SingleRow
                 row={data[index]}
+                fieldLabels={fieldLabels}
                 index={index}
                 setSize={setSize}
                 isMobile={isMobile}
-                selectedType={selectedResource?.key}
+                selectedResource={selectedResource}
                 viewType={viewType}
               />
             </div>
@@ -116,7 +138,7 @@ const RowSkeleton = ({ isMobile }) => {
   );
 };
 
-export const SingleRow = memo(({ row, index, setSize, selectedType, className = '', isMobile, viewType }: any) => {
+export const SingleRow = memo(({ row, index, fieldLabels, setSize, selectedResource, className = '', isMobile, viewType }: any) => {
   const [activeItemData, setStore] = useTimelineStore((state) => state.activeItemData);
 
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -139,9 +161,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
             <IconButton
               size="small"
               onClick={() => {
-                window.open(
-                  `${selectedType === 'fieldTicket' ? routes.fieldTicketDetail.path : selectedType === 'fieldServiceOrder' ? routes.fieldServiceOrderDetail.path : routes.rentalManagementDetail.path}/${row.resourceId}`
-                );
+                window.open(`${selectedResource?.path}/${row.resourceId}`);
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -153,7 +173,7 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       },
       {
         id: 'customerAccount',
-        head: 'Customer',
+        head: fieldLabels?.find((e) => e?.fieldName === 'customerAccount')?.fieldLabel || 'Customer Account',
         cell: row?.customerAccount ? (
           <div className="flex items-center">
             <p title={row?.customerAccount} className="line-clamp-1">
@@ -174,42 +194,42 @@ export const SingleRow = memo(({ row, index, setSize, selectedType, className = 
       },
       ...(viewType === 'service'
         ? [
-            {
-              id: 'serviceName',
-              head: 'Service',
-              cell:
-                row.serviceName && row.serviceId ? (
-                  <div className="flex items-center">
-                    <p title={row.serviceName} className="line-clamp-1">
-                      {row.serviceName}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            }
-          ]
+          {
+            id: 'serviceName',
+            head: 'Service',
+            cell:
+              row.serviceName && row.serviceId ? (
+                <div className="flex items-center">
+                  <p title={row.serviceName} className="line-clamp-1">
+                    {row.serviceName}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          }
+        ]
         : []),
       {
         id: 'estimateStartDate',
-        head: 'Estimate Start Date',
+        head: fieldLabels?.find((e) => e?.fieldName === 'estimateStartDate')?.fieldLabel || 'Estimate Start Date',
         cell: row['estimateStartDate'] ? <p className="text-truncate">{displayDate(row.estimateStartDate)}</p> : <NoDataCell />
       },
       {
         id: 'estimateEndDate',
-        head: 'Estimate End Date',
+        head: fieldLabels?.find((e) => e?.fieldName === 'estimateEndDate')?.fieldLabel || 'Estimate End Date',
         cell: row['estimateEndDate'] ? <p className="text-truncate">{displayDate(row.estimateEndDate)}</p> : <NoDataCell />
       }
     ];
-  }, [row, selectedType, viewType]);
+  }, [row, selectedResource, viewType]);
 
   function handleDragStart(event: React.DragEvent<HTMLDivElement>) {
     event.dataTransfer.effectAllowed = 'move';
