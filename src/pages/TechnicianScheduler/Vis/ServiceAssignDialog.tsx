@@ -34,8 +34,21 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewTyp
     }
   }, [selectedResource]);
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     setColumns(null);
+
+    const { data: { data } } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: selectedResource.resource,
+          fieldNames: ['customerAccount', 'estimateStartDate', 'estimateEndDate']
+        }
+      ]
+    });
+    let fieldLabels = []
+    if (data?.length) {
+      fieldLabels = data[0]?.fieldNames;
+    }
     const columns = [
       {
         accessor: 'index',
@@ -46,8 +59,7 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewTyp
       },
       {
         accessor: 'resourceNumber',
-        Header: `${selectedResource?.key === 'fieldTicket' ? resources?.fieldTicket?.titleSingular :
-          selectedResource?.key === 'fieldServiceOrder' ? resources?.fieldServiceOrder?.titleSingular : resources?.rentalManagement?.titleSingular}`,
+        Header: `${selectedResource?.titleSingular}`,
         width: 200,
         Cell: ({ row }) =>
           row.original['resourceNumber'] ? (
@@ -56,9 +68,7 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewTyp
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(
-                    `${selectedResource?.key === 'fieldTicket' ? routes.fieldTicketDetail.path : selectedResource?.key === 'fieldServiceOrder' ? routes.fieldServiceOrderDetail.path : routes.rentalManagementDetail.path}/${row.original.resourceId}`
-                  );
+                  window.open(`${selectedResource?.path}/${row.original.resourceId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -70,7 +80,7 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewTyp
       },
       {
         accessor: 'customerAccount',
-        Header: 'Customer Account',
+        Header: fieldLabels?.find((e) => e?.fieldName === 'customerAccount')?.fieldLabel || 'Customer Account',
         width: 250,
         Cell: ({ row }) =>
           row.original['customerAccount'] ? (
@@ -125,14 +135,14 @@ const ServiceAssignDialog = ({ selectedResource, handleClose, handleAdd, viewTyp
         }] : []),
       {
         accessor: 'estimateStartDate',
-        Header: 'Estimate Start Date',
+        Header: fieldLabels?.find((e) => e?.fieldName === 'estimateStartDate')?.fieldLabel || 'Estimate Start Date',
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateStartDate'] ? <p className="text-truncate">{displayDate(row.original.estimateStartDate)}</p> : <NoDataCell />
       },
       {
         accessor: 'estimateEndDate',
-        Header: 'Estimate End Date',
+        Header: fieldLabels?.find((e) => e?.fieldName === 'estimateEndDate')?.fieldLabel || 'Estimate End Date',
         width: 200,
         Cell: ({ row }) =>
           row.original['estimateEndDate'] ? <p className="text-truncate">{displayDate(row.original.estimateEndDate)}</p> : <NoDataCell />
