@@ -65,7 +65,7 @@ const Dashboard = () => {
           businessUnit: businessUnitOptions,
           frequency: frequencyData
         });
-      } catch (error) {}
+      } catch (error) { }
     })();
     fetchDashboards();
   }, [selectedEntity]);
