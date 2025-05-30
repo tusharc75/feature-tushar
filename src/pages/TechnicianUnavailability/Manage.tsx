@@ -17,9 +17,9 @@ import { fetch_resource_fields } from 'src/components/ResourceFields';
 import dayjs from 'dayjs';
 import { useData } from 'src/StateProvider/Provider';
 
-function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, technicianId= null }) {
+function ManageUnavailability({ onClose, onSuccess, id = null, isClone = false, technicianId = null }) {
+
   const toastConfig = useContext(CustomToastContext);
-  const ref = useRef(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -34,44 +34,41 @@ function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, te
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.technicianUnavailability);
       if (id) {
-        axiosInstance()
-          .get(`/employee-master-unavailability/${id}`)
-          .then(({ data: { data } }) => {
-            let fields = fieldsDataForUpdate;
-            if (isClone) {
-              fields = fieldsDataForCreate;
-              setTitle(data?.title);
-            } else {
-              setTitle(`Edit - ${data?.title}`);
-              if (technicianId) {
-                fields?.forEach((e) => {
-                  if (e.fieldName === 'technician') {
-                    e.disableOnEdit = true;
-                    e.isUneditable = true;
-                  }
-                });
-              }
+        axiosInstance().get(`/employee-master-unavailability/${id}`).then(({ data: { data } }) => {
+          let fields = fieldsDataForUpdate;
+          if (isClone) {
+            fields = fieldsDataForCreate;
+            setTitle(data?.title);
+          } else {
+            setTitle(`Edit - ${data?.title}`);
+            if (technicianId) {
+              fields?.forEach((e) => {
+                if (e.fieldName === 'technician') {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              });
             }
-            setInitialData({
-              fields: fields,
-              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fieldsDataAll)
-            });
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
+          }
+          setInitialData({
+            fields: fields,
+            values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fieldsDataAll)
           });
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
       } else {
         setTitle(`Create ${resources?.technicianUnavailability?.titleSingular}`);
         let initialData: any = getObjKeys('', fieldsDataForCreate);
         if (technicianId) {
           initialData.technician = technicianId;
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'technician') {
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
         }
-        fieldsDataForCreate?.forEach((e) => {
-          if (e.fieldName === 'technician') {
-            e.disableOnEdit = true;
-            e.isUneditable = true;
-          }
-        });
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -91,34 +88,32 @@ function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, te
     setIsSubmitting(true);
     if (id && !isClone) {
       values._id = id;
-      axiosInstance()
-        .put(`employee-master-unavailability`, values)
-        .then(({ data }) => {
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        })
+      axiosInstance().put(`employee-master-unavailability`, values).then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
         .finally(() => {
           setIsSubmitting(false);
         });
     } else {
-      axiosInstance().post(`employee-master-unavailability`, values)
-        .then(({ data }) => {
-          onSuccess();
-          toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        })
-        .finally(() => {
-          setIsSubmitting(false);
+      axiosInstance().post(`employee-master-unavailability`, values).then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      }).finally(() => {
+        setIsSubmitting(false);
+      });
     }
   };
 
@@ -148,7 +143,6 @@ function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, te
     >
       {initialData && initialData?.fields?.length ? (
         <Formik
-          innerRef={ref}
           initialValues={initialData.values}
           validateOnMount
           validationSchema={yupSchema(initialData.fields)}
@@ -159,10 +153,11 @@ function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, te
             <>
               <CustomDialogHeader
                 onClose={() => {
-                  if (!isEqual(ref.current.values, initialData.values)) {
-                    setShowConfirmDialog(true);
-                  } else {
+                  if (isEqual(initialData.values, values)) {
                     onClose();
+                  }
+                  else {
+                    setShowConfirmDialog(true);
                   }
                 }}
                 title={title}
@@ -188,8 +183,12 @@ function ManageUnavailability({ onClose, onSuccess, id= null, isClone= false, te
                   buttonType="transparent"
                   id="dialog-cancel-button"
                   onClick={() => {
-                    if (isEqual(initialData, values)) onClose();
-                    else setShowConfirmDialog(true);
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    }
+                    else {
+                      setShowConfirmDialog(true);
+                    }
                   }}
                 >
                   Cancel

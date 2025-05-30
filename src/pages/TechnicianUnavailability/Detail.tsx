@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import { sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -25,13 +25,9 @@ const TechnicianUnavailability = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const {
-    state: { permissions, user, resources }
+    state: { permissions, resources }
   }: any = useData();
-  const [customizedRoutes, setCustomizedRoutes] = useState<any>([
-    { ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }
-  ]);
-  const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [allowedToDelete, setAllowedToDelete] = useState(false);
+
 
   useEffect(() => {
     if (id) {
@@ -57,14 +53,7 @@ const TechnicianUnavailability = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/employee-master-unavailability/${id}`);
-
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.technicianUnavailability, data));
-      setAllowedToDelete(
-        permissions?.technicianUnavailability?.isDelete && checkIsAllowedToDelete(user, sidebarResource.technicianUnavailability, data?.owner?.optionValue)
-      );
-
       setData(data);
-      setCustomizedRoutes([{ ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }, { title: data?.title }]);
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -96,16 +85,16 @@ const TechnicianUnavailability = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={customizedRoutes} />
+          <CustomBreadCrumbs routes={[{ ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }, { title: data?.title }]} />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.technicianUnavailability?.isUpdate && allowedToEdit && (
+            {permissions?.technicianUnavailability?.isUpdate && (
               <ThemeButton iconForMobile={<EditIcon />} onClick={() => setEditDialog(true)} mobileTooltip={'Edit'}>
                 {'Edit'}
               </ThemeButton>
             )}
-            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {permissions?.technicianUnavailability?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
           </Box>
         </Box>
       </Box>
