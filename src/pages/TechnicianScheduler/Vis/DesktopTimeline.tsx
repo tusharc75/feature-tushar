@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import useLocalStorage from 'src/hooks/useLocalStore';
 import Map from 'src/pages/TechnicianScheduler/Vis/Map';
+import ShowDragMessage from 'src/pages/TechnicianScheduler/Vis/ShowDragMessage';
 import TechnicianHeader from 'src/pages/TechnicianScheduler/Vis/TechnicianHeader';
 import GroupTemplate from 'src/pages/TechnicianScheduler/Vis/Templates/GroupTemplate';
 import { ItemTemplate } from 'src/pages/TechnicianScheduler/Vis/Templates/ItemTemplate';
@@ -20,6 +21,7 @@ type DesktopTimelineProps = {
 };
 
 export const techSchlocalStoreKey = 'technician-scheduler-active-item';
+// 'vis-timeline'
 
 const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelineProps) => {
   const {
@@ -74,13 +76,14 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       onInitialDrawComplete() {
         // to calculate item positions correctly
         timelineRef.current?.redraw();
+        timelineRef.current?.zoomIn(1);
       },
       onDropObjectOnItem: function (objectData, item, callback) {
         alert('dropped object with content: "' + objectData + '" to item: "' + item + '"');
       },
 
-      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(9, 'day').toDate(),
-      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(9, 'day').toDate(),
+      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
+      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
       minHeight: 62,
       maxHeight: window.innerHeight - 200,
       selectable: false,
@@ -134,6 +137,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         prevOverGroup.current.classList.add(...GROUP_HIGHLIGHT_CLASSES);
       }
     }
+
     timeLineContainerElement.addEventListener('dragover', handleDragOver.bind(this), false);
     timeLineContainerElement.addEventListener('drop', handleDrop.bind(this), false);
     technicianContainerElement.addEventListener('drop', handleDrop.bind(this), false);
@@ -165,6 +169,8 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       <div className="absolute inset-0 -z-[1] flex animate-pulse items-center justify-center rounded-md bg-gray-200 dark:bg-gray-800"></div>
       <Map />
       <div className="relative">
+        <div id="buttons-container"></div>
+
         <div
           className="timeline min-h-full flex-grow overflow-auto [&>*]:bg-[var(--dark-primary,white)] [&_.vis-text]:dark:!text-[white]"
           ref={timelineContainer}
@@ -172,6 +178,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         <div className="absolute right-0 top-0 flex h-[62px] w-[300px] border bg-[var(--dark-primary,white)]">
           <TechnicianHeader timelineData={timelineData} />
         </div>
+        <ShowDragMessage containerRef={timelineContainer} />
       </div>
     </div>
   );
