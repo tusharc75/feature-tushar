@@ -8,8 +8,7 @@ import ButtonMenu from 'src/components/ButtonMenu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import IconButtonTabs from 'src/components/IconButtonTabs';
-import { cn, sidebarResource } from 'src/constants/helpers';
-
+import { cn } from 'src/constants/helpers';
 import { useTechnicianResources } from 'src/pages/TechnicianScheduler/useTechnicianResources';
 import DesktopTimeline from 'src/pages/TechnicianScheduler/Vis/DesktopTimeline';
 import Dialogs from 'src/pages/TechnicianScheduler/Vis/Dialogs';
@@ -27,7 +26,7 @@ const TimelineElementImpl = () => {
   const [selectedResource, setStore] = useTimelineStore((store) => store.selectedResource);
   const [createDialog, setCreateDialog] = useState(false);
   const technicianResources = useTechnicianResources(toastConfig, (resource) => setStore({ selectedResource: resource }));
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const [timelineData, setTimelineData] = useState<{ groups: DataSet<any, 'id'> | null; items: DataSet<any, 'id'> | null }>({
