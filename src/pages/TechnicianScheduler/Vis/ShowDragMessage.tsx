@@ -69,11 +69,11 @@ const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObjec
               <HiCursorClick />
             </div>
             <p className="text-[13px] font-normal ">
-              Click on any date e.g{' '}
+              Click on any date (e.g.,
               <span className="font-semibold">
-                ({dayjs().format('D')} or {dayjs().format('ddd D')})
-              </span>{' '}
-              in the timeline to focus on that day's events.
+                {dayjs().format('D')} or {dayjs().format('ddd D')}
+              </span>
+              ) in the timeline to zoom into that day's events.
             </p>
           </li>
           <li className="flex !list-disc items-start gap-2 text-gray-500">
@@ -82,8 +82,8 @@ const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObjec
               <HiCursorClick />
             </div>
             <p className="text-[13px] font-normal ">
-              Click on any month e.g <span className="font-semibold">({dayjs().format('MMMM YYYY')})</span> in the timeline to focus on that month's
-              events.
+              Click on any month (e.g.,<span className="font-semibold"> {dayjs().format('MMMM YYYY')}</span>) in the timeline to to view that month's
+              events in detail.
             </p>
           </li>
         </ul>
