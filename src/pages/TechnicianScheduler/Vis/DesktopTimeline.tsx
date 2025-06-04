@@ -147,10 +147,35 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
 
     const handleChanged = () => {
       const groups = document.querySelectorAll('.vis-foreground .vis-group');
-      for (const group of groups) {
-        const rect = group.getBoundingClientRect();
-        group.setAttribute('data-original-height', `${rect.height}`);
-        // console.log((group as HTMLElement).dataset.originalHeight);
+      const panels = document.querySelectorAll('.vis-panel.vis-left .vis-label');
+      for (let i = 0; i < groups.length; i++) {
+        const item = groups[i] as HTMLDivElement;
+        const panel = panels[i] as HTMLDivElement;
+
+        item.setAttribute('data-original-height', `${parseInt((item.computedStyleMap().get('height') as string) || '0px', 10)}`);
+        if (+item.dataset.originalHeight > 108 && !item.dataset.expanded) {
+          item.style.maxHeight = '142px';
+          panel.style.maxHeight = `142px`;
+          item.style.overflow = 'hidden';
+          if (!item.dataset.buttonInserted) {
+            const button = document.createElement('button');
+            button.innerText = 'Show All';
+            button.onclick = (e) => {
+              item.style.maxHeight = `${item.dataset.originalHeight}px`;
+              panel.style.maxHeight = `${item.dataset.originalHeight}px`;
+              item.setAttribute('data-expanded', 'true');
+              try {
+                item.removeChild(button);
+              } catch (error) {
+                console.log(error);
+              }
+            };
+            button.classList.add('timeline-show-all-button');
+
+            item.appendChild(button);
+            item.setAttribute('data-button-inserted', 'true');
+          }
+        }
       }
     };
 
