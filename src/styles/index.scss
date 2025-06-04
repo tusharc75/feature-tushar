@@ -4805,3 +4805,8 @@ td.google-visualization-orgchart-node {
     opacity: 1 !important;
   }
 }
+.vis-timeline {
+  .vis-left.vis-panel.vis-vertical-scroll {
+    direction: ltr;
+  }
+}

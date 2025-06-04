@@ -35,6 +35,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
   const [selectedResource, setStore] = useTimelineStore((state) => state.selectedResource);
   const currentRange = useRef<{ start: Date; end: Date; firstTarget: HTMLElement }>(null);
   const prevOverGroup = useRef<HTMLElement>(null);
+  const technicianHeaderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLocalStore(activeItemData);
@@ -50,6 +51,8 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         item: 'top',
         axis: 'top'
       },
+      verticalScroll: true,
+      zoomKey: 'ctrlKey',
       moment: function (date: Date) {
         return moment(date).tz(user?.user?.timezone || 'America/New_York');
       },
@@ -77,6 +80,13 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         // to calculate item positions correctly
         timelineRef.current?.redraw();
         timelineRef.current?.zoomIn(1);
+        setTimeout(() => {
+          const sidebar = document.querySelector<HTMLDivElement>('.vis-panel.vis-left');
+          const container = technicianHeaderRef.current;
+          if (container && sidebar) {
+            container.style.width = `${sidebar.offsetWidth}px`;
+          }
+        }, 200);
       },
       onDropObjectOnItem: function (objectData, item, callback) {
         alert('dropped object with content: "' + objectData + '" to item: "' + item + '"');
@@ -108,6 +118,15 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       currentRange.current = { end: e.end, start: e.start, firstTarget: e.event?.firstTarget };
     };
     timelineRef.current.on('rangechanged', handleRangeChange);
+    const handleChanged = () => {
+      const groups = document.querySelectorAll('.vis-foreground .vis-group');
+      for (const group of groups) {
+        const rect = group.getBoundingClientRect();
+        group.setAttribute('data-original-height', `${rect.height}`);
+        // console.log((group as HTMLElement).dataset.originalHeight);
+      }
+    };
+    timelineRef.current.on('changed', handleChanged);
 
     const timeLineContainerElement = document.querySelector('.vis-panel.vis-center .vis-content') as HTMLDivElement;
     const technicianContainerElement = document.querySelector('.vis-panel.vis-left .vis-content') as HTMLDivElement;
@@ -147,6 +166,8 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       technicianContainerElement.removeEventListener('drop', handleDrop.bind(this), false);
       timeLineContainerElement.removeEventListener('dragover', handleDragOver.bind(this), false);
       timelineRef.current.off('rangechanged', handleRangeChange);
+      timelineRef.current.off('changed', handleChanged);
+      timeline?.destroy();
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,13 +190,11 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       <div className="absolute inset-0 -z-[1] flex animate-pulse items-center justify-center rounded-md bg-gray-200 dark:bg-gray-800"></div>
       <Map />
       <div className="relative">
-        <div id="buttons-container"></div>
-
         <div
           className="timeline min-h-full flex-grow overflow-auto [&>*]:bg-[var(--dark-primary,white)] [&_.vis-text]:dark:!text-[white]"
           ref={timelineContainer}
         ></div>
-        <div className="absolute right-0 top-0 flex h-[62px] w-[300px] border bg-[var(--dark-primary,white)]">
+        <div ref={technicianHeaderRef} className="absolute right-0 top-0 flex h-[62px] w-[300px] border bg-[var(--dark-primary,white)]">
           <TechnicianHeader timelineData={timelineData} />
         </div>
         <ShowDragMessage containerRef={timelineContainer} />
