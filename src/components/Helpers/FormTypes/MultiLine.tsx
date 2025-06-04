@@ -38,7 +38,7 @@ function MultiLine({ value, label, required = false, onChange, name = '', rest =
         size="small"
         sx={{
           position: 'absolute',
-          bottom: 8,
+          bottom: error ? 30 : 8,
           right: 8,
           zIndex: 1,
         }}
