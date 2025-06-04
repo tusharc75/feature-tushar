@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
 import { Close, ControlCamera } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { CgScrollV } from 'react-icons/cg';
+import { HiCursorClick } from 'react-icons/hi';
+import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
 import { PiMouseLeftClickFill, PiMouseMiddleClickFill } from 'react-icons/pi';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { CgMouse, CgScrollV } from 'react-icons/cg';
 
 const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObject<HTMLDivElement> }) => {
   // const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
@@ -45,18 +47,44 @@ const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObjec
 
         <ul className="!list-disc space-y-2 px-4 pb-4 pt-2">
           <li className="flex !list-disc items-start gap-2 text-gray-500">
-            <div className="mt-1 flex flex-shrink-0">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end">
               <PiMouseLeftClickFill size={20} />
               <ControlCamera className="!text-[20px]" />
             </div>
             <p className="text-[13px] font-normal ">Adjust the timeline by clicking and dragging (Up, Down, Left, Right) to view more information.</p>
           </li>
-          <li className="flex !list-disc items-start gap-2 text-gray-500">
+          <li className="mb-3 flex !list-disc items-start gap-2 border-b pb-3 text-gray-500">
             <div className="mt-1 flex flex-shrink-0">
-              <PiMouseMiddleClickFill size={20} />
+              <span className="rounded-md bg-gray-100 p-1 text-xs font-semibold">Ctrl</span>
               <CgScrollV size={20} />
             </div>
-            <p className="text-sm font-normal ">Adjust the zoom level using the scroll wheel.</p>
+            <p className="text-sm font-normal ">
+              Adjust the zoom level using the <span className="rounded-md bg-gray-100 p-1 text-xs font-semibold">Ctrl</span>
+              &nbsp;+&nbsp;scroll&nbsp;wheel.
+            </p>
+          </li>
+          <li className="flex !list-disc items-start gap-2 text-gray-500">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end gap-1">
+              <LuZoomIn />
+              <HiCursorClick />
+            </div>
+            <p className="text-[13px] font-normal ">
+              Click on any date (e.g.,
+              <span className="font-semibold">
+                {dayjs().format('D')} or {dayjs().format('ddd D')}
+              </span>
+              ) in the timeline to zoom into that day's events.
+            </p>
+          </li>
+          <li className="flex !list-disc items-start gap-2 text-gray-500">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end gap-1">
+              <LuZoomOut />
+              <HiCursorClick />
+            </div>
+            <p className="text-[13px] font-normal ">
+              Click on any month (e.g.,<span className="font-semibold"> {dayjs().format('MMMM YYYY')}</span>) in the timeline to to view that month's
+              events in detail.
+            </p>
           </li>
         </ul>
       </div>
