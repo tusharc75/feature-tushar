@@ -259,20 +259,18 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance()
-      .patch(`${routes?.generateInvoice.path} / cancel`, {
-        invoice: invoiceData?._id,
-        comment: data,
-        resource: resource
-      })
-      .then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
+    axiosInstance().patch(`${routes?.generateInvoice.path}/cancel`, {
+      invoice: invoiceData?._id,
+      comment: data,
+      resource: resource
+    }).then(({ data }) => {
+      onSuccess();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
