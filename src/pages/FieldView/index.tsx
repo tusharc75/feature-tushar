@@ -1,27 +1,30 @@
-import { Box, IconButton } from "@mui/material";
-import axios, { CancelTokenSource } from "axios";
-import { camelCase } from "lodash";
-import { useContext, useEffect, useMemo, useState } from "react";
-import axiosInstance from "src/axios/axiosInstance";
-import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
-import CustomContainer from "src/components/CustomContainer";
-import { useTableReducer } from "src/components/CustomReactTable";
-import HtmlTooltip from "src/components/CustomTooltipTitle";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import routes from "src/components/Helpers/Routes";
-import IconButtonTabs from "src/components/IconButtonTabs";
-import { ListingPageHeader } from "src/components/PageHeaders";
-import { sidebarResource } from "src/constants/helpers";
-import CardView from "src/pages/FieldView/CardView";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { useData } from "src/StateProvider/Provider";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import { IoAppsSharp } from "react-icons/io5";
-import { IoMapSharp } from "react-icons/io5";
-import { useParams, useLocation, useHistory } from 'react-router-dom'
-import MapView from "src/pages/FieldView/MapView";
+import { Box, IconButton } from '@mui/material';
+import axios, { CancelTokenSource } from 'axios';
+import { camelCase } from 'lodash';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomContainer from 'src/components/CustomContainer';
+import { useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import IconButtonTabs from 'src/components/IconButtonTabs';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import { sidebarResource } from 'src/constants/helpers';
+import CardView from 'src/pages/FieldView/CardView';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { IoAppsSharp } from 'react-icons/io5';
+import { IoMapSharp } from 'react-icons/io5';
+import { useParams, useLocation, useHistory } from 'react-router-dom';
+import MapView from 'src/pages/FieldView/MapView';
+import ShowView from 'src/pages/FieldView/ShowView';
+import { TData } from 'src/pages/FieldView/types';
+import { FieldStoreProvider, useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
-const FieldView = () => {
+const FieldViewImpl = () => {
   const {
     state: { resources }
   }: any = useData();
@@ -39,59 +42,65 @@ const FieldView = () => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { search } = state;
 
-  const [view, setView] = useState('card')
-  const [loading, setLoading] = useState(false)
-  const [data, setData] = useState([])
+  const [view, setView] = useState<'card' | 'map'>('card');
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<TData[]>(null);
+  const [, setStore] = useFieldStore((store) => store.activeItem);
 
   const resource = useMemo(() => {
     if (wellId) {
-      return sidebarResource.serializedAsset
+      return sidebarResource.serializedAsset;
     } else if (padId) {
-      return sidebarResource?.wellMaster
+      return sidebarResource?.wellMaster;
     }
-    return sidebarResource?.padMaster
-  }, [padId, wellId])
+    return sidebarResource?.padMaster;
+  }, [padId, wellId]);
 
   const breadCrumbs = useMemo(() => {
     if (resource === sidebarResource?.wellMaster) {
-      return [{ ...routes?.fieldView, title: resources?.fieldView?.titlePlural }, { title: padName }]
+      return [{ ...routes?.fieldView, title: resources?.fieldView?.titlePlural }, { title: padName }];
     } else if (resource === sidebarResource?.serializedAsset) {
-      return [{ ...routes?.fieldView, title: resources?.fieldView?.titlePlural }, { path: `${routes?.fieldView?.path}/${padId}`, title: padName }, { title: wellName }]
+      return [
+        { ...routes?.fieldView, title: resources?.fieldView?.titlePlural },
+        { path: `${routes?.fieldView?.path}/${padId}`, title: padName },
+        { title: wellName }
+      ];
     }
-    return [{ title: resources?.fieldView?.titlePlural }]
-  }, [resource, padId, padName, wellName, wellId])
+    return [{ title: resources?.fieldView?.titlePlural }];
+  }, [resource, padId, padName, wellName, resources?.fieldView?.titlePlural]);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
-    setLoading(true)
+    setLoading(true);
     const queryString = getQueryString();
     axiosInstance()
       .get(`${routes[camelCase(resource)]?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
-        let rows = resource === sidebarResource?.padMaster ? data?.data : data
-        rows = rows?.map(d => ({
+        let rows = resource === sidebarResource?.padMaster ? data?.data : data;
+        rows = rows?.map((d) => ({
+          ...d,
           _id: d?._id,
           ...(resource === sidebarResource?.padMaster ? { padName: d?.padName } : {}),
           ...(resource === sidebarResource?.wellMaster ? { wellName: d?.wellName } : {}),
-          ...(resource === sidebarResource?.serializedAsset ? { assetNumber: d?.assetNumber } : {}),
-        }))
-        setData(rows)
-        setLoading(false)
+          ...(resource === sidebarResource?.serializedAsset ? { assetNumber: d?.assetNumber } : {})
+        }));
+        setData(rows);
+        setLoading(false);
       })
       .catch((error) => {
-        setLoading(false)
+        setLoading(false);
         toastConfig.setToastConfig(error);
-      })
-  }
+      });
+  };
 
   const getQueryString = () => {
     let deepFilter = `?`;
 
-    const filterByIds = []
+    const filterByIds = [];
 
     if (resource === sidebarResource?.wellMaster) {
-      filterByIds.push({ field: 'padName', term: { $in: [padId] } })
+      filterByIds.push({ field: 'padName', term: { $in: [padId] } });
     } else if (resource === sidebarResource?.serializedAsset) {
-      filterByIds.push({ field: 'wellName', term: { $in: [wellId] } })
+      filterByIds.push({ field: 'wellName', term: { $in: [wellId] } });
     }
 
     if (filterByIds?.length) {
@@ -115,8 +124,13 @@ const FieldView = () => {
   }, [search, resource]);
 
   const handleClick = (data: any) => {
-    const newPath = `${location.pathname}/${data?._id}`;
-    history.push(newPath, { padName: padName || data?.padName || '', wellName: wellName || data?.wellName || '' });
+    if (resource === sidebarResource?.serializedAsset) {
+      window.open(`${routes.serializedAssetDetail.path}/${data?._id}`, '_blank');
+    } else {
+      setData(null);
+      const newPath = `${location.pathname}/${data?._id}`;
+      history.push(newPath, { padName: padName || data?.padName || '', wellName: wellName || data?.wellName || '' });
+    }
   };
 
   const handleSearch = (e) => {
@@ -141,7 +155,10 @@ const FieldView = () => {
               }
             ] as const
           }
-          setValue={setView}
+          setValue={(data) => {
+            setView(data);
+            setStore({ activeItem: null });
+          }}
           value={view}
         />
         <HtmlTooltip title={'Refresh'}>
@@ -156,17 +173,21 @@ const FieldView = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs isConfirmBeforeClick={true} onBreadCrumbClick={(path) => {
-          if (resource === sidebarResource?.serializedAsset) {
-            history.push(path, { padName: padName });
-          } else if (resource === sidebarResource?.wellMaster) {
-            history.push(path);
-          } else {
-            history.push(path);
-          }
-        }} routes={breadCrumbs} />
+        <CustomBreadCrumbs
+          isConfirmBeforeClick={true}
+          onBreadCrumbClick={(path) => {
+            if (resource === sidebarResource?.serializedAsset) {
+              history.push(path, { padName: padName });
+            } else if (resource === sidebarResource?.wellMaster) {
+              history.push(path);
+            } else {
+              history.push(path);
+            }
+          }}
+          routes={breadCrumbs}
+        />
       </div>
-      <CustomContainer>
+      <CustomContainer className="relative">
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -174,30 +195,28 @@ const FieldView = () => {
           isAddButtonVisible={false}
           rightSideContents={rightSideContents()}
         />
-        {loading || !data?.length ? (
+        {loading || !data ? (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-
+        ) : data?.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <p>No Data found</p>
+          </div>
         ) : (
           <>
-            {view === 'card' && (
-              <CardView resource={resource} data={data} clickOnCard={(data) => {
-                if (resource === sidebarResource?.serializedAsset) {
-                } else {
-                  handleClick(data)
-                }
-              }} />
-            )}
-            {view === 'map' && (
-              <MapView data={data} />
-            )}
+            <ShowView data={data} onClick={handleClick} resource={resource} view={view} />
           </>
         )}
       </CustomContainer>
-
     </section>
-  )
-}
+  );
+};
+
+const FieldView = () => (
+  <FieldStoreProvider>
+    <FieldViewImpl />
+  </FieldStoreProvider>
+);
 
 export default FieldView;
