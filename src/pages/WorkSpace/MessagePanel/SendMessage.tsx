@@ -33,7 +33,7 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => {},
+  onEditComplete = () => { },
   editorId = '',
   channelData,
   disabled = false,
@@ -78,19 +78,19 @@ const SendMessage = ({
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isRecording) {
+    if(isRecording){
       setRecordingSeconds(0);
       interval = setInterval(() => {
         setRecordingSeconds((prev) => prev + 1);
       }, 1000);
-    } else if (!isRecording && interval) {
+    } else if(!isRecording && interval) {
       setRecordingSeconds(0);
     }
 
     return () => {
-      if (interval) clearInterval(interval);
+      if(interval) clearInterval(interval);
     };
-  }, [isRecording]);
+  }, [isRecording])
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -133,7 +133,7 @@ const SendMessage = ({
                 socket.emit('joinChannel', data?._id);
               }
             })
-            .catch((error) => {});
+            .catch((error) => { });
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
@@ -207,7 +207,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => {}
+          toJSON: () => { }
         })
       });
     }
@@ -230,20 +230,9 @@ const SendMessage = ({
         return;
       }
     }
-
-    if (key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-      const liElement = editorRef.current?.selection.getNode().closest('ul, ol');
-
-      if (liElement) {
-        return;
-      } else {
-        e.preventDefault();
-        if (message && message !== initialMessage && !isLoading) postMessage();
-      }
-    }
-
-    if (key === 'Enter' && (e.shiftKey || e.ctrlKey || e.metaKey)) {
-      return;
+    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      if (message && message !== initialMessage && !isLoading) postMessage();
     }
   };
 
@@ -259,7 +248,9 @@ const SendMessage = ({
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
 
         const recorder = new MediaRecorder(stream, { mimeType });
 
@@ -358,7 +349,7 @@ const SendMessage = ({
         </div>
 
         {isRecording && (
-          <div className="relative mb-4 flex items-center gap-3 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 shadow-sm">
+          <div className="relative flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm">
             {/* Animated border glow */}
             <div
               className="absolute inset-0 rounded-lg"
@@ -370,24 +361,24 @@ const SendMessage = ({
             {/* Recording indicator */}
             <div className="relative flex items-center gap-3">
               {/* Mic icon with animated background */}
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-red-500 shadow-sm">
-                <div className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
-                <Mic className="relative h-4 w-4 text-white" />
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 shadow-sm">
+                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                <Mic className="relative w-4 h-4 text-white" />
               </div>
 
               {/* Recording text and status */}
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-900">
-                    Recording
-                    <span className="ml-2 rounded bg-red-100 px-2 py-0.5 font-mono text-xs text-red-700">
-                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:{String(recordingSeconds % 60).padStart(2, '0')}
+                  <span className="font-semibold text-gray-900 text-sm">Recording
+                    <span className='ml-2 px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono text-xs'>
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:
+                      {String(recordingSeconds % 60).padStart(2, '0')}
                     </span>
-                  </span>{' '}
+                  </span>
                   <div className="flex gap-1">
-                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '0ms' }} />
-                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '150ms' }} />
-                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '300ms' }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
                 <span className="text-xs text-gray-600">Speak clearly into your microphone</span>
@@ -398,9 +389,9 @@ const SendMessage = ({
               variant="outline"
               size="sm"
               onClick={getAudio}
-              className="ml-auto h-8 border-gray-300 px-3 transition-colors hover:border-red-300 hover:bg-red-50"
+              className="ml-auto h-8 px-3 border-gray-300 hover:border-red-300 hover:bg-red-50 transition-colors"
             >
-              <Square className="mr-1.5 h-3 w-3 fill-current" />
+              <Square className="w-3 h-3 mr-1.5 fill-current" />
               Stop
             </Button>
           </div>

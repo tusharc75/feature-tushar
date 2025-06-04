@@ -17,7 +17,7 @@ import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { UseWorkSpace } from 'src/pages/WorkSpace/useWorkSpace';
 import { formatDateWithTodayYestarday, getAvatarColor } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
-
+ 
 type DisplaySingleMessageProps = {
   message: Message;
   selectedMessage: Message;
@@ -32,7 +32,7 @@ type DisplaySingleMessageProps = {
   channelData: ChannelData;
   type?: 'messages' | 'pins';
 };
-
+ 
 export const DisplaySingleMessage = ({
   message,
   selectedMessage,
@@ -63,18 +63,18 @@ export const DisplaySingleMessage = ({
       user: { user }
     }
   } = useData();
-
+ 
   if (!message) return null;
-
+ 
   const replies = message.replies || [];
   const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
-
+ 
   const groupedReactions = Object.values(groupBy(message.reactions, 'emoji')).map((reactions) => ({
     emoji: reactions[0].emoji,
     count: reactions.length,
     users: reactions.map((reaction) => reaction.user)
   }));
-
+ 
   const handleReaction = async (emoji) => {
     try {
       await axiosInstance().post('/work-space/channel/message/reaction', { messageId: message._id, emoji });
@@ -85,7 +85,7 @@ export const DisplaySingleMessage = ({
       closeEmojiPanel();
     }
   };
-
+ 
   const handleReactionClick = async (reaction) => {
     try {
       if (reaction?.users?.find((u) => u.optionValue === user?._id)) {
@@ -98,7 +98,7 @@ export const DisplaySingleMessage = ({
       toastConfig.setToastConfig(error);
     }
   };
-
+ 
   const deleteAttachment = async (messageId, attachmentId) => {
     try {
       await axiosInstance().put(`/work-space/channel/message/remove-attachment`, { messageId, attachmentId });
@@ -107,9 +107,9 @@ export const DisplaySingleMessage = ({
       toastConfig.setToastConfig(error);
     }
   };
-
+ 
   const isSelf = user?._id === message?.user?.optionValue;
-
+ 
   return (
     <>
       <li
@@ -162,7 +162,7 @@ export const DisplaySingleMessage = ({
                     <span
                       className={cn(
                         `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
-                       [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
+                        [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px]
                        [&_span:last-child]:text-gray-400`,
                         isSelf
                           ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
@@ -288,7 +288,7 @@ export const DisplaySingleMessage = ({
                     )}
                   </div>
                 </div>
-
+ 
                 <div
                   className={cn(
                     'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
