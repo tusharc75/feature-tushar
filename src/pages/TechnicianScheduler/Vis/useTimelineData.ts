@@ -22,9 +22,6 @@ const useTimelineData = (timelineData: { groups: DataSet<any, 'id'> | null; item
         filtered = filtered.concat(items.slice(0, 4));
       }
     }
-
-    console.log(filtered);
-
     return new DataSet(filtered);
   }
 

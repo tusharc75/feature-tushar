@@ -87,9 +87,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
       setAllowedToDelete(
         permissions?.invoice?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
-          data?.canDelete &&
-          allowCreateInvoice
+        checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
+        data?.canDelete &&
+        allowCreateInvoice
       );
       setInvoiceData(data);
     } catch (error) {
@@ -135,9 +135,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === MATERIAL_TYPE.package
-                    ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                      ? '(Product)'
-                      : '(Service)'
+                    ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                      ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                     : row.original.type === MATERIAL_TYPE.service
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}
@@ -251,17 +250,16 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail?.assetNumber
-              : parent.type === MATERIAL_TYPE.service
-                ? parent.serviceDetail?.serviceName
-                : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -288,19 +286,18 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageName
-            : _subRow?.type === MATERIAL_TYPE.serializedAsset
-              ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow?.type === MATERIAL_TYPE.service
-                ? _subRow?.serviceDetail?.serviceName
-                : _subRow?.type === MATERIAL_TYPE.other
-                  ? _subRow.detail
-                  : ''
-      }`;
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceName
+              : _subRow?.type === MATERIAL_TYPE.other
+                ? _subRow.detail
+                : ''
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
