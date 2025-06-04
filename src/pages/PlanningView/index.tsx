@@ -245,6 +245,12 @@ function PlanningView() {
     }
   };
 
+  useEffect(() => {
+    if ([sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && view === 'list') {
+      setView('calendar')
+    }
+  }, [selectedResource]);
+
   return (
     <>
       <Box className="main-container-v1">
@@ -281,25 +287,26 @@ function PlanningView() {
                   Create
                 </ThemeButton>
               )}
-            <IconButtonTabs
-              onItemClick={resetSelectedRecords}
-              items={
-                [
-                  {
-                    value: 'calendar',
-                    icon: <FaRegCalendar />,
-                    tooltip: 'Calendar View'
-                  },
-                  {
-                    value: 'list',
-                    icon: <TfiLayoutListThumbAlt />,
-                    tooltip: 'List View'
-                  }
-                ] as const
-              }
-              setValue={setView}
-              value={view}
-            />
+            {![sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) &&
+              <IconButtonTabs
+                onItemClick={resetSelectedRecords}
+                items={
+                  [
+                    {
+                      value: 'calendar',
+                      icon: <FaRegCalendar />,
+                      tooltip: 'Calendar View'
+                    },
+                    {
+                      value: 'list',
+                      icon: <TfiLayoutListThumbAlt />,
+                      tooltip: 'List View'
+                    }
+                  ] as const
+                }
+                setValue={setView}
+                value={view}
+              />}
             <HtmlTooltip title={'Refresh'}>
               <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
                 <RefreshIcon fontSize="small" color="primary" />
