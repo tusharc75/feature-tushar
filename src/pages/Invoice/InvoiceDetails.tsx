@@ -40,6 +40,8 @@ import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { RiExchange2Line } from 'react-icons/ri';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
+import Doa from 'src/pages/Invoice/Doa';
+import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -61,6 +63,7 @@ const InvoiceDetails = () => {
   const [invoiceFields, setInvoiceFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [nextStep, setNextStep] = useState(true);
+  const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -68,16 +71,15 @@ const InvoiceDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [stepList, setStepList] = useState(invoiceProcessSteps);
+  const [stepNames, setStepNames] = useState(invoiceProcessSteps?.map((item) => item.name));
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-
-  const invoiceProcessStepsNames = React.useMemo(() => {
-    return invoiceProcessSteps.map((item) => item.name);
-  }, [invoiceProcessSteps]);
+  const [DOAData, setDOAData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -120,23 +122,48 @@ const InvoiceDetails = () => {
     }
   };
 
+  const updateDOASetup = (doasetup) => {
+    if (doasetup) {
+      setStepList(invoiceProcessSteps);
+      setStepNames(invoiceProcessSteps?.map((item) => item.name));
+    } else {
+      setStepList(invoiceProcessSteps?.filter((e) => e.name !== 'DOA'));
+      setStepNames(invoiceProcessSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
+    }
+  };
+
   const fetchInvoiceData = async () => {
     setLoading(true);
     try {
       let data;
       const response: any = await axiosInstance().get(`${invoice.api}/${id}`);
       data = response?.data?.data;
-      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
-        setCurrentStep(invoiceProcessSteps?.length - 1);
-      } else {
-        setCurrentStep(getIndex(data?.processStatus, invoiceProcessSteps));
-      }
       setHeadingLabel(data.invoiceNumber);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       setAllowedToDelete(
         permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete
       );
       setInvoiceData(data);
+      var tempStepList = invoiceProcessSteps;
+      if (!data?.doasetup) {
+        tempStepList = invoiceProcessSteps?.filter((e) => e.name !== 'DOA')
+      }
+      setStepList(tempStepList);
+      setStepNames(tempStepList?.map((item) => item.name));
+
+      if ([INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(data?.status)) {
+        setCurrentStep(tempStepList?.length - 1);
+      } else {
+        setCurrentStep(getIndex(data?.processStatus, tempStepList));
+      }
+
+      if (data?.doasetup) {
+        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
+        if (doaResponse?.data?.data) {
+          setDOAData(doaResponse?.data?.data);
+        }
+      }
+
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -394,41 +421,68 @@ const InvoiceDetails = () => {
           <TabPanel value={tabValue} index={1}>
             <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
               {invoiceData ? (
-                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
-                  <Steps
-                    isNextStep={false}
-                    nextStep={nextStep}
-                    steps={invoiceProcessSteps}
-                    currentStep={currentStep}
-                    setCurrentStep={setCurrentStep}
-                    isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
-                    stepFullScreen={stepFullScreen}
-                    setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
-                    updateStatus={(step: number) => {
-                      dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
-                    }}
-                  />
-                  {currentStep === 0 && invoiceData && (
-                    <Material
-                      invoiceData={invoiceData}
-                      invoiceFields={invoiceFields}
-                      fetchInvoiceData={fetchInvoiceData}
-                      setNextStep={setNextStep}
-                      stepFullScreen={stepFullScreen}
-                      allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
-                    />
+                <>
+                  {stepList[currentStep]?.name === 'DOA' && (
+                    <Box
+                      style={{
+                        marginLeft: 'auto',
+                        maxWidth: 'max-content',
+                        marginTop: DOAData ? '-30px' : ''
+                      }}
+                    >
+                      <ShowDoa status={invoiceData?.doa_status} data={DOAData} />
+                    </Box>
                   )}
-                  {currentStep === 1 && invoiceData && (
-                    <Invoice
-                      invoiceData={invoiceData}
-                      invoiceFields={invoiceFields}
-                      setNextStep={setNextStep}
-                      handleChangeStatus={handleChangeStatus}
+                  <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                    <Steps
+                      isNextStep={false}
+                      nextStep={nextStep}
+                      isPrevStep={prevStep}
+                      steps={stepList}
+                      currentStep={currentStep}
+                      setCurrentStep={setCurrentStep}
+                      isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
                       stepFullScreen={stepFullScreen}
-                      statusOptions={statusOptions}
+                      setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
+                      updateStatus={(step: number) => {
+                        dynamicFormUpdateProcessStatus(sidebarResource.invoice, stepNames[step], id);
+                      }}
                     />
-                  )}
-                </Grid>
+                    {currentStep === 0 && invoiceData && (
+                      <Material
+                        invoiceData={invoiceData}
+                        invoiceFields={invoiceFields}
+                        fetchInvoiceData={fetchInvoiceData}
+                        setNextStep={setNextStep}
+                        stepFullScreen={stepFullScreen}
+                        allowedToEdit={allowedToEdit && permissions?.invoice?.isUpdate ? true : false}
+                        updateDOASetup={updateDOASetup}
+                      />
+                    )}
+                    {currentStep === 1 && invoiceData && (
+                      <Doa
+                        invoiceData={invoiceData}
+                        invoiceFields={invoiceFields}
+                        setNextStep={setNextStep}
+                        setPrevStep={setPrevStep}
+                        fetchInvoiceData={fetchInvoiceData}
+                        DOAData={DOAData}
+                        stepFullScreen={stepFullScreen}
+                      />
+                    )}
+                    {currentStep === 2 && invoiceData && (
+                      <Invoice
+                        invoiceData={invoiceData}
+                        invoiceFields={invoiceFields}
+                        setNextStep={setNextStep}
+                        handleChangeStatus={handleChangeStatus}
+                        stepFullScreen={stepFullScreen}
+                        statusOptions={statusOptions}
+                      />
+                    )}
+                  </Grid>
+                </>
+
               ) : (
                 <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />

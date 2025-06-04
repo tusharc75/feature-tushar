@@ -138,9 +138,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === 'service'
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -420,10 +419,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === MATERIAL_TYPE.service
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.product
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === MATERIAL_TYPE.service
