@@ -20,7 +20,11 @@ const ShowView = ({ data, onClick, view, resource }: ShowViewProps) => {
       {view === 'map' && (
         <div
           className={cn(
-            'overflow-hidden rounded-md transition-all duration-300 [&_.gm-style-iw.gm-style-iw-c]:!p-0 [&_button.gm-ui-hover-effect]:!size-[24px] [&_button.gm-ui-hover-effect_span]:!m-0',
+            `overflow-hidden rounded-md transition-all duration-300 
+            [&_.gm-style-iw-tc:after]:bg-[var(--dark-primary,white)] 
+            [&_.gm-style-iw.gm-style-iw-c]:bg-[var(--dark-primary,white)] [&_.gm-style-iw.gm-style-iw-c]:!p-0 
+            [&_button.gm-ui-hover-effect]:!size-[24px] [&_button.gm-ui-hover-effect_span]:!m-0
+          dark:[&_button.gm-ui-hover-effect_span]:[filter:invert(1)]`,
             view === 'map' ? 'flex-grow' : ''
           )}
         >

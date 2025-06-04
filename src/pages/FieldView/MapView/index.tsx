@@ -101,10 +101,10 @@ const MapView = ({ data, resource }: MapProps) => {
                   onClick={() => stStore({ activeItem: item._id })}
                   className="flex w-[200px] cursor-pointer flex-col justify-center bg-transparent px-2 py-4 text-left"
                 >
-                  <div key={label} className={cn('grid grid-cols-[1fr_1fr] items-start', className)} {...rest}>
-                    <h6 className="text-sm font-semibold text-[--primary-text]">{label}: </h6>
+                  <div key={label} className={cn('items-start', className)} {...rest}>
+                    {/* <h6 className="text-sm font-semibold text-[--primary-text]">{label}: </h6> */}
                     <p
-                      className="line-clamp-2 text-right text-sm font-medium text-[#6B7280] dark:text-gray-300"
+                      className=" line-clamp-2 text-center font-bold text-[#6B7280] dark:text-gray-300"
                       title={typeof value === 'string' ? value : ''}
                     >
                       {value}
