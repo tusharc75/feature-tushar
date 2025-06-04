@@ -44,6 +44,17 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
   const options = useMemo(() => {
     const optionsData: TimelineOptions = {
       groupEditable: true,
+      verticalScroll: true,
+      zoomKey: 'ctrlKey',
+      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
+      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
+      minHeight: 62,
+      maxHeight: window.innerHeight - 200,
+      selectable: false,
+      groupHeightMode: 'auto',
+      dataAttributes: ['id'],
+      zoomMax: 31556952000, // 1 year in milliseconds
+      zoomMin: 60000, // 1 minuite in milliseconds
       editable: {
         updateGroup: true
       },
@@ -51,8 +62,6 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         item: 'top',
         axis: 'top'
       },
-      verticalScroll: true,
-      zoomKey: 'ctrlKey',
       moment: function (date: Date) {
         return moment(date).tz(user?.user?.timezone || 'America/New_York');
       },
@@ -90,17 +99,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       },
       onDropObjectOnItem: function (objectData, item, callback) {
         alert('dropped object with content: "' + objectData + '" to item: "' + item + '"');
-      },
-
-      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
-      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
-      minHeight: 62,
-      maxHeight: window.innerHeight - 200,
-      selectable: false,
-      groupHeightMode: 'auto',
-      dataAttributes: ['id'],
-      zoomMax: 31556952000, // 1 year in milliseconds
-      zoomMin: 60000 // 1 minuite in milliseconds
+      }
     };
     return optionsData;
   }, [user?.user?.timezone, setStore, selectedResource]);
@@ -114,10 +113,38 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
     timelineRef.current?.destroy();
     timelineRef.current = timeline;
 
+    const handleTimelineCLick = (event: MouseEvent) => {
+      const target = event.currentTarget as HTMLDivElement;
+      const zoom = target.classList.contains('vis-minor') ? 1 : -1;
+      const data = timeline.getEventProperties(event);
+
+      const time = data.time;
+      let start = dayjs(time).startOf('day').toDate();
+      let end = dayjs(time).endOf('day').toDate();
+      if (zoom < 0) {
+        start = dayjs(time).startOf('month').toDate();
+        end = dayjs(time).endOf('month').toDate();
+      }
+      timeline.setWindow(start, end);
+    };
+
+    let minors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-minor');
+    let majors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-major');
+
     const handleRangeChange = (e: { start: Date; end: Date; event: { firstTarget: HTMLElement } }) => {
       currentRange.current = { end: e.end, start: e.start, firstTarget: e.event?.firstTarget };
+
+      // Remove all previous listeners to prevent memory leak
+      minors?.forEach((e) => e?.removeEventListener('click', handleTimelineCLick));
+      majors?.forEach((e) => e?.removeEventListener('click', handleTimelineCLick));
+
+      minors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-minor');
+      majors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-major');
+
+      minors.forEach((e) => e.addEventListener('click', handleTimelineCLick));
+      majors.forEach((e) => e.addEventListener('click', handleTimelineCLick));
     };
-    timelineRef.current.on('rangechanged', handleRangeChange);
+
     const handleChanged = () => {
       const groups = document.querySelectorAll('.vis-foreground .vis-group');
       for (const group of groups) {
@@ -126,7 +153,9 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         // console.log((group as HTMLElement).dataset.originalHeight);
       }
     };
+
     timelineRef.current.on('changed', handleChanged);
+    timelineRef.current.on('rangechanged', handleRangeChange);
 
     const timeLineContainerElement = document.querySelector('.vis-panel.vis-center .vis-content') as HTMLDivElement;
     const technicianContainerElement = document.querySelector('.vis-panel.vis-left .vis-content') as HTMLDivElement;

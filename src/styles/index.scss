@@ -4810,3 +4810,10 @@ td.google-visualization-orgchart-node {
     direction: ltr;
   }
 }
+.vis-panel.vis-top .vis-text {
+  cursor: pointer;
+  transition: all 300ms;
+  &:hover {
+    color: gray !important;
+  }
+}
