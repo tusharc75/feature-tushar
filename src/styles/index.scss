@@ -4730,3 +4730,96 @@ td.google-visualization-orgchart-node {
     @apply text-gray-500;
   }
 }
+.vis-item-content {
+  width: 100%;
+  padding: 0px !important;
+}
+
+.vis-inner {
+  display: flex !important;
+  min-height: calc(100%) !important;
+  background-color: var(--dark-primary, white) !important;
+}
+.vis-label {
+  border-bottom: 0px !important;
+  box-shadow: 0px -1px 0px 0px var(--common-border-color) !important; //border
+}
+
+.vis-time-axis .vis-grid.vis-minor,
+.vis-panel.vis-center,
+.vis-panel.vis-left,
+.vis-panel.vis-right,
+.vis-panel.vis-top,
+.vis-panel.vis-bottom,
+.vis-foreground .vis-group,
+.vis-timeline {
+  border-color: var(--common-border-color) !important;
+}
+// .vis-item-visible-frame {
+//   display: none;
+// }
+.vis-item {
+  background-color: transparent !important;
+  overflow: hidden !important;
+  border: 0px !important;
+  color: inherit !important;
+  display: block !important;
+}
+.vis-timeline {
+  background-color: var(--dark-primary, white);
+  border-left: 0px !important;
+}
+.vis-text.vis-minor {
+  border-top: 1px solid var(--common-border-color);
+}
+.vis-panel.vis-left {
+  left: unset !important;
+  right: -1px !important;
+  touch-action: auto !important;
+  user-select: auto !important;
+  -webkit-user-drag: auto !important;
+  .vis-labelset {
+    border-left: 1px solid var(--common-border-color) !important;
+  }
+}
+
+.vis-text.vis-major {
+  font-weight: 600;
+}
+.vis-text.vis-minor {
+  font-weight: 500;
+}
+.technician-group {
+  -webkit-user-drag: element !important;
+}
+.vis-panel.vis-background,
+.vis-panel.vis-top,
+.vis-panel.vis-center {
+  left: 0px !important;
+}
+.vis-labelset .vis-label .vis-inner {
+  padding: 0px !important;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dragElement {
+    opacity: 1 !important;
+  }
+}
+.vis-timeline {
+  .vis-left.vis-panel.vis-vertical-scroll {
+    direction: ltr;
+  }
+}
+.vis-panel.vis-top .vis-text {
+  transition: all 300ms;
+  &:hover {
+    color: gray !important;
+  }
+}
+
+.vis-panel.vis-top .vis-text.vis-minor {
+  cursor: zoom-in;
+}
+.vis-panel.vis-top .vis-text.vis-major {
+  cursor: zoom-out;
+}

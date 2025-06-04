@@ -451,5 +451,22 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
+  },
+  {
+    resource: sidebarResource.salesOrder,
+    policy: [
+      {
+        fieldName: 'restrictAutoDebitInventory',
+        fieldLabel: 'Restrict Auto Debit Inventory',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'debitInventoryOnAveragePrice',
+        fieldLabel: 'Debit Inventory On Average Price',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
   }
 ];

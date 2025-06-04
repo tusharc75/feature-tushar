@@ -398,12 +398,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          workOrderData?.serializedAsset &&
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -426,10 +426,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          !workOrderData?.currentRepairJob &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        !workOrderData?.currentRepairJob &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -505,9 +505,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -520,9 +520,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -594,6 +594,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
           referenceId={workOrderData?._id}
           resource={ACTIVITY_RESOURCE.workOrder}
           resourceLabel={workOrderData?.workOrderNumber}
+          extraData={{ version: workOrderData?.versions?.length + 1 || 1 }}
           extraRelatedTo={{
             referenceId:
               workOrderData?.type === WORK_ORDER_TYPE.repairOrder

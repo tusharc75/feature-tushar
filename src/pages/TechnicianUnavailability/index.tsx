@@ -22,6 +22,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 let employeeUnavailabilityTimeout;
 
 const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
+
   const renderedFrom = id ? `${camelCase(sidebarResource.employeeMaster)}_Unavailability` : `${camelCase(sidebarResource.technicianUnavailability)}`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -69,7 +70,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
     if (id) {
       data = data?.filter((d) => d?.fieldData?.fieldName !== 'technician');
     }
-    let newColumns = generateColumns(renderedFrom, data, routes.technicianUnavailabilityDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes.technicianUnavailabilityDetail.path, id ? false : true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -273,10 +274,10 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
             margin="none"
             size="small"
             name="technician"
-            label={resources?.technician?.titleSingular}
+            label={resources?.employeeMaster?.titleSingular}
             variant="outlined"
             fullWidth
-            placeholder="Select Technician"
+            placeholder={resources?.employeeMaster?.titleSingular}
           />
         )}
       />

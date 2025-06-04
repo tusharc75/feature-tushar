@@ -32,7 +32,7 @@ import { getPricingConditions, getPricingValue, getTaxList } from 'src/component
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit, updateDOASetup }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -292,6 +292,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+    updateDOASetup(data?.doasetup)
   };
 
   const generateNestedData = (material, parent) => {

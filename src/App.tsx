@@ -283,11 +283,12 @@ import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineCont
 import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
 import ResourceDataMapping from 'src/pages/ResourceDataMapping';
-import {useLiveLocationTracking} from './hooks/useLiveLocationTracking';
+import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
+import FieldView from 'src/pages/FieldView';
 
-var notificationInterval: any = null;    
+var notificationInterval: any = null;
 
 function App() {
   useEffect(() => {
@@ -343,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1257,9 +1258,18 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.technicianUnavailability.path}`}>
               <TechnicianUnavailability />
-            </PrivateRoute> 
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.technicianUnavailabilityDetail.path}/:id`}>
               <TechnicianUnavailabilityDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
+              <FieldView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

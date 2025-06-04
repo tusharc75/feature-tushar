@@ -12,6 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 import dayjs from 'dayjs';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import axios, { CancelTokenSource } from 'axios';
 
 const renderedFrom = 'resourceLogs';
 
@@ -28,7 +29,9 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
 
   useEffect(() => {
     if (selectedResource) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [selectedResource, selectedOption, selectedAction, selectedUser, page, limit]);
 
@@ -165,97 +168,94 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
     return query;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`/log?${queryString}`)
-      .then(
-        ({
-          data: {
-            data: { data, count }
-          }
-        }) => {
-          let rows = data?.map((u, index) => {
-            var changeString = [];
-            var changes = [];
-            var operations = [];
-            if (u?.action == 'update' || u?.action == 'create') {
-              if (Array.isArray(u?.changes)) {
-                if (u?.changes?.length === 0) {
-                  return;
-                }
-                u?.changes?.forEach((e) => {
-                  if (e?.fieldLabel) {
-                    if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
-                      return;
-                    }
-                    changes.push(e);
-                    var oldValue = e?.oldValue;
-                    var newValue = e?.newValue;
-                    if (e?.type === 'date') {
-                      if (oldValue && dayjs(oldValue)?.isValid) {
-                        oldValue = displayDate(oldValue);
-                      }
-                      if (newValue && dayjs(newValue)?.isValid) {
-                        newValue = displayDate(newValue);
-                      }
-                    } else if (e?.type === 'dropDown' && e?.lookup) {
-                      oldValue = oldValue?.label;
-                      newValue = newValue?.label;
-                    } else if (e?.type === 'multiSelect' && e?.lookup) {
-                      oldValue = isArray(oldValue) ? oldValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
-                      newValue = isArray(newValue) ? newValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
-                    }
-                    if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
-                      changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
-                    } else if (newValue || newValue === 0) {
-                      changeString.push(`${e.fieldLabel} changed to ${newValue}`);
-                    }
-                  } else if (e?.label) {
-                    operations.push(e);
-                  }
-                });
-                if (u?.changes?.every((e: any) => e?.type === 'add')) {
-                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
-                  u.action = 'add';
-                  changeString.push(`${[...materialSet].join(', ')} Added`);
-                }
-                if (u?.changes?.every((e: any) => e?.type === 'delete')) {
-                  const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
-                  u.action = 'delete';
-                  changeString.push(`${[...materialSet].join(', ')} Deleted`);
-                }
-              } else {
-                operations.push({ ...u?.changes });
-              }
-              if (changeString?.length) {
-                u.changeString = changeString?.toString();
-              } else {
-                u.changeString = 'Click View to check changes';
-              }
-              if (u?.action == 'create') {
-                u.changeString = 'Created';
-              }
-            } else if (u?.action == 'delete') {
-              u.changeString = 'Deleted';
-            }
-            u.changes = changes;
-            u.operations = operations;
-            u.key = selectedResource?.key || camelCase(selectedResource);
-            u.index = count - index
-            return u;
-          });
-          rows = rows.filter((e) => e);
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
+    axiosInstance().get(`/log?${queryString}`, { cancelToken: cancelTokenSource?.token }).then(
+      ({
+        data: {
+          data: { data, count }
         }
-      )
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      }) => {
+        let rows = data?.map((u, index) => {
+          var changeString = [];
+          var changes = [];
+          var operations = [];
+          if (u?.action == 'update' || u?.action == 'create') {
+            if (Array.isArray(u?.changes)) {
+              if (u?.changes?.length === 0) {
+                return;
+              }
+              u?.changes?.forEach((e) => {
+                if (e?.fieldLabel) {
+                  if (e?.fieldLabel === 'history' || e?.fieldLabel === 'createdBy' || e?.fieldLabel === '_id') {
+                    return;
+                  }
+                  changes.push(e);
+                  var oldValue = e?.oldValue;
+                  var newValue = e?.newValue;
+                  if (e?.type === 'date') {
+                    if (oldValue && dayjs(oldValue)?.isValid) {
+                      oldValue = displayDate(oldValue);
+                    }
+                    if (newValue && dayjs(newValue)?.isValid) {
+                      newValue = displayDate(newValue);
+                    }
+                  } else if (e?.type === 'dropDown' && e?.lookup) {
+                    oldValue = oldValue?.label;
+                    newValue = newValue?.label;
+                  } else if (e?.type === 'multiSelect' && e?.lookup) {
+                    oldValue = isArray(oldValue) ? oldValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
+                    newValue = isArray(newValue) ? newValue?.map((e) => e?.label)?.toString() : newValue?.label || '';
+                  }
+                  if ((oldValue || oldValue === 0) && (newValue || newValue === 0)) {
+                    changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);
+                  } else if (newValue || newValue === 0) {
+                    changeString.push(`${e.fieldLabel} changed to ${newValue}`);
+                  }
+                } else if (e?.label) {
+                  operations.push(e);
+                }
+              });
+              if (u?.changes?.every((e: any) => e?.type === 'add')) {
+                const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
+                u.action = 'add';
+                changeString.push(`${[...materialSet].join(', ')} Added`);
+              }
+              if (u?.changes?.every((e: any) => e?.type === 'delete')) {
+                const materialSet = new Set(u?.changes?.map((e: any) => `${UnCamelCase(e?.referenceType)}(s)`));
+                u.action = 'delete';
+                changeString.push(`${[...materialSet].join(', ')} Deleted`);
+              }
+            } else {
+              operations.push({ ...u?.changes });
+            }
+            if (changeString?.length) {
+              u.changeString = changeString?.toString();
+            } else {
+              u.changeString = 'Click View to check changes';
+            }
+            if (u?.action == 'create') {
+              u.changeString = 'Created';
+            }
+          } else if (u?.action == 'delete') {
+            u.changeString = 'Deleted';
+          }
+          u.changes = changes;
+          u.operations = operations;
+          u.key = selectedResource?.key || camelCase(selectedResource);
+          u.index = count - index
+          return u;
+        });
+        rows = rows.filter((e) => e);
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      }
+    ).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (

@@ -417,8 +417,7 @@ const WorkOrder = ({
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
-      minWidth: 100,
-      width: 100,
+      width: 150,
       sticky: 'right',
       disableFilters: true,
       disableSortBy: true,

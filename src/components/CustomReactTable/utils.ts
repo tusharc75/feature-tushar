@@ -53,7 +53,7 @@ export const getStickyPosition = (columnDef: TColType, index, table) => {
     style: {}
   };
 
-  if (columnDef.sticky === undefined) return obj;
+  if (columnDef.sticky === undefined || !['left', 'right'].includes(columnDef.sticky)) return obj;
   const colSizes = table.getAllColumns().map((c) => c.getSize());
 
   const addSizes = (index: number) => {
@@ -91,7 +91,7 @@ export const getStickyPosition2 = (columnDef: TColType, index, colSizes) => {
     style: {}
   };
 
-  if (columnDef.sticky === undefined) return obj;
+  if (columnDef.sticky === undefined || !['left', 'right'].includes(columnDef.sticky)) return obj;
 
   const addSizes = (index: number) => {
     if (columnDef.sticky === 'left') {
