@@ -853,6 +853,7 @@ const Quotation = ({
                   Bulk Edit
                 </MenuItem>
                 <MenuItem
+                  disabled={selectedRecords?.length && selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
                   onClick={() => {
                     closeActions();
                     setShowCostDialog({ open: true, showSaveAndNext: false, parentId: null });
