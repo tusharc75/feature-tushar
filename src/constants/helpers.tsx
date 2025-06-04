@@ -128,6 +128,7 @@ export const purchaseRequisitionSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -3708,6 +3709,10 @@ export const DOA_RESOURCE = [
   {
     key: 'serializedAssetStatusChangeRequest',
     resorce: sidebarResource.serializedAssetStatusChangeRequest
+  },
+  {
+    key: 'invoice',
+    resorce: sidebarResource.invoice
   }
 ];
 
