@@ -1041,7 +1041,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
       if (isClone) {
-        obj[key.fieldName] = new Date();
+        obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       } else {
@@ -1049,7 +1049,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'date') {
       if (isClone) {
-        obj[key.fieldName] = new Date();
+        obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       } else {
