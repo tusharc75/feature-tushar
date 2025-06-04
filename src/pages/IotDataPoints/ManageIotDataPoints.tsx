@@ -322,7 +322,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                           required={true}
                           value={values['formula']}
                           error={touched['formula'] && Boolean(errors['formula'])}
-                          touched={touched['formula'] && errors['formula'] ? String(errors['formula']) : 'Please enter Formula'}
+                          touched={touched['formula'] && errors['formula'] ? String(errors['formula']) : ''}
                           onChange={(value) => setFieldValue('formula', value)}
                         />
                       </Box>
