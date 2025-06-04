@@ -22,7 +22,7 @@ import { useParams, useLocation, useHistory } from 'react-router-dom';
 import MapView from 'src/pages/FieldView/MapView';
 import ShowView from 'src/pages/FieldView/ShowView';
 import { TData } from 'src/pages/FieldView/types';
-import { FieldStoreProvider } from 'src/pages/FieldView/useFieldStore';
+import { FieldStoreProvider, useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 const FieldViewImpl = () => {
   const {
@@ -45,6 +45,7 @@ const FieldViewImpl = () => {
   const [view, setView] = useState<'card' | 'map'>('card');
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<TData[]>(null);
+  const [, setStore] = useFieldStore((store) => store.activeItem);
 
   const resource = useMemo(() => {
     if (wellId) {
@@ -154,7 +155,10 @@ const FieldViewImpl = () => {
               }
             ] as const
           }
-          setValue={setView}
+          setValue={(data) => {
+            setView(data);
+            setStore({ activeItem: null });
+          }}
           value={view}
         />
         <HtmlTooltip title={'Refresh'}>

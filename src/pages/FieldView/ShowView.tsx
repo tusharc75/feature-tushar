@@ -13,12 +13,17 @@ type ShowViewProps = {
 
 const ShowView = ({ data, onClick, view, resource }: ShowViewProps) => {
   return (
-    <div className={cn('relative flex h-[calc(100vh-200px)] gap-4 overflow-hidden')}>
+    <div className={cn('relative mt-3 flex h-[calc(100vh-200px)] gap-4 overflow-hidden')}>
       <div className={cn('transition-all duration-300', view === 'map' ? 'md:w-[300px]' : 'w-full flex-grow')}>
         <CardView resource={resource} data={data} clickOnCard={onClick} />
       </div>
       {view === 'map' && (
-        <div className={cn('overflow-hidden rounded-md transition-all duration-300', view === 'map' ? 'flex-grow' : '')}>
+        <div
+          className={cn(
+            'overflow-hidden rounded-md transition-all duration-300 [&_.gm-style-iw.gm-style-iw-c]:!p-0 [&_button.gm-ui-hover-effect]:!size-[24px] [&_button.gm-ui-hover-effect_span]:!m-0',
+            view === 'map' ? 'flex-grow' : ''
+          )}
+        >
           <MapView resource={resource} data={data} />
         </div>
       )}

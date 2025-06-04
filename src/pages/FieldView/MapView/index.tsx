@@ -1,7 +1,9 @@
-import { GoogleMap, InfoWindow, Marker } from '@react-google-maps/api';
+import { GoogleMap, InfoWindow, Marker, InfoBox } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
-import { getAddressPayload } from 'src/pages/FieldView/CardView/utils';
+import { cn } from 'src/constants/helpers';
+import { generateData, getAddressPayload } from 'src/pages/FieldView/CardView/utils';
 import { FieldViewResource, TData } from 'src/pages/FieldView/types';
+import { useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 type MapProps = {
   data: TData[];
@@ -13,7 +15,7 @@ type MapProps = {
 //   ? { location: { lat: item.address.latitude, lng: item.address.longitude } }
 //   : { address: item?.address?.optionLabel as string };
 
-type LocationData = { latitude: number; longitude: number; _id: string };
+type LocationData = { latitude: number; longitude: number; _id: string } & TData;
 
 const MapView = ({ data, resource }: MapProps) => {
   const containerStyle = {
@@ -23,19 +25,18 @@ const MapView = ({ data, resource }: MapProps) => {
     minWidth: '100%'
   };
   const [locations, setLocations] = useState<LocationData[]>([]);
+  const [, stStore] = useFieldStore((store) => store.activeItem);
 
   useEffect(() => {
     if (data) {
       const geocoder = new window.google.maps.Geocoder();
       const geocodePromises: Promise<LocationData>[] = data.map((item) => {
         const payload = getAddressPayload(item, resource);
-        console.log(payload);
         return new Promise((resolve, reject) => {
           geocoder.geocode(payload, (results, status) => {
             if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
               const { location } = results[0].geometry;
-
-              resolve({ latitude: location.lat(), longitude: location.lng(), _id: item._id } as LocationData);
+              resolve({ latitude: location.lat(), longitude: location.lng(), _id: item._id, ...item } as LocationData);
             } else {
               reject(`Geocode failed for ${item._id} with status: ${status}`);
             }
@@ -82,19 +83,37 @@ const MapView = ({ data, resource }: MapProps) => {
           { featureType: 'transit', stylers: [{ visibility: 'off' }] },
           { featureType: 'poi', stylers: [{ visibility: 'off' }] }
         ],
-        gestureHandling: 'cooperative'
+        // gestureHandling: 'cooperative',
+        gestureHandling: 'greedy'
       }}
       mapContainerStyle={containerStyle}
       center={{ lat: locations[0]?.latitude ? locations[0].latitude : 31.9686, lng: locations[0]?.longitude ? locations[0]?.longitude : 99.9018 }}
       zoom={4}
     >
       {locations?.map((item) => {
+        const { type, label, value, className, ...rest } = generateData(item, resource)[0];
+
         return (
-          <InfoWindow position={new google.maps.LatLng(item?.latitude, item?.longitude)}>
-            <div>
-              <h1>hi</h1>
-            </div>
-          </InfoWindow>
+          <>
+            <InfoWindow position={new google.maps.LatLng(item?.latitude, item?.longitude)} options={{ minWidth: 200, maxWidth: 400 }}>
+              <>
+                <button
+                  onClick={() => stStore({ activeItem: item._id })}
+                  className="flex w-[200px] cursor-pointer flex-col justify-center bg-transparent px-2 py-4 text-left"
+                >
+                  <div key={label} className={cn('grid grid-cols-[1fr_1fr] items-start', className)} {...rest}>
+                    <h6 className="text-sm font-semibold text-[--primary-text]">{label}: </h6>
+                    <p
+                      className="line-clamp-2 text-right text-sm font-medium text-[#6B7280] dark:text-gray-300"
+                      title={typeof value === 'string' ? value : ''}
+                    >
+                      {value}
+                    </p>
+                  </div>
+                </button>
+              </>
+            </InfoWindow>
+          </>
         );
         // <Marker key={item?._id} position={new google.maps.LatLng(item?.latitude, item?.longitude)} />;
       })}
