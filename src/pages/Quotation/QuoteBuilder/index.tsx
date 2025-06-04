@@ -228,7 +228,7 @@ const QuoteBuilder = ({
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
+      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.lenght && parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -539,6 +539,7 @@ const QuoteBuilder = ({
           onSuccess={(data) => {
             addFieldTicketMaterial(data);
           }}
+          isRedirectTodetailPage={false}
         />
       )}
     </Fragment>
