@@ -27,7 +27,7 @@ const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
 
   return (
     <section className="@container">
-      <div className="@[750px]:grid-cols-3 @[950px]:grid-cols-4 @[500px]:grid-cols-2 grid max-h-[calc(100vh-200px)] grid-cols-1 gap-4 overflow-auto">
+      <div className="@[750px]:grid-cols-3 @[950px]:grid-cols-4 @[500px]:grid-cols-2 grid max-h-[calc(100vh-200px)] grid-cols-1 gap-4 overflow-auto ">
         {data?.map((item) => {
           const dataList = generateData(item, resource);
           const dataHasTag = dataList.find((d) => d.type === 'tag');
