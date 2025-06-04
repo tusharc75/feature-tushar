@@ -87,7 +87,7 @@ export const getTaxList = async (user: any, referenceData: any, fields: any, mat
     }
   }
   if (taxApplicableOnCustomer) {
-    if (fields?.find((e) => e.fieldData?.fieldName === 'taxCode')) {
+    if (fields?.find((e) => e?.fieldData?.fieldName === 'taxCode' || e?.fieldName === 'taxCode')) {
       if (referenceData?.taxCode?.optionValue) {
         let api = `${routes?.taxMaster.path}/by-zipcode?taxCode=${referenceData?.taxCode?.optionValue}&materialType=${materialType}`
         const response = await axiosInstance().get(api);
