@@ -56,8 +56,15 @@ const useDesktopDM = () => {
   useEffect(() => {
     const tokenSource = axios.CancelToken.source();
     fetchData({ cancelToken: tokenSource.token });
+
+    // Add event listener for pin/unpin updates
+    const handlePinnedUsersUpdated = () => {
+      fetchData({});
+    };
+    window.addEventListener('pinnedUsersUpdated', handlePinnedUsersUpdated);
     return () => {
       tokenSource.cancel();
+      window.removeEventListener('pinnedUsersUpdated', handlePinnedUsersUpdated);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

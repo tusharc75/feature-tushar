@@ -1,6 +1,6 @@
 import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
-import { memo, useMemo, useRef } from 'react';
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessage';
@@ -9,6 +9,10 @@ import { checkIsUser } from 'src/components/DesktopDM/useDesktopDM';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 
 type ChatBoxProps = {
   state: UseDesktopDM;
@@ -74,6 +78,39 @@ const ChatBoxHeader = memo(
     const isUserData = checkIsUser(data);
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
+    const { setToastConfig } = useContext(CustomToastContext);
+
+    // --- Pin logic ---
+    const [pinned, setPinned] = useState(!!data.pinned);
+
+    useEffect(() => {
+      setPinned(!!data.pinned);
+    }, [data]);
+
+    const handlePinUser = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const userId = isUserData ? data._id : (data as Chat).to?.optionValue;
+
+      try {
+        const response = await axiosInstance().post(`work-space/channel/pin-unpin/${userId}`);
+        setPinned(response.data.pinned);
+
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: response.data.pinned ? 'User pinned successfully' : 'User unpinned successfully'
+        });
+
+        // Notify UserList to refresh
+        window.dispatchEvent(new CustomEvent('pinnedUsersUpdated'));
+      } catch (err) {
+        setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Something went wrong. Please try again.'
+        });
+      }
+    };
 
     return (
       <header
@@ -115,6 +152,26 @@ const ChatBoxHeader = memo(
           )}
         </div>
         <div className="buttons flex items-center gap-1">
+
+          {/* Pin User Button */}
+          <HtmlTooltip title={pinned ? "Unpin User" : "Pin User"}>
+            <IconButton
+              size="small"
+              onClick={handlePinUser}
+              sx={{
+                color: pinned ? '#f59e42' : 'var(--theme-primary, #6366f1)',
+                background: pinned ? 'rgba(245, 158, 66, 0.08)' : undefined
+              }}
+            >
+              {pinned ? (
+                <PushPinIcon fontSize="small" />
+              ) : (
+                <PushPinOutlinedIcon fontSize="small" />
+              )}
+            </IconButton>
+          </HtmlTooltip>
+
+
           {!isMobile && (
             <HtmlTooltip title={openedChat.open === 'partial' ? 'Expand' : 'Collapse'}>
               <IconButton size="small" color="primary">
