@@ -167,11 +167,9 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
               try {
                 item.removeChild(button);
               } catch (error) {
-                console.log(error);
               }
             };
             button.classList.add('timeline-show-all-button');
-
             item.appendChild(button);
             item.setAttribute('data-button-inserted', 'true');
           }
