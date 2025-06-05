@@ -1169,7 +1169,7 @@ const Productpackage = ({
             setAddExistingSerializedPackages(false);
           }}
           extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGES_STATUS.available }]}
-          extraFilterById={[{ field: 'warehouse', term: { $in: [rentalManagementData?.warehouse?.optionValue] } }]}
+          referenceData={{ warehouse: rentalManagementData?.warehouse }}
           isSubmitting={isSubmitting}
         />
       )}
