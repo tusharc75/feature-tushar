@@ -3,7 +3,7 @@ import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -22,9 +22,10 @@ interface EditDialogProps {
   material: any[];
   isBulkedit: any;
   loading: any;
+  referenceFrom?: string
 }
 
-const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assemblyOrderData, rowData, material, isBulkedit, loading }) => {
+const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assemblyOrderData, rowData, material, isBulkedit, loading, referenceFrom = '' }) => {
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -37,6 +38,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
 
   const fetchData = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', true);
+    if (referenceFrom === sidebarResource?.workOrder) {
+      data = data?.filter(d => d?.fieldName === 'qty')
+    }
     if (isBulkedit) {
       data.forEach((element) => {
         element.required = false;
@@ -75,6 +79,16 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
     handleSaveData(rows);
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (referenceFrom === sidebarResource.workOrder) {
+      if (values?.qty < 1) {
+        errors['qty'] = "Qty can't be 0";
+      }
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -92,6 +106,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
           onSubmit={handleSubmit}
+          validate={validate}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>

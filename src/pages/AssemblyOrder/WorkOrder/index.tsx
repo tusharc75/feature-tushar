@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
-import { CheckCircle, Delete } from '@mui/icons-material';
+import { CheckCircle, Delete, Edit } from '@mui/icons-material';
 import { flatMap, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -42,6 +42,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -80,6 +81,7 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -338,6 +340,25 @@ const WorkOrder = ({
                   </IconButton>
                 </HtmlTooltip>
               )}
+
+            {row.original?.workOrderId && [MATERIAL_TYPE.product]?.includes(row?.original?.type) && (
+              <HtmlTooltip
+                title={'Edit'}
+              >
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Edit"
+                    onClick={() => {
+                      setMaterialEdit({ open: true, data: row?.original });
+                    }}
+                  >
+                    <Edit fontSize="small" color={'primary'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            )}
+
             {row.original?.workOrderId && (
               <HtmlTooltip title="Drawings">
                 <IconButton
@@ -351,6 +372,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+
             <HtmlTooltip
               title={
                 !row?.original?.canDelete
@@ -768,6 +790,31 @@ const WorkOrder = ({
       });
   };
 
+  const handleUpdateQty = (data) => {
+    setSubmitting(true);
+    axiosInstance()
+      .put(`${workOrder.api}/${materialEdit?.data?.workOrder?._id}/consumable/update-qty`, [
+        {
+          product: materialEdit?.data?.materialId,
+          ...data
+        }
+      ])
+      .then(({ data }) => {
+        setSubmitting(false);
+        fetchData();
+        setMaterialEdit({ open: false, data: null });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
       {isAutoCreating && (
@@ -830,6 +877,23 @@ const WorkOrder = ({
         </Box>
       )}
 
+      {materialEdit.open && (
+        <MaterialQtyDialog
+          onClose={() => {
+            setMaterialEdit({ open: false, data: null });
+          }}
+          rowData={materialEdit.data}
+          assemblyOrderData={assemblyOrderData}
+          handleSaveData={(data) => {
+            handleUpdateQty(data[0])
+          }}
+          loading={isSubmitting}
+          isBulkedit={false}
+          material={material}
+          referenceFrom={sidebarResource.workOrder}
+        />
+      )}
+
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
@@ -869,6 +933,7 @@ const WorkOrder = ({
           }}
         />
       )}
+
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
@@ -884,6 +949,7 @@ const WorkOrder = ({
           isSubmitting={isCompleting}
         />
       )}
+
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
@@ -958,6 +1024,7 @@ const WorkOrder = ({
           }}
         />
       )}
+
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
@@ -968,6 +1035,7 @@ const WorkOrder = ({
           isSubmitting={isSubmitting}
         />
       )}
+
       {arrangeView && (
         <ArrangeView
           data={
@@ -983,6 +1051,7 @@ const WorkOrder = ({
           loading={false}
         />
       )}
+
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog?.data?.workOrder?._id}
@@ -996,6 +1065,7 @@ const WorkOrder = ({
           showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? false : true}
         />
       )}
+
     </>
   );
 };
