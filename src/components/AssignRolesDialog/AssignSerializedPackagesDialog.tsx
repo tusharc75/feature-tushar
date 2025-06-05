@@ -1,4 +1,4 @@
-import { Box, Dialog } from '@mui/material';
+import { Autocomplete, Box, Dialog, TextField } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -20,7 +20,8 @@ const AssignSerializedPackagesDialog = ({
   extraDeepFilter = [],
   extraFilterById = [],
   isSubmitting = false,
-  selectedPackages = []
+  selectedPackages = [],
+  referenceData = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -32,6 +33,10 @@ const AssignSerializedPackagesDialog = ({
   const [columns, setColumns] = useState(null);
   const [packages, setPackages] = useState([]);
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const [warehouseOption, setWarehouseOption] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(
+    referenceData && referenceData?.warehouse ? referenceData?.warehouse?.optionValue : null
+  );
 
   const {
     state: { resources }
@@ -45,7 +50,7 @@ const AssignSerializedPackagesDialog = ({
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPackage]);
+  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedPackage, selectedWarehouse]);
 
   const fetchGridColumns = () => {
     axiosInstance()
@@ -103,6 +108,10 @@ const AssignSerializedPackagesDialog = ({
       } else {
         filterByIds.push({ field: 'package', term: { $in: selectedPackages?.map((p) => p?.package) } });
       }
+    }
+
+    if (selectedWarehouse) {
+      filterByIds.push({ field: 'warehouse', term: { $in: [selectedWarehouse] } })
     }
 
     if (filterByIds?.length) {
@@ -168,43 +177,85 @@ const AssignSerializedPackagesDialog = ({
     setPackages(tempPackages);
   }, [selectedRecords]);
 
+  useEffect(() => {
+    axiosInstance()
+      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .then(({ data: { data } }) => {
+        setWarehouseOption(data['Warehouse']);
+      });
+  }, []);
+
   const leftSideContents = () => {
     return (
       <>
         <Box style={{ display: 'inline' }}>
           {packages?.length > 0
             ? packages?.map((d) => (
-                <Box
-                  m={0.5}
-                  p={1}
-                  border={1}
-                  className={`cursor-pointer rounded-sm ${
-                    selectedPackage === d.package ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+              <Box
+                m={0.5}
+                p={1}
+                border={1}
+                className={`cursor-pointer rounded-sm ${selectedPackage === d.package ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                  borderColor="var(--common-border-color)"
-                  onClick={() => {
-                    if (selectedPackage === d.id) {
-                      setSelectedPackage(null);
-                    } else {
-                      setSelectedPackage(d.package);
-                    }
-                  }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {d?.qty < 0 ? (
-                    <span key={d.packageName} className="text-error">{`${d.packageName} (${d?.qty})`}</span>
-                  ) : d?.qty === 0 ? (
-                    <span key={d.packageName} className="text-success">{`${d.packageName} (${d?.qty})`}</span>
-                  ) : (
-                    <span key={d.packageName}>{`${d.packageName} (${d?.qty})`}</span>
-                  )}
-                </Box>
-              ))
+                borderColor="var(--common-border-color)"
+                onClick={() => {
+                  if (selectedPackage === d.id) {
+                    setSelectedPackage(null);
+                  } else {
+                    setSelectedPackage(d.package);
+                  }
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                {d?.qty < 0 ? (
+                  <span key={d.packageName} className="text-error">{`${d.packageName} (${d?.qty})`}</span>
+                ) : d?.qty === 0 ? (
+                  <span key={d.packageName} className="text-success">{`${d.packageName} (${d?.qty})`}</span>
+                ) : (
+                  <span key={d.packageName}>{`${d.packageName} (${d?.qty})`}</span>
+                )}
+              </Box>
+            ))
             : null}
         </Box>
       </>
     );
   };
+
+  const leftSideContentsOfSearchFilter = () => {
+    return (
+      <Box mt={0.5}>
+        <Autocomplete
+          fullWidth
+          sx={{ width: 250 }}
+          options={warehouseOption}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+          value={
+            warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+              ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="plant"
+              placeholder={resources?.warehouse?.titleSingular}
+              label={resources?.warehouse?.titleSingular}
+              variant="outlined"
+              fullWidth
+              className="m-0"
+            />
+          )}
+        />
+      </Box>
+    )
+  }
 
   return (
     <Dialog
@@ -239,6 +290,7 @@ const AssignSerializedPackagesDialog = ({
           addButtonOnclick={handleAdd}
           isAddButtonVisible={true}
           setQueryString={false}
+          leftSideContentsOfSearchFilter={leftSideContentsOfSearchFilter()}
         />
 
         {columns ? (
