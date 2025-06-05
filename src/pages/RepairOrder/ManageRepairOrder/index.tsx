@@ -149,7 +149,7 @@ const ManageRepairOrder = ({
               }
             });
           }
-        } else if (referenceType === 'serializedAssetsInspection') {
+        } else if (referenceType === 'serializedAssetsInspection' || referenceType === 'serializedAsset') {
           fieldsDataForCreate?.forEach((e) => {
             if (e.fieldName === 'warehouse' && referenceData?.warehouse) {
               initialData['warehouse'] = referenceData?.warehouse;
