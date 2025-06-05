@@ -158,4 +158,3 @@ export type Warehouse = {
   optionLabel?: string;
 };
 
-export type TData = PadData | WellData | AssetData;

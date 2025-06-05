@@ -1,13 +1,11 @@
-import React from 'react';
-import { cn, sidebarResource } from 'src/constants/helpers';
+import { cn } from 'src/constants/helpers';
 import CardView from 'src/pages/FieldView/CardView';
 import MapView from 'src/pages/FieldView/MapView';
-import { TData } from 'src/pages/FieldView/types';
 
 type ShowViewProps = {
   view: 'card' | 'map';
-  data: TData[];
-  onClick: (data: TData) => void;
+  data: any[];
+  onClick: (data: any) => void;
   resource: 'Serialized Asset' | 'Well Master' | 'Pad Master';
 };
 
