@@ -90,14 +90,14 @@ function DropdownCellImpl({ permissions, permissionForLinks, field, original }) 
         data.forEach((o, index) =>
           o?.optionLabel
             ? resultComponents.push(
-                <ExternalLinkCell
-                  key={o?.optionLabel}
-                  link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
-                  value={o?.optionLabel}
-                  endComma={index !== data?.length - 1}
-                  startComma={index === 0}
-                />
-              )
+              <ExternalLinkCell
+                key={o?.optionLabel}
+                link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
+                value={o?.optionLabel}
+                endComma={index !== data?.length - 1}
+                startComma={index === 0}
+              />
+            )
             : typeof o !== 'string'
               ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
               : ''

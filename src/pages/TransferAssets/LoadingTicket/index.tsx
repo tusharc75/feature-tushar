@@ -367,7 +367,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Assets Replaced Successfully`
+          message: `${resources?.serializedAsset?.titlePlural} Replaced Successfully`
         });
         fetchAssetsData(true);
       })
@@ -503,7 +503,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             setShowConfirmBoxReceive({ open: true, type: 'receiveAssets' });
           }}
         >
-          Receive Assets
+          {`Receive ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
         <MenuItem
           disabled={
@@ -528,7 +528,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             setAddSerializedAssetDialog({ open: true, products: products });
           }}
         >
-          Replace Assets
+          {`Replace ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
           selectedRecords.length &&
@@ -539,7 +539,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
               setShowConfirmBox(true);
             }}
           >
-            Remove Assets
+            {`Remove ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         ) : null}
         <MenuItem

@@ -13,7 +13,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, productAuction } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, productAuction, sidebarResource } from '../../constants/helpers';
 import BidsPage from './Bids';
 import ManageProductAuction from './ManageProductAuction';
 
@@ -119,7 +119,7 @@ const ProductAuctionDetailsPage = () => {
               <CustomTab value={1}>Bids</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={productAuctionData} fields={fields} />
+              <DetailsPage data={productAuctionData} fields={fields} resource={sidebarResource?.productAuction} referenceId={productAuctionData?._id} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <BidsPage bids={bids} />

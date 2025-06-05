@@ -1,6 +1,6 @@
-import React, { useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState, useEffect } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import { Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
+import { Avatar, Box, CircularProgress, Dialog, IconButton, TextField, Theme, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -14,6 +14,35 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useAppTheme } from 'src/constants/AppConfig';
+import GenerativeAiDialog from 'src/components/GenerativeAiDialog';
+import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import ReactDOM from 'react-dom';
+
+const Portal = ({ children }: { children: React.ReactNode }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  const fullscreenContainer = document.querySelector('.tox-fullscreen');
+  if (!fullscreenContainer) return null;
+
+  return ReactDOM.createPortal(
+    <div style={{
+      position: 'fixed',
+      bottom: '10px',
+      right: '10px',
+      zIndex: 10000
+    }}>
+      {children}
+    </div>,
+    fullscreenContainer
+  );
+};
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -47,13 +76,9 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
   const [imageDetails, setImageDetails] = useState({ width: 0, height: 0, alt: '' });
   const { setToastConfig } = useContext(CustomToastContext);
 
+  const [generativeAiDialogOpen, setGenerativeAiDialogOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const fileInputRef = useRef(null);
-
-  const handleUploadFileClick = (e) => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -167,9 +192,85 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
     setImageDetails((prevState) => ({ ...prevState, [name]: value }));
   };
 
+  const handleFullscreenChange = (state: boolean) => {
+    setIsFullscreen(state);
+  };
+
+  const GenieButton = ({ onClick }: { onClick: () => void }) => (
+    <Box
+      position="absolute"
+      bottom="10px"
+      right="10px"
+      zIndex={10}
+    >
+      <IconButton size="small" onClick={onClick}>
+        <Avatar src={genieImage} sx={{ width: 25, height: 25 }} />
+      </IconButton>
+    </Box>
+  );
+
   return (
     <Box>
       {label}
+      <Box position="relative" width="100%">
+        <Editor
+          ref={editorRef}
+          id={name}
+          onInit={(evt, editor) => {
+            editorRef.current = editor;
+            editor.on('FullscreenStateChanged', handleFullscreenChange);
+          }}
+          initialValue={isUpdate && value}
+          onChange={(content: any) => {
+            setIsUpdate(false);
+            setFieldValue(name, content?.level?.content);
+          }}
+          init={{
+            height: '150px',
+            width: '100%',
+            table_default_attributes: {
+              border: '0'
+            },
+            block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
+            font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
+            plugins: [
+              'advlist autolink lists link charmap print preview anchor ',
+              ' searchreplace visualblocks code fullscreen  ',
+              'insertdatetime media table paste code wordcount hr'
+            ],
+            menubar: true,
+            toolbar:
+              'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
+              'bold italic backcolor | alignleft aligncenter ' +
+              'alignright alignjustify | bullist numlist outdent indent ',
+            content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
+            setup: (editor) => {
+              editor.ui.registry.addButton('uploadImage', {
+                text: 'Upload Image',
+                onAction: () => setIsUploadImage(true)
+              });
+            },
+            skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+            content_css: themeColor === 'dark' ? 'dark' : 'default'
+          }}
+        />
+        {isFullscreen && (
+          <Portal>
+            <GenieButton onClick={() => setGenerativeAiDialogOpen(true)} />
+          </Portal>
+        )}
+        <GenieButton onClick={() => setGenerativeAiDialogOpen(true)} />
+      </Box>
+      <input
+        id={`file`}
+        name={`file`}
+        onChange={handleUploadFile}
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        onClick={(e: any) => (e.target.value = null)}
+        type="file"
+        accept=".docx,.doc"
+      />
       {isUploadImage ? (
         <Dialog
           onClose={(event, reason) => {
@@ -184,7 +285,6 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           maxWidth="xs"
         >
           <CustomDialogHeader onClose={() => setIsUploadImage(false)} title="Upload Image"></CustomDialogHeader>
-
           <CustomDialogContent>
             <div>
               <Grid container spacing={3}>
@@ -302,59 +402,21 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           </CustomDialogFooter>
         </Dialog>
       ) : null}
-      <Editor
-        id={name}
-        onInit={(evt, editor) => (editorRef.current = editor)}
-        initialValue={isUpdate && value}
-        onChange={(content: any) => {
-          setIsUpdate(false);
-          setFieldValue(name, content?.level?.content);
-        }}
-        init={{
-          height: '150px',
-          width: '100%',
-          table_default_attributes: {
-            border: '0'
-          },
-          block_formats: 'Paragraph=p;Header 1=h1;Header 2=h2;Header 3=h3',
-          font_formats: 'Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n',
-          plugins: [
-            'advlist autolink lists link charmap print preview anchor ',
-            ' searchreplace visualblocks code fullscreen  ',
-            'insertdatetime media table paste code wordcount hr'
-          ],
-          menubar: true,
-          toolbar:
-            'fullscreen | uploadImage | uploadDocument | undo redo | formatselect  | ' +
-            'bold italic backcolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent ',
-          content_style: '* { padding: 0; margin: 0; box-sizing: border-box; } body { font-family:Poppins, sans-serif; font-size:14px }',
-          setup: (editor) => {
-            editor.ui.registry.addButton('uploadImage', {
-              text: 'Upload Image',
-              onAction: () => setIsUploadImage(true)
-            });
-            editor.ui.registry.addButton('uploadDocument', {
-              text: 'Upload Document',
-              onAction: (e) => handleUploadFileClick(e)
-            });
-          },
-
-          skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
-          content_css: themeColor === 'dark' ? 'dark' : 'default'
-        }}
-      />
-
-      <input
-        id={`file`}
-        name={`file`}
-        onChange={handleUploadFile}
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onClick={(e: any) => (e.target.value = null)}
-        type="file"
-        accept=".docx,.doc"
-      />
+      {generativeAiDialogOpen &&
+        <GenerativeAiDialog
+          existingContent={value?.replace(/<p><br data-mce-bogus="1"><\/p>/g, '')}
+          handleInsert={(content) => {
+            const editor = editorRef.current;
+            editor.focus();
+            editor.setContent('');
+            const htmlContent = `<div style="white-space: pre-wrap;">${content.replace(/\n/g, '<br>')}</div>`;
+            editor.insertContent(htmlContent);
+            setGenerativeAiDialogOpen(false)
+          }}
+          handleClose={() => {
+            setGenerativeAiDialogOpen(false)
+          }}
+        />}
     </Box>
   );
 }

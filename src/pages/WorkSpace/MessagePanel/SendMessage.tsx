@@ -1,5 +1,5 @@
-import { AttachFile, Cancel, Close, Mic, MicOff, Send } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { AttachFile, Cancel, Close, Mic, MicOff, Send, Square } from '@mui/icons-material';
+import { Button, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -33,7 +33,7 @@ const SendMessage = ({
   socket,
   messageId = null,
   initialMessage = '',
-  onEditComplete = () => {},
+  onEditComplete = () => { },
   editorId = '',
   channelData,
   disabled = false,
@@ -64,6 +64,7 @@ const SendMessage = ({
   const [audioBlobs, setAudioBlobs] = useState([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -74,6 +75,22 @@ const SendMessage = ({
       setFilesWithUrl([]);
     }
   }, [channelId]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if(isRecording){
+      setRecordingSeconds(0);
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if(!isRecording && interval) {
+      setRecordingSeconds(0);
+    }
+
+    return () => {
+      if(interval) clearInterval(interval);
+    };
+  }, [isRecording])
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -116,7 +133,7 @@ const SendMessage = ({
                 socket.emit('joinChannel', data?._id);
               }
             })
-            .catch((error) => {});
+            .catch((error) => { });
         } else {
           formData.append('channelId', channelId);
           if (parentMessageId) formData.append('parentId', parentMessageId);
@@ -126,6 +143,9 @@ const SendMessage = ({
       setMessage('');
       setFiles([]);
       setAudioBlobs([]);
+      if (editorRef.current) {
+        editorRef.current.setContent('');
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -187,7 +207,7 @@ const SendMessage = ({
           top: elementRect.top + frameRect.top,
           x: elementRect.x + frameRect.x,
           y: elementRect.y + frameRect.y,
-          toJSON: () => {}
+          toJSON: () => { }
         })
       });
     }
@@ -222,8 +242,17 @@ const SendMessage = ({
       setIsRecording(false);
     } else {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Audio recording is not supported in this browser');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : 'audio/mp4';
+
+        const recorder = new MediaRecorder(stream, { mimeType });
 
         recorderRef.current = recorder;
         chunks.current = [];
@@ -233,22 +262,31 @@ const SendMessage = ({
         };
 
         recorder.onstop = () => {
-          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          const blob = new Blob(chunks.current, { type: mimeType });
           setAudioBlobs((prev) => [...prev, blob]);
           stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.onerror = (event) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Error during recording: ' + event.error
+          });
+          setIsRecording(false);
         };
 
         recorder.start();
         setIsRecording(true);
       } catch (e) {
-        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+        toastConfig.setToastConfig({ open: true, type: 'error', message: e.message || 'Error accessing microphone' });
       }
     }
   };
 
   return (
-    <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
-      <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
+    <div className={`send-message bg-[var(--dark-primary,white)] pt-3`}>
+      <div className="editor overflow-hidden ">
         {files.length > 0 && (
           <div className="flex flex-wrap p-1">
             {filesWithUrl?.map((file, index) => {
@@ -294,7 +332,7 @@ const SendMessage = ({
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
             <div key={index} className="relative">
-              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '350px' }}></audio>
               <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
@@ -310,7 +348,56 @@ const SendMessage = ({
           ))}
         </div>
 
-        <div className="editor" key={themeColor}>
+        {isRecording && (
+          <div className="relative flex items-center gap-3 px-4 py-3 mb-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 shadow-sm">
+            {/* Animated border glow */}
+            <div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                animation: 'glow 1.5s infinite alternate',
+                background: 'linear-gradient(90deg, #60a5fa22, #6366f122)'
+              }}
+            />
+            {/* Recording indicator */}
+            <div className="relative flex items-center gap-3">
+              {/* Mic icon with animated background */}
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-red-500 shadow-sm">
+                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
+                <Mic className="relative w-4 h-4 text-white" />
+              </div>
+
+              {/* Recording text and status */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-gray-900 text-sm">Recording
+                    <span className='ml-2 px-2 py-0.5 rounded bg-red-100 text-red-700 font-mono text-xs'>
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:
+                      {String(recordingSeconds % 60).padStart(2, '0')}
+                    </span>
+                  </span>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-1 h-1 rounded-full bg-red-500 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+                <span className="text-xs text-gray-600">Speak clearly into your microphone</span>
+              </div>
+            </div>
+            {/* Stop button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={getAudio}
+              className="ml-auto h-8 px-3 border-gray-300 hover:border-red-300 hover:bg-red-50 transition-colors"
+            >
+              <Square className="w-3 h-3 mr-1.5 fill-current" />
+              Stop
+            </Button>
+          </div>
+        )}
+
+        <div className="editor [&_.tox-tinymce]:border-b-0" key={themeColor}>
           <Editor
             key={themeColor}
             id={editorId ? editorId : 'default'}
@@ -320,22 +407,24 @@ const SendMessage = ({
               }
             }}
             onKeyDown={handleKeyDown}
-            value={message ? message : '<span></span>'}
             onInit={(_evt, editor) => {
               editorRef.current = editor;
               if (initialMessage) {
                 editor.setContent(initialMessage);
               }
             }}
-            initialValue=""
+            initialValue={''}
             disabled={disabled || !(channelId || resourceData)}
             init={{
+              placeholder: 'Type a message',
+              auto_focus: editorId ? editorId : 'default',
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
               height: 100,
               menubar: false,
               paste_as_text: true,
               plugins: [
+                'placeholder',
                 'advlist',
                 'paste',
                 'autolink',
@@ -358,6 +447,10 @@ const SendMessage = ({
               ],
               toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              toolbar_mode: 'floating',
+              mobile: {
+                toolbar_mode: 'floating'
+              },
               setup: (editor) => {
                 editor.on('BeforeSetContent', (e) => {
                   // Adding 'link' class to <a> tags
@@ -369,7 +462,7 @@ const SendMessage = ({
             }}
           />
         </div>
-        <div className="footer flex justify-between gap-2 [border-top:1px_solid_var(--common-border-color)]">
+        <div className="flex items-center justify-between gap-2">
           {!initialMessage ? (
             <>
               <input
@@ -382,8 +475,8 @@ const SendMessage = ({
               />
               <label htmlFor="file-upload">
                 <HtmlTooltip title="Attach file(s)" placement="top">
-                  <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }} disabled={disabled}>
-                    <AttachFile />
+                  <IconButton color="primary" aria-label="upload" component="span" sx={{ padding: '5px', borderRadius: 0 }} disabled={disabled}>
+                    <AttachFile fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
               </label>
@@ -392,21 +485,36 @@ const SendMessage = ({
                   color="primary"
                   aria-label="upload-audio"
                   component="span"
-                  style={{ padding: 5, borderRadius: 0 }}
+                  sx={{ padding: '5px', borderRadius: 0 }}
                   disabled={disabled}
                   onClick={getAudio}
                 >
-                  {isRecording ? <MicOff /> : <Mic />}
+                  {isRecording ? <MicOff fontSize="small" /> : <Mic fontSize="small" />}
                 </IconButton>
               </HtmlTooltip>
               <IconButton
-                style={{ padding: 5 }}
-                disabled={disabled || !message || isLoading}
+                sx={{
+                  display: 'block',
+                  padding: '8px',
+                  borderRadius: '4px',
+                  background: 'var(--new-theme-color)',
+                  color: 'white',
+                  '&:hover': {
+                    background: 'var(--new-theme-color)',
+                    color: 'white'
+                  },
+                  '&:disabled': {
+                    background: 'var(--new-theme-color-disabled)',
+                    color: 'white',
+                    opacity: 0.5
+                  }
+                }}
+                disabled={disabled || (!message && files.length === 0 && audioBlobs.length === 0) || isLoading}
                 size="small"
                 className="send-button !ml-auto !block"
                 onClick={postMessage}
               >
-                <Send />
+                <Send fontSize="small" />
               </IconButton>
             </>
           ) : (

@@ -1,20 +1,12 @@
 import { Box, Theme } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import dayjs from 'dayjs';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { View, dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-
-type Props = {};
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
 
 const useStyles = makeStyles((theme: Theme) => ({
   topbar: {
@@ -34,20 +26,17 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const localizer = dayjsLocalizer(dayjs);
-
-const CalendarView = (props: Props) => {
+const CalendarView = () => {
   const classes = useStyles();
   const {
-    state: { permissions, selectedEntity, user }
+    state: { selectedEntity }
   }: any = useData();
   const [events, setEvents] = useState([]);
-  const [range, setRange] = useState();
-  const [dateRange, setDateRange] = useState({
-    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
-    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
-  });
-  const [view, setView] = useState<View>('month');
+  // const [range, setRange] = useState();
+  // const [dateRange, setDateRange] = useState({
+  //   estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+  //   estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
+  // });
   const [converPlanning, setConvertPlanning] = useState({ open: false, data: null });
   const toastConfig = useContext(CustomToastContext);
 
@@ -67,33 +56,18 @@ const CalendarView = (props: Props) => {
           }));
         setEvents(eventsData);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   }, []);
-
-  const onRangeChange = useCallback(
-    (range, view) => {
-      setRange(range);
-    },
-    [setRange]
-  );
-
-  const onView = useCallback(
-    (view) => {
-      setView(view);
-    },
-    [setView]
-  );
 
   const getEventStyle = useCallback((obj) => {
     return {
-      style: {
-        backgroundColor:
-          obj.type === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : obj.type === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)',
-        color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
-        borderRadius: '4px',
-        border: 'none',
-        padding: '8px 16px'
-      }
+      backgroundColor:
+        obj.type === 'Rental Job' ? 'rgba(255, 232, 204, 1)' : obj.type === 'Sales Order' ? 'rgba(234, 239, 254, 1)' : 'rgba(253, 220, 228, 1)',
+      color: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
+      textColor: obj.type === 'Rental Job' ? 'rgba(236, 85, 0, 1)' : obj.type === 'Sales Order' ? 'rgba(4, 50, 161, 1)' : 'rgba(165, 4, 43, 1)',
+      borderRadius: '4px',
+      borderColor: 'transparent',
+      padding: '8px 16px'
     };
   }, []);
 
@@ -120,31 +94,22 @@ const CalendarView = (props: Props) => {
         </div>
         <div className="relative">
           <CustomCalendar
-            defaultDate={dayjs().toDate()}
-            defaultView="day"
             events={events}
-            localizer={localizer}
-            formats={formats}
-            popup={true}
-            onNavigate={(date) => {
-              // if (view === 'month') {
-              //   setDateRange({
-              //     estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-              //     estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
-              //   });
-              // }
-            }}
-            views={['month', 'week', 'day']}
-            eventPropGetter={getEventStyle}
-            onSelectEvent={(event: any) => {
+            // onNavigate={(date) => {
+            //   // if (view === 'month') {
+            //   //   setDateRange({
+            //   //     estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
+            //   //     estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+            //   //   });
+            //   // }
+            // }}
+            getEventStyle={getEventStyle}
+            eventClick={(arg) => {
               setConvertPlanning({
                 open: true,
-                data: event
+                data: arg.event.extendedProps
               });
             }}
-            onRangeChange={onRangeChange}
-            onView={onView}
-            view={view}
           />
         </div>
       </div>

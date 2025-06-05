@@ -237,6 +237,8 @@ const SubleaseDetailsPage = () => {
                     ? fields?.filter((e) => e?.fieldData?.fieldName !== 'warehouse')
                     : fields?.filter((e) => !['fromWarehouse', 'toWarehouse']?.includes(e?.fieldData?.fieldName))
                 }
+                resource={sidebarResource.sublease}
+                referenceId={subleaseData?._id}
               />
             ) : (
               <div className="p-2">

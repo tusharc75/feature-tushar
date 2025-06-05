@@ -35,6 +35,7 @@ import { UserDropdown } from '../Helpers/userDropdown';
 import { SubTask } from './SubTask';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const TaskSchema = object().shape({
   name: string().required('Please enter task name'),
@@ -212,26 +213,12 @@ export const CreateTask = ({
                           }}
                         />
                         <Box pt={1}>
-                          <TextField
-                            fullWidth
-                            margin="dense"
-                            type="text"
-                            size="small"
-                            multiline
-                            rows={3}
+                          <MultiLine
                             label="Description"
-                            name="description"
+                            onChange={(value) => {
+                              setFieldValue('description', value);
+                            }}
                             value={values['description']}
-                            variant="outlined"
-                            onChange={(e) => {
-                              setFieldValue('description', e.target.value);
-                            }}
-                            sx={{
-                              '& .MuiInputBase-root textarea': {
-                                resize: 'vertical',
-                                overflow: 'auto',
-                              },
-                            }}
                           />
                         </Box>
                         {id && (

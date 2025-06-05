@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -29,6 +29,9 @@ import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CreateProjectSales from 'src/pages/ProjectSales/CreateProjectSales';
 import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 
 function PlanningView() {
   const {
@@ -49,6 +52,9 @@ function PlanningView() {
 
   const [view, setView] = useState('calendar');
   const [createDialog, setCreateDialog] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const [resourcePolicy, setResourcePolicy] = useState(null);
+
   const ref: any = useRef();
 
   const PLANNING_RESOURCE = [
@@ -186,8 +192,21 @@ function PlanningView() {
       fieldName: 'assemblyOrderNumber',
       start: 'createDate',
       end: 'estimateCompleteDate'
+    },
+    {
+      key: 'subcontractAssembly',
+      resource: sidebarResource.subcontractAssembly,
+      title: resources?.subcontractAssembly?.titlePlural,
+      path: routes.subcontractAssemblyDetail.path,
+      fieldName: 'subcontractAssemblyNumber',
+      start: 'createDate',
+      end: 'expectedDeliveryDate'
     }
   ];
+
+  useEffect(() => {
+    fetchPolicy();
+  }, []);
 
   useEffect(() => {
     const options: any = [];
@@ -213,11 +232,30 @@ function PlanningView() {
     }
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.planningView}`);
+      if (data) {
+        setResourcePolicy(data?.policy);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  useEffect(() => {
+    if ([sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && view === 'list') {
+      setView('calendar')
+    }
+  }, [selectedResource]);
+
   return (
     <>
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
-          <Box className="nav-v1">
+          <Box className="nav-v1 ">
             <CustomBreadCrumbs routes={[{ title: resources?.planningView?.titlePlural, path: routes.planningView.path }]} />
           </Box>
           {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
@@ -234,7 +272,8 @@ function PlanningView() {
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource && permissions[selectedResource?.key]?.isCreate &&
+            {selectedResource &&
+              permissions[selectedResource?.key]?.isCreate &&
               ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
                 <ThemeButton
                   className="mr-2"
@@ -248,25 +287,26 @@ function PlanningView() {
                   Create
                 </ThemeButton>
               )}
-            <IconButtonTabs
-              onItemClick={resetSelectedRecords}
-              items={
-                [
-                  {
-                    value: 'list',
-                    icon: <TfiLayoutListThumbAlt />,
-                    tooltip: 'List View'
-                  },
-                  {
-                    value: 'calendar',
-                    icon: <FaRegCalendar />,
-                    tooltip: 'Calendar View'
-                  }
-                ] as const
-              }
-              setValue={setView}
-              value={view}
-            />
+            {![sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) &&
+              <IconButtonTabs
+                onItemClick={resetSelectedRecords}
+                items={
+                  [
+                    {
+                      value: 'calendar',
+                      icon: <FaRegCalendar />,
+                      tooltip: 'Calendar View'
+                    },
+                    {
+                      value: 'list',
+                      icon: <TfiLayoutListThumbAlt />,
+                      tooltip: 'List View'
+                    }
+                  ] as const
+                }
+                setValue={setView}
+                value={view}
+              />}
             <HtmlTooltip title={'Refresh'}>
               <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
                 <RefreshIcon fontSize="small" color="primary" />
@@ -280,6 +320,7 @@ function PlanningView() {
               setSelectedResource={setSelectedResource}
               setQueryString={setQueryString}
               ref={ref}
+              resourcePolicy={resourcePolicy}
             />
           )}
           {view === 'list' && (
@@ -425,6 +466,16 @@ function PlanningView() {
         <ManageAssemblyOrder
           isClone={false}
           assemblyOrderId={null}
+          onClose={() => setCreateDialog(false)}
+          onSuccess={() => {
+            onClickRefreshIcon();
+          }}
+          isRedirectTodetailPage={false}
+        />
+      )}
+      {createDialog && selectedResource?.resource === sidebarResource?.subcontractAssembly && (
+        <ManageSubcontractAssembly
+          isClone={false}
           onClose={() => setCreateDialog(false)}
           onSuccess={() => {
             onClickRefreshIcon();

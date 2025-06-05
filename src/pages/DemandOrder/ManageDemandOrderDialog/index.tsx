@@ -26,6 +26,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = null, onClose, onSuccess, open, isRedirectTodetailPage = true }) => {
   const history = useHistory();
@@ -48,13 +49,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
-
-      fieldData = response?.data?.data?.filter((e) => !['purchaseOrder', 'productionOrder']?.includes(e.fieldData.fieldName));
-
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.demandOrder, ['purchaseOrder', 'productionOrder']);
 
       if (demandOrderId) {
         try {
@@ -75,7 +70,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
           } else {
             setSalesData({
               fields: fieldsDataForUpdate,
-              initialValues: getObjKeysWithValues(data, fieldsDataForUpdate)
+              initialValues: getObjKeysWithValues(data, fieldsDataAll)
             });
             setLoading(false);
           }

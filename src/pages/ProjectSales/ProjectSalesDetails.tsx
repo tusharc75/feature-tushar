@@ -312,7 +312,7 @@ const ProjectSalesDetails = () => {
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
-                <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} />
+                <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} resource={sidebarResource?.projectSales} referenceId={copyOfProjectSalesData?._id} />
               </Box>
             </TabPanel>
             <TabPanel value={currentTabIndex} index={1}>

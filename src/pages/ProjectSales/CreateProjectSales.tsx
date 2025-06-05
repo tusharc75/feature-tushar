@@ -23,6 +23,8 @@ import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
+
 interface InitialData {
   fields: any[];
   values: object;
@@ -53,12 +55,9 @@ const CreateProjectSales = ({
     fields: [],
     values: {}
   });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const history = useHistory();
 
   const [productSalesName, setProductSalesName] = useState('');
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -66,56 +65,56 @@ const CreateProjectSales = ({
     getInitialData();
   }, []);
 
-  const getInitialData = () => {
-    axiosInstance()
-      .get('/field?resource=Project Sales')
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+  const getInitialData = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.projectSales);
 
-        if (projectSalesId) {
-          axiosInstance()
-            .get(`${routes.projectSales.path}/${projectSalesId}`)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { projectName, ...rest } = data;
-                let tempData = { ...rest };
-                tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
-                if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
-                  tempObjKeysWithValues['projectManager'] = user._id;
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: tempObjKeysWithValues
-                });
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
+      if (projectSalesId) {
+        axiosInstance()
+          .get(`${routes.projectSales.path}/${projectSalesId}`)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { projectName, ...rest } = data;
+              let tempData = { ...rest };
+              tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
+              if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
+                tempObjKeysWithValues['projectManager'] = user._id;
               }
-              setProductSalesName(data.projectName);
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
-          tempObjKeysWithValues['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
-            tempObjKeysWithValues['currency'] = user?.brandCurrency;
-          }
-          if (fieldsDataForCreate?.some((e) => e.fieldName === 'projectManager')) {
-            tempObjKeysWithValues['projectManager'] = user._id;
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: tempObjKeysWithValues
+              // It should be fieldDataForCreate not fieldDataForUpdate
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: tempObjKeysWithValues
+              });
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+            setProductSalesName(data.projectName);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
+        tempObjKeysWithValues['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
+          tempObjKeysWithValues['currency'] = user?.brandCurrency;
         }
-      })
-      .catch((err) => {});
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'projectManager')) {
+          tempObjKeysWithValues['projectManager'] = user._id;
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: tempObjKeysWithValues
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleSubmit = (values) => {

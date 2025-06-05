@@ -2,6 +2,22 @@
   display: none;
 }
 
+.tox.tox-fullscreen {
+  z-index: 99999999999 !important;
+  position: fixed !important;
+}
+
+body.tox-fullscreen .main-sidebar,
+body.tox-fullscreen .MuiToolbar-root,
+body.tox-fullscreen .navHeader,
+body.tox-fullscreen .headerbox-v1 {
+  display: none !important;
+}
+
+body.tox-fullscreen .css-9ljhy7-MuiButtonBase-root-MuiIconButton-root {
+  display: none !important;
+}
+
 .tox-toolbar.tox-toolbar--scrolling {
   display: flex;
   @media all and (max-width: 768px) {

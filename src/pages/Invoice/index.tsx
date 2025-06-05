@@ -69,6 +69,10 @@ const Invoice = () => {
     {
       key: `All ${resources?.invoice?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.invoice?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -220,7 +224,12 @@ const Invoice = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
@@ -386,7 +395,10 @@ const Invoice = () => {
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={fetchData}
+          asyncExport={true}
+          asyncImport={true}
           additionalParams={getQueryString(true)}
+          resource={sidebarResource.invoice}
         />
       </div>
       <CustomContainer>

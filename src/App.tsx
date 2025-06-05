@@ -1,7 +1,7 @@
 import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
-import { lazy, Suspense, useContext, useEffect, useState } from 'react';
+import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
@@ -282,11 +282,13 @@ import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToa
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
+import ResourceDataMapping from 'src/pages/ResourceDataMapping';
+import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
+import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
+import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
+import FieldView from 'src/pages/FieldView';
 
 var notificationInterval: any = null;
-let watchIdRef: number | null = null;
-let oldLogitude: number | null = null;
-let oldLatitude: number | null = null;
 
 function App() {
   useEffect(() => {
@@ -307,6 +309,9 @@ function App() {
     state: { user, permissions, resources },
     dispatch
   }: any = useData();
+
+  //location tracking
+  useLiveLocationTracking(user, isOffline);
 
   const handleCloseUpdateModal = () => {
     handleHardReload();
@@ -339,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -404,52 +409,6 @@ function App() {
         });
     }
   };
-
-  useEffect(() => {
-    if (!user || isOffline || !localStorage.getItem('token')) return;
-    const startTracking = () => {
-      if (!navigator.geolocation || watchIdRef !== null) return;
-      watchIdRef = navigator.geolocation.watchPosition(
-        ({ coords: { latitude, longitude } }) => {
-          if (oldLatitude !== latitude && oldLogitude !== longitude) {
-            axiosInstance().post('user/live-location', { longitude, latitude });
-            oldLatitude = latitude;
-            oldLogitude = longitude;
-          }
-        },
-        (e) => {},
-        { enableHighAccuracy: false }
-      );
-    };
-    const stopTracking = () => {
-      if (watchIdRef !== null) {
-        navigator.geolocation.clearWatch(watchIdRef);
-        watchIdRef = null;
-      }
-    };
-    if (oldLatitude === null && oldLatitude === null) {
-      (async () => {
-        try {
-          const status = await navigator.permissions.query({ name: 'geolocation' });
-          if (status.state === 'prompt') {
-            navigator.geolocation.getCurrentPosition(
-              () => startTracking(),
-              () => stopTracking()
-            );
-          } else if (status.state === 'granted') {
-            startTracking();
-          } else {
-            stopTracking();
-          }
-        } catch (error) {
-          console.error('Error checking location permission:', error);
-        }
-      })();
-    }
-    return () => {
-      stopTracking();
-    };
-  }, [user, isOffline]);
 
   const conditionalRedirect = (Comp, location) => {
     let redirectToAnotherScreen = null;
@@ -1290,6 +1249,27 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.schedulingMaintenance.path}`}>
               <ScheduleMaintenance />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.customerAccountsAndServicesDataMapping.path}`}>
+              <ResourceDataMapping resourceRendered={'customerAccountsAndServicesDataMapping'} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.customerAccountsAndProductsDataMapping.path}`}>
+              <ResourceDataMapping resourceRendered={'customerAccountsAndProductsDataMapping'} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.technicianUnavailability.path}`}>
+              <TechnicianUnavailability />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.technicianUnavailabilityDetail.path}/:id`}>
+              <TechnicianUnavailabilityDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
+              <FieldView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

@@ -34,7 +34,15 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import dayjs from 'dayjs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
+const ManageFieldTicket = ({
+  onClose,
+  onSuccess,
+  isClone = false,
+  id = null,
+  referenceData = null,
+  fullScreenView = false,
+  isRedirectTodetailPage = true
+}) => {
   const {
     state: { user, resources }
   }: any = useData();
@@ -55,7 +63,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
 
   const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
   const [allFields, setAllFields] = useState([]);
-
 
   useEffect(() => {
     fetchFields();
@@ -100,12 +107,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         data = response?.data?.data;
       }
       const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      setAllFields(allFields)
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+      setAllFields(allFields);
+      const fieldsDataForCreate = data
+        .filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
         .map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
+      const fieldsDataForUpdate = data
+        .filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName))
         .map((d: any) => d.fieldData);
-
       if (id) {
         let mainData;
         if (isOffline) {
@@ -122,7 +130,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.fieldTicketNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
-          setIsMaterialAvailable(!mainData?.canDelete)
+          setIsMaterialAvailable(!mainData?.canDelete);
           tempData = rest;
         } else {
           if (referenceData) {
@@ -214,11 +222,10 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-          if (referenceData) {
-            onSuccess(data.data);
-          } else {
+          if (isRedirectTodetailPage) {
             history.push(`${routes.fieldTicket.path}/detail/${data?.data?._id}`);
           }
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -310,12 +317,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id
-                  ? isClone
-                    ? `Clone - ${cloneHeading}`
-                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                  : `Create ${resources?.fieldTicket?.titleSingular}`
-                  }`}
+                title={`${
+                  id
+                    ? isClone
+                      ? `Clone - ${cloneHeading}`
+                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                    : `Create ${resources?.fieldTicket?.titleSingular}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -398,7 +406,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                  buttonType='transparent'
+                  buttonType="transparent"
                 >
                   Cancel
                 </ThemeButton>
@@ -412,7 +420,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   }}
                   disabled={loading || submitting}
                   isLoading={submitting}
-                  buttonType='theme'
+                  buttonType="theme"
                 >
                   Save
                 </ThemeButton>

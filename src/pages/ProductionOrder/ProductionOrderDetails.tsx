@@ -244,7 +244,12 @@ const ProductionOrderDetails = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {productionOrderData && productionOrderFields.length ? (
-              <DetailsPage data={productionOrderData} fields={productionOrderFields} />
+              <DetailsPage
+                data={productionOrderData}
+                fields={productionOrderFields}
+                resource={sidebarResource?.productionOrder}
+                referenceId={productionOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />

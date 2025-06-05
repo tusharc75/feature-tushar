@@ -1,15 +1,8 @@
 import dayjs from 'dayjs';
 import { uniq } from 'lodash';
 import { useEffect, useState } from 'react';
-import { dayjsLocalizer } from 'react-big-calendar';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
-
-const localizer = dayjsLocalizer(dayjs);
 
 const CalendarView = ({ product, warehouse, storageLocation }) => {
   const [activities, setActivities] = useState([]);
@@ -67,25 +60,14 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative mt-2">
       <CustomCalendar
-        defaultDate={dayjs().toDate()}
-        defaultView="month"
         events={activities}
-        localizer={localizer}
-        formats={formats}
-        showAllEvents
-        style={{ minHeight: 'calc(100vh - 200px)', borderRadius: '4px' }}
-        views={['month', 'week', 'day']}
-        eventPropGetter={(obj) => ({
-          style: {
-            backgroundColor: obj?.isFinalInventory ? '#D6F6F6' : obj.type === 'credit' ? '#DBF8DB' : '#FAEAE9',
-            color: '#000011',
-            borderRadius: '4px',
-            border: 'none',
-            padding: '8px 16px',
-            fontWeight: obj?.isFinalInventory ? 'bold' : 'normal'
-          }
+        getEventStyle={(obj) => ({
+          backgroundColor: obj?.isFinalInventory ? '#D6F6F6' : obj.type === 'credit' ? '#DBF8DB' : '#FAEAE9',
+          color: '#000011',
+          textColor: '#000011',
+          borderColor: 'transparent'
         })}
       />
     </div>

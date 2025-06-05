@@ -67,6 +67,7 @@ import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 type MultiFileType = {
   fileName: string;
@@ -946,25 +947,18 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <TextField
-          {...rest}
-          variant="outlined"
-          type={fromFilter ? 'search' : 'text'}
-          multiline
+        <MultiLine
           label={getLabel(label)}
-          name={name}
-          required={required}
-          rows={3}
           value={values[name]}
+          required={required}
+          onChange={(value) => {
+            handleChange(name, value)
+          }}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-          sx={{
-            '& .MuiInputBase-root textarea': {
-              resize: 'vertical',
-              overflow: 'auto',
-            },
-          }}
+          fromFilter={fromFilter}
+          type={fromFilter ? 'search' : 'text'}
+          {...rest}
         />
       </InfoLabel>
     ) : type === 'number' ? (
@@ -977,6 +971,8 @@ const FormTypes = (props) => {
         <TextField
           {...rest}
           variant="outlined"
+          type='number'
+          onKeyDown={(e) => (fieldData?.isAllowedMinus ? ['e', 'E', '+'] : ['e', 'E', '+', '-']).includes(e.key) && e.preventDefault()}
           label={getLabel(label)}
           name={name}
           required={required}
@@ -986,16 +982,9 @@ const FormTypes = (props) => {
           ref={inputNumberRef}
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
-            inputLabel: { shrink: !!values[name] },
             input: {
-              inputComponent: CustomFormat as any,
-              inputProps: {
-                allowNegative: false,
-                onValueChange: (values) => {
-                  handleChange(name, values.value);
-                },
-                selectedCurrencyCode: selectedCurrencyCode
-              }
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
+              readOnly: fieldData?.isUneditable ? true : false
             }
           }}
         />
@@ -1020,7 +1009,6 @@ const FormTypes = (props) => {
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           slotProps={{
             input: {
-              inputComponent: CustomFormat as any,
               inputProps: {
                 allowNegative: false,
                 onValueChange: (values) => {
@@ -1028,9 +1016,7 @@ const FormTypes = (props) => {
                 },
                 selectedCurrencyCode: selectedCurrencyCode
               },
-              startAdornment: startAdornment ? (
-                startAdornment
-              ) : (
+              startAdornment: startAdornment ? (startAdornment) : (
                 <InputAdornment position="start">
                   {result(
                     find(getUniqueCurrencies(), function (obj) {
@@ -1863,7 +1849,7 @@ const FormTypes = (props) => {
           {...rest}
           variant="outlined"
           type="number"
-          onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+          onKeyDown={(e) => (fieldData?.isAllowedMinus ? ['e', 'E', '+'] : ['e', 'E', '+', '-']).includes(e.key) && e.preventDefault()}
           label={label}
           required={required}
           name={name}
@@ -1880,7 +1866,7 @@ const FormTypes = (props) => {
           }
           slotProps={{
             input: {
-              inputProps: { min: 0 },
+              inputProps: fieldData?.isAllowedMinus ? {} : { min: 0 },
               readOnly: fieldData && fieldData?.isUneditable ? true : false
             }
           }}

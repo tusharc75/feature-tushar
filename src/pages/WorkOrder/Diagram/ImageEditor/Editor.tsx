@@ -49,6 +49,7 @@ const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, ma
       imageEditor.on('addText', (pos, ...rest) => {
         setStore({ newTextPosition: pos.originPosition });
       });
+      imageEditor.on('click', (...args) => {});
       imageEditor.on('objectActivated', (obj) => {
         if (!obj) {
           setStore({ activeObjectId: null, currentSelectedShapeType: null, newTextPosition: null });
@@ -79,7 +80,7 @@ const EditorImpl = forwardRef<EditorRef, EditorProps>(({ imageUrl, imageName, ma
   }));
 
   return (
-    <div style={{ width: maxWidth, height: maxHeight }} className="relative">
+    <div style={{ width: maxWidth, height: maxHeight }} className="relative flex flex-col md:flex-row">
       <div ref={rootEl} style={{ width: maxWidth, height: maxHeight }} className="tui-image-editor flex items-center justify-center"></div>
       {editorInst && <LeftSidebar imageEditor={editorInst} />}
       {editorInst && <RightSidebar imageEditor={editorInst} />}

@@ -103,7 +103,6 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           Header: 'Type',
           disableFilters: true,
           width: 200,
-          disabled: true,
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) =>
             row.original['type'] ? (
@@ -114,9 +113,8 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                      ? '(Product)'
-                      : '(Service)'
+                    ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                      ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                     : row.original.type === 'service'
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}

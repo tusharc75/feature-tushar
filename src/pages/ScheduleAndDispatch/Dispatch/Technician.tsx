@@ -121,7 +121,7 @@ const Technicians = ({ rentalManagementData }) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${rentalManagement.api}/technician?rentalJobId=${rentalManagementData?._id}`;
+    let api = `/technician?referenceId=${rentalManagementData?._id}&referenceType=${sidebarResource.rentalManagement}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {

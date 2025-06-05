@@ -165,9 +165,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        disabled: true,
         width: 200,
-        disableFilters: true,
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -178,8 +176,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}

@@ -9,6 +9,7 @@ import { CustomDialogTransition, displayDateTime, sidebarResource } from 'src/co
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import dayjs from 'dayjs';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 export default function StartStopDate({ resource, onClose, type, loading, handleSubmit, data = null, minStartDateTime = null, maxEndDateTime = null, notes = '' }) {
   const [initialValues, setInitialValues] = useState(null);
@@ -114,24 +115,11 @@ export default function StartStopDate({ resource, onClose, type, loading, handle
                     </Grid>
                   )}
                   <Grid size={{ xs: 12, sm: 12 }}>
-                    <TextField
-                      id="outlined-multiline-static"
+                    <MultiLine
                       label="Notes"
-                      multiline
-                      fullWidth
-                      rows={2}
                       value={values.notes}
-                      variant="outlined"
-                      error={touched['notes'] && Boolean(errors['notes'])}
-                      helperText={touched['notes'] && errors['notes']}
-                      onChange={(e) => {
-                        setFieldValue('notes', e.target.value);
-                      }}
-                      sx={{
-                        '& .MuiInputBase-root textarea': {
-                          resize: 'vertical',
-                          overflow: 'auto',
-                        },
+                      onChange={(value) => {
+                        setFieldValue('notes',value);
                       }}
                     />
                   </Grid>

@@ -49,6 +49,7 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import ResourceField from 'src/pages/DynamicForm/Step/View/ResourceField';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -498,12 +499,23 @@ const RentalManagementDetailsPage = () => {
             {user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead && (
               <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>
             )}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 3)}>Views</CustomTab>}
+            {resourceData?.policy?.showFieldJobs && permissions?.fieldServiceOrder?.isRead && (
+              <CustomTab value={tabIndexValue(resourceData, 3)}>{resources?.fieldServiceOrder?.titlePlural}</CustomTab>
+            )}
+            {resourceData?.policy?.showFieldTickets && permissions?.fieldTicket?.isRead && (
+              <CustomTab value={tabIndexValue(resourceData, 4)}>{resources?.fieldTicket?.titlePlural}</CustomTab>
+            )}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 5)}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
               {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
-                <DetailsPage data={rentalManagementData} fields={rentalManagementFields} />
+                <DetailsPage
+                  data={rentalManagementData}
+                  fields={rentalManagementFields}
+                  resource={sidebarResource?.rentalManagement}
+                  referenceId={rentalManagementData?._id}
+                />
               ) : null}
             </Box>
           </TabPanel>
@@ -606,6 +618,7 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
+                  rentalPolicyData={resourceData?.policy}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Loading Ticket' && rentalManagementData && (
@@ -675,6 +688,22 @@ const RentalManagementDetailsPage = () => {
             />
           </TabPanel>
           <TabPanel value={tabValue} index={tabIndexValue(resourceData, 3)}>
+            <ResourceField
+              step={{ linkResourceField: 'rentalJob', linkResourceName: sidebarResource?.fieldServiceOrder, readOnly: true }}
+              renderedFrom={`${renderedFrom}_${camelCase(resources?.fieldServiceOrder?.titlePlural)}`}
+              data={rentalManagementData}
+              referenceData={null}
+            />
+          </TabPanel>
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 4)}>
+            <ResourceField
+              step={{ linkResourceField: 'rentalJob', linkResourceName: sidebarResource?.fieldTicket, readOnly: true }}
+              renderedFrom={`${renderedFrom}_${camelCase(resources?.fieldTicket?.titlePlural)}`}
+              data={rentalManagementData}
+              referenceData={null}
+            />
+          </TabPanel>
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 5)}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>

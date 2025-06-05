@@ -23,8 +23,9 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, fieldTicketFields, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Submit`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -96,11 +97,11 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
+        width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <p>{`${startCase(row.original?.type)} `}</p>
+          <div>
+            <p>{`${startCase(row.original?.type)}`}</p>
           </div>
         )
       },
@@ -181,16 +182,13 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const fetchGridData = async () => {
     dispatch({ type: 'loading', loading: true });
-    let material, costs;
+    let material;
     if (isOffline) {
       let data = await findAll(objectStore.fieldTicketMaterial);
       material = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && d?.type !== MATERIAL_TYPE.manualEntry);
-      costs = data = data?.filter((d: any) => d?.fieldTicketId === fieldTicketData?._id && d?.type === MATERIAL_TYPE.manualEntry);
     } else {
       const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
-      const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
       material = [...materialResponse?.data?.data?.material];
-      costs = costResponse?.data?.data || [];
     }
 
     const materialRows = material?.filter((e) => !e.parentId);
@@ -202,18 +200,17 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
         parent?.serviceDetail?.serviceName ||
         parent?.serializedAssetDetail?.assetNumber ||
         parent?.packageDetail?.packageName ||
+        parent?.detail ||
         '';
       parent.description =
-        parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
+        parent?.productDetail?.productDescription ||
+        parent?.serviceDetail?.serviceDescription ||
+        parent?.packageDetail?.packageDescription ||
+        parent?.description ||
+        '';
       parent.subRows = generateNestedData(material, parent);
     });
-    costs?.forEach((ele, i) => {
-      ele.index = i + 1 + material?.length;
-      ele.detail = ele.description || '';
-      ele.description = ele.description || '';
-      ele.type = MATERIAL_TYPE.manualEntry;
-    });
-    dispatch({ type: 'initialize', data: [...materialRows, ...costs], count: [...materialRows, ...costs]?.length });
+    dispatch({ type: 'initialize', data: materialRows, count: materialRows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -264,7 +261,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
             {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
               <ThemeButton
                 id={'submit-field-ticket'}
-                buttonType='theme'
+                buttonType="theme"
                 onClick={() => {
                   setSubmitDialog(true);
                 }}
@@ -273,7 +270,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
               </ThemeButton>
             )}
             {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && !isOffline && (
-              <ThemeButton buttonType='theme' onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
+              <ThemeButton buttonType="theme" onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
                 Re-Open
               </ThemeButton>
             )}
@@ -310,8 +307,9 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            expander={resourcePolicy?.showAddPackages ? true : false}
+            expander={true}
           />
+          <FinalPriceBox allFields={fieldTicketFields} data={fieldTicketData} />
         </Box>
       ) : (
         <Box p={2} height={500}>

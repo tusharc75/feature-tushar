@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, storageLocation } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@mui/material';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -18,6 +18,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null }) => {
   const history = useHistory();
@@ -34,62 +35,63 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${storageLocation.resource}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (storageLocationId) {
-          axiosInstance()
-            .get(`${storageLocation.api}/` + storageLocationId)
-            .then(({ data: { data } }) => {
-              setStorageLocationData(data);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, storageLocation, ...rest } = data;
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                if (referenceData?.warehouse) {
-                  fieldsDataForCreate?.forEach((e) => {
-                    if (e.fieldName === 'warehouse') {
-                      e.disableOnEdit = true;
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+    fetchFields();
+  }, [storageLocationId]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.storageLocation);
+
+      if (storageLocationId) {
+        axiosInstance()
+          .get(`${storageLocation.api}/` + storageLocationId)
+          .then(({ data: { data } }) => {
+            setStorageLocationData(data);
+            if (isClone) {
+              const { storageLocationName, ...rest } = data;
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              if (referenceData?.warehouse) {
+                fieldsDataForCreate?.forEach((e) => {
+                  if (e.fieldName === 'warehouse') {
+                    e.disableOnEdit = true;
+                    e.isUneditable = true;
+                  }
                 });
               }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (referenceData?.warehouse) {
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'warehouse') {
-                createValues.warehouse = referenceData?.warehouse;
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData?.warehouse) {
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'warehouse') {
+              createValues.warehouse = referenceData?.warehouse;
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
           });
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [storageLocationId]);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setLoading(true);

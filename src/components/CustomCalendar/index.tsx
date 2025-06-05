@@ -1,177 +1,62 @@
-import { CircularProgress, useMediaQuery } from '@mui/material';
-import dayjs from 'dayjs';
-import { useEffect, useMemo, useState } from 'react';
-import { Calendar, CalendarProps, Navigate } from 'react-big-calendar';
-import withDragAndDrop, { withDragAndDropProps } from 'react-big-calendar/lib/addons/dragAndDrop';
-import { isMobile, isTablet } from 'react-device-detect';
-import MobileDayView from 'src/components/CustomCalendar/MobileDayView';
-import CustomToolbar from 'src/components/CustomCalendar/Toolbar';
-import { parseEventForMobile } from 'src/components/CustomCalendar/utils';
-import { cn, filterDataByDateIntersection } from 'src/constants/helpers';
+import { CalendarOptions, DatesSetArg } from '@fullcalendar/core';
+import FullCalendar from '@fullcalendar/react';
+import { useMediaQuery } from '@mui/material';
+import React from 'react';
+import { Calendar } from 'src/components/CustomCalendar/Calendar';
+import { MobileCalendar } from 'src/components/CustomCalendar/MobileCalendar';
+import { Event, View } from 'src/components/CustomCalendar/types';
 
-interface DragAndDropCalendarProps<TEvent extends object = Event, TResource extends object = object>
-  extends Omit<CalendarProps<TEvent, TResource>, 'views'>,
-    withDragAndDropProps<TEvent, TResource> {}
+export type CustomCalednerProps = {
+  events: Event[];
+  isLoading?: boolean;
+  initialView?: View;
+  getEventStyle?: (
+    data: Event,
+    themeMode: 'dark' | 'light'
+  ) => Partial<{ color: string; backgroundColor: string; borderColor: string; textColor: string }>;
+  onNavigate?: (dateInfo: DatesSetArg) => void;
+} & Omit<CalendarOptions, 'views' | 'events'>;
 
-const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+const CustomCalendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
+  (
+    {
+      events,
+      isLoading,
+      initialView = 'dayGridMonth',
+      getEventStyle,
 
-export type ViewType = 'month' | 'week' | 'day' | 'agenda';
+      onNavigate,
+      height = 'max(calc(100vh - 250px), 700px)',
+      ...rest
+    },
+    ref
+  ) => {
+    const isMobile = useMediaQuery('(max-width:768px)');
 
-type CommonProps = {
-  views: ViewType[];
-  loading?: boolean;
-};
-type NormalCalendarProps = {
-  dragAndDrop?: false;
-} & Omit<CalendarProps<any, any>, 'views'>;
-
-type DraggableCalendarProps = {
-  dragAndDrop?: true;
-} & DragAndDropCalendarProps;
-
-export type CustomCalendarProps = NormalCalendarProps | DraggableCalendarProps;
-
-const CustomCalendar = ({
-  events,
-  onRangeChange,
-  view,
-  defaultView,
-  onView,
-  views,
-  onSelectEvent,
-  loading = false,
-  dragAndDrop = false,
-  defaultDate,
-  date,
-  onNavigate,
-  ...rest
-}: CustomCalendarProps & CommonProps) => {
-  const [stateDate, setStateDate] = useState(date || defaultDate || dayjs());
-  const isMobileView = useMediaQuery('(max-width: 767px)');
-  const mobileView = (isMobile && !isTablet) || isMobileView;
-  const [stateView, setStateView] = useState(view ? view : defaultView ? defaultView : 'month');
-  const [mobileEvents, setMobileEvents] = useState([]);
-  const [mobileViewData, setMobileViewData] = useState<{ open: boolean; date: string }>({ open: false, date: '' });
-  const [isDataPresent, setIsDataPresent] = useState(true);
-
-  const handleRangeChange = (dates, view) => {
-    if (view === 'day' || view === 'agenda') {
-      setIsDataPresent(!!filterDataByDateIntersection(dates, events)?.length);
-    } else {
-      setIsDataPresent(true);
-    }
-    onRangeChange?.(dates, view);
-  };
-
-  const handleView = (view: ViewType) => {
-    setStateView(view);
-    onView?.(view);
-  };
-
-  useEffect(() => {
-    if (mobileView) {
-      setMobileEvents(parseEventForMobile(events));
-    }
-  }, [events, mobileView]);
-
-  const handleOpenMobileDayView = (data) => {
-    setMobileViewData({ open: true, date: data.start });
-  };
-
-  const handleCloseMobileDayView = () => {
-    setMobileViewData({ open: false, date: '' });
-  };
-
-  const Component = useMemo(() => (dragAndDrop && !mobileView ? DragAndDropCalendar : Calendar) as any, [dragAndDrop, mobileView]);
-
-  const components = useMemo(
-    () => ({
-      month: {
-        header: (props: any) => {
-          const { label } = props;
-          return (
-            <div>
-              <span className="sr-only max-md:not-sr-only">{label[0]}</span>
-              <span className="not-sr-only max-md:sr-only">{label}</span>
-            </div>
-          );
-        },
-        ...(mobileView
-          ? {
-              event: (props) => {
-                const { event } = props;
-                return (
-                  <div className="flex min-h-2 flex-col rounded-md ">
-                    <span
-                      className={cn('text-sm ', stateView === 'month' ? 'max-md:sr-only' : '')}
-                      {...rest.eventPropGetter(event, event.start, event.end, undefined)}
-                    >
-                      {event.title}
-                    </span>
-                  </div>
-                );
-              }
-            }
-          : {})
-      }
-    }),
-    [mobileView, rest, stateView]
-  );
-
-  return (
-    <div className="relative min-h-[300px] [&_.rbc-agenda-empty]:hidden">
-      <Component
-        date={stateDate}
-        onNavigate={(date: Date, view: ViewType, action: 'PREV' | 'NEXT' | 'TODAY' | 'DATE') => {
-          setStateDate(date);
-          onNavigate?.(date, view, action);
-        }}
-        view={stateView}
-        events={mobileView ? mobileEvents : events}
-        onView={handleView}
-        onRangeChange={handleRangeChange}
-        views={views}
-        components={{
-          ...components,
-          toolbar: (props: any) => <CustomToolbar {...props} parentOnNavigate={onNavigate} setStateDate={setStateDate} />
-        }}
-        onSelectEvent={(event, data) => (mobileView && stateView === 'month' ? handleOpenMobileDayView(event) : onSelectEvent(event, data))}
+    return isMobile ? (
+      <MobileCalendar
+        events={events}
+        ref={ref}
+        isLoading={isLoading}
+        initialView={initialView}
+        getEventStyle={getEventStyle}
+        onNavigate={onNavigate}
+        height={height}
         {...rest}
       />
-
-      {!isDataPresent && (
-        <div className="absolute left-1/2 top-1/2 select-none text-center text-gray-500 [transform:translate(-50%,-50%)]">
-          No data available for the selected date range.
-        </div>
-      )}
-      {loading && (
-        <div className="absolute inset-0 z-20  flex select-none items-center justify-center text-center [backdrop-filter:blur(3px)]">
-          <div className="rounded-md bg-[var(--dark-primary,white)] p-8 shadow-md">
-            <CircularProgress />
-            <p className="text-center">Loading...</p>
-          </div>
-        </div>
-      )}
-
-      {mobileViewData.open && (
-        <>
-          <MobileDayView
-            Component={Component}
-            calnedarProps={{
-              onSelectEvent,
-              events,
-              view: 'day',
-              views: ['day'],
-              date: mobileViewData.date,
-              ...rest
-            }}
-            date={mobileViewData.date}
-            onClose={handleCloseMobileDayView}
-          />
-        </>
-      )}
-    </div>
-  );
-};
+    ) : (
+      <Calendar
+        events={events}
+        ref={ref}
+        isLoading={isLoading}
+        initialView={initialView}
+        getEventStyle={getEventStyle}
+        onNavigate={onNavigate}
+        height={height}
+        {...rest}
+      />
+    );
+  }
+);
 
 export default CustomCalendar;

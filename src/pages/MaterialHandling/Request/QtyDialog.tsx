@@ -5,6 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
 function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
@@ -96,30 +97,18 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   />
                 </Box>
               ) : null}
-              <TextField
-                margin="dense"
-                size="small"
-                type="text"
-                label="Comment"
-                name="comment"
-                fullWidth
-                multiline
-                rows={2}
-                required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
-                variant="outlined"
-                value={values['comment']}
-                error={touched['comment'] && Boolean(errors['comment'])}
-                helperText={touched['comment'] && errors['comment']}
-                onChange={(e) => {
-                  setFieldValue('comment', e.target.value);
-                }}
-                sx={{
-                  '& .MuiInputBase-root textarea': {
-                    resize: 'vertical',
-                    overflow: 'auto',
-                  },
-                }}
-              />
+              <Box pt={2}>
+                <MultiLine
+                  label="Comment"
+                  value={values['comment']}
+                  required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
+                  error={Boolean(errors['comment'])}
+                  touched={Boolean(errors['comment']) ? String(errors['comment']) : ''}
+                  onChange={(value) => {
+                    setFieldValue('comment', value);
+                  }}
+                />
+              </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
               <ThemeButton

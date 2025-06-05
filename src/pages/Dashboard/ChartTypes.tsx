@@ -181,7 +181,7 @@ const ChartTypes = ({
     const colorMap = {
       color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
       color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
-      color3: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 150, 132, 0.5)']
+      color3: ['rgba(0,128,0, 1)', 'rgba(0,128,0, 0.5)']
     };
     const obj = swapChartColors(colorMap);
     if (!obj) return;
@@ -260,7 +260,13 @@ const ChartTypes = ({
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <ThemeButton disabled={loading} onClick={handleOpenFilter} startIcon={<BsFilter fontSize={14} />}>
+                    <ThemeButton
+                      disabled={loading}
+                      onClick={handleOpenFilter}
+                      startIcon={<BsFilter fontSize={14} />}
+                      iconForMobile={<BsFilter fontSize={14} />}
+                      mobileTooltip='Filters'
+                    >
                       Filters
                     </ThemeButton>
                   </Badge>
@@ -273,7 +279,9 @@ const ChartTypes = ({
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
                     buttonType="transparent"
+                    iconForMobile={<ImportExport />}
                     startIcon={<ImportExport />}
+                    mobileTooltip='Export to'
                   >
                     Export to
                   </ThemeButton>
@@ -286,7 +294,9 @@ const ChartTypes = ({
                       setTableView(!tableView);
                     }}
                     buttonType="transparent"
+                    iconForMobile={!tableView ? <TableChart /> : <Timeline />}
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
+                    mobileTooltip={`${!tableView ? 'Table' : 'Chart'} View`}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
                   </ThemeButton>
@@ -416,7 +426,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                          .fullFormatAmountWithoutSpace
+                                        .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -462,7 +472,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                    .fullFormatAmountWithoutSpace
+                                  .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -485,21 +495,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
-                            },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
                           }
-                        })
+                        }
+                      })
                     }}
                   />
                 </>

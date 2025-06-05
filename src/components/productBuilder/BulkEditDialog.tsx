@@ -36,9 +36,6 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
   const [productFields, setProductFields] = useState([]);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
-
-  const [, setUploadingImageOrFileProgress] = useState(0);
-
   const [isAddField, setIsAddField] = useState(false);
   const [fields, setFields] = useState([]);
   const [sectionName, setSectionName] = useState('');
@@ -323,7 +320,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                 {section.sectionFields &&
                                   section.sectionFields.map((field) =>
                                     field.fieldName === 'priceTemplate' && !isShowProductTemplate ? (
-                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <FormControlLabel
                                           control={
                                             <Checkbox
@@ -361,7 +358,7 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                         removeDisplayType={removeDisplayType}
                                       />
                                     ) : (
-                                      <Grid key={field.fieldName} size={{xs:12, sm:6, md:6}}>
+                                      <Grid key={field.fieldName} size={{ xs: 12, sm: 6, md: 6 }}>
                                         <Box display="flex">
                                           <Box flexGrow={1}>
                                             <FormTypes
@@ -384,13 +381,6 @@ const BulkEditDialog = ({ productDataList, productBuilderId, handleClose, handle
                                               isvlookupReverse={field.isvlookupReverse}
                                               size="small"
                                               disabled={['productCategory', 'priceTemplate'].includes(field.fieldName) ? true : false}
-                                              imageOrFileUploadCompletePercentage={
-                                                ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                                  ? (completePercentage) => {
-                                                      setUploadingImageOrFileProgress(completePercentage);
-                                                    }
-                                                  : null
-                                              }
                                             />
                                           </Box>
                                           {(field.leval === 'product-builder-custom' || field.leval === 'price-builder-custom') && (

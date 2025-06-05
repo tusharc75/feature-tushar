@@ -111,6 +111,11 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         page++;
       }
       setIsAutoCreating({ open: false, total: 0, done: 0 });
+      toastConfig.setToastConfig({
+        open: true,
+        message: `Automatic ${resources?.workOrder?.titlePlural} has been successfully generated.`,
+        type: 'success'
+      });
       fetchData();
     } catch (error) {
       setIsAutoCreating({ open: false, total: 0, done: 0 });
@@ -1253,7 +1258,7 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Upload Documents
+        Upload Attachments
       </MenuItem >
       <MenuItem
         onClick={() => {

@@ -1,7 +1,8 @@
-import { Box, Toolbar, useMediaQuery } from '@mui/material';
+import { Toolbar, useMediaQuery } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { InfoSidebarContainer } from 'src/components/InfoSidebar';
 import { cn } from 'src/constants/helpers';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import Sidebar from './Sidebar/Sidebar';
@@ -35,16 +36,16 @@ const Layout = ({ children }) => {
   return (
     <>
       <Sidebar />
-      <div ref={contentRef}>
+      <div ref={contentRef} className="[--info-sidebar-w:min(100%,300px)]">
         <Toolbar />
-        <Box display="flex">
+        <div className={cn('relative flex')}>
           {!isMobileWidth && <Toolbar style={{ width: '66px' }} />}
           <motion.div
             animate={{ opacity: 1 }}
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={cn(`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`)}
+            className={cn(` min-h-[calc(100vh-64px)] w-full flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`)}
             // style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >
@@ -58,7 +59,8 @@ const Layout = ({ children }) => {
               {children}
             </div>
           </motion.div>
-        </Box>
+          <InfoSidebarContainer />
+        </div>
       </div>
     </>
   );

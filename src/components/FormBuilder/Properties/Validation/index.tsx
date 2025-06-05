@@ -2,8 +2,8 @@ import { Box, Checkbox, FormControlLabel, IconButton, Menu, MenuItem, Typography
 import { MoreHoriz, Settings } from '@mui/icons-material';
 import { useState } from 'react';
 import { OPERATOR } from 'src/components/FormBuilder/helper';
-import ValidationDialog from 'src/components/FormBuilder/Properties/Validation/ValidationDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ValidationDialog from './ValidationDialog';
 
 const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
   const [anchorElSetting, setAnchorElSetting] = useState(null);
@@ -52,6 +52,21 @@ const Validation = ({ values, setFieldValue, fields, fieldsToExclude }) => {
             />
           }
           label="Restrict Back Date"
+        />
+      </Box>
+      <Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              name="restrictCurrentDateAutoSelect"
+              checked={values['restrictCurrentDateAutoSelect']}
+              onChange={(e) => {
+                setFieldValue('restrictCurrentDateAutoSelect', e.target.checked);
+              }}
+              color="primary"
+            />
+          }
+          label="Restrict Current Date Auto Select"
         />
       </Box>
       <Box pl={0.5} mt={1}>

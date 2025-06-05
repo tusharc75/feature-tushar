@@ -27,6 +27,7 @@ import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import { ASSET_STATUS } from '../../constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
@@ -51,16 +52,10 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}`);
-      data = response?.data?.data;
-
-      data = data?.filter(
-        (e) => !['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName)
-      );
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.workOrder, ['productionOrder', 'repairOrder', 'repairJob', 'assemblyOrder', 'serviceProcessStatus']);
 
       let assetOption = []
-      let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
+      let serializedAssetFieldIndex = fieldsDataAll.findIndex((e) => e?.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
         const deepFilter = [
           {
@@ -82,22 +77,18 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           data: { data: lookupResource }
         } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`);
         if (lookupResource[serializedAsset.resource]) {
-          data[serializedAssetFieldIndex].fieldData.option = lookupResource[serializedAsset.resource];
+          fieldsDataAll[serializedAssetFieldIndex].option = lookupResource[serializedAsset.resource];
           assetOption = lookupResource[serializedAsset.resource]
           setAssetOptionData(lookupResource[serializedAsset.resource]);
         }
       }
-
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
       if (workOrderId) {
         let data;
         const response = await axiosInstance().get(`${workOrder.api}/${workOrderId}`);
         data = response?.data?.data;
         assetOption = assetOption.filter((i) => i.warehouse === data?.warehouse?.optionValue);
         if (isClone) {
-          const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
+          const { workOrderNumber, status, ...rest } = data;
           rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           rest['status'] = WORK_ORDER_STATUS.new;
           setInitialData({
@@ -110,7 +101,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           }
           setInitialData({
             fields: fieldsDataForUpdate,
-            values: getObjKeysWithValues(data, fieldsDataForUpdate)
+            values: getObjKeysWithValues(data, fieldsDataAll)
           });
         }
         setAssetOptions(assetOption);

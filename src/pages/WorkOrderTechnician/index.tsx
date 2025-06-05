@@ -31,6 +31,7 @@ import {
   ATTACHMENT_TYPE,
   WORKORDER_SERVICE_STATUS,
   WORKORDER_TECHNICIAN_SERVICE_STATUS,
+  WORK_ORDER_STATUS,
   prepareDataForGrid,
   sidebarResource,
   workOrder
@@ -467,12 +468,14 @@ const WorkOrderTechnician = () => {
       disabled: selectedRecords?.length === 0,
       items: [
         {
-          disabled:
-            selectedRecords?.length &&
-            selectedRecords?.filter((s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length ===
-              selectedRecords?.length
-              ? false
-              : true,
+          disabled: selectedRecords?.length &&
+            selectedRecords?.filter((s) =>
+              s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending &&
+              s?.status !== WORK_ORDER_STATUS.onHold
+              && s?.canPerform)?.length ===
+            selectedRecords?.length
+            ? false
+            : true,
           label: `Complete Service(s)`,
           onClick: () => setShowServiceCompleteConfirmBox(true)
         }

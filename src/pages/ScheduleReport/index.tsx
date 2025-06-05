@@ -17,6 +17,8 @@ import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
+import EditIcon from '@mui/icons-material/Edit';
+
 
 const ScheduleReport = () => {
   const renderedFrom = camelCase(sidebarResource.scheduleReport);
@@ -53,16 +55,18 @@ const ScheduleReport = () => {
         Header: 'Schedule Name',
         Cell: ({ row }) =>
           row?.original?.scheduleName ? (
-            <p
-              className="text-truncate link"
-              onClick={() => {
-                if (permissions?.scheduleReport?.isUpdate) {
-                  setShowManageDialog({ open: true, id: row?.original?._id });
-                }
-              }}
-            >
-              {row.original.scheduleName}
-            </p>
+            <div>
+              <p
+                className="text-truncate link"
+                onClick={() => {
+                  if (permissions?.scheduleReport?.isUpdate) {
+                    setShowManageDialog({ open: true, id: row?.original?._id });
+                  }
+                }}
+              >
+                {row.original.scheduleName}
+              </p>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -70,12 +74,19 @@ const ScheduleReport = () => {
       {
         accessor: 'resource',
         Header: 'Report',
-        Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row.original.resource}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.resource ? <div>
+          <p className="text-truncate">{row.original.resource}</p>
+        </div> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
         Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'emails',
+        Header: 'Emails',
+        Cell: ({ row }) => (row?.original?.emails?.length ? <p className="text-truncate">{row.original.emails}</p> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
@@ -86,6 +97,15 @@ const ScheduleReport = () => {
         accessor: 'day',
         Header: 'Day',
         Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        Cell: ({ row }) => (
+          <div>
+            {startCase(row?.original?.status)}
+          </div>
+        ),
       },
       {
         accessor: 'reportAction',
@@ -115,6 +135,18 @@ const ScheduleReport = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {permissions?.scheduleReport?.isUpdate &&
+          <HtmlTooltip title={'Edit'}>
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setShowManageDialog({ open: true, id: row?.original?._id })
+              }}
+            >
+              <EditIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>}
         {permissions?.scheduleReport?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -248,6 +280,7 @@ const ScheduleReport = () => {
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}
             resource={sidebarResource.scheduleReport}
+            isClientSideGrid={true}
           />
         ) : (
           <Box p={2} height={500}>

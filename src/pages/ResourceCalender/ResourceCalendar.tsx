@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { camelCase, startCase } from 'lodash';
-import { useCallback, useEffect, useState } from 'react';
-import { dayjsLocalizer, View } from 'react-big-calendar';
+import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,26 +9,17 @@ import CustomCalendar from 'src/components/CustomCalendar';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 
-type Props = {};
-
-const formats = {
-  weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
-};
-
-const localizer = dayjsLocalizer(dayjs);
-
-const MyCalendar = (props: Props) => {
+const MyCalendar = (props) => {
   const { resource } = useParams();
   const history = useHistory();
   const [resourcecamelCase] = useState(camelCase(resource));
   const [resourceStartCase] = useState(startCase(resource));
   const [events, setEvents] = useState([]);
-  const [range, setRange] = useState();
+  // const [range, setRange] = useState();
   const [dateRange, setDateRange] = useState({
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
-  const [view, setView] = useState<View>('month');
 
   useEffect(() => {
     const deepFilter = [
@@ -58,23 +48,9 @@ const MyCalendar = (props: Props) => {
       .catch((err) => {});
   }, [resource, dateRange]);
 
-  const onRangeChange = useCallback(
-    (range, view) => {
-      setRange(range);
-    },
-    [setRange]
-  );
-
-  const onView = useCallback(
-    (view) => {
-      setView(view);
-    },
-    [setView]
-  );
-
   return (
     <>
-      <div className="headerbox">
+      <div className="headerbox mb-2">
         <CustomBreadCrumbs
           routes={[
             {
@@ -88,28 +64,18 @@ const MyCalendar = (props: Props) => {
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
         <div className="relative">
           <CustomCalendar
-            defaultDate={dayjs().toDate()}
-            defaultView="day"
             events={events}
-            localizer={localizer}
-            formats={formats}
-            popup={true}
-            onNavigate={(date) => {
-              if (view === 'month') {
+            onNavigate={(arg) => {
+              if (arg.view.type === 'dayGridMonth') {
                 setDateRange({
-                  estimateStartDate: dayjs(date).startOf('month').format('MM/DD/YYYY'),
-                  estimateEndDate: dayjs(date).endOf('month').format('MM/DD/YYYY')
+                  estimateStartDate: dayjs(arg.start).startOf('month').format('MM/DD/YYYY'),
+                  estimateEndDate: dayjs(arg.start).endOf('month').format('MM/DD/YYYY')
                 });
               }
             }}
-            views={['month', 'week', 'day']}
-            eventPropGetter={(obj) => ({})}
-            onSelectEvent={(event: any) => {
-              history.push(`${routes[resourcecamelCase].path}/detail/${event.id}`);
+            eventClick={(arg) => {
+              history.push(`${routes[resourcecamelCase].path}/detail/${arg.event.id}`);
             }}
-            onRangeChange={onRangeChange}
-            onView={onView}
-            view={view}
           />
         </div>
       </CustomContainer>

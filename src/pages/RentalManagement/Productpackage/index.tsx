@@ -204,7 +204,6 @@ const Productpackage = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
@@ -216,9 +215,8 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -333,17 +331,18 @@ const Productpackage = ({
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
             </HtmlTooltip>
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-                }}
-              >
-                <AttachFileIcon fontSize="small" color='primary' />
-              </IconButton>
-            </HtmlTooltip>
+            {permissions?.attachment?.isRead && (
+              <HtmlTooltip title="Attachments">
+                <IconButton
+                  size="small"
+                  aria-label="Attachment"
+                  onClick={(e) => {
+                    setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
+                  }}
+                >
+                  <AttachFileIcon fontSize="small" color='primary' />
+                </IconButton>
+              </HtmlTooltip>)}
             {allowedToEdit || !quotationApproved ? (
               !row.original.canDelete ? (
                 <HtmlTooltip
@@ -988,7 +987,7 @@ const Productpackage = ({
     return (
       <>
         {flattenArray(dataRows)?.filter((e) => e?.serializedProduct)?.length > 0 && (
-          <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+          <HtmlTooltip title={`Check ${resources?.serializedAsset?.titlePlural} Availability`} arrow placement="top">
             <IconButton
               size="small"
               aria-label="Details"

@@ -18,6 +18,7 @@ import { useData } from '../../StateProvider/Provider';
 import { isArray, isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = false }) => {
   const history = useHistory();
@@ -33,79 +34,79 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
   const [wellNumberData, setWellNumberData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.wellNumber}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (id) {
-          axiosInstance()
-            .get(`${routes.wellNumber.path}/` + id)
-            .then(({ data: { data } }) => {
-              setWellNumberData(data);
-              if (isClone) {
-                const { wellNumber, ...rest } = data;
-                setCloneHeading(wellNumber);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                if (referenceData?.wellName) {
-                  fieldsDataForCreate?.forEach((e) => {
-                    if (e.fieldName === 'wellName') {
-                      e.disableOnEdit = true;
-                      e.isUneditable = true;
-                    }
-                  });
-                }
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          if (referenceData) {
-            for (const [key, values] of Object.entries(referenceData)) {
-              if (fieldsDataForCreate?.find((e) => e.fieldName === key)) {
-                if (key === 'wellName' && isArray(values)) {
-                  if (values?.length === 1) {
-                    createValues[key] = values[0];
-                  }
-                } else {
-                  createValues[key] = values;
-                }
-              }
-            }
-            if (referenceData?.wellName) {
-              fieldsDataForCreate?.forEach((e) => {
-                if (e.fieldName === 'wellName') {
-                  if (isArray(referenceData?.wellName)) {
-                    e.option = e.option?.filter((e) => referenceData?.wellName?.includes(e?.optionValue));
-                  } else {
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.wellNumber);
+      if (id) {
+        axiosInstance()
+          .get(`${routes.wellNumber.path}/` + id)
+          .then(({ data: { data } }) => {
+            setWellNumberData(data);
+            if (isClone) {
+              const { wellNumber, ...rest } = data;
+              setCloneHeading(wellNumber);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              if (referenceData?.wellName) {
+                fieldsDataForCreate?.forEach((e) => {
+                  if (e.fieldName === 'wellName') {
                     e.disableOnEdit = true;
                     e.isUneditable = true;
                   }
-                }
+                });
+              }
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
               });
             }
-          }
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
           });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        if (referenceData) {
+          for (const [key, values] of Object.entries(referenceData)) {
+            if (fieldsDataForCreate?.find((e) => e.fieldName === key)) {
+              if (key === 'wellName' && isArray(values)) {
+                if (values?.length === 1) {
+                  createValues[key] = values[0];
+                }
+              } else {
+                createValues[key] = values;
+              }
+            }
+          }
+          if (referenceData?.wellName) {
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'wellName') {
+                if (isArray(referenceData?.wellName)) {
+                  e.option = e.option?.filter((e) => referenceData?.wellName?.includes(e?.optionValue));
+                } else {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              }
+            });
+          }
         }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFields();
   }, [id]);
 
   const handleSubmit = (values) => {

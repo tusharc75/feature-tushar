@@ -68,6 +68,7 @@ import IconButtonTabs from 'src/components/IconButtonTabs';
 import { flattenArray } from 'src/constants/columns';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -269,7 +270,6 @@ const LoadingTicket = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -552,7 +552,7 @@ const LoadingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      cell: ({ row }) =>
+      Cell: ({ row }) =>
         user?.user?.brandPolicy?.assetDeliveredStatus &&
           [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
             row?.original?.rentalAssetStatus
@@ -720,14 +720,12 @@ const LoadingTicket = ({
       } else {
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = [];
+        let extraIndexCount = 0;
         rows.forEach((parent, i) => {
-          if (
-            parent.type === MATERIAL_TYPE.product &&
-            (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
-          ) {
+          if (parent.type === MATERIAL_TYPE.product && (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)) {
             const subProductRows = processProduct(
               '',
-              newRows?.length,
+              newRows?.length + extraIndexCount,
               parent,
               material,
               nonSerializedInventory,
@@ -737,6 +735,27 @@ const LoadingTicket = ({
               productSerialNumbers
             );
             newRows = [...newRows, ...subProductRows];
+
+            if (parent?.productDetail?.serializedProduct && productAssets?.filter((e) => e.uniqueId === parent._id)?.length) {
+              extraIndexCount++;
+              parent.index = i + 1 + extraIndexCount;
+              parent.type = parent?.type;
+              parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+              parent.detail = parent?.productDetail?.productName;
+              parent.description = parent?.productDetail?.productDescription;
+              parent.qty = productAssets?.filter((e) => e.uniqueId === parent._id)?.length;
+              parent.subRows = generateNestedData(
+                parent,
+                material,
+                productAssets,
+                loadingTicketProducts,
+                consumeProducts,
+                nonSerializedInventory,
+                nonSerializeAsset,
+                productSerialNumbers
+              );
+              newRows.push(parent);
+            }
           } else {
             parent.index = i + 1;
             parent.type = parent?.type;
@@ -1780,22 +1799,11 @@ const LoadingTicket = ({
               {statusToUpdate.status === 'Repair' ? (
                 <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               ) : (
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label={`Please enter the reason for ${statusToUpdate.status}`}
-                  multiline
-                  fullWidth
-                  rows={4}
                   value={statusToUpdate.message}
-                  variant="outlined"
-                  onChange={(e) => {
-                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
-                  }}
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto'
-                    }
+                  onChange={(value) => {
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: value }));
                   }}
                 />
               )}

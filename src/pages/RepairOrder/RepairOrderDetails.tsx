@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import EditIcon from '@mui/icons-material/Edit';
 import { Skeleton } from '@mui/material';
 import { camelCase } from 'lodash';
@@ -89,6 +88,7 @@ const RepairOrderDetails = () => {
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
   const [resourceData, setResourceData] = useState(null);
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -125,7 +125,7 @@ const RepairOrderDetails = () => {
       const steps = generateAddExistingSerializedAsset(
         true,
         repairOrderData?.type === REPAIR_ORDER_TYPE.external
-          ? `Add Existing Customer Assets`
+          ? `Add Existing Customer ${resources?.serializedAsset?.titlePlural}`
           : `Add Existing ${resources?.serializedAsset?.titlePlural}`
       ).steps;
       walkmeInstance.instance.push(steps);
@@ -403,7 +403,12 @@ const RepairOrderDetails = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {repairOrderData && repairOrderFields.length ? (
-              <DetailsPage data={repairOrderData} fields={repairOrderFields} />
+              <DetailsPage
+                data={repairOrderData}
+                fields={repairOrderFields}
+                resource={sidebarResource?.repairOrder}
+                referenceId={repairOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -417,6 +422,7 @@ const RepairOrderDetails = () => {
               isNextStep={false}
               nextStep={nextStep}
               isPrevStep={prevStep}
+              nextStepToolTip={nextStepToolTip}
               steps={stepList}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -425,13 +431,13 @@ const RepairOrderDetails = () => {
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               handlePrev={
                 stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit &&
-                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                  quotationVersionData?.status
-                )
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    quotationVersionData?.status
+                  )
                   ? () => {
-                      setShowQuotationConfirmBox(true);
-                    }
+                    setShowQuotationConfirmBox(true);
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -444,6 +450,7 @@ const RepairOrderDetails = () => {
                   fetchRepairOrderData={fetchRepairOrderData}
                   repairOrderData={repairOrderData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   setHasAssetsAdded={setHasAssetsAdded}
@@ -462,6 +469,7 @@ const RepairOrderDetails = () => {
                 fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
+                setNextStepToolTip={setNextStepToolTip}
                 currentStepName={stepNames[currentStep]}
                 stepFullScreen={stepFullScreen}
                 stepNames={stepNames}
@@ -469,8 +477,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }
@@ -492,6 +500,7 @@ const RepairOrderDetails = () => {
                 setQuotationVersionData={setQuotationVersionData}
                 invoiceStep={false}
                 updateOrderStatus={updateOrderStatus}
+                setNextStepToolTip={setNextStepToolTip}
               />
             )}
             {stepNames[currentStep] === 'Loading Ticket' && repairOrderData && (
@@ -499,6 +508,7 @@ const RepairOrderDetails = () => {
                 <LoadingTicket
                   repairOrderData={repairOrderData}
                   setNextStep={setNextStep}
+                  setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-5`}
                   allowedToEdit={allowedToEdit}
                 />
@@ -517,6 +527,7 @@ const RepairOrderDetails = () => {
                 invoiceStep={true}
                 setQuotationVersionData={setQuotationVersionData}
                 updateOrderStatus={updateOrderStatus}
+                setNextStepToolTip={setNextStepToolTip}
               />
             )}
           </TabPanel>

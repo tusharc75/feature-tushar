@@ -12,6 +12,7 @@ export const actionDisable = "You don't have permission to perform this action";
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
+export const createDisable = 'You do not have permission to Create';
 export const deleteDisable = 'You do not have permission to Delete';
 export const editDisable = 'You do not have permission to Edit';
 export const addDisable = 'You do not have permission to Add';
@@ -172,3 +173,10 @@ export const subcontractAssemblyMessage = {
 export const repairJobMessage = {
   repairProcess: 'Please enter the price to proceed'
 };
+
+
+export const repairOrderMessage = {
+  workOrderComplete: 'Complete work order to proceed',
+  deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
+};
+

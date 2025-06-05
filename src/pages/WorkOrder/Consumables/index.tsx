@@ -5,6 +5,8 @@ import routes from '../../../components/Helpers/Routes';
 import Grid from '@mui/material/Grid2';
 import axiosInstance from 'src/axios/axiosInstance';
 import {
+  ACTIVITY_RESOURCE,
+  ATTACHMENT_TYPE,
   CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
@@ -39,6 +41,8 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import DescriptionIcon from '@mui/icons-material/Description';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const Consumables = ({
   isCreate,
@@ -76,6 +80,7 @@ const Consumables = ({
   const [serialNumbers, setSerialNumbers] = useState([]);
   const [serviceOption, setServiceOption] = useState([]);
   const [selectedService, setSelectedService] = useState(null);
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
 
   const {
     state: { user, permissions, resources }
@@ -334,7 +339,6 @@ const Consumables = ({
                 </>
               )}
           </>
-
           {allowedToEdit && hasChildFields && ![MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
             <HtmlTooltip title="Edit">
               <IconButton
@@ -351,6 +355,17 @@ const Consumables = ({
               </IconButton>
             </HtmlTooltip>
           )}
+          <HtmlTooltip title="Drawings">
+            <IconButton
+              size="small"
+              aria-label="Drawings"
+              onClick={() => {
+                setShowDrawingDialog({ open: true, data: row?.original });
+              }}
+            >
+              <DescriptionIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
           {allowedToEdit && (
             <HtmlTooltip title="Delete">
               <IconButton
@@ -776,6 +791,7 @@ const Consumables = ({
             serviceName={serviceName}
             consumeRequest={consumeRequest}
             serialNumberRequired={serialNumberRequired}
+            canChangeWarehouse={false}
           />
         )}
         {openLogDialog.open && (
@@ -897,6 +913,19 @@ const Consumables = ({
           />
         )}
       </Grid>
+      {showDrawingDialog.open && (
+        <DiagramDialog
+          referenceId={workOrderId}
+          handleClose={() => {
+            setShowDrawingDialog({ open: false, data: null });
+          }}
+          referenceLabel={showDrawingDialog?.data?.productName}
+          uniqueId={showDrawingDialog?.data?._id}
+          resource={ACTIVITY_RESOURCE.workOrder}
+          attachmentType={ATTACHMENT_TYPE.drawing}
+          showMaterialFilter={false}
+        />
+      )}
     </>
   );
 };

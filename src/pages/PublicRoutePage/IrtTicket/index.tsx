@@ -10,6 +10,7 @@ import DetailsPage from '../../../components/Shared/DetailsPage';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { IRT_APPROVER_STATUS } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const resaonList = [
   'Inventory physically not here to release.  Action:  Complete paperwork and cycle count to correct inventory accuracy. ',
@@ -155,23 +156,10 @@ const IrtTicket = ({ openAuthId, openAuthData }) => {
                           </Box>
                         )}
                         <Box my={1}>
-                          <TextField
-                            variant="outlined"
-                            type="text"
+                          <MultiLine
                             label="Comment"
-                            multiline
-                            fullWidth
-                            rows={2}
-                            margin="dense"
-                            size="small"
                             value={comment}
-                            onChange={(e: any) => setComment(e.target.value)}
-                            sx={{
-                              '& .MuiInputBase-root textarea': {
-                                resize: 'vertical',
-                                overflow: 'auto',
-                              },
-                            }}
+                            onChange={(value) => setComment(value)}
                           />
                         </Box>
                         <Box pt={2}>

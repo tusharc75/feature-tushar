@@ -47,7 +47,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [tabValue, setTabValue] = useState(0);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { dataRows } = state;
   const { generateColumns } = useColumns();
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
@@ -162,9 +162,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData?._id}`);
     data = response?.data?.data;
 
-    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData?._id}/additional-cost`);
-    let additionalCostData = responseAdditionalCostData?.data?.data;
-
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -174,7 +171,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           ? parent.packageDetail?.packageName
           : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.detail || ''
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -185,19 +184,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               ? parent?.packageDetail?.packageDescription || ''
               : parent.type === MATERIAL_TYPE.serializedAsset
                 ? parent.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+                : parent.description || '';
       parent.subRows = generateNestedData(data.material, parent);
     });
-    if (additionalCostData?.length > 0) {
-      additionalCostData?.forEach((element) => {
-        element.index = rows.length + 1;
-        element.detail = element.description;
-        element.description = element.description;
-        element.type = 'manualEntry';
-        element.parentId = null;
-        rows.push(element);
-      });
-    }
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
@@ -207,24 +196,19 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === MATERIAL_TYPE.serializedAsset
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+      _subRow.detail = _subRow?.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : _subRow?.detail || ''
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service
+        ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+              : _subRow?.description || '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -233,7 +217,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
-      .get(`${invoice.api}/zip/${invoiceData?._id}`, {
+      .get(`${invoice.api} / zip / ${invoiceData?._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -255,7 +239,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadPdf = () => {
     setIsDownloadingPdf(true);
     axiosInstance()
-      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
+      .get(`${invoice.api} / zip / pdf / ${invoiceData._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -275,31 +259,29 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance()
-      .patch(`${routes?.generateInvoice.path}/cancel`, {
-        invoice: invoiceData?._id,
-        comment: data,
-        resource: resource
-      })
-      .then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
+    axiosInstance().patch(`${routes?.generateInvoice.path}/cancel`, {
+      invoice: invoiceData?._id,
+      comment: data,
+      resource: resource
+    }).then(({ data }) => {
+      onSuccess();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    fileName: `${resources?.invoice?.titleSingular} - ${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
-    hideDetailButton: resource === sidebarResource.fieldTicket ? true : false,
+    hideDetailButton: resource === sidebarResource.fieldTicket ? dataRows?.find((e) => e?.subRows?.length) ? false : true : false,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(invoiceData),
     defaultColumns: [
@@ -318,6 +300,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
     ]
   };
+
 
   const leftSideContents = () => {
     return (
@@ -411,7 +394,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                             renderedFrom={renderedFrom}
                             refreshGrid={fetchData}
                             isClientSideGrid={true}
-                            expander={resource === sidebarResource.fieldTicket ? false : true}
+                            expander={true}
                           />
                         </Box>
                       ) : (
@@ -442,7 +425,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                         renderedFrom={renderedFrom}
                         isClientSideGrid={true}
                         refreshGrid={fetchData}
-                        expander={resource === sidebarResource.fieldTicket ? false : true}
+                        expander={true}
                       />
                     </Box>
                   ) : (
@@ -457,7 +440,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
         </CustomDialogContent>
         <CustomDialogFooter>
           <ThemeButton
-            buttonType='transparent'
+            buttonType="transparent"
             onClick={() => {
               onClose();
             }}

@@ -15,6 +15,7 @@ import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { cloneDeep } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Save, Update } from '@mui/icons-material';
 
 export const PreviewDialog = ({
   type,
@@ -110,7 +111,13 @@ export const PreviewDialog = ({
         data.columns
           ?.map((e) => {
             const col = allColumn.find((col) => col.fieldName === e.name);
-            if (col) return { ...col, ...(e?.width ? { width: e.width } : {}), ...(e?.customLabel ? { customLabel: e.customLabel } : {}), ...(e?.alignment ? { alignment: e.alignment } : {}) };
+            if (col)
+              return {
+                ...col,
+                ...(e?.width ? { width: e.width } : {}),
+                ...(e?.customLabel ? { customLabel: e.customLabel } : {}),
+                ...(e?.alignment ? { alignment: e.alignment } : {})
+              };
           })
           .filter((col) => col !== undefined)
       );
@@ -160,7 +167,7 @@ export const PreviewDialog = ({
         TransitionComponent={CustomDialogTransition}
       >
         <CustomDialogHeader
-          title={`Visible Columns in ${type}`}
+          title={`Select Column(s) to view in the ${type}`}
           onClose={() => {
             handleClose();
           }}
@@ -216,85 +223,94 @@ export const PreviewDialog = ({
             {isAsyncDownload && <DownloadHistory referenceId={referenceId} resource={resource} loadingType={loadingType} />}
           </Grid>
         </CustomDialogContent>
-        <CustomDialogFooter>
-          {(type?.includes('Excel') || type?.includes('PDF')) &&
-            (selectedExcelView || selectedPdfView) &&
-            !checkVisibleColumnsSame(
-              type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf,
-              type?.includes('Excel') ? selectedExcelView : selectedPdfView
-            ) && (
-              <>
-                <ThemeButton
-                  iconForMobile={false}
-                  buttonType="yellow"
-                  id={'show-column-dialog-save-update-button'}
-                  onClick={() => {
-                    const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
-                    delete selectedView._id;
-                    setShowSaveViewDialog({ open: true, data: selectedView });
-                  }}
-                  disabled={sortBy && !orderBy}
-                >
-                  Save as New
-                </ThemeButton>
-              </>
+        <CustomDialogFooter className="!flex-wrap gap-2 [&>*]:!ml-0">
+          <div className="first-row flex gap-2">
+            {(type?.includes('Excel') || type?.includes('PDF')) &&
+              (selectedExcelView || selectedPdfView) &&
+              !checkVisibleColumnsSame(
+                type?.includes('Excel') ? visibleColumnsExcel : visibleColumnsPdf,
+                type?.includes('Excel') ? selectedExcelView : selectedPdfView
+              ) && (
+                <>
+                  <ThemeButton
+                    iconForMobile={false}
+                    buttonType="yellow"
+                    id={'show-column-dialog-save-update-button'}
+                    onClick={() => {
+                      const selectedView = type === 'Excel' ? cloneDeep(selectedExcelView) : cloneDeep(selectedPdfView);
+                      delete selectedView._id;
+                      setShowSaveViewDialog({ open: true, data: selectedView });
+                    }}
+                    disabled={sortBy && !orderBy}
+                  >
+                    Save as New
+                  </ThemeButton>
+                </>
+              )}
+            {type?.includes('Excel') && type?.includes('PDF') ? null : (
+              <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
+                <>
+                  <ThemeButton
+                    id={'show-column-dialog-save-update-button'}
+                    onClick={() => {
+                      setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
+                    }}
+                    disabled={
+                      visibleColumnsPdf?.length === 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)
+                    }
+                    buttonType="yellow"
+                    mobileTooltip={
+                      type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'
+                    }
+                  >
+                    {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+                  </ThemeButton>
+                </>
+              </HtmlTooltip>
             )}
-          {type?.includes('Excel') && type?.includes('PDF') ? null : (
-            <HtmlTooltip title={selectedPdfView?.user && user?._id !== selectedPdfView?.user ? 'View owner can only update' : ''}>
-              <>
-                <ThemeButton
-                  id={'show-column-dialog-save-update-button'}
-                  onClick={() => {
-                    setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
-                  }}
-                  disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy) || (selectedPdfView?.user && user?._id !== selectedPdfView?.user)}
-                  buttonType="yellow"
-                >
-                  {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
-                </ThemeButton>
-              </>
-            </HtmlTooltip>
-          )}
-          {operation === 'Send Email' ? (
-            <ThemeButton
-              buttonType="theme"
-              isLoading={loadingType === 'Regular'}
-              disabled={loadingType || visibleColumnsPdf?.length === 0}
-              onClick={(e) => {
-                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
-              }}
-              id={'show-column-dialog-send-email-button'}
-            >
-              {operation}
-            </ThemeButton>
-          ) : (
-            <>
+          </div>
+          <div className="second-row flex gap-2">
+            {operation === 'Send Email' ? (
               <ThemeButton
                 buttonType="theme"
-                id={'show-column-dialog-export-button'}
                 isLoading={loadingType === 'Regular'}
-                disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
+                disabled={loadingType || visibleColumnsPdf?.length === 0}
                 onClick={(e) => {
                   handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                 }}
+                id={'show-column-dialog-send-email-button'}
               >
-                {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
+                {operation}
               </ThemeButton>
-              {hideDetailButton || type === 'Excel' ? null : (
+            ) : (
+              <>
                 <ThemeButton
                   buttonType="theme"
-                  id={'show-column-dialog-operation-2-button'}
-                  isLoading={loadingType === 'Detail'}
+                  id={'show-column-dialog-export-button'}
+                  isLoading={loadingType === 'Regular'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                   onClick={(e) => {
-                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
+                    handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                   }}
                 >
-                  {`${button2Title} ${operation}`}
+                  {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
                 </ThemeButton>
-              )}
-            </>
-          )}
+                {hideDetailButton || type === 'Excel' ? null : (
+                  <ThemeButton
+                    buttonType="theme"
+                    id={'show-column-dialog-operation-2-button'}
+                    isLoading={loadingType === 'Detail'}
+                    disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
+                    onClick={(e) => {
+                      handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
+                    }}
+                  >
+                    {`${button2Title} ${operation}`}
+                  </ThemeButton>
+                )}
+              </>
+            )}
+          </div>
         </CustomDialogFooter>
       </Dialog>
       {showSaveViewDialog.open && (

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Dialog, Box, TextField, Chip, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, Box, TextField, Chip, Typography, Autocomplete } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -19,6 +19,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
 
   const handleSubmit = (values) => {
     delete values['orderQuantity'];
+    delete values['productSerialNumbersMain'];
     const rows = values?.products?.filter((e) => e.returnQuantity > 0);
     if (rows?.length) {
       onSuccess(rows);
@@ -40,6 +41,11 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
           errors.returnQuantity = 'Return quantity is not more then order quantity';
         } else if (returnQty > product.qty - invoiceQuantity - consumeQty) {
           errors.returnQuantity = `Sum of return and consume quantity cannot exceed the quantity you ordered`;
+        }
+        if (d?.productSerialNumbersMain?.length) {
+          if (returnQty !== d?.productSerialNumbers?.length) {
+            errors.productSerialNumbers = 'Please enter serial numbers same as return quantity ';
+          }
         }
       });
     }
@@ -80,6 +86,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
             orderQuantity: d.qty || 0,
             uniqueId: d?.uniqueId,
             productSerialNumbers: d?.productSerialNumbers,
+            productSerialNumbersMain: d?.productSerialNumbers,
             row: d
           }))
         }}
@@ -113,7 +120,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                             </Typography>
                                           </Grid>
                                         </Grid>
-                                        <Box mt={1}>
+                                        <Box mt={2}>
                                           <Grid container spacing={2} alignItems="center">
                                             <Grid size={{ xs: 12, md: 3 }}>
                                               <TextField
@@ -176,6 +183,36 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 disabled
                                               />
                                             </Grid>
+                                            {data?.productSerialNumbersMain?.length > 0 &&
+                                              <Grid size={{ xs: 6, md: 6 }}>
+                                                <Autocomplete
+                                                  options={data?.productSerialNumbersMain}
+                                                  fullWidth
+                                                  multiple
+                                                  size="small"
+                                                  value={data?.productSerialNumbers}
+                                                  getOptionLabel={(option) => option.assetNumber}
+                                                  isOptionEqualToValue={(option: any, val: any) => option.serialNumber === val.serialNumber}
+                                                  onChange={(_, newVal: any) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.products[index],
+                                                      ['productSerialNumbers']: newVal
+                                                    });
+                                                  }}
+                                                  renderInput={(params) => (
+                                                    <TextField
+                                                      required={true}
+                                                      {...params}
+                                                      label="Select Serial Number"
+                                                      name="productSerialNumbers"
+                                                      variant="outlined"
+                                                      error={validate([data])?.productSerialNumbers}
+                                                      helperText={validate([data]).productSerialNumbers ? validate([data]).productSerialNumbers : ''}
+                                                    />
+                                                  )}
+                                                />
+                                              </Grid>
+                                            }
                                           </Grid>
                                         </Box>
                                       </Grid>
@@ -202,7 +239,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               </ThemeButton>
               <ThemeButton
                 onClick={() => {
-                  if (!validate(values.products).returnQuantity) {
+                  if (!validate(values.products).returnQuantity && !validate(values.products).productSerialNumbers) {
                     handleSubmit(values);
                   }
                 }}
@@ -219,6 +256,3 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
 };
 
 export default ReturnTicketDialog;
-function useEffect(arg0: () => void, arg1: any[]) {
-  throw new Error('Function not implemented.');
-}

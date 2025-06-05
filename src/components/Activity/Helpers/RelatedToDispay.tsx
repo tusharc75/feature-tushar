@@ -5,6 +5,7 @@ import { purple } from '@mui/material/colors';
 import { useHistory } from 'react-router-dom';
 import routes from '../../Helpers/Routes';
 import { kebabCase, startCase } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme: Theme) => ({
   boldFont: {
@@ -25,9 +26,15 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 export const RelatedToDispay = ({ relatedTo, inline = false }) => {
   const classes = useStyles();
+
   const handleClick = (obj, resourceName) => {
     window.open(`${routes[resourceName]?.path || `/${kebabCase(resourceName)}`}/detail/${obj?._id}`);
   };
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   return (
     <Box style={{ display: inline ? 'flex' : 'block', flexWrap: 'wrap', alignItems: 'center' }}>
       <Box mb={inline ? 0 : 1}>
@@ -40,7 +47,7 @@ export const RelatedToDispay = ({ relatedTo, inline = false }) => {
           <Box mr={1} key={`relatedTo${index}`} component="div" display="inline">
             <Chip
               key={index}
-              label={`${routes[_element?.type]?.title || startCase(_element?.type)} - ${_element.name}`}
+              label={`${resources[_element?.type]?.titleSingular || startCase(_element?.type)} - ${_element.name}`}
               size="medium"
               clickable={true}
               onClick={(e) => {

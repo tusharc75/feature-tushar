@@ -103,29 +103,12 @@ const DashboardBuilder = () => {
       });
   };
 
-  const handleExportField = () => {
-    const dataToExport =
-      formData?.length > 0
-        ? {
-          name: values?.name.trim(),
-          charts: formData
-        }
-        : {
-          name: '',
-          charts: [
-            {
-              graphyType: '', // Valid types ["Chart", "Map", "Table"]
-              chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-              column: 6,
-              chartTitle: '',
-              kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-              hasFilters: false,
-              hasTableView: false,
-              hasExport: false,
-              filters: []
-            }
-          ]
-        };
+  const handleExport = () => {
+    const dataToExport = {
+      name: values?.name.trim(),
+      defaultDuration: values?.defaultDuration,
+      charts: formData
+    }
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `${values?.name || 'Dashboard Fields'}.json`);
   };
@@ -137,8 +120,8 @@ const DashboardBuilder = () => {
     let reader = new FileReader();
     reader.onload = function (e) {
       const data: any = e.target.result;
-      const { name, charts } = JSON.parse(data);
-      setValues((prev) => ({ ...prev, name }));
+      const { name, charts, defaultDuration } = JSON.parse(data);
+      setValues((prev) => ({ ...prev, name, defaultDuration: defaultDuration || 'current-year' }));
       setFormData(charts);
     };
     reader.readAsBinaryString(f);
@@ -228,12 +211,14 @@ const DashboardBuilder = () => {
           </Box>
           <Box>
             <Box display="flex" justifyContent="flex-end">
-              <Box mr={2}>
-                <button className="new-headerbox-button-v1" onClick={handleExportField}>
-                  <span>Export</span>
-                  <ExportIcon />
-                </button>
-              </Box>
+              {formData?.length > 0 &&
+                <Box mr={2}>
+                  <button className="new-headerbox-button-v1" onClick={handleExport}>
+                    <span>Export</span>
+                    <ExportIcon />
+                  </button>
+                </Box>
+              }
               <Box>
                 <input accept="json" style={{ display: 'none' }} onChange={handleImport} id="import-file" multiple={false} type="file" />
                 <label htmlFor="import-file" className="new-headerbox-button-v1">

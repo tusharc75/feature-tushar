@@ -16,7 +16,7 @@ import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
 import Visibility from './Visibility';
-import Validation from 'src/components/FormBuilder/Properties/Validation';
+import Validation from './Validation';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -127,6 +127,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         if (!values.additionalInfoSection) {
           values.additionalInfoSection = '';
         }
+        if (!values.operationOnLineItems) {
+          values.operationOnLineItems = '';
+        }
         setInitialValues(values);
       }
       return () => setInitialValues(null);
@@ -204,6 +207,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
+            ele.operationOnLineItems = values?.operationOnLineItems || '';
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
@@ -211,6 +215,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addManualOptionInExcel = values.addManualOptionInExcel;
             ele.addAdditionalOption = values.addAdditionalOption;
             ele.addBulkOptions = values.addBulkOptions;
+            ele.isAllowedMinus = values.isAllowedMinus;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
@@ -229,6 +234,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
+            ele.restrictCurrentDateAutoSelect = values?.restrictCurrentDateAutoSelect || false
             ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;

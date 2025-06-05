@@ -206,11 +206,11 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   <CustomTab key={i} value={i} className="relative">
                     <span className={cn('block ', currentTabIndex === i && 'pr-[18px]')}>{c?.entity?.entityName}</span>
                     {permissions?.user?.isDelete &&
-                    currentTabIndex === i &&
-                    !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
+                      currentTabIndex === i &&
+                      !Boolean(userId === user?._id && currentEntity?.entity?._id === selectedEntity) ? (
                       <HtmlTooltip className="absolute right-4" title={'Delete'}>
                         <IconButton aria-label="delete" size="small" className="ml-1" onClick={() => handleDeleteEntity()}>
-                          <Delete color="error" />
+                          <Delete color="error" fontSize='small' />
                         </IconButton>
                       </HtmlTooltip>
                     ) : null}
@@ -224,9 +224,11 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                 <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Roles ({currentEntity?.role?.length || '0'})</h6>
                 {permissions?.user?.isUpdate && (
                   <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
-                    <IconButton color="primary" size="small" onClick={handleAssignRole}>
-                      <ControlPoint />
-                    </IconButton>
+                    <HtmlTooltip title='Assigned Roles'>
+                      <IconButton color="primary" size="small" onClick={handleAssignRole}>
+                        <ControlPoint />
+                      </IconButton>
+                    </HtmlTooltip>
                   </span>
                 )}
               </div>
@@ -255,8 +257,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                       height={303}
                     />
                   </BoxWithBorder>

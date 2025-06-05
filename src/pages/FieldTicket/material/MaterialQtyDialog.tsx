@@ -5,7 +5,6 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { isArray, uniqBy } from 'lodash';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import {
   getObjKeysWithValues,
   getObjKeys,
@@ -26,13 +25,13 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { bulkUpdate, calculateRowsField } from '../../../components/RentalManagment/helper';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import dayjs from 'dayjs';
 import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
 import { useData } from 'src/StateProvider/Provider';
+import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -66,8 +65,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   referenceType = null
 }) => {
   const ref = useRef(null);
-
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
   const [fields, setFields] = useState([]);
@@ -82,6 +79,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const { isOffline } = useContext(CustomOfflineContext);
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
+  const [submitState, setSubmitState] = useState({ open: false, values: null });
 
   const {
     state: { user }
@@ -254,18 +252,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   };
 
   const handleSubmit = async (values) => {
-    if (isBulkedit) {
-      const rows = bulkUpdate(values, selectedServices, material, allFields, fieldTicketData?.currency);
-      handleSaveData(rows);
-    } else {
-      if (isEqual(ref?.current?.values, initialData.values)) {
-        handleSaveData([rowData], saveAndNext, true);
-        return;
-      }
-      const rows = await calculateRowsField(material, values, allFields, rowData, fieldTicketData?.currency);
-      handleSaveData(rows, saveAndNext);
-      setShowConfirmationDialog(false);
-    }
+    setSubmitState({ open: true, values: values })
   };
 
   async function getAllPricingCondition(values: any, pricingMethodOptions: any) {
@@ -684,18 +671,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
-              {showConfirmationDialog && (
-                <ConfirmationDialog
-                  open={showConfirmationDialog}
-                  message="Would you prefer to override the product-level price configuration?"
-                  onOk={() => {
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    setShowConfirmationDialog(false);
-                  }}
-                />
-              )}
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   open={showConfirmDialog}
@@ -717,6 +692,31 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+      {submitState.open &&
+        <MaterialUpdateActions
+          resource={sidebarResource.fieldTicket}
+          referenceData={fieldTicketData}
+          allFields={allFields}
+          material={material}
+          isBulkedit={isBulkedit}
+          selectedRecords={selectedServices}
+          rowData={rowData}
+          handleUpdateData={(rows) => {
+            if (isBulkedit) {
+              handleSaveData(rows);
+            }
+            else {
+              handleSaveData(rows, saveAndNext);
+            }
+            setSubmitState({ open: false, values: null })
+          }}
+          values={submitState.values}
+          handleClose={() => {
+            setSubmitState({ open: false, values: null })
+          }}
+          needCalculate={false}
+        />
+      }
     </Dialog>
   );
 };

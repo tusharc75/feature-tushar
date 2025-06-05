@@ -2,7 +2,6 @@ import { useState, useEffect, useContext } from 'react';
 import { Box, IconButton } from '@mui/material';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import TinyMce from './../../components/TinyMCE';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -92,9 +91,9 @@ const Comments = ({ uniqueId }) => {
                 onChange={(value) => {
                   setComment(value);
                 }}
-                imageOrFileUploadCompletePercentage={(completePercentage) => null}
                 initialValue={''}
                 height={200}
+                doNotShowUploadFile={true}
               />
             </Grid>
             <Grid size={{ xs: 12 }}>

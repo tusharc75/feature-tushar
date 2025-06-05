@@ -131,7 +131,7 @@ export default function NewCreateQuotePdfTemplate() {
           .get(`/field?resource=${resource}`)
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
-            setVariables(['entity', ...vars]);
+            setVariables(['entity', 'currentDate', ...vars]);
             setAllFields(data);
           })
           .catch((err) => {
@@ -569,7 +569,7 @@ export default function NewCreateQuotePdfTemplate() {
 
   return initialValues && pdfResourceOption ? (
     <>
-      <DeviceMessage />
+      <DeviceMessage backPath={queryParams.quotation ? `${routes.quotationDetail.path}/${quoteData._id}` : routes.quotePdfTemplate.path} />
       <Formik
         innerRef={(ref) => ref && setFormValues(ref.values)}
         initialValues={initialValues}
@@ -1062,6 +1062,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.header}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>
@@ -1081,6 +1082,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.aboveTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         variables={variables}
+                        doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
                     </Box>
@@ -1100,6 +1102,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.belowTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         variables={variables}
+                        doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
                     </Box>
@@ -1119,6 +1122,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.footer}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>
@@ -1138,6 +1142,7 @@ export default function NewCreateQuotePdfTemplate() {
                         initialValue={initialValues?.tabelSummaryLeftSide}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
+                        doNotShowUploadFile={true}
                         variables={variables}
                       />
                     </Box>

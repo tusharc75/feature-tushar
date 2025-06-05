@@ -123,7 +123,7 @@ const PurchaseRequisitionDetail = () => {
       ]);
 
       if (data?.doaSetup) {
-        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}`);
+        const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
         if (doaResponse?.data?.data) {
           setDOAData(doaResponse?.data?.data);
         }
@@ -238,7 +238,12 @@ const PurchaseRequisitionDetail = () => {
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </div>
             ) : (
-              <DetailsPage data={purchaseRequisitionData} fields={fields} />
+              <DetailsPage
+                data={purchaseRequisitionData}
+                fields={fields}
+                resource={sidebarResource?.purchaseRequisition}
+                referenceId={purchaseRequisitionData?._id}
+              />
             )}
           </Box>
         </TabPanel>

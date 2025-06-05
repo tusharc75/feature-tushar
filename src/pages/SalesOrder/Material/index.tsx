@@ -221,7 +221,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+          {row?.original?.type != MATERIAL_TYPE.manualEntry && permissions?.attachment?.isRead && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"

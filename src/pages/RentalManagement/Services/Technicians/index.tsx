@@ -28,15 +28,21 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getPricingConditions, getPricingValue } from 'src/components/PricingCondition';
 import dayjs from 'dayjs';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(sidebarResource?.rentalManagement)}_technician`;
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [technicianAssign, setTechnicianAssign] = useState({ open: false, data: null });
   const [anchorEl, setAnchorEl] = useState(null);
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -96,7 +102,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
 
   const fetchColumns = async () => {
     let data = isOffline ? [] : await fetch_rental_technician_fields(rentalManagementData?.currency, false);
-    let technicianFields = []
+    let technicianFields = [];
     if (!isOffline) {
       const fieldLabelResponce = await axiosInstance().put(`/field/find-field-labels`, {
         fields: [
@@ -106,7 +112,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           }
         ]
       });
-      technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || []
+      technicianFields = fieldLabelResponce?.data?.data?.find((e) => e.resource === sidebarResource.employeeMaster)?.fieldNames || [];
     }
     const column: any = [
       {
@@ -169,40 +175,48 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         width: 200,
         Cell: ({ row }) => (row.original['status'] ? <p>{row.original?.status}</p> : <NoDataCell />)
       },
-      ...(technicianFields?.find((e) => e.fieldName === 'competencyType') ? [{
-        accessor: 'competencyType',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencyType',
-              lookupResource: sidebarResource.competencyType
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencyType')
-      }] : []),
-      ...(technicianFields?.find((e) => e.fieldName === 'competencies') ? [{
-        accessor: 'competencies',
-        Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-        width: 250,
-        Cell: ({ row }) => (
-          <DropdownCell
-            permissions={permissions}
-            permissionForLinks={{}}
-            field={{
-              fieldName: 'competencies',
-              lookupResource: sidebarResource.competencies
-            }}
-            original={row?.original}
-          />
-        ),
-        accessorFn: (original) => AccessorFunction(original, 'competencies')
-      }] : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
+        ? [
+            {
+              accessor: 'competencyType',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
+        : []),
+      ...(technicianFields?.find((e) => e.fieldName === 'competencies')
+        ? [
+            {
+              accessor: 'competencies',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
+        : []),
       {
         accessor: 'startDate',
         Header: 'Start Date',
@@ -248,7 +262,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
                       size="small"
                       aria-label="Details"
                       onClick={() => {
-                        setDeleteData([{ id: row.original._id }]);
+                        setDeleteData([row.original._id]);
                       }}
                     >
                       <DeleteIcon fontSize="small" color={'error'} />
@@ -276,7 +290,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${rentalManagement.api}/technician?rentalJobId=${rentalManagementData?._id}`;
+    let api = `/technician?referenceId=${rentalManagementData?._id}&referenceType=${sidebarResource.rentalManagement}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&serviceId=${selectedService?.optionValue}&uniqueId=${selectedService?._id}`;
     }
@@ -313,7 +327,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/technician`, { ids: rows })
+      .put(`/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -337,6 +351,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       const element: any = {};
       element.referenceId = rentalManagementData?._id;
       element.technician = d?._id;
+      element.referenceNumber = `${resources?.rentalManagement?.titleSingular}-${rentalManagementData?.rentalJobName}`;
       element.uniqueId = selectedService?._id || null;
       element.materialId = d?.competenciesId;
       element.type = 'competency';
@@ -362,31 +377,20 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+      element.referenceId = rentalManagementData?._id;
+      element.referenceType = sidebarResource.rentalManagement;
       Object.assign(element, calValues);
       delete element.materialId;
     });
 
-    axiosInstance()
-      .post(`${rentalManagement.api}/technician`, { technician: tempMaterial })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        setTechnicianDialog(false);
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    setTechnicianAssign({ open: true, data: tempMaterial });
   };
 
   return (
     <>
       <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         <Box mb={1}>
-          <Typography variant='subtitle2'>Technicians</Typography>
+          <Typography variant="subtitle2">Technicians</Typography>
         </Box>
         {allowedToEdit && (
           <Box display="flex" justifyContent="space-between" mb={2}>
@@ -425,13 +429,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
                   <MenuItem
                     disabled={isDeleting}
                     onClick={() => {
-                      setDeleteData(
-                        selectedRecords?.map((d) => {
-                          return {
-                            id: d?._id
-                          };
-                        })
-                      );
+                      setDeleteData(selectedRecords?.map((d) => d?._id));
                       handleClose();
                     }}
                   >
@@ -500,6 +498,20 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           loadingEdit={isUpdating}
           bulkEdit={isBulkEdit}
           showSaveAndNext={technicianEdit.showSaveAndNext}
+        />
+      )}
+      {technicianAssign.open && (
+        <TechnicianAssign
+          allData={technicianAssign?.data}
+          onlyEstimateDates={true}
+          handleSuccess={() => {
+            setTechnicianDialog(false);
+            fetchData();
+            setTechnicianAssign({ open: false, data: null });
+          }}
+          handleClose={() => {
+            setTechnicianAssign({ open: false, data: null });
+          }}
         />
       )}
     </>

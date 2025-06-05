@@ -3,7 +3,7 @@ import { SvgInterface } from 'src/assets/svg/svgIcons';
 
 const GenieText = (props: SvgInterface) => {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 2565 561" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 2565 561" width={64} height={14} {...props}>
       <g clipPath="url(#clip0_503_6422)">
         <mask id="mask0_503_6422" width="561" height="561" x="0" y="0" maskUnits="userSpaceOnUse" style={{ maskType: 'luminance' }}>
           <path fill="#fff" d="M561 0H0v561h561z"></path>

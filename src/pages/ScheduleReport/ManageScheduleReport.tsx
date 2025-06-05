@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef, Fragment } from 'react';
-import { Dialog, Box, TextField, Typography } from '@mui/material';
+import { Dialog, Box, TextField, Typography, FormControlLabel, Checkbox, Chip } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -34,11 +34,13 @@ type ValueTypes = {
   sharepointclientId?: string;
   sharepointclientSecret?: string;
   fileType?: string;
+  status: string;
+  emails: string[]
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const formikRef = useRef<FormikProps<ValueTypes>>(null);
-
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const { setToastConfig } = useContext(CustomToastContext);
   const [scheduleData, setScheduleData] = useState(null);
   const [formData, setFormData] = useState(null);
@@ -105,7 +107,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             subscribeUsers: data?.subscribeUsers || [],
             reportAction: data?.reportAction,
             sharepointSite: data?.sharepointSite,
-            fileType: data?.fileType || 'xslx'
+            fileType: data?.fileType || 'xslx',
+            status: data?.status,
+            emails: data?.emails || [],
           };
           setScheduleData(newData);
         } catch (err) {
@@ -125,7 +129,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         week: '',
         day: new Date().getDay().toString(),
         hour: '',
-        fileType: 'xslx'
+        fileType: 'xslx',
+        status: 'active',
+        emails: []
       });
     }
   }, [id]);
@@ -136,7 +142,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       const deepFilter: any = [];
 
       const column: any = [];
-      if(filterColumns?.length){
+      if (filterColumns?.length) {
         scheduleData?.filters?.forEach((_f) => {
           const col = filterColumns?.find((c) => c?.fieldData?.fieldName === _f?.term)?.fieldData;
           if (col?.lookup) {
@@ -281,6 +287,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!values.scheduleName || values.scheduleName === '') {
       errors['scheduleName'] = 'Schedule name is required';
     }
+    if (!values.status) {
+      errors['status'] = 'Status is required';
+    }
     if (!values.resource) {
       errors['resource'] = 'Report is required';
     }
@@ -290,10 +299,20 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!values.fileType) {
       errors['fileType'] = 'File Type is required';
     }
+    if (values.emails && values.emails.length > 0) {
+      const invalidEmails = values.emails.filter(
+        (email: string) => !emailRegex.test(email)
+      );
+      if (invalidEmails.length > 0) {
+        errors['emails'] = 'Enter valid emails';
+      }
+    }
+
     if (values.reportAction) {
       if (values.reportAction === 'Email') {
-        if (values?.subscribeUsers?.length === 0) {
-          errors['subscribeUsers'] = 'Users is required';
+        if (values?.subscribeUsers?.length === 0 && values.emails.length === 0) {
+          errors['subscribeUsers'] = 'User or email is required';
+          errors['emails'] = 'User or email is required';
         }
       }
 
@@ -341,7 +360,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date) {
+        if (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date)) {
           filters.push({
             term: d?.field,
             value: d?.term,
@@ -577,7 +596,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv']}
+                          options={['xslx', 'csv', 'pdf']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
@@ -602,30 +621,85 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   <Box my={2}>
                     <Grid container spacing={2}>
                       {values?.reportAction === 'Email' && (
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <Autocomplete
-                            options={usersList}
-                            fullWidth
-                            multiple
-                            size="small"
-                            getOptionLabel={(option) => option.name}
-                            isOptionEqualToValue={(option, value) => option.userId === value.userId}
-                            value={values.subscribeUsers}
-                            onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
-                                helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
-                                label="Users"
-                                name="subscribeUsers"
-                                required
-                                variant="outlined"
-                              />
-                            )}
-                          />
-                        </Grid>
+                        <>
+                          <Grid size={{ xs: 12, sm: 6 }}>
+                            <Autocomplete
+                              options={usersList}
+                              fullWidth
+                              multiple
+                              size="small"
+                              getOptionLabel={(option) => option.name}
+                              isOptionEqualToValue={(option, value) => option.userId === value.userId}
+                              value={values.subscribeUsers}
+                              onChange={(_, newVal) => setFieldValue('subscribeUsers', newVal)}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  error={touched['subscribeUsers'] && Boolean(errors['subscribeUsers'])}
+                                  helperText={touched['subscribeUsers'] && errors['subscribeUsers']}
+                                  label="Users"
+                                  name="subscribeUsers"
+                                  variant="outlined"
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6 }}>
+                            <Autocomplete
+                              multiple
+                              freeSolo
+                              fullWidth
+                              size="small"
+                              options={[]}
+                              value={values.emails || []}
+                              onChange={(_, newValue) => {
+                                const uniqueEmails = [...new Set(newValue.filter(Boolean))];
+                                setFieldValue('emails', uniqueEmails);
+                              }}
+                              renderTags={(value: string[], getTagProps) =>
+                                value.map((option: string, index: number) => (
+                                  <Chip size='small' label={option} {...getTagProps({ index })} />
+                                ))
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  error={touched['emails'] && Boolean(errors['emails'])}
+                                  helperText={touched['emails'] && errors['emails']}
+                                  label="Emails"
+                                  name="emails"
+                                  type='email'
+                                  variant="outlined"
+                                  placeholder='Add email & press enter'
+                                />
+                              )}
+                            />
+                          </Grid>
+                        </>
                       )}
+
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <Autocomplete
+                          options={['active', 'pause']}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => startCase(option)}
+                          isOptionEqualToValue={(option, value) => option === value}
+                          value={values.status}
+                          onChange={(_, newVal) => setFieldValue('status', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['status'] && Boolean(errors['status'])}
+                              helperText={touched['status'] && errors['status']}
+                              label="Status"
+                              name="status"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>
                       {values?.reportAction === 'Sharepoint Upload' && sharepointOptions && (
                         <Grid size={{ xs: 12, sm: 6 }}>
                           <Autocomplete

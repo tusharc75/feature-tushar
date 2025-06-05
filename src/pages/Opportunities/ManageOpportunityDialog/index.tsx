@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import { Formik, Form } from 'formik';
 import Dialog from '@mui/material/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import { getObjKeys, yupSchema, getObjKeysWithValues, opportunity, GenerateResourceLineNumber } from '../../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, opportunity, GenerateResourceLineNumber, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -18,6 +18,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 export default function ManageOpportunityDialog({
   open,
   onSuccess,
@@ -45,48 +46,52 @@ export default function ManageOpportunityDialog({
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [cloneHeading, setCloneHeading] = useState('');
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
-      .then(async ({ data: { data } }) => {
-        const process = data.find((obj) => obj?.fieldData?.type === 'process')?.fieldData;
-        if (process) {
-          data = data?.filter((e) => e.fieldData.sectionName !== process?.additionalInfoSection);
-        }
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.opportunity);
+      const process = fieldsDataAll.find((obj) => obj?.type === 'process');
+      if (process) {
+        fieldsDataAll = fieldsDataAll?.filter((e) => e.sectionName !== process?.additionalInfoSection);
+        fieldsDataForCreate = fieldsDataForCreate?.filter((e) => e.sectionName !== process?.additionalInfoSection);
+        fieldsDataForUpdate = fieldsDataForUpdate?.filter((e) => e.sectionName !== process?.additionalInfoSection);
+      }
 
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (opportunityId) {
-          var opportunityData: any = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
-          opportunityData = opportunityData?.data?.data;
-          if (isClone) {
-            const { opportunityName, ...rest } = opportunityData;
-            rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            setCloneHeading(opportunityName);
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-            });
-          } else {
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: { ...getObjKeysWithValues(opportunityData, fieldsDataForUpdate) }
-            });
-          }
-        } else {
-          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-          initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+      if (opportunityId) {
+        var opportunityData: any = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
+        opportunityData = opportunityData?.data?.data;
+        if (isClone) {
+          const { opportunityName, ...rest } = opportunityData;
+          rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+          setCloneHeading(opportunityName);
           setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
+            fields: fieldsDataForUpdate,
+            values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+          });
+        } else {
+          setInitialData({
+            fields: fieldsDataForUpdate,
+            values: { ...getObjKeysWithValues(opportunityData, fieldsDataAll) }
           });
         }
-      });
+      } else {
+        let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
   }, []);
 
   const handleSubmit = (values) => {

@@ -9,7 +9,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, repairType } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, sidebarResource, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box, Typography, IconButton, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -22,6 +22,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -39,46 +40,48 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/field?resource=${repairType.resource}`)
-      .then(({ data: { data } }) => {
-        let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-        if (repairTypeId) {
-          axiosInstance()
-            .get(`${repairType.api}/` + repairTypeId)
-            .then(({ data: { data } }) => {
-              setRepairTypeData(data);
-              setRepairSteps(data?.steps ? data?.steps : []);
-              if (isClone) {
-                const { _id, createdBy, updatedBy, repairType, ...rest } = data;
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
-                });
-                setLoading(false);
-              } else {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          let createValues: any = getObjKeys('', fieldsDataForCreate);
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: createValues
-          });
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [repairTypeId]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.repairType);
+
+      if (repairTypeId) {
+        axiosInstance()
+          .get(`${repairType.api}/` + repairTypeId)
+          .then(({ data: { data } }) => {
+            setRepairTypeData(data);
+            setRepairSteps(data?.steps ? data?.steps : []);
+            if (isClone) {
+              const { repairType, ...rest } = data;
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
+              });
+              setLoading(false);
+            } else {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        let createValues: any = getObjKeys('', fieldsDataForCreate);
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: createValues
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
 
   const handleSubmit = (values) => {
     if (repairSteps?.length === 0) {
@@ -218,7 +221,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                     <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>Repair Steps</h2>
                   </div>
                   <Grid container>
-                    <Grid size={{xs:12, sm:6, md:6, lg:6}}>
+                    <Grid size={{ xs: 12, sm: 6, md: 6, lg: 6 }}>
                       <Box
                         style={{ maxHeight: '350px', overflow: 'auto' }}
                         border={1}
@@ -229,13 +232,13 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                       >
                         <Box p={1}>
                           <Grid container alignItems="center">
-                            <Grid size={{xs:2, sm:2, md:2, lg:2}}>
+                            <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                               <Typography variant="body2">Sr.</Typography>
                             </Grid>
-                            <Grid size={{xs:8, sm:8, md:8, lg:8}}>
+                            <Grid size={{ xs: 8, sm: 8, md: 8, lg: 8 }}>
                               <Typography variant="body2">Step Name</Typography>
                             </Grid>
-                            <Grid size={{xs:2, sm:2, md:2, lg:2}}>
+                            <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                               <Grid container justifyContent="flex-end">
                                 <IconButton size="small" aria-label="setting" onClick={() => handleAddRepairSteps()}>
                                   <AddCircleOutlineIcon fontSize="small" />
@@ -247,10 +250,10 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                         {repairSteps?.map((steps, index) => (
                           <Box key={index} p={1} borderTop={1} borderColor="var(--common-border-color)" width={'100%'}>
                             <Grid container alignItems="center">
-                              <Grid size={{xs:2, sm:2, md:2, lg:2}}>
+                              <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                                 <Typography variant="body2">{steps.order}</Typography>
                               </Grid>
-                              <Grid size={{xs:8, sm:8, md:8, lg:8}}>
+                              <Grid size={{ xs: 8, sm: 8, md: 8, lg: 8 }}>
                                 <TextField
                                   id="standard-basic"
                                   variant="outlined"
@@ -262,7 +265,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                                   onChange={(event) => handleonChangeValue(index, event.target.value)}
                                 />
                               </Grid>
-                              <Grid size={{xs:2, sm:2, md:2, lg:2}}>
+                              <Grid size={{ xs: 2, sm: 2, md: 2, lg: 2 }}>
                                 <Grid container justifyContent="flex-end">
                                   <IconButton size="small" aria-label="setting" onClick={() => handleRemoveRepairSteps(index)}>
                                     <RemoveCircleOutlineIcon fontSize="small" />

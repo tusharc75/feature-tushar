@@ -1,5 +1,5 @@
 import { Close } from '@mui/icons-material';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -8,6 +8,7 @@ import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Edito
 
 const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
   const editorRef = useRef<EditorRef>(null);
+  const isMomile = useMediaQuery('(max-width:768px)');
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
@@ -71,7 +72,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose 
   };
 
   return (
-    <Box>
+    <div className="h-screen">
       <head className="flex items-center justify-between gap-2 border-b px-4 py-3">
         {data.name && <h6 className="line-clamp-1 text-base font-semibold">{data.name}</h6>}
         <div className="flex items-center gap-2">
@@ -88,12 +89,11 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose 
           )}
         </div>
       </head>
-      <main className={cn('-mt-[1px] h-[calc(100vh-59px)] w-full overflow-auto')}>
+      <main className={cn('-mt-[1px] w-full overflow-auto ')}>
         {loading ? (
           <Box
-            className="loading"
+            className="loading h-[calc(100vh-60px)]"
             sx={{
-              height: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -107,7 +107,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedAttachment, handleClose 
           )
         )}
       </main>
-    </Box>
+    </div>
   );
 };
 

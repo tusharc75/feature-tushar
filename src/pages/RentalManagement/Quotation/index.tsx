@@ -111,7 +111,6 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         sticky: isMobile ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) =>
@@ -123,9 +122,8 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -227,21 +225,11 @@ const Quotation = ({
     const response = await axiosInstance().get(
       `${quotation.api}/productpackage/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
-    const additionalCost = await axiosInstance().get(
-      `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
-    );
-    const additionalCostData = additionalCost?.data?.data?.map((e) => {
-      return {
-        ...e,
-        type: MATERIAL_TYPE.manualEntry,
-        parentId: null
-      };
-    });
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     inventory = data?.inventory ? data?.inventory : [];
     const rowsMaterial = data.material.filter((e) => e.parentId === null);
-    const rows = [...rowsMaterial, ...additionalCostData];
+    const rows = rowsMaterial;
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset

@@ -39,8 +39,9 @@ import {
 } from '../walkmeSteps';
 import { getTaxById } from 'src/components/PricingCondition';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct }) => {
+const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit: hasPermission, checkReceivedProduct, purchaseOrderFields, fetchPurchaseOrderData }) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -154,7 +155,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
     columns.push({
       accessor: 'type',
       Header: 'Type',
-      disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? <p className="text-truncate">{row.original.type}</p> : <NoDataCell />;
@@ -258,7 +258,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
                 <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
-            {row?.original?.type != 'Manual Entry' && (
+            {permissions?.attachment?.isRead && row?.original?.type != 'Manual Entry' && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"
@@ -437,6 +437,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .then(() => {
         setAddProductDialog(false);
         fetchData();
+        fetchPurchaseOrderData()
         setAddingProducts(false);
       })
       .catch((error) => {
@@ -452,6 +453,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .then(() => {
         setAddProductDialog(false);
         fetchData();
+        fetchPurchaseOrderData()
         setAddingProducts(false);
         setIsBulkEdit(false);
         if (saveAndNext) {
@@ -497,6 +499,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       await axiosInstance().post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/delete`, { ids: cost?.map((e) => e._id) });
     }
     fetchData();
+    fetchPurchaseOrderData()
     setShowDeleteConfirmBox(false);
     setDeletePurchaseOrderItem([]);
   };
@@ -507,6 +510,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .post(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/add`, { additionalCost: rows })
       .then(() => {
         fetchData();
+        fetchPurchaseOrderData()
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         setLoadingEdit(false);
       })
@@ -522,6 +526,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .put(`${purchaseOrder.api}/cost/${purchaseOrderData._id}/update`, { additionalCost: rows })
       .then(() => {
         fetchData();
+        fetchPurchaseOrderData()
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < dataRows?.length - 1) {
@@ -566,6 +571,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .post(`${purchaseOrder.api}/service/${purchaseOrderData._id}/add`, { services: tempServiceArray })
       .then(() => {
         fetchData();
+        fetchPurchaseOrderData()
         setAddServiceDialog(false);
         setSubmitting(false);
       })
@@ -581,6 +587,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
       .put(`${purchaseOrder.api}/service/${purchaseOrderData._id}/update`, { services: rows })
       .then(() => {
         fetchData();
+        fetchPurchaseOrderData()
         if (saveAndNext) {
           const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
           if (rowIndex < dataRows?.length - 1) {
@@ -678,12 +685,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-            uniq(
-              map(
-                selectedRecords?.filter((e) => !e.hideSelection),
-                'type'
-              )
-            )?.length === 1
+              uniq(
+                map(
+                  selectedRecords?.filter((e) => !e.hideSelection),
+                  'type'
+                )
+              )?.length === 1
               ? false
               : true
           }
@@ -772,6 +779,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
           />
+          <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} />
         </Box>
       ) : (
         <Box p={2} height={500}>
@@ -786,21 +794,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                  {
-                    field: 'expenseItem',
-                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                  }
-                ]
+                {
+                  field: 'expenseItem',
+                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                }
+              ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -861,11 +869,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
         />

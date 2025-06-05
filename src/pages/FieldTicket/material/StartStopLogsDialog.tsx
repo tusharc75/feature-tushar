@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Dialog, Box, IconButton } from '@mui/material';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, displayDateTime, fieldServiceOrder, fieldTicket, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDateTime, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
@@ -42,7 +42,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    let api = `${resource === sidebarResource.fieldServiceOrder ? fieldServiceOrder.api : fieldTicket.api}/technician/start-stop-logs?referenceId=${referenceId}&technician=${technician}`;
+    let api = `/technician/start-stop-logs?referenceId=${referenceId}&technician=${technician}`;
     if (service && service?.optionValue !== 'All') {
       api = `${api}&service=${service?.optionValue}&uniqueId=${service?._id}`;
     }
@@ -240,7 +240,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
 
   const handleUpdateLog = (values, _id) => {
     setStartStopDateDialog({ ...startStopDateDialog, loading: true });
-    axiosInstance().put(`${resource === sidebarResource.fieldServiceOrder ? fieldServiceOrder.api : fieldTicket.api}/technician/update-log`, { ...values, _id })
+    axiosInstance().put(`/technician/update-log`, { ...values, _id })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -260,7 +260,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
   const handleDeleteLog = (ids: any[]) => {
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().put(`${resource === sidebarResource.fieldServiceOrder ? fieldServiceOrder.api : fieldTicket.api}/technician/delete-log`, { ids })
+    axiosInstance().put(`/technician/delete-log`, { ids })
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,

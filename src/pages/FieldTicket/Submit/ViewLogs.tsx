@@ -53,7 +53,6 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
         accessor: 'type',
         Header: 'Action',
         width: 150,
-        disabled: true,
         Cell: ({ row }) => {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
         }

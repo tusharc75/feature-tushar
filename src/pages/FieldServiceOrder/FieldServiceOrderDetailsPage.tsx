@@ -291,7 +291,12 @@ const ServiceOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {!loadingDetails && serviceOrderData && serviceOrderFields.length > 0 ? (
-              <DetailsPage data={serviceOrderData} fields={serviceOrderFields} />
+              <DetailsPage
+                data={serviceOrderData}
+                fields={serviceOrderFields}
+                resource={sidebarResource?.fieldServiceOrder}
+                referenceId={serviceOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -402,7 +407,11 @@ const ServiceOrderDetailsPage = () => {
           />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <OnField rentalId={serviceOrderData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldServiceOrder} />
+          <OnField
+            referenceData={serviceOrderData}
+            rentalJob={serviceOrderData?.rentalJob?.optionValue}
+            referenceFrom={sidebarResource?.fieldServiceOrder}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>{serviceOrderData && <FieldServiceOrderView fieldServiceOrderData={serviceOrderData} />}</Box>

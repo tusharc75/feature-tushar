@@ -93,6 +93,11 @@ const WorkOrder = ({
     try {
       setIsAutoCreating(true);
       await axiosInstance().post(`${routes.assemblyOrder.path}/work-order/${assemblyOrderData._id}`);
+      toastConfig.setToastConfig({
+        open: true,
+        message: `Automatic ${resources?.workOrder?.titlePlural} has been successfully generated.`,
+        type: 'success'
+      });
       setIsAutoCreating(false);
       fetchData();
     } catch (error) {
@@ -333,7 +338,7 @@ const WorkOrder = ({
                   </IconButton>
                 </HtmlTooltip>
               )}
-            {[MATERIAL_TYPE.package, MATERIAL_TYPE.service]?.includes(row.original.type) && row.original?.workOrderId && (
+            {row.original?.workOrderId && (
               <HtmlTooltip title="Drawings">
                 <IconButton
                   size="small"
@@ -985,10 +990,10 @@ const WorkOrder = ({
             setShowDrawingDialog({ open: false, data: null });
           }}
           referenceLabel={showDrawingDialog?.data?.detail}
-          uniqueId={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? showDrawingDialog?.data?.uniqueId : null}
+          uniqueId={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? showDrawingDialog?.data?.uniqueId : null}
           resource={ACTIVITY_RESOURCE.workOrder}
           attachmentType={showDrawingDialog?.data?.type === MATERIAL_TYPE.package ? ATTACHMENT_TYPE.drawing : null}
-          showMaterialFilter={showDrawingDialog?.data?.type === MATERIAL_TYPE.service ? false : true}
+          showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? false : true}
         />
       )}
     </>
@@ -1171,7 +1176,7 @@ const ActionButtonMenuItems = ({
           }
         }}
       >
-        Upload Documents
+        Upload Attachments
       </MenuItem>
       <MenuItem
         onClick={() => {

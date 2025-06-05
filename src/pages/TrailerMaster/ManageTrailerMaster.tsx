@@ -16,6 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,50 +32,50 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.trailerMaster}`)
-      .then(({ data: { data } }) => {
-        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-        if (id) {
-          axiosInstance()
-            .get(`${routes?.trailerMaster.path}/` + id)
-            .then(({ data: { data } }) => {
-              if (isClone) {
-                const { _id, brand, createdBy, trailerName, updatedBy, ...rest } = data;
-                setTitle(`Clone - ${trailerName}`);
-                setInitialData({
-                  fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
-                });
-                setLoading(false);
-              } else {
-                setTitle(`Editing - ${data.trailerName}`);
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                });
-                setLoading(false);
-              }
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          setTitle(`Create ${resources?.trailerMaster?.titleSingular}`);
-          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-          setInitialData({
-            fields: fieldsDataForCreate,
-            values: initialData
-          });
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    fetchFields();
   }, [id]);
+
+  const fetchFields = async () => {
+    try {
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.trailerMaster);
+
+      if (id) {
+        axiosInstance()
+          .get(`${routes?.trailerMaster.path}/` + id)
+          .then(({ data: { data } }) => {
+            if (isClone) {
+              const { trailerName, ...rest } = data;
+              setTitle(`Clone - ${trailerName}`);
+              setInitialData({
+                fields: fieldsDataForCreate,
+                values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+              });
+              setLoading(false);
+            } else {
+              setTitle(`Editing - ${data.trailerName}`);
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataAll)
+              });
+              setLoading(false);
+            }
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        setTitle(`Create ${resources?.trailerMaster?.titleSingular}`);
+        let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+        setLoading(false);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const handleSubmit = (values) => {
     setSubmitting(true);

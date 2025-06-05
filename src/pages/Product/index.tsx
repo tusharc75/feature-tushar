@@ -167,7 +167,7 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={permissions?.product?.isDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize='small' color={permissions?.product?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -182,7 +182,7 @@ const Product = () => {
                   history.push(`${routes.productDetail.path}/${row?.original._id}/bom`, { productName: row?.original.productName });
                 }}
               >
-                <RiBillLine fontSize={'20px'} color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
+                <RiBillLine fontSize={'18px'} color={permissions?.product?.isUpdate ? 'primary' : 'disabled'} />
               </IconButton>
             </span>
           </HtmlTooltip>

@@ -18,11 +18,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isArray, isEqual, isString } from 'lodash';
 import DocumentScanner from '../Helpers/DocumentScanner';
-import { ATTACHMENT_TYPE, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
+import { ATTACHMENT_TYPE, checkSuperAdminAccess, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 import { updateDisable } from 'src/constants/messageHelpers';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
 
@@ -47,7 +48,7 @@ export default function ManageAttachment({
   parentFolder = null,
   type = 'file',
   attachmentType = null,
-  customhandleAdd = null,
+  customhandleAdd = null
 }) {
   const toastConfig = useContext(CustomToastContext);
 
@@ -67,7 +68,9 @@ export default function ManageAttachment({
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [attachmentData, setAttachmentData] = useState(null);
 
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     fetchAttachmentData();
@@ -77,9 +80,7 @@ export default function ManageAttachment({
     try {
       setIsFetching(true);
       if (type === 'file') {
-        const fieldsResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
-        const createFields = fieldsResponce?.data?.data?.filter((f) => f.isCreate).map((f) => f.fieldData);
-        const updateFields = fieldsResponce?.data?.data?.filter((f) => f.isUpdate).map((f) => f.fieldData);
+        let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);
         if (attachmentId) {
           const attachmentResponce: any = await axiosInstance().get(`/attachment/${attachmentId}`);
           const data = attachmentResponce?.data?.data;
@@ -91,30 +92,34 @@ export default function ManageAttachment({
           }
           setIsFetching(false);
           let initialValue: any = { name: data?.name, attachmentType: data?.attachmentType };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeysWithValues(data, updateFields) };
+          if (fieldsDataForUpdate?.length) {
+            initialValue = { ...initialValue, ...getObjKeysWithValues(data, fieldsDataAll) };
           }
-          setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
+          setAllowedToEdit(
+            isClone
+              ? true : checkSuperAdminAccess(user, sidebarResource.attachment) ?
+                data?.canEdit : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
+          );
           if (!isClone) {
-            setAttachmentData(data)
+            setAttachmentData(data);
           }
           setInitialData({
-            fields: updateFields,
+            fields: fieldsDataForUpdate,
             values: initialValue
           });
         } else {
           let initialValue: any = { name: '', attachmentType: '' };
-          if (createFields?.length) {
-            initialValue = { ...initialValue, ...getObjKeys('', createFields) };
+          if (fieldsDataForCreate?.length) {
+            initialValue = { ...initialValue, ...getObjKeys('', fieldsDataForCreate) };
           }
           if (attachmentType) {
             initialValue.attachmentType = attachmentType;
           }
           setInitialData({
-            fields: createFields,
+            fields: fieldsDataForCreate,
             values: initialValue
           });
-          setAllowedToEdit(true)
+          setAllowedToEdit(true);
           setIsFetching(false);
         }
       } else if (type === 'folder') {
@@ -127,7 +132,12 @@ export default function ManageAttachment({
                 values: data
               });
               parentFolder = data?.parentFolder;
-              setAllowedToEdit(isClone ? true : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit)
+              setAllowedToEdit(
+                isClone ? true
+                  : checkSuperAdminAccess(user, sidebarResource.attachment)
+                    ? data?.canEdit
+                    : data?.createdBy?.user?._id === user?.user?._id && data?.canEdit
+              );
               setIsFetching(false);
             })
             .catch((error) => {
@@ -139,7 +149,7 @@ export default function ManageAttachment({
             fields: [],
             values: { name: '' }
           });
-          setAllowedToEdit(true)
+          setAllowedToEdit(true);
           setIsFetching(false);
         }
       }
@@ -248,15 +258,17 @@ export default function ManageAttachment({
 
   const onUploadFile = (files) => {
     if (isArray(files)) {
-      setAllAttachments((prevState) => [...files?.map((e) => {
-        return {
-          name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
-          url: e?.fileName,
-          date: new Date()
-        }
-      }), ...prevState]);
-    }
-    else if (isString(files)) {
+      setAllAttachments((prevState) => [
+        ...files?.map((e) => {
+          return {
+            name: e?.fileName?.split('_OMS_TS_')?.pop() || e?.fileName,
+            url: e?.fileName,
+            date: new Date()
+          };
+        }),
+        ...prevState
+      ]);
+    } else if (isString(files)) {
       setAllAttachments((prevState) => [{ name: files?.split('_OMS_TS_')?.pop() || files, url: files, date: new Date() }, ...prevState]);
     }
   };
@@ -385,11 +397,7 @@ export default function ManageAttachment({
                                   }}
                                 />
                               </div>
-                              <ThemeButton
-                                buttonType="theme"
-                                component="span"
-                                disabled={!allowedToEdit}
-                                onClick={() => setDocumentScanDialog(true)}>
+                              <ThemeButton buttonType="theme" component="span" disabled={!allowedToEdit} onClick={() => setDocumentScanDialog(true)}>
                                 Scan Document
                               </ThemeButton>
                             </div>
@@ -418,11 +426,10 @@ export default function ManageAttachment({
                               <DeleteRequest
                                 file={attachmentData}
                                 handleSucess={() => {
-                                  fetchData()
-                                  handleClose()
+                                  fetchData();
+                                  handleClose();
                                 }}
                                 showWithoutPopOver={true}
-
                               />
                             </Grid>
                           </>

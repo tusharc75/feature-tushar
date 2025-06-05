@@ -54,6 +54,7 @@ import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail
 import UserSession from './UserSession';
 
 import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const useStyles = makeStyles((theme: Theme) => ({
   dataValue: {
@@ -184,11 +185,7 @@ const UserDetailsPage = () => {
     await axiosInstance()
       .get(`/user/${id}`)
       .then(({ data: { data } }) => {
-        if (data?.hideEmail) {
-          data.email = null;
-        }
         handleMainPoints(data);
-        const name = [data.firstName, data.lastName].filter((d) => d).join(' ');
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
@@ -449,11 +446,11 @@ const UserDetailsPage = () => {
                     <CustomTab value={1} label={'Org Chart'} />
                     {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
                     <CustomTab value={3} label={'User Session'} />
-                    <CustomTab value={4} label={'Assigned Entity'} />
+                    <CustomTab value={4} label={`Assigned ${resources?.entity?.titlePlural}`} />
                   </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
-                    <DetailsPage data={userData} fields={userFields} />
+                    <DetailsPage data={userData} fields={userFields} resource={sidebarResource?.user} referenceId={userData?._id} />
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <OrgChartContainer
@@ -519,12 +516,16 @@ const UserDetailsPage = () => {
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                         <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
-                          <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Entity ({entities?.length || 0})</h6>
+                          <h6 className="text-sm font-semibold leading-[1.05] ">
+                            {`Assigned ${resources?.entity?.titlePlural}`} ({entities?.length || 0})
+                          </h6>
                           {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
                             <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
-                              <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
-                                <ControlPoint />
-                              </IconButton>
+                              <HtmlTooltip title="Assign Entities">
+                                <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
+                                  <ControlPoint />
+                                </IconButton>
+                              </HtmlTooltip>
                             </span>
                           )}
                         </div>

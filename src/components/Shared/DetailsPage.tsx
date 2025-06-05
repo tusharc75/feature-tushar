@@ -278,7 +278,7 @@ const Details = (props: DetailProps) => {
                 className="link"
                 title={data[fieldData.fieldName].optionLabel || value}
               >
-                <span className={`link block p-0 md:truncate md:text-ellipsis`}>
+                <span className={`link block break-all p-0 md:truncate md:text-ellipsis`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -520,23 +520,25 @@ const Details = (props: DetailProps) => {
     const generateFormDataWithFollowUps = () => {
       if (formsData.length === 0) return [];
       const newFormData = [...formsData];
-      if (!taskData || taskData?.length === 0) return newFormData;
-      formsData?.forEach((ele) => {
+      newFormData?.forEach((ele) => {
         ele.followUpData = [];
         ele?.sectionFields?.forEach((e) => {
           e.followUpData = [];
         });
       });
+      if (!taskData || taskData?.length === 0) return newFormData;
       taskData?.forEach((task, i) => {
-        const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
-        const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
-        if (sectionIndex !== -1) {
-          const fieldIndex = newFormData[sectionIndex].sectionFields.findIndex((field) => field.fieldData.fieldLabel === taskName);
-          if (fieldIndex !== -1 && sectionIndex > -1) {
-            if (newFormData[sectionIndex].sectionFields[fieldIndex].followUpData) {
-              newFormData[sectionIndex].sectionFields[fieldIndex].followUpData.push(taskData[i]);
-            } else {
-              newFormData[sectionIndex].sectionFields[fieldIndex].followUpData = [taskData[i]];
+        const taskName = task?.formRelatedTo?.fields?.[0]?.fieldLabel;
+        if (taskName) {
+          const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
+          if (sectionIndex !== -1) {
+            const fieldIndex = newFormData[sectionIndex].sectionFields.findIndex((field) => field.fieldData.fieldLabel === taskName);
+            if (fieldIndex !== -1 && sectionIndex > -1) {
+              if (newFormData[sectionIndex].sectionFields[fieldIndex].followUpData) {
+                newFormData[sectionIndex].sectionFields[fieldIndex].followUpData.push(taskData[i]);
+              } else {
+                newFormData[sectionIndex].sectionFields[fieldIndex].followUpData = [taskData[i]];
+              }
             }
           }
         }
@@ -647,6 +649,7 @@ const Details = (props: DetailProps) => {
                                     data={field.followUpData}
                                     columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
                                     setOpenTask={setOpenTask}
+                                    handleRefresh={fetchTaskData}
                                   />
                                 )}
                               </div>
@@ -661,7 +664,11 @@ const Details = (props: DetailProps) => {
             )
           );
         })}
-        <ShowModificationData data={data} containerPadding={containerPadding} />
+        <ShowModificationData
+          data={data}
+          containerPadding={containerPadding}
+          resource={resource}
+        />
         {dialogData && dialogData.open && (
           <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
         )}

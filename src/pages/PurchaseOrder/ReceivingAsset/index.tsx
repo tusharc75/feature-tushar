@@ -27,8 +27,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateReceiveProduct, generateRejectProduct } from 'src/pages/PurchaseOrder/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
+const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit, purchaseOrderFields }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
@@ -106,7 +107,6 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       Header: 'Type',
       width: 100,
       primaryField: true,
-      disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => {
         return row.original['type'] ? (
@@ -467,6 +467,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
               hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
               expander={true}
             />
+            <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} />
           </Box>
         ) : (
           <Box p={2} height={500}>

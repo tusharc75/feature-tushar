@@ -85,6 +85,7 @@ import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import { flattenArray } from 'src/constants/columns';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -719,14 +720,9 @@ const ReceivingTicket = ({
 
       if (view === 'flat') {
         newRows = [...productAssets];
-
-        material
-          ?.filter(
-            (ele) =>
-              ele.type === MATERIAL_TYPE.product &&
-              ele?.consumableType !== 'Internal' &&
-              (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
-          )
+        material?.filter((ele) => ele.type === MATERIAL_TYPE.product &&
+          ele?.consumableType !== 'Internal' && (!ele?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === ele?._id)?.length)
+        )
           ?.forEach((element) => {
             const subProductRows = processProduct(
               '',
@@ -768,14 +764,14 @@ const ReceivingTicket = ({
       } else {
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
         newRows = [];
+        let extraIndexCount = 0;
         rows.forEach((parent, i) => {
-          if (
-            parent.type === MATERIAL_TYPE.product &&
+          if (parent.type === MATERIAL_TYPE.product &&
             (!parent?.productDetail?.serializedProduct || productSerialNumbers?.filter((e) => e?._id === parent?._id)?.length)
           ) {
             const subProductRows = processProduct(
               '',
-              newRows?.length,
+              newRows?.length + extraIndexCount,
               parent,
               material,
               nonSerializedInventory,
@@ -788,6 +784,28 @@ const ReceivingTicket = ({
               invoiceData
             );
             newRows = [...newRows, ...subProductRows];
+            if (parent?.productDetail?.serializedProduct && productAssets?.filter((e) => e.uniqueId === parent._id)?.length) {
+              extraIndexCount++;
+              parent.index = i + 1 + extraIndexCount;
+              parent.type = parent?.type;
+              parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+              parent.detail = parent?.productDetail?.productName;
+              parent.description = parent?.productDetail?.productDescription;
+              parent.qty = productAssets?.filter((e) => e.uniqueId === parent._id)?.length;
+              parent.subRows = generateNestedData(
+                parent,
+                material,
+                productAssets,
+                loadingTicketProducts,
+                receiveTicketProducts,
+                returnTicketProducts,
+                consumeProducts,
+                nonSerializedInventory,
+                nonSerializeAsset,
+                productSerialNumbers
+              );
+              newRows.push(parent);
+            }
           } else {
             parent.index = i + 1;
             parent.type = parent?.type;
@@ -1359,7 +1377,6 @@ const ReceivingTicket = ({
       {
         accessor: 'type',
         Header: 'Type',
-        disabled: true,
         cell: ({ row }) =>
           row.original['type'] ? (
             <p>
@@ -1759,7 +1776,7 @@ const ReceivingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      cell: ({ row }) => {
+      Cell: ({ row }) => {
         return (
           <>
             {allowedToEdit ? (
@@ -1793,6 +1810,7 @@ const ReceivingTicket = ({
     });
     setColumns(column);
   };
+
 
   const getFilterSelectedRecords = (materialType = null, record = selectedRecords) => {
     if (materialType) {
@@ -1911,8 +1929,7 @@ const ReceivingTicket = ({
           _ids: statusPolicy?.assetIds,
           referenceData: data,
           ticketType: ticketType,
-          stopAutoIncrementIds:
-            ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
+          stopAutoIncrementIds: ticketType === DELIVERY_TICKET_TYPE.return ? records?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id) : []
         });
       } else {
         setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
@@ -2584,7 +2601,7 @@ const ReceivingTicket = ({
       <TabPanel value={tabValue} index={0}>
         <DetailsPageHeader
           isAddButtonVisible={false}
-          isActionButtonVisible={true}
+          isActionButtonVisible={allowedToEdit}
           actionButtonMenuItems={
             <ActionButtonMenuItems
               {...{
@@ -2862,9 +2879,7 @@ const ReceivingTicket = ({
           products={getFilterSelectedRecords(MATERIAL_TYPE.product)}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
-              ? user?.user?.brandPolicy?.rentalReceivingStatus
-              : ASSET_STATUS.underReview;
+            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus ? user?.user?.brandPolicy?.rentalReceivingStatus : ASSET_STATUS.underReview;
             const statusPolicy = checkAssetPolicy(receivingStatus);
             if (statusPolicy && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length && !onReceiveAssetDataCapture) {
               setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
@@ -2946,22 +2961,11 @@ const ReceivingTicket = ({
               {[ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(statusToUpdate.status) ? (
                 <h4>You want to change the status of selected assets to {statusToUpdate.status} ?</h4>
               ) : (
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label={`Please enter the reason for ${statusToUpdate.status}`}
-                  multiline
-                  fullWidth
-                  rows={4}
                   value={statusToUpdate.message}
-                  variant="outlined"
-                  onChange={(e) => {
-                    setStatusToUpdate((prevState) => ({ ...prevState, message: e.target.value }));
-                  }}
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto'
-                    }
+                  onChange={(value) => {
+                    setStatusToUpdate((prevState) => ({ ...prevState, message: value }));
                   }}
                 />
               )}

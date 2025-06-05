@@ -35,6 +35,7 @@ type ListingPageHeaderProps = {
   searchFilter?: any[];
   handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
+  rightSideContentsBeforeAction?: ReactNode;
   leftSideContentsOfSearchFilter?: ReactNode;
   isActionButtonVisible: boolean;
   actionButtonProps?: Omit<ButtonPropsWithExtraData, 'text'>;
@@ -55,6 +56,7 @@ const ListingPageHeader = ({
 
   leftSideContents,
   rightSideContents,
+  rightSideContentsBeforeAction,
   leftSideContentsOfSearchFilter,
 
   searchValue,
@@ -190,7 +192,7 @@ const ListingPageHeader = ({
           </>
         ) : null}
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
+          className={`flex flex-grow ${shouldNotFlexWrap && !leftSideContentsOfSearchFilter ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
             !isLeftSidePresent && isMobile ? '-mt-2' : ''
           }`}
         >
@@ -217,7 +219,7 @@ const ListingPageHeader = ({
               activityName="note"
             />
           ) : null}
-          {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
+          {rightSideContents || rightSideContentsBeforeAction || isAddButtonVisible || isActionButtonVisible ? (
             <>
               <div className="flex min-w-fit flex-wrap items-center gap-[8px]">
                 {isAddButtonVisible ? (
@@ -242,7 +244,7 @@ const ListingPageHeader = ({
                     </ThemeButton>
                   </HtmlTooltip>
                 ) : null}
-
+                {rightSideContentsBeforeAction ? rightSideContentsBeforeAction : null}
                 <HideWhenOffline>
                   {isActionButtonVisible ? (
                     <>

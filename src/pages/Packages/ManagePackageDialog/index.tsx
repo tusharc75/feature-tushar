@@ -17,6 +17,7 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
@@ -36,11 +37,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
 
   const fetchFields = async () => {
     try {
-      let fieldData;
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.packages}`);
-      fieldData = response?.data?.data;
-      const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.packages);
       if (packageId) {
         try {
           let data;
@@ -54,7 +51,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             }
           }
           if (isClone) {
-            const { _id, brand, createdBy, entity, packageName, history, updatedBy, ...rest } = data;
+            const { packageName, ...rest } = data;
             setPackageName(packageName);
             setInitialData({
               fields: fieldsDataForCreate,
@@ -63,7 +60,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           } else {
             setInitialData({
               fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              values: getObjKeysWithValues(data, fieldsDataAll)
             });
           }
         } catch (error) {

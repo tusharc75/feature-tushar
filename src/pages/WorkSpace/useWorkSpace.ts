@@ -56,11 +56,11 @@ const reducer = (state: UseWorkSpaceState, action: UseWorkSpaceActions) => {
 };
 
 type WorkSpaceProps = {
-  title?: string | null;
+  referenceId?: string | null;
   fromSidebar?: boolean;
 };
 
-export const useWorkSpace = ({ title = '', fromSidebar = false }: WorkSpaceProps = {}) => {
+export const useWorkSpace = ({ referenceId = '', fromSidebar = false }: WorkSpaceProps = {}) => {
   const location = useLocation();
   const parsedParams = queryString.parse(location.search);
   const history = useHistory();
@@ -131,14 +131,16 @@ export const useWorkSpace = ({ title = '', fromSidebar = false }: WorkSpaceProps
       if (state.selectedResource) {
         api = `${api}?resource=${state.selectedResource}`;
       }
+      if (referenceId) {
+        api = `${api}?referenceId=${referenceId}`;
+      }
       const {
         data: { data }
       } = await axiosInstance().get(api);
 
       setAllChannels(data);
-      if (title) {
-        const channel = data?.find((channel) => channel?.title === title);
-        setSelectedChannel(channel, data);
+      if (referenceId && data?.length) {
+        setSelectedChannel(data[0], data);
       } else if (setActiveChannel) {
         const queryParam = new URLSearchParams(window.location.search);
         const channelId = newDirectMessageChannelId || state.selectedChannel._id || queryParam.get('channelId');

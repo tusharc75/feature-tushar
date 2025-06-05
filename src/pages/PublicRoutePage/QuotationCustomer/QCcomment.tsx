@@ -5,6 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function QCcomment({ onClose, onSubmit, type }) {
@@ -24,27 +25,11 @@ export default function QCcomment({ onClose, onSubmit, type }) {
         showManimizeMaximize={true}
       />
       <CustomDialogContent>
-        <TextField
-          variant="outlined"
-          type="text"
+        <MultiLine
           label="Comment"
-          multiline
-          rows={4}
-          required={true}
-          name={'comment'}
-          fullWidth
-          margin="dense"
-          size="small"
           value={comment || ''}
-          onChange={(e) => {
-            setComment(e.target.value);
-          }}
-          sx={{
-            '& .MuiInputBase-root textarea': {
-              resize: 'vertical',
-              overflow: 'auto',
-            },
-          }}
+          required={true}
+          onChange={(value) => setComment(value)}
         />
       </CustomDialogContent>
       <CustomDialogFooter>

@@ -342,7 +342,6 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
         {
           accessor: 'type',
           Header: 'Type',
-          disabled: true,
           Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
         },
         {
@@ -575,7 +574,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
           <DurationFilter label={''} defaultTimeFrame="all" duration={duration} setDuration={setDuration} showAll={true} />
         </Box>
         <ImportExportLinks
-          permissions={permissions?.history}
+          permissions={permissions?.serializedAsset}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
           afterImportCompleted={() => { }}

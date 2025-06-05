@@ -14,6 +14,9 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { Groups } from '@mui/icons-material';
+import { FiExternalLink } from 'react-icons/fi';
+import { ListRelatedTo } from 'src/components/Activity/Helpers/ListRelatedTo';
+import { startCase } from 'lodash';
 
 const MessagePanel = ({
   state,
@@ -65,7 +68,7 @@ const MessagePanel = ({
     return {
       members: members,
       title: resourceLabel,
-      resource: resource
+      relatedTo: [{ type: resource, referenceId: resourceData?._id }]
     };
   }, [resource, resourceData, resourceLabel]);
 
@@ -73,14 +76,16 @@ const MessagePanel = ({
     <>
       <div
         className={cn(
-          'relative flex-grow transition-all duration-300 [--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]',
-          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]',
-          isSidebarCollapsed && 'px-2',
-          fromSidebar ? 'rounded-md border ' : ''
+          'relative flex-grow transition-all duration-300 ',
+          threadDialogOpen?.open && !fromSidebar ? 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]' : '',
+          // isSidebarCollapsed && 'px-2',
+          fromSidebar
+            ? '[--thread-bar-width:min(360px,100%)]'
+            : '[--thread-bar-width:min(360px,100%)] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]'
         )}
       >
         {isSidebarCollapsed && (
-          <div className="absolute left-4 top-[7px] z-10 bg-[var(--dark-primary,white)]">
+          <div className="absolute left-3 top-[13px] z-10 bg-[var(--dark-primary,white)]">
             <HtmlTooltip title="Show sidebar">
               <IconButton size={'small'} style={{ minWidth: 32, minHeight: 32 }} onClick={toggleSidebar}>
                 <VscLayoutSidebarLeft />
@@ -162,9 +167,33 @@ const MessageHeader = ({
     <div className={cn(' [border-bottom:1px_solid_var(--common-border-color)]', fromSidebar ? 'p-[8px]' : 'p-[7px_15px]')}>
       <div className="mb-1 flex items-center justify-between gap-2">
         {!fromSidebar && (
-          <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
-            {resource && resourceLabel ? resourceLabel : selectedChannel?.title}
-          </h5>
+          <div className="flex items-center gap-1 md:gap-2">
+            <h5 className={cn('line-clamp-1 min-w-0 flex-shrink text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
+              {resource && resourceLabel ? resourceLabel : selectedChannel?.title}
+            </h5>
+            {selectedChannel?.relatedTo?.length > 0 && (
+              <>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    const relatedTo = selectedChannel?.relatedTo[0];
+                    window.open(`${routes[relatedTo?.type].path}/detail/${relatedTo?.referenceId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+                <Chip
+                  label={`${resources[selectedChannel?.relatedTo[0]?.type]?.titleSingular || startCase(selectedChannel?.relatedTo[0]?.type)} `}
+                  size="medium"
+                  color='info'
+                />
+              </>
+            )}
+            <div className="flex gap-2 p-2">
+              <Chip label="Chats" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
+              <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
+            </div>
+          </div>
         )}
 
         {(selectedChannel || fromSidebar) && (
@@ -244,10 +273,6 @@ const MessageHeader = ({
       {!fromSidebar && (
         <>
           <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel ? selectedChannel?.description : 'Direct Messaging'}</p>
-          <div className="flex gap-2 p-2">
-            <Chip label="Messages" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
-            <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
-          </div>
         </>
       )}
     </div>

@@ -1,0 +1,95 @@
+import { Close, ControlCamera } from '@mui/icons-material';
+import { IconButton } from '@mui/material';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { CgScrollV } from 'react-icons/cg';
+import { HiCursorClick } from 'react-icons/hi';
+import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
+import { PiMouseLeftClickFill } from 'react-icons/pi';
+
+const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObject<HTMLDivElement> }) => {
+  // const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
+  const [showMessage, setShowMessage] = useState(true);
+
+  useEffect(() => {
+    const container = containerRef?.current;
+    const handleClick = (e: MouseEvent) => {
+      setShowMessage(false);
+    };
+    if (container) {
+      container.addEventListener('click', handleClick);
+      return () => {
+        container.removeEventListener('click', handleClick);
+      };
+    }
+  }, [containerRef]);
+
+  const handleClose = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setShowMessage(false);
+  };
+
+  if (!showMessage) return null;
+  return (
+    <div className="absolute bottom-0 left-0 right-[300px] top-0 z-50 flex items-center justify-center ">
+      <button className="absolute inset-0 cursor-pointer bg-black/25 [backdrop-filter:blur(2px)] " aria-label="Close Info" onClick={handleClose}>
+        <span className="sr-only">Close Controls</span>
+      </button>
+      <div className=" relative max-w-[350px] rounded-md border bg-[var(--dark-secondary,white)] shadow">
+        <div className="flex items-center justify-between border-b pb-2 pl-4 pr-2 pt-2">
+          <p className="-mt-1 font-semibold">Controls</p>
+          <IconButton onClick={handleClose} color="primary" size="small">
+            <Close />
+          </IconButton>
+        </div>
+
+        <ul className="!list-disc space-y-2 px-4 pb-4 pt-2 text-gray-500 dark:text-gray-300">
+          <li className="flex !list-disc items-start gap-2 ">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end">
+              <PiMouseLeftClickFill size={20} />
+              <ControlCamera className="!text-[20px]" />
+            </div>
+            <p className="text-[13px] font-normal">Adjust the timeline by clicking and dragging (Up, Down, Left, Right) to view more information.</p>
+          </li>
+          <li className="mb-3 flex !list-disc items-start gap-2 border-b pb-3">
+            <div className="mt-1 flex flex-shrink-0">
+              <span className="rounded-md bg-gray-100 p-1 text-xs font-semibold dark:bg-gray-500 dark:text-white">Ctrl</span>
+              <CgScrollV size={20} />
+            </div>
+            <p className="text-sm font-normal ">
+              Adjust the zoom level using the{' '}
+              <span className="mt-1 rounded-md bg-gray-100 p-1 text-xs font-semibold leading-8 dark:bg-gray-500 dark:text-white">Ctrl</span>
+              &nbsp;+&nbsp;scroll&nbsp;wheel.
+            </p>
+          </li>
+          <li className="flex !list-disc items-start gap-2">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end gap-1">
+              <LuZoomIn />
+              <HiCursorClick />
+            </div>
+            <p className="text-[13px] font-normal ">
+              Click on any date (e.g.,
+              <span className="font-semibold">
+                {dayjs().format('D')} or {dayjs().format('ddd D')}
+              </span>
+              ) in the timeline to zoom into that day's events.
+            </p>
+          </li>
+          <li className="flex !list-disc items-start gap-2">
+            <div className="mt-1 flex min-w-[51px] flex-shrink-0 justify-end gap-1">
+              <LuZoomOut />
+              <HiCursorClick />
+            </div>
+            <p className="text-[13px] font-normal ">
+              Click on any month (e.g.,<span className="font-semibold"> {dayjs().format('MMMM YYYY')}</span>) in the timeline to to view that month's
+              events in detail.
+            </p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default ShowDragMessage;

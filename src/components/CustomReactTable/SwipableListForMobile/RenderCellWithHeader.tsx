@@ -3,8 +3,9 @@ import { flexRender } from '@tanstack/react-table';
 import { TColType } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
 import { getCellValue, handleCellClick, handleKeyDown } from '../utils';
+import { memo } from 'react';
 
-const CellShell = ({ children, field, currentEditingCellPosition, submitInput, cell, dispatch, row, setCellValue }) => {
+const CellShell = memo(({ children, field, currentEditingCellPosition, submitInput, cell, dispatch, row, setCellValue }: any) => {
   return (
     <h6 className=" grid max-w-full text-[12px]">
       <span className="text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{field.header}: </span>
@@ -21,9 +22,9 @@ const CellShell = ({ children, field, currentEditingCellPosition, submitInput, c
       </span>
     </h6>
   );
-};
+});
 
-const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
+const RenderCellWithHeader = memo(({ field, row, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
   const { currentEditingCellPosition }: TInitialState = state;
   const cell = row.getVisibleCells().find((cell: any) => cell?.column?.id === field?.id);
   if (!cell) return null;
@@ -98,6 +99,6 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
         </CellShell>
       );
   }
-};
+});
 
 export default RenderCellWithHeader;

@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem } from '@mui/material';
+import { Box, Button, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import axios, { CancelTokenSource } from 'axios';
@@ -20,6 +20,7 @@ import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, pre
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import { useHistory } from 'react-router-dom';
 
 const SubcontractAssembly = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -36,8 +37,13 @@ const SubcontractAssembly = () => {
     {
       key: `All ${resources?.subcontractAssembly?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.subcontractAssembly?.titlePlural}`,
+      value: 3
     }
   ];
+  const history = useHistory();
 
   const renderedFrom = camelCase(sidebarResource?.subcontractAssembly);
   const toastConfig = useContext(CustomToastContext);
@@ -157,7 +163,13 @@ const SubcontractAssembly = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
+    
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
@@ -241,6 +253,29 @@ const SubcontractAssembly = () => {
       });
   };
 
+  const LeftSideButtons = () => {
+    return (
+      <>
+        {permissions?.planningView?.isRead && (
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push({
+                pathname: routes.planningView.path,
+                state: {
+                  resource: sidebarResource?.subcontractAssembly
+                }
+              });
+            }}
+          >
+            <span>{`Calendar`}</span>
+          </Button>
+        )}
+
+      </>
+    );
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -277,6 +312,7 @@ const SubcontractAssembly = () => {
           addButtonOnclick={() => {
             setOpen({ open: true, isClone: false, id: null });
           }}
+          leftSideContents={<LeftSideButtons />}
           isAddButtonVisible={permissions?.subcontractAssembly.isCreate}
         />
         {columns ? (
@@ -298,12 +334,11 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.subcontractAssembly?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.subcontractAssemblyNumber || ''}`
-                : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.subcontractAssembly?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

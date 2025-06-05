@@ -60,7 +60,6 @@ const Material = ({
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
-
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -72,7 +71,7 @@ const Material = ({
   }, [allFields]);
 
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
 
   const fetchFields = async () => {
@@ -97,7 +96,6 @@ const Material = ({
         accessor: 'type',
         Header: 'Type',
         disableFilters: true,
-        disabled: true,
         width: 100,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
@@ -183,7 +181,7 @@ const Material = ({
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
           </IconButton>
-          {row?.original?.type != MATERIAL_TYPE.manualEntry && (
+          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"

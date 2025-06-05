@@ -30,9 +30,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    ['@media (max-width: 960px)']: {
-      display: 'none'
-    }
   },
   delBtn: {
     color: 'red'
@@ -68,7 +65,7 @@ export default function ImportExportLinks({
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
   const [customImportDialog, setCustomImportDialog] = useState(false);
 
-  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, importData: null });
+  const [openAsyncImpExpDialog, setOpenAsyncImpExpDialog] = useState({ open: false, type: null, importData: null, api: null });
   const [refresh, setRefresh] = useState(false);
 
   const {
@@ -182,7 +179,6 @@ export default function ImportExportLinks({
               message: `Found some issue(s) while importing ${module}`
             });
           }
-          // handleExtraClose();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -248,9 +244,16 @@ export default function ImportExportLinks({
       });
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = (apiUrl = null) => {
+    let exportApi = apiUrl ? apiUrl : `${api}/template`;
+    if (additionalParams) {
+      if (exportApi?.includes('?') && additionalParams?.includes('?')) {
+        additionalParams = additionalParams?.replace(`?`, `&`);
+      }
+      exportApi = `${exportApi}${additionalParams}`;
+    }
     axiosInstance()
-      .get(`${api}/template`, { responseType: 'arraybuffer' })
+      .get(exportApi, { responseType: 'arraybuffer' })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
@@ -277,9 +280,7 @@ export default function ImportExportLinks({
   );
 
   return (
-    <div
-      className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`}
-    >
+    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`}  >
       {!isCustomImport ? (
         <div className={classes.linksContainer}>
           {ImportInput}
@@ -293,12 +294,12 @@ export default function ImportExportLinks({
                     setIsUploadDialog(true);
                     handleClose();
                   } else if (module === resources?.product?.titlePlural && resource) {
-                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null });
+                    setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: null });
                   }
                 }}
                 className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
               >
-                <span>Import from Excel</span>
+                {!isMobile && <span>Import from Excel</span>}
                 <ImportIcon />
               </label>
             </>
@@ -306,15 +307,18 @@ export default function ImportExportLinks({
           <label
             onClick={(e) => {
               if (module === resources?.product?.titlePlural && resource) {
-                setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null });
+                setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: null });
               } else {
                 exportToExcel();
               }
             }}
             className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
-            Export to Excel
-            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
+            {!isMobile &&
+              <span>
+                Export to Excel{' '}
+                {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? '(All)' : `(${recordsToExport})`) : null}
+              </span>}
             <ExportIcon />
           </label>
           <label
@@ -327,7 +331,8 @@ export default function ImportExportLinks({
             }}
             className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
           >
-            Download Template
+            {!isMobile &&
+              <span>Download Template</span>}
             <DownloadIcon />
           </label>
           {extraImportExportLinks?.length > 0 && (
@@ -366,14 +371,30 @@ export default function ImportExportLinks({
                           }}
                           type="file"
                         />
-                        <label htmlFor={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}>{d.title}</label>
+                        <label
+                          htmlFor={module === resources?.product?.titlePlural && resource ? '' : `${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                          onClick={(e) => {
+                            if (module === resources?.product?.titlePlural && resource) {
+                              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: null, api: d.api });
+                              handleExtraClose();
+                            }
+                          }}
+                        >
+                          {d.title}
+                        </label>
                       </MenuItem>
                     );
                   } else {
                     return (
                       <MenuItem
                         onClick={() => {
-                          exportToExcel(d.api);
+                          if (d?.type === 'download') {
+                            handleDownloadTemplate();
+                          } else if (d?.type === 'export' && module === resources?.product?.titlePlural && resource) {
+                            setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.export, importData: null, api: d?.api });
+                          } else {
+                            exportToExcel(d.api);
+                          }
                           handleExtraClose();
                         }}
                       >
@@ -400,12 +421,6 @@ export default function ImportExportLinks({
           Import/Export
         </ThemeButton>
       )}
-      {isMobile && (
-        <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-          <IoIosArrowDropdown />
-        </IconButton>
-      )}
-
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
@@ -512,7 +527,7 @@ export default function ImportExportLinks({
         <SelectionDialog
           uploadData={(file, _data) => {
             if (module === resources?.product?.titlePlural && resource) {
-              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, refrenceId: refrenceId } });
+              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, refrenceId: refrenceId }, api: null });
             } else {
               uploadData(file, _data);
             }
@@ -543,7 +558,7 @@ export default function ImportExportLinks({
       {openAsyncImpExpDialog.open && (
         <ImportExportDialog
           handleClose={() => {
-            setOpenAsyncImpExpDialog({ open: false, type: null, importData: null });
+            setOpenAsyncImpExpDialog({ open: false, type: null, importData: null, api: null });
             setAnchorEl(null);
           }}
           type={openAsyncImpExpDialog.type}
@@ -551,10 +566,11 @@ export default function ImportExportLinks({
           subResource={null}
           referenceId={null}
           handleExport={() => {
-            exportToExcel();
+            exportToExcel(openAsyncImpExpDialog.api);
           }}
           refresh={refresh}
           api={api}
+          apiUrl={openAsyncImpExpDialog.api}
           additionalParams={additionalParams}
           additionalFormData={openAsyncImpExpDialog.importData}
         />

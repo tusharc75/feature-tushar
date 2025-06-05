@@ -15,6 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import IconAutoComplete from './IconAutoComplete';
 import { defaultIcons } from 'src/assets/IconGenerator';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,7 +92,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid size={{xs:12, sm:12}}>
+                    <Grid size={{ xs: 12, sm: 12 }}>
                       <TextField
                         margin="dense"
                         size="small"
@@ -108,29 +109,14 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         helperText={touched['sectionName'] && errors['sectionName']}
                       />
                     </Grid>
-                    <Grid size={{xs:12, sm:12}}>
-                      <TextField
-                        margin="dense"
-                        size="small"
-                        type="text"
+                    <Grid size={{ xs: 12, sm: 12 }}>
+                      <MultiLine
                         label="Description"
-                        name="description"
-                        placeholder="Description"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        onChange={(e) => setFieldValue('description', e.target.value)}
-                        variant="outlined"
+                        onChange={(value) => setFieldValue('description', value)}
                         value={values['description']}
-                        sx={{
-                          '& .MuiInputBase-root textarea': {
-                            resize: 'vertical',
-                            overflow: 'auto',
-                          },
-                        }}
                       />
                     </Grid>
-                    <Grid size={{xs:12}}>
+                    <Grid size={{ xs: 12 }}>
                       <IconAutoComplete
                         onChange={(e, val) => {
                           setFieldValue('iconName', val);

@@ -70,7 +70,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         accessor: 'type',
         Header: 'Type',
         width: 100,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (row.original['type'] ? <h5>{`${startCase(row.original?.type)} `}</h5> : <NoDataCell />)
       },
@@ -300,7 +299,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
       await asyncForEach(Array.from(Array(qty).keys()), async (i: any) => {
         const element: any = {};
         element.materialId = d._id;
-        element.type = d?.type || addDialog.type;
+        element.type = addDialog.type === 'newProduct' ? MATERIAL_TYPE.product : addDialog.type;
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = 1;
         element.parentId = addDialog.parentId;
@@ -528,7 +527,6 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
               {
                 ...d,
                 unitMain: d?.unit,
-                type: MATERIAL_TYPE.product
               }
             ]);
           }}

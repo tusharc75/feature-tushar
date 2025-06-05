@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { makeStyles } from '@mui/styles';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from './Helpers/FormTypes/MultiLine';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -37,26 +38,15 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
       <CustomDialogHeader title="Comment" showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent>
         <Box className="my-2">
-          <TextField
-            id="outlined-multiline-static"
+          <MultiLine
             label="Comment"
-            multiline
-            required={required}
-            fullWidth
-            rows={4}
+            onChange={(value) => {
+              setComment(value);
+            }}
             value={comment}
-            variant="outlined"
-            error={Boolean(error)}
-            helperText={Boolean(error) && error}
-            onChange={(e) => {
-              setComment(e.target.value);
-            }}
-            sx={{
-              '& .MuiInputBase-root textarea': {
-                resize: 'vertical',
-                overflow: 'auto',
-              },
-            }}
+            required={required}
+            error={error}
+            touched={error}
           />
         </Box>
       </CustomDialogContent>

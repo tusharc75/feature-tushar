@@ -125,7 +125,7 @@ const BudgetDetail = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </div>
         ) : (
-          <DetailsPage data={budgetData} fields={fields} />
+          <DetailsPage data={budgetData} fields={fields} resource={sidebarResource?.budget} referenceId={budgetData?._id} />
         )}
       </Box>
       {openUpdateDialog && (

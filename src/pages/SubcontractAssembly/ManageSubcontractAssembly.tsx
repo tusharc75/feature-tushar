@@ -24,8 +24,9 @@ import {
   sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
 
-const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null }) => {
+const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null, isRedirectTodetailPage = true }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -46,20 +47,13 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.subcontractAssembly}`);
-      data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
+      const { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.subcontractAssembly);
       if (id) {
         let data;
         const response = await axiosInstance().get(`${routes?.subcontractAssembly?.path}/${id}`);
         data = response?.data?.data;
-        let fields = fieldsDataForUpdate;
         let tempData = data;
         if (isClone) {
-          fields = fieldsDataForCreate;
           const { subcontractAssemblyNumber, ...rest } = data;
           rest.subcontractAssemblyNumber = GenerateResourceLineNumber(fieldsDataForCreate);
           rest.status = SUBCONTRACT_ASSEMBLY_STATUS.new;
@@ -76,7 +70,7 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
         }
         setInitialData({
           fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
-          values: getObjKeysWithValues(tempData, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
+          values: getObjKeysWithValues(tempData, isClone ? fieldsDataForCreate : fieldsDataAll)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
@@ -114,11 +108,13 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
           toastConfig.setToastConfig(error);
         });
     } else {
-      axiosInstance()
-        .post(`${routes.subcontractAssembly?.path}`, values)
+      axiosInstance().post(`${routes.subcontractAssembly?.path}`, values)
         .then(({ data }) => {
           setLoading(false);
-          history.push(`${routes.subcontractAssembly.path}/detail/${data?.data?._id}`);
+          if (isRedirectTodetailPage) {
+            history.push(`${routes.subcontractAssembly.path}/detail/${data?.data?._id}`);
+          }
+          onSuccess();
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,

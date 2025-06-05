@@ -96,7 +96,6 @@ const ServiceMaster = (props: Props) => {
         Header: 'Type',
         width: 100,
         disableFilters: true,
-        disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -248,7 +247,7 @@ const ServiceMaster = (props: Props) => {
                   });
                 }}
               >
-                <AddCircleOutlineIcon />
+                <AddCircleOutlineIcon fontSize="small" color="primary" />
               </IconButton>
             </HtmlTooltip>
           )}

@@ -73,10 +73,7 @@ const QuotationViews = (props) => {
     setLoading(true);
     try {
       const viewsData = await axiosInstance().get(`${quotation.api}/productpackage/${quoteId}/${versionId}`);
-      const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quoteId}/${versionId}`);
       let parent = viewsData.data.data.material?.filter((item) => item?.parentId === null);
-      let additionalData = additionalCost?.data?.data || [];
-      parent = [...parent, ...additionalData];
 
       const parentIds = parent?.map((item) => `${item?.id}`);
       const child = viewsData.data.data.material?.filter((item) => item?.parentId !== null);

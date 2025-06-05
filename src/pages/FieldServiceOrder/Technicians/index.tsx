@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { camelCase, isArray, isObject } from 'lodash';
-import { ReactNode, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -35,9 +35,8 @@ import ConsumablesDialog from './ConsumablesDialog';
 import StartStopLogsDialog, { formatDurationInHrs } from 'src/pages/FieldTicket/material/StartStopLogsDialog';
 import StartStopDateDialog from 'src/pages/FieldTicket/material/StartStopDateDialog';
 import { Visibility } from '@mui/icons-material';
-import { RiUserShared2Fill } from 'react-icons/ri';
-import { RiUserReceived2Fill } from 'react-icons/ri';
-import PreviewDownload from 'src/components/PreviewDownload';
+import { RiUserShared2Fill, RiUserReceived2Fill } from 'react-icons/ri';
+import TechnicianAssign from 'src/components/TechnicianAssign';
 
 const Technicians = ({
   allowedToEdit,
@@ -51,11 +50,17 @@ const Technicians = ({
 }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldServiceOrder)}_Technicians`;
 
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [technicianDialog, setTechnicianDialog] = useState(false);
+  const [technicianAssign, setTechnicianAssign] = useState({ open: false, technicians: null, data: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
@@ -77,7 +82,6 @@ const Technicians = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
-  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, rows: [] });
 
   useEffect(() => {
     fetchColumns();
@@ -145,72 +149,72 @@ const Technicians = ({
       },
       ...(resourcePolicy?.addServices
         ? [
-          {
-            accessor: 'service',
-            Header: 'Service',
-            width: 200,
-            Cell: ({ row }) =>
-              row?.original?.serviceId ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate" title={row.original.service}>
-                    {row.original.service}
-                  </p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ]
+            {
+              accessor: 'service',
+              Header: 'Service',
+              width: 200,
+              Cell: ({ row }) =>
+                row?.original?.serviceId ? (
+                  <div className="flex items-center gap-2">
+                    <p className="text-truncate" title={row.original.service}>
+                      {row.original.service}
+                    </p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            }
+          ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencyType')
         ? [
-          {
-            accessor: 'competencyType',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencyType',
-                  lookupResource: sidebarResource.competencyType
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencyType')
-          }
-        ]
+            {
+              accessor: 'competencyType',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencyType')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencyType',
+                    lookupResource: sidebarResource.competencyType
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencyType')
+            }
+          ]
         : []),
       ...(technicianFields?.find((e) => e.fieldName === 'competencies')
         ? [
-          {
-            accessor: 'competencies',
-            Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
-            width: 250,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'competencies',
-                  lookupResource: sidebarResource.competencies
-                }}
-                original={row?.original}
-              />
-            ),
-            accessorFn: (original) => AccessorFunction(original, 'competencies')
-          }
-        ]
+            {
+              accessor: 'competencies',
+              Header: technicianFields?.find((e) => e.fieldName === 'competencies')?.fieldLabel,
+              width: 250,
+              Cell: ({ row }) => (
+                <DropdownCell
+                  permissions={permissions}
+                  permissionForLinks={{}}
+                  field={{
+                    fieldName: 'competencies',
+                    lookupResource: sidebarResource.competencies
+                  }}
+                  original={row?.original}
+                />
+              ),
+              accessorFn: (original) => AccessorFunction(original, 'competencies')
+            }
+          ]
         : []),
       {
         accessor: 'startDate',
@@ -387,7 +391,7 @@ const Technicians = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    let api = `${fieldServiceOrder.api}/technician?fieldServiceOrder=${serviceOrderData?._id}`;
+    let api = `/technician?referenceId=${serviceOrderData?._id}&referenceType=${sidebarResource.fieldServiceOrder}`;
     if (selectedService && selectedService?.optionValue !== 'All') {
       api = `${api}&uniqueId=${selectedService?._id}`;
     }
@@ -459,7 +463,7 @@ const Technicians = ({
   const handleDelete = async (rows) => {
     setIsDeleting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician`, { ids: rows })
+      .put(`/technician`, { ids: rows })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -478,51 +482,10 @@ const Technicians = ({
       });
   };
 
-  const handleAssign = (rows, skipDateValidation = false) => {
-    setIsSubmitting(true);
-    const technician: any = [];
-    rows.forEach((d) => {
-      const element: any = {};
-      element.technician = d?._id;
-      element.referenceId = serviceOrderData?._id;
-      element.warehouse = serviceOrderData?.warehouse?.optionValue;
-      element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
-      element.uniqueId = selectedService?.optionValue !== 'All' ? selectedService?._id : null;
-      element.estimateStartDate = serviceOrderData?.estimateStartDate;
-      element.estimateEndDate = serviceOrderData?.estimateEndDate;
-      technician.push(element);
-    });
-    axiosInstance()
-      .post(`${fieldServiceOrder.api}/technician`, { technician, skipDateValidation })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
-        });
-        if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-          handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
-        }
-        setTechnicianDialog(false);
-        fetchData();
-        fetchserviceOrderData();
-        setIsSubmitting(false);
-        setShowConfirmBox({ open: false, rows: [] });
-      })
-      .catch((error) => {
-        if (skipDateValidation) {
-          toastConfig.setToastConfig(error);
-        } else {
-          setShowConfirmBox({ open: true, rows: rows });
-        }
-        setIsSubmitting(false);
-      });
-  };
-
   const handleUpdateTechnician = async (rows: any) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician/${serviceOrderData._id}`, { technician: rows })
+      .put(`${fieldServiceOrder.api}/${serviceOrderData._id}/material/technician`, { technician: rows })
       .then(() => {
         setIsSubmitting(false);
         fetchData();
@@ -612,11 +575,11 @@ const Technicians = ({
 
   const leftSideContents = () => {
     return (
-      <Box style={{ maxWidth: '400px' }}>
+      <Box style={{ maxWidth: '300px', flexGrow: '1' }}>
         <Autocomplete
           id={'select-service'}
           size="small"
-          style={{ minWidth: '300px' }}
+          style={{ width: 'min(100%, 300px)', minWidth: 200 }}
           fullWidth
           options={serviceOption ? serviceOption : []}
           autoHighlight
@@ -641,6 +604,7 @@ const Technicians = ({
     let value: any = {
       type: type,
       referenceId: serviceOrderData?._id,
+      referenceType: sidebarResource.fieldServiceOrder,
       _id: _id ? [_id] : selectedRecords?.map((r) => r?._id)
     };
     if (values?.notes) value.notes = values?.notes;
@@ -654,7 +618,7 @@ const Technicians = ({
     }
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${fieldServiceOrder.api}/technician/start-end-date`, value)
+      .put(`/technician/start-end-date`, value)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -734,7 +698,21 @@ const Technicians = ({
       {technicianDialog && (
         <AssignEmployeeDialog
           onSuccess={(data) => {
-            handleAssign(data);
+            setTechnicianAssign({
+              open: true,
+              technicians: data?.map((d) => ({ _id: d?._id, name: d?.firstName + ' ' + d?.lastName })),
+              data: [
+                {
+                  resourceId: serviceOrderData?._id,
+                  warehouse: serviceOrderData?.warehouse?.optionValue,
+                  serviceId: selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null,
+                  uniqueId: selectedService?.optionValue !== 'All' ? selectedService?._id : null,
+                  estimateStartDate: serviceOrderData?.estimateStartDate,
+                  estimateEndDate: serviceOrderData?.estimateEndDate,
+                  resourceNumber: serviceOrderData?.fieldServiceOrderNumber
+                }
+              ]
+            });
           }}
           handleClose={() => {
             setTechnicianDialog(false);
@@ -815,15 +793,26 @@ const Technicians = ({
           resource={sidebarResource.fieldServiceOrder}
         />
       )}
-      {showConfirmBox.open && (
-        <ConfirmationDialog
-          open={showConfirmBox.open}
-          message={`A technician is already scheduled during these dates. Do you still wish to proceed with this assignment?`}
-          onClose={() => {
-            setShowConfirmBox({ open: false, rows: [] });
+      {technicianAssign.open && (
+        <TechnicianAssign
+          resource={{
+            resource: sidebarResource.fieldServiceOrder,
+            titleSingular: resources?.fieldServiceOrder?.titleSingular,
+            titlePlural: resources?.fieldServiceOrder?.titlePlural
           }}
-          onOk={() => {
-            handleAssign(showConfirmBox.rows, true);
+          technicians={technicianAssign?.technicians}
+          resourceData={technicianAssign?.data}
+          handleSuccess={() => {
+            if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+              handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
+            }
+            setTechnicianDialog(false);
+            fetchData();
+            fetchserviceOrderData();
+            setTechnicianAssign({ open: false, technicians: null, data: null });
+          }}
+          handleClose={() => {
+            setTechnicianAssign({ open: false, technicians: null, data: null });
           }}
         />
       )}
