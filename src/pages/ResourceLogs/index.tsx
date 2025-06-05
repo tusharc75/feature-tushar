@@ -5,10 +5,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { LOG_RESOURCE } from 'src/constants/helpers';
+import { LOG_RESOURCE, downloadExcel } from 'src/constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import ResourceLogsGrid from './ResourceLogsGrid';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { ExportIcon } from 'src/assets/svg/svgIcons';
 
 const ResourceLogs = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,6 +40,30 @@ const ResourceLogs = () => {
 
   const [selectedAction, setSelectedAction] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+
+  const handleExport = async () => {
+    try {
+      const response = await axiosInstance().get('/log/export', {
+        params: {
+          resource: selectedResource?.optionValue,
+          option: selectedOption?.optionValue,
+          action: selectedAction?.optionValue,
+          user: selectedUser?.optionValue
+        },
+        responseType: 'arraybuffer'
+      });
+      const fileName = response.headers['content-disposition']?.split('filename=')[1] || `resource_logs_${new Date().toISOString()}.xlsx`;
+      downloadExcel(response.data, fileName);
+
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Exported to excel successfully.'
+      });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   useEffect(() => {
     const data: any = [];
@@ -82,6 +108,14 @@ const ResourceLogs = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes.resourceLogs, title: resources?.resourceLogs?.titlePlural }]} />
+        <ThemeButton
+          startIcon={<ExportIcon />}
+          onClick={handleExport}
+          disabled={!selectedResource || !permissions?.resourceLogs?.isRead}
+          mobileTooltip="Export to Excel"
+        >
+          Export to Excel
+        </ThemeButton>
       </div>
       <CustomContainer>
         <div className="header-panel">
