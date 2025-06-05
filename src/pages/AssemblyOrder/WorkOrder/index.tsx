@@ -315,7 +315,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {row?.original?.workOrderId &&
+            {row?.original?.workOrderId && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(row?.original?.workOrderStatus) &&
               [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(row?.original?.type) &&
               !user?.user?.brandPolicy?.workOrderConsumableHide && (
                 <HtmlTooltip title="Add Products/Consumables">
@@ -341,23 +341,22 @@ const WorkOrder = ({
                 </HtmlTooltip>
               )}
 
-            {row.original?.workOrderId && [MATERIAL_TYPE.product]?.includes(row?.original?.type) && (
-              <HtmlTooltip
-                title={'Edit'}
-              >
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    onClick={() => {
-                      setProductQtyEdit({ open: true, data: row?.original });
-                    }}
-                  >
-                    <Edit fontSize="small" color={'primary'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            )}
+            {row.original?.workOrderId && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(row?.original?.workOrderStatus)
+              && [MATERIAL_TYPE.product]?.includes(row?.original?.type) && (
+                <HtmlTooltip title={'Edit'}      >
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setProductQtyEdit({ open: true, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              )}
 
             {row.original?.workOrderId && (
               <HtmlTooltip title="Drawings">
@@ -427,12 +426,12 @@ const WorkOrder = ({
         parent.workOrderId = parent?.workOrder?._id;
         parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
         parent.status = parent?.workOrder?.status || '';
+        parent.workOrderStatus = parent?.workOrder?.status || '';
         if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
           parent.canAutoCompleteWorkOrder = true;
         }
         if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
           parent.hideSelection = true;
-          parent.workOrderStatus = WORK_ORDER_STATUS.completed;
           if (parent?.serializedPackage) {
             parent.serializedPackageId = parent?.serializedPackage?.optionValue;
             parent.serializedPackageNumber = parent?.serializedPackage?.optionLabel;
@@ -470,12 +469,12 @@ const WorkOrder = ({
         _subPackage.workOrderId = _subPackage?.workOrder?._id;
         _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
         _subPackage.status = _subPackage?.workOrder?.status || '';
+        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
         if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
           _subPackage.canAutoCompleteWorkOrder = true;
         }
         if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
           _subPackage.hideSelection = true;
-          _subPackage.workOrderStatus = WORK_ORDER_STATUS.completed;
           if (_subPackage?.serializedPackage) {
             _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
             _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
@@ -518,6 +517,7 @@ const WorkOrder = ({
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderId = parent?.workOrderId;
       _subRow.workOrderNumber = parent?.workOrderNumber;
+      _subRow.workOrderStatus = parent?.workOrderStatus;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
