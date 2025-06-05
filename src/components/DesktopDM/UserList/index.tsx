@@ -48,7 +48,7 @@ const UserList = memo(
     }, [users, chats, inputValue, checkIsUser]);
 
     // Split filteredData into pinned and others
-   const { pinnedUsers, otherUsers } = useMemo(() => {
+    const { pinnedUsers, otherUsers } = useMemo(() => {
       const pinned: typeof filteredData = [];
       const others: typeof filteredData = [];
       filteredData.forEach((item) => {
@@ -106,39 +106,29 @@ const UserList = memo(
           </div>
           <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
             {permissions?.equiptAi?.isRead && <RenderGenie openGenie={openGenie} />}
-            
             {(pinnedUsers.length > 0 || otherUsers.length > 0) ? (
               <>
                 {/* Pinned Users */}
                 {pinnedUsers.length > 0 && (
                   <div>
-                    <div className="flex items-center gap-2 mb-1 ml-1">
-                      <span className="text-xs font-bold text-indigo-500 tracking-wide uppercase">📌 Pinned Users</span>
-                      <span className="flex-grow border-t border-2 border-indigo-300 dark:border-indigo-700 rounded-full opacity-70"></span>
-                    </div>
                     {pinnedUsers.map((c) => {
                       const isUser = checkIsUser(c);
                       if (isUser) {
-                        return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
+                        return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
                       } else {
-                        return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
+                        return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
                       }
                     })}
                   </div>
                 )}
-                {/* Divider between pinned and others */}
-                {pinnedUsers.length > 0 && otherUsers.length > 0 && (
-                  <div className="flex items-center gap-2 my-2">
-                    <span className="flex-grow border-t border-dashed border-fuchsia-400 dark:border-fuchsia-700 opacity-80"></span>
-                  </div>
-                )}
+
                 {/* Other Users */}
                 {otherUsers.map((c) => {
                   const isUser = checkIsUser(c);
                   if (isUser) {
-                    return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
+                    return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
                   } else {
-                    return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
+                    return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
                   }
                 })}
               </>
