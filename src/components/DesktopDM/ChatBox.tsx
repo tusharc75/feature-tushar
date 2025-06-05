@@ -9,10 +9,10 @@ import { checkIsUser } from 'src/components/DesktopDM/useDesktopDM';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
-import PushPinIcon from '@mui/icons-material/PushPin';
-import PushPinOutlinedIcon from '@mui/icons-material/PushPinOutlined';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import { TbPinnedOff } from 'react-icons/tb';
+import { BsFillPinFill } from 'react-icons/bs';
 
 type ChatBoxProps = {
   state: UseDesktopDM;
@@ -154,19 +154,16 @@ const ChatBoxHeader = memo(
         <div className="buttons flex items-center gap-1">
 
           {/* Pin User Button */}
-          <HtmlTooltip title={pinned ? "Unpin User" : "Pin User"}>
+          <HtmlTooltip title={pinned ? "Unpin" : "Pin"}>
             <IconButton
               size="small"
               onClick={handlePinUser}
-              sx={{
-                color: pinned ? '#f59e42' : 'var(--theme-primary, #6366f1)',
-                background: pinned ? 'rgba(245, 158, 66, 0.08)' : undefined
-              }}
+              sx={{ color: "primary", size: "small" }}
             >
               {pinned ? (
-                <PushPinIcon fontSize="small" />
+                <TbPinnedOff fontSize="18px" />
               ) : (
-                <PushPinOutlinedIcon fontSize="small" />
+                 <BsFillPinFill fontSize="18px" />
               )}
             </IconButton>
           </HtmlTooltip>
