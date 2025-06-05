@@ -46,9 +46,9 @@ const ResourceLogs = () => {
       const response = await axiosInstance().get('/log/export', {
         params: {
           resource: selectedResource?.optionValue,
-          option: selectedOption?.optionValue,
+          referenceId: selectedOption?.optionValue,
           action: selectedAction?.optionValue,
-          user: selectedUser?.optionValue
+          userId: selectedUser?.optionValue
         },
         responseType: 'arraybuffer'
       });
