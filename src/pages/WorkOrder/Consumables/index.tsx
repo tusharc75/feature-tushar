@@ -627,7 +627,7 @@ const Consumables = ({
             additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
           />
         )}
-        {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && (
+        {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && allowedToEdit && (
           <ThemeButton
             disabled={
               selectedRecords?.length &&
@@ -723,11 +723,11 @@ const Consumables = ({
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={true}
+        isAddButtonVisible={isCreate}
         addButtonMenuItems={addButtonMenuItems()}
         leftSideContents={!hideServiceFilter ? leftSideContents() : null}
         rightSideContents={rightSideContents()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
         hasXpadding

@@ -45,7 +45,6 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
       axiosInstance()
         .get(`${routes.assemblyOrder.path}/material/${assemblyOrderData?._id}`)
         .then(({ data: { data } }) => {
-          console.log(data)
           let material = [];
           material = data?.material?.filter((m) => m?.type === MATERIAL_TYPE.package && !m?.serializedPackage);
           if (workOrderIds?.length) {
