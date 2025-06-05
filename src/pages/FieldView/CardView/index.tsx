@@ -3,13 +3,13 @@ import { useEffect, useRef } from 'react';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 import { generateData } from 'src/pages/FieldView/CardView/utils';
-import { FieldViewResource, TData } from 'src/pages/FieldView/types';
+import { FieldViewResource } from 'src/pages/FieldView/types';
 import { useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 type CardViewProps = {
   resource: FieldViewResource;
-  data: TData[];
-  clickOnCard: (data: TData) => void;
+  data: any[];
+  clickOnCard: (data: any) => void;
 };
 
 const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
@@ -79,7 +79,7 @@ const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
               </div>
               <div className="mt-auto flex justify-end border-t p-[12px]">
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-500">
-                  <span>View Details</span>
+                  <span>View</span>
                   <span className="transition-all duration-300 group-hover:-mr-1 group-hover:ml-1">
                     <East fontSize="small" />
                   </span>

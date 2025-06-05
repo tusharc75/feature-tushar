@@ -12,16 +12,13 @@ import routes from 'src/components/Helpers/Routes';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { sidebarResource } from 'src/constants/helpers';
-import CardView from 'src/pages/FieldView/CardView';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { IoAppsSharp } from 'react-icons/io5';
 import { IoMapSharp } from 'react-icons/io5';
 import { useParams, useLocation, useHistory } from 'react-router-dom';
-import MapView from 'src/pages/FieldView/MapView';
 import ShowView from 'src/pages/FieldView/ShowView';
-import { TData } from 'src/pages/FieldView/types';
 import { FieldStoreProvider, useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 const FieldViewImpl = () => {
@@ -44,7 +41,7 @@ const FieldViewImpl = () => {
 
   const [view, setView] = useState<'card' | 'map'>('card');
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<TData[]>(null);
+  const [data, setData] = useState<any[]>(null);
   const [, setStore] = useFieldStore((store) => store.activeItem);
 
   const resource = useMemo(() => {
@@ -186,8 +183,6 @@ const FieldViewImpl = () => {
           }}
           routes={breadCrumbs}
         />
-      </div>
-      <CustomContainer className="relative">
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -195,6 +190,8 @@ const FieldViewImpl = () => {
           isAddButtonVisible={false}
           rightSideContents={rightSideContents()}
         />
+      </div>
+      <CustomContainer className="relative">
         {loading || !data ? (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -205,7 +202,11 @@ const FieldViewImpl = () => {
           </div>
         ) : (
           <>
-            <ShowView data={data} onClick={handleClick} resource={resource} view={view} />
+            <ShowView
+              data={data}
+              onClick={handleClick}
+              resource={resource}
+              view={view} />
           </>
         )}
       </CustomContainer>
