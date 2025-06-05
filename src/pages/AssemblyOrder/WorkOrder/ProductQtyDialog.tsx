@@ -3,29 +3,25 @@ import { Dialog, Box } from '@mui/material';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FieldList from 'src/components/FormBuilder/FieldList';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
-  handleSaveData: VoidFunction | any;
-  assemblyOrderData: any;
-  rowData?: object | any;
-  material: any[];
-  isBulkedit: any;
-  loading: any;
+  rowData: object | any;
+  handleSave: any;
+  loading: boolean
 }
 
-const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assemblyOrderData, rowData, material, isBulkedit, loading }) => {
-
+const ProductQtyDialog: FC<EditDialogProps> = ({ onClose, rowData, handleSave, loading }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -36,43 +32,20 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
   }, []);
 
   const fetchData = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', true);
-    if (isBulkedit) {
-      data.forEach((element) => {
-        element.required = false;
-      });
-      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
-      setInitialData({
-        fields: data,
-        values: { ...getObjKeys('', data) }
-      });
-    } else {
-      if (rowData?.workOrder) {
-        data?.forEach((e) => {
-          if (e.fieldName === 'workOrderType') {
-            e.disableOnEdit = true;
-            e.isUneditable = true;
-          }
-        });
-      }
-      setInitialData({
-        fields: data,
-        values: getObjKeysWithValues(rowData, data)
-      });
-    }
-  };
-
-  const getTitle = () => {
-    if (rowData) {
-      return `Edit - ${rowData.detail}`;
-    } else {
-      return 'Bulk Edit';
-    }
+    const newFields = field.map((item) => item.fieldData);
+    setInitialData({
+      fields: newFields,
+      values: getObjKeysWithValues(rowData, newFields)
+    });
   };
 
   const handleSubmit = async (values) => {
-    let rows: any = [{ ...values, _id: rowData?._id }];
-    handleSaveData(rows);
+    handleSave({ ...values, _id: rowData?._id, product: rowData?.materialId });
+  };
+
+  const validate = (values) => {
+    const errors = {};
+    return errors;
   };
 
   return (
@@ -91,12 +64,13 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={getTitle()}
+                title={`Edit - ${rowData?.detail}`}
                 onClose={() => {
                   if (!isEqual(ref?.current?.values, initialData.values)) {
                     setShowConfirmDialog(true);
@@ -111,7 +85,6 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
                 showManimizeMaximize={true}
               ></CustomDialogHeader>
               <CustomDialogContent>
-                {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <InputField
                     errors={errors}
@@ -135,7 +108,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
                     }
                   }}
                 >
-                  Close
+                  {'Close'}
                 </ThemeButton>
                 <ThemeButton
                   isLoading={loading}
@@ -143,6 +116,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
                   buttonType="theme"
                   onClick={submitForm}
                 >
+                  {' '}
                   Save
                 </ThemeButton>
               </CustomDialogFooter>
@@ -171,4 +145,23 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, assem
   );
 };
 
-export default MaterialQtyDialog;
+const field = [
+  {
+    fieldData: {
+      fieldLabel: 'Qty',
+      fieldName: 'qty',
+      isTooltip: false,
+      option: [],
+      order: 1,
+      required: true,
+      sectionName: 'Quantity Information',
+      tooltipMessage: '',
+      type: FieldList.DECIMAL.type
+    },
+    isCreate: true,
+    isDelete: true,
+    isUpdate: true
+  }
+];
+
+export default ProductQtyDialog;

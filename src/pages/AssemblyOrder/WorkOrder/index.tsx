@@ -42,7 +42,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import MaterialQtyDialog from 'src/pages/AssemblyOrder/Material/MaterialQtyDialog';
+import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -81,7 +81,7 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
-  const [materialEdit, setMaterialEdit] = useState({ open: false, data: null });
+  const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -350,7 +350,7 @@ const WorkOrder = ({
                     size="small"
                     aria-label="Edit"
                     onClick={() => {
-                      setMaterialEdit({ open: true, data: row?.original });
+                      setProductQtyEdit({ open: true, data: row?.original });
                     }}
                   >
                     <Edit fontSize="small" color={'primary'} />
@@ -793,16 +793,15 @@ const WorkOrder = ({
   const handleUpdateQty = (data) => {
     setSubmitting(true);
     axiosInstance()
-      .put(`${workOrder.api}/${materialEdit?.data?.workOrder?._id}/consumable/update-qty`, [
+      .put(`${workOrder.api}/${productQtyEdit?.data?.workOrder?._id}/consumable/update-qty`, [
         {
-          product: materialEdit?.data?.materialId,
           ...data
         }
       ])
       .then(({ data }) => {
         setSubmitting(false);
         fetchData();
-        setMaterialEdit({ open: false, data: null });
+        setProductQtyEdit({ open: false, data: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -877,20 +876,16 @@ const WorkOrder = ({
         </Box>
       )}
 
-      {materialEdit.open && (
-        <MaterialQtyDialog
+      {productQtyEdit.open && (
+        <ProductQtyDialog
           onClose={() => {
-            setMaterialEdit({ open: false, data: null });
+            setProductQtyEdit({ open: false, data: null });
           }}
-          rowData={materialEdit.data}
-          assemblyOrderData={assemblyOrderData}
-          handleSaveData={(data) => {
-            handleUpdateQty(data[0])
+          rowData={productQtyEdit.data}
+          handleSave={(data) => {
+            handleUpdateQty(data)
           }}
           loading={isSubmitting}
-          isBulkedit={false}
-          material={material}
-          referenceFrom={sidebarResource.workOrder}
         />
       )}
 
