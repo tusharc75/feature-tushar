@@ -25,7 +25,9 @@ import {
   ASSET_STATUS,
   INVENTORY_HISTORY_TYPE,
   INVENTORY_OWNER_TYPE,
+  MATERIAL_TYPE,
   repairJob,
+  repairOrder,
   serializedAsset,
   sidebarResource,
   SYSTEM_ASSET_STATUS,
@@ -54,6 +56,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import dayjs from 'dayjs';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import ServiceHistory from 'src/pages/SerializedAsset/ServiceHistory';
+import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,6 +68,7 @@ const SerializedAssetDetailsPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [showRepairJobDialog, setShowRepairJobDialog] = useState(false);
+  const [showRepairOrderDialog, setShowRepairOrderDialog] = useState(false);
 
   const [assetDetails, setAssetDetails] = useState(null);
   const [fields, setFields] = useState(null);
@@ -97,37 +101,37 @@ const SerializedAssetDetailsPage = () => {
   const extraFields = [
     ...(permissions?.rentalManagement?.isRead
       ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869032395b3',
-              fieldName: 'rentalJob',
-              fieldLabel: resources?.rentalManagement?.titleSingular,
-              lookup: true,
-              lookupResource: sidebarResource.rentalManagement,
-              resource: sidebarResource.serializedAsset,
-              type: 'dropDown',
-              sectionName: 'Other Information'
-            },
-            isRead: true
-          }
-        ]
+        {
+          fieldData: {
+            _id: '630dc2429ec41869032395b3',
+            fieldName: 'rentalJob',
+            fieldLabel: resources?.rentalManagement?.titleSingular,
+            lookup: true,
+            lookupResource: sidebarResource.rentalManagement,
+            resource: sidebarResource.serializedAsset,
+            type: 'dropDown',
+            sectionName: 'Other Information'
+          },
+          isRead: true
+        }
+      ]
       : []),
     ...(permissions?.repairOrder?.isRead
       ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869032395b5',
-              fieldName: 'repairOrder',
-              fieldLabel: resources?.repairOrder?.titleSingular,
-              lookup: true,
-              lookupResource: sidebarResource.repairOrder,
-              resource: sidebarResource.serializedAsset,
-              type: 'dropDown',
-              sectionName: 'Other Information'
-            },
-            isRead: true
-          }
-        ]
+        {
+          fieldData: {
+            _id: '630dc2429ec41869032395b5',
+            fieldName: 'repairOrder',
+            fieldLabel: resources?.repairOrder?.titleSingular,
+            lookup: true,
+            lookupResource: sidebarResource.repairOrder,
+            resource: sidebarResource.serializedAsset,
+            type: 'dropDown',
+            sectionName: 'Other Information'
+          },
+          isRead: true
+        }
+      ]
       : [])
   ];
 
@@ -336,7 +340,24 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleAddAssetsToRepairOrder = async (repairOrderId: any) => {
+    const rows = [{
+      materialId: assetDetails._id,
+      type: MATERIAL_TYPE.serializedAsset,
+      qty: 1,
+      parentId: null
+    }]
+
+    axiosInstance()
+      .post(`${repairOrder.api}/${repairOrderId}/product-package`, { material: rows, autoCreateWorkOrder: true })
+      .then(() => {
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -471,6 +492,18 @@ const SerializedAssetDetailsPage = () => {
                 </ThemeButton> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
+                    {permissions?.repairOrder?.isCreate && assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
+                      [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
+                        assetDetails?.status
+                      ) && (
+                        <ThemeButton
+                          iconForMobile={<BuildIcon />}
+                          onClick={() => setShowRepairOrderDialog(true)}
+                          mobileTooltip={`Create ${resources?.repairOrder?.titleSingular}`}
+                        >
+                          {`Create ${resources?.repairOrder?.titleSingular}`}
+                        </ThemeButton>
+                      )}
                     {permissions?.repairJob?.isCreate &&
                       assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
@@ -683,6 +716,21 @@ const SerializedAssetDetailsPage = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showRepairOrderDialog && (
+        <ManageRepairOrder
+          referenceType="serializedAsset"
+          referenceData={{
+            warehouse: assetDetails?.warehouse?.optionValue
+          }}
+          onClose={() => setShowRepairOrderDialog(false)}
+          onSuccess={(obj) => {
+            setShowRepairOrderDialog(false);
+            handleAddAssetsToRepairOrder(obj?._id);
+            fetchAllData();
+          }}
+          isClone={false}
         />
       )}
       {showRepairJobDialog && (
