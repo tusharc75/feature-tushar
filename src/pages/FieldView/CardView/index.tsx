@@ -5,7 +5,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 import { generateData } from 'src/pages/FieldView/CardView/utils';
-import { FieldViewResource, TData } from 'src/pages/FieldView/types';
+import { FieldViewResource } from 'src/pages/FieldView/types';
 import { useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 type CardViewProps = {

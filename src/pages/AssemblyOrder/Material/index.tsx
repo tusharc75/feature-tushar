@@ -535,7 +535,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           handleClose={() => {
             setOpenSerializedPackagesDialog(false);
           }}
-          extraFilterById={[{ field: 'warehouse', term: { $in: [assemblyOrderData?.warehouse?.optionValue] } }]}
+          referenceData={{ warehouse: assemblyOrderData?.warehouse }}
           extraDeepFilter={[{ field: 'status', term: [SERIALIZED_PACKAGES_STATUS.available, SERIALIZED_PACKAGES_STATUS.underReview] }]}
           isSubmitting={isSubmitting}
           ids={dataRows?.map((d) => d?.serializedPackageId)}

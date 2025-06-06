@@ -121,8 +121,6 @@ export default function StartStopDate({ resource, onClose, type, loading, handle
                       onChange={(value) => {
                         setFieldValue('notes',value);
                       }}
-                      error={touched['notes'] && Boolean(errors['notes'])}
-                      touched={touched['notes'] && String(errors['notes'])}
                     />
                   </Grid>
                 </Grid>

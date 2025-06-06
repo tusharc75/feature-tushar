@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem, Typography } from '@mui/material';
-import { CheckCircle, Delete } from '@mui/icons-material';
+import { CheckCircle, Delete, Edit } from '@mui/icons-material';
 import { flatMap, map, orderBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -42,6 +42,7 @@ import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -80,6 +81,7 @@ const WorkOrder = ({
   const [arrangeView, setArrangeView] = useState(false);
   const [openSerializedPackageDialog, setOpenSerializedPackageDialog] = useState({ open: false, ids: [] });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, data: null });
+  const [productQtyEdit, setProductQtyEdit] = useState({ open: false, data: null });
 
   const { generateColumns, getMaterialLabel } = useColumns();
 
@@ -313,7 +315,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-            {row?.original?.workOrderId &&
+            {row?.original?.workOrderId && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(row?.original?.workOrderStatus) &&
               [MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(row?.original?.type) &&
               !user?.user?.brandPolicy?.workOrderConsumableHide && (
                 <HtmlTooltip title="Add Products/Consumables">
@@ -338,6 +340,24 @@ const WorkOrder = ({
                   </IconButton>
                 </HtmlTooltip>
               )}
+
+            {row.original?.workOrderId && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(row?.original?.workOrderStatus)
+              && [MATERIAL_TYPE.product]?.includes(row?.original?.type) && (
+                <HtmlTooltip title={'Edit'}      >
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setProductQtyEdit({ open: true, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              )}
+
             {row.original?.workOrderId && (
               <HtmlTooltip title="Drawings">
                 <IconButton
@@ -351,6 +371,7 @@ const WorkOrder = ({
                 </IconButton>
               </HtmlTooltip>
             )}
+
             <HtmlTooltip
               title={
                 !row?.original?.canDelete
@@ -405,12 +426,12 @@ const WorkOrder = ({
         parent.workOrderId = parent?.workOrder?._id;
         parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
         parent.status = parent?.workOrder?.status || '';
+        parent.workOrderStatus = parent?.workOrder?.status || '';
         if (parent?.workOrder?.status === WORK_ORDER_STATUS.new) {
           parent.canAutoCompleteWorkOrder = true;
         }
         if (parent?.workOrder?.status === WORK_ORDER_STATUS.completed) {
           parent.hideSelection = true;
-          parent.workOrderStatus = WORK_ORDER_STATUS.completed;
           if (parent?.serializedPackage) {
             parent.serializedPackageId = parent?.serializedPackage?.optionValue;
             parent.serializedPackageNumber = parent?.serializedPackage?.optionLabel;
@@ -448,12 +469,12 @@ const WorkOrder = ({
         _subPackage.workOrderId = _subPackage?.workOrder?._id;
         _subPackage.workOrderNumber = _subPackage?.workOrder?.workOrderNumber;
         _subPackage.status = _subPackage?.workOrder?.status || '';
+        _subPackage.workOrderStatus = _subPackage?.workOrder?.status || '';
         if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.new) {
           _subPackage.canAutoCompleteWorkOrder = true;
         }
         if (_subPackage?.workOrder?.status === WORK_ORDER_STATUS.completed) {
           _subPackage.hideSelection = true;
-          _subPackage.workOrderStatus = WORK_ORDER_STATUS.completed;
           if (_subPackage?.serializedPackage) {
             _subPackage.serializedPackageId = _subPackage?.serializedPackage?.optionValue;
             _subPackage.serializedPackageNumber = _subPackage?.serializedPackage?.optionLabel;
@@ -496,6 +517,7 @@ const WorkOrder = ({
       _subRow.workOrder = parent?.workOrder;
       _subRow.workOrderId = parent?.workOrderId;
       _subRow.workOrderNumber = parent?.workOrderNumber;
+      _subRow.workOrderStatus = parent?.workOrderStatus;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
       _subRow.type === MATERIAL_TYPE.service ? serviceIndex++ : productIndex++;
@@ -768,6 +790,30 @@ const WorkOrder = ({
       });
   };
 
+  const handleUpdateQty = (data) => {
+    setSubmitting(true);
+    axiosInstance()
+      .put(`${workOrder.api}/${productQtyEdit?.data?.workOrder?._id}/consumable/update-qty`, [
+        {
+          ...data
+        }
+      ])
+      .then(({ data }) => {
+        setSubmitting(false);
+        fetchData();
+        setProductQtyEdit({ open: false, data: null });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
       {isAutoCreating && (
@@ -830,6 +876,19 @@ const WorkOrder = ({
         </Box>
       )}
 
+      {productQtyEdit.open && (
+        <ProductQtyDialog
+          onClose={() => {
+            setProductQtyEdit({ open: false, data: null });
+          }}
+          rowData={productQtyEdit.data}
+          handleSave={(data) => {
+            handleUpdateQty(data)
+          }}
+          loading={isSubmitting}
+        />
+      )}
+
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           okBtnLoading={isDeleting}
@@ -869,6 +928,7 @@ const WorkOrder = ({
           }}
         />
       )}
+
       {openSerializedPackageDialog.open && (
         <PackageNumberDialog
           onClose={() => {
@@ -884,6 +944,7 @@ const WorkOrder = ({
           isSubmitting={isCompleting}
         />
       )}
+
       {addServicesDialog.open && !addServicesDialog.new && (
         <AssignServiceDialog
           handleClose={() => setAddServicesDialog({ open: false, new: false })}
@@ -958,6 +1019,7 @@ const WorkOrder = ({
           }}
         />
       )}
+
       {consumablesDialog.open && (
         <AssignProductDialog
           handleCloseDialog={() => setConsumablesDialog({ open: false, ids: [], data: null })}
@@ -968,6 +1030,7 @@ const WorkOrder = ({
           isSubmitting={isSubmitting}
         />
       )}
+
       {arrangeView && (
         <ArrangeView
           data={
@@ -983,6 +1046,7 @@ const WorkOrder = ({
           loading={false}
         />
       )}
+
       {showDrawingDialog.open && (
         <DiagramDialog
           referenceId={showDrawingDialog?.data?.workOrder?._id}
@@ -996,6 +1060,7 @@ const WorkOrder = ({
           showMaterialFilter={[MATERIAL_TYPE.service, MATERIAL_TYPE.product]?.includes(showDrawingDialog?.data?.type) ? false : true}
         />
       )}
+
     </>
   );
 };

@@ -109,27 +109,27 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       },
       ...(resource === sidebarResource.fieldTicket
         ? [
-            {
-              accessor: 'fieldTicketNumber',
-              Header: 'Field Ticket',
-              disabled: true,
-              Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row.original.fieldTicketNumber}</p>
-                  {permissions?.fieldTicket?.isRead && (
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  )}
-                </div>
-              )
-            }
-          ]
+          {
+            accessor: 'fieldTicketNumber',
+            Header: 'Field Ticket',
+            disabled: true,
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
+                <p className="text-truncate">{row.original.fieldTicketNumber}</p>
+                {permissions?.fieldTicket?.isRead && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                )}
+              </div>
+            )
+          }
+        ]
         : []),
       {
         accessor: 'detail',
@@ -257,9 +257,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             ? parent?.serviceDetail?.serviceName
             : parent.type === MATERIAL_TYPE.serializedAsset
               ? parent?.serializedAssetDetail?.assetNumber
-              : parent.type === MATERIAL_TYPE.manualEntry
-                ? parent?.description
-                : parent.packageDetail?.packageName;
+              : parent.type === MATERIAL_TYPE.package
+                ? parent.packageDetail?.packageName
+                : parent?.detail || '';
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -290,7 +290,9 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             ? _subRow?.serviceDetail?.serviceName
             : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? _subRow?.serializedAssetDetail?.assetNumber
-              : _subRow?.packageDetail?.packageName;
+              : _subRow.type === MATERIAL_TYPE.package
+                ? _subRow.packageDetail?.packageName
+                : _subRow?.detail || '';
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
@@ -300,7 +302,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
               ? _subRow?.packageDetail?.packageDescription || ''
               : _subRow.type === MATERIAL_TYPE.serializedAsset
                 ? _subRow?.description || ''
-                : '';
+                : _subRow?.description || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.subRows = generateNestedData(material, _subRow);
     });

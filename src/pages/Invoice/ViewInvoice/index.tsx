@@ -196,24 +196,19 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
-        }`;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === MATERIAL_TYPE.serializedAsset
-                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-                : '';
+      _subRow.detail = _subRow?.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName : _subRow?.detail || ''
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service
+        ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+              : _subRow?.description || '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -222,7 +217,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
-      .get(`${invoice.api}/zip/${invoiceData?._id}`, {
+      .get(`${invoice.api} / zip / ${invoiceData?._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -244,7 +239,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadPdf = () => {
     setIsDownloadingPdf(true);
     axiosInstance()
-      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
+      .get(`${invoice.api} / zip / pdf / ${invoiceData._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -264,27 +259,25 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   };
 
   const handleCancelInvoice = async (data) => {
-    axiosInstance()
-      .patch(`${routes?.generateInvoice.path}/cancel`, {
-        invoice: invoiceData?._id,
-        comment: data,
-        resource: resource
-      })
-      .then(({ data }) => {
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
+    axiosInstance().patch(`${routes?.generateInvoice.path}/cancel`, {
+      invoice: invoiceData?._id,
+      comment: data,
+      resource: resource
+    }).then(({ data }) => {
+      onSuccess();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    fileName: `${resources?.invoice?.titleSingular} - ${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
