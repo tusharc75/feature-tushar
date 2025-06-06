@@ -1,7 +1,6 @@
-import { Person } from '@mui/icons-material';
 import React from 'react';
-import { sidebarResource } from 'src/constants/helpers';
-import { AssetData, WellData, PadData, TData, Status, FieldViewResource } from 'src/pages/FieldView/types';
+import { ASSET_STATUS, sidebarResource } from 'src/constants/helpers';
+import { AssetData, WellData, PadData, Status, FieldViewResource } from 'src/pages/FieldView/types';
 
 const convertToString = (value: string | Object | undefined) => {
   if (!value) return '';
@@ -9,8 +8,8 @@ const convertToString = (value: string | Object | undefined) => {
   return JSON.stringify(value);
 };
 
-type GenerateDataReturnType = { label: string; value: React.ReactNode; type?: 'tag' | 'key-val' } & React.HTMLAttributes<HTMLDivElement>;
-export const generateData = (data: TData, resource: FieldViewResource) => {
+type GenerateDataReturnType = { label: string; value: React.ReactNode; type?: 'tag' | 'key-val' | 'location', coordinate?: any } & React.HTMLAttributes<HTMLDivElement>;
+export const generateData = (data: any, resource: FieldViewResource) => {
   let generatedData: GenerateDataReturnType[] = [];
 
   switch (resource) {
@@ -23,7 +22,9 @@ export const generateData = (data: TData, resource: FieldViewResource) => {
         },
         {
           label: 'Location',
-          value: convertToString(tempData.address?.optionLabel ?? '')
+          type: 'location',
+          value: convertToString(tempData.address?.optionLabel ?? ''),
+          coordinate: { latitude: tempData.address?.latitude, longitude: tempData.address?.longitude }
         }
       ];
       break;
@@ -37,44 +38,35 @@ export const generateData = (data: TData, resource: FieldViewResource) => {
         },
         {
           label: 'Location',
-          value: convertToString(tempData?.address?.optionLabel ?? '')
-        },
-        {
-          label: 'Amount',
-          value: convertToString(tempData.amount ?? '')
-        },
-        {
-          label: 'Created By',
-          value: (
-            <>
-              <Person fontSize="small" /> {convertToString(tempData.createdBy?.user?.concatedName ?? '')}
-            </>
-          ),
-          type: 'tag'
+          type: 'location',
+          value: convertToString(tempData.address?.optionLabel ?? ''),
+          coordinate: { latitude: tempData.address?.latitude, longitude: tempData.address?.longitude }
         }
       ];
       break;
     }
     case sidebarResource?.serializedAsset: {
-      const tempData = data as AssetData;
+      const tempData = data as any;
       generatedData = [
         {
-          label: 'Asset Number',
+          label: 'Asset',
           value: convertToString(tempData.assetNumber ?? '')
         },
         {
+          label: 'Product',
+          value: convertToString(tempData.product?.optionLabel ?? '')
+        },
+        {
           label: 'Location',
+          type: 'location',
+          coordinate: { latitude: tempData.currentLocation?.latitude, longitude: tempData.currentLocation?.longitude },
           value: convertToString(tempData.currentLocation?.optionLabel ?? '')
         },
         {
-          label: 'WareHouse',
-          value: convertToString(tempData.warehouse?.optionLabel ?? '')
-        },
-        {
           label: 'Status',
-          value: <>{convertToString(tempData.status ?? '')}</>,
+          value: <>{convertToString(tempData.status)}</>,
           type: 'tag',
-          className: statusColorMap(tempData.status ?? 'Available')
+          className: statusColorMap(tempData.status)
         }
       ];
       break;
@@ -86,7 +78,7 @@ export const generateData = (data: TData, resource: FieldViewResource) => {
   return generatedData;
 };
 
-export const getAddressPayload = (data: TData, resource: FieldViewResource) => {
+export const getAddressPayload = (data: any, resource: FieldViewResource) => {
   let payload: google.maps.GeocoderRequest = {};
   if (resource === sidebarResource?.padMaster || resource === sidebarResource.wellMaster) {
     const newData = data as PadData;
@@ -107,31 +99,14 @@ export const getAddressPayload = (data: TData, resource: FieldViewResource) => {
 const statusColorMap = (status: Status) => {
   let className = '';
   switch (status) {
-    case 'Available':
-      className = 'bg-green-500 text-white dark:bg-green-800 dark:text-white';
-      break;
-    case 'Lost':
+    case ASSET_STATUS.needRepair:
       className = 'bg-red-500 text-white dark:bg-red-800 dark:text-white';
       break;
-    case 'Customer Possession':
+    case ASSET_STATUS.needRecert:
       className = 'bg-orange-500 text-white dark:bg-orange-800 dark:text-white';
       break;
-    case 'In-Use':
-      className = 'bg-blue-500 text-white dark:bg-blue-800 dark:text-white';
-      break;
-    case 'In-Repair':
-      className = 'bg-yellow-500 text-black dark:bg-yellow-800 dark:text-white';
-      break;
-    case 'Delivered':
-      className = 'bg-green-500 text-black dark:bg-green-800 dark:text-white';
-      break;
-    case 'New':
-      className = 'bg-blue-500 text-white dark:bg-blue-800 dark:text-white';
-      break;
-    case 'In-Transit':
-      className = 'bg-emerald-500 text-black dark:bg-emerald-800 dark:text-white';
-      break;
     default:
+      className = 'bg-green-500 text-white dark:bg-green-800 dark:text-white';
       break;
   }
   return className;
