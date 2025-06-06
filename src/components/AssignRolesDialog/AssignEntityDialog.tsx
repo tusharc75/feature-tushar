@@ -1,8 +1,20 @@
-import { Box, Checkbox, Collapse, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Theme, Typography } from '@mui/material';
+import {
+  Box,
+  Checkbox,
+  Collapse,
+  FormControl,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Theme,
+  Typography
+} from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -14,7 +26,6 @@ import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { makeStyles } from '@mui/styles';
-import ContentFullScreen from 'src/components/ContentFullScreen';
 
 const useStyles = makeStyles((theme: Theme) => ({
   button: {
@@ -56,26 +67,25 @@ const AssignEntityDialog = ({
   const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []);
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
-  const activeStep = useRef(0);
+  const [activeStep, setActiveStep] = useState(0);
   const [, setCheckAll] = useState(false);
-  const steps = [`Select ${type}`, 'Select Role'];
+  const steps = [`Select ${startCase(type)}`, 'Select Role'];
   const [search, setSearch] = useState('');
   const classes = useStyles();
 
   const handleNext = () => {
     setSearch('');
-    activeStep.current += 1;
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
-    activeStep.current -= 1;
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
   useEffect(() => {
     setLoadingData(true);
     if (type == 'user') {
-      axiosInstance()
-        .get(`/${type}`)
+      axiosInstance().get(`/${type}`)
         .then(({ data: { data } }) => {
           setData(
             data.filter((user) => !assignedEntity.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false, show: true }))
@@ -90,25 +100,26 @@ const AssignEntityDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      setLoadingData(false);
-      setData(
-        user?.entity?.map((obj) => ({
+      axiosInstance().get(`/${type}`).then(({ data: { data } }) => {
+        setData(data?.map((obj) => ({
           ...obj,
           optionLabel: obj.entityName,
           optionValue: obj._id,
           isChecked: false,
           show: true
-        }))
-      );
-      setDataConst(
-        user?.entity?.map((obj) => ({
+        })));
+        setDataConst(data?.map((obj) => ({
           ...obj,
           optionLabel: obj.entityName,
           optionValue: obj._id,
           isChecked: false,
           show: true
-        }))
-      );
+        })));
+        setLoadingData(false);
+      }).catch((error) => {
+        setLoadingData(false);
+        toastConfig.setToastConfig(error);
+      });
     }
 
     axiosInstance()
@@ -123,10 +134,7 @@ const AssignEntityDialog = ({
               .map((obj) => ({ ...obj, isChecked: false }))
           );
           setRoleConst(
-            data
-              .filter(
-                (role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id)
-              )
+            data.filter((role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id))
               .map((obj) => ({ ...obj, isChecked: false }))
           );
         } else {
@@ -220,7 +228,7 @@ const AssignEntityDialog = ({
     setSearch(value);
     let resultData = [];
     let resultRole = [];
-    if (activeStep.current === 0) {
+    if (activeStep === 0) {
       resultData = dataConst.filter((data) => {
         if (type === 'entity') {
           return data.entityName?.toLowerCase().search(value?.trim()?.toLowerCase()) !== -1;
@@ -231,10 +239,6 @@ const AssignEntityDialog = ({
           );
         }
       });
-      resultData = resultData.map((item) => ({
-        ...item,
-        isChecked: selectedData.includes(item._id)
-      }));
       setData(resultData);
     } else {
       resultRole = roleConst?.filter((data) => {
@@ -243,10 +247,6 @@ const AssignEntityDialog = ({
           data.description.toLowerCase().search(value?.trim()?.toLowerCase()) !== -1
         );
       });
-      resultRole = resultRole.map((item) => ({
-        ...item,
-        isChecked: selectedRole.includes(item._id)
-      }));
       setRole(resultRole);
     }
   };
@@ -265,15 +265,9 @@ const AssignEntityDialog = ({
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      const updatedData = data.map((item) => (item._id === d._id ? { ...item, isChecked } : item));
-                      setData(updatedData);
-
-                      if (isChecked) {
-                        setSelectedData((prev) => [...prev, d._id]);
-                      } else {
-                        setSelectedData((prev) => prev.filter((id) => id !== d._id));
-                      }
+                      d.isChecked = e.target.checked;
+                      setSelectedData(data.filter((d) => d.isChecked).map((obj) => obj._id));
+                      setCheckAll(!data.some((d) => d.isChecked === false));
                     }}
                     checked={d.isChecked}
                     inputProps={{
@@ -285,7 +279,7 @@ const AssignEntityDialog = ({
                   <h6 className="MuiTypography-body1 line-clamp-1 text-[16px] font-[500_!important]">
                     {type === 'entity' ? d.entityName : d.concatedName}
                   </h6>
-                  <p className="MuiTypography-body2 line-clamp-1">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
+                  <p className="text-sm">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
                 </div>
               </li>
             ))}
@@ -303,15 +297,8 @@ const AssignEntityDialog = ({
                   <Checkbox
                     edge="start"
                     onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      const updatedRole = role.map((item) => (item._id === d._id ? { ...item, isChecked } : item));
-                      setRole(updatedRole);
-
-                      if (isChecked) {
-                        setSelectedRole((prev) => [...prev, d._id]);
-                      } else {
-                        setSelectedRole((prev) => prev.filter((id) => id !== d._id));
-                      }
+                      d.isChecked = e.target.checked;
+                      setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
                     }}
                     checked={d.isChecked}
                     inputProps={{
@@ -344,7 +331,7 @@ const AssignEntityDialog = ({
               <Checkbox
                 edge="start"
                 onChange={(e) => {
-                  if (activeStep.current === 0 && !regionalRole) {
+                  if (activeStep === 0 && !regionalRole) {
                     data.forEach((d) => (d.isChecked = e.target.checked));
                     setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
                   } else {
@@ -352,7 +339,7 @@ const AssignEntityDialog = ({
                     setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
                   }
                 }}
-                checked={activeStep.current === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
+                checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
                 inputProps={{
                   'aria-labelledby': `checkbox-list-label-select-all`
                 }}
@@ -368,6 +355,7 @@ const AssignEntityDialog = ({
   return (
     <>
       <CustomDialogHeader
+        onClose={handleCloseDialog}
         showRequiredLabel={false}
         title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`}
       />
@@ -387,31 +375,30 @@ const AssignEntityDialog = ({
                   searchValue={search}
                   onSearch={handleSearch}
                 />
-
                 <div className="mt-3 grid gap-[20px]">
                   {steps.map((label, index) => (
                     <div key={label} className="relative">
                       <h4 className="flex items-center gap-[18px] text-[14px] text-[var(--primary-text)] max-[600px]:ml-[6px]">
                         <span className="grid h-[20px] w-[20px] place-items-center rounded-full bg-[--primary] text-[12px] text-white">
-                          {activeStep.current > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
+                          {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
                         </span>
                         <span>{label}</span>
                       </h4>
-                      {activeStep.current === index && (
+                      {activeStep === index && (
                         <div
                           style={{ borderLeft: '1px dashed var(--common-border-color)' }}
                           className="absolute left-[10px] top-[20px]  z-10 hidden h-full w-[2px] -translate-x-1/2 -translate-y-1/2 transform min-[600px]:block"
                         ></div>
                       )}
-                      <Collapse in={activeStep.current === index}>
+                      <Collapse in={activeStep === index}>
                         <div className="max-w-full  min-[600px]:ml-[35px]">
                           <div className="max-w-full">{getStepContent(index)}</div>
                           <div className={classes.actionsContainer}>
                             <div>
-                              <ThemeButton buttonType="transparent" disabled={activeStep.current === 0} onClick={handleBack}>
+                              <ThemeButton buttonType="transparent" disabled={activeStep === 0} onClick={handleBack}>
                                 Back
                               </ThemeButton>
-                              {activeStep.current !== steps.length - 1 && (
+                              {activeStep !== steps.length - 1 && (
                                 <ThemeButton buttonType="theme" onClick={handleNext} disabled={selectedData.length === 0} className={classes.button}>
                                   Next
                                 </ThemeButton>
