@@ -845,6 +845,13 @@ const Quotation = ({
                 onClose={closeActions}
               >
                 <MenuItem
+                  disabled={
+                    !Boolean(
+                      selectedRecords &&
+                      selectedRecords.filter((e) => !e.hideSelection).length &&
+                      !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+                    )
+                  }
                   onClick={() => {
                     closeActions();
                     setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
