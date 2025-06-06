@@ -2,7 +2,7 @@ import { Person } from '@mui/icons-material';
 import { Avatar, Badge } from '@mui/material';
 import dayjs from 'dayjs';
 import { memo } from 'react';
-import { TbPinnedOff } from 'react-icons/tb';
+import { BsFillPinFill } from 'react-icons/bs';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import GenieText from 'src/assets/svg/GenieText';
 import { Chat, User } from 'src/components/DesktopDM/types';
@@ -78,7 +78,7 @@ export const RenderChatUser = memo(
 
               {isPinned && (
                 <span className="ml-auto flex items-center">
-                  <TbPinnedOff fontSize="18px" />
+                  <BsFillPinFill color='#444' fontSize="18px" />
                 </span>
               )}
 
@@ -137,7 +137,7 @@ export const RenderUser = memo(({ user, onClick, onlineUsers, isPinned }: { onCl
         <p className="line-clamp-1 text-xs font-normal">{user.concatedName ? user.concatedName : `${user.firstName} ${user.lastName}`}</p>
         {isPinned && (
           <span className="ml-auto flex items-center">
-            <TbPinnedOff fontSize="18px" />
+            <BsFillPinFill color='#444' fontSize="18px" />
           </span>
         )}
       </button>
