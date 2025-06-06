@@ -14,6 +14,7 @@ export type User = {
   lastName: string;
   concatedName: string;
   avatar: string;
+  pinned?: boolean;
 };
 
 export type Chat = {
@@ -27,6 +28,7 @@ export type Chat = {
   to?: MessageUser;
   notifications?: number;
   recentMessage: RecentMessage;
+  pinned?: boolean;
 };
 export type RecentMessage = {
   message?: string;
