@@ -61,47 +61,53 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
         }}
       >
         {!loading ? (
-          <Grid container spacing={1}>
-            <table className="w-full text-left text-sm rtl:text-right">
-              <thead className={`text-xs uppercase ${themeColor === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Product
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Average Price
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Maximum Price
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Minimum Price
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {aiPriceSuggestions.map((suggestion) => (
-                  <tr
-                    key={suggestion.id}
-                    className={`border-b ${themeColor === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
-                  >
-                    <th scope="row" className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {suggestion?.product?.optionLabel}
+          aiPriceSuggestions.length > 0 ? (
+            <Grid container spacing={1}>
+              <table className="w-full text-left text-sm rtl:text-right">
+                <thead className={`text-xs uppercase ${themeColor === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
+                  <tr>
+                    <th scope="col" className="px-6 py-3">
+                      Product
                     </th>
-                    <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {formatAmountWithCurrency(quotationData?.currency, suggestion?.averagePrice || 0)?.fullFormatAmount || ''}
-                    </td>
-                    <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {formatAmountWithCurrency(quotationData?.currency, suggestion?.maxPrice || 0)?.fullFormatAmount || ''}
-                    </td>
-                    <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      {formatAmountWithCurrency(quotationData?.currency, suggestion?.minPrice || 0)?.fullFormatAmount || ''}
-                    </td>
+                    <th scope="col" className="px-6 py-3">
+                      Average Price
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Maximum Price
+                    </th>
+                    <th scope="col" className="px-6 py-3">
+                      Minimum Price
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </Grid>
+                </thead>
+                <tbody>
+                  {aiPriceSuggestions.map((suggestion) => (
+                    <tr
+                      key={suggestion.id}
+                      className={`border-b ${themeColor === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
+                    >
+                      <th scope="row" className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {suggestion?.product?.optionLabel}
+                      </th>
+                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.averagePrice || 0)?.fullFormatAmount || ''}
+                      </td>
+                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.maxPrice || 0)?.fullFormatAmount || ''}
+                      </td>
+                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.minPrice || 0)?.fullFormatAmount || ''}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Grid>
+          ) : (
+            <div className="flex min-h-[230px] items-center justify-center">
+              <p>No data history found for this customer to suggest the price</p>
+            </div>
+          )
         ) : (
           <Box height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

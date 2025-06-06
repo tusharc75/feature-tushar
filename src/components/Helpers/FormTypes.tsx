@@ -1990,7 +1990,7 @@ const FormTypes = (props) => {
                       if (!lookup) {
                         if (reason === 'clear') {
                           setFieldValue(name, []);
-                        } else if (reason === 'remove-option' && values[name].length === 1) {
+                        } else if (reason === 'removeOption' && values[name].length === 1) {
                           setFieldValue(name, []);
                         }
                         let modValues = [];
