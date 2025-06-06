@@ -408,7 +408,7 @@ const ChartTypes = ({
                             callbacks: {
                               label: function (context) {
                                 let label =
-                                  chart?.chartType === 'Bar' && chart?.stack ? context.dataset.label : context.label || context.dataset.label || '';
+                                  chart?.chartType === 'Bar' && (chart?.stack || chart?.kpi?.name === 'Rental Job Customer Wise Revenue') ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
