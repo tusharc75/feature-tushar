@@ -446,8 +446,8 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
               >
                 <div
                   className={cn(
-                    'rounded-md border-2 [&_fieldset]:hidden',
-                    '![--animation-duration:10s] ![--glow-intensity:0.25] ![--spread:4px]',
+                    'rounded-md border-[--border-w] [&_fieldset]:hidden',
+                    '![--animation-duration:10s] ![--border-w:2px] ![--glow-intensity:0.25] ![--spread:4px]',
                     isInputFocused ? '' : `ai-ring border-transparent`
                   )}
                 >
