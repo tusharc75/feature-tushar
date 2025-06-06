@@ -19,7 +19,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { cn, CustomDialogTransition, dateFormat } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateFormat, displayDate } from 'src/constants/helpers';
 
 const ResourcePopover = ({ anchorEl, data, eventData, open, onClose, resourceList }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -47,7 +47,7 @@ const ResourcePopover = ({ anchorEl, data, eventData, open, onClose, resourceLis
   const head = useMemo(() => {
     return (
       <div className="sticky top-0 z-10 flex items-center justify-between bg-[var(--dark-primary,white)] pb-1 pr-1 pt-1">
-        <h5 className="text-sm">{`${eventData?.title} - ${dayjs(eventData?.start).format(dateFormat)}`}</h5>
+        <h5 className="text-sm">{`${eventData?.title} - ${displayDate(eventData?.originalDate || eventData?.start)}`}</h5>
         <div className="flex gap-1">
           <HtmlTooltip title={!isFullScreen ? 'Maximize' : 'Minimize'}>
             <IconButton size="small" onClick={() => setIsFullScreen((prev) => !prev)} className="close-icon-v1">
@@ -62,7 +62,7 @@ const ResourcePopover = ({ anchorEl, data, eventData, open, onClose, resourceLis
         </div>
       </div>
     );
-  }, [eventData?.start, eventData?.title, isFullScreen, onClose]);
+  }, [eventData?.title, isFullScreen, onClose, eventData?.originalDate, eventData?.start]);
 
   return (
     <>
