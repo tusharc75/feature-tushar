@@ -49,4 +49,4 @@ const RippleButton = React.forwardRef<HTMLButtonElement, { children: React.React
   }
 );
 
-export default RippleButton;
+export default React.memo(RippleButton);

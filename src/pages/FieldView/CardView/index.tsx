@@ -1,5 +1,7 @@
 import { East } from '@mui/icons-material';
 import { useEffect, useRef } from 'react';
+import { FaLocationDot } from 'react-icons/fa6';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import RippleButton from 'src/components/RippleButton';
 import { cn } from 'src/constants/helpers';
 import { generateData } from 'src/pages/FieldView/CardView/utils';
@@ -8,12 +10,14 @@ import { useFieldStore } from 'src/pages/FieldView/useFieldStore';
 
 type CardViewProps = {
   resource: FieldViewResource;
-  data: any[];
-  clickOnCard: (data: any) => void;
+  data: TData[];
+  clickOnCard: (data: TData) => void;
+  view: 'card' | 'map';
 };
 
-const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
+const CardView = ({ resource, data, clickOnCard, view }: CardViewProps) => {
   const [activeItem, setStore] = useFieldStore((store) => store.activeItem);
+  const [availableLocations] = useFieldStore((store) => store.availableLocations);
   const itemRefs = useRef<Record<string, HTMLButtonElement>>({});
 
   useEffect(() => {
@@ -27,7 +31,7 @@ const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
 
   return (
     <section className="@container">
-      <div className="@[750px]:grid-cols-3 @[950px]:grid-cols-4 @[500px]:grid-cols-2 grid max-h-[calc(100vh-200px)] grid-cols-1 gap-4 overflow-auto ">
+      <div className="grid max-h-[calc(100vh-200px)] grid-cols-1 gap-4 overflow-auto @[500px]:grid-cols-2 @[750px]:grid-cols-3 @[950px]:grid-cols-4 ">
         {data?.map((item) => {
           const dataList = generateData(item, resource);
           const dataHasTag = dataList.find((d) => d.type === 'tag');
@@ -77,9 +81,21 @@ const CardView = ({ resource, data, clickOnCard }: CardViewProps) => {
                   );
                 })}
               </div>
-              <div className="mt-auto flex justify-end border-t p-[12px]">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-500">
-                  <span>View</span>
+              <div className="mt-auto flex justify-between border-t p-[12px]">
+                {/* {view === 'map' && availableLocations[item._id] && (
+                  <ThemeButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      setStore({ activeItem: item._id });
+                    }}
+                    startIcon={<FaLocationDot />}
+                  >
+                    Locate On Map
+                  </ThemeButton>
+                )} */}
+                <div className="ml-auto flex items-center gap-2 text-sm font-semibold text-gray-500">
+                  <span>View Details</span>
                   <span className="transition-all duration-300 group-hover:-mr-1 group-hover:ml-1">
                     <East fontSize="small" />
                   </span>

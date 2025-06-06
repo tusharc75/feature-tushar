@@ -480,14 +480,15 @@ const QuoteBuilder = ({
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={
-          quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-            ? true
-            : false
-        }
+
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
+        isActionButtonVisible={
+          quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
+            ? user?.user?.brandPolicy?.createFieldTicketFromQuotation || false
+            : false
+        }
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
       />
@@ -503,7 +504,7 @@ const QuoteBuilder = ({
             renderedFrom={renderedFrom}
             hideSelection={
               quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? false
+                ? !user?.user?.brandPolicy?.createFieldTicketFromQuotation
                 : true
             }
             hideAction={true}
