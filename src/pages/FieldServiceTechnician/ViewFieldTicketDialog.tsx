@@ -34,7 +34,6 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
         <CustomDialogContent>
           <FieldTicket
             serviceOrderData={serviceOrderData}
-            setNextStep={() => { }}
             allowedToEdit={allowedToEdit}
             handleChangeStatus={() => { }}
             fetchServiceOrderData={() => { }}
