@@ -4029,6 +4029,65 @@ $isAppliedBillDark: #234623;
   background-clip: text;
 }
 
+@property --glow-deg {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+.ai-ring {
+  --gradient-glow: #1588cb, #a066b1, #fd3295, rgba(255, 69, 0, 0.502), #1588cb;
+  --surface: var(--dark-secondary, white);
+  --border-w: 1px;
+  --spread: 1px;
+  --blur: 6px;
+  --glow-intensity: 0.225;
+  --animation-duration: 3s;
+  background:
+    linear-gradient(var(--surface, canvas) 0 0) padding-box,
+    conic-gradient(from var(--glow-deg), var(--gradient-glow)) border-box;
+  border: var(--border-w, 2px) solid transparent;
+  // animation: glow-rotate 10s infinite linear;
+  animation-name: glow-rotate;
+  animation-duration: var(--animation-duration);
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  position: relative;
+  isolation: isolate;
+
+  &::after,
+  &::before {
+    content: '';
+    position: absolute;
+    border-radius: inherit;
+  }
+
+  &::before {
+    background-color: var(--surface, canvas);
+    inset: calc(var(--spread, 10px) * 0.5);
+    z-index: -1;
+    filter: blur(var(--blur, 5px));
+  }
+
+  &::after {
+    animation-name: glow-rotate;
+    animation-duration: var(--animation-duration);
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    z-index: -2;
+    background: conic-gradient(from var(--glow-deg), var(--gradient-glow));
+    inset: calc(var(--spread, 10px) * -1);
+    filter: blur(var(--blur, 5px));
+    opacity: var(--glow-intensity, 0.5);
+  }
+}
+
+@keyframes glow-rotate {
+  100% {
+    --glow-deg: 360deg;
+  }
+}
+
 .MuiChip-colorPrimary {
   [data-mode='dark'] & {
     color: white !important;
