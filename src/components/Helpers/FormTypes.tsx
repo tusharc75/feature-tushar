@@ -2626,6 +2626,66 @@ const FormTypes = (props) => {
           </Grid>
         </Box>
       </Fragment>
+    ) : type === 'uploadZone' ? (
+      <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+        <Box
+          onDrop={(e) => {
+            e.preventDefault();
+            if (!rest?.disabled && !isFileUploading) {
+              handleUploadFile({ target: { files: e.dataTransfer.files } }, true);
+            }
+          }}
+          onDragOver={(e) => e.preventDefault()}
+          onPaste={(e) => {
+            e.preventDefault();
+            const items = e.clipboardData?.items;
+            const fileItems: File[] = [];
+            for (let i = 0; i < items.length; i++) {
+              const item = items[i];
+              if (item.kind === 'file') {
+                const file = item.getAsFile();
+                if (file) fileItems.push(file);
+              }
+            }
+            if (fileItems.length) {
+              const dt = new DataTransfer();
+              fileItems.forEach(f => dt.items.add(f));
+              handleUploadFile({ target: { files: dt.files } }, true);
+            } else {
+              console.warn('No file found in clipboard');
+            }
+          }}
+          tabIndex={0}
+          sx={{
+            mt: 2,
+            p: 2,
+            border: '2px dashed #ccc',
+            borderRadius: '8px',
+            textAlign: 'center',
+            bgcolor: '#fafafa',
+            outline: 'none',
+            '&:focus': { borderColor: '#0f9fa9' },
+          }}
+        >
+          <Typography variant="body2" color="textSecondary">
+            {isFileUploading ? (
+              `Uploading... ${fileUploadProgress}%`
+            ) : (
+              <>
+                Paste (Ctrl+V) / Drag files here
+              </>
+            )}
+          </Typography>
+        </Box>
+
+        {touched[name] && Boolean(errors[name]) && (
+          <Box pt={1}>
+            <Typography variant="body2" className="text-truncate" color="error">
+              {errors[name]}
+            </Typography>
+          </Box>
+        )}
+      </Grid>
     ) : type === 'url' ? (
       <InfoLabel
         info={tooltipMessage}
