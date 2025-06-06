@@ -1,6 +1,6 @@
 import { Avatar, Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { formatAmountWithCurrency } from 'src/constants/helpers';
+import { cn, formatAmountWithCurrency } from 'src/constants/helpers';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,9 +11,7 @@ import DashboardModal from 'src/components/DashboardModal';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 
 const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
-
   const [aiPriceSuggestions, setAiPriceSuggestions] = useState([]);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [themeColor] = useAppTheme();
 
@@ -43,11 +41,21 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
         handleClose={handleClose}
         open={true}
         dialogProps={{
-          fullScreen: fullScreen || isMobile || isTablet,
+          fullScreen: isMobile || isTablet,
           maxWidth: 'sm'
         }}
         modalHead={{
-          title: `AI Price Suggestions`,
+          title: (
+            <span
+              className={cn(
+                `[--border-gradient:91deg,_#1588CB_0.01%,_#A066B1_33.01%,_#FD3295_66%,_rgba(255,_69,_0,_0.50)_100%]`,
+                'gradient-text [-webkit-text-fill-color:transparent] [background:linear-gradient(var(--border-gradient))]',
+                ''
+              )}
+            >
+              AI Price Suggestions
+            </span>
+          ),
           icon: <Avatar src={genieImage} />,
           fullScreenOption: true
         }}
@@ -77,10 +85,7 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
                     key={suggestion.id}
                     className={`border-b ${themeColor === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
                   >
-                    <th
-                      scope="row"
-                      className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}
-                    >
+                    <th scope="row" className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {suggestion?.product?.optionLabel}
                     </th>
                     <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -103,7 +108,6 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
           </Box>
         )}
       </DashboardModal>
-
     </>
   );
 };

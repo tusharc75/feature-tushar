@@ -4024,6 +4024,10 @@ $isAppliedBillDark: #234623;
     transform: scale3d(1.4, 1.4, 1);
   }
 }
+.gradient-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
 
 .MuiChip-colorPrimary {
   [data-mode='dark'] & {
