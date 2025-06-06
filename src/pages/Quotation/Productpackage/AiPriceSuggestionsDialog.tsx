@@ -105,7 +105,7 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
             </Grid>
           ) : (
             <div className="flex min-h-[230px] items-center justify-center">
-              <p>No data history found for this customer to show the price</p>
+              <p>No data history found for this customer to suggest the price</p>
             </div>
           )
         ) : (
