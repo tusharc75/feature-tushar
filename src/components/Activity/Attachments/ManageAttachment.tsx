@@ -258,7 +258,6 @@ export default function ManageAttachment({
   };
 
   const onUploadFile = (files) => {
-    console.log(files);
     if (isArray(files)) {
       setAllAttachments((prevState) => [
         ...files?.map((e) => {
@@ -374,7 +373,6 @@ export default function ManageAttachment({
                           />
                         </Grid>
                       ))}
-
                     {type === 'file' && (
                       <>
                         <Grid size={{ xs: 12, sm: 12, md: 12 }}>
