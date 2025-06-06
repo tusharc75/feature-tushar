@@ -105,14 +105,14 @@ const DashboardModal: FC<ModalProps> = ({
               )}
             </div>
           </Box>
-          <Box className={styles.modalHeadActions} style={{ minWidth: modalHead?.fullScreenOption ? '85px' : '45px' }}>
+          <Box className={'flex items-center gap-1'} style={{ minWidth: modalHead?.fullScreenOption ? '85px' : '45px' }}>
             {modalHead?.fullScreenOption ? (
               <IconButton aria-label="close" onClick={() => toggleMaximized()}>
-                {maximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+                {maximized ? <FiMinimize2 size={18} className="block" /> : <FiMaximize2 size={18} className="block" />}
               </IconButton>
             ) : null}
             <IconButton aria-label="close" onClick={() => handleClose()}>
-              <CloseIcon />
+              <CloseIcon className="block" />
             </IconButton>
           </Box>
         </MuiDialogTitle>

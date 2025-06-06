@@ -351,7 +351,8 @@ const FieldTicket = ({
           isAddButtonVisible={true}
           addButtonProps={{
             disabled: allowedToEdit && (!serviceOrderData?.quotation || noQuotationCheck) ? false : true,
-            tooltip: !allowedToEdit ? ownerAndColaborator : (serviceOrderData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
+            tooltip: !allowedToEdit ? ownerAndColaborator :
+              (serviceOrderData?.quotation && !noQuotationCheck) ? `Converted from ${resources?.quotation?.titleSingular} you can not perform this action` : ''
           }}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={!isOffline}
