@@ -3,7 +3,8 @@ import Chart from 'react-chartjs-2';
 import { Paper, Box, useTheme, useMediaQuery, Typography, Badge, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ImportExport, TableChart, Timeline } from '@mui/icons-material';
-import { BsFilter, BsFillPinFill } from 'react-icons/bs';
+import { BsFilter } from 'react-icons/bs';
+import { MdOutlinePushPin } from "react-icons/md";
 import { Skeleton } from '@mui/material';
 import { TbPinnedOff } from 'react-icons/tb';
 import FiltersDropdown from './FiltersDropdown';
@@ -313,7 +314,7 @@ const ChartTypes = ({
                         color="primary"
                         size="small"
                       >
-                        <BsFillPinFill fontSize="18px" />
+                        <MdOutlinePushPin fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
