@@ -2,12 +2,12 @@ import { Person } from '@mui/icons-material';
 import { Avatar, Badge } from '@mui/material';
 import dayjs from 'dayjs';
 import { memo } from 'react';
-import { TbPinnedOff } from 'react-icons/tb';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 import GenieText from 'src/assets/svg/GenieText';
 import { Chat, User } from 'src/components/DesktopDM/types';
 import { stripHtmlTags } from 'src/components/DesktopDM/utils';
 import { cn, formatDate } from 'src/constants/helpers';
+import { MdOutlinePushPin } from "react-icons/md";
 
 export const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
   return (
@@ -75,13 +75,6 @@ export const RenderChatUser = memo(
           <div className="flex-grow">
             <div className="flex w-full justify-between">
               <p className="line-clamp-1 text-[14px]">{chat.to?.optionLabel}</p>
-
-              {isPinned && (
-                <span className="ml-auto flex items-center">
-                  <TbPinnedOff fontSize="18px" />
-                </span>
-              )}
-
               <div className="flex items-start gap-1">
                 {chat.notifications > 0 && (
                   <div className="flex min-h-[15px] min-w-[15px] flex-shrink-0 items-center justify-center rounded-full bg-green-500 px-1">
@@ -93,6 +86,11 @@ export const RenderChatUser = memo(
                     ? formatDate(chat.recentMessage?.date, 'H:MM A')
                     : formatDate(chat.recentMessage?.date, 'MMM D')}
                 </span>
+                {isPinned && (
+                  <span className="ml-auto flex items-center">
+                    <MdOutlinePushPin className="text-[var(--primary-text)]" />
+                  </span>
+                )}
               </div>
             </div>
             <span className="line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">
@@ -137,7 +135,7 @@ export const RenderUser = memo(({ user, onClick, onlineUsers, isPinned }: { onCl
         <p className="line-clamp-1 text-xs font-normal">{user.concatedName ? user.concatedName : `${user.firstName} ${user.lastName}`}</p>
         {isPinned && (
           <span className="ml-auto flex items-center">
-            <TbPinnedOff fontSize="18px" />
+            <MdOutlinePushPin className="text-[var(--primary-text)]" />
           </span>
         )}
       </button>

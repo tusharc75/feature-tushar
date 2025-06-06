@@ -12,7 +12,8 @@ import { useStore } from 'src/StateProvider/fastContext';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TbPinnedOff } from 'react-icons/tb';
-import { BsFillPinFill } from 'react-icons/bs';
+import { MdOutlinePushPin } from "react-icons/md";
+
 
 type ChatBoxProps = {
   state: UseDesktopDM;
@@ -80,7 +81,6 @@ const ChatBoxHeader = memo(
     const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
     const { setToastConfig } = useContext(CustomToastContext);
 
-    // --- Pin logic ---
     const [pinned, setPinned] = useState(!!data.pinned);
 
     useEffect(() => {
@@ -90,25 +90,12 @@ const ChatBoxHeader = memo(
     const handlePinUser = async (e: React.MouseEvent) => {
       e.stopPropagation();
       const userId = isUserData ? data._id : (data as Chat).to?.optionValue;
-
       try {
         const response = await axiosInstance().post(`work-space/channel/pin-unpin/${userId}`);
         setPinned(response.data.pinned);
-
-        setToastConfig({
-          open: true,
-          type: 'success',
-          message: response.data.pinned ? 'User pinned successfully' : 'User unpinned successfully'
-        });
-
-        // Notify UserList to refresh
         window.dispatchEvent(new CustomEvent('pinnedUsersUpdated'));
       } catch (err) {
-        setToastConfig({
-          open: true,
-          type: 'error',
-          message: 'Something went wrong. Please try again.'
-        });
+        setToastConfig(err);
       }
     };
 
@@ -152,23 +139,15 @@ const ChatBoxHeader = memo(
           )}
         </div>
         <div className="buttons flex items-center gap-1">
-
-          {/* Pin User Button */}
           <HtmlTooltip title={pinned ? "Unpin" : "Pin"}>
-            <IconButton
-              size="small"
-              onClick={handlePinUser}
-              sx={{ color: "primary", size: "small" }}
-            >
+            <IconButton size="small" onClick={handlePinUser}    >
               {pinned ? (
-                <TbPinnedOff fontSize="18px" />
+                <TbPinnedOff className="text-[var(--primary-text)]" />
               ) : (
-                 <BsFillPinFill fontSize="18px" />
+                <MdOutlinePushPin className="text-[var(--primary-text)]" />
               )}
             </IconButton>
           </HtmlTooltip>
-
-
           {!isMobile && (
             <HtmlTooltip title={openedChat.open === 'partial' ? 'Expand' : 'Collapse'}>
               <IconButton size="small" color="primary">

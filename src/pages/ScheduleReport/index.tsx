@@ -58,6 +58,7 @@ const ScheduleReport = () => {
             <div>
               <p
                 className="text-truncate link"
+                title={row.original.scheduleName}
                 onClick={() => {
                   if (permissions?.scheduleReport?.isUpdate) {
                     setShowManageDialog({ open: true, id: row?.original?._id });
@@ -75,18 +76,20 @@ const ScheduleReport = () => {
         accessor: 'resource',
         Header: 'Report',
         Cell: ({ row }) => (row?.original?.resource ? <div>
-          <p className="text-truncate">{row.original.resource}</p>
+          <p className="text-truncate" title={row.original.resource}>{row.original.resource}</p>
         </div> : <NoDataCell />)
       },
       {
         accessor: 'subscribeUsers',
         Header: 'Subscribe Users',
-        Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <p className="text-truncate">{row.original.subscribeUsers}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.subscribeUsers?.length ? <div> <p
+          className="text-truncate"
+          title={row.original.subscribeUsers}>{row.original.subscribeUsers}</p></div> : <NoDataCell />)
       },
       {
         accessor: 'emails',
         Header: 'Emails',
-        Cell: ({ row }) => (row?.original?.emails?.length ? <p className="text-truncate">{row.original.emails}</p> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.emails?.length ? <div> <p className="text-truncate" title={row.original.emails}>{row.original.emails}</p></div> : <NoDataCell />)
       },
       {
         accessor: 'frequency',
