@@ -562,7 +562,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
     resource: sidebarResource.creditMemo,
     referenceId: creditMemoData?._id,
     columns: columns,
-    isSendEmail: false,
+    isSendEmail: true,
     extraQueryParams: { isCreditMemo: true },
     defaultColumns: [
       'type',
