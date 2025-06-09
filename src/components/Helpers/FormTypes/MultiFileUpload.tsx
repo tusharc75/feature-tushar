@@ -89,10 +89,9 @@ const MultiFileUpload: React.FC<Props> = ({
           </>
         )}
       </Box>
-
       <Grid size={{ xs: 12, sm: 12, md: 12 }}>
         <Box
-          className={`mt-2 p-6 border border-gray-300 rounded-lg bg-gray-50 outline-none text-center flex flex-col items-center justify-center focus:border-cyan-600`}
+          className={`mt-2 p-3 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-800 outline-none text-center flex flex-col items-center justify-center focus:border-cyan-600`}
           onDrop={(e) => {
             e.preventDefault();
             if (!disabled && !isFileUploading) {
@@ -120,9 +119,9 @@ const MultiFileUpload: React.FC<Props> = ({
             </Typography>
           ) : (
             <>
-              <BackupOutlinedIcon color="action" fontSize='large'  />
-              <Typography variant="body2" color="#555555" mt={1} fontWeight={500} > {/*  fontWeight={600}  */}
-                Drag and drop files here or press (Ctrl + V)
+              <BackupOutlinedIcon color="action" fontSize='large' />
+              <Typography variant="body2" color="#555555" mt={1} fontWeight={500} >
+                Drag and drop files here or press (Ctrl/⌘ + V)
               </Typography>
               <Grid container spacing={2} marginTop={2}>
                 <label htmlFor={name}>
@@ -136,13 +135,17 @@ const MultiFileUpload: React.FC<Props> = ({
                     {required ? ' Upload Files *' : ' Upload Files'}
                   </ThemeButton>
                 </label>
-                <ThemeButton buttonType="default" component="span" disabled={disabled} onClick={() => setDocumentScanDialog(true)} startIcon={<DescriptionOutlinedIcon className='m-0.5' />}>
-                  Scan Files
+                <ThemeButton
+                  buttonType="theme"
+                  component="span"
+                  disabled={disabled}
+                  onClick={() => setDocumentScanDialog(true)}
+                  startIcon={<DescriptionOutlinedIcon className='m-0.5' />}>
+                  Scan Document
                 </ThemeButton>
               </Grid>
             </>
           )}
-
           {touched[name] && Boolean(errors[name]) && (
             <Box pt={1}>
               <Typography variant="body2" className="text-truncate" color="error">
@@ -152,44 +155,37 @@ const MultiFileUpload: React.FC<Props> = ({
           )}
         </Box>
       </Grid>
-
-      {
-        !doNotShowUploadedFile && values[name] && isArray(values[name]) && values[name].length > 0 && (
-          <Box mt={2}>
-            {values[name].map((item, i) => (
-              <Box key={`${item.fileName}-${i}`} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-                <Typography variant="body2" className="text-truncate" color="textPrimary" sx={{ maxWidth: '80%' }}>
-                  {item?.fileName}
-                </Typography>
-                <HtmlTooltip title="Remove">
-                  <IconButton
-                    size="small"
-                    disabled={!values[name]}
-                    onClick={() =>
-                      setFieldValue(
-                        name,
-                        values[name].filter((d) => d.fileName !== item.fileName)
-                      )
-                    }
-                  >
-                    <DeleteIcon fontSize="small" color="error" />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            ))}
-          </Box>
-        )
+      {!doNotShowUploadedFile && values[name] && isArray(values[name]) && values[name].length > 0 && (
+        <Box mt={2}>
+          {values[name].map((item, i) => (
+            <Box key={`${item.fileName}-${i}`} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+              <Typography variant="body2" className="text-truncate" color="textPrimary" sx={{ maxWidth: '80%' }}>
+                {item?.fileName}
+              </Typography>
+              <HtmlTooltip title="Remove">
+                <IconButton
+                  size="small"
+                  disabled={!values[name]}
+                  onClick={() =>
+                    setFieldValue(name, values[name].filter((d) => d.fileName !== item.fileName))
+                  }
+                >
+                  <DeleteIcon fontSize="small" color="error" />
+                </IconButton>
+              </HtmlTooltip>
+            </Box>
+          ))}
+        </Box>
+      )
       }
-      {
-        documentScanDialog && (
-          <DocumentScanner
-            name={name}
-            open={setDocumentScanDialog}
-            onClose={() => setDocumentScanDialog(false)}
-            setFieldValue={setFieldValue}
-          />
-        )
-      }
+      {documentScanDialog && (
+        <DocumentScanner
+          name={name}
+          open={setDocumentScanDialog}
+          onClose={() => setDocumentScanDialog(false)}
+          setFieldValue={setFieldValue}
+        />
+      )}
     </Fragment >
   );
 };

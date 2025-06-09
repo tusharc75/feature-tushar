@@ -482,7 +482,7 @@ const FormTypes = (props) => {
   const handleUploadFile = async (ev, isMultiple = false) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
-       
+
       let urls = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
@@ -2637,13 +2637,11 @@ const FormTypes = (props) => {
         values={values}
         errors={errors}
         touched={touched}
-        accept=".png,.jpg,.pdf"
         required={required}
         setFieldValue={setFieldValue}
         doNotShowUploadedFile={false}
         disabled={false}
       />
-
     ) : type === 'url' ? (
       <InfoLabel
         info={tooltipMessage}
