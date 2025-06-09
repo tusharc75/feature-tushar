@@ -32,7 +32,7 @@ interface Props {
   disabled?: boolean;
 }
 
-const MultiFileUploadNew: React.FC<Props> = ({
+const MultiFileUpload: React.FC<Props> = ({
   name,
   label = '',
   tooltipMessage = '',
@@ -194,4 +194,4 @@ const MultiFileUploadNew: React.FC<Props> = ({
   );
 };
 
-export default MultiFileUploadNew;
+export default MultiFileUpload;

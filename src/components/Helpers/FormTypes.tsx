@@ -68,7 +68,7 @@ import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
-import MultiFileUploadNew from './FormTypes/MultiFileUpload';
+import MultiFileUpload from './FormTypes/MultiFileUpload';
 
 type MultiFileType = {
   fileName: string;
@@ -2628,7 +2628,7 @@ const FormTypes = (props) => {
         </Box>
       </Fragment>
     ) : type === 'multiFileUploadNew' ? (
-      <MultiFileUploadNew
+      <MultiFileUpload
         name={name}
         label={label}
         handleUploadFile={handleUploadFile}
