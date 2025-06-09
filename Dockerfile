@@ -1,4 +1,4 @@
-FROM node:20.11.1-alpine3.19 AS builder
+FROM node:20.2.0-alpine3.19 AS builder
 WORKDIR /app
 COPY . .
 RUN yarn install && yarn build
