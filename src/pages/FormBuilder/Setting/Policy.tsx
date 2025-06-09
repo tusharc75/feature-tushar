@@ -85,15 +85,15 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
     const options =
       data?.option && data?.option?.length
         ? data?.option
-        : fields
-            ?.filter((ele) => !ele.fieldData?.primaryField)
-            ?.map((e) => {
-              return {
-                optionLabel: e?.fieldData?.fieldLabel,
-                optionValue: e?.fieldData?.fieldName,
-                order: e?.fieldData?.order
-              };
-            });
+        : data?.fieldOption ? fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [] : fields
+          ?.filter((ele) => !ele.fieldData?.primaryField)
+          ?.map((e) => {
+            return {
+              optionLabel: e?.fieldData?.fieldLabel,
+              optionValue: e?.fieldData?.fieldName,
+              order: e?.fieldData?.order
+            };
+          });
     return (
       <>
         {!loading ? (

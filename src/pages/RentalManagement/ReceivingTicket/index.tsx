@@ -534,7 +534,7 @@ const ReceivingTicket = ({
           },
           {
             resource: sidebarResource.serializedAsset,
-            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber']
+            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber', 'subStatus']
           }
         ]
       });
@@ -1654,6 +1654,15 @@ const ReceivingTicket = ({
         Header: 'Asset Status',
         cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       },
+      ...(assetFields?.find((f) => f.fieldName === 'subStatus')
+        ? [
+          {
+            accessor: 'subStatus',
+            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
           {
@@ -2590,6 +2599,25 @@ const ReceivingTicket = ({
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
+  const handleChangeSubStatus = (subStatus) => {
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-sub-status`, {
+        subStatus,
+        assetIds: selectedRecords?.map(r => r?._id)
+      })
+      .then(({ data }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
       {serviceData?.length > 0 && (
@@ -2635,7 +2663,8 @@ const ReceivingTicket = ({
                 assetPolicyData,
                 validateAction,
                 resources,
-                getFilterSelectedRecords
+                getFilterSelectedRecords,
+                handleChangeSubStatus
               }}
             />
           }
@@ -3232,6 +3261,7 @@ const ActionButtonMenuItems = ({
   validateAction,
   resources,
   getFilterSelectedRecords,
+  handleChangeSubStatus
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -3747,6 +3777,18 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
+      {assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(a => {
+        return (
+          <MenuItem
+            onClick={() => {
+              handleChangeSubStatus(a)
+            }}
+            id={`${a}-menu-item`}
+          >
+            {`Change Sub Status ${a}`}
+          </MenuItem>
+        )
+      })}
     </>
   );
 };
