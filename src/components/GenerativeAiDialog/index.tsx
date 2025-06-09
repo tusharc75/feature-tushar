@@ -13,6 +13,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
 
 const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl, existingContent }: any) => {
+
   const theme = useTheme();
   const [prompt, setPrompt] = useState('');
   const [responses, setResponses] = useState<any[]>([]);
@@ -39,8 +40,7 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
       const sanitized = sanitizeContent(existingContent);
       getContentSuggestions(sanitized);
     }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [responses, existingContent]);
+  }, [existingContent]);
 
   const handleSubmit = async (customPrompt: string | null = null) => {
     const currentPrompt = customPrompt || prompt;
@@ -166,7 +166,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
   const getContentSuggestions = async (content?: string) => {
     setIsReviewLoading(true);
     setReviewResponse('');
-
     try {
       const headers: any = {
         'Content-Type': 'application/json'
@@ -260,7 +259,6 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
 
   const dismissSuggestions = () => {
     setHasExistingContent(false);
-    handleClose();
   };
 
   const showSubmitButton = isInputFocused || prompt.trim().length > 0;
@@ -376,7 +374,9 @@ const GenerativeAiDialog: React.FC<any> = ({ handleInsert, handleClose, anchorEl
               ) : (
                 <Box sx={{ mb: 2 }}>
                   <Box sx={{ p: 1, border: '1px solid #eee', borderRadius: 1, mb: 2 }}>
-                    <Markdown remarkPlugins={[remarkGfm]}>{reviewResponse}</Markdown>
+                    <div className="ai-response pt-1">
+                      <Markdown remarkPlugins={[remarkGfm]}>{reviewResponse}</Markdown>
+                    </div>
                   </Box>
                   <Box sx={{ display: 'flex-start', justifyContent: 'space-between', mt: 2 }}>
                     <ThemeButton buttonType="theme" onClick={acceptSuggestions}>
