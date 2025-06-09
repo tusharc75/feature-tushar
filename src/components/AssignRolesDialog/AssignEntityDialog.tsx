@@ -14,7 +14,7 @@ import {
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -73,14 +73,21 @@ const AssignEntityDialog = ({
   const [search, setSearch] = useState('');
   const classes = useStyles();
 
+  const activeStepRef = useRef(activeStep);
+
   const handleNext = () => {
     setSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
 
   const handleBack = () => {
+    setSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
+  useEffect(() => {
+    activeStepRef.current = activeStep;
+  }, [activeStep]);
 
   useEffect(() => {
     setLoadingData(true);
@@ -228,7 +235,7 @@ const AssignEntityDialog = ({
     setSearch(value);
     let resultData = [];
     let resultRole = [];
-    if (activeStep === 0) {
+    if (activeStepRef.current === 0) {
       resultData = dataConst.filter((data) => {
         if (type === 'entity') {
           return data.entityName?.toLowerCase().search(value?.trim()?.toLowerCase()) !== -1;
