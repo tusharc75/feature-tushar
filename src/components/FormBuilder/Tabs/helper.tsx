@@ -189,7 +189,15 @@ export const resourcePolicy = [
           }
         ],
         defaultValue: []
-      }
+      },
+      {
+        fieldName: 'inUseSubStatus',
+        fieldLabel: 'In-Use Sub Status',
+        type: 'multiSelect',
+        defaultValue: [],
+        fieldOption: 'subStatus',
+        required: false
+      },
     ]
   },
   {
