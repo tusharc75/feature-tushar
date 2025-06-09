@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { Autocomplete, Box, Dialog, IconButton, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { isMobile, isTablet } from 'react-device-detect';
-import { cn, CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { FieldArray, Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -14,6 +14,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function UpdateResourceActions({ onClose, onSuccess, resource, resourceData }) {
   const OPERATOR = [
@@ -41,10 +42,25 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
 
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialValues, setInitialValues] = useState({ updateResourceActions: [] });
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
+  const [lookupResourceDataOptions, setLookupResourceDataOptions] = useState({})
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.product}`)
+      .then(({ data: { data } }) => {
+        setLookupResourceDataOptions(data)
+      })
+      .catch((err) => {
+      });
+  }, [])
 
   useEffect(() => {
     getResourceFieldList(resource);
@@ -164,6 +180,8 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
                               touched={touched}
                               fields={fields}
                               operators={OPERATOR}
+                              resources={resources}
+                              lookupResourceDataOptions={lookupResourceDataOptions}
                             />
                           ))}
                         </ul>
@@ -192,7 +210,7 @@ export default function UpdateResourceActions({ onClose, onSuccess, resource, re
   );
 }
 
-const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fields, operators }) => {
+const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fields, operators, resources, lookupResourceDataOptions }) => {
   return (
     <li className="flex list-none items-center gap-2">
       <fieldset className="flex-grow space-y-2 rounded-md border px-3 pb-3">
@@ -313,6 +331,28 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
                 </>
               )}
             </FieldArray>
+          </div>
+          <div className='mt-4'>
+            <Autocomplete
+              options={lookupResourceDataOptions[sidebarResource.product] || []}
+              getOptionLabel={(option: any) => option?.optionLabel || ''}
+              fullWidth
+              multiple
+              value={[...lookupResourceDataOptions[sidebarResource.product] || []]?.filter(p => values?.updateResourceActions?.[index]?.products?.includes(p?.optionValue))}
+              onChange={(e, newValue) => {
+                setFieldValue(`updateResourceActions.${index}.products`, newValue?.map(v => v?.optionValue) || []);
+              }}
+              size="small"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={resources?.product?.titlePlural}
+                  margin="none"
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+            />
           </div>
         </fieldset>
         <fieldset className="rounded-md  border border-dashed border-gray-200 p-3 dark:border-gray-800">
