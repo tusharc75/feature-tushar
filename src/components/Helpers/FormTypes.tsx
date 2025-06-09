@@ -68,6 +68,7 @@ import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import MultiFileUploadNew from './FormTypes/MultiFileUpload';
 
 type MultiFileType = {
   fileName: string;
@@ -481,8 +482,8 @@ const FormTypes = (props) => {
   const handleUploadFile = async (ev, isMultiple = false) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
-
-      let urls: any = values[name] ? values[name] : [];
+       
+      let urls = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -506,9 +507,9 @@ const FormTypes = (props) => {
         }
         if (!url) return;
         if (isMultiple) {
-          urls.push(url);
+          urls?.push(url);
         } else {
-          urls = url;
+          urls = [url];
         }
       }
       setFieldValue(name, urls);
@@ -2626,66 +2627,23 @@ const FormTypes = (props) => {
           </Grid>
         </Box>
       </Fragment>
-    ) : type === 'uploadZone' ? (
-      <Grid size={{ xs: 12, sm: 12, md: 12 }}>
-        <Box
-          onDrop={(e) => {
-            e.preventDefault();
-            if (!rest?.disabled && !isFileUploading) {
-              handleUploadFile({ target: { files: e.dataTransfer.files } }, true);
-            }
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          onPaste={(e) => {
-            e.preventDefault();
-            const items = e.clipboardData?.items;
-            const fileItems: File[] = [];
-            for (let i = 0; i < items.length; i++) {
-              const item = items[i];
-              if (item.kind === 'file') {
-                const file = item.getAsFile();
-                if (file) fileItems.push(file);
-              }
-            }
-            if (fileItems.length) {
-              const dt = new DataTransfer();
-              fileItems.forEach(f => dt.items.add(f));
-              handleUploadFile({ target: { files: dt.files } }, true);
-            } else {
-              console.warn('No file found in clipboard');
-            }
-          }}
-          tabIndex={0}
-          sx={{
-            mt: 2,
-            p: 2,
-            border: '2px dashed #ccc',
-            borderRadius: '8px',
-            textAlign: 'center',
-            bgcolor: '#fafafa',
-            outline: 'none',
-            '&:focus': { borderColor: '#0f9fa9' },
-          }}
-        >
-          <Typography variant="body2" color="textSecondary">
-            {isFileUploading ? (
-              `Uploading... ${fileUploadProgress}%`
-            ) : (
-              <>
-                Paste (Ctrl+V) / Drag files here
-              </>
-            )}
-          </Typography>
-        </Box>
+    ) : type === 'multiFileUploadNew' ? (
+      <MultiFileUploadNew
+        name={name}
+        label={label}
+        handleUploadFile={handleUploadFile}
+        isFileUploading={isFileUploading}
+        fileUploadProgress={fileUploadProgress}
+        values={values}
+        errors={errors}
+        touched={touched}
+        accept=".png,.jpg,.pdf"
+        required={required}
+        setFieldValue={setFieldValue}
+        doNotShowUploadedFile={false}
+        disabled={false}
+      />
 
-        {touched[name] && Boolean(errors[name]) && (
-          <Box pt={1}>
-            <Typography variant="body2" className="text-truncate" color="error">
-              {errors[name]}
-            </Typography>
-          </Box>
-        )}
-      </Grid>
     ) : type === 'url' ? (
       <InfoLabel
         info={tooltipMessage}

@@ -17,7 +17,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isArray, isEqual, isString } from 'lodash';
-import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, checkSuperAdminAccess, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -26,7 +25,6 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import { updateDisable } from 'src/constants/messageHelpers';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
-import { Typography } from '@mui/material';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -374,90 +372,63 @@ export default function ManageAttachment({
                         </Grid>
                       ))}
                     {type === 'file' && (
-                      <>
-                        <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+                      <Grid container size={{ xs: 12, md: 12, sm: 12 }}>
+                        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
                           <FormTypes
                             label=""
                             name="fileUrl"
                             required={true}
-                            type="uploadZone"
+                            type="multiFileUploadNew"
                             values={values}
                             disabled={!allowedToEdit}
                             errors={errors}
                             touched={touched}
                             size="small"
-                            setFieldValue={(fname, file) => {
+                            setFieldValue={(fname, file, isScanning = false) => {
+                              if (isScanning) {
+                                setFieldValue(fname, file);
+                              }
                               onUploadFile(file);
                             }}
                             doNotShowUploadedFile={true}
+                            fileUploadProgress={uploadingImageOrFileProgress}
                             imageOrFileUploadCompletePercentage={(completePercentage) => {
                               setUploadingImageOrFileProgress(completePercentage);
                             }}
                           />
                         </Grid>
-                        <Grid container size={{ xs: 12 }}>
-                          <Grid size={{ xs: 12 }}>
-                            <div style={{ width: '100%' }}>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <div className="ml-0">
-                                  <FormTypes
-                                    label=""
-                                    name="fileUrl"
-                                    required={true}
-                                    type="multiFileUpload"
-                                    values={values}
-                                    disabled={!allowedToEdit}
-                                    errors={errors}
-                                    touched={touched}
-                                    size="small"
-                                    setFieldValue={(fname, file) => {
-                                      onUploadFile(file);
-                                    }}
-                                    doNotShowUploadedFile={true}
-                                    imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                      setUploadingImageOrFileProgress(completePercentage);
-                                    }}
-                                  />
-                                </div>
-                                <ThemeButton buttonType="theme" component="span" disabled={!allowedToEdit} onClick={() => setDocumentScanDialog(true)}>
-                                  Scan Document
-                                </ThemeButton>
-                              </div>
-                            </div>
-                          </Grid>
-                          <Grid size={{ xs: 12 }}>
-                            <AttachmentThumbnail
-                              attachments={allAttachments}
-                              handleDeleteAttachment={handleDeleteAttachment}
-                              allowedToEdit={allowedToEdit}
-                            />
-                          </Grid>
-                          {attachmentData && (
-                            <>
-                              <Grid size={{ xs: 6 }}>
-                                <div className="flex flex-col p-2">
-                                  <p>
-                                    Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
-                                  </p>
-                                  <p>
-                                    Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
-                                  </p>
-                                </div>
-                              </Grid>
-                              <Grid size={{ xs: 6 }}>
-                                <DeleteRequest
-                                  file={attachmentData}
-                                  handleSucess={() => {
-                                    fetchData();
-                                    handleClose();
-                                  }}
-                                  showWithoutPopOver={true}
-                                />
-                              </Grid>
-                            </>
-                          )}
+                        <Grid size={{ xs: 12 }}>
+                          <AttachmentThumbnail
+                            attachments={allAttachments}
+                            handleDeleteAttachment={handleDeleteAttachment}
+                            allowedToEdit={allowedToEdit}
+                          />
                         </Grid>
-                      </>
+                        {attachmentData && (
+                          <>
+                            <Grid size={{ xs: 6 }}>
+                              <div className="flex flex-col p-2">
+                                <p>
+                                  Uploaded By: <span>{attachmentData?.createdBy?.user?.concatedName}</span>
+                                </p>
+                                <p>
+                                  Uploaded Date: <span>{displayDate(attachmentData?.createdBy?.date)}</span>
+                                </p>
+                              </div>
+                            </Grid>
+                            <Grid size={{ xs: 6 }}>
+                              <DeleteRequest
+                                file={attachmentData}
+                                handleSucess={() => {
+                                  fetchData();
+                                  handleClose();
+                                }}
+                                showWithoutPopOver={true}
+                              />
+                            </Grid>
+                          </>
+                        )}
+                      </Grid>
                     )}
                   </Grid>
                 </Box>
@@ -517,14 +488,6 @@ export default function ManageAttachment({
                   setShowConfirmationDialog(false);
                 }}
                 onOk={() => handleDeleteAttachment(attachmentToDelete)}
-              />
-            )}
-            {documentScanDialog && (
-              <DocumentScanner
-                open={setDocumentScanDialog}
-                onClose={() => setDocumentScanDialog(false)}
-                setFieldValue={setFieldValue}
-                onUploadFile={onUploadFile}
               />
             )}
           </>
