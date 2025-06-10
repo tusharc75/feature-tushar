@@ -522,6 +522,7 @@ export default function DeliveryTicketDetail(props) {
                 defaultColumns={
                   serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
                 }
+                isSendEmail={true}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}

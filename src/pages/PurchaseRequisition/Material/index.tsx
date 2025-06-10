@@ -480,7 +480,8 @@ const Material = ({
     fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
-    columns: columns
+    columns: columns,
+    isSendEmail : true
   };
 
   const actionButtonMenuItems = () => {

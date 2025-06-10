@@ -254,7 +254,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     resource: sidebarResource.subcontractAssembly,
     referenceId: subcontractAssemblyData._id,
     columns: columns,
-    isSendEmail: false
+    isSendEmail: true
   };
 
   return (
