@@ -153,7 +153,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         const panel = panels[i] as HTMLDivElement;
 
         item.setAttribute('data-original-height', `${parseInt((item.computedStyleMap().get('height') as string) || '0px', 10)}`);
-        if (+item.dataset.originalHeight > 108 && !item.dataset.expanded) {
+        if (+item.dataset.originalHeight > 115 && !item.dataset.expanded) {
           item.style.maxHeight = '142px';
           panel.style.maxHeight = `142px`;
           item.style.overflow = 'hidden';
@@ -166,8 +166,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
               item.setAttribute('data-expanded', 'true');
               try {
                 item.removeChild(button);
-              } catch (error) {
-              }
+              } catch (error) {}
             };
             button.classList.add('timeline-show-all-button');
             item.appendChild(button);

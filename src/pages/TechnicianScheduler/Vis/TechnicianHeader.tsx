@@ -1,9 +1,11 @@
-import { Map } from '@mui/icons-material';
+import { Gamepad, Map } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import useLocalStorage from 'src/hooks/useLocalStore';
 import SearchButton from 'src/pages/TechnicianScheduler/SearchButton';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
+import { SHOW_MESSAGE_KEY } from 'src/pages/TechnicianScheduler/Vis/utils';
 import { DataSet } from 'vis-timeline/standalone';
 
 const TechnicianHeader = ({
@@ -14,6 +16,7 @@ const TechnicianHeader = ({
     items: DataSet<any, 'id'> | null;
   };
 }) => {
+  const [, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY);
   const [, setStore] = useTimelineStore((state) => state.mapData);
   const [searchValue, setSearchValue] = useState('');
 
@@ -50,6 +53,11 @@ const TechnicianHeader = ({
         <HtmlTooltip title="Map">
           <IconButton size="small" color="primary" onClick={handleMapCLick}>
             <Map fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+        <HtmlTooltip title={'Show Controls'}>
+          <IconButton onClick={() => setShowMessage(true)} size="small" color="primary">
+            <Gamepad fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </div>
