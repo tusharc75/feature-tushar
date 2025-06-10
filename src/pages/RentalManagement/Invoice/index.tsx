@@ -309,6 +309,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   const previewDownloadProps = {
     fileName: `${resources?.rentalManagement?.titleSingular}-${rentalManagementData?.rentalJobName}`,
+    subject: `${resources?.rentalManagement?.titleSingular}-${rentalManagementData?.rentalJobName}`,
     resource: sidebarResource.rentalManagement,
     referenceId: rentalManagementData._id,
     columns: columns,

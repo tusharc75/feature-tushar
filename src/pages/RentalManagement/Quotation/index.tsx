@@ -367,13 +367,13 @@ const Quotation = ({
 
   const previewDownloadProps = {
     fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(quotationData),
     isExcelDownload: true,
-    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     extraQueryParams: { uniqueId: quotationData?.versions[currentVersion]?._id },
     defaultColumns: [
       'index',
