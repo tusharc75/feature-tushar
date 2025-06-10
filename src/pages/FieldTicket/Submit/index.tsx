@@ -236,6 +236,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, fieldTicketFields, allowedToE
 
   const previewDownloadProps = {
     fileName: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
+    subject: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,
     columns: columns,
