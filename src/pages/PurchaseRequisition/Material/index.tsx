@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -481,7 +481,8 @@ const Material = ({
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
     columns: columns,
-    isSendEmail : true
+    isSendEmail : true,
+    toEmails: getEmailsFromContacts(purchaseRequisitionData),
   };
 
   const actionButtonMenuItems = () => {
