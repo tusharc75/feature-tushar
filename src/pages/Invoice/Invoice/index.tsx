@@ -188,6 +188,7 @@ const Invoice = ({ invoiceData, invoiceFields, setNextStep, handleChangeStatus, 
 
   const previewDownloadProps = {
     fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,

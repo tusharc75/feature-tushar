@@ -165,6 +165,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
 
   const previewDownloadProps = {
     fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+    subject: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
     resource: sidebarResource.sublease,
     referenceId: subleaseData._id,
     columns: columns,

@@ -729,6 +729,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const previewDownloadProps = {
     fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
+    subject: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
     resource: sidebarResource.purchaseOrder,
     referenceId: purchaseOrderData?._id,
     columns: columns,

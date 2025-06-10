@@ -199,6 +199,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
 
   const previewDownloadProps = {
     fileName: `${resources?.salesOrder?.titleSingular}-${salesOrderData?.salesOrderNo}`,
+    subject: `${resources?.salesOrder?.titleSingular}-${salesOrderData?.salesOrderNo}`,
     resource: sidebarResource.salesOrder,
     referenceId: salesOrderData._id,
     columns: columns,
