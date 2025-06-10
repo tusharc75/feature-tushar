@@ -1,5 +1,5 @@
 import { Box, IconButton } from '@mui/material';
-import { AddCircleOutline, Autorenew, Subject, Visibility } from '@mui/icons-material';
+import { AddCircleOutline, Autorenew, Visibility } from '@mui/icons-material';
 import HistoryIcon from '@mui/icons-material/History';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -257,7 +257,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     columns: columns,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(subcontractAssemblyData),
-    Subject: `${resources?.subcontractAssembly?.titleSingular}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
+    subject: `${resources?.subcontractAssembly?.titleSingular}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
   };
 
   return (
