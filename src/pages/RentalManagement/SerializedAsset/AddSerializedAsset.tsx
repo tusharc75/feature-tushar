@@ -571,7 +571,18 @@ const AddSerializedAsset = ({
                       <ThemeButton
                         buttonType="theme"
                         onClick={() => {
-                          if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                          if (
+                            user?.user?.brandPolicy?.serializedAssetCertification &&
+                            selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                          ) {
+                            setCertificateExpireAlert({
+                              open: true,
+                              asset: selectedRecords
+                                ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                                ?.map((e) => e.assetNumber)
+                                ?.toString()
+                            });
+                          } else if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                             const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                             setOpenAssetDataDialog({
                               open: true,
@@ -663,151 +674,165 @@ const AddSerializedAsset = ({
           </Box>
         </CustomDialogContent>
       </Dialog>
-      {showTransferAssetDialog.open ? (
-        <ManageTransferAsset
-          isClone={false}
-          transferAssetId={null}
-          onClose={() => setShowTransferAssetDialog({ open: false, data: null })}
-          onSuccess={(data) => {
-            handleAddAssetToTransferAsset(data?._id);
-          }}
-          referenceId={referenceData._id}
-          referenceType={referenceType}
-          assets={selectedRecords?.map((e) => e._id)}
-          referenceData={{
-            transferFromPlant: selectedRecords[0]?.warehouseId,
-            transfertoPlant: referenceData?.warehouse,
-            wellName: referenceData?.wellName,
-            wellNumber: referenceData?.wellNumber,
-            afeNumber: referenceData?.afeNumber,
-            transferType: 'Internal'
-          }}
-        />
-      ) : null}
-      {showTicketDialog.open && (
-        <ManageDeliveryTicket
-          ticketType={DELIVERY_TICKET_TYPE.receiving}
-          referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
-          referenceData={showTicketDialog.data}
-          assets={selectedRecords}
-          products={[]}
-          onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
-          onSuccess={(data) => {
-            handleCreateLoadingTicketAddAsstes(data);
-          }}
-        />
-      )}
-      {mtrConfirmBox && (
-        <ConfirmationDialog
-          open={mtrConfirmBox}
-          okBtnLoading={isAdding}
-          message={`MTR(s) missing for some or all line items.`}
-          onClose={() => {
-            setMtrConfirmBox(false);
-          }}
-          onOk={() => {
-            addSerializedAsset(selectedRecords);
-            setMtrConfirmBox(false);
-          }}
-        />
-      )}
-      {inuseAssetConfirmBox && (
-        <ConfirmationDialog
-          open={inuseAssetConfirmBox}
-          okBtnLoading={isSubmitting}
-          message={`Do you want to move the assets to the new rental job?`}
-          onClose={() => {
-            setInuseAssetConfirmBox(false);
-          }}
-          onOk={() => {
-            const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
-              ? user?.user?.brandPolicy?.rentalReceivingStatus
-              : ASSET_STATUS.underReview;
-            if (checkAssetPolicy(receivingStatus)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
-              setOpenAssetDataDialog({
-                open: true,
-                statusPolicy: statusPolicy,
-                _ids: assetIds,
-                type: 'underReview'
-              });
-            } else {
-              handleAutoTransferAssets();
-            }
-          }}
-        />
-      )}
-      {certificateExpireAlert.open && (
-        <MessageDialog
-          open={true}
-          header="Certification Information"
-          message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
-          onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
-        />
-      )}
-      {openAssetDataDialog.open && (
-        <AssetDetailsChangeDialog
-          ids={openAssetDataDialog._ids}
-          statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
-          onSuccess={(data) => {
-            if (Number(tabValue) === 2) {
-              if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                if (openAssetDataDialog.type === 'underReview') {
-                  setUnderReviewAssetData(data);
-                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
-                  setOpenAssetDataDialog({
-                    open: true,
-                    statusPolicy: statusPolicy,
-                    _ids: assetIds,
-                    type: 'reserved'
-                  });
+      {
+        showTransferAssetDialog.open ? (
+          <ManageTransferAsset
+            isClone={false}
+            transferAssetId={null}
+            onClose={() => setShowTransferAssetDialog({ open: false, data: null })}
+            onSuccess={(data) => {
+              handleAddAssetToTransferAsset(data?._id);
+            }}
+            referenceId={referenceData._id}
+            referenceType={referenceType}
+            assets={selectedRecords?.map((e) => e._id)}
+            referenceData={{
+              transferFromPlant: selectedRecords[0]?.warehouseId,
+              transfertoPlant: referenceData?.warehouse,
+              wellName: referenceData?.wellName,
+              wellNumber: referenceData?.wellNumber,
+              afeNumber: referenceData?.afeNumber,
+              transferType: 'Internal'
+            }}
+          />
+        ) : null
+      }
+      {
+        showTicketDialog.open && (
+          <ManageDeliveryTicket
+            ticketType={DELIVERY_TICKET_TYPE.receiving}
+            referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
+            referenceData={showTicketDialog.data}
+            assets={selectedRecords}
+            products={[]}
+            onClose={() => setShowTicketDialog({ open: false, data: {}, assets: [] })}
+            onSuccess={(data) => {
+              handleCreateLoadingTicketAddAsstes(data);
+            }}
+          />
+        )
+      }
+      {
+        mtrConfirmBox && (
+          <ConfirmationDialog
+            open={mtrConfirmBox}
+            okBtnLoading={isAdding}
+            message={`MTR(s) missing for some or all line items.`}
+            onClose={() => {
+              setMtrConfirmBox(false);
+            }}
+            onOk={() => {
+              addSerializedAsset(selectedRecords);
+              setMtrConfirmBox(false);
+            }}
+          />
+        )
+      }
+      {
+        inuseAssetConfirmBox && (
+          <ConfirmationDialog
+            open={inuseAssetConfirmBox}
+            okBtnLoading={isSubmitting}
+            message={`Do you want to move the assets to the new rental job?`}
+            onClose={() => {
+              setInuseAssetConfirmBox(false);
+            }}
+            onOk={() => {
+              const receivingStatus = user?.user?.brandPolicy?.rentalReceivingStatus
+                ? user?.user?.brandPolicy?.rentalReceivingStatus
+                : ASSET_STATUS.underReview;
+              if (checkAssetPolicy(receivingStatus)) {
+                const { statusPolicy, assetIds } = checkAssetPolicy(receivingStatus);
+                setOpenAssetDataDialog({
+                  open: true,
+                  statusPolicy: statusPolicy,
+                  _ids: assetIds,
+                  type: 'underReview'
+                });
+              } else {
+                handleAutoTransferAssets();
+              }
+            }}
+          />
+        )
+      }
+      {
+        certificateExpireAlert.open && (
+          <MessageDialog
+            open={true}
+            header="Certification Information"
+            message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
+            onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
+          />
+        )
+      }
+      {
+        openAssetDataDialog.open && (
+          <AssetDetailsChangeDialog
+            ids={openAssetDataDialog._ids}
+            statusPolicy={openAssetDataDialog.statusPolicy}
+            setAssetsData={() => { }}
+            onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
+            onSuccess={(data) => {
+              if (Number(tabValue) === 2) {
+                if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                  if (openAssetDataDialog.type === 'underReview') {
+                    setUnderReviewAssetData(data);
+                    const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
+                    setOpenAssetDataDialog({
+                      open: true,
+                      statusPolicy: statusPolicy,
+                      _ids: assetIds,
+                      type: 'reserved'
+                    });
+                  } else {
+                    handleAutoTransferAssets(underReviewAssetData, data);
+                    setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
+                  }
                 } else {
-                  handleAutoTransferAssets(underReviewAssetData, data);
+                  handleAutoTransferAssets(data);
                   setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
                 }
               } else {
-                handleAutoTransferAssets(data);
+                if (openAssetDataDialog.type === 'add') {
+                  addSerializedAsset(selectedRecords, false, data);
+                } else {
+                  setShowTransferAssetDialog({ open: true, data: data });
+                }
                 setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
               }
-            } else {
-              if (openAssetDataDialog.type === 'add') {
-                addSerializedAsset(selectedRecords, false, data);
-              } else {
-                setShowTransferAssetDialog({ open: true, data: data });
-              }
-              setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
-            }
-          }}
-          staticLookUpFilters={{
-            wellNumber: referenceData?.wellNumber,
-            wellName: referenceData?.wellName ? (isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName) : null
-          }}
-          productsDefaultData={selectedProducts}
-        />
-      )}
-      {showStatusChangeConfirmBox.open && (
-        <CustomMessageDialog
-          open={showStatusChangeConfirmBox.open}
-          errorMessages={showStatusChangeConfirmBox.assetDataError}
-          onClose={() => {
-            setShowStatusChangeConfirmBox({
-              open: false,
-              underReviewAssetsData: null,
-              reserveAssetsData: null,
-              assetDataError: []
-            });
-            handleSerializedAssetClose();
-          }}
-          onConfirm={() => {
-            handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
-          }}
-          isSubmitting={isSubmitting}
-          title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
-        />
-      )}
-    </Fragment>
+            }}
+            staticLookUpFilters={{
+              wellNumber: referenceData?.wellNumber,
+              wellName: referenceData?.wellName ? (isString(referenceData?.wellName) ? [referenceData?.wellName] : referenceData?.wellName) : null
+            }}
+            productsDefaultData={selectedProducts}
+          />
+        )
+      }
+      {
+        showStatusChangeConfirmBox.open && (
+          <CustomMessageDialog
+            open={showStatusChangeConfirmBox.open}
+            errorMessages={showStatusChangeConfirmBox.assetDataError}
+            onClose={() => {
+              setShowStatusChangeConfirmBox({
+                open: false,
+                underReviewAssetsData: null,
+                reserveAssetsData: null,
+                assetDataError: []
+              });
+              handleSerializedAssetClose();
+            }}
+            onConfirm={() => {
+              handleAutoTransferAssets(showStatusChangeConfirmBox.underReviewAssetsData, showStatusChangeConfirmBox.reserveAssetsData, true);
+            }}
+            isSubmitting={isSubmitting}
+            title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
+          />
+        )
+      }
+    </Fragment >
   );
 };
 
