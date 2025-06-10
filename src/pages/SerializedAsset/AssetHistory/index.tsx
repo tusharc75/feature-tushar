@@ -151,7 +151,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     // },
   ];
 
-  const { page, limit, filters, sorting } = state;
+  const { page, limit, filters, sorting, search } = state;
 
   useEffect(() => {
     if (fields) {
@@ -492,7 +492,7 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     if (id) {
       fetchData();
     }
-  }, [id, refresh, page, limit, filters, sorting, duration, tabValue]);
+  }, [id, refresh, page, limit, filters, search, sorting, duration, tabValue]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -528,6 +528,9 @@ const AssetHistory = ({ id, refresh, resourceData, fields }) => {
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };
