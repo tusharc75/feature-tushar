@@ -571,8 +571,7 @@ const AddSerializedAsset = ({
                       <ThemeButton
                         buttonType="theme"
                         onClick={() => {
-                          if (
-                            user?.user?.brandPolicy?.serializedAssetCertification &&
+                          if (user?.user?.brandPolicy?.serializedAssetCertification &&
                             selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
                           ) {
                             setCertificateExpireAlert({
@@ -582,7 +581,10 @@ const AddSerializedAsset = ({
                                 ?.map((e) => e.assetNumber)
                                 ?.toString()
                             });
-                          } else if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                            return;
+                          }
+
+                          if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                             const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                             setOpenAssetDataDialog({
                               open: true,

@@ -428,18 +428,21 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
   const addButtonOnClick = () => {
     if (Number(tabValue) === 2) {
       setInuseAssetConfirmBox(true);
-    } else if (
-      user?.user?.brandPolicy?.serializedAssetCertification &&
-      selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
-    ) {
-      setCertificateExpireAlert({
-        open: true,
-        asset: selectedRecords
-          ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
-          ?.map((e) => e.assetNumber)
-          ?.toString()
-      });
     } else if (Number(tabValue) === 0 || Number(tabValue) === 1) {
+
+      if (user?.user?.brandPolicy?.serializedAssetCertification &&
+        selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+      ) {
+        setCertificateExpireAlert({
+          open: true,
+          asset: selectedRecords
+            ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+            ?.map((e) => e.assetNumber)
+            ?.toString()
+        });
+        return;
+      }
+
       if (checkAssetPolicy(ASSET_STATUS.reserved)) {
         const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
         setOpenAssetDataDialog({
