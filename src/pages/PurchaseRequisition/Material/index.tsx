@@ -27,6 +27,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Subject } from '@mui/icons-material';
 
 const Material = ({
   allowedToEdit,
@@ -477,12 +478,13 @@ const Material = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisition}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
     columns: columns,
-    isSendEmail : true,
+    isSendEmail: true,
     toEmails: getEmailsFromContacts(purchaseRequisitionData),
+    Subject: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisition}`
   };
 
   const actionButtonMenuItems = () => {

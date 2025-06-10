@@ -523,6 +523,7 @@ export default function DeliveryTicketDetail(props) {
                 defaultColumns={
                   serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
                 }
+                subject={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
                 isSendEmail={true}
                 toEmails = {getEmailsFromContacts(deliveryTicketData)}
               />
