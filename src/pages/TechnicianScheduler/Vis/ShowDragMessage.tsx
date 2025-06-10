@@ -6,10 +6,11 @@ import { CgScrollV } from 'react-icons/cg';
 import { HiCursorClick } from 'react-icons/hi';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
 import { PiMouseLeftClickFill } from 'react-icons/pi';
+import useLocalStorage from 'src/hooks/useLocalStore';
+import { SHOW_MESSAGE_KEY } from 'src/pages/TechnicianScheduler/Vis/utils';
 
 const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObject<HTMLDivElement> }) => {
-  // const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
-  const [showMessage, setShowMessage] = useState(true);
+  const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
 
   useEffect(() => {
     const container = containerRef?.current;
