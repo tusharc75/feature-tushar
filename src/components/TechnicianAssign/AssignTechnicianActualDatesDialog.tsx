@@ -9,7 +9,7 @@ import CustomDateTimeRangePicker, { DateTimeRange, DateValidationError } from 's
 import { isMobile, isTablet } from 'react-device-detect';
 
 function AssignTechnicianActualDatesDialog({ handleAssign, handleClose, resourceData, isSubmitting }) {
-  
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [dateTimeRanges, setDateTimeRanges] = useState<DateTimeRange[]>([
     {
@@ -20,7 +20,7 @@ function AssignTechnicianActualDatesDialog({ handleAssign, handleClose, resource
   const [validationErrors, setValidationErrors] = useState<DateValidationError[]>([]);
 
   const getTitle = useCallback(() => {
-    return `${resourceData[0]?.fieldTicketNumber || resourceData[0]?.rentalJobName || resourceData[0]?.fieldServiceOrderNumber}`;
+    return `${resourceData[0]?.resourceNumber}`;
   }, [resourceData]);
 
   return (
