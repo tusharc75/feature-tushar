@@ -3777,8 +3777,9 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
-      {assetPolicyData?.policy?.inUseSubStatus?.length
-        && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
           return (
             <MenuItem
               onClick={() => {
