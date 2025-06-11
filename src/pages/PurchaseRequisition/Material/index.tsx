@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -477,10 +477,13 @@ const Material = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    fileName: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
-    columns: columns
+    columns: columns,
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(purchaseRequisitionData),
+    subject: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`
   };
 
   const actionButtonMenuItems = () => {
