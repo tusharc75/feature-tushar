@@ -780,7 +780,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
           />
-          <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} />
+          <FinalPriceBox
+            allFields={purchaseOrderFields}
+            data={purchaseOrderData}
+            childFields={productFields}
+            material={dataRows}
+          />
         </Box>
       ) : (
         <Box p={2} height={500}>
