@@ -3777,18 +3777,24 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
-      {assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(a => {
-        return (
-          <MenuItem
-            onClick={() => {
-              handleChangeSubStatus(a)
-            }}
-            id={`${a}-menu-item`}
-          >
-            {`Change Sub Status ${a}`}
-          </MenuItem>
-        )
-      })}
+      {assetPolicyData?.policy?.inUseSubStatus?.length
+        && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+          return (
+            <MenuItem
+              onClick={() => {
+                handleChangeSubStatus(status)
+              }}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length
+                && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((e) => e?.status === ASSET_STATUS.inUse)
+                && !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.find((e) => e?.subStatus === status)
+                ? false : true
+              }
+              id={`${status}-menu-item`}
+            >
+              {`Change Sub Status ${status}`}
+            </MenuItem>
+          )
+        })}
     </>
   );
 };
