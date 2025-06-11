@@ -23,9 +23,15 @@ import _ from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { useData } from 'src/StateProvider/Provider';
 
-const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit }) => {
+const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -163,16 +169,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       }
     });
 
+    delete v?.minimumPrice
+
     Object.keys(v).forEach((key) => {
       if (!(key.indexOf('_') !== -1 && key !== '_id' && key?.split('_')?.length)) {
         updatedData[key] = v[key];
       }
     });
     const values: any = updatedData;
-
-    if (!v['enableDurationBasedPricing']) {
-      values['durationBasedPricing'] = []
-    }
 
     let data = [];
 
@@ -200,6 +204,8 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     } else {
       data = [values];
     }
+
+    console.log('ddddd', data)
 
     axiosInstance()
       .put(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data })
@@ -502,22 +508,27 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             />
                           </Grid>
                         </Grid>
-                        <RentPriceBox
-                          conditionData={conditionData}
-                          values={values}
-                          setFieldValue={setFieldValue}
-                          currency={currency}
-                          allowedToEdit={allowedToEdit}
-                          touched={touched}
-                          errors={errors}
-                        />
-                        <div className='mt-2'>
+                        <div className='mt-2 border p-2'>
+                          <RentPriceBox
+                            conditionData={conditionData}
+                            values={values}
+                            setFieldValue={setFieldValue}
+                            currency={currency}
+                            allowedToEdit={allowedToEdit}
+                            touched={touched}
+                            errors={errors}
+                          />
+                        </div>
+                        <div className='mt-2 border p-2'>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 checked={values['enableMinimumPrice']}
                                 onChange={(e) => {
                                   setFieldValue('enableMinimumPrice', e?.target?.checked);
+                                  if (!e?.target?.checked) {
+                                    setFieldValue('minimumPrice', {})
+                                  }
                                 }}
                                 name="enableMinimumPrice"
                                 color="primary"
@@ -532,19 +543,20 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               setFieldValue={setFieldValue}
                               currency={currency}
                               allowedToEdit={allowedToEdit}
-                              touched={touched}
-                              errors={errors}
                               minimumPrice={true}
                             />
                           )}
                         </div>
-                        <div className='mt-2'>
+                        <div className='mt-2 border p-2'>
                           <FormControlLabel
                             control={
                               <Checkbox
                                 checked={values['enableDurationBasedPricing']}
                                 onChange={(e) => {
                                   setFieldValue('enableDurationBasedPricing', e?.target?.checked);
+                                  if (!e?.target?.checked) {
+                                    setFieldValue('durationBasedPricing', [])
+                                  }
                                 }}
                                 name="enableDurationBasedPricing"
                                 color="primary"
@@ -561,6 +573,77 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             />
                           )}
                         </div>
+                        {permissions?.serializedAsset?.isRead && (
+                          <div className='mt-2 border p-2'>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={values['enableAssetStatusWisePricing']}
+                                  onChange={(e) => {
+                                    setFieldValue('enableAssetStatusWisePricing', e?.target?.checked);
+                                    if (!e?.target?.checked) {
+                                      setFieldValue('assetStatusWisePricing', [])
+                                    }
+                                  }}
+                                  name="enableAssetStatusWisePricing"
+                                  color="primary"
+                                />
+                              }
+                              label="Enable Asset Status Wise Pricing"
+                            />
+                            {values['enableAssetStatusWisePricing'] && (
+                              <div className='mt-2'>
+                                <Autocomplete
+                                  multiple
+                                  id="status"
+                                  options={assetStatusField?.option || []}
+                                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                                  isOptionEqualToValue={(option: any, val) => option?.optionValue === val}
+                                  value={[...assetStatusField?.option || []]?.filter(o => [...values['assetStatusWisePricing'] || []]?.map(a => a?.status)?.includes(o?.optionValue))}
+                                  onChange={(e, val) => {
+                                    const newObj: any = {};
+                                    currency.forEach((_currency) => {
+                                      values['unit']?.map((_unit) => {
+                                        values['pricingMethod']?.map((_pricingMethod) => {
+                                          newObj[`rent_${camelCase(_pricingMethod.toLowerCase())}_${_currency.toLowerCase()}_${camelCase(_unit.toLowerCase())}`] = 0
+                                        });
+                                      });
+                                    }
+                                    );
+                                    setFieldValue('assetStatusWisePricing', val?.map(v => {
+                                      const _v = values['assetStatusWisePricing']?.find(a => a?.status === v?.optionValue)
+                                      return ({
+                                        ...newObj,
+                                        ..._v,
+                                        status: v?.optionValue
+                                      })
+                                    }))
+                                  }}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      margin="dense"
+                                      size="small"
+                                      name="status"
+                                      variant="outlined"
+                                      label="Status"
+                                    />
+                                  )}
+                                />
+                                {values['pricingMethod']?.length > 0 && values['unit']?.length > 0 && values['assetStatusWisePricing'] && values['assetStatusWisePricing']?.length > 0 && values['assetStatusWisePricing']?.map(value => (
+                                  <RentPriceBox
+                                    conditionData={conditionData}
+                                    values={values}
+                                    setFieldValue={setFieldValue}
+                                    currency={currency}
+                                    allowedToEdit={true}
+                                    status={value?.status}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </Box>
                     </Fragment>
                   )}
@@ -938,9 +1021,11 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
 
 export default ConditionDialog;
 
-const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched, errors, minimumPrice = false }) => {
+const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedToEdit, touched = null, errors = null, minimumPrice = false, status = '' }) => {
+  const value = minimumPrice ? values?.minimumPrice || {} : status ? values['assetStatusWisePricing']?.find(a => a?.status === status) || {} : values
   return (
-    <div className='mt-2 p-2 border'>
+    <div className={`mt-2 p-2 ${status ? 'border' : ''}`}>
+      {status && <div>{status}</div>}
       <table>
         <thead>
           <tr>
@@ -975,9 +1060,21 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                               type="number"
                               onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                               style={{ margin: 0 }}
-                              value={minimumPrice ? values?.minimumPrice?.[__fieldName] : values[__fieldName]}
+                              value={value[__fieldName]}
                               onChange={(e) => {
-                                setFieldValue(minimumPrice ? `minimumPrice.${__fieldName}` : __fieldName, parseFloat(e.target.value));
+                                if (status) {
+                                  const assetStatusWisePricing = [...values['assetStatusWisePricing']]
+                                  assetStatusWisePricing?.forEach(a => {
+                                    if (a?.status === status) {
+                                      a[__fieldName] = parseFloat(e.target.value)
+                                    }
+                                  });
+                                  setFieldValue('assetStatusWisePricing', assetStatusWisePricing)
+                                } else if (minimumPrice) {
+                                  setFieldValue(`minimumPrice.${__fieldName}`, parseFloat(e.target.value));
+                                } else {
+                                  setFieldValue(__fieldName, parseFloat(e.target.value));
+                                }
                               }}
                               slotProps={{
                                 input: {
@@ -994,8 +1091,8 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                                   inputProps: { min: 0, max: 9999999999 }
                                 }
                               }}
-                              error={!minimumPrice && touched[__fieldName] && Boolean(errors[__fieldName])}
-                              helperText={!minimumPrice && touched[__fieldName] && errors[__fieldName]}
+                              error={touched && errors && touched[__fieldName] && Boolean(errors[__fieldName])}
+                              helperText={touched && errors && touched[__fieldName] && errors[__fieldName]}
                             />
                           </td>
                         )
@@ -1012,7 +1109,7 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                           type="number"
                           onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                           style={{ margin: 0 }}
-                          value={values[_fieldName]}
+                          value={value[_fieldName]}
                           onChange={(e) => {
                             setFieldValue(_fieldName, parseFloat(e.target.value));
                           }}
@@ -1031,8 +1128,8 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
                               inputProps: { min: 0, max: 9999999999 }
                             }
                           }}
-                          error={touched[_fieldName] && Boolean(errors[_fieldName])}
-                          helperText={touched[_fieldName] && errors[_fieldName]}
+                          error={touched && errors && touched[_fieldName] && Boolean(errors[_fieldName])}
+                          helperText={touched && errors && touched[_fieldName] && errors[_fieldName]}
                         />
                       </td>
                     ) : null
@@ -1047,7 +1144,7 @@ const RentPriceBox = ({ conditionData, values, setFieldValue, currency, allowedT
 
 const DurationBasedPricing = ({ values, setFieldValue, currency }) => {
   return (
-    <div className='mt-2 p-2 border'>
+    <div className='mt-2 p-2'>
       {currency && currency?.map(_currency => (
         values['unit']?.map(_unit => (
           values['pricingMethod']?.map(_pricingMethod => {
