@@ -436,7 +436,6 @@ const AddSerializedAsset = ({
   };
 
   const handleAddButtonClick = useCallback(() => {
-    console.log('rrrrr', referenceType)
     if (referenceType === 'Rental Job') {
       if (
         user?.user?.brandPolicy?.serializedAssetCertification &&
