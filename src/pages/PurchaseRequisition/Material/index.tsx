@@ -477,13 +477,13 @@ const Material = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    fileName: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
     columns: columns,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(purchaseRequisitionData),
-    subject: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`
+    subject: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`
   };
 
   const actionButtonMenuItems = () => {
