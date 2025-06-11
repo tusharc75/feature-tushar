@@ -436,6 +436,7 @@ const AddSerializedAsset = ({
   };
 
   const handleAddButtonClick = useCallback(() => {
+    console.log('rrrrr', referenceType)
     if (referenceType === 'Rental Job') {
       if (
         user?.user?.brandPolicy?.serializedAssetCertification &&
@@ -469,6 +470,22 @@ const AddSerializedAsset = ({
       } else {
         addSerializedAsset(selectedRecords);
         return;
+      }
+    } else if (referenceType === 'ReplaceAsset' || referenceType === 'RentalJobSwapAsset') {
+      if (
+        user?.user?.brandPolicy?.serializedAssetCertification &&
+        selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+      ) {
+        setCertificateExpireAlert({
+          open: true,
+          asset: selectedRecords
+            ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+            ?.map((e) => e.assetNumber)
+            ?.toString()
+        });
+        return;
+      } else {
+        addSerializedAsset(selectedRecords);
       }
     }
     addSerializedAsset(selectedRecords);
