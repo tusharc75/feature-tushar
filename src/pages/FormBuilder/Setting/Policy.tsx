@@ -214,7 +214,10 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
 
 const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
   const [fieldOptions, setFieldOptions] = useState([]);
+
   const [statusOptions, setStatusOptions] = useState([]);
+  const [subStatusOptions, setSubStatusOptions] = useState([]);
+
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data], fields: Data?.fields });
   const [optionLoading, setOptionLoading] = useState(false);
 
@@ -256,6 +259,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     let fieldsData = [...fields];
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
     setStatusOptions(statusOptions);
+    let subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
+    setSubStatusOptions(subStatusOptions);
     fieldsData = fieldsData
       ?.filter((ele) => !ele.fieldData?.primaryField)
       ?.map((e) => {
@@ -272,6 +277,12 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     const options = statusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
     return options ? options : statusOptions;
   };
+
+  const getSubStatusOptions = (data) => {
+    const options = subStatusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
+    return options ? options : subStatusOptions;
+  };
+
 
   return (
     <>
@@ -364,7 +375,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                           ? field.option
                           : field?.fieldName === 'status'
                             ? getStatusOptions(initialData?.fieldsData)
-                            : fieldOptions
+                            : field?.fieldName === 'subStatus'
+                              ? getSubStatusOptions(initialData?.fieldsData)
+                              : fieldOptions
                       }
                       error={errors[`policies.${idx}.data.${index}.${field.fieldName}`]}
                       touched={touched?.policies && touched.policies[idx].data[index][field.fieldName]}
@@ -382,8 +395,12 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                             ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                             : field?.fieldName === 'status'
                               ? statusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
-                              : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                          : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                              : field?.fieldName === 'subStatus'
+                                ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
+                                : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                          : field?.fieldName === 'subStatus'
+                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))[0] :
+                            statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
