@@ -198,6 +198,26 @@ export const resourcePolicy = [
         fieldOption: 'subStatus',
         required: false
       },
+      {
+        fieldName: 'statusChangeOnSubStatusRental',
+        fieldLabel: 'Status Change On Sub Status Rental Receiving/Return',
+        type: 'multipleFields',
+        fields: [
+          {
+            fieldName: 'subStatus',
+            fieldLabel: 'Sub Status',
+            type: 'dropDown',
+            required: true
+          },
+          {
+            fieldName: 'status',
+            fieldLabel: 'Status',
+            type: 'dropDown',
+            required: true
+          }
+        ],
+        defaultValue: []
+      },
     ]
   },
   {
