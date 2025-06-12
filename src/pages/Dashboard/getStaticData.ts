@@ -1,4 +1,4 @@
-import { displayDateTime, formatAmountWithCurrencyNew } from 'src/constants/helpers';
+import { displayDateTime, formatAmountWithCurrency } from 'src/constants/helpers';
 
 async function getStaticData(data: any, currency: any) {
   let dataObject: any;
@@ -59,18 +59,18 @@ async function getStaticData(data: any, currency: any) {
   const cardData = {
     offeredData: [
       {
-        ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
+        ['Total Booked Volume']: `${Math.round(totalBookedVolume)} ${volumeUnit || 'MT'}`,
         ['Hit Ratio']:
           totalBookedVolume && totalOfferedVolume
             ? isNaN(totalBookedVolume / totalOfferedVolume)
               ? 0
               : (totalBookedVolume / totalOfferedVolume) * 100
             : 0,
-        ['Total Offered Volume']: `${totalOfferedVolume.toFixed(2)} ${volumeUnit || 'MT'}`
+        ['Total Offered Volume']: `${Math.round(totalOfferedVolume)} ${volumeUnit || 'MT'}`
       },
       {
         ['Total Booked Value']: totalBookedValue
-          ? formatAmountWithCurrencyNew(currency, totalBookedValue)
+          ? formatAmountWithCurrency(currency, Math.round(totalBookedValue)).fullFormatAmountWithoutSpace
           : 0,
         ['Hit Ratio']:
           totalBookedValue && totalOfferedValue
@@ -79,36 +79,36 @@ async function getStaticData(data: any, currency: any) {
               : (totalBookedValue / totalOfferedValue) * 100
             : 0,
         ['Total Offered Value']: totalOfferedValue
-          ? formatAmountWithCurrencyNew(currency, totalOfferedValue)
+          ? formatAmountWithCurrency(currency, Math.round(totalOfferedValue)).fullFormatAmountWithoutSpace
           : 0
       },
       {
-        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrencyNew(currency, grossMargin) : 0
+        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrency(currency, Math.round(grossMargin)).fullFormatAmountWithoutSpace : 0
           } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
         ['Hit Ratio']: grossMargin && offeredMargin ? (isNaN(grossMargin / offeredMargin) ? 0 : (grossMargin / offeredMargin) * 100) : 0,
-        ['Offered Gross Margin']: `${offeredMargin ? formatAmountWithCurrencyNew(currency, offeredMargin) : 0
+        ['Offered Gross Margin']: `${offeredMargin ? formatAmountWithCurrency(currency, Math.round(offeredMargin)).fullFormatAmountWithoutSpace : 0
           } (${offeredMarginPercent > 0 ? offeredMarginPercent.toFixed(2) : 0}%)`
       }
     ],
     budgetData: [
       {
-        ['Total Booked Volume']: `${totalBookedVolume.toFixed(2)} ${volumeUnit || 'MT'}`,
+        ['Total Booked Volume']: `${Math.round(totalBookedVolume)} ${volumeUnit || 'MT'}`,
         ['Hit Ratio']:
           totalBookedVolume && volumeBudget ? (isNaN(totalBookedVolume / volumeBudget) ? 0 : (totalBookedVolume / volumeBudget) * 100) : 0,
-        ['Total Budget Volume']: `${volumeBudget.toFixed(2)} ${volumeUnit || 'MT'}`
+        ['Total Budget Volume']: `${Math.round(volumeBudget)} ${volumeUnit || 'MT'}`
       },
       {
         ['Total Booked Value']: totalBookedValue
-          ? formatAmountWithCurrencyNew(currency, totalBookedValue)
+          ? formatAmountWithCurrency(currency, Math.round(totalBookedValue)).fullFormatAmountWithoutSpace
           : 0,
         ['Hit Ratio']: totalBookedValue && totalBudget ? (isNaN(totalBookedValue / totalBudget) ? 0 : (totalBookedValue / totalBudget) * 100) : 0,
-        ['Total Budget']: totalBudget ? formatAmountWithCurrencyNew(currency, totalBudget) : 0
+        ['Total Budget']: totalBudget ? formatAmountWithCurrency(currency, Math.round(totalBudget)).fullFormatAmountWithoutSpace : 0
       },
       {
-        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrencyNew(currency, grossMargin) : 0
+        ['Booked Gross Margin']: `${grossMargin ? formatAmountWithCurrency(currency, Math.round(grossMargin)).fullFormatAmountWithoutSpace : 0
           } (${grossMarginPercent > 0 ? grossMarginPercent.toFixed(2) : 0}%)`,
         ['Hit Ratio']: grossMargin && marginBudget ? (isNaN(grossMargin / marginBudget) ? 0 : (grossMargin / marginBudget) * 100) : 0,
-        ['Total Budget Gross Margin']: `${marginBudget ? formatAmountWithCurrencyNew(currency, marginBudget) : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`
+        ['Total Budget Gross Margin']: `${marginBudget ? formatAmountWithCurrency(currency, Math.round(marginBudget)).fullFormatAmountWithoutSpace : 0} (${grossMarginPercentBudget > 0 ? grossMarginPercentBudget.toFixed(2) : 0}%)`
       }
     ]
   };
