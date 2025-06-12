@@ -462,6 +462,15 @@ export default function TinyMCE(props) {
                 skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
                 content_css: themeColor === 'dark' ? 'dark' : 'default',
                 setup: function (editor) {
+                  //change style of p tag
+                  editor.on('NodeChange', () => {
+                    const ps = editor.getBody().querySelectorAll('p');
+                    ps.forEach((p) => {
+                      p.style.marginTop = '0px';
+                      p.style.marginBottom = '0px';
+                    });
+                  });
+
                   editor.ui.registry.addButton('hrStyled', {
                     icon: 'horizontal-rule',
                     tooltip: 'Insert styled horizontal line',
