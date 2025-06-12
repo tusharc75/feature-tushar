@@ -184,7 +184,7 @@ const Quotation = ({
     let { fieldsDataAll } = await fetch_resource_fields(sidebarResource.quotation);
     setQuotationFields(fieldsDataAll)
 
-    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationInfo?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
     if (
