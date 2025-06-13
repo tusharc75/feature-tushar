@@ -172,12 +172,12 @@ export const resourcePolicy = [
       },
       {
         fieldName: 'statusColor',
-        fieldLabel: 'Status Color',
+        fieldLabel: 'Status/Sub Status Color',
         type: 'multipleFields',
         fields: [
           {
             fieldName: 'status',
-            fieldLabel: 'Status',
+            fieldLabel: 'Status/Sub Status',
             type: 'multiSelect',
             required: true
           },
