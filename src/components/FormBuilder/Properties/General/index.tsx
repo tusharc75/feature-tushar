@@ -33,7 +33,6 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [subFieldOpen, setSubFieldOpen] = useState(false);
-  const [htmlDescription, setHtmlDescription] = useState(values['htmlDescription'] || '');
 
   useEffect(() => {
     getLookupList();
@@ -511,14 +510,14 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         </Box>
       )}
       {['groupSignature'].includes(fieldData.type) && <PreFilter lookupResource={'User'} values={values} setFieldValue={setFieldValue} />}
-      {(fieldData.type === 'decimal' || fieldData.type === 'radio') && <MinMax
+      {(fieldData.type === 'decimal' || fieldData.type === 'radio' || (fieldData.type === 'dropDown' && !fieldData?.lookup)) && <MinMax
         values={values}
         setFieldValue={setFieldValue}
         errors={errors}
         touched={touched}
         fieldData={fieldData}
       />}
-      {fieldData.type === 'description' && <Description values={htmlDescription} setFieldValue={setFieldValue} />}
+      {fieldData.type === 'description' && <Description values={values['htmlDescription']} setFieldValue={setFieldValue} />}
       {fieldData.type === 'counter' && (
         <Box mt={1}>
           <ThemeButton
