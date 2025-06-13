@@ -151,19 +151,45 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       for (let i = 0; i < groups.length; i++) {
         const item = groups[i] as HTMLDivElement;
         const panel = panels[i] as HTMLDivElement;
+        const setMaxHeight = (height: number) => {
+          item.style.maxHeight = `${height}px`;
+          panel.style.maxHeight = `${height}px`;
+        };
+        const setMinHeight = (height: number | '') => {
+          item.style.minHeight = !height ? '' : `${height}px`;
+          panel.style.minHeight = !height ? '' : `${height}px`;
+        };
 
         item.setAttribute('data-original-height', `${parseInt((item.computedStyleMap().get('height') as string) || '0px', 10)}`);
         if (+item.dataset.originalHeight > 115 && !item.dataset.expanded) {
-          item.style.maxHeight = '142px';
-          panel.style.maxHeight = `142px`;
+          setMaxHeight(142);
+
           item.style.overflow = 'hidden';
           if (!item.dataset.buttonInserted) {
+            const collapseButton = document.createElement('button');
+            collapseButton.innerText = 'Collapse';
+            collapseButton.classList.add('timeline-collapse-button');
+            collapseButton.onclick = (e) => {
+              item.removeAttribute('data-expanded');
+              item.appendChild(button);
+              setMaxHeight(142);
+              setMinHeight('');
+              try {
+                item.removeChild(collapseButton);
+              } catch {}
+            };
+
             const button = document.createElement('button');
             button.innerText = 'Show All';
             button.onclick = (e) => {
-              item.style.maxHeight = `${item.dataset.originalHeight}px`;
-              panel.style.maxHeight = `${item.dataset.originalHeight}px`;
+              setMaxHeight(Number(item.dataset.originalHeight) + 40);
+              setTimeout(() => {
+                setMinHeight(Number(item.dataset.originalHeight) + 40);
+              }, 300);
               item.setAttribute('data-expanded', 'true');
+              panel.setAttribute('data-expanded', 'true');
+              item.appendChild(collapseButton);
+
               try {
                 item.removeChild(button);
               } catch (error) {}

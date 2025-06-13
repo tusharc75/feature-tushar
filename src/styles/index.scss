@@ -4913,9 +4913,44 @@ td.google-visualization-orgchart-node {
     border-color: var(--new-theme-color);
   }
 }
+.vis-group[data-expanded='true'] {
+  height: 100% !important;
+}
+
+.timeline-collapse-button {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  margin-inline: auto;
+  bottom: -1px;
+  padding: 4px 10px;
+  z-index: 100;
+  cursor: pointer;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 600;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  background-color: var(--dark-secondary, rgb(235, 235, 235));
+  border: 1px solid var(--common-border-color);
+  color: var(--primary-text);
+  transition: all 300ms;
+
+  &:hover {
+    opacity: 1;
+    background: var(--new-theme-color);
+    color: white;
+    border-color: var(--new-theme-color);
+  }
+}
 .vis-panel.vis-left .vis-label,
 .vis-group {
-  transition: max-height 300ms;
+  transition:
+    max-height 300ms,
+    height 300ms,
+    min-height 300ms;
 }
 // .\@container {
 //   container-type: inline-size;

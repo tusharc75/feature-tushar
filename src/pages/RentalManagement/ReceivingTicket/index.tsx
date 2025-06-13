@@ -175,6 +175,8 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
 
+  const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
+
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -1308,6 +1310,8 @@ const ReceivingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    setRentalJobChildFields(rentalJobProductFields)
+
     const newColumns = generateColumns(
       renderedFrom,
       rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
@@ -2716,6 +2720,7 @@ const ReceivingTicket = ({
           fetchRecords={fetchRecords}
           allowedToEdit={allowedToEdit}
           stepFullScreen={stepFullScreen}
+          rentalJobChildFields={rentalJobChildFields}
         />
       </TabPanel>
       <Menu
