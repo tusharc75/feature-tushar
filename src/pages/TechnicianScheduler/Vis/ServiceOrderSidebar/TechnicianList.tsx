@@ -51,7 +51,9 @@ const TechnicianList = ({ state, selectedResource, container, isMobile, viewType
   }, []);
 
   useEffect(() => {
-    fetchColumn()
+    if (selectedResource) {
+      fetchColumn()
+    }
   }, [selectedResource]);
 
   const fetchColumn = async () => {
