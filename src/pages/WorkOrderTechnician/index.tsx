@@ -205,6 +205,7 @@ const WorkOrderTechnician = () => {
                       </HtmlTooltip>
                     </Box>
                   ) : null}
+
                   {resourceData?.policy?.showWorkOrderPdfPreviewInTile && (
                     <Box ml={1}>
                       <HtmlTooltip title="Preview PDF">
@@ -221,6 +222,15 @@ const WorkOrderTechnician = () => {
                       </HtmlTooltip>
                     </Box>
                   )}
+                  {row?.original?.priority &&
+                    <Box ml={1}>
+                      <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' :
+                          row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'} `}>
+                          {row?.original?.priority}
+                        </span>
+                      </HtmlTooltip>
+                    </Box>}
                 </div>
               ) : (
                 <NoDataCell />

@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -129,7 +129,7 @@ const ReceivingTicket = ({
   const [showConformationRevertTicket, setShowConformationRevertTicket] = useState(false);
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState({ open: false });
   const [okBtnLoading, setOkBtnLoading] = useState(false);
-  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
+  const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: null, message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
   const [showQtyDialog, setShowQtyDialog] = useState({ open: false, data: null });
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {} });
@@ -534,7 +534,7 @@ const ReceivingTicket = ({
           },
           {
             resource: sidebarResource.serializedAsset,
-            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber']
+            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber', 'subStatus']
           }
         ]
       });
@@ -1316,6 +1316,19 @@ const ReceivingTicket = ({
       rentalManagementData?.currency
     );
 
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     const column: any = [
       {
         accessor: 'index',
@@ -1326,11 +1339,13 @@ const ReceivingTicket = ({
           <div
             className="d-flex align-items-center gap-2"
             style={{
-              backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
-                row?.original?.status
-              )
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
@@ -1654,6 +1669,15 @@ const ReceivingTicket = ({
         Header: 'Asset Status',
         cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       },
+      ...(assetFields?.find((f) => f.fieldName === 'subStatus')
+        ? [
+          {
+            accessor: 'subStatus',
+            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
       ...(assetFields?.find((f) => f?.fieldName === 'padName')
         ? [
           {
@@ -2590,6 +2614,25 @@ const ReceivingTicket = ({
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
+  const handleChangeSubStatus = (subStatus) => {
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-sub-status`, {
+        subStatus,
+        assetIds: selectedRecords?.map(r => r?._id)
+      })
+      .then(({ data }) => {
+        fetchRecords();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
       {serviceData?.length > 0 && (
@@ -2635,7 +2678,8 @@ const ReceivingTicket = ({
                 assetPolicyData,
                 validateAction,
                 resources,
-                getFilterSelectedRecords
+                getFilterSelectedRecords,
+                handleChangeSubStatus
               }}
             />
           }
@@ -3232,6 +3276,7 @@ const ActionButtonMenuItems = ({
   validateAction,
   resources,
   getFilterSelectedRecords,
+  handleChangeSubStatus
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -3747,6 +3792,25 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
+      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+          return (
+            <MenuItem
+              onClick={() => {
+                handleChangeSubStatus(status)
+              }}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length
+                && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((e) => e?.status === ASSET_STATUS.inUse)
+                && !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.find((e) => e?.subStatus === status)
+                ? false : true
+              }
+              id={`${status}-menu-item`}
+            >
+              {`Change Sub Status ${status}`}
+            </MenuItem>
+          )
+        })}
     </>
   );
 };

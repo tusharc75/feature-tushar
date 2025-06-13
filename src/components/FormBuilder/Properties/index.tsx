@@ -252,6 +252,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.stopHideColumn = values?.stopHideColumn || false;
             ele.isHideColumnSum = values?.isHideColumnSum || false;
             ele.showInPdf = values?.showInPdf || false;
+            ele.showTotalInCard = values?.showTotalInCard || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;

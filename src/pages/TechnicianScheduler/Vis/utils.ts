@@ -120,3 +120,4 @@ export const classNamesCleanup = () => {
   const allElement = document.querySelectorAll('.vis-group');
   allElement.forEach((e) => e.classList.remove(...GROUP_HIGHLIGHT_CLASSES));
 };
+export const SHOW_MESSAGE_KEY = 'equipt-show-timeline-controls';

@@ -19,6 +19,7 @@ import {
   DELIVERY_TICKET_TYPE,
   SUBCONTRACT_ASSEMBLY_STATUS,
   deliveryTicket,
+  getEmailsFromContacts,
   sidebarResource
 } from 'src/constants/helpers';
 import ReceivingCostDialog from 'src/pages/SubcontractAssembly/Receiving/ReceivingCostDialog';
@@ -254,7 +255,9 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     resource: sidebarResource.subcontractAssembly,
     referenceId: subcontractAssemblyData._id,
     columns: columns,
-    isSendEmail: false
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(subcontractAssemblyData),
+    subject: `${resources?.subcontractAssembly?.titleSingular}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
   };
 
   return (

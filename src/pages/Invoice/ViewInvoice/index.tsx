@@ -217,7 +217,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadZip = () => {
     setIsDownloadingZip(true);
     axiosInstance()
-      .get(`${invoice.api} / zip / ${invoiceData?._id}`, {
+      .get(`${invoice.api}/zip/${invoiceData?._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -239,7 +239,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const handleDownloadPdf = () => {
     setIsDownloadingPdf(true);
     axiosInstance()
-      .get(`${invoice.api} / zip / pdf / ${invoiceData._id}`, {
+      .get(`${invoice.api}/zip/pdf/${invoiceData._id}`, {
         responseType: 'blob'
       })
       .then((response) => {
@@ -278,6 +278,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const previewDownloadProps = {
     fileName: `${resources?.invoice?.titleSingular} - ${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,

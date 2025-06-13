@@ -247,8 +247,8 @@ const SerializedAsset = () => {
               <div
                 style={{
                   backgroundColor: (() => {
-                    return statusColors[row?.original?.status]
-                      ? statusColors[row?.original?.status]
+                    return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                      ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
                       : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
                         ? COLOUR_MASTER.lostAssets.background
                         : '';

@@ -61,3 +61,8 @@ export const OPERATION_ON_LINE_ITEMS = {
   add: 'Add',
   substract: 'Substract'
 };
+
+export const PRE_FILTER_CHECKBOX_OPTION = {
+  yes: 'YES',
+  no: 'NO'
+}

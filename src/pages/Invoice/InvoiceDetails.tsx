@@ -448,7 +448,7 @@ const InvoiceDetails = () => {
                         dynamicFormUpdateProcessStatus(sidebarResource.invoice, stepNames[step], id);
                       }}
                     />
-                    {currentStep === 0 && invoiceData && (
+                    {stepNames[currentStep] === 'Add Products' && invoiceData && (
                       <Material
                         invoiceData={invoiceData}
                         invoiceFields={invoiceFields}
@@ -459,7 +459,7 @@ const InvoiceDetails = () => {
                         updateDOASetup={updateDOASetup}
                       />
                     )}
-                    {currentStep === 1 && invoiceData && (
+                    {stepNames[currentStep] === 'DOA' && invoiceData && (
                       <Doa
                         invoiceData={invoiceData}
                         invoiceFields={invoiceFields}
@@ -470,7 +470,7 @@ const InvoiceDetails = () => {
                         stepFullScreen={stepFullScreen}
                       />
                     )}
-                    {currentStep === 2 && invoiceData && (
+                    {stepNames[currentStep] === 'Ready To Invoice' && invoiceData && (
                       <Invoice
                         invoiceData={invoiceData}
                         invoiceFields={invoiceFields}
