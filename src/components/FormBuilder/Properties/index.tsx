@@ -99,6 +99,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.minValueServiceAdd = '';
         values.maxValueServiceAdd = '';
       }
+      values.enableServicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue || false;
+      values.servicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue ? values?.servicesAddOnBasedOnValue || [] : [];
+
       if (
         !values.unique &&
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
@@ -230,6 +233,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValue = values?.maxValue || 0;
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
+            ele.enableServicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue || false;
+            ele.servicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue ? values?.servicesAddOnBasedOnValue || [] : [];
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
