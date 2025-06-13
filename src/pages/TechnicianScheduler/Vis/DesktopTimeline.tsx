@@ -19,8 +19,8 @@ type DesktopTimelineProps = {
   loading: boolean;
   onDragEnd: ({ service, technician }: { service: Service; technician: Activity }) => void;
 };
-const FIT_WIDTH = 1473;
-const FIT_DAYS = 29;
+const FIT_WIDTH = 1473 - 306;
+const FIT_DAYS = 10;
 
 export const techSchlocalStoreKey = 'technician-scheduler-active-item';
 // 'vis-timeline'
@@ -39,20 +39,6 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
   const prevOverGroup = useRef<HTMLElement>(null);
   const technicianHeaderRef = useRef<HTMLDivElement>(null);
 
-  const getStartEndToPerfectlyFitDays = useCallback((date: Date) => {
-    let start = dayjs(date).startOf('month').toDate();
-    let end = dayjs(date).endOf('month').toDate();
-
-    const containerCurrentWidth = timelineContainer.current?.clientWidth;
-    if (containerCurrentWidth) {
-      const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
-      start = dayjs(date).subtract(halfOfTotalDays, 'days').toDate();
-      end = dayjs(date).add(halfOfTotalDays, 'days').toDate();
-    }
-
-    return { start, end };
-  }, []);
-
   useEffect(() => {
     setLocalStore(activeItemData);
   }, [setLocalStore, activeItemData]);
@@ -62,9 +48,8 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       groupEditable: true,
       verticalScroll: true,
       zoomKey: 'ctrlKey',
-      // start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
-      // end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
-      ...getStartEndToPerfectlyFitDays(new Date()),
+      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
+      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
       minHeight: 62,
       maxHeight: window.innerHeight - 200,
       selectable: false,
@@ -119,7 +104,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       }
     };
     return optionsData;
-  }, [user?.user?.timezone, setStore, selectedResource, getStartEndToPerfectlyFitDays]);
+  }, [user?.user?.timezone, setStore, selectedResource]);
 
   const handleDisplayTimeline = useCallback(() => {
     if (!timelineData.groups || !timelineData.items || loading) return;
@@ -142,10 +127,13 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         start = dayjs(time).startOf('month').toDate();
         end = dayjs(time).endOf('month').toDate();
 
-        if (timelineContainer.current) {
-          const newDate = getStartEndToPerfectlyFitDays(time);
-          start = newDate.start;
-          end = newDate.end;
+        const containerCurrentWidth = timelineContainer.current?.clientWidth;
+        if (containerCurrentWidth) {
+          console.log(containerCurrentWidth, timelineContainer);
+          const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
+
+          start = dayjs(time).subtract(halfOfTotalDays, 'days').toDate();
+          end = dayjs(time).add(halfOfTotalDays, 'days').toDate();
         }
       }
       timeline.setWindow(start, end);
