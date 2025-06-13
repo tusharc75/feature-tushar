@@ -431,9 +431,9 @@ const WorkOrder = () => {
           <ConfirmationDialog
             open={isConfirmDialogVisible}
             message={`Are you sure you want to delete ${deleteRecord
-                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
               setDeleteRecord(null);
