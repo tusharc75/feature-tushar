@@ -655,6 +655,20 @@ const Steps = ({
               step: step
             });
           }
+        } else if (result?.normalAddon?.length) {
+          if (resource === sidebarResource.workOrderTechnician) {
+            handleAddService(
+              result?.normalAddon?.map((e) => e._id),
+              step
+            );
+          } else {
+            setAddServiceConfirmation({
+              open: true,
+              status: '',
+              services: result?.normalAddon,
+              step: step
+            });
+          }
         }
 
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
