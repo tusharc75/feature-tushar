@@ -10,7 +10,7 @@ import GroupTemplate from 'src/pages/TechnicianScheduler/Vis/Templates/GroupTemp
 import { ItemTemplate } from 'src/pages/TechnicianScheduler/Vis/Templates/ItemTemplate';
 import { Activity, DNDData, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
-import { GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { calculateRatio, GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
 import { useData } from 'src/StateProvider/Provider';
 import { DataSet, Timeline, TimelineOptions } from 'vis-timeline/standalone';
 
@@ -19,6 +19,8 @@ type DesktopTimelineProps = {
   loading: boolean;
   onDragEnd: ({ service, technician }: { service: Service; technician: Activity }) => void;
 };
+const FIT_WIDTH = 1473 - 306;
+const FIT_DAYS = 10;
 
 export const techSchlocalStoreKey = 'technician-scheduler-active-item';
 // 'vis-timeline'
@@ -124,6 +126,15 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       if (zoom < 0) {
         start = dayjs(time).startOf('month').toDate();
         end = dayjs(time).endOf('month').toDate();
+
+        const containerCurrentWidth = timelineContainer.current?.clientWidth;
+        if (containerCurrentWidth) {
+          console.log(containerCurrentWidth, timelineContainer);
+          const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
+
+          start = dayjs(time).subtract(halfOfTotalDays, 'days').toDate();
+          end = dayjs(time).add(halfOfTotalDays, 'days').toDate();
+        }
       }
       timeline.setWindow(start, end);
     };
