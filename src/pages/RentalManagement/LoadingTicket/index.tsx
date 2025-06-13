@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { makeStyles } from '@mui/styles';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
@@ -28,6 +28,7 @@ import routes from '../../../components/Helpers/Routes';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import {
   ASSET_STATUS,
+  COLOUR_MASTER,
   COLOUR_MASTER_CLASSES,
   CustomDialogTransition,
   DELIVERY_FROM_TO_TYPE,
@@ -217,6 +218,19 @@ const LoadingTicket = ({
       rentalManagementData?.currency
     );
 
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     const column: any = [
       {
         accessor: 'index',
@@ -226,16 +240,18 @@ const LoadingTicket = ({
         disabled: true,
         cell: ({ row }) => (
           <div
-            className={cn(
-              'd-flex align-items-center gap-2',
-              row?.original?.warehouseId &&
-                row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
-                !row?.original?.loadingTicketId
-                ? COLOUR_MASTER_CLASSES.transferAsset.background
-                : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
-                  ? COLOUR_MASTER_CLASSES.lostAssets.background
-                  : ''
-            )}
+            style={{
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+                      !row?.original?.loadingTicketId
+                      ? COLOUR_MASTER_CLASSES.transferAsset.background : '';
+              })()
+            }}
+            className={'d-flex align-items-center gap-2'}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
             {row?.original?.loadingTicketId && (

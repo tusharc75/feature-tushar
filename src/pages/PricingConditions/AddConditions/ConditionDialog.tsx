@@ -205,7 +205,6 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
       data = [values];
     }
 
-    console.log('ddddd', data)
 
     axiosInstance()
       .put(`${pricingCondition.api}/condition/${pricingConditionId}`, { condition: data })

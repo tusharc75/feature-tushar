@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -1316,6 +1316,19 @@ const ReceivingTicket = ({
       rentalManagementData?.currency
     );
 
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     const column: any = [
       {
         accessor: 'index',
@@ -1326,11 +1339,13 @@ const ReceivingTicket = ({
           <div
             className="d-flex align-items-center gap-2"
             style={{
-              backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
-                row?.original?.status
-              )
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>

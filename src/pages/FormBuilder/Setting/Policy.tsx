@@ -213,6 +213,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
 };
 
 const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
+
   const [fieldOptions, setFieldOptions] = useState([]);
 
   const [statusOptions, setStatusOptions] = useState([]);
@@ -258,8 +259,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   useEffect(() => {
     let fieldsData = [...fields];
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
-    setStatusOptions(statusOptions);
     let subStatusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'subStatus')?.fieldData?.option || [];
+    setStatusOptions(statusOptions);
     setSubStatusOptions(subStatusOptions);
     fieldsData = fieldsData
       ?.filter((ele) => !ele.fieldData?.primaryField)
@@ -274,8 +275,15 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   }, [fields]);
 
   const getStatusOptions = (data) => {
-    const options = statusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));
-    return options ? options : statusOptions;
+    const statusTemp = [...statusOptions];
+    if (Data?.fieldName === 'statusColor') {
+      subStatusOptions?.forEach((e) => {
+        if (!statusTemp?.find((ele) => ele?.optionLabel === e?.optionLabel)) {
+          statusTemp.push(e)
+        }
+      })
+    }
+    return statusTemp;
   };
 
   const getSubStatusOptions = (data) => {
@@ -394,13 +402,13 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                           ? field?.lookupResource
                             ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                             : field?.fieldName === 'status'
-                              ? statusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
+                              ? getStatusOptions(initialData?.fieldsData)?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                               : field?.fieldName === 'subStatus'
-                                ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))
+                                ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))
                                 : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : field?.fieldName === 'subStatus'
-                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`].includes(ele?.optionValue))[0] :
-                            statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                            ? subStatusOptions?.filter((ele) => value[`${field.fieldName}`]?.includes(ele?.optionValue))[0] :
+                            getStatusOptions(initialData?.fieldsData)?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
                       multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
