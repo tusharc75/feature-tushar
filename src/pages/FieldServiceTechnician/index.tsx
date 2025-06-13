@@ -53,9 +53,11 @@ const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFi
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status)
-          && (user?.user?.brandPolicy?.createFieldTicketFromQuotation && row?.original?.quotation ? null :
-            <HtmlTooltip title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}>
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) &&
+          (user?.user?.brandPolicy?.createFieldTicketFromQuotation && row?.original?.quotation ? null : (
+            <HtmlTooltip
+              title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}
+            >
               <span>
                 <IconButton
                   size="small"
@@ -75,7 +77,7 @@ const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFi
                 </IconButton>
               </span>
             </HtmlTooltip>
-          )}
+          ))}
         {view === 'table' && (
           <Box>
             <HtmlTooltip title={`View ${resources?.fieldTicket?.titlePlural}`}>
@@ -192,7 +194,7 @@ const FieldServiceTechnician = () => {
       if (isOfflineRef.current) return;
       axiosInstance()
         .patch(`${routes?.fieldServiceOrder?.path}/status/${fieldServiceOrderId}`, { status: status })
-        .then(() => { })
+        .then(() => {})
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -374,8 +376,8 @@ const FieldServiceTechnician = () => {
       setSelectedData(row);
       setAllowedToEdit(
         permissions?.fieldTicket?.isUpdate &&
-        checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
       );
     }
   };
@@ -393,10 +395,10 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
-    if (isMobileView && view === 'card') {
+    if (isMobileView && view === 'card' && columns) {
       handleViewChange('table');
     }
-  }, [isMobileView, view, handleViewChange]);
+  }, [isMobileView, view, handleViewChange, columns]);
 
   return (
     <section className="main-container-v1">
@@ -452,10 +454,10 @@ const FieldServiceTechnician = () => {
                         <FieldTicket
                           serviceOrderData={selectedData?.orignalData}
                           allowedToEdit={allowedToEdit}
-                          handleChangeStatus={() => { }}
+                          handleChangeStatus={() => {}}
                           resource={sidebarResource.fieldServiceTechnician}
                           enableGlobalSearch={false}
-                          fetchServiceOrderData={() => { }}
+                          fetchServiceOrderData={() => {}}
                         />
                       )
                     ) : (
