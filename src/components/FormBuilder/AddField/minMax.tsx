@@ -107,7 +107,7 @@ export const MinMax = ({ values, fieldData, setFieldValue, touched, errors }) =>
             </Grid>
           )}
         </>}
-      {fieldData.type === 'radio' &&
+      {['radio', 'dropDown']?.includes(fieldData.type) &&
         <>
           <FormControlLabel
             control={
