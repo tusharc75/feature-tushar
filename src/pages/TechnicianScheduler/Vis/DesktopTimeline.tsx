@@ -10,7 +10,7 @@ import GroupTemplate from 'src/pages/TechnicianScheduler/Vis/Templates/GroupTemp
 import { ItemTemplate } from 'src/pages/TechnicianScheduler/Vis/Templates/ItemTemplate';
 import { Activity, DNDData, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
-import { GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { calculateRatio, GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
 import { useData } from 'src/StateProvider/Provider';
 import { DataSet, Timeline, TimelineOptions } from 'vis-timeline/standalone';
 
@@ -19,6 +19,8 @@ type DesktopTimelineProps = {
   loading: boolean;
   onDragEnd: ({ service, technician }: { service: Service; technician: Activity }) => void;
 };
+const FIT_WIDTH = 1473;
+const FIT_DAYS = 29;
 
 export const techSchlocalStoreKey = 'technician-scheduler-active-item';
 // 'vis-timeline'
@@ -37,6 +39,20 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
   const prevOverGroup = useRef<HTMLElement>(null);
   const technicianHeaderRef = useRef<HTMLDivElement>(null);
 
+  const getStartEndToPerfectlyFitDays = useCallback((date: Date) => {
+    let start = dayjs(date).startOf('month').toDate();
+    let end = dayjs(date).endOf('month').toDate();
+
+    const containerCurrentWidth = timelineContainer.current?.clientWidth;
+    if (containerCurrentWidth) {
+      const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
+      start = dayjs(date).subtract(halfOfTotalDays, 'days').toDate();
+      end = dayjs(date).add(halfOfTotalDays, 'days').toDate();
+    }
+
+    return { start, end };
+  }, []);
+
   useEffect(() => {
     setLocalStore(activeItemData);
   }, [setLocalStore, activeItemData]);
@@ -46,8 +62,9 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       groupEditable: true,
       verticalScroll: true,
       zoomKey: 'ctrlKey',
-      start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
-      end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
+      // start: currentRange.current?.start ? currentRange.current.start : dayjs().subtract(10, 'day').toDate(),
+      // end: currentRange.current?.end ? currentRange.current.end : dayjs().add(10, 'day').toDate(),
+      ...getStartEndToPerfectlyFitDays(new Date()),
       minHeight: 62,
       maxHeight: window.innerHeight - 200,
       selectable: false,
@@ -102,7 +119,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       }
     };
     return optionsData;
-  }, [user?.user?.timezone, setStore, selectedResource]);
+  }, [user?.user?.timezone, setStore, selectedResource, getStartEndToPerfectlyFitDays]);
 
   const handleDisplayTimeline = useCallback(() => {
     if (!timelineData.groups || !timelineData.items || loading) return;
@@ -124,6 +141,12 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       if (zoom < 0) {
         start = dayjs(time).startOf('month').toDate();
         end = dayjs(time).endOf('month').toDate();
+
+        if (timelineContainer.current) {
+          const newDate = getStartEndToPerfectlyFitDays(time);
+          start = newDate.start;
+          end = newDate.end;
+        }
       }
       timeline.setWindow(start, end);
     };

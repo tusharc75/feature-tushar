@@ -121,3 +121,10 @@ export const classNamesCleanup = () => {
   allElement.forEach((e) => e.classList.remove(...GROUP_HIGHLIGHT_CLASSES));
 };
 export const SHOW_MESSAGE_KEY = 'equipt-show-timeline-controls';
+
+export function calculateRatio(a: number, b: number, c: number): number {
+  if (b === 0 || c === 0) {
+    throw new Error('Denominators cannot be zero.');
+  }
+  return c * (b / a);
+}
