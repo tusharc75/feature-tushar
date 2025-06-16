@@ -77,7 +77,7 @@ const SubcontractAssembly = () => {
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
     setWalkmeData([createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, data)]);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -169,7 +169,7 @@ const SubcontractAssembly = () => {
     else {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
-    
+
     if (selectedEntity) {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }

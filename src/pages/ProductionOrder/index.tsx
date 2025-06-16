@@ -82,7 +82,7 @@ const ProductionOrder = () => {
     const response = await axiosInstance().get(`/field?resource=Production Order`);
     data = response?.data?.data;
     let columns = generateColumns(renderedFrom, data, routes?.productionOrderDetail?.path, true);
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
 

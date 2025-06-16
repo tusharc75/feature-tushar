@@ -80,7 +80,7 @@ const Quotation = () => {
     data = response?.data?.data;
     let columns = [];
     let newColumns = generateColumns(renderedFrom, data, routes.quotationDetail.path, true);
-    columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
+    columns = [...newColumns, ...getStaticFields(true), ActionsRenderer];
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (

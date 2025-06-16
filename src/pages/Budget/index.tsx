@@ -54,7 +54,7 @@ const Budget = () => {
     const response = await axiosInstance().get(`/field?resource=Budget&view=true`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.budgetDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

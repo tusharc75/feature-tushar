@@ -102,7 +102,7 @@ const WorkOrder = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
