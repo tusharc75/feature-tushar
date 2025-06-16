@@ -249,7 +249,7 @@ const RentalManagement = () => {
       }
     });
 
-    let staticFields: any = getStaticFields();
+    let staticFields: any = getStaticFields(true);
     if (permissions?.sublease) {
       staticFields = [...extraColumns, ...staticFields];
     }

@@ -1,5 +1,4 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { camelCase, kebabCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -7,7 +6,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getCompletedByField, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
@@ -126,8 +125,7 @@ const WorkFlowReport = () => {
         width: 150,
         Cell: ({ row }) => <div>{row?.original?.status}</div>
       },
-      ...getStaticFields(),
-      ...getCompletedByField()
+      ...getStaticFields(true, true),
     ];
     setColumns(columns);
   };
