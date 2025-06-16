@@ -89,7 +89,7 @@ const DeliveryTicket = () => {
       (e) => !['warehouse', 'customerAccount', 'supplierAccount', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName)
     );
     const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true);
-    const columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
+    const columns = [...newColumns, ...getStaticFields(true), ActionsRenderer];
     columns.forEach((column) => {
       if (column.accessor === 'pickupFrom') {
         column.cell = ({ row }) => (
@@ -380,12 +380,11 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${
-                deleteRecord
-                  ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
+              message={`Are you sure you want to delete ${deleteRecord
+                ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
                   ${deleteRecord?.ticketName || ''}`
-                  : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`
+                } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

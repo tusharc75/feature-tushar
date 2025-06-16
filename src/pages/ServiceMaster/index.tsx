@@ -58,7 +58,7 @@ const ServiceMaster = () => {
     data = response?.data?.data;
     setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, data, false, false)]);
     let newColumns = generateColumns(renderedFrom, data, routes?.serviceMasterDetail?.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

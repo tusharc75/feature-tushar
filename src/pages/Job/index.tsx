@@ -71,7 +71,7 @@ const Job = () => {
     const response = await axiosInstance().get(`/field?resource=Job`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.jobDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   useEffect(() => {

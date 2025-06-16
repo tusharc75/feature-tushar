@@ -79,7 +79,7 @@ const TransferInventory = () => {
       .then(({ data: { data } }) => {
         setWalkmeData([createTransferInventoryFlow(data, resources?.transferInventory?.titleSingular)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 
@@ -313,12 +313,11 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}`
               : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

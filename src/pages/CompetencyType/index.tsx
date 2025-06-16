@@ -54,7 +54,7 @@ const CompetencyType = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.competencyType}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.competencyTypeDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

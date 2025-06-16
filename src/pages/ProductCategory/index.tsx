@@ -52,7 +52,7 @@ const ProductCategory = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.productCategory}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.productCategoryDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -258,12 +258,11 @@ const ProductCategory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.productCategory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name || ''}`
               : `selected ${resources?.productCategory?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
