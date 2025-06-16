@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ImageZoomPan from 'src/components/ImageZoomPan';
 import { cn } from 'src/constants/helpers';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
+import { AutoTOC } from '../components/AutoTOC';
+import { useAutoTOC } from 'src/pages/UserManual/hooks/useAutoTOC';
 
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
@@ -12,6 +14,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
   const totalImages = useRef(0);
   const mainContainerRef = useRef<HTMLElement>(null);
   const [isImageLoading, setIsImageloading] = useState(false);
+  const autoTOC = useAutoTOC('.manual-content-section', pageData);
 
   const scrollToHash = useCallback(() => {
     if (window.location.hash) {
@@ -99,7 +102,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
               <>
-                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="scroll-m-[calc(var(--manual-head-height)+20px)]">
+                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]">
                   <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
                   <div
                     className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
@@ -112,7 +115,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                     <div
                       key={subSection._id}
                       id={kebabCase(`${subSection.sectionName}-section-id`)}
-                      className="scroll-m-[calc(var(--manual-head-height)+20px)]"
+                      className="manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]"
                     >
                       <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
                       <div
@@ -132,11 +135,12 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                   On This Page
                 </AccordionSummary>
                 <AccordionDetails>
-                  <OnThisPageImpl pageData={pageData} />
+                  <OnThisPageImpl pageData={pageData} autoTOC={autoTOC} />
+                  <AutoTOC toc={autoTOC} />
                 </AccordionDetails>
               </Accordion>
             ) : (
-              <OnThisPageImpl pageData={pageData} />
+              <OnThisPageImpl pageData={pageData} autoTOC={autoTOC} />
             )}
           </div>
           {zoomedImage && (
@@ -162,17 +166,57 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
 
 export default ManualContent;
 
-const OnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
+const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: any[] }) => {
   const hash = window.location.hash.split('#')[1];
+
   return (
-    <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] ">
+    <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] overflow-y-auto h-[calc(100vh-2rem)]">
       {pageData?.map((e) => {
-        const link = `${kebabCase(e.sectionName)}-section-id`;
+        const sectionId = `${kebabCase(e.sectionName)}-section-id`;
+        const sectionTOC = Array.isArray(autoTOC)
+          ? autoTOC.filter(t => t.sectionId === sectionId)
+          : [];
+
         return (
-          <li className="m-2 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
-            <a key={e._id} href={`#${link}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}>
+          <li className="m-2 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100" key={e._id}>
+            <a href={`#${sectionId}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === sectionId && 'font-bold')}>
               {e.sectionName}
             </a>
+
+            {sectionTOC.length > 0 && (
+              <ul className="mt-1 pl-4">
+                {sectionTOC.map((tocItem) => (
+                  <li key={tocItem.id} className="m-1.5 list-none">
+                    <a
+                      href={`#${tocItem.id}`}
+                      className={cn(
+                        'text-[12px] hover:text-[var(--link)]',
+                        hash === tocItem.id && 'font-bold'
+                      )}
+                    >
+                      {tocItem.text}
+                    </a>
+                    {tocItem.children && tocItem.children.length > 0 && (
+                      <ul className="pl-4">
+                        {tocItem.children.map((child) => (
+                          <li key={child.id} className="m-1.5 list-none">
+                            <a
+                              href={`#${child.id}`}
+                              className={cn(
+                                'text-[12px] hover:text-[var(--link)]',
+                                hash === child.id && 'font-bold'
+                              )}
+                            >
+                              {child.text}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
             {e?.subSections?.length ? <SubOnThisPageImpl pageData={e?.subSections} /> : null}
           </li>
         );
