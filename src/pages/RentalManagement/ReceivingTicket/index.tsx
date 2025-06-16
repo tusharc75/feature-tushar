@@ -3799,7 +3799,7 @@ const ActionButtonMenuItems = ({
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
-        assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
           return (
             <MenuItem
               onClick={() => {

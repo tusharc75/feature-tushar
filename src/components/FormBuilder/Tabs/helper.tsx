@@ -496,5 +496,16 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
+  },
+  {
+    resource: sidebarResource.assemblyOrder,
+    policy: [
+      {
+        fieldName: 'autoConvertInSameRentalJob',
+        fieldLabel: 'Auto Convert In Same Rental Job',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
   }
 ];
