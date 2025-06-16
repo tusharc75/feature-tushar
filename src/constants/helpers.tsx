@@ -1953,6 +1953,10 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
     finalObject['completedByDate'] = data?.completedBy?.date;
   }
+  if (data?.lastActivityBy) {
+    finalObject['lastActivityBy'] = data?.lastActivityBy?.user?.concatedName;
+    finalObject['lastActivityByDate'] = data?.lastActivityBy?.date;
+  }
   finalObject['id'] = data?._id;
 
   return finalObject;
