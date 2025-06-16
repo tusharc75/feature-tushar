@@ -308,9 +308,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                ?.filter((_f) => _f?.required)
-                ?.map((f) => f?.fieldName)
-                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                  ?.filter((_f) => _f?.required)
+                  ?.map((f) => f?.fieldName)
+                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -655,6 +655,20 @@ const Steps = ({
               step: step
             });
           }
+        } else if (result?.normalAddon?.length) {
+          if (resource === sidebarResource.workOrderTechnician) {
+            handleAddService(
+              result?.normalAddon?.map((e) => e._id),
+              step
+            );
+          } else {
+            setAddServiceConfirmation({
+              open: true,
+              status: '',
+              services: result?.normalAddon,
+              step: step
+            });
+          }
         }
 
         if (type === WORKORDER_SERVICE_STEP_STATUS.passed && result?.isAddStepsOnPass) {
@@ -924,6 +938,7 @@ const Steps = ({
         {permissions?.repairJob?.isCreate &&
           resource === sidebarResource.workOrderTechnician &&
           workOrderData?.status !== WORK_ORDER_STATUS.completed &&
+          workOrderData?.status !== WORK_ORDER_STATUS.onHold &&
           workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
           (workOrderData?.currentRepairJob ? (
             <ThemeButton
@@ -977,9 +992,9 @@ const Steps = ({
               <ThemeButton
                 disabled={
                   allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                     ? false
                     : true
                 }
@@ -999,9 +1014,9 @@ const Steps = ({
           <ThemeButton
             disabled={
               allowedToEdit &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              )
                 ? false
                 : true
             }
@@ -1030,7 +1045,7 @@ const Steps = ({
         <MenuItem
           disabled={
             (allowedToEdit &&
-              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true) || selectedSteps.length === 0
           }
@@ -1090,9 +1105,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true,
                     placement: 'right'
@@ -1108,8 +1123,9 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
-                } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
+              className={`w-full ${
+                minHeightClass ? minHeightClass : 'h-[calc(100vh-278px)] '
+              } space-y-2 overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1126,8 +1142,9 @@ const Steps = ({
                       head={
                         <Box
                           key={step._id}
-                          className={`${classes.accordionHeading} ${!stepData?.status ? '' : 'cursor-pointer'
-                            } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                          className={`${classes.accordionHeading} ${
+                            !stepData?.status ? '' : 'cursor-pointer'
+                          } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                         >
                           <div className="flex gap-2 ">
                             {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
@@ -1232,12 +1249,12 @@ const Steps = ({
                                           <DeleteOutline
                                             color={
                                               allowedToEdit &&
-                                                ![
-                                                  WORKORDER_SERVICE_STEP_STATUS.passed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.failed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.completed,
-                                                  WORKORDER_SERVICE_STEP_STATUS.skipped
-                                                ].includes(stepData?.passFailStatus)
+                                              ![
+                                                WORKORDER_SERVICE_STEP_STATUS.passed,
+                                                WORKORDER_SERVICE_STEP_STATUS.failed,
+                                                WORKORDER_SERVICE_STEP_STATUS.completed,
+                                                WORKORDER_SERVICE_STEP_STATUS.skipped
+                                              ].includes(stepData?.passFailStatus)
                                                 ? 'error'
                                                 : 'disabled'
                                             }
@@ -1392,10 +1409,10 @@ const Steps = ({
                                     ) : null
                                   ) : null}
                                   {stepData?.status &&
-                                    step?.isAllowToPerform &&
-                                    ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                                    // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                                    isStepsAllowToPerform ? (
+                                  step?.isAllowToPerform &&
+                                  ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                                  // ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                                  isStepsAllowToPerform ? (
                                     [
                                       WORKORDER_SERVICE_STEP_STATUS.passed,
                                       WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1508,12 +1525,12 @@ const Steps = ({
                                     <DeleteOutline
                                       color={
                                         allowedToEdit &&
-                                          ![
-                                            WORKORDER_SERVICE_STEP_STATUS.passed,
-                                            WORKORDER_SERVICE_STEP_STATUS.failed,
-                                            WORKORDER_SERVICE_STEP_STATUS.completed,
-                                            WORKORDER_SERVICE_STEP_STATUS.skipped
-                                          ].includes(stepData?.passFailStatus)
+                                        ![
+                                          WORKORDER_SERVICE_STEP_STATUS.passed,
+                                          WORKORDER_SERVICE_STEP_STATUS.failed,
+                                          WORKORDER_SERVICE_STEP_STATUS.completed,
+                                          WORKORDER_SERVICE_STEP_STATUS.skipped
+                                        ].includes(stepData?.passFailStatus)
                                           ? 'error'
                                           : 'disabled'
                                       }
@@ -1543,7 +1560,7 @@ const Steps = ({
                                       : allowedToEdit
                                     : false
                                   : [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-                                    !workOrderData?.deleted
+                                      !workOrderData?.deleted
                                     ? false
                                     : resource === sidebarResource?.workOrderTechnician
                                       ? true
@@ -1668,16 +1685,16 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                        isStepsAllowToPerform &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) &&
-                        ![
-                          WORKORDER_SERVICE_STEP_STATUS.skipped,
-                          WORKORDER_SERVICE_STEP_STATUS.completed,
-                          WORKORDER_SERVICE_STEP_STATUS.end,
-                          WORKORDER_SERVICE_STEP_STATUS.passed
-                        ]?.includes(getFields(selectedStep)?.stepData?.status)
+                      isStepsAllowToPerform &&
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      ) &&
+                      ![
+                        WORKORDER_SERVICE_STEP_STATUS.skipped,
+                        WORKORDER_SERVICE_STEP_STATUS.completed,
+                        WORKORDER_SERVICE_STEP_STATUS.end,
+                        WORKORDER_SERVICE_STEP_STATUS.passed
+                      ]?.includes(getFields(selectedStep)?.stepData?.status)
                         ? false
                         : true
                     }
@@ -1966,9 +1983,9 @@ const Steps = ({
                 <ThemeButton
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }

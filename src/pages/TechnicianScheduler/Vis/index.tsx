@@ -55,24 +55,26 @@ const TimelineElementImpl = () => {
             visible: true
           };
           for (const technician of item.technicianHistory) {
-            let start = technician.estimateStartDate;
-            let end = technician.estimateEndDate;
-            if (start === end) {
-              start = dayjs(start).tz().startOf('day').toDate();
-              end = dayjs(end).tz().endOf('day').toDate();
+            let start = technician?.startDate || technician?.estimateStartDate;
+            let end = technician?.endDate || technician?.estimateEndDate;
+            if (start && end && technician?.reference?.optionLabel) {
+              if (start === end) {
+                start = dayjs(start).tz().startOf('day').toDate();
+                end = dayjs(end).tz().endOf('day').toDate();
+              }
+              const singleItem: DataItem & { itemType: string; status: string } = {
+                ...technician,
+                id: technician._id,
+                group: item._id,
+                status: technician.status,
+                content: technician?.reference?.optionLabel,
+                start,
+                end,
+                itemType: technician.type || 'technicianHistory',
+                type: undefined
+              };
+              itemList.push(singleItem);
             }
-            const singleItem: DataItem & { itemType: string; status: string } = {
-              ...technician,
-              id: technician._id,
-              group: item._id,
-              status: technician.status,
-              content: technician?.reference?.optionLabel,
-              start,
-              end,
-              itemType: technician.type || 'technicianHistory',
-              type: undefined
-            };
-            itemList.push(singleItem);
           }
           for (const technician of item.technicianUnavailability) {
             let start = technician.startDate;

@@ -1,7 +1,7 @@
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useMemo } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -31,6 +31,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { AddOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
+import ButtonMenu from 'src/components/ButtonMenu';
 
 const WorkOrder = () => {
   let renderedFrom = camelCase(sidebarResource?.workOrder);
@@ -67,6 +68,15 @@ const WorkOrder = () => {
     }
   ];
 
+  const [selectedResource, setSelectedResource] = useState({ 'value': '', label: 'All' });
+
+  const resourceItems = useMemo(() => [
+    { label: 'All', value: '' },
+    ...(permissions?.repairOrder?.isRead ? [{ label: resources?.repairOrder?.titlePlural, value: sidebarResource.repairOrder }] : []),
+    ...(permissions?.productionOrder?.isRead ? [{ label: resources?.productionOrder?.titlePlural, value: sidebarResource.productionOrder }] : []),
+    ...(permissions?.assemblyOrder?.isRead ? [{ label: resources?.assemblyOrder?.titlePlural, value: sidebarResource.assemblyOrder }] : []),
+  ], [permissions, resources]);
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -81,7 +91,7 @@ const WorkOrder = () => {
       fetchData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedResource]);
 
   useEffect(() => {
     dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
@@ -196,6 +206,10 @@ const WorkOrder = () => {
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (selectedResource?.value !== '') {
+      deepFilters.push({ field: 'type', term: [selectedResource.value] })
+    }
 
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -353,6 +367,17 @@ const WorkOrder = () => {
             }
           }}
           isAddButtonVisible={true}
+          leftSideContents={
+            <ButtonMenu
+              showChevron={true}
+              items={resourceItems}
+              onItemClick={(e, item: any) => {
+                setSelectedResource(item);
+              }}
+            >
+              <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.label}</span>
+            </ButtonMenu>
+          }
         />
         {createWorkOrderResouce.length > 1 && (
           <Menu
@@ -405,12 +430,11 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

@@ -33,7 +33,6 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [subFieldOpen, setSubFieldOpen] = useState(false);
-  const [htmlDescription, setHtmlDescription] = useState(values['htmlDescription'] || '');
 
   useEffect(() => {
     getLookupList();
@@ -150,45 +149,45 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'converter' ||
         values['type'] === 'percent' ||
         values['type'] === 'currencyAmount') && (
-        <Grid spacing={3} container>
-          {values['type'] === 'formula' && (
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <FormControl fullWidth margin="dense" size="small" variant="outlined">
-                <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={values['returnType']}
-                  onChange={(e) => {
-                    setFieldValue('returnType', e.target.value);
-                  }}
-                  label="Return Type"
-                  name="returnType"
-                  size="small"
-                >
-                  <MenuItem value="decimal">Decimal</MenuItem>
-                  <MenuItem value="string">String</MenuItem>
-                  <MenuItem value="boolean">Boolean</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          )}
-          {(values['type'] === 'decimal' ||
-            values['type'] === 'converter' ||
-            values['type'] === 'percent' ||
-            values['type'] === 'currencyAmount' ||
-            values['returnType'] === 'decimal') && (
-            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-              <DecimalPlaces
-                values={values}
-                setFieldValue={(name, value) => {
-                  setFieldValue(name, value);
-                }}
-              />
-            </Grid>
-          )}
-        </Grid>
-      )}
+          <Grid spacing={3} container>
+            {values['type'] === 'formula' && (
+              <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                <FormControl fullWidth margin="dense" size="small" variant="outlined">
+                  <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="demo-simple-select-outlined"
+                    value={values['returnType']}
+                    onChange={(e) => {
+                      setFieldValue('returnType', e.target.value);
+                    }}
+                    label="Return Type"
+                    name="returnType"
+                    size="small"
+                  >
+                    <MenuItem value="decimal">Decimal</MenuItem>
+                    <MenuItem value="string">String</MenuItem>
+                    <MenuItem value="boolean">Boolean</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            {(values['type'] === 'decimal' ||
+              values['type'] === 'converter' ||
+              values['type'] === 'percent' ||
+              values['type'] === 'currencyAmount' ||
+              values['returnType'] === 'decimal') && (
+                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                  <DecimalPlaces
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                  />
+                </Grid>
+              )}
+          </Grid>
+        )}
       {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && !values['dataList'] && (
         <Box>
           <FormControlLabel
@@ -511,8 +510,14 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         </Box>
       )}
       {['groupSignature'].includes(fieldData.type) && <PreFilter lookupResource={'User'} values={values} setFieldValue={setFieldValue} />}
-      {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
-      {fieldData.type === 'description' && <Description values={htmlDescription} setFieldValue={setFieldValue} />}
+      {(fieldData.type === 'decimal' || fieldData.type === 'radio' || (fieldData.type === 'dropDown' && !fieldData?.lookup)) && <MinMax
+        values={values}
+        setFieldValue={setFieldValue}
+        errors={errors}
+        touched={touched}
+        fieldData={fieldData}
+      />}
+      {fieldData.type === 'description' && <Description values={values['htmlDescription']} setFieldValue={setFieldValue} />}
       {fieldData.type === 'counter' && (
         <Box mt={1}>
           <ThemeButton

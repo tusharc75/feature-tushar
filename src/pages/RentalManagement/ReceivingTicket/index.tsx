@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -174,6 +174,8 @@ const ReceivingTicket = ({
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
+
+  const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
 
   const {
     state: { user, permissions, resources }
@@ -1308,6 +1310,8 @@ const ReceivingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    setRentalJobChildFields(rentalJobProductFields)
+
     const newColumns = generateColumns(
       renderedFrom,
       rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
@@ -1315,6 +1319,19 @@ const ReceivingTicket = ({
       false,
       rentalManagementData?.currency
     );
+
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
 
     const column: any = [
       {
@@ -1326,11 +1343,13 @@ const ReceivingTicket = ({
           <div
             className="d-flex align-items-center gap-2"
             style={{
-              backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
-                row?.original?.status
-              )
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
@@ -2701,6 +2720,7 @@ const ReceivingTicket = ({
           fetchRecords={fetchRecords}
           allowedToEdit={allowedToEdit}
           stepFullScreen={stepFullScreen}
+          rentalJobChildFields={rentalJobChildFields}
         />
       </TabPanel>
       <Menu
@@ -3779,7 +3799,7 @@ const ActionButtonMenuItems = ({
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
-        assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
           return (
             <MenuItem
               onClick={() => {

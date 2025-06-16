@@ -33,7 +33,7 @@ const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObjec
 
   if (!showMessage) return null;
   return (
-    <div className="absolute bottom-0 left-0 right-[300px] top-0 z-50 flex items-center justify-center ">
+    <div className="absolute bottom-0 left-0 right-[0px] top-0 z-50 flex items-center justify-center ">
       <button className="absolute inset-0 cursor-pointer bg-black/25 [backdrop-filter:blur(2px)] " aria-label="Close Info" onClick={handleClose}>
         <span className="sr-only">Close Controls</span>
       </button>

@@ -261,7 +261,7 @@ const PurchaseRequisitionDetail = () => {
                       style={{
                         marginLeft: 'auto',
                         maxWidth: 'max-content',
-                        marginTop: '-30px'
+                        marginTop: DOAData ? '-30px' : ''
                       }}
                     >
                       <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
