@@ -485,6 +485,7 @@ const AddSerializedAsset = ({
         return;
       } else {
         addSerializedAsset(selectedRecords);
+        return;
       }
     }
     addSerializedAsset(selectedRecords);
