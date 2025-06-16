@@ -26,7 +26,7 @@ export const ItemTemplate = memo(({ service, setStore }: { service: any; setStor
           open: true,
           type: 'start',
           referenceId: data?.referenceId,
-          minDateTime: data?.end || null,
+          minDateTime: data?.endDate || data?.estimateStartDate || null,
           notes: '',
           _id: data?._id
         }

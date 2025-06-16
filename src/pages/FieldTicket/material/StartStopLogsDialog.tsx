@@ -46,16 +46,13 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
     if (service && service?.optionValue !== 'All') {
       api = `${api}&service=${service?.optionValue}&uniqueId=${service?._id}`;
     }
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        const rows = data?.filter((e) => e?.startDate)
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
-        dispatch({ type: 'loading', loading: false });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      const rows = data?.filter((e) => e?.startDate)
+      dispatch({ type: 'initialize', data: rows, count: rows?.length });
+      dispatch({ type: 'loading', loading: false });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const columns: any = [
@@ -127,14 +124,16 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.startedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.startedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.startedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.startedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.startedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )
@@ -147,14 +146,16 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
       disableSortBy: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.endedBy) ? (
-          <Link
-            className="link text-truncate"
-            title={row?.original?.endedBy?.optionLabel}
-            to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
-            target={'_blank'}
-          >
-            {row?.original?.endedBy?.optionLabel}
-          </Link>
+          <div>
+            <Link
+              className="link text-truncate"
+              title={row?.original?.endedBy?.optionLabel}
+              to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}
+              target={'_blank'}
+            >
+              {row?.original?.endedBy?.optionLabel}
+            </Link>
+          </div>
         ) : (
           <NoDataCell />
         )
@@ -193,8 +194,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
                 <IconButton
                   size="small"
                   onClick={() => {
-                    let minStartDate = null,
-                      maxEndDate = null;
+                    let minStartDate = null, maxEndDate = null;
                     dataRows?.forEach((d: any, index: number) => {
                       if (d._id === row.original._id) {
                         if (index !== 0) {
@@ -260,7 +260,7 @@ const StartStopLogsDialog = ({ onClose, referenceId, service, fetchRecords, tech
   const handleDeleteLog = (ids: any[]) => {
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().put(`/technician/delete-log`, { ids })
+    axiosInstance().put(`/technician/delete-log`, { ids, resetStartEndDate: dataRows?.length === 1 ? true : false })
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,
