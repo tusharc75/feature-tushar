@@ -53,7 +53,7 @@ const AssemblyOrder = () => {
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const history = useHistory();
-  
+
   useEffect(() => {
     fetchColumns();
   }, []);
@@ -63,7 +63,7 @@ const AssemblyOrder = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.assemblyOrder}`);
     data = response?.data?.data;
     let columns = generateColumns(renderedFrom, data, routes.assemblyOrderDetail.path, true);
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
 

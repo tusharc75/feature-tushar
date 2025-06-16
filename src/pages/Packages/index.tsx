@@ -59,7 +59,7 @@ const PackageList = () => {
     data = response?.data?.data;
     setWalkmeData([createResourceFlow(sidebarResource.packages, data)]);
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

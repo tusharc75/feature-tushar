@@ -93,7 +93,7 @@ const ServiceOrder = () => {
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes?.fieldServiceOrderDetail?.path, true);
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(renderedFrom, field));
     });

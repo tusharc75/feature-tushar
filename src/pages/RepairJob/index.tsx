@@ -104,7 +104,7 @@ const RepairJob = () => {
         o['sortable'] = false;
       });
     }
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(pageTitle, field));
     });

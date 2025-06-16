@@ -55,7 +55,7 @@ const SerializedPackages = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -88,7 +88,7 @@ const SerializedPackages = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-         <HtmlTooltip
+        <HtmlTooltip
           title={row?.original?.canDelete ? 'Delete' : deleteDisable}
         >
           <span>

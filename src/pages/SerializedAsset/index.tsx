@@ -355,7 +355,7 @@ const SerializedAsset = () => {
             )
           });
         }
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 

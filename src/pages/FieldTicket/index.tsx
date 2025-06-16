@@ -106,7 +106,7 @@ const FieldTicket = () => {
         );
       }
     });
-    setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {

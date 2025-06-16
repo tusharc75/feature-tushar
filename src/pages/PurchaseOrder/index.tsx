@@ -54,8 +54,8 @@ const PurchaseOrder = () => {
       value: 2
     },
     {
-      key : `Closed ${resources?.purchaseOrder?.titlePlural}`,
-      value : 3
+      key: `Closed ${resources?.purchaseOrder?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -121,7 +121,7 @@ const PurchaseOrder = () => {
             )
           }
         ];
-        setColumns([...newColumns, ...extraColumn, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...extraColumn, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 

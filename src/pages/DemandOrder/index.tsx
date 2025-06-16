@@ -75,7 +75,7 @@ const DemandOrder = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.demandOrderDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

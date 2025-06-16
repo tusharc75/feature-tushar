@@ -76,7 +76,7 @@ const TransferAsset = () => {
       .get(`/field?resource=${sidebarResource.transferAsset}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.transferAssetDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 
@@ -338,12 +338,11 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}`
               : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
