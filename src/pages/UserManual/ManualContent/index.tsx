@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import ImageZoomPan from 'src/components/ImageZoomPan';
 import { cn } from 'src/constants/helpers';
 import { ComponentCommonProps, Section } from 'src/pages/UserManual/type';
-import { AutoTOC } from '../components/AutoTOC';
 import { useAutoTOC } from 'src/pages/UserManual/hooks/useAutoTOC';
+import styles from '../userManual.module.scss';
 
 const ManualContent = ({ state }: ComponentCommonProps) => {
   const { pageData, loading, isMobile } = state;
@@ -18,9 +18,14 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
 
   const scrollToHash = useCallback(() => {
     if (window.location.hash) {
-      const targetElement = document.querySelector(window.location.hash);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth' });
+      try {
+        const hash = decodeURIComponent(window.location.hash);
+        const targetElement = document.querySelector(hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      } catch (error) {
+        console.error('Error scrolling to hash:', error);
       }
     }
   }, []);
@@ -37,36 +42,58 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     let allImagesTillSection: HTMLImageElement[];
     if (!loading && window.location.hash !== '') {
       setIsImageloading(true);
+      imagesLoaded.current = 0;
+
       setTimeout(() => {
-        const allSections = document.querySelectorAll('[id*="-section-id"]');
-        const sectionIndex = [...allSections].findIndex((d) => d.id === window.location.hash.split('#')[1]);
-        const sections = sectionIndex > -1 ? [...allSections].splice(0, sectionIndex) : [...allSections];
-        allImagesTillSection = sections.map((s) => [...s.querySelectorAll('img')]).flat();
+        try {
+          const hash = decodeURIComponent(window.location.hash.substring(1));
+          const allSections = document.querySelectorAll('[id*="-section-id"]');
+          const sectionIndex = [...allSections].findIndex((d) => d.id === hash);
+          const sections = sectionIndex > -1 ? [...allSections].splice(0, sectionIndex) : [...allSections];
+          allImagesTillSection = sections.map((s) => [...s.querySelectorAll('img')]).flat();
 
-        totalImages.current = allImagesTillSection.length;
+          totalImages.current = allImagesTillSection.length;
 
-        // add listeners till images till the sections
-        // if images are loaded then scroll to the section
-        allImagesTillSection?.forEach((img) => {
-          if (img.complete) {
-            imagesLoaded.current++;
-          } else {
-            img.addEventListener('load', handleImageLoad);
-            img.addEventListener('error', handleImageLoad);
+          if (totalImages.current === 0) {
+            scrollToHash();
+            setIsImageloading(false);
+            return;
           }
-        });
 
-        if (imagesLoaded.current === totalImages.current) {
-          scrollToHash();
+          allImagesTillSection?.forEach((img) => {
+            if (img.complete) {
+              imagesLoaded.current++;
+              if (imagesLoaded.current === totalImages.current) {
+                scrollToHash();
+                setIsImageloading(false);
+              }
+            } else {
+              img.addEventListener('load', handleImageLoad);
+              img.addEventListener('error', handleImageLoad);
+            }
+          });
+
+          // If all images are already loaded
+          if (imagesLoaded.current === totalImages.current) {
+            scrollToHash();
+            setIsImageloading(false);
+          }
+        } catch (error) {
+          console.error('Error in image loading:', error);
           setIsImageloading(false);
         }
       }, 0);
+    } else {
+      setIsImageloading(false);
     }
+
     return () => {
       allImagesTillSection?.forEach((img) => {
         img.removeEventListener('load', handleImageLoad);
         img.removeEventListener('error', handleImageLoad);
       });
+      imagesLoaded.current = 0;
+      totalImages.current = 0;
     };
   }, [handleImageLoad, loading, scrollToHash]);
 
@@ -102,7 +129,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
               <>
-                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className="manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]">
+                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}>
                   <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
                   <div
                     className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
@@ -115,7 +142,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                     <div
                       key={subSection._id}
                       id={kebabCase(`${subSection.sectionName}-section-id`)}
-                      className="manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]"
+                      className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}
                     >
                       <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
                       <div
@@ -136,7 +163,6 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <OnThisPageImpl pageData={pageData} autoTOC={autoTOC} />
-                  <AutoTOC toc={autoTOC} />
                 </AccordionDetails>
               </Accordion>
             ) : (
