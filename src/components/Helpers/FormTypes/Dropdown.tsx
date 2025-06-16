@@ -32,6 +32,7 @@ import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { isFieldVisible } from 'src/components/Helpers/FormTypes';
+import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -1240,6 +1241,50 @@ function Dropdown({
                               order: option.length,
                               ...(fieldData.lookupDependentOn && {
                                 [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
+                              })
+                            };
+                            setOptionsList([tempNewOption, ...option]);
+                            if (type === 'multiSelect') {
+                              handleChange(
+                                name,
+                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                              );
+                            } else {
+                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                            }
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.packageCategory && permissions?.packageCategory?.isCreate && (
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
+                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                      <IconButton
+                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                        onClick={() => setLookupDialog(true)}
+                        size="small"
+                        color="primary"
+                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                      >
+                        <AddCircleIcon />
+                      </IconButton>
+                    </HtmlTooltip>
+                    {lookupDialog && (
+                      <ManagePackageCategory
+                        isRedirectToDetailPage={false}
+                        onClose={() => setLookupDialog(false)}
+                        onSuccess={(data) => {
+                          setLookupDialog(false);
+                          if (data?._id) {
+                            let tempNewOption = {
+                              default: true,
+                              optionLabel: data?.packageCategory,
+                              optionValue: data?._id,
+                              order: option.length,
+                              ...(fieldData.lookupDependentOn && {
+                                [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                               })
                             };
                             setOptionsList([tempNewOption, ...option]);
