@@ -5,6 +5,7 @@ import AssignTechnicianActualDatesDialog from './AssignTechnicianActualDatesDial
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { TechnicianAssignProps } from './types';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 const TechnicianAssign = ({
   resourceData,
@@ -18,11 +19,13 @@ const TechnicianAssign = ({
   const [assignDialog, setAssignDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, message: '', dateTimeRanges: null });
+
+  const [showUnavailabilityDialog, setShowUnavailabilityDialog] = useState(false);
+
   const toastConfig = useContext(CustomToastContext);
 
   const handleAssign = (skipDateValidation = false, dateTimeRanges = null) => {
     let data = [];
-
     resourceData?.map((ele: any) => {
       technicians?.map((technician) => {
         if (dateTimeRanges?.length > 0) {
@@ -52,11 +55,9 @@ const TechnicianAssign = ({
         }
       });
     });
-
     if (allData?.length > 0) {
       data = allData?.map(({ referenceNumber, ...rest }) => rest);
     }
-
     setIsSubmitting(true);
     axiosInstance()
       .post(`/technician`, { technician: data, skipDateValidation })
@@ -66,10 +67,15 @@ const TechnicianAssign = ({
         setShowConfirmBox({ open: false, message: '', dateTimeRanges: null });
       })
       .catch((error) => {
-        if (skipDateValidation) {
-          toastConfig.setToastConfig(error);
-        } else {
-          setShowConfirmBox({ open: true, message: error?.message, dateTimeRanges: dateTimeRanges });
+        if (error?.data?.status === 504) {
+          setShowUnavailabilityDialog(true)
+        }
+        else {
+          if (skipDateValidation) {
+            toastConfig.setToastConfig(error);
+          } else {
+            setShowConfirmBox({ open: true, message: error?.message, dateTimeRanges: dateTimeRanges });
+          }
         }
         setIsSubmitting(false);
       });
@@ -121,6 +127,17 @@ const TechnicianAssign = ({
           okBtnLoading={isSubmitting}
         />
       )}
+      {showUnavailabilityDialog ? (
+        <MessageDialog
+          open={showUnavailabilityDialog}
+          message={"Technician is unavailable for this dates, choose different date or assign another technician"}
+          onClose={() => {
+            setShowUnavailabilityDialog(false)
+            setIsSubmitting(false);
+            setShowConfirmBox({ open: false, message: '', dateTimeRanges: null })
+          }}
+        />
+      ) : null}
       {showConfirmBox?.open && (
         <ConfirmationDialog
           open={showConfirmBox.open}
