@@ -430,7 +430,7 @@ const InvoiceDetails = () => {
                         marginTop: DOAData ? '-30px' : ''
                       }}
                     >
-                      <ShowDoa status={invoiceData?.doa_status} data={DOAData} />
+                      <ShowDoa status={invoiceData?.status} data={DOAData} />
                     </Box>
                   )}
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
