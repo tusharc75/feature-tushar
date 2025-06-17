@@ -25,6 +25,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
+  ASSET_STATUS,
   DELIVERY_TICKET_STATUS,
   QUOTATION_STATUS,
   RENTAL_STATUS,
@@ -99,6 +100,7 @@ const RentalManagementDetailsPage = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [assets, setAssets] = useState(null);
+  const [assetStatusOptions, setAssetStatusOptions] = useState([])
 
   useEffect(() => {
     return history.listen((location) => {
@@ -190,12 +192,17 @@ const RentalManagementDetailsPage = () => {
           data.data.some((o) => {
             if (o?.fieldData?.fieldName === 'status') {
               setAllowUpdateStatus(o?.isUpdate);
+              let options = o?.fieldData?.option?.filter(_o => [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(_o?.optionValue))
+              if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+                options = options?.filter(_o => _o?.optionValue != ASSET_STATUS.scrap)
+              }
+              setAssetStatusOptions([...options])
               return true;
             }
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -530,11 +537,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                  allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                    allowedToEdit &&
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                        setShowCancelConfirmBox({ open: true, isQuote: true });
-                      }
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -559,12 +566,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -584,12 +591,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -633,6 +640,7 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
                   rentalPolicyData={resourceData?.policy}
+                  assetStatusOptions={assetStatusOptions?.filter(o => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
@@ -648,6 +656,8 @@ const RentalManagementDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
                   rentalPolicyData={resourceData?.policy}
+                  assetStatusOptions={assetStatusOptions}
+                  setAssetStatusOptions={setAssetStatusOptions}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
