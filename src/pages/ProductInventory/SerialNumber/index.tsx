@@ -12,25 +12,29 @@ import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'serialNumber_grid';
 
-const SerialNumber = ({ product, warehouse }) => {
+const SerialNumber = ({ product, warehouse, storageLocation }) => {
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
 
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { resources }
+    state: { resources, user }
   }: any = useData();
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, warehouse]);
+  }, [page, limit, filters, sorting, warehouse, storageLocation]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
     if (warehouse) {
       deepFilter = `${deepFilter}&warehouse=${warehouse}`;
+    }
+
+    if (storageLocation) {
+      deepFilter = `${deepFilter}&storageLocation=${storageLocation}`;
     }
 
     if (product) {
@@ -110,6 +114,21 @@ const SerialNumber = ({ product, warehouse }) => {
         </>
       )
     },
+    ...(user?.user?.brandPolicy?.storageLocation ? [{
+      accessor: 'storageLocation',
+      Header: resources?.storageLocation?.titleSingular,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.storageLocation ? (
+            <h5 className="text-truncate" title={row?.original?.storageLocation}>
+              {row?.original?.storageLocation}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    }] : []),
     {
       accessor: 'status',
       Header: 'Status',
@@ -143,7 +162,7 @@ const SerialNumber = ({ product, warehouse }) => {
 
   return (
     <>
-      <Grid size={{xs:12, md:12, sm:12}}>
+      <Grid size={{ xs: 12, md: 12, sm: 12 }}>
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}

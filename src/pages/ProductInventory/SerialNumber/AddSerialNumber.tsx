@@ -12,7 +12,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 
-const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serialNumberCount }) => {
+const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storageLocation, serialNumberCount }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -20,7 +20,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
   const handleSubmit = (values) => {
     setLoading(true);
     axiosInstance()
-      .post(`${productInventory.api}/add-serial-number/${product}/${warehouse}`, { serialNumber: values?.serialNumber })
+      .post(`${productInventory.api}/add-serial-number/${product}`, { warehouse: warehouse, storageLocation: storageLocation, serialNumber: values?.serialNumber })
       .then(({ data: { data } }) => {
         setLoading(false);
         handleSucess();
@@ -61,11 +61,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
           <Form autoComplete="off" autoCorrect="off" noValidate className="flex min-h-full flex-col">
             <CustomDialogHeader
               title={'Add Serial Numbers'}
-              onClose={(e, reason) => {
-                if (reason !== 'backdropClick') {
-                  handleClose();
-                }
-              }}
+              onClose={handleClose}
               showRequiredLabel={false}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
