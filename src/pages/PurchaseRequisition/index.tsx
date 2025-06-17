@@ -75,7 +75,7 @@ const PurchaseRequisition = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.purchaseRequisition}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.purchaseRequisitionDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

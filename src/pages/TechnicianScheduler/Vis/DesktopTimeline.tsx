@@ -129,7 +129,6 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
 
         const containerCurrentWidth = timelineContainer.current?.clientWidth;
         if (containerCurrentWidth) {
-          console.log(containerCurrentWidth, timelineContainer);
           const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
 
           start = dayjs(time).subtract(halfOfTotalDays, 'days').toDate();
@@ -187,7 +186,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
               setMinHeight('');
               try {
                 item.removeChild(collapseButton);
-              } catch {}
+              } catch { }
             };
 
             const button = document.createElement('button');
@@ -203,7 +202,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
 
               try {
                 item.removeChild(button);
-              } catch (error) {}
+              } catch (error) { }
             };
             button.classList.add('timeline-show-all-button');
             item.appendChild(button);

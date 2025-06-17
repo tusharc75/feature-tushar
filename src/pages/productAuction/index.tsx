@@ -55,7 +55,7 @@ const ProductAuction = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.productAuction}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.productAuctionDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

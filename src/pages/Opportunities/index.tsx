@@ -92,7 +92,7 @@ const Opportunities = () => {
           (o.primaryField = true);
       }
     });
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.opportunity, field));
     });

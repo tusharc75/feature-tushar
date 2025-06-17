@@ -76,7 +76,7 @@ const BulkAssetCreation = () => {
       .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 
@@ -338,12 +338,11 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
              ${deleteRecord?.baNumber}`
-              : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

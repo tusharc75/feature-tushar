@@ -3,6 +3,7 @@
   max-width: 564px;
   width: 100%;
   margin-left: 31px;
+
   @media all and (max-width: 768px) {
     max-width: 100%;
     margin-left: 0;
@@ -39,10 +40,12 @@
 
   ::placeholder {
     color: #686869;
-    opacity: 1; /* Firefox */
+    opacity: 1;
+    /* Firefox */
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+
     [data-mode='dark'] & {
       color: white;
     }
@@ -53,6 +56,7 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+
     [data-mode='dark'] & {
       color: white;
     }
@@ -63,6 +67,7 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+
     [data-mode='dark'] & {
       color: white;
     }
@@ -84,6 +89,7 @@
     transform: translateY(-50%);
     fill: #7e818c;
     cursor: pointer;
+
     [data-mode='dark'] & {
       fill: white;
     }
@@ -100,9 +106,11 @@
   background-color: #fff;
   color: #000;
   overflow: hidden;
+
   [data-mode='dark'] & {
     background-color: var(--dark-primary);
   }
+
   .filtered_data {
     max-height: 330px;
     background-color: white;
@@ -113,6 +121,7 @@
 
     .resultUL {
       position: relative;
+
       &::after {
         content: '';
         position: absolute;
@@ -121,11 +130,13 @@
         right: 23px;
         height: 1px;
         bottom: 0;
+
         [data-mode='dark'] & {
           background-color: #3c3c4b;
         }
       }
     }
+
     .list_header {
       background-color: white;
       color: #828282;
@@ -136,11 +147,13 @@
       top: 0;
       z-index: 1;
       font-size: 15px;
+
       [data-mode='dark'] & {
         background-color: var(--dark-primary);
         color: #9c9b9e;
       }
     }
+
     .heaaderResults {
       padding: 3px 23px;
       font-size: 14px;
@@ -148,14 +161,17 @@
       font-weight: 500;
       font-size: 15px;
       transition: backgorund 0s;
+
       [data-mode='dark'] & {
         color: white;
       }
     }
+
     .no_result_container {
       padding: 20px 0;
       -webkit-user-select: none;
       user-select: none;
+
       svg {
         fill: var(--grey);
         margin: 0 auto 10px;
@@ -163,6 +179,7 @@
         height: 50px;
       }
     }
+
     .no_result {
       color: var(--grey);
       -webkit-user-select: none;
@@ -170,4 +187,13 @@
       text-align: center;
     }
   }
+}
+
+.manual-content-section {
+    h1,
+    h2,
+    h3,
+    h4 {
+      scroll-margin-top: calc(var(--manual-head-height) + 20px) !important;
+    }
 }

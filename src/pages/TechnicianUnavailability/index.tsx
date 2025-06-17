@@ -361,7 +361,7 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
       {showDeleteConfirmBox?.open && (
         <ConfirmationDialog
           open={showDeleteConfirmBox?.open}
-          message={`Are you sure you want to delete ${showDeleteConfirmBox?.data ? `${resources?.technicianUnavailability?.titleSingular?.toLowerCase()} : ${showDeleteConfirmBox?.data?.titke}` : 'selected record(s)'} ?`}
+          message={`Are you sure you want to delete ${showDeleteConfirmBox?.data ? `${resources?.technicianUnavailability?.titleSingular?.toLowerCase()} : ${showDeleteConfirmBox?.data?.title}` : 'selected record(s)'} ?`}
           onClose={() => {
             setShowDeleteConfirmBox({ open: false, data: null });
           }}
