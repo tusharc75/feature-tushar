@@ -640,8 +640,7 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
                   rentalPolicyData={resourceData?.policy}
-                  assetStatusOptions={assetStatusOptions}
-                  setAssetStatusOptions={setAssetStatusOptions}
+                  assetStatusOptions={assetStatusOptions?.filter(o => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (

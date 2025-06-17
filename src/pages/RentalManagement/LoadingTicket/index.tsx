@@ -100,7 +100,6 @@ const LoadingTicket = ({
   stepFullScreen,
   rentalPolicyData,
   assetStatusOptions,
-  setAssetStatusOptions
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
