@@ -18,21 +18,22 @@ const FinalPriceBox = ({ allFields, data, childFields = [], material = [] }) => 
   const [subTotal, setSubTotal] = useState(0);
 
   useEffect(() => {
-    const sumFields = []
-    childFields?.filter((e) => e?.showTotalInCard)?.forEach((field) => {
-      let fieldName = field.fieldName + '_' + (field.displayCurrency[0] || data?.currency)?.toLowerCase();
-      const total = material?.filter((f) => f.hasOwnProperty(fieldName) && !isNaN(f[fieldName]))
-        .reduce((sum, row) => Number(row[fieldName]) + sum, 0);
-      if (total) {
-        sumFields.push({ fieldLabel: field?.fieldLabel, total })
-      }
-    })
-    setChildFieldSum(sumFields)
+    if (childFields?.length) {
+      const sumFields = []
+      childFields?.filter((e) => e?.showTotalInCard)?.forEach((field) => {
+        let fieldName = field.fieldName + '_' + (field.displayCurrency[0] || data?.currency)?.toLowerCase();
+        const total = material?.filter((f) => f.hasOwnProperty(fieldName) && !isNaN(f[fieldName]))
+          .reduce((sum, row) => Number(row[fieldName]) + sum, 0);
+        if (total) {
+          sumFields.push({ fieldLabel: field?.fieldLabel, total })
+        }
+      })
+      setChildFieldSum(sumFields)
 
-    const subTotalField = `finalPrice_${data?.currency?.toLowerCase()}`
-    const subTotalTemp = material?.filter((f) => !f.parentId && f.hasOwnProperty(subTotalField) && !isNaN(f[subTotalField])).reduce((sum, row) => Number(row[subTotalField]) + sum, 0);
-    setSubTotal(subTotalTemp)
-
+      const subTotalField = `finalPrice_${data?.currency?.toLowerCase()}`
+      const subTotalTemp = material?.filter((f) => !f.parentId && f.hasOwnProperty(subTotalField) && !isNaN(f[subTotalField])).reduce((sum, row) => Number(row[subTotalField]) + sum, 0);
+      setSubTotal(subTotalTemp)
+    }
   }, [childFields, material]);
 
   return (
