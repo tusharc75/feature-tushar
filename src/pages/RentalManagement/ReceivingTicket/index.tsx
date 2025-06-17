@@ -112,7 +112,9 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  rentalPolicyData
+  rentalPolicyData,
+  assetStatusOptions,
+  setAssetStatusOptions
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -175,7 +177,6 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
-  const [assetStatusOptions, setAssetStatusOptions] = useState([])
 
   const {
     state: { user, permissions, resources }
@@ -202,7 +203,6 @@ const ReceivingTicket = ({
   useEffect(() => {
     fetchPolicy();
     fetchFieldLabels();
-    fetchSerializedAssetFields()
   }, []);
 
   useEffect(() => {
@@ -524,23 +524,6 @@ const ReceivingTicket = ({
     }
     return true;
   };
-
-  const fetchSerializedAssetFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
-      .then(({ data: { data } }) => {
-        const statusField = data?.find(d => d?.fieldData?.fieldName === 'status')?.fieldData
-        if (statusField) {
-          let options = statusField?.option?.filter(o => [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(o?.optionValue))
-          if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
-            options = options?.filter(o => o?.optionValue != ASSET_STATUS.scrap)
-          }
-          setAssetStatusOptions([...options])
-        }
-      })
-      .catch((err) => { });
-
-  }
 
   const fetchFieldLabels = async () => {
     try {
