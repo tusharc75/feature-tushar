@@ -264,7 +264,7 @@ const PurchaseRequisitionDetail = () => {
                         marginTop: DOAData ? '-30px' : ''
                       }}
                     >
-                      <ShowDoa status={purchaseRequisitionData?.doa_status} data={DOAData} />
+                      <ShowDoa status={purchaseRequisitionData?.status} data={DOAData} />
                     </Box>
                   )}
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
