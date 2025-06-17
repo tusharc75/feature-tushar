@@ -1338,6 +1338,7 @@ const ReceivingTicket = ({
       {
         accessor: 'index',
         Header: 'Index',
+        sticky: 'left',
         width: view === 'flat' ? 100 : 150,
         disabled: true,
         cell: ({ row }) => (

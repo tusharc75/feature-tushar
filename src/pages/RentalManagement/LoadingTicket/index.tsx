@@ -238,6 +238,7 @@ const LoadingTicket = ({
         Header: 'Index',
         minWidth: 100,
         width: 100,
+        sticky: 'left',
         disabled: true,
         cell: ({ row }) => (
           <div
