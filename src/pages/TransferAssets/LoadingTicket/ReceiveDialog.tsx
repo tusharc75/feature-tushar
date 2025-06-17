@@ -117,6 +117,9 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
     } else if (minDate && values.receiveDate < minDate) {
       errors.receiveDate = `Receive date can't be less than ${displayDate(minDate)}`;
     }
+    else if (dayjs(values['receiveDate']).isAfter(dayjs())) {
+      errors['receiveDate'] = `Please select valid date`;
+    }
     return errors;
   };
 
@@ -145,6 +148,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
               <Box p={1}>
                 <CustomDatePicker
                   {...(minDate ? { minDate } : {})}
+                  maxDate={new Date()}
                   fullWidth
                   size="small"
                   margin="dense"
