@@ -137,6 +137,7 @@ const LoadingTicket = ({
   const [fieldLabels, setFieldLabels] = useState(null);
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
+  const [assetStatusOptions, setAssetStatusOptions] = useState([])
 
   const { generateColumns } = useColumns();
 
@@ -149,6 +150,7 @@ const LoadingTicket = ({
   useEffect(() => {
     fetchPolicy();
     fetchFieldLabels();
+    fetchSerializedAssetFields()
   }, []);
 
   useEffect(() => {
@@ -157,6 +159,22 @@ const LoadingTicket = ({
       fetchRecords();
     }
   }, [view, fieldLabels]);
+
+  const fetchSerializedAssetFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
+      .then(({ data: { data } }) => {
+        const statusField = data?.find(d => d?.fieldData?.fieldName === 'status')?.fieldData
+        if (statusField) {
+          let options = statusField?.option?.filter(o => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))
+          if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+            options = options?.filter(o => o?.optionValue != ASSET_STATUS.scrap)
+          }
+          setAssetStatusOptions([...options])
+        }
+      })
+      .catch((err) => { });
+  }
 
   const fetchPolicy = async () => {
     try {
@@ -1537,7 +1555,7 @@ const LoadingTicket = ({
         {!isOffline && allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <ThemeButton
             disabled={
-              !allowUpdateStatus ||
+              !allowUpdateStatus || assetStatusOptions?.length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
                 [
@@ -1720,26 +1738,21 @@ const LoadingTicket = ({
           horizontal: 'right'
         }}
       >
-        {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
-          <MenuItem
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
-            onClick={() => {
-              setAnchorEl(null);
-              setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-            }}
-          >
-            {ASSET_STATUS.scrap}
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
-          onClick={() => {
-            setAnchorEl(null);
-            setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-          }}
-        >
-          {ASSET_STATUS.lost}
-        </MenuItem>
+        {assetStatusOptions?.length > 0 && assetStatusOptions?.map(o => {
+          return (
+            <MenuItem
+              disabled={
+                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false
+              }
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
+              }}
+            >
+              {o.optionLabel}
+            </MenuItem>
+          )
+        })}
       </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
