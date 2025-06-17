@@ -76,12 +76,13 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
   const fetchData = () => {
     setLoadingData(true);
-    axiosInstance()
-      .get(`${productInventory.api}/serial-number?products=${product[0]._id}&warehouse=${warehouse}`)
+    let api = `${productInventory.api}/serial-number?products=${product[0]._id}&warehouse=${warehouse}`;
+    if (selectedStorageLocation) {
+      api = `${api}&storageLocation=${selectedStorageLocation}`;
+    }
+    axiosInstance().get(api)
       .then(({ data: { data } }) => {
-        if (data?.length) {
-          setSerialNumbers(data);
-        }
+        setSerialNumbers(data);
         setLoadingData(false);
       })
       .catch((err) => {
@@ -302,6 +303,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
   useEffect(() => {
     getCurrentInventory();
+    fetchData()
   }, [selectedStorageLocation]);
 
   return (
