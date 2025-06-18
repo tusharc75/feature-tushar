@@ -59,6 +59,10 @@ const RepairOrder = () => {
     {
       key: `All ${resources?.repairOrder?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.repairOrder?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -145,6 +149,11 @@ const RepairOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
