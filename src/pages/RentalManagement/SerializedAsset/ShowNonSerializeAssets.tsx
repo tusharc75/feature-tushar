@@ -16,7 +16,6 @@ import {
 import { useData } from 'src/StateProvider/Provider';
 
 const ShowNonSerializeAssets = ({ data, onClose, title }) => {
-  console.log('data', data)
   const {
     state: { resources }
   }: any = useData();
