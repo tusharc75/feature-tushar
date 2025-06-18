@@ -42,6 +42,10 @@ const PurchaseRequisition = () => {
     {
       key: `All ${resources?.purchaseRequisition.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Converted ${resources?.purchaseRequisition?.titlePlural}`,
+      value: 3
     }
   ];
   const renderedFrom = camelCase(sidebarResource.purchaseRequisition);
@@ -161,6 +165,11 @@ const PurchaseRequisition = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {

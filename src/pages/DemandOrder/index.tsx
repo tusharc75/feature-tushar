@@ -44,7 +44,11 @@ const DemandOrder = () => {
     {
       key: `All ${resources?.demandOrder?.titlePlural}`,
       value: 2
-    }
+    },
+    {
+      key: `Converted ${resources?.demandOrder?.titlePlural}`,
+      value: 3
+    },
   ];
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -133,6 +137,12 @@ const DemandOrder = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
