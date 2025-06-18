@@ -13,8 +13,14 @@ import {
   TableCell,
   TableRow,
 } from '@mui/material';
+import { useData } from 'src/StateProvider/Provider';
 
 const ShowNonSerializeAssets = ({ data, onClose, title }) => {
+  console.log('data', data)
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   return (
     <Dialog
@@ -44,6 +50,8 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
               <TableRow>
                 <TableCell>Index</TableCell>
                 <TableCell align="left">Serial Number</TableCell>
+                <TableCell align="left">{resources?.storageLocation?.titleSingular}</TableCell>
+                <TableCell align="left">{resources?.warehouse?.titleSingular}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -53,6 +61,8 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
                     {index + 1}
                   </TableCell>
                   <TableCell align="left">{element?.assetNumber}</TableCell>
+                  <TableCell align="left">{element?.productSerialNumberDetail?.storageLocation?.optionLabel}</TableCell>
+                  <TableCell align="left">{element?.productSerialNumberDetail?.warehouse?.optionLabel}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
