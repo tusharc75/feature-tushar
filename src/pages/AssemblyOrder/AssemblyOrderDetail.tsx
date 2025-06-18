@@ -251,7 +251,7 @@ const AssemblyOrderDetail = () => {
                 >
                   {permissions?.rentalManagement?.isUpdate && (
                     <>
-                      {assemblyOrderData?.rentalJob?.map(r => {
+                      {Array.isArray(assemblyOrderData?.rentalJob) && assemblyOrderData?.rentalJob?.map(r => {
                         return (
                           <MenuItem
                             onClick={() => {

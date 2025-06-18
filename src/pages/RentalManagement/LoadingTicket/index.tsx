@@ -98,7 +98,8 @@ const LoadingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  rentalPolicyData
+  rentalPolicyData,
+  assetStatusOptions,
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -237,6 +238,7 @@ const LoadingTicket = ({
         Header: 'Index',
         minWidth: 100,
         width: 100,
+        sticky: 'left',
         disabled: true,
         cell: ({ row }) => (
           <div
@@ -1537,7 +1539,7 @@ const LoadingTicket = ({
         {!isOffline && allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <ThemeButton
             disabled={
-              !allowUpdateStatus ||
+              !allowUpdateStatus || assetStatusOptions?.length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
                 [
@@ -1720,26 +1722,21 @@ const LoadingTicket = ({
           horizontal: 'right'
         }}
       >
-        {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
-          <MenuItem
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
-            onClick={() => {
-              setAnchorEl(null);
-              setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-            }}
-          >
-            {ASSET_STATUS.scrap}
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
-          onClick={() => {
-            setAnchorEl(null);
-            setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-          }}
-        >
-          {ASSET_STATUS.lost}
-        </MenuItem>
+        {assetStatusOptions?.length > 0 && assetStatusOptions?.map(o => {
+          return (
+            <MenuItem
+              disabled={
+                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false
+              }
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
+              }}
+            >
+              {o.optionLabel}
+            </MenuItem>
+          )
+        })}
       </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

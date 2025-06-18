@@ -327,11 +327,11 @@ const ManageDeliveryTicket = ({
           if (user?.user?.brandPolicy?.storageLocation) {
             if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
             }
-            else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit) {
+            else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
               if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
                 fieldsDataForCreate?.forEach((element) => {
                   if (element?.fieldName === 'pickupFromStorageLocation') {
-                    element.required = true;
+                    element.required = user?.user?.brandPolicy?.rentalInventoryDebit || user?.user?.brandPolicy?.rentalInventorySofthold || false;
                   }
                 });
               }
@@ -341,7 +341,7 @@ const ManageDeliveryTicket = ({
               if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
                 fieldsDataForCreate?.forEach((element) => {
                   if (element?.fieldName === 'deliveryToStorageLocation') {
-                    element.required = true;
+                    element.required = user?.user?.brandPolicy?.rentalInventoryDebit || user?.user?.brandPolicy?.rentalInventorySofthold || false;
                   }
                 });
               }
@@ -349,10 +349,11 @@ const ManageDeliveryTicket = ({
                 fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['deliveryToStorageLocation']?.includes(e.fieldName));
               }
             }
+            else {
+              fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(e.fieldName));
+            }
           } else {
-            fieldsDataForCreate = fieldsDataForCreate?.filter(
-              (e) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(e.fieldName)
-            );
+            fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(e.fieldName));
           }
           if (fieldsDataForCreate?.some((e) => e?.primaryField && e?.isSystemGenerate)) {
             tempInitialData['ticketName'] = `${referenceData?.ticketName}_${generateUniqueIdOnly()}`;
