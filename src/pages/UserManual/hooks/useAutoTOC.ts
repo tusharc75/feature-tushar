@@ -27,23 +27,17 @@ export function useAutoTOC(containerSelector = '.manual-content-section', pageDa
     });
 
     const tocData = [];
-    let lastH1, lastH2, lastH3;
+    let currentH1 = null;
     
     headings.forEach(h => {
       const entry = { ...h, children: [] };
+      
       if (h.level === 1) {
         tocData.push(entry);
-        lastH1 = entry;
-        lastH2 = lastH3 = null;
-      } else if (h.level === 2 && lastH1) {
-        lastH1.children.push(entry);
-        lastH2 = entry;
-        lastH3 = null;
-      } else if (h.level === 3 && lastH2) {
-        lastH2.children.push(entry);
-        lastH3 = entry;
-      } else if (h.level === 4 && lastH3) {
-        lastH3.children.push(entry);
+        currentH1 = entry;
+      } else if (h.level >= 2 && h.level <= 4 && currentH1) {
+        // All h2, h3, h4 go under the same h1
+        currentH1.children.push(entry);
       }
     });
 
