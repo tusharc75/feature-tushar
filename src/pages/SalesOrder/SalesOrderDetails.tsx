@@ -195,7 +195,9 @@ const SalesOrderDetails = () => {
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.invoiced].includes(salesOrderData?.status) && (
+                  (resourceData?.policy?.restrictAutoDebitInventory ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced] :
+                    [SALES_ORDER_STATUS.invoiced]
+                  ).includes(salesOrderData?.status) && (
                     <ButtonWithPulse
                       onClick={() => {
                         setShowClosedConfirmBox(true);
