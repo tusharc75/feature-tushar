@@ -1,4 +1,4 @@
-import { Close, ExpandMore } from '@mui/icons-material';
+import { Close, ContentCopy, ExpandMore } from '@mui/icons-material';
 import { Accordion, AccordionDetails, AccordionSummary, CircularProgress, IconButton } from '@mui/material';
 import { kebabCase } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -117,6 +117,11 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     mainContainerRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
   }, [pageData]);
 
+  const handleCopyLink = (sectionId: string) => {
+    const url = `${window.location.origin}${window.location.pathname}#${sectionId}`;
+    navigator.clipboard.writeText(url);
+  };
+
   return (
     <main ref={mainContainerRef} className="relative flex min-h-screen flex-grow scroll-m-24 bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
@@ -128,9 +133,19 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
           {isImageLoading && <CircularProgress className="fixed" size={16} />}
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
-              <>
-                <div key={e._id} id={kebabCase(`${e.sectionName}-section-id`)} className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}>
-                  <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
+              <div key={e._id}>
+                <div id={kebabCase(`${e.sectionName}-section-id`)} className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}>
+                  <div className="group flex items-center gap-2">
+                    <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
+                    <IconButton
+                      onClick={() => handleCopyLink(kebabCase(`${e.sectionName}-section-id`))}
+                      size="small"
+                      className="!p-1 !text-gray-400 hover:!text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Copy link"
+                    >
+                      <ContentCopy fontSize="small" />
+                    </IconButton>
+                  </div>
                   <div
                     className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
                     dangerouslySetInnerHTML={{ __html: e.content }}
@@ -144,15 +159,25 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                       id={kebabCase(`${subSection.sectionName}-section-id`)}
                       className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}
                     >
-                      <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
+                      <div className="group flex items-center gap-2">
+                        <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
+                        <IconButton
+                          onClick={() => handleCopyLink(kebabCase(`${subSection.sectionName}-section-id`))}
+                          size="small"
+                          className="!p-1 !text-gray-400 hover:!text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Copy link"
+                        >
+                          <ContentCopy fontSize="small" />
+                        </IconButton>
+                      </div>
                       <div
-                        className="&_img]:cursor-pointer prose mt-4 max-w-full dark:prose-invert [&_img]:max-w-full"
+                        className="prose mt-4 max-w-full dark:prose-invert [&_img]:block [&_img]:max-w-full [&_img]:cursor-pointer"
                         onClick={handleClick}
                         dangerouslySetInnerHTML={{ __html: subSection.content }}
                       ></div>
                     </div>
                   ))}
-              </>
+              </div>
             ))}
           </div>
           <div className="basis-full px-4 lg:basis-1/4">
