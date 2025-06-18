@@ -122,6 +122,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     navigator.clipboard.writeText(url);
   };
 
+
   return (
     <main ref={mainContainerRef} className="relative flex min-h-screen flex-grow scroll-m-24 bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
@@ -217,75 +218,88 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
 
 export default ManualContent;
 
-const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: any[] }) => {
+interface TOCItem {
+  id: string;
+  text: string;
+  level: number;
+  sectionId: string;
+  children: TOCItem[];
+}
+
+interface SectionTOC {
+  sectionId: string;
+  toc: TOCItem[];
+}
+
+const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: SectionTOC[] }) => {
   const hash = window.location.hash.split('#')[1];
+
+  const renderTOCItems = (items: TOCItem[]) => (
+    <ul className="mt-1 pl-4">
+      {items.map(item => (
+        <li key={item.id} className="m-1.5 list-none">
+          <a
+            href={`#${item.id}`}
+            className={cn('text-[12px] hover:text-[var(--link)]', hash === item.id && 'font-bold')}
+          >
+            {item.text}
+          </a>
+          {item.children.length > 0 && renderTOCItems(item.children)}
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] overflow-y-auto h-[calc(100vh-2rem)]">
-      {pageData?.map((e) => {
-        const sectionId = `${kebabCase(e.sectionName)}-section-id`;
-        const sectionTOC = Array.isArray(autoTOC)
-          ? autoTOC.filter(t => t.sectionId === sectionId)
-          : [];
+      {pageData.map(section => {
+        const sectionId = `${kebabCase(section.sectionName)}-section-id`;
+        const tocEntry = autoTOC.find(t => t.sectionId === sectionId);
+        const sectionTOC = tocEntry ? tocEntry.toc : [];
 
         return (
-          <li className="m-2 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100" key={e._id}>
-            <a href={`#${sectionId}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === sectionId && 'font-bold')}>
-              {e.sectionName}
-            </a>
-
-            {sectionTOC.length > 0 && (
-              <ul className="mt-1 pl-4">
-                {sectionTOC.map((tocItem) => (
-                  <li key={tocItem.id} className="m-1.5 list-none">
-                    <a
-                      href={`#${tocItem.id}`}
-                      className={cn(
-                        'text-[12px] hover:text-[var(--link)]',
-                        hash === tocItem.id && 'font-bold'
-                      )}
-                    >
-                      {tocItem.text}
-                    </a>
-                    {tocItem.children && tocItem.children.length > 0 && (
-                      <ul className="pl-4">
-                        {tocItem.children.map((child) => (
-                          <li key={child.id} className="m-1.5 list-none">
-                            <a
-                              href={`#${child.id}`}
-                              className={cn(
-                                'text-[12px] hover:text-[var(--link)]',
-                                hash === child.id && 'font-bold'
-                              )}
-                            >
-                              {child.text}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
+          <li
+            key={section._id}
+            className="mb-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100"
+          >
+            {sectionTOC.length === 0 && (
+              <a
+                href={`#${sectionId}`}
+                className={cn('text-[12px] hover:text-[var(--link)]', hash === sectionId && 'font-bold')}
+              >
+                {section.sectionName}
+              </a>
             )}
-            {e?.subSections?.length ? <SubOnThisPageImpl pageData={e?.subSections} /> : null}
+
+            {sectionTOC.length > 0 && renderTOCItems(sectionTOC)}
+
+            {section.subSections?.length > 0 && (
+              <SubOnThisPageImpl pageData={section.subSections} />
+            )}
           </li>
         );
       })}
     </ul>
   );
 };
+
 
 const SubOnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
   const hash = window.location.hash.split('#')[1];
   return (
     <ul className="sticky top-[--manual-head-height] list-none pl-2 pr-0">
-      {pageData?.map((e) => {
-        const link = `${kebabCase(e.sectionName)}-section-id`;
+      {pageData.map(section => {
+        const link = `${kebabCase(section.sectionName)}-section-id`;
         return (
-          <li className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
-            <a key={e._id} href={`#${link}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}>
-              {e.sectionName}
+          <li
+            key={section._id}
+            className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100"
+          >
+            <a
+              href={`#${link}`}
+              className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}
+            >
+              {section.sectionName}
             </a>
           </li>
         );
@@ -293,3 +307,5 @@ const SubOnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
     </ul>
   );
 };
+
+
