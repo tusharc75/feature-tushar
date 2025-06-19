@@ -215,9 +215,9 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     if (dependentOnField) {
       const dependentOnFieldValue = values[dependentOnField?.fieldName];
       if (dependentOnFieldValue) {
-        const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
+        const dependentFieldOption = dependentOnField?.option?.filter((e) => dependentOnFieldValue?.includes(e.optionValue));
         if (dependentFieldOption) {
-          const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
+          const dependentIds = dependentFieldOption?.map((e) => e[lookupDependentOnField]) || [];
           let option = options;
           if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
             newAddressOptionList?.forEach((ele: any) => {
