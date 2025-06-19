@@ -402,10 +402,12 @@ const AssignSerialNumbersDialog = ({
   const leftSideContentsOfSearchFilter = () => {
     return (
       <>
-        {!selectedProduct || !selectedWarehouse ? (
-          <HtmlTooltip title={'Please Select Product'}>
+        {!selectedProduct || !selectedWarehouse || (user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? (
+          <HtmlTooltip title={!selectedProduct ?
+            `Please Select Product` :
+            (user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? `Please Select ${resources?.storageLocation?.titleSingular}` : ''}>
             <span>
-              <ThemeButton disabled={true}>Add New Serial Numbers</ThemeButton>
+              <ThemeButton disabled={true}>Add Serial Numbers</ThemeButton>
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (
@@ -415,7 +417,7 @@ const AssignSerialNumbersDialog = ({
             }}
             buttonType="theme"
           >
-            Add New Serial Numbers
+            Add Serial Numbers
           </ThemeButton>
         ) : null}
       </>
