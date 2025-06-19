@@ -229,6 +229,9 @@ const Material = ({
         setNextStep(false);
       }
     }
+    else {
+      setPrevStep(true);
+    }
   };
 
   const fetchData = async () => {
@@ -545,8 +548,7 @@ const Material = ({
             resource={sidebarResource.purchaseRequisition}
             id={purchaseRequisitionData._id}
             entity={purchaseRequisitionData.entity}
-            processStatus={currentStep}
-            fetchParentData={fetchParentData}
+            fetchData={fetchParentData}
           />
         )}
       </>
