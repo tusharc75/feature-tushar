@@ -83,6 +83,7 @@ const SerializedAsset = () => {
   const [status, setStatus] = useState('');
   const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
+  const [allStatusOptions, setAllStatusOptions] = useState(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -235,6 +236,7 @@ const SerializedAsset = () => {
       .then(({ data: { data } }) => {
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
+            setAllStatusOptions(o.fieldData.option)
             setOtherStatusOptions([...o.fieldData.option?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))]);
             setAllowUpdateStatus(o?.isUpdate);
             return true;
@@ -777,7 +779,8 @@ const SerializedAsset = () => {
                 setShowScrapAsset,
                 resources,
                 columns,
-                history
+                history,
+                allStatusOptions
               }}
             />
           }
@@ -900,7 +903,8 @@ const LeftSideContent = ({
   setShowScrapAsset,
   resources,
   columns,
-  history
+  history,
+  allStatusOptions
 }) => {
   return (
     <>
@@ -990,20 +994,22 @@ const LeftSideContent = ({
             label={`Subleased ${resources?.serializedAsset?.titlePlural}`}
           />
         )}
-        <FormControlLabel
-          control={
-            <Checkbox
-              name="showScrapAsset"
-              checked={showScrapAsset}
-              onChange={(e) => {
-                setShowScrapAsset(e.target.checked);
-              }}
-              color="primary"
-            />
-          }
-          style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
-          label={`Scrapped ${resources?.serializedAsset?.titlePlural}`}
-        />
+        {allStatusOptions?.find((e => e.optionLabel === ASSET_STATUS.scrap)) &&
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="showScrapAsset"
+                checked={showScrapAsset}
+                onChange={(e) => {
+                  setShowScrapAsset(e.target.checked);
+                }}
+                color="primary"
+              />
+            }
+            style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
+            label={`Scrapped ${resources?.serializedAsset?.titlePlural}`}
+          />
+        }
       </Fragment>
     </>
   );
