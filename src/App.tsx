@@ -284,7 +284,6 @@ import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
 import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
-import { useFirebaseNotifications } from 'src/hooks/useFirebaseNotifications';
 import { firebaseConfig } from './firebase';
 
 var notificationInterval: any = null;
@@ -323,8 +322,6 @@ function App() {
     state: { user, permissions, resources },
     dispatch
   }: any = useData();
-
-  useFirebaseNotifications(user?.user)
 
   //location tracking
   useLiveLocationTracking(user, isOffline);

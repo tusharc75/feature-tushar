@@ -4,6 +4,7 @@ import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
 import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
+import { requestAndSyncFcmToken } from 'src/hooks/useFirebaseNotifications';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -187,7 +188,8 @@ const useUIDesktopDm = () => {
 
   const toggleMainWindow = useCallback(() => {
     setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' }));
-  }, []);
+    requestAndSyncFcmToken(user);
+  }, [user]);
 
   const closeMainWindow = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
     e.stopPropagation();
