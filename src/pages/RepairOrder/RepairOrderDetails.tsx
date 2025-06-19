@@ -89,6 +89,7 @@ const RepairOrderDetails = () => {
   const [resourceData, setResourceData] = useState(null);
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
+  const [isQuotationStep, setIsQuotationStep] = useState(false)
 
   useEffect(() => {
     return history.listen((location) => {
@@ -186,6 +187,12 @@ const RepairOrderDetails = () => {
             }
             return e;
           });
+        }
+        if (data?.addQuotationStep) {
+          setIsQuotationStep(true)
+        }
+        else {
+          setIsQuotationStep(false)
         }
         setStepList(steps);
         setStepNames(steps.map((item) => item.name));
@@ -351,7 +358,7 @@ const RepairOrderDetails = () => {
                 {permissions?.repairOrder?.isUpdate &&
                   allowedToEdit &&
                   !repairOrderData?.deleted &&
-                  ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) &&
+                  ['Add Assets', 'Work Order'].includes(stepNames[currentStep]) && isQuotationStep &&
                   [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                     quotationVersionData?.status
                   ) && (
@@ -372,7 +379,7 @@ const RepairOrderDetails = () => {
                   !(
                     [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
-                    ) && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
+                    ) && isQuotationStep && ['Add Assets', 'Work Order'].includes(stepNames[currentStep])
                   ) && (
                     <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                       {'Edit'}
@@ -454,12 +461,9 @@ const RepairOrderDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-1`}
                   stepFullScreen={stepFullScreen}
                   setHasAssetsAdded={setHasAssetsAdded}
-                  allowedToEdit={
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
-                      ? false
-                      : allowedToEdit
+                  allowedToEdit={!allowedToEdit ? allowedToEdit :
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(quotationVersionData?.status)
+                      && isQuotationStep ? false : true
                   }
                 />
               </>
@@ -476,9 +480,9 @@ const RepairOrderDetails = () => {
                 allowedToEdit={
                   currentStep === 3
                     ? allowedToEdit
-                    : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                    : ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                       quotationVersionData?.status
-                    )
+                    ) && isQuotationStep)
                       ? false
                       : allowedToEdit
                 }
