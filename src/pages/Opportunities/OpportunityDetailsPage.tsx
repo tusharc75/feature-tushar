@@ -582,7 +582,12 @@ function OpportunityDetailsPage() {
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </div>
               ) : (
-                <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
+                <DetailsPage
+                  data={copyOfOpportunityData}
+                  fields={opportunityFields}
+                  resource={sidebarResource?.opportunity}
+                  referenceId={copyOfOpportunityData?._id}
+                />
               )}
               <div className="pt-3 ">
                 {opportunityData && permissions?.supplierContact?.isRead && (

@@ -5,6 +5,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChange, accepted }) => {
   const [selectedRec, setSelectedRec] = useState(null);
@@ -13,8 +14,8 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
   const reasons = ['Price Too High', 'Price Too Low', 'Incorrect Data', 'Not Needed', 'DOA', 'Others'];
   const [value, setValue] = React.useState('');
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.value);
+  const handleChange = (value) => {
+    setValue(value);
   };
 
   return (
@@ -51,20 +52,10 @@ const DOAReasonDialog = ({ reasonDialogOpen, handleCloseDialog, QuoteStatusChang
                 ))}
               </List>
               {selectedRec === 'Others' && (
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label="Other reasons"
-                  multiline
-                  value={value}
                   onChange={handleChange}
-                  rows={4}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto',
-                    },
-                  }}
+                  value={value}
                 />
               )}
             </>

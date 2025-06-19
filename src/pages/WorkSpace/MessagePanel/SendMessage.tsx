@@ -1,5 +1,5 @@
-import { AttachFile, Cancel, Close, Mic, MicOff, Send } from '@mui/icons-material';
-import { IconButton } from '@mui/material';
+import { AttachFile, Cancel, Close, Mic, MicOff, Send, Square } from '@mui/icons-material';
+import { Button, IconButton } from '@mui/material';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Socket } from 'socket.io-client';
@@ -64,6 +64,7 @@ const SendMessage = ({
   const [audioBlobs, setAudioBlobs] = useState([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunks = useRef<Blob[]>([]);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -74,6 +75,22 @@ const SendMessage = ({
       setFilesWithUrl([]);
     }
   }, [channelId]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isRecording) {
+      setRecordingSeconds(0);
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if (!isRecording && interval) {
+      setRecordingSeconds(0);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -126,6 +143,9 @@ const SendMessage = ({
       setMessage('');
       setFiles([]);
       setAudioBlobs([]);
+      if (editorRef.current) {
+        editorRef.current.setContent('');
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -210,9 +230,19 @@ const SendMessage = ({
         return;
       }
     }
-    if (key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      if (message && message !== initialMessage && !isLoading) postMessage();
+    if (key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      const liElement = editorRef.current?.selection.getNode().closest('ul, ol');
+
+      if (liElement) {
+        return;
+      } else {
+        e.preventDefault();
+        if (message && message !== initialMessage && !isLoading) postMessage();
+      }
+    }
+
+    if (key === 'Enter' && (e.shiftKey || e.ctrlKey || e.metaKey)) {
+      return;
     }
   };
 
@@ -222,8 +252,15 @@ const SendMessage = ({
       setIsRecording(false);
     } else {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Audio recording is not supported in this browser');
+        }
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
+
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+
+        const recorder = new MediaRecorder(stream, { mimeType });
 
         recorderRef.current = recorder;
         chunks.current = [];
@@ -233,15 +270,24 @@ const SendMessage = ({
         };
 
         recorder.onstop = () => {
-          const blob = new Blob(chunks.current, { type: 'audio/webm' });
+          const blob = new Blob(chunks.current, { type: mimeType });
           setAudioBlobs((prev) => [...prev, blob]);
           stream.getTracks().forEach((track) => track.stop());
+        };
+
+        recorder.onerror = (event) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Error during recording: ' + event.error
+          });
+          setIsRecording(false);
         };
 
         recorder.start();
         setIsRecording(true);
       } catch (e) {
-        toastConfig.setToastConfig({ open: true, type: 'error', message: 'Error accessing microphone' });
+        toastConfig.setToastConfig({ open: true, type: 'error', message: e.message || 'Error accessing microphone' });
       }
     }
   };
@@ -294,7 +340,7 @@ const SendMessage = ({
         <div className="flex flex-wrap gap-1">
           {audioBlobs?.map((audioBlob, index) => (
             <div key={index} className="relative">
-              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '200px' }}></audio>
+              <audio controls src={URL.createObjectURL(audioBlob)} style={{ width: '350px' }}></audio>
               <HtmlTooltip title="Remove" placement="top" className="absolute right-0 top-0">
                 <IconButton
                   size="small"
@@ -309,6 +355,56 @@ const SendMessage = ({
             </div>
           ))}
         </div>
+
+        {isRecording && (
+          <div className="relative mb-4 flex items-center gap-3 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 shadow-sm">
+            {/* Animated border glow */}
+            <div
+              className="absolute inset-0 rounded-lg"
+              style={{
+                animation: 'glow 1.5s infinite alternate',
+                background: 'linear-gradient(90deg, #60a5fa22, #6366f122)'
+              }}
+            />
+            {/* Recording indicator */}
+            <div className="relative flex items-center gap-3">
+              {/* Mic icon with animated background */}
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-red-500 shadow-sm">
+                <div className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-75" />
+                <Mic className="relative h-4 w-4 text-white" />
+              </div>
+
+              {/* Recording text and status */}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">
+                    Recording
+                    <span className="ml-2 rounded bg-red-100 px-2 py-0.5 font-mono text-xs text-red-700">
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, '0')}:{String(recordingSeconds % 60).padStart(2, '0')}
+                    </span>
+                  </span>
+                  <div className="flex gap-1">
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '0ms' }} />
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '150ms' }} />
+                    <div className="h-1 w-1 animate-bounce rounded-full bg-red-500" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+                <span className="text-xs text-gray-600">Speak clearly into your microphone</span>
+              </div>
+            </div>
+            {/* Stop button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={getAudio}
+              className="ml-auto h-8 border-gray-300 px-3 transition-colors hover:border-red-300 hover:bg-red-50"
+            >
+              <Square className="mr-1.5 h-3 w-3 fill-current" />
+              Stop
+            </Button>
+          </div>
+        )}
+
         <div className="editor [&_.tox-tinymce]:border-b-0" key={themeColor}>
           <Editor
             key={themeColor}
@@ -319,7 +415,6 @@ const SendMessage = ({
               }
             }}
             onKeyDown={handleKeyDown}
-            value={message ? message : '<span></span>'}
             onInit={(_evt, editor) => {
               editorRef.current = editor;
               if (initialMessage) {
@@ -360,6 +455,10 @@ const SendMessage = ({
               ],
               toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | emoticons | help`,
               content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+              toolbar_mode: 'floating',
+              mobile: {
+                toolbar_mode: 'floating'
+              },
               setup: (editor) => {
                 editor.on('BeforeSetContent', (e) => {
                   // Adding 'link' class to <a> tags
@@ -418,7 +517,7 @@ const SendMessage = ({
                     opacity: 0.5
                   }
                 }}
-                disabled={disabled || !message || isLoading}
+                disabled={disabled || (!message && files.length === 0 && audioBlobs.length === 0) || isLoading}
                 size="small"
                 className="send-button !ml-auto !block"
                 onClick={postMessage}

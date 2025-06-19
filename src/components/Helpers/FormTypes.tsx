@@ -67,6 +67,8 @@ import Signature from './FormTypes/Signature';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import MultiFileUpload from './FormTypes/MultiFileUpload';
 
 type MultiFileType = {
   fileName: string;
@@ -481,7 +483,7 @@ const FormTypes = (props) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
 
-      let urls: any = values[name] ? values[name] : [];
+      let urls = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -505,9 +507,9 @@ const FormTypes = (props) => {
         }
         if (!url) return;
         if (isMultiple) {
-          urls.push(url);
+          urls?.push(url);
         } else {
-          urls = url;
+          urls = [url];
         }
       }
       setFieldValue(name, urls);
@@ -946,25 +948,18 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
-        <TextField
-          {...rest}
-          variant="outlined"
-          type={fromFilter ? 'search' : 'text'}
-          multiline
+        <MultiLine
           label={getLabel(label)}
-          name={name}
-          required={required}
-          rows={3}
           value={values[name]}
+          required={required}
+          onChange={(value) => {
+            handleChange(name, value)
+          }}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
-          sx={{
-            '& .MuiInputBase-root textarea': {
-              resize: 'vertical',
-              overflow: 'auto',
-            },
-          }}
+          fromFilter={fromFilter}
+          type={fromFilter ? 'search' : 'text'}
+          {...rest}
         />
       </InfoLabel>
     ) : type === 'number' ? (
@@ -1996,7 +1991,7 @@ const FormTypes = (props) => {
                       if (!lookup) {
                         if (reason === 'clear') {
                           setFieldValue(name, []);
-                        } else if (reason === 'remove-option' && values[name].length === 1) {
+                        } else if (reason === 'removeOption' && values[name].length === 1) {
                           setFieldValue(name, []);
                         }
                         let modValues = [];
@@ -2632,6 +2627,21 @@ const FormTypes = (props) => {
           </Grid>
         </Box>
       </Fragment>
+    ) : type === 'multiFileUploadNew' ? (
+      <MultiFileUpload
+        name={name}
+        label={label}
+        handleUploadFile={handleUploadFile}
+        isFileUploading={isFileUploading}
+        fileUploadProgress={fileUploadProgress}
+        values={values}
+        errors={errors}
+        touched={touched}
+        required={required}
+        setFieldValue={setFieldValue}
+        doNotShowUploadedFile={false}
+        disabled={false}
+      />
     ) : type === 'url' ? (
       <InfoLabel
         info={tooltipMessage}

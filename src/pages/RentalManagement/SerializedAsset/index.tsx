@@ -1,10 +1,6 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import { Delete, ExpandMore } from '@mui/icons-material';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import RepeatIcon from '@mui/icons-material/Repeat';
-import WarningIcon from '@mui/icons-material/Warning';
+import { Delete, ExpandMore, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
 import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -49,7 +45,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import AddSerializedAssetThroughRfid from './AddSerializedAssetThroughRfid';
+import ScanButtons from 'src/components/ScanButtons';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -69,7 +65,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [columns, setColumns] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
-  const [rfidQrDialogOpen, setRfidQrDialogOpen] = useState(false);
   const [purchaseOrderCount, setPurchaseOrderCount] = useState(0);
   const [subleaseCount, setSubleaseCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
@@ -143,9 +138,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === 'service'
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -191,7 +185,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.purchaseOrder.path);
                   }}
                 >
-                  <LibraryBooksIcon fontSize="small" color={'primary'} />
+                  <LibraryBooks fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -203,7 +197,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.bulkAssetCreation.path);
                   }}
                 >
-                  <LibraryBooksIcon fontSize="small" color={'primary'} />
+                  <LibraryBooks fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -215,7 +209,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                     OpenInNewWindow(routes.sublease.path);
                   }}
                 >
-                  <ReceiptIcon fontSize="small" color={'primary'} />
+                  <Receipt fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -225,7 +219,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               ${row.original?.offlineErrorAsset}
               Please re-add the left over Quanity`}
               >
-                <WarningIcon fontSize="small" color={'error'} />
+                <Warning fontSize="small" color={'error'} />
               </HtmlTooltip>
             )}
             {row.original?.type === 'asset' && (
@@ -269,7 +263,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                         window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank');
                       }}
                     >
-                      <RepeatIcon fontSize="small" color={'primary'} />
+                      <Repeat fontSize="small" color={'primary'} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
@@ -817,21 +811,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
     if (data.length) {
       setAdding(true);
-      axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer }).then(({ data }) => {
-        setAddSerializedAssetDialog({ open: false });
-        fetchData();
-        setRfidQrDialogOpen(false);
-        setAssetAssignedProduct([]);
-        setAdding(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer })
+        .then(({ data }) => {
+          setAddSerializedAssetDialog({ open: false });
+          fetchData();
+          setAssetAssignedProduct([]);
+          setAdding(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setAdding(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setAdding(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -1047,19 +1043,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
-        {rentalPolicyData?.assignAssetUsingRfidQr && (
-          <ThemeButton
-            id="assign-serialized-asset-button-rfid-qr"
-            disabled={disableAssignSerializedAssets(selectedRecords)}
-            onClick={() => {
-              setRfidQrDialogOpen(true);
-            }}
-            tooltip={!allowedToEdit ? ownerAndColaborator : ``}
-            buttonType="theme"
-          >
-            {`Assign Through RFID/QR`}
-          </ThemeButton>
-        )}
+        <ScanButtons
+          referenceData={rentalManagementData}
+          disabled={disableAssignSerializedAssets(selectedRecords)}
+          products={assetAssignedProduct?.map((e) => ({
+            _id: e.materialId,
+            uniqueId: e._id,
+            realAssetQty: e.realAssetQty,
+            realAssetAssignedQty: e.realAssetAssignedQty
+          }))}
+          fetchData={fetchData}
+        />
         <ThemeButton
           id="assign-serialized-asset-button"
           disabled={disableAssignSerializedAssets(selectedRecords)}
@@ -1073,7 +1067,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           tooltip={!allowedToEdit ? ownerAndColaborator : ``}
           buttonType="theme"
         >
-          {`Assign ${resources?.serializedAsset?.titleSingular}`}
+          {`Assign ${resources?.serializedAsset?.titlePlural}`}
         </ThemeButton>
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <ThemeButton onClick={openLinkActions} endIcon={<ExpandMore />}>
@@ -1184,7 +1178,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setShowConfirmBox(true);
           }}
         >
-          {`Remove Asset/Serial Number`}
+          {`Remove ${resources?.serializedAsset?.titlePlural}/Serial Numbers`}
         </MenuItem>
       </>
     );
@@ -1475,22 +1469,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           ids={productSerialNumbers?.map((e) => e?.serialNumber)}
           showWarehouseFilter={true}
           referenceData={{ rentalJob: rentalManagementData._id }}
-        />
-      )}
-      {rfidQrDialogOpen && (
-        <AddSerializedAssetThroughRfid
-          selectedProducts={assetAssignedProduct}
-          onSuccess={() => {
-            setRfidQrDialogOpen(false);
-            fetchData();
-            setAssetAssignedProduct([]);
-          }}
-          onClose={() => {
-            setRfidQrDialogOpen(false);
-            fetchData();
-            setAssetAssignedProduct([]);
-          }}
-          referenceData={rentalManagementData}
         />
       )}
     </Fragment>

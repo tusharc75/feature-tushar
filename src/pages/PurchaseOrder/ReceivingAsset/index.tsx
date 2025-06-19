@@ -27,8 +27,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateReceiveProduct, generateRejectProduct } from 'src/pages/PurchaseOrder/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
+const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit, purchaseOrderFields }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
@@ -421,6 +422,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
   const previewDownloadProps = useMemo(
     () => ({
       fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
+      subject: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
       resource: sidebarResource.purchaseOrder,
       referenceId: purchaseOrderData?._id,
       columns: columns,
@@ -466,6 +468,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
               hideSelection={[PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? true : false}
               expander={true}
             />
+            <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} />
           </Box>
         ) : (
           <Box p={2} height={500}>

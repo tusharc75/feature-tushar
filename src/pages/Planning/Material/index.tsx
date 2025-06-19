@@ -90,8 +90,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -462,7 +461,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.planning?.titlePlural}-${planningData?.planningNumber}`,
+    fileName: `${resources?.planning?.titleSingular}-${planningData?.planningNumber}`,
+    subject: `${resources?.planning?.titleSingular}-${planningData?.planningNumber}`,
     resource: sidebarResource.planning,
     referenceId: planningData._id,
     columns: columns,

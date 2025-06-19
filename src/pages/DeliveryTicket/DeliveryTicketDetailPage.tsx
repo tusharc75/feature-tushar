@@ -35,6 +35,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   displayDateTime,
+  getEmailsFromContacts,
   getObjKeysWithValues,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -522,6 +523,9 @@ export default function DeliveryTicketDetail(props) {
                 defaultColumns={
                   serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
                 }
+                subject={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
+                isSendEmail={true}
+                toEmails = {getEmailsFromContacts(deliveryTicketData)}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
@@ -535,7 +539,7 @@ export default function DeliveryTicketDetail(props) {
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>Header</CustomTab>
-            {permissions?.serializedAsset?.isRead && <CustomTab value={1}>Serialized Assets</CustomTab>}
+            {permissions?.serializedAsset?.isRead && <CustomTab value={1}>{resources?.serializedAsset?.titlePlural}</CustomTab>}
             <CustomTab value={2}>Additional Products</CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && <CustomTab value={3}>Add-On</CustomTab>}
             {resourceData &&
@@ -579,6 +583,8 @@ export default function DeliveryTicketDetail(props) {
                     }
                   }
                 ]}
+                resource={sidebarResource?.deliveryTicket}
+                referenceId={deliveryTicketData?._id}
               />
             ) : (
               <div className="p-2">

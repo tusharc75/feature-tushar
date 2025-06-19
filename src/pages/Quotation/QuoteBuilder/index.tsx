@@ -114,9 +114,8 @@ const QuoteBuilder = ({
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                    ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                      ? '(Product)'
-                      : '(Service)'
+                    ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                      ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                     : row.original.type === 'service'
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}
@@ -147,14 +146,13 @@ const QuoteBuilder = ({
                 size="small"
                 onClick={() => {
                   window.open(
-                    `${
-                      row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
                     }/${row.original.materialId}`
                   );
                 }}
@@ -167,19 +165,19 @@ const QuoteBuilder = ({
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'description',
@@ -207,17 +205,15 @@ const QuoteBuilder = ({
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.service
-              ? parent.serviceDetail?.serviceName
-              : parent?.type === MATERIAL_TYPE.manualEntry
-                ? parent?.detail
-                : parent.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent?.type === MATERIAL_TYPE.manualEntry ? parent?.detail
+              : parent.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -232,7 +228,7 @@ const QuoteBuilder = ({
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.subRows = generateNestedData(data.material, parent);
-      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
+      parent.hideSelection = parent?.fieldTicketCreated ? true : parent?.subRows?.lenght && parent?.subRows?.every((e) => e?.fieldTicketCreated) ? true : false;
     });
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -270,23 +266,14 @@ const QuoteBuilder = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.assetNumber
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : _subRow.type === MATERIAL_TYPE.service
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-      }`;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow.serializedAssetDetail?.assetNumber
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName : _subRow?.detail || '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow?.description || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qtyDisplay = _subRow.qty;
@@ -400,13 +387,13 @@ const QuoteBuilder = ({
 
   const previewDownloadProps = {
     fileName: `${resources?.quotation?.titleSingular}-${quotationData?.quotationNumber}`,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     resource: sidebarResource.quotation,
     referenceId: quotationData?._id,
     columns: columns,
     isSendEmail: true,
     toEmails: getEmailsFromContacts(quotationData),
     isExcelDownload: true,
-    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
     extraQueryParams: { uniqueId: versionData?._id },
     defaultColumns: [
       'index',
@@ -493,14 +480,15 @@ const QuoteBuilder = ({
     <Fragment>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={
-          quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-            ? true
-            : false
-        }
+
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
+        isActionButtonVisible={
+          quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
+            ? user?.user?.brandPolicy?.createFieldTicketFromQuotation || false
+            : false
+        }
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
       />
@@ -516,7 +504,7 @@ const QuoteBuilder = ({
             renderedFrom={renderedFrom}
             hideSelection={
               quotationData?.type === QUOTATION_TYPE.fieldJob && quotationData.status === QUOTATION_STATUS.converted && quotationData?.fieldJob
-                ? false
+                ? !user?.user?.brandPolicy?.createFieldTicketFromQuotation
                 : true
             }
             hideAction={true}
@@ -552,6 +540,7 @@ const QuoteBuilder = ({
           onSuccess={(data) => {
             addFieldTicketMaterial(data);
           }}
+          isRedirectTodetailPage={false}
         />
       )}
     </Fragment>

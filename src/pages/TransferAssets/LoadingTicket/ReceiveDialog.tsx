@@ -19,11 +19,16 @@ import routes from 'src/components/Helpers/Routes';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import { useData } from 'src/StateProvider/Provider';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [minDate, setMinDate] = useState(null);
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     findValidationDate();
@@ -92,7 +97,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
-              message: `Assets Received Successfully`
+              message: `${resources?.serializedAsset?.titlePlural} Received Successfully`
             });
             handleSuccess();
             setLoading(false);
@@ -111,6 +116,9 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
       errors.receiveDate = 'Receive Date is Required';
     } else if (minDate && values.receiveDate < minDate) {
       errors.receiveDate = `Receive date can't be less than ${displayDate(minDate)}`;
+    }
+    else if (dayjs(values['receiveDate']).isAfter(dayjs())) {
+      errors['receiveDate'] = `Please select valid date`;
     }
     return errors;
   };
@@ -132,7 +140,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogHeader
-              title={type === 'changeReceiveDate' ? 'Change Receive Date' : 'Receive Assets'}
+              title={type === 'changeReceiveDate' ? 'Change Receive Date' : `Receive ${resources?.serializedAsset?.titlePlural}`}
               showRequiredLabel={true}
               onClose={handleClose}
             />
@@ -140,6 +148,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
               <Box p={1}>
                 <CustomDatePicker
                   {...(minDate ? { minDate } : {})}
+                  maxDate={new Date()}
                   fullWidth
                   size="small"
                   margin="dense"

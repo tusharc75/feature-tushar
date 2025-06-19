@@ -1,6 +1,6 @@
 import { Close, ExpandMore, Person } from '@mui/icons-material';
 import { Avatar, Badge, IconButton } from '@mui/material';
-import { memo, useMemo, useRef } from 'react';
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SendMessage from 'src/components/DesktopDM/SendMessage';
 import ShowMessages, { ShowMessageRef } from 'src/components/DesktopDM/ShowMessage';
@@ -9,6 +9,11 @@ import { checkIsUser } from 'src/components/DesktopDM/useDesktopDM';
 import { cn } from 'src/constants/helpers';
 import { useDelayedClass } from 'src/hooks';
 import { useStore } from 'src/StateProvider/fastContext';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { TbPinnedOff } from 'react-icons/tb';
+import { MdOutlinePushPin } from "react-icons/md";
+
 
 type ChatBoxProps = {
   state: UseDesktopDM;
@@ -74,6 +79,25 @@ const ChatBoxHeader = memo(
     const isUserData = checkIsUser(data);
     const [onlineUsers] = useStore((state) => state.onlineUsers);
     const isUserOnline = onlineUsers.includes(isUserData ? data._id : (data as Chat).to?.optionValue);
+    const { setToastConfig } = useContext(CustomToastContext);
+
+    const [pinned, setPinned] = useState(!!data.pinned);
+
+    useEffect(() => {
+      setPinned(!!data.pinned);
+    }, [data]);
+
+    const handlePinUser = async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const userId = isUserData ? data._id : (data as Chat).to?.optionValue;
+      try {
+        const response = await axiosInstance().post(`work-space/channel/pin-unpin/${userId}`);
+        setPinned(response.data.pinned);
+        window.dispatchEvent(new CustomEvent('pinnedUsersUpdated'));
+      } catch (err) {
+        setToastConfig(err);
+      }
+    };
 
     return (
       <header
@@ -115,6 +139,15 @@ const ChatBoxHeader = memo(
           )}
         </div>
         <div className="buttons flex items-center gap-1">
+          <HtmlTooltip title={pinned ? "Unpin" : "Pin"}>
+            <IconButton size="small" onClick={handlePinUser}    >
+              {pinned ? (
+                <TbPinnedOff className="text-[var(--primary-text)]" />
+              ) : (
+                <MdOutlinePushPin className="text-[var(--primary-text)]" />
+              )}
+            </IconButton>
+          </HtmlTooltip>
           {!isMobile && (
             <HtmlTooltip title={openedChat.open === 'partial' ? 'Expand' : 'Collapse'}>
               <IconButton size="small" color="primary">

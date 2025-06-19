@@ -30,8 +30,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
+const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit, updateDOASetup }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -211,7 +212,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry  && (
+          {permissions?.attachment?.isRead && row?.original?.type != MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title="Attachments">
               <IconButton
                 size="small"
@@ -291,6 +292,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+    updateDOASetup(data?.doasetup)
   };
 
   const generateNestedData = (material, parent) => {
@@ -410,6 +412,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
+        fetchInvoiceData();
         setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         toastConfig.setToastConfig({
           open: true,
@@ -429,6 +432,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
       if (!showNext) {
         const { data } = await axiosInstance().put(`${routes.invoice.path}/material/${invoiceData._id}`, { material: rows });
         fetchData();
+        fetchInvoiceData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -502,6 +506,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
           setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         }
         fetchData();
+        fetchInvoiceData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -533,6 +538,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
         .put(`${routes?.invoice?.path}/${invoiceData._id}/additional-cost/remove`, { ids: cost })
         .then(({ data }) => {
           fetchData();
+          fetchInvoiceData();
           setDeleteData(null);
           toastConfig.setToastConfig({
             open: true,
@@ -684,6 +690,7 @@ const Material = ({ invoiceData, invoiceFields, fetchInvoiceData, setNextStep, s
                 _id: invoiceData?._id
               }}
             />
+            <FinalPriceBox allFields={invoiceFields} data={invoiceData} />
           </Box>
         </>
       ) : (

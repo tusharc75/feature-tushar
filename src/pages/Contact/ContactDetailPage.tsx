@@ -571,9 +571,9 @@ const ContactDetailsPage = (props) => {
               </CustomTabs>
               <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (
-                  <DetailsPage data={contactData} fields={contactFields} />
+                  <DetailsPage data={contactData} fields={contactFields} resource={sidebarResource[contactResource]} referenceId={contactData?._id} />
                 ) : (
-                  <DetailsPage data={contactData} fields={filteredContactFields} />
+                  <DetailsPage data={contactData} fields={filteredContactFields} resource={sidebarResource[contactResource]} referenceId={contactData?._id} />
                 )}
               </TabPanel>
               <TabPanel value={currentTabIndex} index={1}>

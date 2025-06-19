@@ -52,7 +52,7 @@ import AddFieldServiceOrderDataDialog from 'src/pages/FieldTicket/material/AddFi
 import AddRentalDataDialog from 'src/pages/FieldTicket/material/AddRentalDataDialog';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
-
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const Consumables = ({
   allowedToEdit,
@@ -98,13 +98,15 @@ const Consumables = ({
   useEffect(() => {
     setServiceOption([
       { optionLabel: 'All', optionValue: 'All' },
-      ...services?.map((s) => {
-        return {
-          optionLabel: s?.detail,
-          optionValue: s?.materialId,
-          _id: s?._id
-        };
-      })
+      ...services
+        ?.filter((e) => e.type === MATERIAL_TYPE.service)
+        ?.map((s) => {
+          return {
+            optionLabel: `${s?.detail}${services?.find((e) => e._id === s.parentId) ? ` (${services?.find((e) => e._id === s.parentId)?.detail})` : ''} `,
+            optionValue: s?.materialId,
+            _id: s?._id
+          };
+        })
     ]);
     if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?._id === selectedServiceOption?._id)) {
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All', _id: null });
@@ -278,7 +280,7 @@ const Consumables = ({
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
-            {!isOffline &&
+            {!isOffline && (
               <HtmlTooltip title="Attachments">
                 <IconButton
                   size="small"
@@ -290,7 +292,7 @@ const Consumables = ({
                   <AttachFileIcon fontSize="small" color="primary" />
                 </IconButton>
               </HtmlTooltip>
-            }
+            )}
             {row.original?.isqtyRequestLog && !isOffline && (
               <HtmlTooltip title="View Requests">
                 <IconButton
@@ -617,6 +619,7 @@ const Consumables = ({
       }
       if (!next) {
         fetchData();
+        fetchFieldTicketData();
       }
       if (saveAndNext || next) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
@@ -751,7 +754,7 @@ const Consumables = ({
           )}
         {!isOffline &&
           resourcePolicy?.showFieldServiceOrderAddMaterial &&
-          fieldTicketData?.isServiceInFieldServiceOrder &&
+          fieldTicketData?.isProductInFieldServiceOrder &&
           fieldTicketData?.fieldServiceOrder?.optionValue && (
             <>
               <MenuItem
@@ -838,6 +841,7 @@ const Consumables = ({
                 </Box>
               )}
             </Grid>
+            <FinalPriceBox allFields={fieldTicketFields} data={fieldTicketData} />
           </Grid>
         </Box>
       </TabPanel>
@@ -895,6 +899,7 @@ const Consumables = ({
           serviceName={null}
           consumeRequest={consumeRequest}
           serialNumberRequired={false}
+          canChangeWarehouse={true}
         />
       )}
       {openLogDialog.open && (

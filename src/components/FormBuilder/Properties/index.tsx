@@ -99,6 +99,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.minValueServiceAdd = '';
         values.maxValueServiceAdd = '';
       }
+      values.enableServicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue || false;
+      values.servicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue ? values?.servicesAddOnBasedOnValue || [] : [];
+
       if (
         !values.unique &&
         (fieldData.type === 'multiLine' || fieldData.type === 'singleLine' || fieldData.type === 'mobileNumber' || fieldData.type === 'number')
@@ -126,6 +129,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
         if (!values.additionalInfoSection) {
           values.additionalInfoSection = '';
+        }
+        if (!values.operationOnLineItems) {
+          values.operationOnLineItems = '';
         }
         setInitialValues(values);
       }
@@ -204,6 +210,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
+            ele.operationOnLineItems = values?.operationOnLineItems || '';
             ele.isDefaultValue = values.isDefaultValue;
             ele.disableOnEdit = values.disableOnEdit;
             ele.unique = values.unique;
@@ -226,10 +233,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.maxValue = values?.maxValue || 0;
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
+            ele.enableServicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue || false;
+            ele.servicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue ? values?.servicesAddOnBasedOnValue || [] : [];
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
+            ele.restrictCurrentDateAutoSelect = values?.restrictCurrentDateAutoSelect || false
             ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
@@ -247,6 +257,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.stopHideColumn = values?.stopHideColumn || false;
             ele.isHideColumnSum = values?.isHideColumnSum || false;
             ele.showInPdf = values?.showInPdf || false;
+            ele.showTotalInCard = values?.showTotalInCard || false;
 
             if (values?.hasOwnProperty('isWarningTooltip')) {
               ele.isWarningTooltip = values.isWarningTooltip;

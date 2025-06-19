@@ -60,6 +60,7 @@ const SalesOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [showInvoiceConfirmBox, setShowInvoiceConfirmBox] = useState(false)
   const [steps, setSteps] = useState([]);
   const [resourceData, setResourceData] = useState(null);
 
@@ -183,8 +184,20 @@ const SalesOrderDetails = () => {
           <Box className="control-buttons-v1">
             {salesOrderData ? (
               <>
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.readyToInvoice].includes(salesOrderData?.status) && (
+                  <ThemeButton
+                    iconForMobile={false}
+                    onClick={() => {
+                      setShowInvoiceConfirmBox(true)
+                    }}
+                  >
+                    Invoiced
+                  </ThemeButton>
+                )}
                 {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.readyToInvoice].includes(salesOrderData?.status) && (
+                  (resourceData?.policy?.restrictAutoDebitInventory ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced] :
+                    [SALES_ORDER_STATUS.invoiced]
+                  ).includes(salesOrderData?.status) && (
                     <ButtonWithPulse
                       onClick={() => {
                         setShowClosedConfirmBox(true);
@@ -243,7 +256,7 @@ const SalesOrderDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={salesOrderData} fields={salesOrderFields} />
+                <DetailsPage data={salesOrderData} fields={salesOrderFields} resource={sidebarResource?.salesOrder} referenceId={salesOrderData?._id} />
               </>
             )}
           </Box>
@@ -271,7 +284,7 @@ const SalesOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 fetchSalesOrderData={fetchSalesOrderData}
                 updateJobStatus={updateJobStatus}
-                allowedToEdit={allowedToEdit && !salesOrderData?.quotation}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[1].name && salesOrderData && (
@@ -313,6 +326,19 @@ const SalesOrderDetails = () => {
             setShowConfirmBox(false);
           }}
           onOk={handleDelete}
+        />
+      )}
+      {showInvoiceConfirmBox && (
+        <ConfirmationDialog
+          open={showInvoiceConfirmBox}
+          message={`Are you sure you want to invoiced ?`}
+          onClose={() => {
+            setShowInvoiceConfirmBox(false);
+          }}
+          onOk={() => {
+            updateJobStatus(SALES_ORDER_STATUS.invoiced);
+            setShowInvoiceConfirmBox(false);
+          }}
         />
       )}
       {showClosedConfirmBox && (

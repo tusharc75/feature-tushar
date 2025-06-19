@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomDialogTransition, quotation, QUOTATION_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCurrentStep, updateStatus, setCustomerAcceptable }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -16,8 +17,8 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
   const [commentError, setCommentError] = useState(null);
   const [submitting, setSubmitting] = useState(null);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setComment(event.target?.value?.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
     setCommentError(null);
   };
 
@@ -95,24 +96,13 @@ const ManualReponseDialog = ({ quotationId, versionId, setNextStep = null, setCu
           </List>
           {selectedOption && (
             <Box my={2}>
-              <TextField
-                fullWidth
-                id="outlined-multiline-static"
+              <MultiLine
                 label="Comment"
-                multiline
-                value={comment}
-                onChange={handleChange}
-                rows={4}
-                variant="outlined"
+                value={comment || ''}
                 error={Boolean(commentError)}
-                helperText={Boolean(commentError) && commentError}
+                touched={Boolean(commentError) && commentError}
                 required={selectedOption === 'Reject'}
-                sx={{
-                  '& .MuiInputBase-root textarea': {
-                    resize: 'vertical',
-                    overflow: 'auto',
-                  },
-                }}
+                onChange={handleChange}
               />
             </Box>
           )}

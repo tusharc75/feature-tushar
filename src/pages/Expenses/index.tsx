@@ -93,7 +93,7 @@ const Expenses = () => {
           );
         }
       },
-      ...getStaticFields()
+      ...getStaticFields(true)
     ];
     setColumns([...extracolumns, ActionsRenderer]);
   };

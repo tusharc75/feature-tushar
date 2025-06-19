@@ -128,6 +128,7 @@ export const purchaseRequisitionSteps: stepInterface[] = [
 
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -417,7 +418,8 @@ export const sidebarResource = {
   serializedAssetsCertification: 'Serialized Assets Certification',
   technicianUnavailability: 'Technician Unavailability',
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
-  customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping'
+  customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
+  fieldView: 'Field View'
 } as const;
 
 export const primaryFields = {
@@ -891,9 +893,9 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       const options = defaultOptions?.map((data: any) => data.optionValue);
       obj[key.fieldName] = value ? value : options;
     } else if (key.type === 'date') {
-      obj[key.fieldName] = value ? value : new Date();
+      obj[key.fieldName] = value ? value : key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'dateTime') {
-      obj[key.fieldName] = new Date();
+      obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
     } else if (key.type === 'year') {
       obj[key.fieldName] = value ? value : new Date();
     } else if (key.type === 'colorPicker') {
@@ -1039,7 +1041,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
       if (isClone) {
-        obj[key.fieldName] = new Date();
+        obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       } else {
@@ -1047,7 +1049,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'date') {
       if (isClone) {
-        obj[key.fieldName] = new Date();
+        obj[key.fieldName] = key?.restrictCurrentDateAutoSelect ? '' : new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       } else {
@@ -1596,9 +1598,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) { }
   }
 };
 
@@ -1686,7 +1686,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
         break;
 
       case 'EUR':
-        currencyData = filterCountries.find((f) => f.country === 'France') ?? filterCountries[0];
+        currencyData = filterCountries.find((f) => f.country === 'Germany') ?? filterCountries[0];
         break;
 
       case 'GBP':
@@ -1953,6 +1953,10 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
     finalObject['completedByDate'] = data?.completedBy?.date;
   }
+  if (data?.lastActivityBy) {
+    finalObject['lastActivityBy'] = data?.lastActivityBy?.user?.concatedName;
+    finalObject['lastActivityByDate'] = data?.lastActivityBy?.date;
+  }
   finalObject['id'] = data?._id;
 
   return finalObject;
@@ -2052,7 +2056,7 @@ export const ASSET_STATUS = {
   onPO: 'On PO',
   notApplied: 'N/A',
   scrapRequested: 'Scrap Requested'
-};
+} as const;
 
 //This is used to restrict status change
 export const SYSTEM_ASSET_STATUS = [
@@ -2466,7 +2470,8 @@ export const REPORT_SECTIONS = {
   user: 'User',
   integration: 'Integration',
   iot: 'Iot',
-  technician: 'Technician'
+  technician: 'Technician',
+  repairOrder: 'Repair Order'
 };
 
 export const REPORT_LIST = [
@@ -2779,6 +2784,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'technicianSchedule',
     section: REPORT_SECTIONS.technician
+  },
+  {
+    title: 'Asset Repair Cost',
+    permission: 'repairOrder',
+    key: 'standardReport',
+    type: 'assetRepairCost',
+    section: REPORT_SECTIONS.repairOrder
   }
 ];
 
@@ -3049,7 +3061,8 @@ export const QUOTATION_STATUS = {
   converted: 'Converted',
   sentforDOA: 'Sent for DOA',
   acceptedbyDOA: 'Accepted by DOA',
-  rejectedbyDOA: 'Rejected by DOA'
+  rejectedbyDOA: 'Rejected by DOA',
+  customerAcceptanceNotRequired: 'Customer Acceptance Not Required'
 };
 
 export const QUOTATION_TYPE = {
@@ -3687,6 +3700,10 @@ export const DOA_RESOURCE = [
   {
     key: 'serializedAssetStatusChangeRequest',
     resorce: sidebarResource.serializedAssetStatusChangeRequest
+  },
+  {
+    key: 'invoice',
+    resorce: sidebarResource.invoice
   }
 ];
 
@@ -4224,4 +4241,13 @@ export const getEmailsFromContacts = (data, field = 'customerContact') => {
     emails.push(data?.[field]?.email);
   }
   return emails;
+};
+
+export const EQUIPT_BE_CONNECTED_WINDOW = 'equipt-beConnected-window';
+export const handleClearLocalStore = () => {
+  const beConnectedWindowData = localStorage.getItem(EQUIPT_BE_CONNECTED_WINDOW);
+  localStorage.clear();
+  if (beConnectedWindowData) {
+    localStorage.setItem(EQUIPT_BE_CONNECTED_WINDOW, beConnectedWindowData);
+  }
 };

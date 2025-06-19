@@ -23,7 +23,7 @@ import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
 import { Settings } from '@mui/icons-material';
-import SettingDialog from './SettingDialog';
+import Setting from './Setting';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import EditIcon from '@mui/icons-material/Edit';
@@ -437,12 +437,7 @@ const CreateFormBuilder = () => {
                   <Grid size={{ xs: 3 }} container justifyContent="flex-end">
                     {permissions?.formBuilder?.isUpdate && (
                       <Box>
-                        <ThemeButton
-                          onClick={handleSave}
-                          disabled={isUpdating}
-                          isLoading={isUpdating}
-                          buttonType='theme'
-                        >
+                        <ThemeButton onClick={handleSave} disabled={isUpdating} isLoading={isUpdating} buttonType="theme">
                           Save
                         </ThemeButton>
                       </Box>
@@ -460,7 +455,7 @@ const CreateFormBuilder = () => {
                     >
                       {'Close'}
                     </ThemeButton>
-                    <HtmlTooltip title="Settings">
+                    <HtmlTooltip title="Settings/Policy">
                       <IconButton
                         aria-label="setting"
                         onClick={() => {
@@ -515,10 +510,10 @@ const CreateFormBuilder = () => {
                 />
               ) : null}
               {settingDialog && (
-                <SettingDialog
+                <Setting
                   entities={user?.entity}
                   resource={isNew ? startCase(toLower(resourceLabel)) : resource}
-                  handleClose={() => setSettingDialog(false)}
+                  onClose={() => setSettingDialog(false)}
                 />
               )}
             </Fragment>

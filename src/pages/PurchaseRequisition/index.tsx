@@ -42,6 +42,10 @@ const PurchaseRequisition = () => {
     {
       key: `All ${resources?.purchaseRequisition.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Converted ${resources?.purchaseRequisition?.titlePlural}`,
+      value: 3
     }
   ];
   const renderedFrom = camelCase(sidebarResource.purchaseRequisition);
@@ -75,7 +79,7 @@ const PurchaseRequisition = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.purchaseRequisition}`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.purchaseRequisitionDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -136,20 +140,19 @@ const PurchaseRequisition = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" fontSize='small' />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color={row?.original?.canDelete ? "error" : 'disabled'} fontSize='small' />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -161,6 +164,11 @@ const PurchaseRequisition = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
@@ -195,8 +203,7 @@ const PurchaseRequisition = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] =
-            permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
+          finalObject['canDelete'] = u?.canDelete && permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

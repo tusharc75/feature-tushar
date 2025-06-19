@@ -558,11 +558,12 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.creditMemo?.titlePlural}-${creditMemoData?.invoiceNumber}`,
+    fileName: `${resources?.creditMemo?.titleSingular}-${creditMemoData?.invoiceNumber || creditMemoData?.creditMemoNumber}`,
+    subject: `${resources?.creditMemo?.titleSingular}-${creditMemoData?.invoiceNumber || creditMemoData?.creditMemoNumber}`,
     resource: sidebarResource.creditMemo,
     referenceId: creditMemoData?._id,
     columns: columns,
-    isSendEmail: false,
+    isSendEmail: true,
     extraQueryParams: { isCreditMemo: true },
     defaultColumns: [
       'type',

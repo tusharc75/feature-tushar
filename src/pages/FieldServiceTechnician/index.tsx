@@ -41,7 +41,7 @@ import { isMobile } from 'react-device-detect';
 
 type Views = 'card' | 'table';
 
-const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }) => {
+const getActionColumn = ({ view, permissions, user, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }) => {
   return {
     accessor: 'action',
     Header: 'Actions',
@@ -53,30 +53,31 @@ const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTic
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && !row?.original?.quotation && (
-          <HtmlTooltip
-            title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}
-          >
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Add"
-                disabled={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? false : true}
-                onClick={() => {
-                  handleCreateFieldTicket(
-                    row?.original?.orignalData,
-                    data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData)
-                  );
-                }}
-              >
-                <NoteAddIcon
-                  fontSize="small"
-                  color={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? 'primary' : 'disabled'}
-                />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) &&
+          (user?.user?.brandPolicy?.createFieldTicketFromQuotation && row?.original?.quotation ? null : (
+            <HtmlTooltip
+              title={permissions?.fieldTicket?.isCreate && row?.original?.canEdit ? `Create ${resources?.fieldTicket?.titleSingular}` : createDisable}
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Add"
+                  disabled={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? false : true}
+                  onClick={() => {
+                    handleCreateFieldTicket(
+                      row?.original?.orignalData,
+                      data?.filter((obj) => obj.isRead).map((d: any) => d.fieldData)
+                    );
+                  }}
+                >
+                  <NoteAddIcon
+                    fontSize="small"
+                    color={permissions?.fieldTicket?.isCreate && row?.original?.canEdit && !isSubmitting ? 'primary' : 'disabled'}
+                  />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          ))}
         {view === 'table' && (
           <Box>
             <HtmlTooltip title={`View ${resources?.fieldTicket?.titlePlural}`}>
@@ -183,7 +184,7 @@ const FieldServiceTechnician = () => {
       ...getStaticFields()
     ];
     if (!policy?.showOnlyAssignedTickets) {
-      newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
+      newColumns.push(getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data, resources }));
     }
     setColumns(newColumns);
   };
@@ -295,7 +296,7 @@ const FieldServiceTechnician = () => {
       }
       let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u);
-        finalObject.canEdit = checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, u);
+        finalObject.canEdit = permissions?.fieldTicket?.isCreate;
         finalObject.orignalData = u;
         return finalObject;
       });
@@ -386,7 +387,7 @@ const FieldServiceTechnician = () => {
       setView(view);
       const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
       updatedColumns.push(
-        getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources })
+        getActionColumn({ view, user, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData, resources })
       );
       setColumns(updatedColumns);
     },
@@ -394,10 +395,10 @@ const FieldServiceTechnician = () => {
   );
 
   useEffect(() => {
-    if (isMobileView && view === 'card') {
+    if (isMobileView && view === 'card' && columns) {
       handleViewChange('table');
     }
-  }, [isMobileView, view, handleViewChange]);
+  }, [isMobileView, view, handleViewChange, columns]);
 
   return (
     <section className="main-container-v1">

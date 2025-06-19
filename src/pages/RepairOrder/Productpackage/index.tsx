@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem, MenuList, Popover } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { capitalize, sortBy, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -22,17 +21,16 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
+import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constants/helpers';
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
-import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 
 const dataAdded = {
   nextButtonAdded: false
 };
 
-const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
+const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
@@ -65,7 +63,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   });
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
-  const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
@@ -82,7 +79,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     const walkmeData = generateAddExistingSerializedAsset(
       false,
       repairOrderData?.type === REPAIR_ORDER_TYPE.external
-        ? `Add Existing Customer Assets`
+        ? `Add Existing Customer ${resources?.serializedAsset?.titlePlural}`
         : `Add Existing ${resources?.serializedAsset?.titlePlural}`
     );
     setWalkmeData([walkmeData]);
@@ -268,18 +265,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {permissions?.attachment?.isRead && (
-            <HtmlTooltip title="Attachments">
-              <IconButton
-                size="small"
-                aria-label="Attachment"
-                onClick={(e) => {
-                  setShowAttachmentDialog({ open: true, _id: row?.original?._id, label: row?.original?.detail });
-                }}
-              >
-                <AttachFileIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>)}
           <HtmlTooltip title={row.original?.canDelete ? 'Delete' : 'Deletion not allowed - Work Order Created'}>
             <span>
               <IconButton
@@ -317,7 +302,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-
+    setNextStepToolTip(null)
     var data: any = [];
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
     data = response?.data?.data;
@@ -524,7 +509,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
           id="add-existing-serialized-asset-menu-item"
         >
           {repairOrderData?.type === REPAIR_ORDER_TYPE.external
-            ? `Add Existing Customer Assets`
+            ? `Add Existing Customer ${resources?.serializedAsset?.titlePlural}`
             : `Add Existing ${resources?.serializedAsset?.titlePlural}`}
         </MenuItem>
         {permissions?.serializedAsset?.isCreate && (
@@ -542,7 +527,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             }}
           >
             {repairOrderData?.type === REPAIR_ORDER_TYPE.external
-              ? `Add New Customer Assets`
+              ? `Add New Customer ${resources?.serializedAsset?.titleSingular}`
               : `Add New ${resources?.serializedAsset?.titleSingular}`}
           </MenuItem>
         )}
@@ -603,7 +588,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
               });
             }}
           >
-            Assign Assets
+            {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
         <MenuItem
@@ -742,17 +727,6 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
             }
           }}
           selectedProducts={products}
-        />
-      )}
-      {showAttachmentDialog.open && (
-        <DiagramDialog
-          referenceId={repairOrderData?._id}
-          uniqueId={showAttachmentDialog?._id}
-          referenceLabel={showAttachmentDialog.label}
-          resource={ACTIVITY_RESOURCE.repairOrder}
-          handleClose={() => {
-            setShowAttachmentDialog({ open: false, _id: null, label: '' });
-          }}
         />
       )}
       {addchildDialog.open && (

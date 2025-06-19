@@ -10,7 +10,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, sidebarResource, warehouse } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -56,12 +56,13 @@ const SerializedPackageDialog = ({ onClose, assemblyOrderId, onSuccess, workOrde
           setInitialValues({
             serializedPackages: material?.map((m) => ({
               package: m?.materialId,
-              serializedPackageNumber: `${assemblyOrderData?.customerAccount?.optionLabel}_${assemblyOrderData?.warehouse?.optionLabel}_${m?.workOrder?.optionLabel}`,
+              warehouse: m?.warehouse?.optionValue || assemblyOrderData?.warehouse?.optionValue,
+              serializedPackageNumber: `${assemblyOrderData?.customerAccount?.optionLabel}_${m?.warehouse?.optionLabel || assemblyOrderData?.warehouse?.optionLabel}_${m?.workOrder?.optionLabel}`,
               uniqueId: m?._id
             }))
           });
         })
-        .catch((error) => {});
+        .catch((error) => { });
     }
   }, [assemblyOrderData]);
 

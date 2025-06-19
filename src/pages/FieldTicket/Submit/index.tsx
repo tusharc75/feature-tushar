@@ -23,8 +23,9 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { findAll, objectStore } from 'src/constants/indexdbhelper';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, fieldTicketFields, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(sidebarResource.fieldTicket)}_Submit`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -194,13 +195,19 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
     materialRows?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.productDetail?.productName ||
+      parent.detail =
+        parent?.productDetail?.productName ||
         parent?.serviceDetail?.serviceName ||
         parent?.serializedAssetDetail?.assetNumber ||
         parent?.packageDetail?.packageName ||
-        parent?.detail || '';
-      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription
-        || parent?.packageDetail?.packageDescription || parent?.description || '';
+        parent?.detail ||
+        '';
+      parent.description =
+        parent?.productDetail?.productDescription ||
+        parent?.serviceDetail?.serviceDescription ||
+        parent?.packageDetail?.packageDescription ||
+        parent?.description ||
+        '';
       parent.subRows = generateNestedData(material, parent);
     });
     dispatch({ type: 'initialize', data: materialRows, count: materialRows?.length });
@@ -229,6 +236,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const previewDownloadProps = {
     fileName: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
+    subject: `${resources?.fieldTicket?.titleSingular}-${fieldTicketData?.fieldTicketNumber}`,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,
     columns: columns,
@@ -300,8 +308,9 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
-            expander={resourcePolicy?.showAddPackages ? true : false}
+            expander={true}
           />
+          <FinalPriceBox allFields={fieldTicketFields} data={fieldTicketData} />
         </Box>
       ) : (
         <Box p={2} height={500}>

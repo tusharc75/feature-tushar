@@ -215,9 +215,8 @@ const Productpackage = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                  ? row.original?.packageDetail.packageType === PACKAGE_TYPE.product
-                    ? '(Product)'
-                    : '(Service)'
+                  ? row.original?.packageDetail?.packageType === PACKAGE_TYPE.product
+                    ? '(Product)' : row.original?.packageDetail?.packageType === PACKAGE_TYPE.service ? '(Service)' : ''
                   : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
@@ -988,7 +987,7 @@ const Productpackage = ({
     return (
       <>
         {flattenArray(dataRows)?.filter((e) => e?.serializedProduct)?.length > 0 && (
-          <HtmlTooltip title="Check Assets Availability" arrow placement="top">
+          <HtmlTooltip title={`Check ${resources?.serializedAsset?.titlePlural} Availability`} arrow placement="top">
             <IconButton
               size="small"
               aria-label="Details"
@@ -1170,7 +1169,7 @@ const Productpackage = ({
             setAddExistingSerializedPackages(false);
           }}
           extraDeepFilter={[{ field: 'status', term: SERIALIZED_PACKAGES_STATUS.available }]}
-          extraFilterById={[{ field: 'warehouse', term: { $in: [rentalManagementData?.warehouse?.optionValue] } }]}
+          referenceData={{ warehouse: rentalManagementData?.warehouse }}
           isSubmitting={isSubmitting}
         />
       )}

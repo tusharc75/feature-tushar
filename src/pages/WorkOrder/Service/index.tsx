@@ -186,7 +186,8 @@ const Service = ({
                   if (
                     allowedToEdit ||
                     element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
-                    (!element?.assignedUsers?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+                    (!element?.assignedUsers?.length && !element?.competencies?.length) ||
+                    (!element?.assignedUsers?.length && element?.competencies?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
                   ) {
                     element.clickable = true;
                   } else {
@@ -204,7 +205,8 @@ const Service = ({
               if (
                 allowedToEdit ||
                 element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
-                (!element?.assignedUsers?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+                (!element?.assignedUsers?.length && !element?.competencies?.length) ||
+                (!element?.assignedUsers?.length && element?.competencies?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
               ) {
                 element.clickable = true;
               } else {
@@ -503,7 +505,8 @@ const Service = ({
     !completed &&
     (allowedToEdit ||
       selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
-      (!selectedService?.assignedUsers?.length && selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
+      (!selectedService?.assignedUsers?.length && !selectedService?.competencies?.length) ||
+      (!selectedService?.assignedUsers?.length && selectedService?.competencies?.length && selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
@@ -770,39 +773,6 @@ const Service = ({
             handleClose={handleCloseMenu}
             uniqueId="work-order-service-menu"
           >
-            {allowedToEdit && resource === sidebarResource.workOrder && (
-              <ActionMenuItem
-                id={'assignTechnicians'}
-                group="Add/Assign"
-                disabled={
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
-                    ? false
-                    : true
-                }
-                onClick={() => {
-                  setUserAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-                searchKey="Assign Technicians"
-              >
-                <AiOutlineUserAdd /> Assign Technicians
-              </ActionMenuItem>
-            )}
-            {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
-              <ActionMenuItem
-                group="Add/Assign"
-                id={'AssignWorkStations'}
-                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
-                onClick={() => {
-                  setWorkStationAssignDialog(true);
-                  setAnchorEl(null);
-                }}
-                searchKey="Assign Work Stations"
-              >
-                <PiBuildingOfficeThin />
-                Assign Work Stations
-              </ActionMenuItem>
-            )}
             {resource === sidebarResource.workOrder && (
               <ActionMenuItem
                 id={'addExistingServices'}
@@ -814,7 +784,7 @@ const Service = ({
                 }}
                 searchKey="Add Existing Services"
               >
-                <PiFilePlusLight />
+                <PiPlusLight />
                 Add Existing Services
               </ActionMenuItem>
             )}
@@ -837,7 +807,7 @@ const Service = ({
                   }}
                   searchKey="Add/Consume Products"
                 >
-                  <BsCart2 />
+                  <PiPlusLight />
                   Add/Consume Products
                 </ActionMenuItem>
               )}
@@ -879,8 +849,41 @@ const Service = ({
                 }}
                 searchKey="Add Steps in Other Services"
               >
-                <PiLinkLight />
+                <PiPlusLight />
                 Add Steps in Other Services
+              </ActionMenuItem>
+            )}
+            {allowedToEdit && resource === sidebarResource.workOrder && (
+              <ActionMenuItem
+                id={'assignTechnicians'}
+                group="Add/Assign"
+                disabled={
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
+                    ? false
+                    : true
+                }
+                onClick={() => {
+                  setUserAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Technicians"
+              >
+                <AiOutlineUserAdd /> Assign Technicians
+              </ActionMenuItem>
+            )}
+            {allowedToEdit && resource === sidebarResource.workOrder && permissions?.workStations?.isRead && (
+              <ActionMenuItem
+                group="Add/Assign"
+                id={'AssignWorkStations'}
+                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                onClick={() => {
+                  setWorkStationAssignDialog(true);
+                  setAnchorEl(null);
+                }}
+                searchKey="Assign Work Stations"
+              >
+                <PiBuildingOfficeThin />
+                Assign Work Stations
               </ActionMenuItem>
             )}
 
@@ -898,10 +901,10 @@ const Service = ({
                 setAnchorEl(null);
               }}
               disabled={!isAllowedToServiceEdit}
-              searchKey="Upload Documents"
+              searchKey="Upload Attachments"
             >
               <PiUploadSimpleLight />
-              Upload Documents
+              Upload Attachments
             </ActionMenuItem>
 
             <ActionMenuItem

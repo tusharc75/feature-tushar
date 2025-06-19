@@ -46,6 +46,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { MdDelete } from 'react-icons/md';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const DOASteps = [
   {
@@ -476,14 +477,14 @@ export default function QuoteDetail() {
     };
     axiosInstance()
       .post(`quote-builder/updateVersion/${quoteData._id}?version=${currentVersion}`, body)
-      .then(() => {})
+      .then(() => { })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const handleReopenReasonChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setReopenReason(event.target.value);
+  const handleReopenReasonChange = (value) => {
+    setReopenReason(value);
   };
 
   const deleteVersion = () => {
@@ -646,8 +647,8 @@ export default function QuoteDetail() {
                     <MenuItem
                       disabled={
                         allowedToEdit &&
-                        ![QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer]?.includes(quoteData?.versions[currentVersion]?.status) &&
-                        !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
+                          ![QUOTE_STATUS.sentforDOA, QUOTE_STATUS.sentToCustomer]?.includes(quoteData?.versions[currentVersion]?.status) &&
+                          !quoteData?.versions[currentVersion]?.status?.includes('Accepted')
                           ? false
                           : true
                       }
@@ -846,22 +847,11 @@ export default function QuoteDetail() {
             showManimizeMaximize={false}
           />
           <CustomDialogContent>
-            <TextField
-              fullWidth
-              id="outlined-multiline-static"
+            <MultiLine
               label="Reason"
-              multiline
               value={reopenReason}
+              required={true}
               onChange={handleReopenReasonChange}
-              rows={3}
-              required
-              variant="outlined"
-              sx={{
-                '& .MuiInputBase-root textarea': {
-                  resize: 'vertical',
-                  overflow: 'auto'
-                }
-              }}
             />
           </CustomDialogContent>
           <CustomDialogFooter>

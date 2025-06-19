@@ -284,8 +284,10 @@ import { useData } from './StateProvider/Provider';
 import DesktopDM from 'src/components/DesktopDM';
 import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
+import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
+import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
+import FieldView from 'src/pages/FieldView';
 import { firebaseConfig } from './firebase';
-
 var notificationInterval: any = null;
 
 function App() {
@@ -1268,6 +1270,21 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.customerAccountsAndProductsDataMapping.path}`}>
               <ResourceDataMapping resourceRendered={'customerAccountsAndProductsDataMapping'} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.technicianUnavailability.path}`}>
+              <TechnicianUnavailability />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.technicianUnavailabilityDetail.path}/:id`}>
+              <TechnicianUnavailabilityDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId`}>
+              <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
+              <FieldView />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

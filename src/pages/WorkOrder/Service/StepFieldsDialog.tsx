@@ -370,6 +370,7 @@ const StepFieldsDialog = ({
                                           tooltipMessage={field?.tooltipMessage}
                                           size="small"
                                           imageOrFileUploadCompletePercentage={null}
+                                          fields={fieldData?.fields}
                                         />
                                       </Grid>
                                     ))}
@@ -398,6 +399,7 @@ const StepFieldsDialog = ({
                                   tooltipMessage={field?.tooltipMessage}
                                   size="small"
                                   style={{ visibility: 'hidden' }}
+                                  fields={fieldData?.fields}
                                 />
                               ))
                             );

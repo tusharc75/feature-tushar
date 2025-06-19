@@ -15,6 +15,7 @@ import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomDialogTransition, displayDateTime, prepareDataForGrid } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -31,8 +32,8 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (event) => {
-    setComment(event.target.value.trimStart());
+  const handleChange = (value) => {
+    setComment(value);
   };
   useEffect(() => {
     fetchProductGridData();
@@ -381,22 +382,10 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Box>
-                <TextField
-                  id="outlined-multiline-static"
+                <MultiLine
                   label="Comment"
-                  placeholder={`Comment`}
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={comment}
+                  value={comment || ''}
                   onChange={handleChange}
-                  variant="outlined"
-                  sx={{
-                    '& .MuiInputBase-root textarea': {
-                      resize: 'vertical',
-                      overflow: 'auto',
-                    },
-                  }}
                 />
               </Box>
             </CustomDialogContent>

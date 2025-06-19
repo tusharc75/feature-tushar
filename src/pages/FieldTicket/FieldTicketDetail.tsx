@@ -250,7 +250,7 @@ const FieldTicketDetail = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage data={fieldTicketData} fields={fields} />
+            <DetailsPage data={fieldTicketData} fields={fields} resource={sidebarResource?.fieldTicket} referenceId={fieldTicketData?._id} />
           )}
         </TabPanel>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
@@ -287,6 +287,7 @@ const FieldTicketDetail = () => {
               <Submit
                 stepFullScreen={stepFullScreen}
                 fieldTicketData={fieldTicketData}
+                fieldTicketFields={fields}
                 allowedToEdit={allowedToEdit}
                 fetchData={fetchData}
                 resourcePolicy={resourceData?.policy}
@@ -295,11 +296,7 @@ const FieldTicketDetail = () => {
           </TabPanel>
         </ContentFullScreen>
         <TabPanel value={tabValue} index={2}>
-          <OnField
-            referenceData={fieldTicketData}
-            rentalJob={fieldTicketData?.rentalJob?.optionValue}
-            referenceFrom={sidebarResource?.fieldTicket}
-          />
+          <OnField referenceData={fieldTicketData} rentalJob={fieldTicketData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldTicket} />
         </TabPanel>
         {resourceData &&
           resourceData?.tabs?.length > 0 &&

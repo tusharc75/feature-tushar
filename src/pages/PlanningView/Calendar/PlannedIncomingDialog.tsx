@@ -5,7 +5,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { displayDateTime, downloadExcel, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { displayDate, downloadExcel, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
@@ -116,8 +116,8 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
       Cell: ({ row }) => (
         <div>
           {row?.original?.date ? (
-            <h5 className="text-truncate" title={displayDateTime(row?.original?.date)}>
-              {displayDateTime(row?.original?.date)}
+            <h5 className="text-truncate" title={displayDate(row?.original?.date)}>
+              {displayDate(row?.original?.date)}
             </h5>
           ) : (
             <NoDataCell />
@@ -206,8 +206,8 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} label={'Pending Planned'} />
-                    <CustomTab value={1} label={'Pending Incoming'} />
+                    <CustomTab value={0} label={'Planned (Pending)'} />
+                    <CustomTab value={1} label={'Incoming (Pending)'} />
                   </CustomTabs>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>

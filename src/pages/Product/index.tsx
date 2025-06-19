@@ -208,7 +208,7 @@ const Product = () => {
           columns = [...columns, ...newColumns];
         });
         columns = columns.filter((item, index, self) => index === self.findIndex((t) => t.accessor === item.accessor));
-        columns = [...columns, ...getStaticFields()];
+        columns = [...columns, ...getStaticFields(true)];
         setColumns([...columns, ActionsRenderer]);
         dispatch({ type: 'initialize', data: rows, count: data?.count });
         setTimeout(() => {

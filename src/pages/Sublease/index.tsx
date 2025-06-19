@@ -84,7 +84,7 @@ const Sublease = () => {
     data = response?.data?.data;
     setWalkmeData([createSubleaseFlow(data, resources?.sublease?.titlePlural)]);
     let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

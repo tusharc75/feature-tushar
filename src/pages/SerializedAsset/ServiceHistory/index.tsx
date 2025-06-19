@@ -45,6 +45,11 @@ const ServiceHistory = ({ id, refresh }) => {
       key: sidebarResource.fieldTicket,
       resource: sidebarResource.fieldTicket,
       title: resources?.fieldTicket?.titlePlural
+    },
+    {
+      key: sidebarResource.repairOrder,
+      resource: sidebarResource.repairOrder,
+      title: resources?.repairOrder?.titlePlural
     }
   ];
 
@@ -66,6 +71,9 @@ const ServiceHistory = ({ id, refresh }) => {
               onClick={() => {
                 if (row.original.referenceType === sidebarResource.fieldTicket) {
                   window.open(`${routes.fieldTicketDetail.path}/${row.original.referenceId}`);
+                }
+                if (row.original.referenceType === sidebarResource.repairOrder) {
+                  window.open(`${routes.repairOrderDetail.path}/${row.original.referenceId}`);
                 }
               }}
             >

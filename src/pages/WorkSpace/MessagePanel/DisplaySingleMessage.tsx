@@ -47,7 +47,7 @@ export const DisplaySingleMessage = ({
   channelData,
   type = 'messages'
 }: DisplaySingleMessageProps) => {
-  const [theme] = useAppTheme();
+  // const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
   const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
   const [themeColor] = useAppTheme();
@@ -158,20 +158,22 @@ export const DisplaySingleMessage = ({
             ) : (
               <>
                 <div>
-                  <span
-                    className={cn(
-                      `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
-                        [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
+                  {message.message && (
+                    <span
+                      className={cn(
+                        `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
+                        [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px]
                        [&_span:last-child]:text-gray-400`,
-                      isSelf
-                        ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
-                        : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white',
-                      message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
-                    )}
-                    dangerouslySetInnerHTML={{
-                      __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
-                    }}
-                  ></span>
+                        isSelf
+                          ? 'ml-auto bg-new-theme-color/10 text-gray-900 dark:bg-slate-800 dark:text-[white]'
+                          : 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white',
+                        message?.pinned ? 'relative border-l-4 border-[#cdbb54]' : ''
+                      )}
+                      dangerouslySetInnerHTML={{
+                        __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
+                      }}
+                    ></span>
+                  )}
                   {message?.pinned && (
                     <span className="absolute right-11 top-7 text-[15px]" title="Pinned">
                       📌

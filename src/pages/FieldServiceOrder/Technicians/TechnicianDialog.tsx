@@ -1,4 +1,4 @@
-import { Box, Dialog, Grid } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
 import { map, orderBy, uniq } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import Grid from '@mui/material/Grid2';
 
 const TechnicianDialog = ({ handleClose, technicianData, serviceOrderData, loading, handleUpdate }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -91,7 +92,7 @@ const TechnicianDialog = ({ handleClose, technicianData, serviceOrderData, loadi
                           <Grid spacing={3} container>
                             {section.sectionFields &&
                               section.sectionFields.map((field) => (
-                                <Grid item md={6} sm={6} xs={12}>
+                                <Grid size={{ xs: 12, md: 6, sm: 6 }}>
                                   <Box display="flex">
                                     <Box flexGrow={1}>
                                       <FormTypes

@@ -21,6 +21,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { checkFormula } from 'src/constants/formulaUtility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 
 const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
   const history = useHistory();
@@ -316,29 +317,13 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                         )}
                       </Box>
                       <Box>
-                        <TextField
-                          inputRef={inputRef}
-                          margin="dense"
-                          size="small"
-                          type="text"
+                        <MultiLine
                           label="Formula"
-                          name="formula"
-                          placeholder="Formula (return field1 + field2)"
-                          fullWidth
-                          multiline
-                          required
-                          rows={4}
-                          variant="outlined"
+                          required={true}
                           value={values['formula']}
                           error={touched['formula'] && Boolean(errors['formula'])}
-                          helperText={touched['formula'] && errors['formula']}
-                          onChange={(e) => setFieldValue('formula', e.target.value)}
-                          sx={{
-                            '& .MuiInputBase-root textarea': {
-                              resize: 'vertical',
-                              overflow: 'auto',
-                            },
-                          }}
+                          touched={touched['formula'] && errors['formula'] ? String(errors['formula']) : ''}
+                          onChange={(value) => setFieldValue('formula', value)}
                         />
                       </Box>
                       <Grid container>

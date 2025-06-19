@@ -1,0 +1,232 @@
+import { useContext, useEffect, useRef, useState } from 'react';
+import { Box, Dialog } from '@mui/material';
+import { Formik, Form } from 'formik';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isEqual } from 'lodash';
+import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import InputField from 'src/components/Helpers/InputField';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
+import dayjs from 'dayjs';
+import { useData } from 'src/StateProvider/Provider';
+
+function ManageUnavailability({ onClose, onSuccess, id = null, isClone = false, technicianId = null }) {
+
+  const toastConfig = useContext(CustomToastContext);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [title, setTitle] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const {
+    state: { user, resources }
+  }: any = useData();
+
+  const fetchFields = async () => {
+    try {
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.technicianUnavailability);
+      if (id) {
+        axiosInstance().get(`/employee-master-unavailability/${id}`).then(({ data: { data } }) => {
+          let fields = fieldsDataForUpdate;
+          if (isClone) {
+            fields = fieldsDataForCreate;
+            setTitle(data?.title);
+          } else {
+            setTitle(`Edit - ${data?.title}`);
+            if (technicianId) {
+              fields?.forEach((e) => {
+                if (e.fieldName === 'technician') {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              });
+            }
+          }
+          setInitialData({
+            fields: fields,
+            values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fieldsDataAll)
+          });
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      } else {
+        setTitle(`Create ${resources?.technicianUnavailability?.titleSingular}`);
+        let initialData: any = getObjKeys('', fieldsDataForCreate);
+        if (technicianId) {
+          initialData.technician = technicianId;
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'technician') {
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
+        }
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: initialData
+        });
+      }
+    }
+    catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchFields();
+  }, []);
+
+  const handleSave = (values: any) => {
+    setIsSubmitting(true);
+    if (id && !isClone) {
+      values._id = id;
+      axiosInstance().put(`employee-master-unavailability`, values).then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      })
+        .finally(() => {
+          setIsSubmitting(false);
+        });
+    } else {
+      axiosInstance().post(`employee-master-unavailability`, values).then(({ data }) => {
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      }).finally(() => {
+        setIsSubmitting(false);
+      });
+    }
+  };
+
+  function validate(values) {
+    const errors = {};
+    let startDate = dayjs(values?.startDate);
+    let endDate = dayjs(values?.endDate);
+    if (endDate.diff(startDate, 'day') < 0) {
+      errors['endDate'] = 'Please enter valid end date';
+    }
+    return errors;
+  }
+
+  return (
+    <Dialog
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
+      {initialData && initialData?.fields?.length ? (
+        <Formik
+          initialValues={initialData.values}
+          validateOnMount
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSave}
+          validate={validate}
+        >
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
+            <>
+              <CustomDialogHeader
+                onClose={() => {
+                  if (isEqual(initialData.values, values)) {
+                    onClose();
+                  }
+                  else {
+                    setShowConfirmDialog(true);
+                  }
+                }}
+                title={title}
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => setFullScreen((prev) => !prev)}
+                showManimizeMaximize={true}
+              />
+              <CustomDialogContent>
+                <Form>
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <ThemeButton
+                  buttonType="transparent"
+                  id="dialog-cancel-button"
+                  onClick={() => {
+                    if (isEqual(initialData.values, values)) {
+                      onClose();
+                    }
+                    else {
+                      setShowConfirmDialog(true);
+                    }
+                  }}
+                >
+                  Cancel
+                </ThemeButton>
+                <ThemeButton
+                  buttonType="theme"
+                  id="dialog-save-button"
+                  onClick={(e) => {
+                    submitForm();
+                  }}
+                  isLoading={isSubmitting}
+                >
+                  Save
+                </ThemeButton>
+              </CustomDialogFooter>
+              {showConfirmDialog ? (
+                <ConfirmationCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    onClose();
+                  }}
+                />
+              ) : null}
+            </>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+    </Dialog>
+  );
+}
+
+export default ManageUnavailability;

@@ -47,6 +47,20 @@ const UserList = memo(
       return newData;
     }, [users, chats, inputValue, checkIsUser]);
 
+    // Split filteredData into pinned and others
+    const { pinnedUsers, otherUsers } = useMemo(() => {
+      const pinned: typeof filteredData = [];
+      const others: typeof filteredData = [];
+      filteredData.forEach((item) => {
+        if (item.pinned) {
+          pinned.push(item);
+        } else {
+          others.push(item);
+        }
+      });
+      return { pinnedUsers: pinned, otherUsers: others };
+    }, [filteredData]);
+
     const openChat = useCallback(
       (data: Chat) => {
         handleChatOpen(data._id, 'chat');
@@ -92,15 +106,32 @@ const UserList = memo(
           </div>
           <section role="list" className="relative flex-grow overflow-y-auto overscroll-contain px-2 py-2">
             {permissions?.equiptAi?.isRead && <RenderGenie openGenie={openGenie} />}
-            {filteredData?.length > 0 ? (
-              filteredData?.map((c) => {
-                const isUser = checkIsUser(c);
-                if (isUser) {
-                  return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} />;
-                } else {
-                  return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} />;
-                }
-              })
+            {(pinnedUsers.length > 0 || otherUsers.length > 0) ? (
+              <>
+                {/* Pinned Users */}
+                {pinnedUsers.length > 0 && (
+                  <div>
+                    {pinnedUsers.map((c) => {
+                      const isUser = checkIsUser(c);
+                      if (isUser) {
+                        return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
+                      } else {
+                        return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
+                      }
+                    })}
+                  </div>
+                )}
+
+                {/* Other Users */}
+                {otherUsers.map((c) => {
+                  const isUser = checkIsUser(c);
+                  if (isUser) {
+                    return <RenderUser user={c} onClick={openUser} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
+                  } else {
+                    return <RenderChatUser user={user} chat={c} onClick={openChat} onlineUsers={onlineUsers} key={c._id} isPinned={c.pinned} />;
+                  }
+                })}
+              </>
             ) : (
               <div className="absolute left-2 right-2 top-1/3 text-center">
                 <p className="select-none text-sm font-semibold text-gray-500 dark:text-gray-400">

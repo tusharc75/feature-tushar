@@ -3,6 +3,8 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import Autocomplete from '@mui/material/Autocomplete';
 import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
+import FieldList from 'src/components/FormBuilder/FieldList';
+import { OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
   return (
@@ -384,8 +386,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                       if (e.target.checked) {
                         setFieldValue('isDefaultValue', true);
                         setFieldValue('defaultValue', 'Auto Generated');
-                      }
-                      else {
+                      } else {
                         setFieldValue('isDefaultValue', false);
                         setFieldValue('defaultValue', '');
                       }
@@ -522,6 +523,28 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
+      {fieldData.type === 'currencyAmount' &&
+        <Box>
+          <Grid container>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="showTotalInCard"
+                    checked={values['showTotalInCard']}
+                    onChange={(e) => {
+                      setFieldValue('showTotalInCard', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Show Total In Card"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}></Grid>
+          </Grid>
+        </Box>
+      }
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -711,6 +734,24 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
+      {fieldData?.type === FieldList.PERCENT.type && (
+        <Box>
+          <Autocomplete
+            value={values['operationOnLineItems']}
+            fullWidth
+            style={{ maxWidth: '300px' }}
+            size="small"
+            options={Object.values(OPERATION_ON_LINE_ITEMS)}
+            getOptionLabel={(option) => option || ''}
+            onChange={(event: any, newValue: string) => {
+              setFieldValue('operationOnLineItems', newValue);
+            }}
+            renderInput={(params) => (
+              <TextField {...params} margin="dense" label="Operation On Line Items" variant="outlined" name="operationOnLineItems" />
+            )}
+          />
+        </Box>
+      )}
       <Box mt={1}>
         <FormControl component="fieldset">
           <FormLabel component="legend">Column Size</FormLabel>

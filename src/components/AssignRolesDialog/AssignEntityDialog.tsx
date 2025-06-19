@@ -14,7 +14,7 @@ import {
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -69,9 +69,11 @@ const AssignEntityDialog = ({
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [, setCheckAll] = useState(false);
-  const steps = [`Select ${type}`, 'Select Role'];
+  const steps = [`Select ${startCase(type)}`, 'Select Role'];
   const [search, setSearch] = useState('');
   const classes = useStyles();
+
+  const activeStepRef = useRef(activeStep);
 
   const handleNext = () => {
     setSearch('');
@@ -79,14 +81,18 @@ const AssignEntityDialog = ({
   };
 
   const handleBack = () => {
+    setSearch('');
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
   useEffect(() => {
+    activeStepRef.current = activeStep;
+  }, [activeStep]);
+
+  useEffect(() => {
     setLoadingData(true);
     if (type == 'user') {
-      axiosInstance()
-        .get(`/${type}`)
+      axiosInstance().get(`/${type}`)
         .then(({ data: { data } }) => {
           setData(
             data.filter((user) => !assignedEntity.some((item) => item?._id === user?._id)).map((obj) => ({ ...obj, isChecked: false, show: true }))
@@ -101,25 +107,26 @@ const AssignEntityDialog = ({
           toastConfig.setToastConfig(error);
         });
     } else {
-      setLoadingData(false);
-      setData(
-        user?.entity?.map((obj) => ({
+      axiosInstance().get(`/${type}`).then(({ data: { data } }) => {
+        setData(data?.map((obj) => ({
           ...obj,
           optionLabel: obj.entityName,
           optionValue: obj._id,
           isChecked: false,
           show: true
-        }))
-      );
-      setDataConst(
-        user?.entity?.map((obj) => ({
+        })));
+        setDataConst(data?.map((obj) => ({
           ...obj,
           optionLabel: obj.entityName,
           optionValue: obj._id,
           isChecked: false,
           show: true
-        }))
-      );
+        })));
+        setLoadingData(false);
+      }).catch((error) => {
+        setLoadingData(false);
+        toastConfig.setToastConfig(error);
+      });
     }
 
     axiosInstance()
@@ -134,10 +141,7 @@ const AssignEntityDialog = ({
               .map((obj) => ({ ...obj, isChecked: false }))
           );
           setRoleConst(
-            data
-              .filter(
-                (role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id)
-              )
+            data.filter((role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id))
               .map((obj) => ({ ...obj, isChecked: false }))
           );
         } else {
@@ -231,7 +235,7 @@ const AssignEntityDialog = ({
     setSearch(value);
     let resultData = [];
     let resultRole = [];
-    if (activeStep === 0) {
+    if (activeStepRef.current === 0) {
       resultData = dataConst.filter((data) => {
         if (type === 'entity') {
           return data.entityName?.toLowerCase().search(value?.trim()?.toLowerCase()) !== -1;
@@ -269,7 +273,13 @@ const AssignEntityDialog = ({
                     edge="start"
                     onChange={(e) => {
                       d.isChecked = e.target.checked;
-                      setSelectedData(data.filter((d) => d.isChecked).map((obj) => obj._id));
+                      dataConst?.forEach(_d => {
+                        if (_d?._id === d?._id) {
+                          _d.isChecked = d.isChecked
+                        }
+                      });
+
+                      setSelectedData(dataConst?.filter((d) => d.isChecked).map((obj) => obj._id));
                       setCheckAll(!data.some((d) => d.isChecked === false));
                     }}
                     checked={d.isChecked}
@@ -282,7 +292,7 @@ const AssignEntityDialog = ({
                   <h6 className="MuiTypography-body1 line-clamp-1 text-[16px] font-[500_!important]">
                     {type === 'entity' ? d.entityName : d.concatedName}
                   </h6>
-                  <p className="MuiTypography-body2 line-clamp-1">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
+                  <p className="text-sm">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
                 </div>
               </li>
             ))}
@@ -301,7 +311,12 @@ const AssignEntityDialog = ({
                     edge="start"
                     onChange={(e) => {
                       d.isChecked = e.target.checked;
-                      setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
+                      roleConst?.forEach(_r => {
+                        if (_r?._id === d?._id) {
+                          _r.isChecked = d.isChecked
+                        }
+                      });
+                      setSelectedRole(roleConst?.filter((r) => r.isChecked).map((obj) => obj._id));
                     }}
                     checked={d.isChecked}
                     inputProps={{
@@ -358,6 +373,7 @@ const AssignEntityDialog = ({
   return (
     <>
       <CustomDialogHeader
+        onClose={handleCloseDialog}
         showRequiredLabel={false}
         title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`}
       />
@@ -377,7 +393,6 @@ const AssignEntityDialog = ({
                   searchValue={search}
                   onSearch={handleSearch}
                 />
-
                 <div className="mt-3 grid gap-[20px]">
                   {steps.map((label, index) => (
                     <div key={label} className="relative">

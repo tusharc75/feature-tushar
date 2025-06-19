@@ -30,6 +30,7 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 import { Link } from 'react-router-dom';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import MessageDialog from 'src/components/Helpers/MessageDialog';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
   const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}`;
@@ -63,6 +64,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
     reserveAssetsData: null,
     assetDataError: []
   });
+  const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   useEffect(() => {
     fetchGridColumns();
@@ -427,6 +429,20 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
     if (Number(tabValue) === 2) {
       setInuseAssetConfirmBox(true);
     } else if (Number(tabValue) === 0 || Number(tabValue) === 1) {
+
+      if (user?.user?.brandPolicy?.serializedAssetCertification &&
+        selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+      ) {
+        setCertificateExpireAlert({
+          open: true,
+          asset: selectedRecords
+            ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+            ?.map((e) => e.assetNumber)
+            ?.toString()
+        });
+        return;
+      }
+
       if (checkAssetPolicy(ASSET_STATUS.reserved)) {
         const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
         setOpenAssetDataDialog({
@@ -484,9 +500,9 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
         />
         <Box pt={1}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab value={0} label={'Assets'} />
-            {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
-            <CustomTab value={2} label={'In Use Assets'} />
+            <CustomTab value={0} label={resources?.serializedAsset?.titlePlural} />
+            {permissions?.sublease && <CustomTab value={1} label={`Sublease ${resources?.serializedAsset?.titlePlural}`} />}
+            <CustomTab value={2} label={`In Use ${resources?.serializedAsset?.titlePlural}`} />
           </CustomTabs>
         </Box>
         {columns ? (
@@ -632,6 +648,14 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, reference
           }}
           isSubmitting={isSubmitting}
           title={'Status change will be triggered for the following assets. Do you want to continue without changing their status?'}
+        />
+      )}
+      {certificateExpireAlert.open && (
+        <MessageDialog
+          open={true}
+          header="Certification Information"
+          message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
+          onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
         />
       )}
     </Dialog>

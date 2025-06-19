@@ -37,16 +37,16 @@ const RippleButton = React.forwardRef<HTMLButtonElement, { children: React.React
         }}
         ref={ref}
         className={cn(
-          'relative cursor-pointer overflow-hidden bg-transparent outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[--new-theme-color] dark:text-[white] dark:disabled:text-gray-500',
+          'relative cursor-pointer  bg-transparent outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-[--new-theme-color] dark:text-[white] dark:disabled:text-gray-500',
           className
         )}
         {...rest}
       >
         {children}
-        {ripples}
+        <div className="absolute inset-0 overflow-hidden rounded-[inherit]">{ripples}</div>
       </button>
     );
   }
 );
 
-export default RippleButton;
+export default React.memo(RippleButton);

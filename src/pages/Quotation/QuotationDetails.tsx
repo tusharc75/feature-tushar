@@ -561,7 +561,12 @@ const QuotationDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={quotationData} fields={getQuotationFields} />
+                <DetailsPage
+                  data={quotationData}
+                  fields={getQuotationFields}
+                  resource={sidebarResource.quotation}
+                  referenceId={quotationData?._id}
+                />
               </>
             )}
           </Box>
@@ -582,10 +587,10 @@ const QuotationDetails = () => {
             {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-              <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+                <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
+                  <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+                </Box>
+              )}
             <div>
               <Steps
                 isNextStep={false}
@@ -603,10 +608,10 @@ const QuotationDetails = () => {
                 handleNext={
                   stepNames[currentStep] === 'Quote Approval'
                     ? () => {
-                        if (allowedToEdit) {
-                          setCustomerAcceptable(true);
-                        }
+                      if (allowedToEdit) {
+                        setCustomerAcceptable(true);
                       }
+                    }
                     : null
                 }
               />

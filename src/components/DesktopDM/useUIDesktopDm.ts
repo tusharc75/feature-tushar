@@ -1,9 +1,11 @@
 import { useMediaQuery } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { OpenedChat, UIState } from 'src/components/DesktopDM/types';
+import { OpenedChat, UIState, WindowOpenState } from 'src/components/DesktopDM/types';
 import { useData } from 'src/StateProvider/Provider';
 import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
+import useLocalStorage from 'src/hooks/useLocalStore';
+import { EQUIPT_BE_CONNECTED_WINDOW } from 'src/constants/helpers';
 import { requestAndSyncFcmToken } from 'src/hooks/useFirebaseNotifications';
 
 const windowWidth = window.innerWidth;
@@ -46,6 +48,7 @@ const checkCanAddNewChatBox = (openedChats: OpenedChat[]) => {
 
 const useUIDesktopDm = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [storeValue, setStoreValue] = useLocalStorage<WindowOpenState | 'null'>(EQUIPT_BE_CONNECTED_WINDOW, 'partial');
   const [_, setStore] = useStore((state) => state[HANDLE_OPEN_CHAT]);
   const {
     state: {
@@ -55,7 +58,7 @@ const useUIDesktopDm = () => {
     }
   }: any = useData();
 
-  const [uiState, setUiState] = useState<UIState>(initialState);
+  const [uiState, setUiState] = useState<UIState>({ ...initialState, mainWindow: storeValue === 'null' ? null : storeValue });
   const isMobile = useMediaQuery('(max-width:800px)');
 
   const onGenieFullScreen = useCallback(() => {
@@ -187,14 +190,22 @@ const useUIDesktopDm = () => {
   }, []);
 
   const toggleMainWindow = useCallback(() => {
-    setUiState((prev) => ({ ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' }));
+    setUiState((prev) => {
+      const data = { ...prev, mainWindow: prev.mainWindow === 'fullyOpen' ? 'partial' : 'fullyOpen' } as UIState;
+      setStoreValue('partial');
+      return data;
+    });
     requestAndSyncFcmToken(user);
-  }, [user]);
+  }, [setStoreValue, user]);
 
-  const closeMainWindow = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-    e.stopPropagation();
-    setUiState({ ...initialState, mainWindow: null });
-  }, []);
+  const closeMainWindow = useCallback(
+    (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+      e.stopPropagation();
+      setStoreValue('null');
+      setUiState({ ...initialState, mainWindow: null });
+    },
+    [setStoreValue]
+  );
 
   const onUserFirstMessageSent = useCallback(({ userId, channelId }: { userId: string; channelId: string }) => {
     if (!userId || !channelId) return;

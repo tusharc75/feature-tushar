@@ -46,6 +46,10 @@ const Planning = () => {
     {
       key: `All ${resources?.planning?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Converted ${resources?.planning?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -62,7 +66,7 @@ const Planning = () => {
   const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.planning));
   const [columns, setColumns] = useState(null);
-  
+
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -78,7 +82,7 @@ const Planning = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.planning}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.planningDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -180,10 +184,15 @@ const Planning = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
+    }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
-    if (selectedPlanningType==='Rental Job') {
+    if (selectedPlanningType === 'Rental Job') {
       deepFilters.push({
         field: 'type',
         term: 'Rental Job'

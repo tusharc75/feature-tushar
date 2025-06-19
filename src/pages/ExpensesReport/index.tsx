@@ -49,7 +49,7 @@ const ExpenseReport = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   useEffect(() => {

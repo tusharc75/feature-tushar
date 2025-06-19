@@ -131,7 +131,7 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
         />
       )}
       ListboxProps={{
-        onScroll: (e) => {
+        onScroll: (e: any) => {
           if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
             setLoading(true);
             fetchOptions('', currentPage + 1);
@@ -191,7 +191,7 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
         />
       )}
       ListboxProps={{
-        onScroll: (e) => {
+        onScroll: (e: any) => {
           if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
             setLoading(true);
             fetchOptions('', currentPage + 1);

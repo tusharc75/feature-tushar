@@ -14,6 +14,7 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   productInventory,
+  sidebarResource,
   transferInventory
 } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -41,13 +42,17 @@ const AssignSerialNumbersDialog = ({
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
-    state: { selectedEntity, resources }
+    state: { selectedEntity, resources, user }
   }: any = useData();
 
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [warehouseOption, setWarehouseOption] = useState([]);
+  const [storageLocationOptions, setStorageLocationOptions] = useState([]);
+
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
+
   const [showTransferInventoryDialog, setShowTransferInventoryDialog] = useState(false);
   const [serialNumberCount, setSerialNumberCount] = useState(0);
   const [addserialNumber, setAddserialNumber] = useState(false);
@@ -84,6 +89,21 @@ const AssignSerialNumbersDialog = ({
           </>
         )
       },
+      ...(user?.user?.brandPolicy?.storageLocation ? [{
+        accessor: 'storageLocation',
+        Header: resources?.storageLocation?.titleSingular,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.storageLocation ? (
+              <h5 className="text-truncate" title={row?.original?.storageLocation}>
+                {row?.original?.storageLocation}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      }] : []),
       {
         accessor: 'status',
         Header: 'Status',
@@ -120,26 +140,31 @@ const AssignSerialNumbersDialog = ({
     } else {
       setSerialNumberCount(0);
     }
-  }, [selectedWarehouse, selectedProduct]);
+  }, [selectedWarehouse, selectedProduct, selectedStorageLocation]);
 
   const fetchProductInventory = () => {
     let api = `${productInventory.api}/product/${selectedProduct}?warehouse=${selectedWarehouse}`;
-    axiosInstance()
-      .get(api)
-      .then(({ data: { data } }) => {
-        const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
+    if (selectedStorageLocation) {
+      api = `${api}&storageLocation=${selectedStorageLocation}`;
+    }
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      if (typeof data === 'object') {
+        const count = data?.inventory - (data?.softHold || 0) - (data?.serialNumber || 0);
         if (count > 0) {
           setSerialNumberCount(count);
         } else {
           setSerialNumberCount(0);
         }
-      })
-      .catch((err) => {});
+      }
+      else {
+        setSerialNumberCount(0);
+      }
+    }).catch((err) => { });
   };
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse]);
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedProduct, selectedWarehouse, selectedStorageLocation]);
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
@@ -181,6 +206,10 @@ const AssignSerialNumbersDialog = ({
       deepFilter = `${deepFilter}&warehouse=${selectedWarehouse}`;
     }
 
+    if (selectedStorageLocation) {
+      deepFilter = `${deepFilter}&storageLocation=${selectedStorageLocation}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     deepFilters.push({
       field: 'status',
@@ -209,9 +238,10 @@ const AssignSerialNumbersDialog = ({
 
   useEffect(() => {
     axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse')
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.storageLocation}`)
       .then(({ data: { data } }) => {
-        setWarehouseOption(data['Warehouse']);
+        setWarehouseOption(data[sidebarResource.warehouse]);
+        setStorageLocationOptions(data[sidebarResource.storageLocation]);
       });
   }, []);
 
@@ -260,63 +290,92 @@ const AssignSerialNumbersDialog = ({
       <>
         {products.length > 0
           ? products?.map((d) => (
-              <Box
-                p={1}
-                border={1}
-                className={`MuiBox-root cursor-pointer p-2 text-[13px] dark:text-gray-300 ${
-                  selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+            <Box
+              p={1}
+              border={1}
+              className={`MuiBox-root cursor-pointer p-2 text-[13px] dark:text-gray-300 ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                 }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+              borderColor="var(--common-border-color)"
+              onClick={() => {
+                if (selectedProduct === d.id) {
+                  setSelectedProduct(null);
+                } else {
+                  setSelectedProduct(d.id);
+                }
+              }}
+              style={{ display: 'inline-block' }}
+            >
+              {d?.qty < 0 ? (
+                <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+              ) : d?.qty === 0 ? (
+                <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+              ) : (
+                <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+              )}
+            </Box>
+          ))
           : null}
         {showWarehouseFilter && (
-          <Box className="min-w-[250px] flex-grow md:max-w-[350px]">
-            <Autocomplete
-              fullWidth
-              options={warehouseOption}
-              getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-              isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-              value={
-                warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-                  ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-                  : ''
-              }
-              disableClearable={true}
-              onChange={(e, val) => {
-                setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-                dispatch({ type: 'selection', selectedRecords: [] });
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="none"
-                  size="small"
-                  name="plant"
-                  placeholder={resources?.warehouse?.titleSingular}
-                  label={resources?.warehouse?.titleSingular}
-                  variant="outlined"
-                  fullWidth
+          <>
+            <Box className="min-w-[250px] flex-grow md:max-w-[350px]">
+              <Autocomplete
+                fullWidth
+                options={warehouseOption}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                value={
+                  warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                    ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                    : ''
+                }
+                disableClearable={true}
+                onChange={(e, val) => {
+                  setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+                  dispatch({ type: 'selection', selectedRecords: [] });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="none"
+                    size="small"
+                    name="plant"
+                    placeholder={resources?.warehouse?.titleSingular}
+                    label={resources?.warehouse?.titleSingular}
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+            </Box>
+            {user?.user?.brandPolicy?.storageLocation && (
+              <Box className="min-w-[250px] flex-grow md:max-w-[350px]">
+                <Autocomplete
+                  options={storageLocationOptions?.filter((e) => e.warehouse === selectedWarehouse)}
+                  getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                  value={
+                    storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation).length
+                      ? storageLocationOptions.filter((data) => data.optionValue === selectedStorageLocation)[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setSelectedStorageLocation(val?.optionValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      size="small"
+                      name="storageLocation"
+                      label="Storage Location"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
                 />
-              )}
-            />
-          </Box>
+              </Box >
+            )}
+          </>
         )}
       </>
     );
@@ -343,10 +402,12 @@ const AssignSerialNumbersDialog = ({
   const leftSideContentsOfSearchFilter = () => {
     return (
       <>
-        {!selectedProduct || !selectedWarehouse ? (
-          <HtmlTooltip title={'Please Select Product'}>
+        {!selectedProduct || !selectedWarehouse || (user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? (
+          <HtmlTooltip title={!selectedProduct ?
+            `Please Select Product` :
+            (user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? `Please Select ${resources?.storageLocation?.titleSingular}` : ''}>
             <span>
-              <ThemeButton disabled={true}>Add New Serial Numbers</ThemeButton>
+              <ThemeButton disabled={true}>Add Serial Numbers</ThemeButton>
             </span>
           </HtmlTooltip>
         ) : serialNumberCount ? (
@@ -356,7 +417,7 @@ const AssignSerialNumbersDialog = ({
             }}
             buttonType="theme"
           >
-            Add New Serial Numbers
+            Add Serial Numbers
           </ThemeButton>
         ) : null}
       </>
@@ -452,6 +513,7 @@ const AssignSerialNumbersDialog = ({
           <AddSerialNumber
             product={selectedProduct}
             warehouse={selectedWarehouse}
+            storageLocation={selectedStorageLocation}
             serialNumberCount={serialNumberCount}
             handleClose={() => setAddserialNumber(false)}
             handleSucess={() => {

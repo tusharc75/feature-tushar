@@ -662,9 +662,9 @@ export default function AccountDetailPage(props) {
             <TabPanel value={tabValue} index={0}>
               <Box>
                 {showAtLast ? (
-                  <DetailsPage data={accountData} fields={accountFields} />
+                  <DetailsPage data={accountData} fields={accountFields} resource={sidebarResource[accountResource]} referenceId={accountData?._id} />
                 ) : (
-                  <DetailsPage data={accountData} fields={filteredAccountFields} />
+                  <DetailsPage data={accountData} fields={filteredAccountFields} resource={sidebarResource[accountResource]} referenceId={accountData?._id} />
                 )}
 
                 <div className="pt-3 ">

@@ -15,6 +15,8 @@ import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import { Groups } from '@mui/icons-material';
 import { FiExternalLink } from 'react-icons/fi';
+import { ListRelatedTo } from 'src/components/Activity/Helpers/ListRelatedTo';
+import { startCase } from 'lodash';
 
 const MessagePanel = ({
   state,
@@ -77,7 +79,9 @@ const MessagePanel = ({
           'relative flex-grow transition-all duration-300 ',
           threadDialogOpen?.open && !fromSidebar ? 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]' : '',
           // isSidebarCollapsed && 'px-2',
-          fromSidebar ? '[--thread-bar-width:360px]' : '[--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]'
+          fromSidebar
+            ? '[--thread-bar-width:min(360px,100%)]'
+            : '[--thread-bar-width:min(360px,100%)] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]'
         )}
       >
         {isSidebarCollapsed && (
@@ -167,10 +171,8 @@ const MessageHeader = ({
             <h5 className={cn('line-clamp-1 min-w-0 flex-shrink text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
               {resource && resourceLabel ? resourceLabel : selectedChannel?.title}
             </h5>
-            <div className="flex gap-2 p-2">
-              <Chip label="Chats" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
-              <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
-              {selectedChannel?.relatedTo?.length > 0 && (
+            {selectedChannel?.relatedTo?.length > 0 && (
+              <>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -180,7 +182,16 @@ const MessageHeader = ({
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              )}
+                <Chip
+                  label={`${resources[selectedChannel?.relatedTo[0]?.type]?.titleSingular || startCase(selectedChannel?.relatedTo[0]?.type)} `}
+                  size="medium"
+                  color='info'
+                />
+              </>
+            )}
+            <div className="flex gap-2 p-2">
+              <Chip label="Chats" clickable color={msgType === 'messages' ? 'primary' : 'default'} onClick={() => setMsgType('messages')} />
+              <Chip label="Pins" clickable color={msgType === 'pins' ? 'primary' : 'default'} onClick={() => setMsgType('pins')} />
             </div>
           </div>
         )}

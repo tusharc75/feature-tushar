@@ -15,7 +15,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, pricingCondition } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, pricingCondition, sidebarResource } from '../../constants/helpers';
 import AddConditions from './AddConditions';
 import PricingConditionsDialog from './PricingConditionsDialog';
 
@@ -119,7 +119,7 @@ const PricingConditionsDetails = () => {
               <CustomTab value={1}>Details</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={detailData} fields={fields} />
+              <DetailsPage data={detailData} fields={fields} resource={sidebarResource?.pricingCondition} referenceId={detailData?._id} />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <AddConditions pricingConditionId={id} detailData={detailData} />

@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, PURCHASE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, PURCHASE_REQUISITION_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
@@ -50,7 +50,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
               rest['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-              rest['status'] = 'New';
+              rest['status'] = PURCHASE_REQUISITION_STATUS.new;
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
@@ -82,17 +82,15 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
-      axiosInstance()
-        .put(`${routes.purchaseRequisition?.path}`, values)
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
+      axiosInstance().put(`${routes.purchaseRequisition?.path}`, values).then(({ data }) => {
+        setSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
         .catch((error) => {
           setSubmitting(false);
           toastConfig.setToastConfig(error);
@@ -121,10 +119,6 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   return (
     <Dialog
@@ -141,7 +135,7 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
       }}
     >
       {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} validate={validate}>
+        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader

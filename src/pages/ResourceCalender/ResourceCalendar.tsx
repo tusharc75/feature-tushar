@@ -6,7 +6,6 @@ import { useHistory, useParams } from 'react-router-dom';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomCalendar from 'src/components/CustomCalendar';
-import { View } from 'src/components/CustomCalendar/types';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 
@@ -21,7 +20,6 @@ const MyCalendar = (props) => {
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
-  const [view, setView] = useState<View>('dayGridMonth');
 
   useEffect(() => {
     const deepFilter = [
@@ -52,7 +50,7 @@ const MyCalendar = (props) => {
 
   return (
     <>
-      <div className="headerbox">
+      <div className="headerbox mb-2">
         <CustomBreadCrumbs
           routes={[
             {
@@ -78,8 +76,6 @@ const MyCalendar = (props) => {
             eventClick={(arg) => {
               history.push(`${routes[resourcecamelCase].path}/detail/${arg.event.id}`);
             }}
-            setView={setView}
-            view={view}
           />
         </div>
       </CustomContainer>

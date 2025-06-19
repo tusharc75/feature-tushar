@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { deleteDatabase } from 'src/constants/indexdbhelper';
+import { handleClearLocalStore } from 'src/constants/helpers';
 
 const Logout = () => {
   const history = useHistory();
@@ -20,7 +21,7 @@ const Logout = () => {
           history.push('/');
           dispatch({ type: SET_USER, payload: null });
           dispatch({ type: SET_SELECTED_ENTITY, payload: null });
-          localStorage.clear();
+          handleClearLocalStore()
           history.push('/login');
         })
         .catch((error) => {

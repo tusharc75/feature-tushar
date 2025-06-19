@@ -110,7 +110,7 @@ const ManageSerializedAsset = ({
               } = data;
               setCloneHeading(assetNumber);
               let oldValues = { ...rest };
-              oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
+              oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.option?.find(o => o?.default)?.optionValue || ASSET_STATUS.available;
               oldValues.assetNumber = data.assetNumberType === ASSET_NUMBER_TYPE.manual ? ''
                 : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
 

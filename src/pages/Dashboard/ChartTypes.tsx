@@ -3,7 +3,8 @@ import Chart from 'react-chartjs-2';
 import { Paper, Box, useTheme, useMediaQuery, Typography, Badge, IconButton } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { ImportExport, TableChart, Timeline } from '@mui/icons-material';
-import { BsFilter, BsFillPinFill } from 'react-icons/bs';
+import { BsFilter } from 'react-icons/bs';
+import { MdOutlinePushPin } from "react-icons/md";
 import { Skeleton } from '@mui/material';
 import { TbPinnedOff } from 'react-icons/tb';
 import FiltersDropdown from './FiltersDropdown';
@@ -181,7 +182,7 @@ const ChartTypes = ({
     const colorMap = {
       color1: ['rgba(255, 99, 132, 1)', 'rgba(255, 99, 132, 0.5)'],
       color2: ['rgba(54, 162, 235, 1)', 'rgba(54, 162, 235, 0.5)'],
-      color3: ['rgba(255, 99, 132, 0.6)', 'rgba(255, 150, 132, 0.5)']
+      color3: ['rgba(0,128,0, 1)', 'rgba(0,128,0, 0.5)']
     };
     const obj = swapChartColors(colorMap);
     if (!obj) return;
@@ -241,8 +242,8 @@ const ChartTypes = ({
       {chart.graphType === 'Custom' ? (
         <Grid container spacing={1}>
           {loading ? (
-            [...Array(4).keys()].map((_, index) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index + 1}>
+            [...Array(6).keys()].map((_, index) => (
+              <Grid size={{ xs: 12, sm: 4, md: 4 }} key={index + 1}>
                 <Box p={2} component={Paper} height={'100%'} display="flex" flexDirection="column" justifyContent="space-between">
                   <Skeleton variant="text" width={150} height={30} />
                   <Skeleton variant="text" width={100} height={20} />
@@ -260,7 +261,13 @@ const ChartTypes = ({
               <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
-                    <ThemeButton disabled={loading} onClick={handleOpenFilter} startIcon={<BsFilter fontSize={14} />}>
+                    <ThemeButton
+                      disabled={loading}
+                      onClick={handleOpenFilter}
+                      startIcon={<BsFilter fontSize={14} />}
+                      iconForMobile={<BsFilter fontSize={14} />}
+                      mobileTooltip='Filters'
+                    >
                       Filters
                     </ThemeButton>
                   </Badge>
@@ -273,7 +280,9 @@ const ChartTypes = ({
                     style={{ marginRight: chart.hasTableView ? 10 : 0 }}
                     onClick={handleOpenExport}
                     buttonType="transparent"
+                    iconForMobile={<ImportExport />}
                     startIcon={<ImportExport />}
+                    mobileTooltip='Export to'
                   >
                     Export to
                   </ThemeButton>
@@ -286,7 +295,9 @@ const ChartTypes = ({
                       setTableView(!tableView);
                     }}
                     buttonType="transparent"
+                    iconForMobile={!tableView ? <TableChart /> : <Timeline />}
                     startIcon={!tableView ? <TableChart /> : <Timeline />}
+                    mobileTooltip={`${!tableView ? 'Table' : 'Chart'} View`}
                   >
                     {!tableView ? 'Table' : 'Chart'} View
                   </ThemeButton>
@@ -303,7 +314,7 @@ const ChartTypes = ({
                         color="primary"
                         size="small"
                       >
-                        <BsFillPinFill fontSize="18px" />
+                        <MdOutlinePushPin fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
@@ -398,7 +409,7 @@ const ChartTypes = ({
                             callbacks: {
                               label: function (context) {
                                 let label =
-                                  chart?.chartType === 'Bar' && chart?.stack ? context.dataset.label : context.label || context.dataset.label || '';
+                                  chart?.chartType === 'Bar' && (chart?.stack || chart?.kpi?.name === 'Rental Job Customer Wise Revenue') ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
@@ -416,7 +427,7 @@ const ChartTypes = ({
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
-                                          .fullFormatAmountWithoutSpace
+                                        .fullFormatAmountWithoutSpace
                                       : parseValue;
                                   }
                                 }
@@ -462,7 +473,7 @@ const ChartTypes = ({
                             callback: function (value) {
                               return chart?.currency
                                 ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                    .fullFormatAmountWithoutSpace
+                                  .fullFormatAmountWithoutSpace
                                 : value;
                             }
                           }
@@ -485,21 +496,21 @@ const ChartTypes = ({
                       },
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
-                          scales: {
-                            x: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
-                            },
-                            y: {
-                              stacked: true,
-                              grid: {
-                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                              }
+                        scales: {
+                          x: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                            }
+                          },
+                          y: {
+                            stacked: true,
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
                           }
-                        })
+                        }
+                      })
                     }}
                   />
                 </>

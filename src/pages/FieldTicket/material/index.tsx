@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { camelCase, isArray, isObject, orderBy, startCase } from 'lodash';
+import { camelCase, isArray, isObject, startCase } from 'lodash';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -76,7 +76,7 @@ const Material = ({
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null, serializedAssetService: false });
+  const [materialDialog, setMaterialDialog] = useState({ open: false, type: '', parentId: null, parentType: null, serializedAssetService: false });
   const [allFields, setAllFields] = useState([]);
   const [isServiceEdit, setIsServiceEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -233,13 +233,20 @@ const Material = ({
               <>
                 <span>{row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}</span>
                 {!isOffline && allowedToEdit && (
-                  <HtmlTooltip title={`Add ${row.original.type === MATERIAL_TYPE.package ? resources?.packages?.titleSingular : `Existing Service`}`}>
+                  <HtmlTooltip
+                    title={
+                      row.original.type === MATERIAL_TYPE.package
+                        ? `Add Existing ${resources?.packages?.titlePlural}`
+                        : `Perform ${resources?.serviceMaster?.titlePlural}`
+                    }
+                  >
                     <IconButton
                       onClick={() => {
                         setMaterialDialog({
                           open: true,
                           type: row.original.type === MATERIAL_TYPE.package ? MATERIAL_TYPE.package : MATERIAL_TYPE.service,
                           parentId: row.original._id,
+                          parentType: row.original.type,
                           serializedAssetService: row.original.type === MATERIAL_TYPE.package ? false : true
                         });
                       }}
@@ -518,7 +525,7 @@ const Material = ({
         material.push(element);
         await insertUpdate(objectStore.fieldTicketMaterial, id, restoreObjKeysWithValues(element, allFields));
         fetchMaterial();
-        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+        setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
@@ -626,7 +633,7 @@ const Material = ({
         }
         fetchMaterial();
         fetchData();
-        setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+        setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
         setAddRentalJobDataDialog({ open: false, type: '' });
         setAddQuotationDataDialog({ open: false, type: '' });
         setAddFieldServiceOrderDataDialog(false);
@@ -722,6 +729,7 @@ const Material = ({
       }
       setUpdating(false);
       fetchMaterial();
+      fetchData();
       if (saveAndNext) {
         const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
         if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -851,6 +859,7 @@ const Material = ({
         }
       }
       fetchMaterial();
+      fetchData();
       if (saveAndNext) {
         const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
         if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -905,7 +914,7 @@ const Material = ({
       <>
         <MenuItem
           onClick={() => {
-            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, parentType: '', serializedAssetService: false });
           }}
           id={'add-existing-service-menu-item'}
         >
@@ -914,7 +923,7 @@ const Material = ({
         {permissions?.serviceMaster?.isCreate && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: 'newService', parentId: null, serializedAssetService: false });
+              setMaterialDialog({ open: true, type: 'newService', parentId: null, parentType: '', serializedAssetService: false });
             }}
             id={'add-new-service-menu-item'}
           >
@@ -924,7 +933,7 @@ const Material = ({
         {permissions?.packages?.isRead && resourcePolicy?.showAddPackages && !isOffline && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, serializedAssetService: false });
+              setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null, parentType: '', serializedAssetService: false });
             }}
             id={'add-existing-package-menu-item'}
           >
@@ -948,7 +957,7 @@ const Material = ({
                 setAddRentalJobDataDialog({ open: true, type: MATERIAL_TYPE.serializedAsset });
               }}
             >
-              Add Rental Assets
+              {`Add Rental ${resources?.serializedAsset?.titlePlural}`}
             </MenuItem>
             <MenuItem
               onClick={() => {
@@ -1001,44 +1010,46 @@ const Material = ({
   const ActionButtonMenuItms = () => {
     return (
       <>
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Bulk edit selected records' : 'Select records to edit'}>
-          <MenuItem
-            disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-            onClick={() => {
-              setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
-              setIsBulkEdit(true);
-            }}
-          >
-            Bulk Edit
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+          onClick={() => {
+            setIsServiceEdit({ open: true, data: null, showSaveAndNext: false });
+            setIsBulkEdit(true);
+          }}
+        >
+          Bulk Edit
+        </MenuItem>
         {selectedRecords.some((e) => e.type === MATERIAL_TYPE.serializedAsset) && (
           <MenuItem
             onClick={() => {
-              setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null, serializedAssetService: true });
+              setMaterialDialog({
+                open: true,
+                type: MATERIAL_TYPE.service,
+                parentId: null,
+                parentType: MATERIAL_TYPE.serializedAsset,
+                serializedAssetService: true
+              });
             }}
           >
-            Add Existing Service
+            {`Perform ${resources?.serviceMaster?.titlePlural}`}
           </MenuItem>
         )}
-        <HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-          <MenuItem
-            disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-            onClick={() => {
-              const obj: any = [];
-              const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
-              dataToDelete?.forEach((ele) => {
-                obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
-              });
-              dataToDelete?.forEach((ele) => {
-                getNestedSubRows(obj, ele);
-              });
-              setDeleteData(obj);
-            }}
-          >
-            Delete
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+          onClick={() => {
+            const obj: any = [];
+            const dataToDelete = selectedRecords && selectedRecords.filter((e) => !e.hideSelection);
+            dataToDelete?.forEach((ele) => {
+              obj.push({ id: ele._id, type: ele.type, materialId: ele.materialId });
+            });
+            dataToDelete?.forEach((ele) => {
+              getNestedSubRows(obj, ele);
+            });
+            setDeleteData(obj);
+          }}
+        >
+          Delete
+        </MenuItem>
       </>
     );
   };
@@ -1071,8 +1082,8 @@ const Material = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             refreshGrid={fetchMaterial}
-            expander={resourcePolicy?.showAddPackages ? true : false}
             resource={sidebarResource.fieldTicket}
+            expander={true}
             arrangeRowField={{
               keys: [
                 { key: 'material', filterType: [MATERIAL_TYPE.service, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset] },
@@ -1090,7 +1101,7 @@ const Material = ({
       <Box mt={3}>
         <Consumables
           allowedToEdit={allowedToEdit}
-          services={dataRows?.filter((e) => e.type === MATERIAL_TYPE.service)}
+          services={flattenArray(dataRows)}
           fieldTicketData={fieldTicketData}
           fieldTicketFields={fieldTicketFields}
           fetchMaterial={fetchMaterial}
@@ -1106,12 +1117,13 @@ const Material = ({
             handleAdd(rows, MATERIAL_TYPE.service);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           extraStaticFilter={[{ field: 'serviceType', term: SERVICE_TYPE.fieldService }]}
           isSubmitting={isSubmitting}
           pricingCondition={fieldTicketData?.pricingCondition?.optionValue || null}
           currency={fieldTicketData.currency}
+          headerLabel={materialDialog.parentType === MATERIAL_TYPE.serializedAsset ? 'Perform' : 'Add'}
         />
       )}
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.package && (
@@ -1120,7 +1132,7 @@ const Material = ({
             handleAdd(rows, MATERIAL_TYPE.package);
           }}
           handleClose={() => {
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           ids={[]}
           isSubmitting={isSubmitting}
@@ -1130,13 +1142,13 @@ const Material = ({
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
-          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false })}
+          onClose={() => setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false })}
           onSuccess={(data) => {
             const row = data?.data;
             row.unitMain = row?.unit;
             row.pricingMethodMain = row?.pricingMethod;
             handleAdd([row], MATERIAL_TYPE.service);
-            setMaterialDialog({ open: false, type: '', parentId: null, serializedAssetService: false });
+            setMaterialDialog({ open: false, type: '', parentId: null, parentType: '', serializedAssetService: false });
           }}
           isRedirectToDetailPage={false}
           referenceData={{ serviceType: SERVICE_TYPE.fieldService }}
@@ -1154,7 +1166,7 @@ const Material = ({
           fieldTicketData={fieldTicketData}
           fieldTicketFields={fieldTicketFields}
           rowData={!isBulkEdit ? isServiceEdit.data : selectedRecords}
-          material={dataRows}
+          material={flattenArray(dataRows)}
           selectedServices={selectedRecords}
           loading={isUpdating}
           showSaveAndNext={isServiceEdit.showSaveAndNext}

@@ -172,12 +172,12 @@ export const resourcePolicy = [
       },
       {
         fieldName: 'statusColor',
-        fieldLabel: 'Status Color',
+        fieldLabel: 'Status/Sub Status Color',
         type: 'multipleFields',
         fields: [
           {
             fieldName: 'status',
-            fieldLabel: 'Status',
+            fieldLabel: 'Status/Sub Status',
             type: 'multiSelect',
             required: true
           },
@@ -189,7 +189,35 @@ export const resourcePolicy = [
           }
         ],
         defaultValue: []
-      }
+      },
+      {
+        fieldName: 'inUseSubStatus',
+        fieldLabel: 'In-Use Sub Status',
+        type: 'multiSelect',
+        defaultValue: [],
+        fieldOption: 'subStatus',
+        required: false
+      },
+      {
+        fieldName: 'statusChangeOnSubStatusRental',
+        fieldLabel: 'Status Change On Sub Status Rental Receiving/Return',
+        type: 'multipleFields',
+        fields: [
+          {
+            fieldName: 'subStatus',
+            fieldLabel: 'Sub Status',
+            type: 'dropDown',
+            required: true
+          },
+          {
+            fieldName: 'status',
+            fieldLabel: 'Status',
+            type: 'dropDown',
+            required: true
+          }
+        ],
+        defaultValue: []
+      },
     ]
   },
   {
@@ -245,12 +273,6 @@ export const resourcePolicy = [
       {
         fieldName: 'nonSerializedProductReceivingTicket',
         fieldLabel: 'Non Serialized Product Receiving Ticket',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
-        fieldName: 'assignAssetUsingRfidQr',
-        fieldLabel: 'Assign Asset Using RFID/QR',
         type: 'checkBox',
         defaultValue: false
       },
@@ -447,6 +469,40 @@ export const resourcePolicy = [
       {
         fieldName: 'hideAssetStatusForFutureDates',
         fieldLabel: 'Hide Asset Status For Future Dates',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'plannedAvailableCountFromCurrentDate',
+        fieldLabel: 'Planned Available Count From Current Date',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.salesOrder,
+    policy: [
+      {
+        fieldName: 'restrictAutoDebitInventory',
+        fieldLabel: 'Restrict Auto Debit Inventory',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'debitInventoryOnAveragePrice',
+        fieldLabel: 'Debit Inventory On Average Price',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.assemblyOrder,
+    policy: [
+      {
+        fieldName: 'autoConvertInSameRentalJob',
+        fieldLabel: 'Auto Convert In Same Rental Job',
         type: 'checkBox',
         defaultValue: false
       }

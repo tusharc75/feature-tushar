@@ -517,12 +517,10 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      <Typography variant="body2">From:</Typography>
-                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">From - {item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      <Typography variant="body2">From:</Typography>
-                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">To - {item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }
@@ -655,12 +653,10 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      <Typography variant="body2">From:</Typography>
-                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">From - {item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      <Typography variant="body2">To:</Typography>
-                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">To - {item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }
@@ -743,12 +739,10 @@ const RentalManagementViews = (props) => {
                 title={
                   <>
                     <p>
-                      <Typography variant="body2">From:</Typography>
-                      <Typography variant="subtitle2">{item?.pickupFrom?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">From - {item?.pickupFrom?.optionLabel}</Typography>
                     </p>
                     <p>
-                      <Typography variant="body2">To:</Typography>
-                      <Typography variant="subtitle2">{item?.deliveryTo?.optionLabel}</Typography>
+                      <Typography variant="subtitle2">To - {item?.deliveryTo?.optionLabel}</Typography>
                     </p>
                   </>
                 }

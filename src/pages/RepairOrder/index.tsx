@@ -13,7 +13,6 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, {
-  getCompletedByField,
   getStaticFields,
   gridFilterParser,
   useColumns,
@@ -60,6 +59,10 @@ const RepairOrder = () => {
     {
       key: `All ${resources?.repairOrder?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.repairOrder?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -89,7 +92,7 @@ const RepairOrder = () => {
     data = response?.data?.data;
     setWalkmeData([createRepairOrderFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes?.repairOrderDetail?.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ...getCompletedByField(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true, true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -146,6 +149,11 @@ const RepairOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -352,12 +360,11 @@ const RepairOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairOrderNumber}`
-                : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

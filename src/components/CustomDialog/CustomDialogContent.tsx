@@ -37,16 +37,24 @@ const useViewportDynamicHeight = () => {
 
 type DialogContentPropsExtended = DialogContentProps & {
   isFooterPresent?: boolean;
+  shouldApplyHeight?: boolean;
 };
 
-function CustomDialogContent({ children, style = {}, isFooterPresent = true, className, ...others }: DialogContentPropsExtended) {
+function CustomDialogContent({
+  children,
+  style = {},
+  isFooterPresent = true,
+  className,
+  shouldApplyHeight = true,
+  ...others
+}: DialogContentPropsExtended) {
   const vh = useViewportDynamicHeight();
   return (
     <React.Fragment>
       <DialogContent
         className={cn(
           'truncate-autocomplete overscroll-contain bg-[--dark-primary,white] px-4 py-3',
-          isFooterPresent ? ' max-[560px]:max-h-[calc(var(--vh)-99px)]' : ' max-[560px]:max-h-[calc(var(--vh)-45px)]',
+          shouldApplyHeight ? (isFooterPresent ? ' max-[560px]:max-h-[calc(var(--vh)-99px)]' : ' max-[560px]:max-h-[calc(var(--vh)-45px)]') : '',
           isTablet || isMobile ? 'min-h-[250px]' : '',
           className
         )}

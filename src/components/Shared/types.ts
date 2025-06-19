@@ -78,13 +78,14 @@ export type FieldData = {
   isUneditable?: boolean;
   systemGeneratedPrefix?: string;
   systemGeneratedPrefixDigit?: number;
-  systemGeneratedStartNumber?:number;
+  systemGeneratedStartNumber?: number;
   systemGeneratedAutoIncrement?: boolean;
   lookupDependentOnField?: LookupDependentOnField;
   isShowFieldDependentOn?: boolean;
   lookUpField?: string;
   lookUpFieldDisplay?: string;
   additionalInfoSection?: string;
+  operationOnLineItems?: string;
   showAdditionalInfoPopup?: boolean;
   dropdowDependentOn?: string;
   isFormula?: boolean;

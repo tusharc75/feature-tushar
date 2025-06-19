@@ -7,6 +7,7 @@ import GenieText from 'src/assets/svg/GenieText';
 import { Chat, User } from 'src/components/DesktopDM/types';
 import { stripHtmlTags } from 'src/components/DesktopDM/utils';
 import { cn, formatDate } from 'src/constants/helpers';
+import { MdOutlinePushPin } from "react-icons/md";
 
 export const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
   return (
@@ -44,7 +45,7 @@ export const RenderGenie = memo(({ openGenie }: { openGenie: () => void }) => {
 });
 
 export const RenderChatUser = memo(
-  ({ chat, onClick, onlineUsers, user }: { onClick: (d: Chat) => void; chat: Chat; onlineUsers: string[]; user: any }) => {
+  ({ chat, onClick, onlineUsers, user, isPinned }: { onClick: (d: Chat) => void; chat: Chat; onlineUsers: string[]; user: any; isPinned: boolean }) => {
     return (
       <>
         <button
@@ -85,6 +86,11 @@ export const RenderChatUser = memo(
                     ? formatDate(chat.recentMessage?.date, 'H:MM A')
                     : formatDate(chat.recentMessage?.date, 'MMM D')}
                 </span>
+                {isPinned && (
+                  <span className="ml-auto flex items-center">
+                    <MdOutlinePushPin className="text-[var(--primary-text)]" />
+                  </span>
+                )}
               </div>
             </div>
             <span className="line-clamp-2 text-[11px] text-gray-500 dark:text-gray-400">
@@ -99,7 +105,7 @@ export const RenderChatUser = memo(
   }
 );
 
-export const RenderUser = memo(({ user, onClick, onlineUsers }: { onClick: (d: User) => void; user: User; onlineUsers: string[] }) => {
+export const RenderUser = memo(({ user, onClick, onlineUsers, isPinned }: { onClick: (d: User) => void; user: User; onlineUsers: string[]; isPinned: boolean }) => {
   return (
     <>
       <button
@@ -127,6 +133,11 @@ export const RenderUser = memo(({ user, onClick, onlineUsers }: { onClick: (d: U
           </Avatar>
         </Badge>
         <p className="line-clamp-1 text-xs font-normal">{user.concatedName ? user.concatedName : `${user.firstName} ${user.lastName}`}</p>
+        {isPinned && (
+          <span className="ml-auto flex items-center">
+            <MdOutlinePushPin className="text-[var(--primary-text)]" />
+          </span>
+        )}
       </button>
       <span className="ml-auto block w-[calc(264px-64px)] border-b " />
     </>

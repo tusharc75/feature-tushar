@@ -1,5 +1,4 @@
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { Edit } from '@mui/icons-material';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -291,7 +290,12 @@ const ServiceOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={0}>
           <Box>
             {!loadingDetails && serviceOrderData && serviceOrderFields.length > 0 ? (
-              <DetailsPage data={serviceOrderData} fields={serviceOrderFields} />
+              <DetailsPage
+                data={serviceOrderData}
+                fields={serviceOrderFields}
+                resource={sidebarResource?.fieldServiceOrder}
+                referenceId={serviceOrderData?._id}
+              />
             ) : (
               <div className="p-2">
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -386,6 +390,7 @@ const ServiceOrderDetailsPage = () => {
               handleChangeStatus={handleChangeStatus}
               resource={sidebarResource.fieldServiceOrder}
               fetchServiceOrderData={fetchServiceOrderData}
+              noQuotationCheck={user?.user?.brandPolicy?.createFieldTicketFromQuotation ? false : true}
             />
           ) : (
             <div className="p-2">
@@ -405,7 +410,8 @@ const ServiceOrderDetailsPage = () => {
           <OnField
             referenceData={serviceOrderData}
             rentalJob={serviceOrderData?.rentalJob?.optionValue}
-            referenceFrom={sidebarResource?.fieldServiceOrder} />
+            referenceFrom={sidebarResource?.fieldServiceOrder}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>{serviceOrderData && <FieldServiceOrderView fieldServiceOrderData={serviceOrderData} />}</Box>

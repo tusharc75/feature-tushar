@@ -1,7 +1,8 @@
 import { Box, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
 import EditIcon from '@mui/icons-material/Edit';
-import { capitalize, isArray } from 'lodash';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { capitalize } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
@@ -25,6 +26,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
   CHILD_RESOURCE,
+  MATERIAL_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
   quotation,
@@ -35,6 +37,10 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 import { flattenArray } from 'src/constants/columns';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_fields } from 'src/components/ResourceFields';
+import AdditionalCostDialog from 'src/pages/Quotation/Productpackage/AdditionalCostDialog';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const dataAdded = {
   completeDataAdded: false,
@@ -52,7 +58,8 @@ const Quotation = ({
   setQuotationVersionData,
   updateOrderStatus,
   invoiceStep,
-  currentStepName = 'Quotation'
+  currentStepName = 'Quotation',
+  setNextStepToolTip
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -78,7 +85,8 @@ const Quotation = ({
   const [currentVersion, setCurrentVersion] = useState(null);
   const [isInlineEdit, setIsInlineEdit] = useState(false);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
-
+  const [quotationFields, setQuotationFields] = useState(null);
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false, parentId: null });
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -86,6 +94,24 @@ const Quotation = ({
   useEffect(() => {
     setWalkmeData([]);
   }, []);
+
+  useEffect(() => {
+    if (repairOrderData?.addQuotationStep) {
+      if (!material?.filter((e) => !e.parentId).every((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
+        setNextStepToolTip(rentalManagementMessage.validPrice);
+      } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote) {
+        setNextStepToolTip(rentalManagementMessage.processQuotation);
+      } else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
+        setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
+      } else {
+        setNextStepToolTip(null);
+      }
+    }
+    else {
+      setNextStepToolTip(null);
+    }
+  }, [material, quotationData?.versions[currentVersion]?._id, quotationData?.versions[currentVersion]?.status]);
+
 
   const handleAddWalkmeData = (rows: any[]) => {
     if (walkmeInstance && walkmeInstance.type === 'flow' && rows.length) {
@@ -155,13 +181,16 @@ const Quotation = ({
       setNextStep(true);
     }
 
-    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
+    let { fieldsDataAll } = await fetch_resource_fields(sidebarResource.quotation);
+    setQuotationFields(fieldsDataAll)
+
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationInfo?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
     if (
       allowedToEdit === false ||
       invoiceStep === true ||
-      ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status)
+      (repairOrderData?.addQuotationStep && ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status))
     ) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -183,7 +212,7 @@ const Quotation = ({
         accessor: 'type',
         Header: 'Type',
         sticky: isMobile || isTablet ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.type === 'serializedAsset' ? 'Asset' : capitalize(row.original.type)}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : row.original.type === MATERIAL_TYPE.manualEntry ? 'Manual Entry' : capitalize(row.original.type)}</p>
       },
       {
         accessor: 'detail',
@@ -208,22 +237,24 @@ const Quotation = ({
                 {row.original?.detail}
               </p>
             )}
-            <IconButton
-              size="small"
-              onClick={() => {
-                if (row.original.type === 'service') {
-                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'product') {
-                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                } else if (row.original.type === 'serializedAsset') {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                } else {
-                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                }
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
+            {row.original.type !== MATERIAL_TYPE.manualEntry &&
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            }
           </div>
         )
       },
@@ -280,30 +311,62 @@ const Quotation = ({
         return (
           <>
             {allowedToEdit && (
-              <HtmlTooltip title="Edit">
-                <IconButton
-                  size="small"
-                  disabled={
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationInfo?.versions[tempCurrentVersion]?.status
-                    ) || invoiceStep
-                  }
-                  aria-label="Edit"
-                  onClick={() => {
-                    handleOpen(row, table.getRowModel().rows);
-                  }}
-                >
-                  <EditIcon
-                    color={
-                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              <>
+                <HtmlTooltip title="Edit">
+                  <IconButton
+                    size="small"
+                    disabled={
+                      repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationInfo?.versions[tempCurrentVersion]?.status
                       ) || invoiceStep
-                        ? 'disabled'
-                        : 'primary'
                     }
-                  />
-                </IconButton>
-              </HtmlTooltip>
+                    aria-label="Edit"
+                    onClick={() => {
+                      handleOpen(row, table.getRowModel().rows);
+                    }}
+                  >
+                    <EditIcon
+                      fontSize="small"
+                      color={
+                        repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                          quotationInfo?.versions[tempCurrentVersion]?.status
+                        ) || invoiceStep
+                          ? 'disabled'
+                          : 'primary'
+                      }
+                    />
+                  </IconButton>
+                </HtmlTooltip>
+                {[QUOTATION_STATUS.buildingQuote, QUOTATION_STATUS.customerAcceptanceNotRequired].includes(quotationInfo?.versions[tempCurrentVersion]?.status) && !invoiceStep &&
+                  <>
+                    {row?.original?.parentId === null && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+                      <HtmlTooltip title="Add Manual Entry">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setRecordToUpdate(null);
+                            setShowCostDialog({ open: true, showSaveAndNext: false, parentId: row?.original?._id });
+                          }}
+                          aria-label="Add Manual Entry"
+                        >
+                          <AddCircleOutlineIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </HtmlTooltip>)}
+                    {row.original.type === MATERIAL_TYPE.manualEntry && (
+                      <HtmlTooltip title={'Delete'}>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          onClick={() => {
+                            setDeleteData([row.original?._id]);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color="error" />
+                        </IconButton>
+                      </HtmlTooltip >
+                    )}
+                  </>}
+              </>
             )}
           </>
         );
@@ -331,25 +394,24 @@ const Quotation = ({
     });
 
     const rows = data.material.filter((e) => e.parentId === null);
-
     rows?.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
-        parent.type === 'serializedAsset'
+        parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent.productDetail?.productName
-            : parent.type === 'service'
+            : parent.type === MATERIAL_TYPE.service
               ? parent.serviceDetail?.serviceName
               : parent.packageDetail?.packageName;
       parent.description =
-        parent.type === 'serializedAsset'
+        parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.product?.productDescription
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
-            : parent.type === 'product'
+            : parent.type === MATERIAL_TYPE.product
               ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
+              : parent.type === MATERIAL_TYPE.package
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
@@ -367,25 +429,26 @@ const Quotation = ({
 
   const generateNestedData = (material, parent) => {
     var subRows: any = material?.filter((e) => e.parentId === parent._id);
-
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.manualEntry
+              ? _subRow?.detail : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+              : _subRow.type === MATERIAL_TYPE.manualEntry
+                ? _subRow?.description : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
@@ -395,10 +458,10 @@ const Quotation = ({
       _subRow.subRows = generateNestedData(material, _subRow);
     });
 
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -414,34 +477,97 @@ const Quotation = ({
 
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
-    axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows })
-      .then(() => {
-        if (saveAndNext) {
-          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
-          if (!row?.parentId) {
-            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-            setRecordToUpdate(dataRows[rowIndex + 1]);
+    axiosInstance().put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}`, { material: rows }).then(() => {
+      if (saveAndNext) {
+        const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+        if (!row?.parentId) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          setIsProductEdit({
+            open: true,
+            isBulkedit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+          });
+        } else {
+          const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+          const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+          setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+          if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
             setIsProductEdit({
-              open: true,
+              open: false,
               isBulkedit: false,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+              showSaveAndNext: false
             });
+            setShowCostDialog({ open: true, showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false, parentId: null });
           } else {
-            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
-            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
-            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
             setIsProductEdit({
               open: true,
               isBulkedit: false,
               showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
             });
           }
+        }
+      } else {
+        setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+      }
+      fetchData();
+      setUpdating(false);
+    })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleSaveCostData = async (rows: any, saveAndNext = false) => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    setUpdating(true);
+    axiosInstance()
+      .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
+            setShowCostDialog({
+              open: true,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false,
+              parentId: null
+            });
+          } else {
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                isBulkedit: false,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({
+                open: true,
+                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false,
+                parentId: null
+              });
+            } else {
+              setIsProductEdit({
+                open: true,
+                isBulkedit: false,
+                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+              });
+            }
+          }
         } else {
-          setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
+          setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
         }
         fetchData();
-        setUpdating(false);
       })
       .catch((error) => {
         setUpdating(false);
@@ -452,16 +578,21 @@ const Quotation = ({
   const handleDelete = (rows) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
-      .then(() => {
+      .post(`${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}/delete`, { ids: rows })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message,
+        });
         setDeleting(false);
         fetchData();
         setDeleteData(null);
       })
       .catch((error) => {
         setDeleting(false);
-        toastConfig.setToastConfig(error);
         setDeleteData(null);
+        toastConfig.setToastConfig(error);
       });
   };
 
@@ -475,11 +606,16 @@ const Quotation = ({
           ? true
           : false;
     }
-    setIsProductEdit({
-      open: true,
-      isBulkedit: false,
-      showSaveAndNext: saveAndNext
-    });
+    if (rowData?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, showSaveAndNext: saveAndNext, parentId: null });
+    } else {
+      setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+      setIsProductEdit({
+        open: true,
+        isBulkedit: false,
+        showSaveAndNext: saveAndNext
+      });
+    }
     setRecordToUpdate(rowData?.original);
   };
 
@@ -490,14 +626,37 @@ const Quotation = ({
 
   const cloneVersion = () => {
     const versionId = quotationData?.versions[currentVersion]?._id;
-    axiosInstance()
-      .post(`/quotation/clone-version/${quotationData._id}/${versionId}`)
-      .then(() => {
-        fetchFields();
+    axiosInstance().post(`/quotation/clone-version/${quotationData._id}/${versionId}`).then(() => {
+      fetchFields();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
+  const handleAddCost = (rows) => {
+    const versionId = quotationData?.versions[currentVersion]?._id;
+    let data = []
+    if (showCostDialog?.parentId) {
+      data = rows.map((item) => ({ ...item, parentId: showCostDialog?.parentId }));
+    }
+    else if (selectedRecords?.length) {
+      selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.forEach((e) => {
+        data = [...data, ...rows.map((item) => ({ ...item, parentId: e?._id }))]
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    }
+    setUpdating(true);
+    axiosInstance().post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: data }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message,
       });
+      setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+      setUpdating(false);
+      fetchData();
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
   };
 
   const handleSendToCustomer = () => {
@@ -572,6 +731,7 @@ const Quotation = ({
             referenceId={repairOrderData?._id}
             columns={columns}
             isSendEmail={true}
+            subject={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.rentalJobName}`}
           />
         </Box>
       ) : (
@@ -660,20 +820,20 @@ const Quotation = ({
                     Create New Version
                   </ThemeButton>
                 ) : null)}
-              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              {repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
-              ) && (
-                  <ThemeButton
-                    mobileTooltip="Actions"
-                    buttonType="yellow"
-                    iconForMobile={<ExpandMore />}
-                    onClick={openActions}
-                    disabled={selectedRecords?.length === 0}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </ThemeButton>
-                )}
+              ) ? null : (
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  iconForMobile={<ExpandMore />}
+                  onClick={openActions}
+                  disabled={selectedRecords?.length === 0}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </ThemeButton>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -686,6 +846,13 @@ const Quotation = ({
                 onClose={closeActions}
               >
                 <MenuItem
+                  disabled={
+                    !Boolean(
+                      selectedRecords &&
+                      selectedRecords.filter((e) => !e.hideSelection).length &&
+                      !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)
+                    )
+                  }
                   onClick={() => {
                     closeActions();
                     setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
@@ -693,6 +860,24 @@ const Quotation = ({
                 >
                   Bulk Edit
                 </MenuItem>
+                <MenuItem
+                  disabled={selectedRecords?.length && selectedRecords?.find((e) => e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
+                  onClick={() => {
+                    closeActions();
+                    setShowCostDialog({ open: true, showSaveAndNext: false, parentId: null });
+                  }}
+                >
+                  Add Manual Entry
+                </MenuItem>
+                {selectedRecords?.length > 0 && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.manualEntry) &&
+                  <MenuItem
+                    onClick={() => {
+                      closeActions();
+                      setDeleteData(selectedRecords?.map((e) => e._id))
+                    }}
+                  >
+                    Delete
+                  </MenuItem>}
               </Menu>
             </Box>
           )}
@@ -734,11 +919,12 @@ const Quotation = ({
             refreshGrid={fetchData}
             hideSelection={
               !allowedToEdit ||
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              (repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
-              )
+              ))
             }
             hideAction={invoiceStep}
+            hideExportTable={repairOrderData?.addQuotationStep && !invoiceStep ? true : false}
             onSaveEdit={onSaveInlineEdit}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
@@ -768,6 +954,7 @@ const Quotation = ({
               setIsInlineEdit(false);
             }
           }}
+          quotationFields={quotationFields}
           isBulkedit={isProductEdit.isBulkedit}
           handleSaveData={handleSaveData}
           quotationData={quotationData}
@@ -819,6 +1006,22 @@ const Quotation = ({
           onClose={() => {
             setShowConfirmationDialog({ open: false, data: {} });
           }}
+        />
+      )}
+      {showCostDialog.open && (
+        <AdditionalCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+            setRecordToUpdate(null);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleSaveCostData}
+          currency={quotationData?.currency}
+          costData={recordToUpdate}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
+          quotationData={quotationData}
+          quotationFields={quotationFields}
         />
       )}
     </Fragment>
