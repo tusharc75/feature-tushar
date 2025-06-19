@@ -18,6 +18,7 @@ import FinalPriceBox from "src/components/FinalPriceBox";
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import { ThemeButton } from "src/components/Helpers/Buttons";
 import SendIcon from '@mui/icons-material/Send';
+import RequestButton from "src/pages/DoaSetupNew/RequestButton";
 
 const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fetchInvoiceData, stepFullScreen }) => {
 
@@ -248,15 +249,15 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
   const rightSideContents = () => {
     return (
       <>
-        {
-          !DOAData && (
-            <ThemeButton startIcon={<SendIcon />} onClick={handleSendForDOA}>
-              Send for DOA
-            </ThemeButton>
-          )
-        }
+        {!DOAData && (
+          <RequestButton
+            resource={sidebarResource.invoice}
+            id={invoiceData._id}
+            entity={invoiceData.entity}
+            fetchData={fetchInvoiceData}
+          />
+        )}
       </>
-
     )
   }
 

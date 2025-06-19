@@ -26,7 +26,6 @@ const ResourceDoaRequestDetail = () => {
 
   const [doaData, setDoaData] = useState(null);
   const [fields, setFields] = useState(null);
-  const [title, setTitle] = useState('');
   const [openComment, setOpenComment] = useState({ open: false, status: '' });
 
   useEffect(() => {
@@ -43,31 +42,16 @@ const ResourceDoaRequestDetail = () => {
   };
 
   const fetchData = async () => {
-    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}?resource=${resource}`);
+    const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/detail/${id}`);
     if (doaResponse?.data?.data) {
       const _data = doaResponse?.data?.data;
-      const title =
-        resource === sidebarResource.serializedAssetStatusChangeRequest
-          ? _data?.serializedAssetStatusChangeRequest?.asset?.optionLabel
-          : resource === sidebarResource?.purchaseRequisition
-            ? _data?.purchaseRequisition?.optionLabel
-            : '';
-      setTitle(title);
-      const resourceData =
-        resource === sidebarResource.serializedAssetStatusChangeRequest
-          ? _data?.serializedAssetStatusChangeRequest
-          : resource === sidebarResource?.purchaseRequisition
-            ? _data?.purchaseRequisition
-            : {};
       setDoaData({
-        ...resourceData,
+        ..._data,
+        ..._data?.referenceData,
         _id: _data?._id,
-        resource: _data?.resource,
         doaStatus: _data?.status,
         userDOAstatus: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.status,
         canPerform: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.isUpdate ? true : false,
-        referenceId: _data?.referenceId,
-        entity: _data?.entity
       });
     }
   };
@@ -100,7 +84,7 @@ const ResourceDoaRequestDetail = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titleSingular }, { title: title }]} />
+          <CustomBreadCrumbs routes={[{ ...routes.resourceDoaRequest, title: resources?.resourceDoaRequest?.titleSingular }, { title: doaData?.refrenceNumber }]} />
         </Box>
         <Box className="controls-v1">
           {doaData?.userDOAstatus === DOA_STATUS.pending && (

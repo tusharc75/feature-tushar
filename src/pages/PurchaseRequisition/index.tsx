@@ -140,20 +140,19 @@ const PurchaseRequisition = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {row?.original?.canDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" fontSize='small' />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color={row?.original?.canDelete ? "error" : 'disabled'} fontSize='small' />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -204,8 +203,7 @@ const PurchaseRequisition = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] =
-            permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
+          finalObject['canDelete'] = u?.canDelete && permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
