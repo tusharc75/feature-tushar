@@ -12,7 +12,6 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
   const {
     state: { resources }
   }: any = useData();
-  console.log('ShowNonSerializeAssets data', data);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   return (
