@@ -474,7 +474,7 @@ const InvoiceDetails = () => {
                       <Invoice
                         invoiceData={invoiceData}
                         invoiceFields={invoiceFields}
-                        setNextStep={setNextStep}
+                        setPrevStep={setPrevStep}
                         handleChangeStatus={handleChangeStatus}
                         stepFullScreen={stepFullScreen}
                         statusOptions={statusOptions}
@@ -482,7 +482,6 @@ const InvoiceDetails = () => {
                     )}
                   </Grid>
                 </>
-
               ) : (
                 <div className="p-2">
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />

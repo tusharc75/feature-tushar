@@ -115,10 +115,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
   };
 
   useEffect(() => {
-    handleCheckNextPrev()
-  }, [DOAData])
-
-  const handleCheckNextPrev = () => {
     if (!DOAData) {
       setNextStep(false);
       setPrevStep(true);
@@ -129,7 +125,7 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
       setPrevStep(false);
       setNextStep(false);
     }
-  };
+  }, [DOAData])
 
   const fetchData = async () => {
     setNextStep(false)
@@ -168,7 +164,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-    handleCheckNextPrev()
   };
 
   const generateNestedData = (material, parent) => {
@@ -224,26 +219,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
       `tax_${invoiceData?.currency?.toLowerCase()}`,
       `finalPrice_${invoiceData?.currency?.toLowerCase()}`
     ]
-  };
-
-  const handleSendForDOA = () => {
-    axiosInstance()
-      .post(`${routes.resourceDoaRequest.path}`, {
-        resource: sidebarResource?.invoice,
-        referenceId: invoiceData?._id,
-        entity: invoiceData?.entity,
-      })
-      .then(({ data }) => {
-        fetchInvoiceData()
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'DOA Sended Successfully'
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const rightSideContents = () => {
