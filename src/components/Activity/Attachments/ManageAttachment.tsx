@@ -25,6 +25,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import { updateDisable } from 'src/constants/messageHelpers';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
+import DigitalSignature from 'src/components/DigitalSignature';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -428,6 +429,13 @@ export default function ManageAttachment({
                             </Grid>
                           </>
                         )}
+                        {/* <Grid size={{ xs: 12 }}>
+                          <DigitalSignature
+                            attachmentId={attachmentId}
+                            type={type}
+                            allAttachments={allAttachments}
+                          />
+                        </Grid> */}
                       </Grid>
                     )}
                   </Grid>
