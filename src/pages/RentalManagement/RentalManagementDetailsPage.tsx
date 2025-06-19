@@ -26,7 +26,6 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
-  DELIVERY_TICKET_STATUS,
   QUOTATION_STATUS,
   RENTAL_STATUS,
   RENTAL_STEPS,
@@ -101,6 +100,7 @@ const RentalManagementDetailsPage = () => {
   const [resourceData, setResourceData] = useState(null);
   const [assets, setAssets] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
+  const [isQuotationStep, setIsQuotationStep] = useState(false)
 
   useEffect(() => {
     return history.listen((location) => {
@@ -220,10 +220,15 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      var steps =
-        user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
-          ? rentalManagementSteps
-          : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
+      var steps = user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
+        ? rentalManagementSteps
+        : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
+      if (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) {
+        setIsQuotationStep(true)
+      }
+      else {
+        setIsQuotationStep(false)
+      }
       if (!user?.user?.brandPolicy?.rentalService) {
         steps = steps?.filter((e) => !['Add Services'].includes(e.name));
       }
@@ -572,7 +577,7 @@ const RentalManagementDetailsPage = () => {
                         QUOTATION_STATUS.sentToCustomer,
                         QUOTATION_STATUS.waitingForSupplierPrice
                       ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? true
+                      ? isQuotationStep ? true : false
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
@@ -597,7 +602,7 @@ const RentalManagementDetailsPage = () => {
                         QUOTATION_STATUS.sentToCustomer,
                         QUOTATION_STATUS.waitingForSupplierPrice
                       ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? true
+                      ? isQuotationStep ? true : false
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
