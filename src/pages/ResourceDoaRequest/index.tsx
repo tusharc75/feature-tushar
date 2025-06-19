@@ -71,7 +71,8 @@ const ResourceDoaRequest = () => {
                   className="text-truncate link"
                   onClick={() => {
                     history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
-                      resource: row?.original?.resource
+                      resource: row?.original?.resource,
+                      currency: row?.original?.currency,
                     });
                   }}
                 >
@@ -84,6 +85,8 @@ const ResourceDoaRequest = () => {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.resourceId}`);
                     } else if (row?.original?.resource === sidebarResource?.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.original.resourceId}`);
+                    } else if (row?.original?.resource === sidebarResource?.invoice) {
+                      window.open(`${routes.invoiceDetail.path}/${row.original.resourceId}`);
                     }
                   }}
                 >
