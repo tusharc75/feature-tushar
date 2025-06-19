@@ -49,6 +49,10 @@ const DeliveryTicket = () => {
     {
       key: `All ${resources?.deliveryTicket?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.deliveryTicket?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -234,6 +238,11 @@ const DeliveryTicket = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     if (selectedEntity) {

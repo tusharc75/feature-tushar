@@ -1,48 +1,74 @@
 import { useEffect, useState } from 'react';
 import { Section } from '../type';
 
+interface TOCItem {
+  id: string;
+  text: string;
+  level: number;
+  sectionId: string;
+  children: TOCItem[];
+}
+
+interface SectionTOC {
+  sectionId: string;
+  toc: TOCItem[];
+}
+
 export function useAutoTOC(containerSelector = '.manual-content-section', pageData?: Section[]) {
-  const [toc, setToc] = useState([]);
+  const [tocData, setTocData] = useState<SectionTOC[]>([]);
 
   useEffect(() => {
     if (!pageData) return;
-    
+
     const containers = Array.from(document.querySelectorAll(containerSelector));
-    const headings = [];
-    
+    const tocMap = new Map<string, TOCItem[]>();
+
     containers.forEach(container => {
-      const found = Array.from(container.querySelectorAll('h1, h2, h3, h4'));
-      found.forEach(node => {
-        const sectionId = container.id;
-        const headingId = `${sectionId}-${node.textContent.replace(/\s+/g, '-').toLowerCase()}`;
+      const sectionId = container.id;
+      const headings = Array.from(container.querySelectorAll('h1, h2, h3, h4'));
+      const sectionTOC: TOCItem[] = [];
+
+      const entryStack: TOCItem[] = [];
+
+      headings.forEach(node => {
+        const text = node.textContent || '';
+        const level = Number(node.tagName[1]);
+        const headingId = `${sectionId}-${text.replace(/\s+/g, '-').toLowerCase()}`;
         node.id = headingId;
-        
-        headings.push({
+
+        const entry: TOCItem = {
           id: headingId,
-          text: node.textContent,
-          level: Number(node.tagName[1]),
-          sectionId: sectionId
-        });
+          text,
+          level,
+          sectionId,
+          children: []
+        };
+
+        // Build the hierarchy
+        while (entryStack.length > 0 && entryStack[entryStack.length - 1].level >= level) {
+          entryStack.pop();
+        }
+
+        if (entryStack.length === 0) {
+          sectionTOC.push(entry);
+        } else {
+          entryStack[entryStack.length - 1].children.push(entry);
+        }
+
+        entryStack.push(entry);
       });
+
+      tocMap.set(sectionId, sectionTOC);
     });
 
-    const tocData = [];
-    let currentH1 = null;
-    
-    headings.forEach(h => {
-      const entry = { ...h, children: [] };
-      
-      if (h.level === 1) {
-        tocData.push(entry);
-        currentH1 = entry;
-      } else if (h.level >= 2 && h.level <= 4 && currentH1) {
-        // All h2, h3, h4 go under the same h1
-        currentH1.children.push(entry);
-      }
-    });
+    // Convert to array for state
+    const result: SectionTOC[] = Array.from(tocMap.entries()).map(([sectionId, toc]) => ({
+      sectionId,
+      toc
+    }));
 
-    setToc(tocData);
+    setTocData(result);
   }, [containerSelector, pageData]);
 
-  return toc;
+  return tocData;
 }

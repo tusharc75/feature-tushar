@@ -65,6 +65,10 @@ const WorkOrder = () => {
     {
       key: `All ${resources?.workOrder?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.workOrder?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -203,6 +207,11 @@ const WorkOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);

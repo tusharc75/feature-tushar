@@ -156,6 +156,9 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
 
 const bindPricingConditionOptions = (field, values) => {
   let options = field?.option || [];
+  if (values?.currency) {
+    options = options?.filter((e) => e?.currency?.toLowerCase() === values?.currency?.toLowerCase())
+  }
   const customerAccount = values?.customerAccount;
   const warehouse = values?.warehouse;
   if (Array.isArray(customerAccount) && customerAccount?.length > 0) {
@@ -179,7 +182,7 @@ const bindPricingConditionOptions = (field, values) => {
 };
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
-  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
     return bindPricingConditionOptions(fieldData, values);
   }
   const lookupDependentOn = fieldData?.lookupDependentOn;
