@@ -284,7 +284,7 @@ const SalesOrderDetails = () => {
                 stepFullScreen={stepFullScreen}
                 fetchSalesOrderData={fetchSalesOrderData}
                 updateJobStatus={updateJobStatus}
-                allowedToEdit={allowedToEdit && !salesOrderData?.quotation}
+                allowedToEdit={allowedToEdit}
               />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[1].name && salesOrderData && (
