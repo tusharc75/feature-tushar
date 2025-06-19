@@ -3,22 +3,16 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  Dialog,
-  Table,
-  TableHead,
-  Paper,
-  TableContainer,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@mui/material';
+import { Dialog, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, IconButton } from '@mui/material';
 import { useData } from 'src/StateProvider/Provider';
+import { FiExternalLink } from 'react-icons/fi';
+import routes from 'src/components/Helpers/Routes';
 
 const ShowNonSerializeAssets = ({ data, onClose, title }) => {
   const {
     state: { resources }
   }: any = useData();
+  console.log('ShowNonSerializeAssets data', data);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   return (
@@ -60,7 +54,12 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
                     {index + 1}
                   </TableCell>
                   <TableCell align="left">{element?.assetNumber}</TableCell>
-                  <TableCell align="left">{element?.productSerialNumberDetail?.storageLocation?.optionLabel}</TableCell>
+                  <TableCell align="left">
+                    {element?.productSerialNumberDetail?.storageLocation?.optionLabel}
+                    <IconButton size="small" onClick={() => { window.open(`${routes.storageLocationDetail.path}/${element?.productSerialNumberDetail?.storageLocation}`);}}>
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </TableCell>
                   <TableCell align="left">{element?.productSerialNumberDetail?.warehouse?.optionLabel}</TableCell>
                 </TableRow>
               ))}
