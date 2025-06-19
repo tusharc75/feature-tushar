@@ -54,7 +54,7 @@ const WellMaster = () => {
     const response = await axiosInstance().get(`/field?resource=Well Master&view=true`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.wellMasterDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

@@ -125,7 +125,7 @@ const Leads = () => {
           </>
         )
       },
-      ...getStaticFields()
+      ...getStaticFields(true)
     ];
     setColumns([...newColumns, ActionsRenderer]);
   };

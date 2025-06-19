@@ -8,7 +8,7 @@ import { Theme } from '@mui/material';
 const useStyles = makeStyles((theme: Theme) => ({
   mainContainer: {
     display: 'flex',
-    alignItems: 'center',
+    // alignItems: 'center',
     background: '#ffffff',
     boxShadow: '0px 2.83064px 30px rgba(0, 0, 0, 0.06)',
     borderRadius: '0px 0px 2.83064px 2.83064px',
@@ -93,19 +93,25 @@ const ShowDoa = ({ status, data }) => {
           )}
           {data?.doaUsers?.length &&
             data?.doaUsers?.map((users, index) => (
-              <div key={index} className={classes.doaUserContainer}>
-                {users?.status === DOA_STATUS.pending && <BsFillClockFill size={18} style={{ color: '#F25F54' }} />}
-                {users?.status === DOA_STATUS.approved && <BsFillCheckCircleFill size={18} style={{ color: '#4BAE4F' }} />}
-
-                <div>
-                  {users?.users?.slice(0, 3).map((user) => (
-                    <div style={{ color: '#09445A' }}>
-                      <Link title={user?.name} className="link" to={`${routes.userDetail.path}/${user?._id}`} target="_blank">
-                        {user?.name}
-                      </Link>
+              <div key={index}>
+                <div className=''>
+                  <div className={classes.doaUserContainer}>
+                    {users?.status === DOA_STATUS.pending && <BsFillClockFill size={18} style={{ color: '#F25F54' }} />}
+                    {users?.status === DOA_STATUS.approved && <BsFillCheckCircleFill size={18} style={{ color: '#4BAE4F' }} />}
+                    <div>
+                      {users?.users?.slice(0, 3).map((user) => (
+                        <div style={{ color: '#09445A' }}>
+                          <Link title={user?.name} className="link" to={`${routes.userDetail.path}/${user?._id}`} target="_blank">
+                            {user?.name}
+                          </Link>
+                        </div>
+                      ))}
+                      {users?.users?.length > 4 && `+ ${users?.users?.length - 4} more`}
                     </div>
-                  ))}
-                  {users?.users?.length > 4 && `+ ${users?.users?.length - 4} more`}
+                  </div>
+                  <div className='pl-7'>
+                    <p style={{ fontSize: '14px' }}>{users?.doaComment}</p>
+                  </div>
                 </div>
               </div>
             ))}

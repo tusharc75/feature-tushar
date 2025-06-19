@@ -73,7 +73,7 @@ const ProjectSales: FC = () => {
       .then(({ data: { data } }) => {
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, routes.projectSalesDetail.path, true);
-        columns = [...newColumns, ...getStaticFields()];
+        columns = [...newColumns, ...getStaticFields(true)];
         setColumns([...columns, ActionsRenderer]);
       });
   };

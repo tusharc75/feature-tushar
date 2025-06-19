@@ -1,12 +1,13 @@
 import { memo } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { displayDate } from 'src/constants/helpers';
+import { displayDate, displayDateTime } from 'src/constants/helpers';
 
 export const headerName = {
   firstName: 'Name'
 };
 
-export const getStaticFields = () => {
+export const getStaticFields = (showLastActivityBy = false, showCompletedBy = false) => {
   return [
     {
       id: 'createdBy',
@@ -33,36 +34,8 @@ export const getStaticFields = () => {
       show: true,
       disableFilters: true,
       cell: ({ row }) => <UpdatedByCell row={row} />
-    }
-  ];
-};
-
-const CreatedByCell = memo(({ row }: any) => {
-  return row?.original?.createdBy ? (
-    <h5 className="createBy" title={`${row?.original?.createdBy} • ${displayDate(row?.original?.createdByDate)}`}>
-      {row?.original?.createdBy}
-      <span className="hidden">&nbsp;-&nbsp;</span>
-      <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-});
-
-const UpdatedByCell = memo(({ row }: any) => {
-  return row?.original?.updatedBy ? (
-    <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${displayDate(row?.original?.updatedByDate)}`}>
-      {row?.original?.updatedBy}&nbsp;
-      <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate)}</span>
-    </h5>
-  ) : (
-    <NoDataCell />
-  );
-});
-
-export const getCompletedByField = () => {
-  return [
-    {
+    },
+    ...(showCompletedBy ? [{
       id: 'completedBy',
       accessorKey: 'completedBy',
       accessor: 'completedBy',
@@ -74,17 +47,71 @@ export const getCompletedByField = () => {
       minSize: 185,
       disableFilters: true,
       cell: ({ row }) => <CompletedByCell row={row} />
-    }
+    }] : []),
+    ...(showLastActivityBy ? [{
+      id: 'lastActivityBy',
+      accessorKey: 'lastActivityBy',
+      accessor: 'lastActivityBy',
+      size: 200,
+      Header: 'Last Activity By',
+      width: 200,
+      minSize: 185,
+      show: true,
+      disableFilters: true,
+      cell: ({ row }) => <LastActivityByCell row={row} />
+    }] : [])
   ];
 };
 
+const CreatedByCell = memo(({ row }: any) => {
+  return row?.original?.createdBy ? (
+    <HtmlTooltip title={`${row?.original?.createdBy} • ${displayDateTime(row?.original?.createdByDate)}`}>
+      <h5 className="flex">
+        {row?.original?.createdBy}
+        <span className="hidden">&nbsp;-&nbsp;</span>
+        <span className="createdAtTime badge-date">{displayDate(row?.original?.createdByDate)}</span>
+      </h5>
+    </HtmlTooltip>
+  ) : (
+    <NoDataCell />
+  );
+});
+
+const UpdatedByCell = memo(({ row }: any) => {
+  return row?.original?.updatedBy ? (
+    <HtmlTooltip title={`${row?.original?.updatedBy} • ${displayDateTime(row?.original?.updatedByDate)}`}>
+      <h5 className="flex">
+        {row?.original?.updatedBy}&nbsp;
+        <span className="updatedAtTime badge-date">{displayDate(row?.original?.updatedByDate)}</span>
+      </h5>
+    </HtmlTooltip>
+  ) : (
+    <NoDataCell />
+  );
+});
+
 const CompletedByCell = memo(({ row }: any) => {
   return row?.original?.completedBy ? (
-    <h5 className="createBy" title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}>
-      {row?.original?.completedBy}
-      <span className="hidden">&nbsp;-&nbsp;</span>
-      <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>
-    </h5>
+    <HtmlTooltip title={`${row?.original?.completedBy} • ${displayDate(row?.original?.completedByDate)}`}>
+      <h5 className="createBy">
+        {row?.original?.completedBy}
+        <span className="hidden">&nbsp;-&nbsp;</span>
+        <span className="createdAtTime badge-date">{displayDate(row?.original?.completedByDate)}</span>
+      </h5>
+    </HtmlTooltip >
+  ) : (
+    <NoDataCell />
+  );
+});
+
+const LastActivityByCell = memo(({ row }: any) => {
+  return row?.original?.lastActivityBy ? (
+    <HtmlTooltip title={`${row?.original?.lastActivityBy} • ${displayDateTime(row?.original?.lastActivityByDate)}`}>
+      <h5 className="flex" >
+        {row?.original?.lastActivityBy}&nbsp;
+        <span className="updatedAtTime badge-date">{displayDate(row?.original?.lastActivityByDate)}</span>
+      </h5>
+    </HtmlTooltip>
   ) : (
     <NoDataCell />
   );

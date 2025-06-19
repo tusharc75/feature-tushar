@@ -57,6 +57,10 @@ const TransferInventory = () => {
     {
       key: `All ${resources?.transferInventory?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.transferInventory?.titlePlural}`,
+      value: 3
     }
   ];
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.transferInventory));
@@ -79,7 +83,7 @@ const TransferInventory = () => {
       .then(({ data: { data } }) => {
         setWalkmeData([createTransferInventoryFlow(data, resources?.transferInventory?.titleSingular)]);
         const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 
@@ -157,6 +161,12 @@ const TransferInventory = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    }
+    else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
     if (isExport) {
       deepFilter = `?`;
@@ -313,12 +323,11 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}`
-              : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

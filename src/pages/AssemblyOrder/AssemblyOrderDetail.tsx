@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, Menu, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -37,6 +37,8 @@ import Loading from 'src/pages/AssemblyOrder/Loading';
 import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
+import { ExpandMore } from '@mui/icons-material';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -64,6 +66,7 @@ const AssemblyOrderDetail = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [openRentalDialog, setOpenRentalDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const assemblyOrderProcessStepsNames = useMemo(() => {
     return assemblyOrderSteps.map((item) => item.name);
@@ -137,9 +140,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete &&
-            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -187,6 +190,23 @@ const AssemblyOrderDetail = () => {
       });
   };
 
+  const showConvertInRentalJob = () => {
+    if (!assemblyOrderData?.canConvert) {
+      return false
+    }
+    let show = false
+    if (assemblyOrderData?.rentalJob?.length > 0) {
+      if (!resourceData?.policy?.autoConvertInSameRentalJob && (permissions?.rentalManagement?.isUpdate || permissions?.rentalManagement?.isCreate)) {
+        show = true
+      }
+    } else {
+      if (permissions?.rentalManagement?.isCreate) {
+        show = true
+      }
+    }
+    return show
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -199,9 +219,63 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
-                {permissions?.rentalManagement?.isCreate && assemblyOrderData?.canConvert && !assemblyOrderData?.rentalJob && (
-                  <ThemeButton onClick={() => setOpenRentalDialog(true)}>{`Convert to ${resources?.rentalManagement?.titleSingular}`}</ThemeButton>
-                )}
+                {showConvertInRentalJob() ? (
+                  <ThemeButton
+                    onClick={(event) => {
+                      if (assemblyOrderData?.rentalJob?.length > 0) {
+                        setAnchorEl(event.currentTarget);
+                      } else {
+                        setOpenRentalDialog(true)
+                      }
+                    }}
+                    aria-controls="convert-to-rental-job-menu"
+                    endIcon={assemblyOrderData?.rentalJob?.length > 0 ? <ExpandMore fontSize="small" /> : <></>}
+                  >
+                    {`Convert to ${resources?.rentalManagement?.titleSingular}`}
+                  </ThemeButton>
+                ) : null}
+                <Menu
+                  id="convert-to-rental-job-menu"
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                  }}
+                >
+                  {permissions?.rentalManagement?.isUpdate && (
+                    <>
+                      {Array.isArray(assemblyOrderData?.rentalJob) && assemblyOrderData?.rentalJob?.map(r => {
+                        return (
+                          <MenuItem
+                            onClick={() => {
+                              setAnchorEl(null);
+                              convertToRental({ _id: r?.optionValue })
+                            }}
+                          >
+                            {`Add to ${r?.optionLabel}`}
+                          </MenuItem>
+                        )
+                      })}
+                    </>
+                  )}
+                  {permissions?.rentalManagement?.isCreate && (
+                    <MenuItem
+                      onClick={() => {
+                        setAnchorEl(null);
+                        setOpenRentalDialog(true)
+                      }}
+                    >
+                      {`Add to New ${resources?.rentalManagement?.titleSingular}`}
+                    </MenuItem>
+                  )}
+                </Menu>
                 {permissions?.assemblyOrder?.isUpdate && allowedToEdit && (
                   <ThemeButton iconForMobile={<EditIcon />} onClick={() => setOpenUpdateDialog(true)} mobileTooltip={'Edit'}>
                     {'Edit'}

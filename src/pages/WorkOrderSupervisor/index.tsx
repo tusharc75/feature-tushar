@@ -313,6 +313,14 @@ const WorkOrderSupervisor = () => {
                 <PictureAsPdfIcon fontSize={'small'} color='primary' />
               </IconButton>
             </HtmlTooltip>
+            {data?.priority &&
+              <HtmlTooltip title={`${data?.priority} Priority`}>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${data?.priority === 'High' ? 'bg-red-600' :
+                  data?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'} `}>
+                  {data?.priority}
+                </span>
+              </HtmlTooltip>
+            }
           </div>
         )
       },
@@ -489,6 +497,7 @@ const WorkOrderSupervisor = () => {
                 newObj['warehouse'] = item?.workOrderDetail?.warehouse;
                 newObj['packageName'] = item?.workOrderDetail?.package?.optionLabel;
                 newObj['packageId'] = item?.workOrderDetail?.package?.optionValue;
+                newObj['priority'] = item?.workOrderDetail?.priority;
                 newObj['customerAccountName'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
                 newObj['customerAccountId'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue;
                 return newObj;

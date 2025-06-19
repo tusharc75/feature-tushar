@@ -37,7 +37,11 @@ const AssemblyOrder = () => {
     {
       key: `All ${resources?.assemblyOrder?.titlePlural}`,
       value: 2
-    }
+    },
+    {
+      key: `Converted ${resources?.assemblyOrder?.titlePlural}`,
+      value: 3
+    },
   ];
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -53,7 +57,7 @@ const AssemblyOrder = () => {
   const [columns, setColumns] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const history = useHistory();
-  
+
   useEffect(() => {
     fetchColumns();
   }, []);
@@ -63,7 +67,7 @@ const AssemblyOrder = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.assemblyOrder}`);
     data = response?.data?.data;
     let columns = generateColumns(renderedFrom, data, routes.assemblyOrderDetail.path, true);
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
 
@@ -128,6 +132,11 @@ const AssemblyOrder = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {

@@ -65,7 +65,7 @@ const SalesOrder = () => {
     const response = await axiosInstance().get(`/field?resource=Sales Order`);
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });
@@ -163,7 +163,7 @@ const SalesOrder = () => {
     else {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
-    
+
     if (isExport) {
       deepFilter = `?`;
     }
@@ -309,12 +309,11 @@ const SalesOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
+          message={`Are you sure you want to delete ${deleteRecord
               ? `${resources?.salesOrder?.titleSingular?.toLowerCase()} :
              ${deleteRecord?.salesOrderNo}`
               : `selected ${resources?.salesOrder?.titlePlural?.toLowerCase()}`
-          } ?`}
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -112,7 +112,9 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  rentalPolicyData
+  rentalPolicyData,
+  assetStatusOptions,
+  setAssetStatusOptions
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -174,6 +176,7 @@ const ReceivingTicket = ({
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
+  const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
 
   const {
     state: { user, permissions, resources }
@@ -427,7 +430,7 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingOrReturnNotDelivered });
         } else if (action === rentalManagementActions.createRepairJob && e.subleaseAsset) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
-        } else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
+        } else if (![ASSET_STATUS.available, ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
         } else if (uniq(map(records, 'warehouseId')).length !== 1) {
           errorMessages.push({
@@ -1308,6 +1311,8 @@ const ReceivingTicket = ({
     const assetFields = fieldLabels?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
 
     const rentalJobProductFields = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    setRentalJobChildFields(rentalJobProductFields)
+
     const newColumns = generateColumns(
       renderedFrom,
       rentalJobProductFields?.filter((r) => r?.fieldName === 'longDescription'),
@@ -1316,21 +1321,37 @@ const ReceivingTicket = ({
       rentalManagementData?.currency
     );
 
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     const column: any = [
       {
         accessor: 'index',
         Header: 'Index',
+        sticky: 'left',
         width: view === 'flat' ? 100 : 150,
         disabled: true,
         cell: ({ row }) => (
           <div
             className="d-flex align-items-center gap-2"
             style={{
-              backgroundColor: [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(
-                row?.original?.status
-              )
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
@@ -2483,6 +2504,21 @@ const ReceivingTicket = ({
       });
   };
 
+  useEffect(() => {
+    if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)
+      ?.every(f =>
+        ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
+          (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered))
+        && [ASSET_STATUS.underReview].includes(f.status))
+    ) {
+      if (!assetStatusOptions?.some(a => a?.optionValue === ASSET_STATUS.available)) {
+        setAssetStatusOptions([{ optionLabel: ASSET_STATUS.available, optionValue: ASSET_STATUS.available }, ...assetStatusOptions])
+      }
+    } else {
+      setAssetStatusOptions([...assetStatusOptions?.filter(o => o?.optionValue != ASSET_STATUS.available)])
+    }
+  }, [selectedRecords])
+
   const rightSideContents = () => {
     return (
       <>
@@ -2492,6 +2528,8 @@ const ReceivingTicket = ({
         {allowedToEdit && !isOffline && !rentalPolicyData?.hideAssetChangeStatus && (
           <ThemeButton
             disabled={
+              !allowUpdateStatus ||
+              assetStatusOptions?.length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
                 [
@@ -2701,6 +2739,7 @@ const ReceivingTicket = ({
           fetchRecords={fetchRecords}
           allowedToEdit={allowedToEdit}
           stepFullScreen={stepFullScreen}
+          rentalJobChildFields={rentalJobChildFields}
         />
       </TabPanel>
       <Menu
@@ -2748,78 +2787,21 @@ const ReceivingTicket = ({
           horizontal: 'right'
         }}
       >
-        {getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 && allowUpdateStatus && (
-          <>
-            {getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(
-              (f) =>
-                ((f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ||
-                  (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
-                [ASSET_STATUS.underReview].includes(f.status)
-            )?.length === getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length && (
-                <>
-                  <MenuItem
-                    disabled={
-                      getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.available)?.length
-                        ? true
-                        : false
-                    }
-                    onClick={() => {
-                      setAnchorEl(null);
-                      setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
-                    }}
-                  >
-                    {ASSET_STATUS.available}
-                  </MenuItem>
-                </>
-              )}
-            {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
-              <MenuItem
-                disabled={
-                  getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false
-                }
-                onClick={() => {
-                  setAnchorEl(null);
-                  setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-                }}
-              >
-                {ASSET_STATUS.scrap}
-              </MenuItem>
-            )}
+        {assetStatusOptions?.length > 0 && assetStatusOptions?.map(o => {
+          return (
             <MenuItem
               disabled={
-                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false
+                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false
               }
               onClick={() => {
                 setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
+                setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
               }}
             >
-              {ASSET_STATUS.lost}
+              {o.optionLabel}
             </MenuItem>
-            <MenuItem
-              disabled={
-                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.needRepair)?.length ? true : false
-              }
-              onClick={() => {
-                setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRepair, message: '' });
-              }}
-            >
-              {ASSET_STATUS.needRepair}
-            </MenuItem>
-            <MenuItem
-              disabled={
-                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.needRecert)?.length ? true : false
-              }
-              onClick={() => {
-                setAnchorEl(null);
-                setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.needRecert, message: '' });
-              }}
-            >
-              {ASSET_STATUS.needRecert}
-            </MenuItem>
-          </>
-        )}
+          )
+        })}
       </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
@@ -3777,18 +3759,25 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
-      {assetPolicyData?.policy?.inUseSubStatus?.length && assetPolicyData?.policy?.inUseSubStatus?.map(a => {
-        return (
-          <MenuItem
-            onClick={() => {
-              handleChangeSubStatus(a)
-            }}
-            id={`${a}-menu-item`}
-          >
-            {`Change Sub Status ${a}`}
-          </MenuItem>
-        )
-      })}
+      {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
+        (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
+        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && assetPolicyData?.policy?.inUseSubStatus?.map(status => {
+          return (
+            <MenuItem
+              onClick={() => {
+                handleChangeSubStatus(status)
+              }}
+              disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length
+                && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((e) => e?.status === ASSET_STATUS.inUse)
+                && !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.find((e) => e?.subStatus === status)
+                ? false : true
+              }
+              id={`${status}-menu-item`}
+            >
+              {`Change Sub Status ${status}`}
+            </MenuItem>
+          )
+        })}
     </>
   );
 };

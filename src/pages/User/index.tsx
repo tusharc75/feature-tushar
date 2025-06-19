@@ -171,7 +171,7 @@ const User: FC = () => {
       .get(`/field?resource=User&view=true`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.userDetail.path, true);
-        setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...extraColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 

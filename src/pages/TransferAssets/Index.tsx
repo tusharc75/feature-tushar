@@ -44,6 +44,10 @@ const TransferAsset = () => {
     {
       key: `All ${resources?.transferAsset?.titlePlural}`,
       value: 2
+    },
+    {
+      key: `Closed ${resources?.transferAsset?.titlePlural}`,
+      value: 3
     }
   ];
 
@@ -76,7 +80,7 @@ const TransferAsset = () => {
       .get(`/field?resource=${sidebarResource.transferAsset}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.transferAssetDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
       });
   };
 
@@ -158,6 +162,11 @@ const TransferAsset = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedType === 1 || selectedType === 2) {
+      deepFilter = deepFilter + `&openRecords=1`;
+    } else {
+      deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -338,12 +347,11 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}`
-              : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
-          } ?`}
+            : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase, sortBy } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -33,17 +33,6 @@ const CreditMemo = () => {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
 
-  const types = [
-    {
-      key: `My ${resources?.creditMemo?.titlePlural}`,
-      value: 1
-    },
-    {
-      key: `All ${resources?.creditMemo?.titlePlural}`,
-      value: 2
-    }
-  ];
-
   const renderedFrom = camelCase(sidebarResource.creditMemo);
   const toastConfig = useContext(CustomToastContext);
 
@@ -56,9 +45,24 @@ const CreditMemo = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-
+  const [allFields, setAllFields] = useState(null)
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
+
+  const types = useMemo(() => [
+    {
+      key: `My ${resources?.creditMemo?.titlePlural}`,
+      value: 1
+    },
+    {
+      key: `All ${resources?.creditMemo?.titlePlural}`,
+      value: 2
+    },
+    ...(allFields?.some(f => f?.fieldData?.fieldName === 'status') ? [{
+      key: `Closed ${resources?.creditMemo?.titlePlural}`,
+      value: 3
+    }] : [])
+  ], [allFields])
 
   useEffect(() => {
     fetchGridColumns();
@@ -74,6 +78,7 @@ const CreditMemo = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)))
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
         const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
@@ -130,8 +135,17 @@ const CreditMemo = () => {
       deepFilter = `?`;
     }
 
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
+    if (allFields?.filter(f => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2) {
+      if (selectedType === 1) {
+        deepFilter = deepFilter + `&myRecords=1`;
+      }
+      if (allFields?.some(f => f?.fieldData?.fieldName === 'status')) {
+        if (selectedType === 1 || selectedType === 2) {
+          deepFilter = deepFilter + `&openRecords=1`;
+        } else {
+          deepFilter = deepFilter + `&closedRecords=1`;
+        }
+      }
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -305,7 +319,7 @@ const CreditMemo = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={types}
+          toggleButtonList={allFields?.filter(f => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : []}
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}

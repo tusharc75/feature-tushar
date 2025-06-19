@@ -344,7 +344,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
