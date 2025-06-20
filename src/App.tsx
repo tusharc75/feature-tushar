@@ -6,7 +6,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import { VITE_APP_ENV } from 'src/config';
+import { FIREBASE_CONFIG, VITE_APP_ENV } from 'src/config';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
@@ -293,23 +293,25 @@ var notificationInterval: any = null;
 function App() {
 
   useEffect(() => {
-    const registerServiceWorker = async () => {
-      if (!('serviceWorker' in navigator)) return;
-      try {
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    if (FIREBASE_CONFIG.apiKey) {
+      const registerServiceWorker = async () => {
+        if (!('serviceWorker' in navigator)) return;
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-        // Send Firebase config to service worker
-        registration.active?.postMessage({
-          type: 'INIT_FIREBASE',
-          config: firebaseConfig
-        });
-      } catch (error) {
-        console.error('Service Worker registration failed:', error);
-      }
-    };
-    window.addEventListener('load', registerServiceWorker);
-    registerSW();
-    return () => window.removeEventListener('load', registerServiceWorker);
+          // Send Firebase config to service worker
+          registration.active?.postMessage({
+            type: 'INIT_FIREBASE',
+            config: firebaseConfig
+          });
+        } catch (error) {
+          console.error('Service Worker registration failed:', error);
+        }
+      };
+      window.addEventListener('load', registerServiceWorker);
+      registerSW();
+      return () => window.removeEventListener('load', registerServiceWorker);
+    }
   }, []);
 
   const toast = useContext(CustomToastContext);
