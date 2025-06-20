@@ -195,7 +195,7 @@ const useUIDesktopDm = () => {
       setStoreValue('partial');
       return data;
     });
-    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY.apiKey) {
+    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
       requestAndSyncFcmToken(user);
     }
   }, [setStoreValue, user]);
