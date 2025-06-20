@@ -326,30 +326,71 @@ function App() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      // Register PWA service worker
+      // Register PWA service worker first
       registerSW();
 
       // Register Firebase messaging service worker if Firebase is configured
       if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
         const registerFirebaseServiceWorker = async () => {
           try {
+            // Check if the service worker file exists before registering
+            const response = await fetch('/firebase-messaging-sw.js', { method: 'HEAD' });
+            if (!response.ok) {
+              console.warn('Firebase messaging service worker file not found, skipping registration');
+              return;
+            }
+
+            // Check if there's already a service worker controlling this page
+            const existingRegistration = await navigator.serviceWorker.getRegistration();
+            if (existingRegistration && existingRegistration.active) {
+              console.log('PWA service worker already active, proceeding with Firebase SW registration');
+            }
+
             const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            // Send Firebase config to service worker
-            registration.active?.postMessage({
-              type: 'INIT_FIREBASE',
-              config: firebaseConfig
-            });
+
+            // Wait for the service worker to be ready before sending config
+            if (registration.installing) {
+              registration.installing.addEventListener('statechange', (e) => {
+                const target = e.target as ServiceWorker;
+                if (target.state === 'activated') {
+                  registration.active?.postMessage({
+                    type: 'INIT_FIREBASE',
+                    config: firebaseConfig
+                  });
+                }
+              });
+            } else if (registration.active) {
+              registration.active.postMessage({
+                type: 'INIT_FIREBASE',
+                config: firebaseConfig
+              });
+            }
           } catch (error) {
             console.error('Firebase Service Worker registration failed:', error);
+            // Don't let this error block the app from loading
           }
         };
 
-        // Register Firebase service worker after page load
+        // Register Firebase service worker after page load with a delay to ensure PWA SW is ready
+        const registerWithDelay = () => {
+          // Add a timeout to prevent infinite loading
+          const timeoutId = setTimeout(() => {
+            console.warn('Firebase service worker registration timed out, continuing without it');
+          }, 10000); // 10 second timeout
+
+          setTimeout(async () => {
+            try {
+              await registerFirebaseServiceWorker();
+            } finally {
+              clearTimeout(timeoutId);
+            }
+          }, 2000);
+        };
+
         if (document.readyState === 'loading') {
-          window.addEventListener('load', registerFirebaseServiceWorker);
-          return () => window.removeEventListener('load', registerFirebaseServiceWorker);
+          window.addEventListener('load', registerWithDelay);
         } else {
-          registerFirebaseServiceWorker();
+          registerWithDelay();
         }
       }
     }
