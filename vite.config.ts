@@ -19,14 +19,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*'],
-        maximumFileSizeToCacheInBytes: 20000000,
-        skipWaiting: true,
-        clientsClaim: true
+        maximumFileSizeToCacheInBytes: 20000000
       },
-      includeAssets: ['**/*'],
-      devOptions: {
-        enabled: false
-      }
+      includeAssets: ['**/*']
     }),
     viteTsconfigPaths(),
     splitVendorChunkPlugin()
