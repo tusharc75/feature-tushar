@@ -11,6 +11,7 @@ import AddSerialNumber from './AddSerialNumber';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   const {
@@ -130,17 +131,21 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
           </Grid>
           <Grid size={{ xs: 6, sm: 6 }}>
             <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-              {serialNumberCount ? (
-                <Box>
-                  <ThemeButton
-                    buttonType='theme'
-                    onClick={() => {
-                      setAddserialNumber(true);
-                    }}
-                  >
-                    Add Serial Numbers
-                  </ThemeButton>
-                </Box>
+              {(user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? (
+                <HtmlTooltip title={(user?.user?.brandPolicy?.storageLocation && !selectedStorageLocation) ? `Please Select ${resources?.storageLocation?.titleSingular}` : ''}>
+                  <span>
+                    <ThemeButton disabled={true}>Add Serial Numbers</ThemeButton>
+                  </span>
+                </HtmlTooltip>
+              ) : serialNumberCount ? (
+                <ThemeButton
+                  onClick={() => {
+                    setAddserialNumber(true);
+                  }}
+                  buttonType="theme"
+                >
+                  Add Serial Numbers
+                </ThemeButton>
               ) : null}
             </Grid>
           </Grid>

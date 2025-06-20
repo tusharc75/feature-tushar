@@ -184,19 +184,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       },
       ...(user?.user?.brandPolicy?.leadTime
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -285,15 +285,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-            ? parent.serviceDetail?.serviceName
-            : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail || ''
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -322,13 +321,12 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-      }`;
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -680,7 +678,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         }}
         addButtonProps={{
           disabled: !allowedToEdit,
-          tooltip: salesOrderData?.quotation ? `Converted from Quotation you can not perform this action` : !allowedToEdit ? ownerAndColaborator : ``
+          tooltip: !allowedToEdit ? ownerAndColaborator : ``
         }}
         leftSideContents
         rightSideContents

@@ -1,35 +1,36 @@
 import { useState } from 'react';
-import ESignatureDialog from './ESignature'; // No ESignatureDialogRef needed
+import SendForSignatureDialog from 'src/components/DigitalSignature/SendForSignatureDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const DigitalSignature = ({ attachmentId, type, isEditMode, allAttachments }: any) => {
-  const [isSignatureDialogOpen, setIsSignatureDialogOpen] = useState(false);
+const DigitalSignature = ({ attachmentId, type, allAttachments }: any) => {
 
-  const handleSendForSignatureClick = () => {
-    setIsSignatureDialogOpen(true);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
   };
 
-  const handleCloseSignatureDialog = () => {
-    setIsSignatureDialogOpen(false);
+  const handleClose = () => {
+    setOpen(false);
   };
 
   return (
     <>
-      {isEditMode && type === 'file' && (
+      {attachmentId && type === 'file' && (
         <ThemeButton
           buttonType="theme"
-          onClick={handleSendForSignatureClick}
-          style={{ marginRight: '8px', backgroundColor: 'green' }}
+          onClick={handleOpen}
         >
           Send for Signature
         </ThemeButton>
       )}
-      <ESignatureDialog
-        attachmentId={attachmentId}
-        allAttachments={allAttachments}
-        open={isSignatureDialogOpen}
-        onClose={handleCloseSignatureDialog}
-      />
+      {open &&
+        <SendForSignatureDialog
+          attachmentId={attachmentId}
+          allAttachments={allAttachments}
+          onClose={handleClose}
+        />
+      }
     </>
   );
 }

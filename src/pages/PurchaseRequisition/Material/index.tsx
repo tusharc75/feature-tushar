@@ -229,6 +229,9 @@ const Material = ({
         setNextStep(false);
       }
     }
+    else {
+      setPrevStep(true);
+    }
   };
 
   const fetchData = async () => {
@@ -241,16 +244,10 @@ const Material = ({
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
 
-    let costData: any = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
-    costData = costData?.data?.data || [];
-    costData?.forEach((e) => {
-      e.type = MATERIAL_TYPE.manualEntry;
-    });
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...costData];
+    let rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -545,8 +542,7 @@ const Material = ({
             resource={sidebarResource.purchaseRequisition}
             id={purchaseRequisitionData._id}
             entity={purchaseRequisitionData.entity}
-            processStatus={currentStep}
-            fetchParentData={fetchParentData}
+            fetchData={fetchParentData}
           />
         )}
       </>
