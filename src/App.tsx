@@ -6,7 +6,7 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import CustomMessageDialog from 'src/components/MessageDialog';
-import { FIREBASE_CONFIG, VITE_APP_ENV } from 'src/config';
+import { VITE_APP_ENV } from 'src/config';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
@@ -293,7 +293,7 @@ var notificationInterval: any = null;
 function App() {
 
   useEffect(() => {
-    if (FIREBASE_CONFIG.apiKey) {
+    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
       const registerServiceWorker = async () => {
         if (!('serviceWorker' in navigator)) return;
         try {
