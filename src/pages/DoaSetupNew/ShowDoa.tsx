@@ -14,8 +14,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderRadius: '0px 0px 2.83064px 2.83064px',
     maxWidth: 'max-content',
     padding: '5px 10px',
-    flexWrap: 'wrap',
-    marginBottom: '15px'
+    flexWrap: 'wrap'
   },
   doa: {
     fontWeight: 600,
@@ -94,7 +93,7 @@ const ShowDoa = ({ status, data }) => {
           {data?.doaUsers?.length &&
             data?.doaUsers?.map((users, index) => (
               <div key={index}>
-                <div className=''>
+                <div className="">
                   <div className={classes.doaUserContainer}>
                     {users?.status === DOA_STATUS.pending && <BsFillClockFill size={18} style={{ color: '#F25F54' }} />}
                     {users?.status === DOA_STATUS.approved && <BsFillCheckCircleFill size={18} style={{ color: '#4BAE4F' }} />}
@@ -109,7 +108,7 @@ const ShowDoa = ({ status, data }) => {
                       {users?.users?.length > 4 && `+ ${users?.users?.length - 4} more`}
                     </div>
                   </div>
-                  <div className='pl-7'>
+                  <div className="pl-7">
                     <p style={{ fontSize: '14px' }}>{users?.doaComment}</p>
                   </div>
                 </div>

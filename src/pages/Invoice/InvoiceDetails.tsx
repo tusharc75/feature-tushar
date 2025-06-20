@@ -146,7 +146,7 @@ const InvoiceDetails = () => {
       setInvoiceData(data);
       var tempStepList = invoiceProcessSteps;
       if (!data?.doasetup) {
-        tempStepList = invoiceProcessSteps?.filter((e) => e.name !== 'DOA')
+        tempStepList = invoiceProcessSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
       setStepNames(tempStepList?.map((item) => item.name));
@@ -423,15 +423,11 @@ const InvoiceDetails = () => {
               {invoiceData ? (
                 <>
                   {stepList[currentStep]?.name === 'DOA' && (
-                    <Box
-                      style={{
-                        marginLeft: 'auto',
-                        maxWidth: 'max-content',
-                        marginTop: DOAData ? '-30px' : ''
-                      }}
-                    >
-                      <ShowDoa status={invoiceData?.status} data={DOAData} />
-                    </Box>
+                    <div className="pointer-events-none flex h-0 justify-end overflow-visible ">
+                      <div className="pointer-events-auto z-10 [transform:translateY(-15px)]">
+                        <ShowDoa status={invoiceData?.status} data={DOAData} />
+                      </div>
+                    </div>
                   )}
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                     <Steps
