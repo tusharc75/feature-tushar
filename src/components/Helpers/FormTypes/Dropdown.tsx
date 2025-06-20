@@ -1,7 +1,7 @@
 import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, has, isEmpty } from 'lodash';
+import { camelCase, has, isArray, isEmpty } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
@@ -217,7 +217,15 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
       if (dependentOnFieldValue) {
         const dependentFieldOption = dependentOnField?.option?.filter((e) => dependentOnFieldValue?.includes(e.optionValue));
         if (dependentFieldOption) {
-          const dependentIds = dependentFieldOption?.map((e) => e[lookupDependentOnField]) || [];
+          let dependentIds = []
+          dependentFieldOption?.forEach((e) => {
+            if (isArray(e[lookupDependentOnField]) && e[lookupDependentOnField]?.length) {
+              dependentIds = [...dependentIds, ...e[lookupDependentOnField]]
+            }
+            else {
+              dependentIds = [...dependentIds, e[lookupDependentOnField]]
+            }
+          })
           let option = options;
           if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
             newAddressOptionList?.forEach((ele: any) => {

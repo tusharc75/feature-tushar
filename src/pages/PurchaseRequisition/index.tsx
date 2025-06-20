@@ -1,5 +1,4 @@
 import { Box, Button, IconButton, MenuItem } from '@mui/material';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
@@ -15,14 +14,12 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
-  PURCHASE_REQUISITION_STATUS,
   checkIsAllowedToDelete,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   sidebarResource
 } from '../../constants/helpers';
-import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
@@ -57,8 +54,6 @@ const PurchaseRequisition = () => {
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseRequisition));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
-  const [showOrderDialog, setOrderDialog] = useState({ open: false, currency: null, warehouse: null, products: [], services: [] });
-  const [convertedPurchaseRequisitionId, setConvertedPurchaseRequisitionId] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -109,34 +104,6 @@ const PurchaseRequisition = () => {
           <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
             <IconButton aria-label="Clone" size="small">
               <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-        {row?.original?.status === PURCHASE_REQUISITION_STATUS.converted ? (
-          <HtmlTooltip className="cursor-stop" title="This purchase requisition is already converted into purchase order">
-            <IconButton aria-label="Clone" size="small">
-              <AutorenewIcon fontSize="small" color="disabled" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip title="Convert">
-            <IconButton
-              size="small"
-              aria-label="Convert"
-              onClick={() => {
-                setConvertedPurchaseRequisitionId(row?.original?.id);
-                const products = row?.original?.material?.filter((item: any) => item?.type == 'product');
-                const services = row?.original?.material?.filter((item: any) => item?.type == 'service');
-                setOrderDialog({
-                  open: true,
-                  currency: row?.original?.currency,
-                  warehouse: row?.original?.warehouseId,
-                  products: products,
-                  services: services
-                });
-              }}
-            >
-              <AutorenewIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -242,27 +209,6 @@ const PurchaseRequisition = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
-      });
-  };
-
-  const handleConvertSuccess = (data: any) => {
-    setOrderDialog({ open: false, currency: null, warehouse: null, products: [], services: [] });
-    axiosInstance()
-      .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
-        _id: convertedPurchaseRequisitionId,
-        purchaseOrder: data?._id,
-        status: PURCHASE_REQUISITION_STATUS.converted
-      })
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `${sidebarResource.purchaseOrder} has been created successfully`
-        });
-      })
-      .catch((err) => {
-        fetchData();
       });
   };
 
@@ -390,24 +336,6 @@ const PurchaseRequisition = () => {
             fetchData();
             setShowManageDialog({ open: false, isClone: false, idToClone: null });
           }}
-        />
-      )}
-      {showOrderDialog.open && (
-        <ManagePurchaseOrder
-          isClone={false}
-          purchaseOrderId={null}
-          onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
-          onSuccess={(data: any) => {
-            handleConvertSuccess(data);
-          }}
-          products={showOrderDialog?.products?.map((e) => {
-            return { ...e, product: e.materialId };
-          })}
-          services={showOrderDialog?.services?.map((e) => {
-            return { ...e, service: e.materialId };
-          })}
-          currency={showOrderDialog.currency}
-          warehouseId={showOrderDialog?.warehouse}
         />
       )}
     </section>

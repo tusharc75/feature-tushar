@@ -115,7 +115,9 @@ const PurchaseRequisitionDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(
-        data?.canDelete && permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
+        data?.canDelete &&
+          permissions?.purchaseRequisition?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
       );
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([
@@ -197,8 +199,8 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {purchaseRequisitionData?.material?.length > 0 && (
-                purchaseRequisitionData?.doaSetup && DOAData?.status !== DOA_STATUS.approved ? null :
+              {purchaseRequisitionData?.material?.length > 0 &&
+                (purchaseRequisitionData?.doaSetup && DOAData?.status !== DOA_STATUS.approved ? null : (
                   <ThemeButton
                     onClick={() => {
                       setOrderDialog({ open: true });
@@ -207,12 +209,9 @@ const PurchaseRequisitionDetail = () => {
                   >
                     {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                   </ThemeButton>
-              )}
+                ))}
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
-                <ThemeButton
-                  iconForMobile={<EditIcon />}
-                  onClick={handleOpenUpdateDialog}
-                  mobileTooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}
@@ -259,15 +258,11 @@ const PurchaseRequisitionDetail = () => {
               ) : (
                 <>
                   {stepList[currentStep]?.name === 'DOA' && (
-                    <Box
-                      style={{
-                        marginLeft: 'auto',
-                        maxWidth: 'max-content',
-                        marginTop: DOAData ? '-30px' : ''
-                      }}
-                    >
-                      <ShowDoa status={purchaseRequisitionData?.status} data={DOAData} />
-                    </Box>
+                    <div className="pointer-events-none flex h-0 justify-end overflow-visible ">
+                      <div className="pointer-events-auto z-10 [transform:translateY(-15px)]">
+                        <ShowDoa status={purchaseRequisitionData?.status} data={DOAData} />
+                      </div>
+                    </div>
                   )}
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                     <Steps
