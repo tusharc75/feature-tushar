@@ -222,70 +222,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 <Warning fontSize="small" color={'error'} />
               </HtmlTooltip>
             )}
-            {row.original?.type === 'asset' && (
-              <span className="d-flex align-items-center gap-2">
-                {allowedToEdit && row?.original?.canRemove && (
-                  <HtmlTooltip title={`Remove`}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                        let isTransferAsset = false;
-                        if (
-                          row.original?.transferData &&
-                          [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)
-                        ) {
-                          isTransferAsset = true;
-                        }
-                        setDeleteData([
-                          {
-                            _id: row.original.uniqueId,
-                            assetId: row.original.inventory,
-                            assetNumber: row.original.detail,
-                            isNonSerializeAsset: row.original.isNonSerializeAsset,
-                            isTransferAsset: isTransferAsset,
-                            isProductSerialNumbers: false
-                          }
-                        ]);
-                      }}
-                    >
-                      <Delete fontSize="small" color={'error'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-                {row.original.isTransferAsset && (
-                  <HtmlTooltip
-                    title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank');
-                      }}
-                    >
-                      <Repeat fontSize="small" color={'primary'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </span>
-            )}
-            {row?.original?.type === 'serialNumber' && allowedToEdit && row?.original?.canRemove && (
-              <HtmlTooltip title={`Remove`}>
+            {row.original?.type === 'asset' && row.original.isTransferAsset && (
+              <HtmlTooltip
+                title={`Transfer from plant ${row?.original?.transferData?.transferFromPlant?.optionLabel} to  ${row?.original?.transferData?.transfertoPlant?.optionLabel}`}
+              >
                 <IconButton
                   size="small"
                   onClick={() => {
-                    setShowConfirmBox(true);
-                    setDeleteData([
-                      {
-                        _id: row.original.uniqueId,
-                        assetId: row.original.serialNumber,
-                        isNonSerializeAsset: false,
-                        isProductSerialNumbers: true
-                      }
-                    ]);
+                    window.open(`${routes.transferAssetDetail.path}/${row?.original?.transferData?._id}`, '_blank');
                   }}
                 >
-                  <Delete fontSize="small" color={'error'} />
+                  <Repeat fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -319,10 +266,89 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         Cell: ({ row }) => (row?.original?.mtrAttachedView ? <h5 className="text-truncate">{row?.original?.mtrAttachedView}</h5> : <NoDataCell />)
       });
     }
-    column = [...column, ...newColumns];
+    column = [...column, ...newColumns, ActionsRenderer];
     setColumns(column);
     fetchData();
   };
+
+  const isDeleteIconVisible = (row) => {
+    if (row?.type === MATERIAL_TYPE.product && row?.parentId && row?.realAssetAssignedQty <= 0) {
+      return true
+    }
+    if (['asset', 'serialNumber']?.includes(row?.type)) {
+      return row?.canRemove
+    }
+    return false
+  }
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row, table }) => {
+      return (
+        <>
+          {allowedToEdit && isDeleteIconVisible(row?.original) && (
+            <HtmlTooltip title={'Delete'}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    if (row?.original?.type === 'asset') {
+                      let isTransferAsset = false;
+                      if (
+                        row?.original?.transferData &&
+                        [TRANSFER_ASSET_STATUS.new, TRANSFER_ASSET_STATUS.inProgress]?.includes(row.original?.transferData?.status)
+                      ) {
+                        isTransferAsset = true;
+                      }
+                      setDeleteData([
+                        {
+                          _id: row.original.uniqueId,
+                          assetId: row.original.inventory,
+                          assetNumber: row.original.detail,
+                          isNonSerializeAsset: row.original.isNonSerializeAsset,
+                          isTransferAsset: isTransferAsset,
+                          isProductSerialNumbers: false,
+                          type: 'asset'
+                        }
+                      ]);
+                    } else if (row?.original?.type === 'serialNumber') {
+                      setDeleteData([
+                        {
+                          _id: row.original.uniqueId,
+                          assetId: row.original.serialNumber,
+                          isNonSerializeAsset: false,
+                          isProductSerialNumbers: true,
+                          type: 'serialNumber'
+                        }
+                      ]);
+                    } else if (row?.original?.type === MATERIAL_TYPE.product) {
+                      setDeleteData([
+                        {
+                          _id: row.original._id,
+                          type: MATERIAL_TYPE.product
+                        }
+                      ]);
+                    }
+                    setShowConfirmBox(true);
+                  }}
+                >
+                  <Delete fontSize="small" color={'error'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          )}
+        </>
+      );
+    }
+  }
 
   const fetchPolicy = async () => {
     try {
@@ -832,21 +858,26 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   };
 
   const handleRemoveInventory = async () => {
-    if (deleteData.length >= 1) {
+    const inventory = deleteData?.filter(d => ['asset', 'serialNumber']?.includes(d?.type))
+    inventory?.forEach((e) => {
+      delete e.type
+      if (!isOffline) {
+        delete e.assetNumber;
+      }
+    });
+    const products = deleteData?.filter(d => d?.type === MATERIAL_TYPE.product)?.map(p => p?._id)
+    if (inventory.length >= 1) {
       if (isOffline) {
         setDeleting(true);
-        await removeAssetsInRental(rentalManagementData._id, deleteData);
+        await removeAssetsInRental(rentalManagementData._id, inventory);
         setDeleting(false);
         setDeleteData(null);
         setShowConfirmBox(false);
         fetchData();
       } else {
-        deleteData?.forEach((e) => {
-          delete e.assetNumber;
-        });
         setDeleting(true);
         axiosInstance()
-          .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: deleteData })
+          .put(`${rentalManagement.api}/${rentalManagementData._id}/inventory/remove`, { products: inventory })
           .then(() => {
             setDeleting(false);
             fetchData();
@@ -859,6 +890,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setDeleteData(null);
           });
       }
+    }
+    if (products?.length >= 1) {
+      setDeleting(true);
+      axiosInstance()
+        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: products })
+        .then(() => {
+          setDeleting(false);
+          fetchData();
+          setDeleteData(null);
+          setShowConfirmBox(false);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
     }
   };
 
@@ -1163,7 +1210,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 assetNumber: element?.detail,
                 isNonSerializeAsset: element?.isNonSerializeAsset,
                 isTransferAsset: isTransferAsset,
-                isProductSerialNumbers: false
+                isProductSerialNumbers: false,
+                type: 'asset'
               });
             });
             serialNumbers?.forEach((element) => {
@@ -1171,7 +1219,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 _id: element.uniqueId,
                 assetId: element.serialNumber,
                 isNonSerializeAsset: false,
-                isProductSerialNumbers: true
+                isProductSerialNumbers: true,
+                type: 'serialNumber'
               });
             });
             setDeleteData(dataTodelete);
