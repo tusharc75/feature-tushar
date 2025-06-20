@@ -298,6 +298,7 @@ function App() {
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState({ open: false, data: null });
+  const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
   const {
@@ -337,6 +338,7 @@ function App() {
             const response = await fetch('/firebase-messaging-sw.js', { method: 'HEAD' });
             if (!response.ok) {
               console.warn('Firebase messaging service worker file not found, skipping registration');
+              setServiceWorkerReady(true);
               return;
             }
 
@@ -357,6 +359,7 @@ function App() {
                     type: 'INIT_FIREBASE',
                     config: firebaseConfig
                   });
+                  setServiceWorkerReady(true);
                 }
               });
             } else if (registration.active) {
@@ -364,10 +367,12 @@ function App() {
                 type: 'INIT_FIREBASE',
                 config: firebaseConfig
               });
+              setServiceWorkerReady(true);
             }
           } catch (error) {
             console.error('Firebase Service Worker registration failed:', error);
             // Don't let this error block the app from loading
+            setServiceWorkerReady(true);
           }
         };
 
@@ -376,6 +381,7 @@ function App() {
           // Add a timeout to prevent infinite loading
           const timeoutId = setTimeout(() => {
             console.warn('Firebase service worker registration timed out, continuing without it');
+            setServiceWorkerReady(true);
           }, 10000); // 10 second timeout
 
           setTimeout(async () => {
@@ -392,9 +398,25 @@ function App() {
         } else {
           registerWithDelay();
         }
+      } else {
+        // If Firebase is not configured, mark service worker as ready immediately
+        setServiceWorkerReady(true);
       }
+    } else {
+      // If service workers are not supported, mark as ready immediately
+      setServiceWorkerReady(true);
     }
-  }, []);
+
+    // Fallback timeout to ensure app loads even if service worker registration fails
+    const fallbackTimeout = setTimeout(() => {
+      if (!serviceWorkerReady) {
+        console.warn('Service worker registration taking too long, continuing without it');
+        setServiceWorkerReady(true);
+      }
+    }, 15000); // 15 second fallback
+
+    return () => clearTimeout(fallbackTimeout);
+  }, [serviceWorkerReady]);
 
   useEffect(() => {
     try {
