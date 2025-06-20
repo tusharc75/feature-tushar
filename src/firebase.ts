@@ -13,5 +13,5 @@ export const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const app = FIREBASE_CONFIG.apiKey ? initializeApp(firebaseConfig) : null;
-export const messaging = FIREBASE_CONFIG.apiKey ? getMessaging(app) : null;
+export const app = import.meta.env?.VITE_APP_FIREBASE_API_KEY ? initializeApp(firebaseConfig) : null;
+export const messaging = import.meta.env?.VITE_APP_FIREBASE_API_KEY ? getMessaging(app) : null;
