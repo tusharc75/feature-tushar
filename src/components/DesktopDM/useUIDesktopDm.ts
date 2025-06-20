@@ -6,6 +6,8 @@ import { HANDLE_OPEN_CHAT, useStore } from 'src/StateProvider/fastContext';
 import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
 import useLocalStorage from 'src/hooks/useLocalStore';
 import { EQUIPT_BE_CONNECTED_WINDOW } from 'src/constants/helpers';
+import { requestAndSyncFcmToken } from 'src/hooks/useFirebaseNotifications';
+import { FIREBASE_CONFIG } from 'src/config';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -194,7 +196,10 @@ const useUIDesktopDm = () => {
       setStoreValue('partial');
       return data;
     });
-  }, [setStoreValue]);
+    if (FIREBASE_CONFIG.apiKey) {
+      requestAndSyncFcmToken(user);
+    }
+  }, [setStoreValue, user]);
 
   const closeMainWindow = useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
