@@ -68,7 +68,7 @@ const SalesOrderDetails = () => {
     axiosInstance()
       .get(`/field?resource=Product&view=true`)
       .then(({ data: { data } }) => {
-        if (data?.some((d) => d?.fieldData?.fieldName === 'procurementMethod')) {
+        if (data?.some((d) => d?.fieldData?.fieldName === 'procurementMethod1')) {
           setSteps(salesOrderProcessSteps);
         } else {
           setSteps(salesOrderProcessSteps?.filter((s) => s.name !== 'Process' && s.name !== 'Loading'));
