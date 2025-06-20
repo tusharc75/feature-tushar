@@ -292,6 +292,31 @@ var notificationInterval: any = null;
 
 function App() {
 
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      registerSW();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
+      const registerServiceWorker = async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          // Send Firebase config to service worker
+          registration.active?.postMessage({
+            type: 'INIT_FIREBASE',
+            config: firebaseConfig
+          });
+        } catch (error) {
+          console.error('Service Worker registration failed:', error);
+        }
+      };
+      window.addEventListener('load', registerServiceWorker);
+      return () => window.removeEventListener('load', registerServiceWorker);
+    }
+  }, []);
+
   const toast = useContext(CustomToastContext);
 
   const notification = useContext(CustomNotificationCountContext);
@@ -323,37 +348,6 @@ function App() {
       setIsUpdateModalOpen({ open: true, data: data });
     }
   };
-
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      // Register PWA service worker
-      registerSW();
-
-      // Register Firebase messaging service worker if Firebase is configured
-      if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
-        const registerFirebaseServiceWorker = async () => {
-          try {
-            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            // Send Firebase config to service worker
-            registration.active?.postMessage({
-              type: 'INIT_FIREBASE',
-              config: firebaseConfig
-            });
-          } catch (error) {
-            console.error('Firebase Service Worker registration failed:', error);
-          }
-        };
-
-        // Register Firebase service worker after page load
-        if (document.readyState === 'loading') {
-          window.addEventListener('load', registerFirebaseServiceWorker);
-          return () => window.removeEventListener('load', registerFirebaseServiceWorker);
-        } else {
-          registerFirebaseServiceWorker();
-        }
-      }
-    }
-  }, []);
 
   useEffect(() => {
     try {
