@@ -134,7 +134,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             ) : (
               <NoDataCell />
             )}
-            {allowedToEdit && ![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
+            {allowedToEdit && ![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
               <>
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -157,8 +157,10 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
@@ -321,21 +323,20 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow.serializedAssetDetail?.assetNumber
+              : _subRow?.detail
+        ;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+        : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetDescription
+              : _subRow?.description;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
-      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
+      _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] || _subRow.type === MATERIAL_TYPE.serializedAsset ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
