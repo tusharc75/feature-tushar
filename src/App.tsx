@@ -293,12 +293,16 @@ var notificationInterval: any = null;
 function App() {
 
   useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      registerSW();
+    }
+  }, []);
+
+  useEffect(() => {
     if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
       const registerServiceWorker = async () => {
-        if (!('serviceWorker' in navigator)) return;
         try {
           const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
           // Send Firebase config to service worker
           registration.active?.postMessage({
             type: 'INIT_FIREBASE',
@@ -309,7 +313,6 @@ function App() {
         }
       };
       window.addEventListener('load', registerServiceWorker);
-      registerSW();
       return () => window.removeEventListener('load', registerServiceWorker);
     }
   }, []);
