@@ -12,6 +12,7 @@
   justify-content: center;
   max-width: max-content;
   margin-inline: auto;
+  margin-top: 8px;
 }
 .iconButton {
   flex-basis: calc(var(--icon-size) + var(--left-right-icon-spacing, 15px));
