@@ -1,5 +1,5 @@
 import { Info } from '@mui/icons-material';
-import { ClickAwayListener, IconButton, Popover, useMediaQuery } from '@mui/material';
+import { IconButton, Popover, useMediaQuery } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { BsFillCheckCircleFill, BsFillClockFill, BsFillXCircleFill } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
@@ -54,7 +54,7 @@ const ShowDoa = ({ status, data }) => {
           {shouldRenderPopup ? (
             <>
               <HtmlTooltip title="User Details">
-                <IconButton onClick={handleClick} size="small" color="primary">
+                <IconButton onClick={handleClick} size="small" sx={{ padding: 0 }} color="primary">
                   <Info fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
