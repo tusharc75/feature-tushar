@@ -24,6 +24,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
+  DOA_STATUS,
   INVOICE_STATUS,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
@@ -112,7 +113,8 @@ const InvoiceDetails = () => {
       const response: any = await axiosInstance().get('/field?resource=Invoice');
       response?.data?.data.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
-          setStatusOptions([...o.fieldData.option]);
+          setStatusOptions([...o.fieldData.option?.filter((e) =>
+            ![INVOICE_STATUS.cancelled, INVOICE_STATUS.sentForDoa, INVOICE_STATUS.acceptedbyDOA, INVOICE_STATUS.rejectedbyDOA]?.includes(e.optionValue))]);
           return true;
         }
       });
@@ -190,27 +192,23 @@ const InvoiceDetails = () => {
 
   const handleDownloadZip = () => {
     setIsDownloading(true);
+    axiosInstance().get(`/invoice/zip/${invoiceData._id}`, {
+      responseType: 'blob'
+    }).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
 
-    axiosInstance()
-      .get(`/invoice/zip/${invoiceData._id}`, {
-        responseType: 'blob'
-      })
-      .then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
+      const filename = response.headers['content-disposition'].split('filename=')[1];
+      link.setAttribute('download', filename);
 
-        const filename = response.headers['content-disposition'].split('filename=')[1];
-        link.setAttribute('download', filename);
-
-        document.body.appendChild(link);
-        link.click();
-        setIsDownloading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
+      document.body.appendChild(link);
+      link.click();
+      setIsDownloading(false);
+    }).catch((err) => {
+      toastConfig.setToastConfig(err);
+      setIsDownloading(false);
+    });
   };
 
   const handleChangeStatus = (status) => {
@@ -271,7 +269,8 @@ const InvoiceDetails = () => {
   };
 
   const validateStatus = (status) => {
-    const currIdx = statusOptions.findIndex((status) => status.optionValue === invoiceData.status);
+    const statusCheck = invoiceData.status === INVOICE_STATUS.acceptedbyDOA ? INVOICE_STATUS.inProgress : invoiceData.status
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === statusCheck);
     return statusOptions[currIdx + 1]?.optionValue !== status;
   };
 
@@ -325,15 +324,16 @@ const InvoiceDetails = () => {
                   </ThemeButton>
                 )}
                 {permissions?.invoice?.isUpdate && allowedToEdit && statusOptions?.length > 0 && invoiceData?.status !== INVOICE_STATUS.closed && (
-                  <ThemeButton
-                    onClick={openActions}
-                    endIcon={<ExpandMore />}
-                    mobileTooltip="Change Status"
-                    disabled={updateLoading}
-                    iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
-                  >
-                    {'Change Status'}
-                  </ThemeButton>
+                  invoiceData?.doasetup && DOAData?.status !== DOA_STATUS.approved ? null :
+                    <ThemeButton
+                      onClick={openActions}
+                      endIcon={<ExpandMore />}
+                      mobileTooltip="Change Status"
+                      disabled={updateLoading}
+                      iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+                    >
+                      {'Change Status'}
+                    </ThemeButton>
                 )}
                 <Menu
                   anchorEl={anchorEl}
@@ -346,23 +346,21 @@ const InvoiceDetails = () => {
                   open={Boolean(anchorEl)}
                   onClose={closeActions}
                 >
-                  {statusOptions
-                    ?.filter((f) => f.optionValue !== INVOICE_STATUS.cancelled)
-                    .map((o) => {
-                      return (
-                        <MenuItem
-                          key={o?.optionValue}
-                          disabled={validateStatus(o?.optionValue)}
-                          onClick={() => {
-                            closeActions();
-                            handleChangeStatus(o?.optionValue);
-                          }}
-                          value={o}
-                        >
-                          {o?.optionLabel}
-                        </MenuItem>
-                      );
-                    })}
+                  {statusOptions?.map((o) => {
+                    return (
+                      <MenuItem
+                        key={o?.optionValue}
+                        disabled={validateStatus(o?.optionValue)}
+                        onClick={() => {
+                          closeActions();
+                          handleChangeStatus(o?.optionValue);
+                        }}
+                        value={o}
+                      >
+                        {o?.optionLabel}
+                      </MenuItem>
+                    );
+                  })}
                 </Menu>
                 {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
                   <ThemeButton
