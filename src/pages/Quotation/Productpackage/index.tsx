@@ -707,6 +707,7 @@ const Productpackage = ({
     return (
       <>
         {quotationData?.type === QUOTATION_TYPE.assemblyOrder ? null : (
+          permissions?.product &&
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
@@ -716,7 +717,7 @@ const Productpackage = ({
           </MenuItem>
         )}
         {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : (
-          <MenuItem
+          permissions?.packages && <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
@@ -727,7 +728,7 @@ const Productpackage = ({
         {(quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService) ||
           quotationData?.type === QUOTATION_TYPE.assemblyOrder ||
           quotationData?.type === QUOTATION_TYPE.repairOrder ? null : (
-          <MenuItem
+          permissions?.serviceMaster && <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
             }}
@@ -751,7 +752,7 @@ const Productpackage = ({
   const actionButtonMenuItems = () => {
     return (
       <>
-        {quotationData?.type === QUOTATION_TYPE.rentalJob && (
+        {[QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.salesOrder]?.includes(quotationData?.type) && (
           <MenuItem
             disabled={products.length ? false : true}
             onClick={() => {
@@ -761,50 +762,46 @@ const Productpackage = ({
             {`Assign ${resources?.serializedAsset?.titlePlural}`}
           </MenuItem>
         )}
-        <MenuItem
-          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
-          onClick={() => {
-            let tempSupplierAccountId = [];
-            selectedRecords?.forEach((element) => {
-              element?.supplierAccount?.forEach((e) => {
-                if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
-                  tempSupplierAccountId.push(e?.optionValue);
-                }
+        {permissions?.supplierAccount &&
+          <MenuItem
+            disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
+            onClick={() => {
+              let tempSupplierAccountId = [];
+              selectedRecords?.forEach((element) => {
+                element?.supplierAccount?.forEach((e) => {
+                  if (tempSupplierAccountId.findIndex((d) => d === e?.optionValue) === -1) {
+                    tempSupplierAccountId.push(e?.optionValue);
+                  }
+                });
               });
-            });
-            axiosInstance()
-              .get(
-                `${supplierContact.contactApi}?filterById=${JSON.stringify([
-                  { field: 'accountName', term: { $in: tempSupplierAccountId } }
-                ])}&filterType=and`
-              )
-              .then(({ data: { data, count } }) => {
-                setSupplierContactData(data);
-                setAskSupplierPriceDialog(true);
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
-          }}
-        >
-          Ask Supplier to Quote
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            setSelectedType('Supplier');
-            setRequestDialog(true);
-          }}
-        >
-          View Supplier Quote
-        </MenuItem>
-        {/* <MenuItem
-                onClick={() => {
-                  setSelectedType('Customer');
-                  setRequestDialog(true);
-                }}
-              >
-                View Customer Price
-              </MenuItem> */}
+              axiosInstance()
+                .get(
+                  `${supplierContact.contactApi}?filterById=${JSON.stringify([
+                    { field: 'accountName', term: { $in: tempSupplierAccountId } }
+                  ])}&filterType=and`
+                )
+                .then(({ data: { data, count } }) => {
+                  setSupplierContactData(data);
+                  setAskSupplierPriceDialog(true);
+                })
+                .catch((error) => {
+                  toastConfig.setToastConfig(error);
+                });
+            }}
+          >
+            Ask Supplier to Quote
+          </MenuItem>
+        }
+        {permissions?.supplierAccount &&
+          <MenuItem
+            onClick={() => {
+              setSelectedType('Supplier');
+              setRequestDialog(true);
+            }}
+          >
+            View Supplier Quote
+          </MenuItem>
+        }
         <MenuItem
           disabled={
             !Boolean(
@@ -1109,18 +1106,20 @@ const Productpackage = ({
           }}
         >
           <MenuList>
-            <MenuItem
-              onClick={() => {
-                setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-              }}
-            >
-              Add Existing Products
-            </MenuItem>
+            {permissions?.product &&
+              <MenuItem
+                onClick={() => {
+                  setAddDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                }}
+              >
+                Add Existing Products
+              </MenuItem>
+            }
             {quotationData?.type === QUOTATION_TYPE.fieldJob && !fieldTicketPolicyData?.policy?.showAddPackages ? null : [
               QUOTATION_TYPE.repairOrder
             ]?.includes(quotationData?.type) ? null : (
-              <MenuItem
+              permissions?.packages && <MenuItem
                 onClick={() => {
                   setAddDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
                   setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
@@ -1133,7 +1132,7 @@ const Productpackage = ({
               QUOTATION_TYPE.fieldJob,
               QUOTATION_TYPE.repairOrder
             ]?.includes(quotationData?.type) ? null : (
-              <MenuItem
+              permissions?.serviceMaster && <MenuItem
                 onClick={() => {
                   setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
                   setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
