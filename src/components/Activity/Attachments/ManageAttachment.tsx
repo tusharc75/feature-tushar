@@ -429,13 +429,13 @@ export default function ManageAttachment({
                             </Grid>
                           </>
                         )}
-                        <Grid size={{ xs: 12 }}>
+                        {/* <Grid size={{ xs: 12 }}>
                           <DigitalSignature
                             attachmentId={attachmentId}
                             type={type}
                             allAttachments={allAttachments}
                           />
-                        </Grid>
+                        </Grid> */}
                       </Grid>
                     )}
                   </Grid>
