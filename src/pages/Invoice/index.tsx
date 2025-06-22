@@ -33,7 +33,6 @@ import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let invoiceTimeout;
 
@@ -381,32 +380,10 @@ const Invoice = () => {
         setIsSubmitting(false);
       });
   };
-  const connectQuickbooks = async () => {
-    try {
-      const res = await axiosInstance().get('/integration/quickbook/');
-      console.log(res);
-      const clientId = res?.data?.data?.quickbooksClientId;
-
-      const redirectUri = encodeURIComponent('http://localhost:4000/integration/quickbook/oauth/callback');  // must match your backend route & QuickBooks app redirect URI
-      const scope = encodeURIComponent('com.intuit.quickbooks.accounting openid profile email phone address');
-      const state = btoa(JSON.stringify({
-        ts: Date.now(),
-        brand: user?.brand,
-        frontendUrl: window.location.origin
-      }));
-      // 3️⃣ Build auth URL
-      const authUrl = `https://appcenter.intuit.com/connect/oauth2?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}`;
-
-      // 4️⃣ Redirect to QuickBooks
-      window.location.href = authUrl;
-    } catch (error) {
-      console.error('Error while initiating QuickBooks OAuth', error);
-    }
-  };
 
   return (
     <section className="main-container-v1">
-      <div className="headerbox-v1 flex">
+      <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.invoice?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.invoice}
@@ -423,13 +400,6 @@ const Invoice = () => {
           additionalParams={getQueryString(true)}
           resource={sidebarResource.invoice}
         />
-        <ThemeButton
-          className='flex-end'
-          buttonType='theme'
-          onClick={connectQuickbooks}
-        >
-          Connect QuickBooks
-        </ThemeButton>
       </div>
       <CustomContainer>
         <ListingPageHeader
