@@ -15,6 +15,7 @@ import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
+  DOA_STATUS,
   MATERIAL_TYPE,
   PURCHASE_REQUISITION_STATUS,
   checkIsAllowedToDelete,
@@ -114,21 +115,21 @@ const PurchaseRequisitionDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(
-        permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
+        data?.canDelete &&
+          permissions?.purchaseRequisition?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
       );
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([
         { ...routes.purchaseRequisition, title: resources?.purchaseRequisition?.titlePlural },
         { title: data?.purchaseRequisitionNumber }
       ]);
-
       if (data?.doaSetup) {
         const doaResponse: any = await axiosInstance().get(`${routes.resourceDoaRequest.path}/${data?._id}?entity=${data?.entity}`);
         if (doaResponse?.data?.data) {
           setDOAData(doaResponse?.data?.data);
         }
       }
-
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -141,7 +142,6 @@ const PurchaseRequisitionDetail = () => {
         .put(`${routes?.purchaseRequisition?.path}/remove`, { ids: [id] })
         .then(({ data }) => {
           setShowConfirmBox(false);
-
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -199,16 +199,17 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {purchaseRequisitionData?.material?.length > 0 && (
-                <ThemeButton
-                  onClick={() => {
-                    setOrderDialog({ open: true });
-                  }}
-                  disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
-                >
-                  {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
-                </ThemeButton>
-              )}
+              {purchaseRequisitionData?.material?.length > 0 &&
+                (purchaseRequisitionData?.doaSetup && DOAData?.status !== DOA_STATUS.approved ? null : (
+                  <ThemeButton
+                    onClick={() => {
+                      setOrderDialog({ open: true });
+                    }}
+                    disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
+                  >
+                    {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
+                  </ThemeButton>
+                ))}
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
@@ -257,15 +258,11 @@ const PurchaseRequisitionDetail = () => {
               ) : (
                 <>
                   {stepList[currentStep]?.name === 'DOA' && (
-                    <Box
-                      style={{
-                        marginLeft: 'auto',
-                        maxWidth: 'max-content',
-                        marginTop: DOAData ? '-30px' : ''
-                      }}
-                    >
-                      <ShowDoa status={purchaseRequisitionData?.status} data={DOAData} />
-                    </Box>
+                    <div className="pointer-events-none flex h-0 justify-end overflow-visible ">
+                      <div className="pointer-events-auto z-10 [transform:translateY(-15px)]">
+                        <ShowDoa status={purchaseRequisitionData?.status} data={DOAData} />
+                      </div>
+                    </div>
                   )}
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
                     <Steps

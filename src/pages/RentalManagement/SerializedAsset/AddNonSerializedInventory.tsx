@@ -54,8 +54,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               qty:
                 type === 'add'
                   ? (d?.inventory || 0) -
-                    (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
-                      0)
+                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
+                    0)
                   : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
               inventory: 0
             }));
@@ -78,6 +78,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             data?.map((p) => ({
               product: p?.materialId,
               warehouse: p?.warehouseId,
+              storageLocation: p?.storageLocationId,
               qty: p?.inventory,
               _id: p?._id
             }))
@@ -97,6 +98,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             data?.map((p) => ({
               product: p?.materialId,
               warehouse: p?.warehouseId,
+              storageLocation: p?.storageLocationId,
               qty: p?.inventory,
               _id: p?._id
             }))
@@ -118,28 +120,28 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
       <Box style={{ display: 'inline' }}>
         {products.length > 0
           ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct?._id === d._id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'}`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct?._id !== d._id) {
-                    setSelectedProduct(d);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.productName} className="text-error">{`${d?.productName} (${d?.qty})`}</span>
-                ) : d?.totalQty - d?.qty > 0 ? (
-                  <span key={d.productName} className="text-success">{`${d?.productName} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.productName}>{`${d?.productName} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+            <Box
+              m={0.5}
+              p={1}
+              border={1}
+              className={`cursor-pointer rounded-sm ${selectedProduct?._id === d._id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'}`}
+              borderColor="var(--common-border-color)"
+              onClick={() => {
+                if (selectedProduct?._id !== d._id) {
+                  setSelectedProduct(d);
+                }
+              }}
+              style={{ display: 'inline-block' }}
+            >
+              {d?.qty < 0 ? (
+                <span key={d.productName} className="text-error">{`${d?.productName} (${d?.qty})`}</span>
+              ) : d?.totalQty - d?.qty > 0 ? (
+                <span key={d.productName} className="text-success">{`${d?.productName} (${d?.qty})`}</span>
+              ) : (
+                <span key={d.productName}>{`${d?.productName} (${d?.qty})`}</span>
+              )}
+            </Box>
+          ))
           : null}
       </Box>
     );
@@ -208,8 +210,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                               const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
                               const tempProductInventoryData: any = productInventoryData?.map((_data) =>
                                 _data?._id === _product?._id &&
-                                _data?.warehouseId === _product?.warehouseId &&
-                                _data?.storageLocationId === _product?.storageLocationId
+                                  _data?.warehouseId === _product?.warehouseId &&
+                                  _data?.storageLocationId === _product?.storageLocationId
                                   ? { ..._data, inventory: inventory }
                                   : _data
                               );
@@ -248,8 +250,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         <Box pt={1}>
           {productInventoryData?.filter((p) => p?._id === selectedProduct?._id)?.reduce((sum, row) => row?.inventory + sum, 0) >
             selectedProducts?.find((s) => s?._id === selectedProduct?._id)?.qty && (
-            <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
-          )}
+              <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
+            )}
         </Box>
       </CustomDialogContent>
     </Dialog>

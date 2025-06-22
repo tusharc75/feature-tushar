@@ -71,7 +71,8 @@ const ResourceDoaRequest = () => {
                   className="text-truncate link"
                   onClick={() => {
                     history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
-                      resource: row?.original?.resource
+                      resource: row?.original?.resource,
+                      currency: row?.original?.currency,
                     });
                   }}
                 >
@@ -84,6 +85,8 @@ const ResourceDoaRequest = () => {
                       window.open(`${routes.serializedAssetDetail.path}/${row.original.resourceId}`);
                     } else if (row?.original?.resource === sidebarResource?.purchaseRequisition) {
                       window.open(`${routes.purchaseRequisitionDetail.path}/${row.original.resourceId}`);
+                    } else if (row?.original?.resource === sidebarResource?.invoice) {
+                      window.open(`${routes.invoiceDetail.path}/${row.original.resourceId}`);
                     }
                   }}
                 >
@@ -172,17 +175,14 @@ const ResourceDoaRequest = () => {
             }
           }
           let finalObject = prepareDataForGrid(d, user);
-          let resourceData = prepareDataForGrid(d?.resourceData || {});
+          let referenceData = prepareDataForGrid(d?.referenceData || {});
           return {
-            ...resourceData,
+            ...referenceData,
             ...finalObject,
             _id: d?._id,
             entity: d?.entity,
-            refrenceFrom:
-              d?.resource === sidebarResource?.serializedAssetStatusChangeRequest
-                ? d?.resourceData?.asset?.optionLabel
-                : d?.resourceData?.optionLabel,
-            resourceId: d?.resource === sidebarResource?.serializedAssetStatusChangeRequest ? d?.resourceData?.asset?.optionValue : d?.referenceId,
+            refrenceFrom: d?.refrenceNumber,
+            resourceId: d?.resource === sidebarResource?.serializedAssetStatusChangeRequest ? d?.referenceData?.asset?.optionValue : d?.referenceId,
             referenceId: d?.referenceId,
             canPerform: doaUser?.isUpdate || false,
             status: status,
