@@ -33,7 +33,6 @@ import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 let invoiceTimeout;
 
@@ -384,7 +383,7 @@ const Invoice = () => {
 
   return (
     <section className="main-container-v1">
-      <div className="headerbox-v1 flex">
+      <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: resources?.invoice?.titlePlural }]} />
         <ImportExportLinks
           permissions={permissions?.invoice}
