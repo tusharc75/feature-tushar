@@ -15,7 +15,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const SendForSignatureDialog = ({ attachmentId, allAttachments, onClose }: any) => {
 
-  const [initialData, setInitialData] = useState({ emails: [] as string[], comment: ''});
+  const [initialData, setInitialData] = useState({ emails: [] as string[], comment: '' });
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
