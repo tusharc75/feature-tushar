@@ -18,29 +18,53 @@ self.addEventListener('message', (event) => {
       console.error('Firebase initialization failed:', error);
     }
   }
+  // For testing a fake push event payload
+  if (event.data?.type === 'TEST_PUSH') {
+    const fakePushEvent = {
+      data: {
+        json: () => ({
+          notification: {
+            title: 'Test Notification',
+            body: 'This is a simulated push message.',
+            icon: '/logo-24x24.ico',
+            data: { url: '/test' }
+          }
+        })
+      }
+    };
+
+    handlePushEvent(fakePushEvent);
+  }
 });
 
-// Handle push notifications
-self.addEventListener('push', (event) => {
+function handlePushEvent(event) {
   try {
     const payload = event.data?.json();
-    if (!payload) return;
+    if (!payload) {
+      console.log('No payload in push event');
+      return;
+    }
 
     const { notification, data } = payload;
     const notificationData = notification || data;
 
     if (notificationData) {
       const { title, body, icon, data: customData } = notificationData;
-      self.registration.showNotification(title || 'Notification', {
+      const notificationPayload = {
+        title,
         body: body || 'No message provided',
         icon: icon || '/logo-24x24.ico',
         data: customData || {}
-      });
+      };
+      self.registration.showNotification(title || 'Notification', notificationPayload);
     }
   } catch (error) {
     console.error('Error handling push notification:', error);
   }
-});
+}
+
+// Handle push notifications
+self.addEventListener('push', handlePushEvent);
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
