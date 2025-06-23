@@ -294,7 +294,7 @@ const ManageSublease = ({
           validate={validate}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, submitForm, setFieldValue }) => (
+          {({ values, errors, touched, submitForm, setFieldValue, setFieldTouched, validateForm }) => (
             <Fragment>
               <CustomDialogHeader
                 title={subleaseId ? (isClone ? 'Clone' : `Update ${subleaseData?.subleaseName}`) : 'Create ' + resources?.sublease?.titleSingular}
@@ -354,7 +354,10 @@ const ManageSublease = ({
                                     type={field.type}
                                     options={field.option}
                                     setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
+                                      setFieldTouched(name, true, false);
+                                      setFieldValue(name, value).then(() => {
+                                        validateForm();
+                                      });
                                     }}
                                     required={field.required}
                                     fullWidth
