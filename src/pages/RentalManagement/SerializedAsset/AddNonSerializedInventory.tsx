@@ -72,37 +72,31 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
     if (data?.length > 0) {
       setSubmitting(true);
       if (type === 'add') {
-        axiosInstance()
-          .put(
-            `${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
-            data?.map((p) => ({
-              product: p?.materialId,
-              warehouse: p?.warehouseId,
-              storageLocation: p?.storageLocationId,
-              qty: p?.inventory,
-              _id: p?._id
-            }))
-          )
-          .then(() => {
-            setSubmitting(false);
-            onSuccess();
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setSubmitting(false);
-          });
+        axiosInstance().put(`${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
+          data?.map((p) => ({
+            product: p?.materialId,
+            warehouse: p?.warehouseId,
+            storageLocation: p?.storageLocationId,
+            qty: p?.inventory,
+            _id: p?._id
+          }))
+        ).then(() => {
+          setSubmitting(false);
+          onSuccess();
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+          setSubmitting(false);
+        });
       } else {
-        axiosInstance()
-          .put(
-            `${rentalManagement.api}/${referenceId}/remove-non-serial-inventory`,
-            data?.map((p) => ({
-              product: p?.materialId,
-              warehouse: p?.warehouseId,
-              storageLocation: p?.storageLocationId,
-              qty: p?.inventory,
-              _id: p?._id
-            }))
-          )
+        axiosInstance().put(`${rentalManagement.api}/${referenceId}/remove-non-serial-inventory`,
+          data?.map((p) => ({
+            product: p?.materialId,
+            warehouse: p?.warehouseId,
+            storageLocation: p?.storageLocationId,
+            qty: p?.inventory,
+            _id: p?._id
+          }))
+        )
           .then(() => {
             setSubmitting(false);
             onSuccess();

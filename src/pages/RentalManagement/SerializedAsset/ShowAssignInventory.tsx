@@ -18,7 +18,7 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 
-const ShowInventory = ({ data, onClose, productName }) => {
+const ShowAssignInventory = ({ data, onClose, productName }) => {
   const {
     state: { resources, user, permissions }
   }: any = useData();
@@ -50,7 +50,6 @@ const ShowInventory = ({ data, onClose, productName }) => {
           <Table aria-label="customized table">
             <TableHead>
               <TableRow>
-                <TableCell>Index</TableCell>
                 <TableCell align="left">Qty</TableCell>
                 <TableCell align="left">{resources?.warehouse?.titleSingular}</TableCell>
                 {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">{resources?.storageLocation?.titleSingular}</TableCell>}
@@ -59,9 +58,7 @@ const ShowInventory = ({ data, onClose, productName }) => {
             <TableBody>
               {data?.map((element, index) => (
                 <TableRow key={data.id}>
-                  <TableCell component="th" scope="row">
-                    {index + 1}
-                  </TableCell>
+
                   <TableCell align="left">{element?.qty}</TableCell>
                   <TableCell align="left">
                     {element?.warehouse?.optionLabel}
@@ -91,4 +88,4 @@ const ShowInventory = ({ data, onClose, productName }) => {
   );
 };
 
-export default ShowInventory;
+export default ShowAssignInventory;
