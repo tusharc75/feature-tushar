@@ -4,7 +4,6 @@ import {
   Autocomplete,
   TextField,
   Box,
-  MenuItem,
 } from '@mui/material';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -13,7 +12,6 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-
 
 const SendForSignatureDialog = ({ attachmentId, allAttachments, onClose }: any) => {
 
