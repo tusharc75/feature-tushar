@@ -1,6 +1,6 @@
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box/Box';
-import { Delete, ExpandMore, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
+import { Delete, ExpandMore, Info, LibraryBooks, Receipt, Repeat, Warning } from '@mui/icons-material';
 import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -46,6 +46,7 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ScanButtons from 'src/components/ScanButtons';
+import ShowInventory from 'src/pages/RentalManagement/SerializedAsset/ShowInventory';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -75,6 +76,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [allLoadingTicketProducts, setAllLoadingTicketProducts] = useState([]);
+  const [showNonSerializedInventory, setShowNonSerializedInventory] = useState({ open: false, data: null })
 
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -233,6 +235,18 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   }}
                 >
                   <Repeat fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.serializedProduct && (
+              <HtmlTooltip title={`Show assigned inventory`}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setShowNonSerializedInventory({ open: true, data: row?.original })
+                  }}
+                >
+                  <Info fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -1518,6 +1532,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           ids={productSerialNumbers?.map((e) => e?.serialNumber)}
           showWarehouseFilter={true}
           referenceData={{ rentalJob: rentalManagementData._id }}
+        />
+      )}
+      {showNonSerializedInventory.open && (
+        <ShowInventory
+          onClose={() => {
+            setShowNonSerializedInventory({ open: false, data: null })
+          }}
+          data={nonSerializedInventory?.filter(inv => inv?._id === showNonSerializedInventory?.data?._id && inv?.product?.optionValue === showNonSerializedInventory?.data?.materialId)}
+          productName={showNonSerializedInventory?.data?.detail}
         />
       )}
     </Fragment>

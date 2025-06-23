@@ -7,7 +7,6 @@ import { GENIE_WINDOW_ID } from 'src/components/DesktopDM/constants';
 import useLocalStorage from 'src/hooks/useLocalStore';
 import { EQUIPT_BE_CONNECTED_WINDOW } from 'src/constants/helpers';
 import { requestAndSyncFcmToken } from 'src/hooks/useFirebaseNotifications';
-import { FIREBASE_CONFIG } from 'src/config';
 
 const windowWidth = window.innerWidth;
 const initialState: UIState = {
@@ -196,7 +195,7 @@ const useUIDesktopDm = () => {
       setStoreValue('partial');
       return data;
     });
-    if (FIREBASE_CONFIG.apiKey) {
+    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
       requestAndSyncFcmToken(user);
     }
   }, [setStoreValue, user]);
