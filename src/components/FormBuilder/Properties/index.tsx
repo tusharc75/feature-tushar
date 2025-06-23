@@ -616,7 +616,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                 Cancel
               </ThemeButton>
               <ThemeButton buttonType="theme" onClick={submitForm}>
-                Save
+                Confirm
               </ThemeButton>
             </CustomDialogFooter>
 
