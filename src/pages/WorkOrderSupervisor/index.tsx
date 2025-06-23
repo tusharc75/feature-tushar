@@ -346,6 +346,13 @@ const WorkOrderSupervisor = () => {
         target: '_blank'
       },
       {
+        accessor: 'warehouse',
+        title: resources?.warehouse?.titleSingular,
+        type: 'link',
+        link: (data) => `${routes?.warehouseDetail?.path}/${data?.warehouseId}`,
+        target: '_blank'
+      },
+      {
         accessor: 'repairOrderNumber',
         type: 'link',
         title: resources?.repairOrder?.titleSingular,
@@ -494,7 +501,8 @@ const WorkOrderSupervisor = () => {
                 newObj['serializedAsset'] = item?.workOrderDetail?.serializedAsset?.optionLabel;
                 newObj['serializedAssetId'] = item?.workOrderDetail?.serializedAsset?.optionValue;
                 newObj['createDate'] = item?.workOrderDetail?.createDate;
-                newObj['warehouse'] = item?.workOrderDetail?.warehouse;
+                newObj['warehouse'] = item?.workOrderDetail?.warehouse?.optionLabel;
+                newObj['warehouseId'] = item?.workOrderDetail?.warehouse?.optionValue;
                 newObj['packageName'] = item?.workOrderDetail?.package?.optionLabel;
                 newObj['packageId'] = item?.workOrderDetail?.package?.optionValue;
                 newObj['priority'] = item?.workOrderDetail?.priority;
@@ -1098,7 +1106,7 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignTechniciansDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
@@ -1132,7 +1140,7 @@ const WorkOrderSupervisor = () => {
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
