@@ -28,6 +28,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [tabValue, setTabValue] = useState(0);
+  const [autoSwitched, setAutoSwitched] = useState(false);
 
   useEffect(() => {
     if (fieldData.type === 'dropDown' && !fieldData.lookup) {
@@ -537,104 +538,200 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         onSubmit={handleSave}
         validate={(v) => validate(v, fieldData)}
       >
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <>
-            <CustomDialogHeader
-              title={`${values['fieldLabel']} - ${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`}
-              onClose={() => {
-                if (isEqual(values, initialValues)) handleClose();
-                setShowConfirmDialog(true);
-              }}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            ></CustomDialogHeader>
-            <CustomDialogContent>
-              <Box>
-                <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
-                  <Box pt={1}>
-                    <CustomTabs value={tabValue} onChange={handleTabChange}>
-                      <CustomTab value={0} label={'General'} />
-                      <CustomTab value={1} label={'Visibility'} />
-                      {['date', 'dateTime']?.includes(fieldData?.type) && <CustomTab value={2} label={'Validation'} />}
-                      <CustomTab value={3} label={'Setting'} />
-                    </CustomTabs>
-                    <TabPanel value={tabValue} index={0}>
-                      <General
-                        values={values}
-                        setFieldValue={setFieldValue}
-                        fields={fields}
-                        fieldData={fieldData}
-                        touched={touched}
-                        errors={errors}
-                        module={module}
-                        isCalculativeField={isCalculativeField}
-                        handleChangeFieldName={handleChangeFieldName}
-                      />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                      <Visibility
-                        values={values}
-                        setFieldValue={setFieldValue}
-                        fields={fields}
-                        fieldsToExclude={[fieldData?.fieldName]}
-                        touched={touched}
-                        errors={errors}
-                      />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={2}>
-                      <Validation values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={3}>
-                      <Setting
-                        initialValues={initialValues}
-                        values={values}
-                        setFieldValue={setFieldValue}
-                        fields={fields}
-                        fieldData={fieldData}
-                        section={section}
-                        touched={touched}
-                        errors={errors}
-                        module={module}
-                        brandId={brandId}
-                      />
-                    </TabPanel>
-                  </Box>
-                </Form>
-              </Box>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <ThemeButton
-                buttonType="transparent"
-                onClick={() => {
+        {({ submitForm, touched, errors, setFieldValue, values }) => {
+          const getTabWithErrors = (errors, touched) => {
+            if (!errors || !touched) return 0;
+            const generalErrors = ['defaultValue', 'tooltipMessage', 'warningTooltipMessage'];
+            if (generalErrors.some(field => errors[field] && touched[field])) {
+              return 3;
+            }
+            return 0;
+          };
+
+          const getErrorCountForTab = (tabIndex) => {
+            if (!errors || !touched) return 0;
+            const errorFields = {
+              3: ['defaultValue', 'tooltipMessage', 'warningTooltipMessage']
+            };
+            const tabErrors = errorFields[tabIndex] || [];
+            return tabErrors.filter(field => errors[field] && touched[field]).length;
+          };
+
+          useEffect(() => {
+            if (Object.keys(errors).length > 0 && Object.keys(touched).length > 0) {
+              const tabWithErrors = getTabWithErrors(errors, touched);
+              if (tabValue !== tabWithErrors) {
+                setTabValue(tabWithErrors);
+                setAutoSwitched(true);
+                setTimeout(() => setAutoSwitched(false), 2000);
+              }
+            }
+          }, [errors, touched, fieldData?.type]);
+
+          return (
+            <>
+              <CustomDialogHeader
+                title={`${values['fieldLabel']} - ${FieldList[fieldData?.type?.toUpperCase()]?.label} Properties`}
+                onClose={() => {
                   if (isEqual(values, initialValues)) handleClose();
                   setShowConfirmDialog(true);
                 }}
-              >
-                Cancel
-              </ThemeButton>
-              <ThemeButton buttonType="theme" onClick={submitForm}>
-                Confirm
-              </ThemeButton>
-            </CustomDialogFooter>
+                isMinimized={!fullScreen}
+                onMinimizeMaximize={() => {
+                  setFullScreen((prevState) => !prevState);
+                }}
+                showManimizeMaximize={true}
+              ></CustomDialogHeader>
+              <CustomDialogContent>
+                <Box>
+                  <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
+                    <Box pt={1}>
+                      <CustomTabs value={tabValue} onChange={handleTabChange}>
+                        <CustomTab
+                          value={0}
+                          label={
+                            <span>
+                              General
+                              {getErrorCountForTab(0) > 0 && (
+                                <span style={{ color: 'red', marginLeft: '4px' }}>
+                                  ({getErrorCountForTab(0)})
+                                </span>
+                              )}
+                            </span>
+                          }
+                        />
+                        <CustomTab
+                          value={1}
+                          label={
+                            <span>
+                              Visibility
+                              {getErrorCountForTab(1) > 0 && (
+                                <span style={{ color: 'red', marginLeft: '4px' }}>
+                                  ({getErrorCountForTab(1)})
+                                </span>
+                              )}
+                            </span>
+                          }
+                        />
+                        {['date', 'dateTime']?.includes(fieldData?.type) && (
+                          <CustomTab
+                            value={2}
+                            label={
+                              <span>
+                                Validation
+                                {getErrorCountForTab(2) > 0 && (
+                                  <span style={{ color: 'red', marginLeft: '4px' }}>
+                                    ({getErrorCountForTab(2)})
+                                  </span>
+                                )}
+                              </span>
+                            }
+                          />
+                        )}
+                        <CustomTab
+                          value={3}
+                          label={
+                            <span>
+                              Setting
+                              {getErrorCountForTab(3) > 0 && (
+                                <span style={{ color: 'red', marginLeft: '4px' }}>
+                                  ({getErrorCountForTab(3)})
+                                </span>
+                              )}
+                            </span>
+                          }
+                        />
+                      </CustomTabs>
+                      {autoSwitched && (
+                        <Box
+                          sx={{
+                            mt: 1,
+                            p: 1,
+                            backgroundColor: '#fff3cd',
+                            border: '1px solid #ffeaa7',
+                            borderRadius: 1,
+                            fontSize: '0.875rem',
+                            color: '#856404'
+                          }}
+                        >
+                          ⚠️ Switched to tab with validation errors
+                        </Box>
+                      )}
+                      <TabPanel value={tabValue} index={0}>
+                        <General
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          fields={fields}
+                          fieldData={fieldData}
+                          touched={touched}
+                          errors={errors}
+                          module={module}
+                          isCalculativeField={isCalculativeField}
+                          handleChangeFieldName={handleChangeFieldName}
+                        />
+                      </TabPanel>
+                      <TabPanel value={tabValue} index={1}>
+                        <Visibility
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          fields={fields}
+                          fieldsToExclude={[fieldData?.fieldName]}
+                          touched={touched}
+                          errors={errors}
+                        />
+                      </TabPanel>
+                      <TabPanel value={tabValue} index={2}>
+                        <Validation values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
+                      </TabPanel>
+                      <TabPanel value={tabValue} index={3}>
+                        <Setting
+                          initialValues={initialValues}
+                          values={values}
+                          setFieldValue={setFieldValue}
+                          fields={fields}
+                          fieldData={fieldData}
+                          section={section}
+                          touched={touched}
+                          errors={errors}
+                          module={module}
+                          brandId={brandId}
+                        />
+                      </TabPanel>
+                    </Box>
+                  </Form>
+                </Box>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <ThemeButton
+                  buttonType="transparent"
+                  onClick={() => {
+                    if (isEqual(values, initialValues)) handleClose();
+                    setShowConfirmDialog(true);
+                  }}
+                >
+                  Cancel
+                </ThemeButton>
+                <ThemeButton buttonType="theme" onClick={submitForm}>
+                  Confirm
+                </ThemeButton>
+              </CustomDialogFooter>
 
-            {showConfirmDialog ? (
-              <ConfirmCancelDialog
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  submitForm();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  handleClose();
-                }}
-              />
-            ) : null}
-          </>
-        )}
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
+                    handleClose();
+                  }}
+                />
+              ) : null}
+            </>
+          );
+        }}
       </Formik>
     </Dialog>
   );
