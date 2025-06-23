@@ -21,7 +21,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
-import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { AddOutlined, ElectricBolt, ExpandLess, ExpandMore } from '@mui/icons-material';
 import UpdateIcon from '@mui/icons-material/Update';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
@@ -39,7 +39,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openAction, setOpenAction] = useState(false);
-  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState(false);
+  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState({ open: false, _key: '' });
   const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = useCallback(
@@ -155,10 +155,22 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <IconButton
                   aria-label="Actions"
                   onClick={() => {
-                    setOpenUpdateResourceActions(true);
+                    setOpenUpdateResourceActions({ open: true, _key: 'updateResourceActions' });
                   }}
                 >
                   <UpdateIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {[sidebarResource.serializedAsset]?.includes(resource) && (
+              <HtmlTooltip title={'Resource Triggers'}>
+                <IconButton
+                  aria-label="Actions"
+                  onClick={() => {
+                    setOpenUpdateResourceActions({ open: true, _key: 'resourceTriggers' });
+                  }}
+                >
+                  <ElectricBolt fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -226,17 +238,18 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             resourceData={resourceData}
           />
         )}
-        {openUpdateResourceActions && (
+        {openUpdateResourceActions.open && (
           <UpdateResourceActions
             onClose={() => {
-              setOpenUpdateResourceActions(false);
+              setOpenUpdateResourceActions({ open: false, _key: '' });
             }}
             onSuccess={() => {
               fetchData();
-              setOpenUpdateResourceActions(false);
+              setOpenUpdateResourceActions({ open: false, _key: '' });
             }}
             resource={resource}
             resourceData={resourceData}
+            _key={openUpdateResourceActions._key}
           />
         )}
 
