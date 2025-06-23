@@ -287,13 +287,32 @@ import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
 import FieldView from 'src/pages/FieldView';
-
+import { firebaseConfig } from './firebase';
 var notificationInterval: any = null;
 
 function App() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       registerSW();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
+      const registerServiceWorker = async () => {
+        try {
+          const registration = await navigator.serviceWorker.register('/messaging/firebase-messaging-sw.js', { scope: '/messaging/' });
+          // Send Firebase config to service worker
+          registration.active?.postMessage({
+            type: 'INIT_FIREBASE',
+            config: firebaseConfig
+          });
+        } catch (error) {
+          console.error('Service Worker registration failed:', error);
+        }
+      };
+      window.addEventListener('load', registerServiceWorker);
+      return () => window.removeEventListener('load', registerServiceWorker);
     }
   }, []);
 

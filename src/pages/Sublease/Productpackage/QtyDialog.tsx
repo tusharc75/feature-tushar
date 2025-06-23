@@ -272,7 +272,7 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
           validate={validate}
           onSubmit={handleSubmit}
         >
-          {({ values, errors, touched, setFieldValue, submitForm }) => (
+          {({ values, errors, touched, setFieldValue, submitForm, setFieldTouched, validateForm }) => (
             <Fragment>
               <CustomDialogHeader
                 title={getTitle()}
@@ -425,7 +425,10 @@ const QtyDialog: FC<EditDialogProps> = ({ onClose, handleSaveData, subleaseData,
                                           type={field.type}
                                           options={field.option}
                                           setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
+                                            setFieldTouched(name, true, false);
+                                            setFieldValue(name, value).then(() => {
+                                              validateForm();
+                                            });
                                           }}
                                           required={field.required}
                                           fullWidth

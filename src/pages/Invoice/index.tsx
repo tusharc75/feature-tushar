@@ -86,7 +86,8 @@ const Invoice = () => {
     data = response?.data?.data;
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
-        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.new, INVOICE_STATUS.inProgress, INVOICE_STATUS.cancelled].includes(e.optionValue));
+        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.new, INVOICE_STATUS.inProgress, INVOICE_STATUS.cancelled,
+        INVOICE_STATUS.acceptedbyDOA, INVOICE_STATUS.rejectedbyDOA, INVOICE_STATUS.sentForDoa].includes(e.optionValue));
         setStatusOptions(statusOps);
       }
     });
