@@ -14,11 +14,10 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const providers = ['AdobeSign', 'DocuSign'];
 
 const SendForSignatureDialog = ({ attachmentId, allAttachments, onClose }: any) => {
 
-  const [initialData, setInitialData] = useState({ emails: [] as string[], comment: '', provider: '' });
+  const [initialData, setInitialData] = useState({ emails: [] as string[], comment: ''});
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
 
@@ -42,7 +41,6 @@ const SendForSignatureDialog = ({ attachmentId, allAttachments, onClose }: any) 
         emails: initialData.emails,
         comment: initialData.comment,
         selectedAttachments: allAttachments,
-        provider: initialData.provider,
       });
       toastConfig.setToastConfig({
         open: true,
@@ -95,27 +93,6 @@ const SendForSignatureDialog = ({ attachmentId, allAttachments, onClose }: any) 
             />
           )}
         />
-        <Box mt={2}>
-          <TextField
-            select
-            fullWidth
-            label="Service Provider"
-            value={initialData.provider}
-            onChange={(e) =>
-              setInitialData({ ...initialData, provider: e.target.value })
-            }
-            variant="outlined"
-            size="small"
-            margin="normal"
-            required
-          >
-            {providers.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
         <Box mt={2}>
           <MultiLine
             label="Comment"
