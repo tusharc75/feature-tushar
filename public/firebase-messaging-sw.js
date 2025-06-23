@@ -18,7 +18,7 @@ self.addEventListener('message', (event) => {
       messaging.onBackgroundMessage((payload) => {
         const { notification, data } = payload;
         const notificationData = notification || data;
-
+        console.log(notificationData);
         if (notificationData) {
           const { title, body, icon, data: customData } = notificationData;
           const notificationPayload = {
@@ -46,6 +46,7 @@ function handlePushEvent(event) {
 
     const { notification, data } = payload;
     const notificationData = notification || data;
+    console.log(notificationData);
 
     if (notificationData) {
       const { title, body, icon, data: customData } = notificationData;
