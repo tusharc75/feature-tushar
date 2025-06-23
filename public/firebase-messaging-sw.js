@@ -18,23 +18,6 @@ self.addEventListener('message', (event) => {
       console.error('Firebase initialization failed:', error);
     }
   }
-  // For testing a fake push event payload
-  if (event.data?.type === 'TEST_PUSH') {
-    const fakePushEvent = {
-      data: {
-        json: () => ({
-          notification: {
-            title: 'Test Notification',
-            body: 'This is a simulated push message.',
-            icon: '/logo-24x24.ico',
-            data: { url: '/test' }
-          }
-        })
-      }
-    };
-
-    handlePushEvent(fakePushEvent);
-  }
 });
 
 function handlePushEvent(event) {
