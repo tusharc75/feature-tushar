@@ -14,6 +14,22 @@ self.addEventListener('message', (event) => {
       if (!config?.apiKey) throw new Error('Invalid Firebase config');
       firebase.initializeApp(config);
       messaging = firebase.messaging();
+
+      messaging.onBackgroundMessage((payload) => {
+        const { notification, data } = payload;
+        const notificationData = notification || data;
+
+        if (notificationData) {
+          const { title, body, icon, data: customData } = notificationData;
+          const notificationPayload = {
+            title,
+            body: body || 'No message provided',
+            icon: icon || '/logo-24x24.ico',
+            data: customData || {}
+          };
+          self.registration.showNotification(title || 'Notification', notificationPayload);
+        }
+      });
     } catch (error) {
       console.error('Firebase initialization failed:', error);
     }
