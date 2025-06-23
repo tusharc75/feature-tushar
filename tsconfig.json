@@ -30,5 +30,5 @@
     "checkJs": false,
     "removeComments": true
   },
-  "include": ["./src/**/*", "public/firebase-messaging-sw.js"]
+  "include": ["./src/**/*", "public/messaging/firebase-messaging-sw.js"]
 }
