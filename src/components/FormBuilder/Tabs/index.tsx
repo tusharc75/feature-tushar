@@ -27,6 +27,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 import { sidebarResource } from 'src/constants/helpers';
+import { RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 
 const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,7 +40,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openAction, setOpenAction] = useState(false);
-  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState({ open: false, _key: '' });
+  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState({ open: false, type: '' });
   const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = useCallback(
@@ -155,7 +156,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <IconButton
                   aria-label="Actions"
                   onClick={() => {
-                    setOpenUpdateResourceActions({ open: true, _key: 'updateResourceActions' });
+                    setOpenUpdateResourceActions({ open: true, type: RESOURCE_ACTION_TYPE.actions });
                   }}
                 >
                   <UpdateIcon fontSize="small" color={'primary'} />
@@ -167,7 +168,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <IconButton
                   aria-label="Actions"
                   onClick={() => {
-                    setOpenUpdateResourceActions({ open: true, _key: 'resourceTriggers' });
+                    setOpenUpdateResourceActions({ open: true, type: RESOURCE_ACTION_TYPE.triggers });
                   }}
                 >
                   <ElectricBolt fontSize="small" color={'primary'} />
@@ -241,15 +242,15 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
         {openUpdateResourceActions.open && (
           <UpdateResourceActions
             onClose={() => {
-              setOpenUpdateResourceActions({ open: false, _key: '' });
+              setOpenUpdateResourceActions({ open: false, type: '' });
             }}
             onSuccess={() => {
               fetchData();
-              setOpenUpdateResourceActions({ open: false, _key: '' });
+              setOpenUpdateResourceActions({ open: false, type: '' });
             }}
             resource={resource}
             resourceData={resourceData}
-            _key={openUpdateResourceActions._key}
+            type={openUpdateResourceActions.type}
           />
         )}
 
