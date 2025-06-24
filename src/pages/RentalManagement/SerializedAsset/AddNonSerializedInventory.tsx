@@ -14,7 +14,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { resources }
+    state: { user, resources }
   }: any = useData();
 
   const [selectedProduct, setSelectedProduct] = useState(selectedProducts[0]);
@@ -55,9 +55,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               qty:
                 type === 'add'
                   ? (d?.inventory || 0) -
-                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && s?.storageLocation?.optionValue === d?.storageLocation?._id)?.qty ||
+                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
                     0)
-                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && s?.storageLocation?.optionValue === d?.storageLocation?._id)?.qty || 0,
+                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty || 0,
               inventory: 0
             }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
@@ -77,7 +77,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
           data?.map((p) => ({
             product: p?.materialId,
             warehouse: p?.warehouseId,
-            storageLocation: p?.storageLocationId,
+            ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
             qty: p?.inventory,
             _id: p?._id
           }))
@@ -93,7 +93,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
           data?.map((p) => ({
             product: p?.materialId,
             warehouse: p?.warehouseId,
-            storageLocation: p?.storageLocationId,
+            ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
             qty: p?.inventory,
             _id: p?._id
           }))
