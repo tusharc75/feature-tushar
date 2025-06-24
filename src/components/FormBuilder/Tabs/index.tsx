@@ -21,12 +21,13 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Steps from './Steps';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
-import { AddOutlined, ExpandLess, ExpandMore } from '@mui/icons-material';
+import { AddOutlined, ElectricBolt, ExpandLess, ExpandMore } from '@mui/icons-material';
 import UpdateIcon from '@mui/icons-material/Update';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import routes from 'src/components/Helpers/Routes';
 import UpdateResourceActions from 'src/components/FormBuilder/Tabs/UpdateResourceActions';
 import { sidebarResource } from 'src/constants/helpers';
+import { RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 
 const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -39,7 +40,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openAction, setOpenAction] = useState(false);
-  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState(false);
+  const [openUpdateResourceActions, setOpenUpdateResourceActions] = useState({ open: false, type: '' });
   const [openNotifications, setOpenNotifications] = useState(false);
 
   const fetchData = useCallback(
@@ -155,10 +156,22 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 <IconButton
                   aria-label="Actions"
                   onClick={() => {
-                    setOpenUpdateResourceActions(true);
+                    setOpenUpdateResourceActions({ open: true, type: RESOURCE_ACTION_TYPE.actions });
                   }}
                 >
                   <UpdateIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {[sidebarResource.serializedAsset]?.includes(resource) && (
+              <HtmlTooltip title={'Resource Triggers'}>
+                <IconButton
+                  aria-label="Actions"
+                  onClick={() => {
+                    setOpenUpdateResourceActions({ open: true, type: RESOURCE_ACTION_TYPE.triggers });
+                  }}
+                >
+                  <ElectricBolt fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
             )}
@@ -226,17 +239,18 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             resourceData={resourceData}
           />
         )}
-        {openUpdateResourceActions && (
+        {openUpdateResourceActions.open && (
           <UpdateResourceActions
             onClose={() => {
-              setOpenUpdateResourceActions(false);
+              setOpenUpdateResourceActions({ open: false, type: '' });
             }}
             onSuccess={() => {
               fetchData();
-              setOpenUpdateResourceActions(false);
+              setOpenUpdateResourceActions({ open: false, type: '' });
             }}
             resource={resource}
             resourceData={resourceData}
+            type={openUpdateResourceActions.type}
           />
         )}
 
