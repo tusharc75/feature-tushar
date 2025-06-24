@@ -534,6 +534,8 @@ function Dropdown({
                             setFieldValue(val.fieldName, val.value);
                             overRideValues[val.fieldName] = val && val.optionValue ? val.optionValue : '';
                           });
+
+                          //Fixed Code For Handle Some Case Start
                           if (name === 'customerAccount') {
                             if (fields?.find((f) => f?.fieldName === 'toOpenInvoice')) {
                               if (val?.defaultOpenInvoice) {
@@ -545,6 +547,13 @@ function Dropdown({
                               }
                             }
                           }
+                          if (['customerAccount', 'warehouse']?.includes(name) && values?.pricingCondition) {
+                            if (['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+                              setFieldValue('pricingCondition', '');
+                            }
+                          }
+                          //Fixed Code For Handle Some Case End
+
                           handleLookUpDependent(name, val, fields, setFieldValue, overRideValues);
                         }
                       }
