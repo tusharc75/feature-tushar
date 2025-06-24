@@ -10,6 +10,8 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, productInventory, rentalManagement } from 'src/constants/helpers';
 
 const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId, type = 'add', nonSerializedInventory = [] }) => {
+
+  console.log('aaaaa', selectedProducts, nonSerializedInventory)
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -54,9 +56,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               qty:
                 type === 'add'
                   ? (d?.inventory || 0) -
-                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
+                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && s?.storageLocation?.optionValue === d?.storageLocation?._id)?.qty ||
                     0)
-                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
+                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && s?.storageLocation?.optionValue === d?.storageLocation?._id)?.qty || 0,
               inventory: 0
             }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
