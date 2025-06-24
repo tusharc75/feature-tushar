@@ -108,23 +108,28 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                    if (val && val.currencyCode) {
-                                      setFieldValue(field.fieldName, val.currencyCode);
-                                      setCurrencySymbol(val.symbolNative);
-                                    } else {
-                                      setFieldValue(field.fieldName, '');
-                                      setCurrencySymbol(null);
+                                  if (val && val.currencyCode) {
+                                    setFieldValue(field.fieldName, val.currencyCode);
+                                    setCurrencySymbol(val.symbolNative);
+                                  } else {
+                                    setFieldValue(field.fieldName, '');
+                                    setCurrencySymbol(null);
+                                  }
+                                  if (values?.pricingCondition) {
+                                    if (['customerAccount', 'warehouse', 'currency'].every((name) => fieldsData?.some((f) => f?.fieldName === name))) {
+                                      setFieldValue('pricingCondition', '');
                                     }
                                   }
+                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                    if (onImageUploadCompletePercentage) {
-                                      onImageUploadCompletePercentage(completePercentage);
-                                    }
+                                  if (onImageUploadCompletePercentage) {
+                                    onImageUploadCompletePercentage(completePercentage);
                                   }
+                                }
                                 : null
                             }
                             fields={fieldsData}
