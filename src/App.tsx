@@ -298,10 +298,11 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (import.meta.env.DEV) return;
     if (import.meta.env?.VITE_APP_FIREBASE_API_KEY) {
       const registerServiceWorker = async () => {
         try {
-          const registration = await navigator.serviceWorker.register('/messaging/firebase-messaging-sw.js', { scope: '/messaging/' });
+          const registration = await navigator.serviceWorker.register('/sw.js');
           // Send Firebase config to service worker
           registration.active?.postMessage({
             type: 'INIT_FIREBASE',
@@ -363,7 +364,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
