@@ -509,3 +509,13 @@ export const resourcePolicy = [
     ]
   }
 ];
+
+export const DATE_VALUE = {
+  currentDate: 'Current Date',
+  custom: 'Custom'
+}
+
+export const RESOURCE_ACTION_TYPE = {
+  actions: 'Actions',
+  triggers: 'Triggers'
+}

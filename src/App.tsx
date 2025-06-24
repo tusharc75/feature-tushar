@@ -308,7 +308,6 @@ function App() {
             type: 'INIT_FIREBASE',
             config: firebaseConfig
           });
-          console.log(registration);
         } catch (error) {
           console.error('Service Worker registration failed:', error);
         }
@@ -365,7 +364,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
