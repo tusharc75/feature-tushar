@@ -19,7 +19,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*'],
-        maximumFileSizeToCacheInBytes: 20000000
+        maximumFileSizeToCacheInBytes: 20000000,
+        importScripts: ['/firebase-messaging-sw.js']
       },
       includeAssets: ['**/*']
     }),

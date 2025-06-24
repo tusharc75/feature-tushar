@@ -729,6 +729,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
 
   const previewDownloadProps = {
     fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
+    subject: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
     resource: sidebarResource.purchaseOrder,
     referenceId: purchaseOrderData?._id,
     columns: columns,
@@ -779,7 +780,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, stepFullScreen,
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
           />
-          <FinalPriceBox allFields={purchaseOrderFields} data={purchaseOrderData} />
+          <FinalPriceBox
+            allFields={purchaseOrderFields}
+            data={purchaseOrderData}
+            childFields={productFields}
+            material={dataRows}
+          />
         </Box>
       ) : (
         <Box p={2} height={500}>

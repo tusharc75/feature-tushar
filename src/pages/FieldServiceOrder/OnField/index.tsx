@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
+  ASSET_STATUS,
   checkIsAllowedToEdit,
   RENTAL_STEPS,
   rentalManagement,
@@ -29,6 +30,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [assetStatusOptions, setAssetStatusOptions] = useState([])
 
   useEffect(() => {
     fetchPolicy()
@@ -63,6 +65,11 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
           data.data.some((o) => {
             if (o?.fieldData?.fieldName === 'status') {
               setAllowUpdateStatus(o?.isUpdate);
+              let options = o?.fieldData?.option?.filter(_o => [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(_o?.optionValue))
+              if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
+                options = options?.filter(_o => _o?.optionValue != ASSET_STATUS.scrap)
+              }
+              setAssetStatusOptions([...options])
               return true;
             }
           });
@@ -106,6 +113,8 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
           stepFullScreen={false}
           allowUpdateStatus={allowUpdateStatus}
           rentalPolicyData={resourceData?.policy}
+          assetStatusOptions={assetStatusOptions}
+          setAssetStatusOptions={setAssetStatusOptions}
         />
       ) : (
         <Box p={2} height={500}>

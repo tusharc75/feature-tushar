@@ -172,12 +172,12 @@ export const resourcePolicy = [
       },
       {
         fieldName: 'statusColor',
-        fieldLabel: 'Status Color',
+        fieldLabel: 'Status/Sub Status Color',
         type: 'multipleFields',
         fields: [
           {
             fieldName: 'status',
-            fieldLabel: 'Status',
+            fieldLabel: 'Status/Sub Status',
             type: 'multiSelect',
             required: true
           },
@@ -189,7 +189,35 @@ export const resourcePolicy = [
           }
         ],
         defaultValue: []
-      }
+      },
+      {
+        fieldName: 'inUseSubStatus',
+        fieldLabel: 'In-Use Sub Status',
+        type: 'multiSelect',
+        defaultValue: [],
+        fieldOption: 'subStatus',
+        required: false
+      },
+      {
+        fieldName: 'statusChangeOnSubStatusRental',
+        fieldLabel: 'Status Change On Sub Status Rental Receiving/Return',
+        type: 'multipleFields',
+        fields: [
+          {
+            fieldName: 'subStatus',
+            fieldLabel: 'Sub Status',
+            type: 'dropDown',
+            required: true
+          },
+          {
+            fieldName: 'status',
+            fieldLabel: 'Status',
+            type: 'dropDown',
+            required: true
+          }
+        ],
+        defaultValue: []
+      },
     ]
   },
   {
@@ -464,6 +492,17 @@ export const resourcePolicy = [
       {
         fieldName: 'debitInventoryOnAveragePrice',
         fieldLabel: 'Debit Inventory On Average Price',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
+  {
+    resource: sidebarResource.assemblyOrder,
+    policy: [
+      {
+        fieldName: 'autoConvertInSameRentalJob',
+        fieldLabel: 'Auto Convert In Same Rental Job',
         type: 'checkBox',
         defaultValue: false
       }

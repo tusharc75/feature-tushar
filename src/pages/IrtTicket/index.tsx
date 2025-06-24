@@ -44,7 +44,7 @@ const IrtTicket = () => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.irtTicket}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.irtTicketDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const fetchIrtTicketData = async (cancelTokenSource?: CancelTokenSource) => {

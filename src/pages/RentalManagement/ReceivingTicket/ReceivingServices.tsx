@@ -23,7 +23,7 @@ import { rentalManagementActions, rentalManagementMessage } from 'src/constants/
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Delete } from '@mui/icons-material';
 
-const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
+const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen, rentalJobChildFields }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagement)}_services`;
   const toastConfig = useContext(CustomToastContext);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
@@ -111,6 +111,11 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Header: 'Description',
         Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
       },
+      ...(rentalJobChildFields?.find((r) => r?.fieldName === 'longDescription') ? [{
+        accessor: 'longDescription',
+        Header: 'Long Description',
+        Cell: ({ row }) => (row?.original?.longDescription ? <h5 className="text-truncate">{row?.original?.longDescription}</h5> : <NoDataCell />)
+      }] : []),
       {
         accessor: 'actualStartDate',
         Header: 'Actual Start Date',

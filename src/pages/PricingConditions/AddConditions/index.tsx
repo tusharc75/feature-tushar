@@ -45,6 +45,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [resourceData, setResourceData] = useState(null);
   const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
+  const [assetStatusField, setAssetStatusField] = useState(null)
 
   useEffect(() => {
     fetchCondition();
@@ -110,6 +111,17 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       toastConfig.setToastConfig(error);
     }
   };
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
+      .then(({ data: { data } }) => {
+        const statusField = data?.find(f => f?.fieldData?.fieldName === 'status')?.fieldData;
+        if (statusField) {
+          setAssetStatusField(statusField)
+        }
+      });
+  }, [])
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -622,6 +634,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             setShowDialog({ open: false, isBulkedit: false });
             fetchCondition();
           }}
+          assetStatusField={assetStatusField}
         />
       )}
       {showDeleteConfirmBox && (

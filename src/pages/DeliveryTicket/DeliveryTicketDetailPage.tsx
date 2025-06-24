@@ -35,6 +35,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   displayDateTime,
+  getEmailsFromContacts,
   getObjKeysWithValues,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -522,6 +523,9 @@ export default function DeliveryTicketDetail(props) {
                 defaultColumns={
                   serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
                 }
+                subject={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
+                isSendEmail={true}
+                toEmails = {getEmailsFromContacts(deliveryTicketData)}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}

@@ -461,7 +461,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.planning?.titlePlural}-${planningData?.planningNumber}`,
+    fileName: `${resources?.planning?.titleSingular}-${planningData?.planningNumber}`,
+    subject: `${resources?.planning?.titleSingular}-${planningData?.planningNumber}`,
     resource: sidebarResource.planning,
     referenceId: planningData._id,
     columns: columns,

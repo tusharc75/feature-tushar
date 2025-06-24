@@ -84,8 +84,10 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                     } else if (row.original.type === MATERIAL_TYPE.product) {
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
+                    } else if (row.original.type === MATERIAL_TYPE.package) {
                       window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -177,18 +179,16 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName;
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription
-            : _subRow?.serviceDetail?.serviceDescription;
+      _subRow.detail = _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow.serializedAssetDetail?.assetNumber
+              : _subRow?.detail;
+      _subRow.description = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription
+        : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription
+            : _subRow.type === MATERIAL_TYPE.serializedAsset ? _subRow?.serializedAssetDetail?.assetDescription
+              : _subRow?.description;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;
@@ -199,6 +199,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
 
   const previewDownloadProps = {
     fileName: `${resources?.salesOrder?.titleSingular}-${salesOrderData?.salesOrderNo}`,
+    subject: `${resources?.salesOrder?.titleSingular}-${salesOrderData?.salesOrderNo}`,
     resource: sidebarResource.salesOrder,
     referenceId: salesOrderData._id,
     columns: columns,

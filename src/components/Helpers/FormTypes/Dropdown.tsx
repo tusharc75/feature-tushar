@@ -1,7 +1,7 @@
 import { Box, Grid, IconButton, ListSubheader, TextField, useMediaQuery } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, has, isEmpty } from 'lodash';
+import { camelCase, has, isArray, isEmpty } from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { ListChildComponentProps, VariableSizeList } from 'react-window';
 import { useData } from 'src/StateProvider/Provider';
@@ -32,6 +32,7 @@ import { NewAddressOptionList } from '../../../StateProvider/AddressProvider';
 import AddMultiple from '../../../pages/DynamicForm/AddMultiple';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { isFieldVisible } from 'src/components/Helpers/FormTypes';
+import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 
 type renderRowProps = {
   setSize: (index: number, height: number) => void;
@@ -155,6 +156,9 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
 
 const bindPricingConditionOptions = (field, values) => {
   let options = field?.option || [];
+  if (values?.currency) {
+    options = options?.filter((e) => e?.currency?.toLowerCase() === values?.currency?.toLowerCase())
+  }
   const customerAccount = values?.customerAccount;
   const warehouse = values?.warehouse;
   if (Array.isArray(customerAccount) && customerAccount?.length > 0) {
@@ -178,7 +182,7 @@ const bindPricingConditionOptions = (field, values) => {
 };
 
 function dropdownOptions(options, values, fields, fieldData, newAddressOptionList = []) {
-  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse'].every((name) => fields?.some((f) => f?.fieldName === name))) {
+  if (fieldData?.fieldName === 'pricingCondition' && ['customerAccount', 'warehouse', 'currency'].every((name) => fields?.some((f) => f?.fieldName === name))) {
     return bindPricingConditionOptions(fieldData, values);
   }
   const lookupDependentOn = fieldData?.lookupDependentOn;
@@ -211,9 +215,17 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     if (dependentOnField) {
       const dependentOnFieldValue = values[dependentOnField?.fieldName];
       if (dependentOnFieldValue) {
-        const dependentFieldOption = dependentOnField?.option?.find((e) => e.optionValue === dependentOnFieldValue);
+        const dependentFieldOption = dependentOnField?.option?.filter((e) => dependentOnFieldValue?.includes(e.optionValue));
         if (dependentFieldOption) {
-          const dependentIds = dependentFieldOption[lookupDependentOnField] || [];
+          let dependentIds = []
+          dependentFieldOption?.forEach((e) => {
+            if (isArray(e[lookupDependentOnField]) && e[lookupDependentOnField]?.length) {
+              dependentIds = [...dependentIds, ...e[lookupDependentOnField]]
+            }
+            else {
+              dependentIds = [...dependentIds, e[lookupDependentOnField]]
+            }
+          })
           let option = options;
           if (fieldData?.lookupResource === 'Address' && newAddressOptionList?.length) {
             newAddressOptionList?.forEach((ele: any) => {
@@ -1240,6 +1252,50 @@ function Dropdown({
                               order: option.length,
                               ...(fieldData.lookupDependentOn && {
                                 [fieldData.lookupDependentOn]: data?.parentMarketSegment || values[fieldData?.lookupDependentOn] || ''
+                              })
+                            };
+                            setOptionsList([tempNewOption, ...option]);
+                            if (type === 'multiSelect') {
+                              handleChange(
+                                name,
+                                tempNewOption && tempNewOption.optionValue ? [...[...(values[name] || [])], tempNewOption.optionValue] : []
+                              );
+                            } else {
+                              handleChange(name, tempNewOption && tempNewOption.optionValue ? tempNewOption.optionValue : '');
+                            }
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+                {fieldData?.lookup && fieldData?.lookupResource === sidebarResource.packageCategory && permissions?.packageCategory?.isCreate && (
+                  <div className="mt-[2px] max-h-fit flex-shrink-0">
+                    <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
+                      <IconButton
+                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                        onClick={() => setLookupDialog(true)}
+                        size="small"
+                        color="primary"
+                        style={{ marginBottom: touched[name] && Boolean(errors[name]) ? 25 : 0 }}
+                      >
+                        <AddCircleIcon />
+                      </IconButton>
+                    </HtmlTooltip>
+                    {lookupDialog && (
+                      <ManagePackageCategory
+                        isRedirectToDetailPage={false}
+                        onClose={() => setLookupDialog(false)}
+                        onSuccess={(data) => {
+                          setLookupDialog(false);
+                          if (data?._id) {
+                            let tempNewOption = {
+                              default: true,
+                              optionLabel: data?.packageCategory,
+                              optionValue: data?._id,
+                              order: option.length,
+                              ...(fieldData.lookupDependentOn && {
+                                [fieldData.lookupDependentOn]: values[fieldData?.lookupDependentOn] || ''
                               })
                             };
                             setOptionsList([tempNewOption, ...option]);

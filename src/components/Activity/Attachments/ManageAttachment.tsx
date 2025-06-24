@@ -17,7 +17,6 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { isArray, isEqual, isString } from 'lodash';
-import DocumentScanner from '../Helpers/DocumentScanner';
 import { ATTACHMENT_TYPE, checkSuperAdminAccess, displayDate, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
 import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -26,6 +25,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import { updateDisable } from 'src/constants/messageHelpers';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
+import DigitalSignature from 'src/components/DigitalSignature';
 
 const AttachmentSchema = object().shape({
   name: string().required('Attachment Name is required'),
@@ -373,35 +373,30 @@ export default function ManageAttachment({
                         </Grid>
                       ))}
                     {type === 'file' && (
-                      <Grid container size={{ xs: 12 }}>
-                        <Grid size={{ xs: 12 }}>
-                          <div style={{ width: '100%' }}>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <div className="ml-0">
-                                <FormTypes
-                                  label=""
-                                  name="fileUrl"
-                                  required={true}
-                                  type="multiFileUpload"
-                                  values={values}
-                                  disabled={!allowedToEdit}
-                                  errors={errors}
-                                  touched={touched}
-                                  size="small"
-                                  setFieldValue={(fname, file) => {
-                                    onUploadFile(file);
-                                  }}
-                                  doNotShowUploadedFile={true}
-                                  imageOrFileUploadCompletePercentage={(completePercentage) => {
-                                    setUploadingImageOrFileProgress(completePercentage);
-                                  }}
-                                />
-                              </div>
-                              <ThemeButton buttonType="theme" component="span" disabled={!allowedToEdit} onClick={() => setDocumentScanDialog(true)}>
-                                Scan Document
-                              </ThemeButton>
-                            </div>
-                          </div>
+                      <Grid container size={{ xs: 12, md: 12, sm: 12 }}>
+                        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
+                          <FormTypes
+                            label=""
+                            name="fileUrl"
+                            required={true}
+                            type="multiFileUploadNew"
+                            values={values}
+                            disabled={!allowedToEdit}
+                            errors={errors}
+                            touched={touched}
+                            size="small"
+                            setFieldValue={(fname, file, isScanning = false) => {
+                              if (isScanning) {
+                                setFieldValue(fname, file);
+                              }
+                              onUploadFile(file);
+                            }}
+                            doNotShowUploadedFile={true}
+                            fileUploadProgress={uploadingImageOrFileProgress}
+                            imageOrFileUploadCompletePercentage={(completePercentage) => {
+                              setUploadingImageOrFileProgress(completePercentage);
+                            }}
+                          />
                         </Grid>
                         <Grid size={{ xs: 12 }}>
                           <AttachmentThumbnail
@@ -434,6 +429,13 @@ export default function ManageAttachment({
                             </Grid>
                           </>
                         )}
+                        {/* <Grid size={{ xs: 12 }}>
+                          <DigitalSignature
+                            attachmentId={attachmentId}
+                            type={type}
+                            allAttachments={allAttachments}
+                          />
+                        </Grid> */}
                       </Grid>
                     )}
                   </Grid>
@@ -494,14 +496,6 @@ export default function ManageAttachment({
                   setShowConfirmationDialog(false);
                 }}
                 onOk={() => handleDeleteAttachment(attachmentToDelete)}
-              />
-            )}
-            {documentScanDialog && (
-              <DocumentScanner
-                open={setDocumentScanDialog}
-                onClose={() => setDocumentScanDialog(false)}
-                setFieldValue={setFieldValue}
-                onUploadFile={onUploadFile}
               />
             )}
           </>

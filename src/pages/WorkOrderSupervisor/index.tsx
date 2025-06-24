@@ -313,6 +313,14 @@ const WorkOrderSupervisor = () => {
                 <PictureAsPdfIcon fontSize={'small'} color='primary' />
               </IconButton>
             </HtmlTooltip>
+            {data?.priority &&
+              <HtmlTooltip title={`${data?.priority} Priority`}>
+                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${data?.priority === 'High' ? 'bg-red-600' :
+                  data?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'} `}>
+                  {data?.priority}
+                </span>
+              </HtmlTooltip>
+            }
           </div>
         )
       },
@@ -335,6 +343,13 @@ const WorkOrderSupervisor = () => {
         title: resources?.workOrder?.titleSingular,
         type: 'link',
         link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
+        target: '_blank'
+      },
+      {
+        accessor: 'warehouse',
+        title: resources?.warehouse?.titleSingular,
+        type: 'link',
+        link: (data) => `${routes?.warehouseDetail?.path}/${data?.warehouseId}`,
         target: '_blank'
       },
       {
@@ -486,9 +501,11 @@ const WorkOrderSupervisor = () => {
                 newObj['serializedAsset'] = item?.workOrderDetail?.serializedAsset?.optionLabel;
                 newObj['serializedAssetId'] = item?.workOrderDetail?.serializedAsset?.optionValue;
                 newObj['createDate'] = item?.workOrderDetail?.createDate;
-                newObj['warehouse'] = item?.workOrderDetail?.warehouse;
+                newObj['warehouse'] = item?.workOrderDetail?.warehouse?.optionLabel;
+                newObj['warehouseId'] = item?.workOrderDetail?.warehouse?.optionValue;
                 newObj['packageName'] = item?.workOrderDetail?.package?.optionLabel;
                 newObj['packageId'] = item?.workOrderDetail?.package?.optionValue;
+                newObj['priority'] = item?.workOrderDetail?.priority;
                 newObj['customerAccountName'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
                 newObj['customerAccountId'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue;
                 return newObj;
@@ -1089,7 +1106,7 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignTechniciansDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
@@ -1123,7 +1140,7 @@ const WorkOrderSupervisor = () => {
       )}
       {workStationAssignDialog.open && (
         <AssignWorkStationDialog
-          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({

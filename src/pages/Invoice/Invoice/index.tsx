@@ -17,7 +17,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 
-const Invoice = ({ invoiceData, invoiceFields, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
+const Invoice = ({ invoiceData, invoiceFields, setPrevStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -39,6 +39,7 @@ const Invoice = ({ invoiceData, invoiceFields, setNextStep, handleChangeStatus, 
   }, []);
 
   useEffect(() => {
+    setPrevStep(true)
     fetchFields();
   }, []);
 
@@ -188,6 +189,7 @@ const Invoice = ({ invoiceData, invoiceFields, setNextStep, handleChangeStatus, 
 
   const previewDownloadProps = {
     fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,

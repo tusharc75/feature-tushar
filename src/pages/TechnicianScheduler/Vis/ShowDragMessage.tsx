@@ -6,10 +6,11 @@ import { CgScrollV } from 'react-icons/cg';
 import { HiCursorClick } from 'react-icons/hi';
 import { LuZoomIn, LuZoomOut } from 'react-icons/lu';
 import { PiMouseLeftClickFill } from 'react-icons/pi';
+import useLocalStorage from 'src/hooks/useLocalStore';
+import { SHOW_MESSAGE_KEY } from 'src/pages/TechnicianScheduler/Vis/utils';
 
 const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObject<HTMLDivElement> }) => {
-  // const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
-  const [showMessage, setShowMessage] = useState(true);
+  const [showMessage, setShowMessage] = useLocalStorage(SHOW_MESSAGE_KEY, true);
 
   useEffect(() => {
     const container = containerRef?.current;
@@ -32,7 +33,7 @@ const ShowDragMessage = ({ containerRef }: { containerRef: React.MutableRefObjec
 
   if (!showMessage) return null;
   return (
-    <div className="absolute bottom-0 left-0 right-[300px] top-0 z-50 flex items-center justify-center ">
+    <div className="absolute bottom-0 left-0 right-[0px] top-0 z-50 flex items-center justify-center ">
       <button className="absolute inset-0 cursor-pointer bg-black/25 [backdrop-filter:blur(2px)] " aria-label="Close Info" onClick={handleClose}>
         <span className="sr-only">Close Controls</span>
       </button>

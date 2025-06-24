@@ -422,6 +422,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
   const previewDownloadProps = useMemo(
     () => ({
       fileName: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
+      subject: `${resources?.purchaseOrder?.titleSingular}-${purchaseOrderData?.purchaseOrderNumber}`,
       resource: sidebarResource.purchaseOrder,
       referenceId: purchaseOrderData?._id,
       columns: columns,

@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Menu, MenuItem, TextField, Theme } from '@mui/material';
+import { Dialog, IconButton, Menu, MenuItem, Theme } from '@mui/material';
 import Box from '@mui/material/Box/Box';
 import { makeStyles } from '@mui/styles';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
@@ -28,6 +28,7 @@ import routes from '../../../components/Helpers/Routes';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import {
   ASSET_STATUS,
+  COLOUR_MASTER,
   COLOUR_MASTER_CLASSES,
   CustomDialogTransition,
   DELIVERY_FROM_TO_TYPE,
@@ -97,7 +98,8 @@ const LoadingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  rentalPolicyData
+  rentalPolicyData,
+  assetStatusOptions,
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -217,25 +219,41 @@ const LoadingTicket = ({
       rentalManagementData?.currency
     );
 
+    const statusColors = {};
+    if (assetPolicyData?.policy?.statusColor) {
+      for (const item of assetPolicyData?.policy?.statusColor) {
+        if (Array.isArray(item.status)) {
+          item.status.forEach((status) => {
+            statusColors[status] = item.colorCode;
+          });
+        } else {
+          statusColors[item.status] = item.colorCode;
+        }
+      }
+    }
+
     const column: any = [
       {
         accessor: 'index',
         Header: 'Index',
         minWidth: 100,
         width: 100,
+        sticky: 'left',
         disabled: true,
         cell: ({ row }) => (
           <div
-            className={cn(
-              'd-flex align-items-center gap-2',
-              row?.original?.warehouseId &&
-                row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
-                !row?.original?.loadingTicketId
-                ? COLOUR_MASTER_CLASSES.transferAsset.background
-                : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
-                  ? COLOUR_MASTER_CLASSES.lostAssets.background
-                  : ''
-            )}
+            style={{
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+                      !row?.original?.loadingTicketId
+                      ? COLOUR_MASTER_CLASSES.transferAsset.background : '';
+              })()
+            }}
+            className={'d-flex align-items-center gap-2'}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
             {row?.original?.loadingTicketId && (
@@ -1521,7 +1539,7 @@ const LoadingTicket = ({
         {!isOffline && allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <ThemeButton
             disabled={
-              !allowUpdateStatus ||
+              !allowUpdateStatus || assetStatusOptions?.length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
               getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some((f) =>
                 [
@@ -1704,26 +1722,21 @@ const LoadingTicket = ({
           horizontal: 'right'
         }}
       >
-        {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
-          <MenuItem
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.scrap)?.length ? true : false}
-            onClick={() => {
-              setAnchorEl(null);
-              setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
-            }}
-          >
-            {ASSET_STATUS.scrap}
-          </MenuItem>
-        )}
-        <MenuItem
-          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === ASSET_STATUS.lost)?.length ? true : false}
-          onClick={() => {
-            setAnchorEl(null);
-            setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
-          }}
-        >
-          {ASSET_STATUS.lost}
-        </MenuItem>
+        {assetStatusOptions?.length > 0 && assetStatusOptions?.map(o => {
+          return (
+            <MenuItem
+              disabled={
+                getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter((e) => e?.status === o?.optionValue)?.length ? true : false
+              }
+              onClick={() => {
+                setAnchorEl(null);
+                setStatusToUpdate({ open: true, isUpdating: false, status: o?.optionValue, message: '' });
+              }}
+            >
+              {o.optionLabel}
+            </MenuItem>
+          )
+        })}
       </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket

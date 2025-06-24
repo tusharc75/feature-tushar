@@ -518,6 +518,7 @@ const SerializedAsset = ({
 
   const previewDownloadProps = {
     fileName: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
+    subject: `${resources?.repairJob?.titleSingular}-${repairJobData?.repairJobName}`,
     resource: sidebarResource.repairJob,
     referenceId: repairJobData?._id,
     columns: columns,

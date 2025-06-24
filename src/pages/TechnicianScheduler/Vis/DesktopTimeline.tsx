@@ -10,7 +10,7 @@ import GroupTemplate from 'src/pages/TechnicianScheduler/Vis/Templates/GroupTemp
 import { ItemTemplate } from 'src/pages/TechnicianScheduler/Vis/Templates/ItemTemplate';
 import { Activity, DNDData, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
-import { GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { calculateRatio, GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
 import { useData } from 'src/StateProvider/Provider';
 import { DataSet, Timeline, TimelineOptions } from 'vis-timeline/standalone';
 
@@ -19,6 +19,8 @@ type DesktopTimelineProps = {
   loading: boolean;
   onDragEnd: ({ service, technician }: { service: Service; technician: Activity }) => void;
 };
+const FIT_WIDTH = 1473 - 306;
+const FIT_DAYS = 10;
 
 export const techSchlocalStoreKey = 'technician-scheduler-active-item';
 // 'vis-timeline'
@@ -124,6 +126,14 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       if (zoom < 0) {
         start = dayjs(time).startOf('month').toDate();
         end = dayjs(time).endOf('month').toDate();
+
+        const containerCurrentWidth = timelineContainer.current?.clientWidth;
+        if (containerCurrentWidth) {
+          const halfOfTotalDays = Math.floor(calculateRatio(FIT_WIDTH, FIT_DAYS, containerCurrentWidth) / 2);
+
+          start = dayjs(time).subtract(halfOfTotalDays, 'days').toDate();
+          end = dayjs(time).add(halfOfTotalDays, 'days').toDate();
+        }
       }
       timeline.setWindow(start, end);
     };
@@ -151,23 +161,48 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
       for (let i = 0; i < groups.length; i++) {
         const item = groups[i] as HTMLDivElement;
         const panel = panels[i] as HTMLDivElement;
+        const setMaxHeight = (height: number) => {
+          item.style.maxHeight = `${height}px`;
+          panel.style.maxHeight = `${height}px`;
+        };
+        const setMinHeight = (height: number | '') => {
+          item.style.minHeight = !height ? '' : `${height}px`;
+          panel.style.minHeight = !height ? '' : `${height}px`;
+        };
 
         item.setAttribute('data-original-height', `${parseInt((item.computedStyleMap().get('height') as string) || '0px', 10)}`);
-        if (+item.dataset.originalHeight > 108 && !item.dataset.expanded) {
-          item.style.maxHeight = '142px';
-          panel.style.maxHeight = `142px`;
+        if (+item.dataset.originalHeight > 115 && !item.dataset.expanded) {
+          setMaxHeight(142);
+
           item.style.overflow = 'hidden';
           if (!item.dataset.buttonInserted) {
+            const collapseButton = document.createElement('button');
+            collapseButton.innerText = 'Collapse';
+            collapseButton.classList.add('timeline-collapse-button');
+            collapseButton.onclick = (e) => {
+              item.removeAttribute('data-expanded');
+              item.appendChild(button);
+              setMaxHeight(142);
+              setMinHeight('');
+              try {
+                item.removeChild(collapseButton);
+              } catch { }
+            };
+
             const button = document.createElement('button');
             button.innerText = 'Show All';
             button.onclick = (e) => {
-              item.style.maxHeight = `${item.dataset.originalHeight}px`;
-              panel.style.maxHeight = `${item.dataset.originalHeight}px`;
+              setMaxHeight(Number(item.dataset.originalHeight) + 40);
+              setTimeout(() => {
+                setMinHeight(Number(item.dataset.originalHeight) + 40);
+              }, 300);
               item.setAttribute('data-expanded', 'true');
+              panel.setAttribute('data-expanded', 'true');
+              item.appendChild(collapseButton);
+
               try {
                 item.removeChild(button);
-              } catch (error) {
-              }
+              } catch (error) { }
             };
             button.classList.add('timeline-show-all-button');
             item.appendChild(button);

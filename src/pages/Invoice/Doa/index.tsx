@@ -18,6 +18,7 @@ import FinalPriceBox from "src/components/FinalPriceBox";
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import { ThemeButton } from "src/components/Helpers/Buttons";
 import SendIcon from '@mui/icons-material/Send';
+import RequestButton from "src/pages/DoaSetupNew/RequestButton";
 
 const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fetchInvoiceData, stepFullScreen }) => {
 
@@ -114,10 +115,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
   };
 
   useEffect(() => {
-    handleCheckNextPrev()
-  }, [DOAData])
-
-  const handleCheckNextPrev = () => {
     if (!DOAData) {
       setNextStep(false);
       setPrevStep(true);
@@ -128,7 +125,7 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
       setPrevStep(false);
       setNextStep(false);
     }
-  };
+  }, [DOAData])
 
   const fetchData = async () => {
     setNextStep(false)
@@ -167,7 +164,6 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
     });
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-    handleCheckNextPrev()
   };
 
   const generateNestedData = (material, parent) => {
@@ -202,6 +198,7 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
 
   const previewDownloadProps = {
     fileName: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
+    subject: `${resources?.invoice?.titleSingular}-${invoiceData?.invoiceNumber}`,
     resource: sidebarResource.invoice,
     referenceId: invoiceData?._id,
     columns: columns,
@@ -224,38 +221,18 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
     ]
   };
 
-  const handleSendForDOA = () => {
-    axiosInstance()
-      .post(`${routes.resourceDoaRequest.path}`, {
-        resource: sidebarResource?.invoice,
-        referenceId: invoiceData?._id,
-        entity: invoiceData?.entity,
-      })
-      .then(({ data }) => {
-        fetchInvoiceData()
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: 'DOA Sended Successfully'
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-
   const rightSideContents = () => {
     return (
       <>
-        {
-          !DOAData && (
-            <ThemeButton startIcon={<SendIcon />} onClick={handleSendForDOA}>
-              Send for DOA
-            </ThemeButton>
-          )
-        }
+        {!DOAData && (
+          <RequestButton
+            resource={sidebarResource.invoice}
+            id={invoiceData._id}
+            entity={invoiceData.entity}
+            fetchData={fetchInvoiceData}
+          />
+        )}
       </>
-
     )
   }
 

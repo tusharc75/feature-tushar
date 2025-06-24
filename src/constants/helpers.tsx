@@ -1953,6 +1953,10 @@ export const prepareDataForGrid = (data, user = {}) => {
     finalObject['completedBy'] = data?.completedBy?.user?.concatedName;
     finalObject['completedByDate'] = data?.completedBy?.date;
   }
+  if (data?.lastActivityBy) {
+    finalObject['lastActivityBy'] = data?.lastActivityBy?.user?.concatedName;
+    finalObject['lastActivityByDate'] = data?.lastActivityBy?.date;
+  }
   finalObject['id'] = data?._id;
 
   return finalObject;
@@ -3294,9 +3298,14 @@ export const INVOICE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   readyToInvoice: 'Ready to Invoice',
+  proforma: 'Proforma',
   invoiced: 'Invoiced',
   closed: 'Closed',
-  cancelled: 'Cancelled'
+  cancelled: 'Cancelled',
+  reconciled: "Reconciled",
+  sentForDoa: 'Sent for DOA',
+  acceptedbyDOA: 'Accepted by DOA',
+  rejectedbyDOA: 'Rejected by DOA'
 };
 
 export const SALES_ORDER_STATUS = {

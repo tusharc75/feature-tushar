@@ -99,7 +99,7 @@ export default function Contact(props) {
     let data = response?.data?.data;
 
     let newColumns = generateColumns(contactResource, data, `/${contactRoute}/detail`, true);
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));
     });

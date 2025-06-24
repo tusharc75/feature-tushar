@@ -184,13 +184,13 @@ const Quotation = ({
     let { fieldsDataAll } = await fetch_resource_fields(sidebarResource.quotation);
     setQuotationFields(fieldsDataAll)
 
-    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationInfo?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
 
     if (
       allowedToEdit === false ||
       invoiceStep === true ||
-      ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status)
+      (repairOrderData?.addQuotationStep && ![QUOTATION_STATUS.buildingQuote].includes(quotationInfo?.versions[tempCurrentVersion]?.status))
     ) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -316,7 +316,7 @@ const Quotation = ({
                   <IconButton
                     size="small"
                     disabled={
-                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                         quotationInfo?.versions[tempCurrentVersion]?.status
                       ) || invoiceStep
                     }
@@ -328,7 +328,7 @@ const Quotation = ({
                     <EditIcon
                       fontSize="small"
                       color={
-                        [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                        repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                           quotationInfo?.versions[tempCurrentVersion]?.status
                         ) || invoiceStep
                           ? 'disabled'
@@ -731,6 +731,7 @@ const Quotation = ({
             referenceId={repairOrderData?._id}
             columns={columns}
             isSendEmail={true}
+            subject={`${resources?.repairOrder?.titleSingular}-${repairOrderData?.rentalJobName}`}
           />
         </Box>
       ) : (
@@ -819,20 +820,20 @@ const Quotation = ({
                     Create New Version
                   </ThemeButton>
                 ) : null)}
-              {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              {repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
-              ) && (
-                  <ThemeButton
-                    mobileTooltip="Actions"
-                    buttonType="yellow"
-                    iconForMobile={<ExpandMore />}
-                    onClick={openActions}
-                    disabled={selectedRecords?.length === 0}
-                    endIcon={<ExpandMore />}
-                  >
-                    Actions
-                  </ThemeButton>
-                )}
+              ) ? null : (
+                <ThemeButton
+                  mobileTooltip="Actions"
+                  buttonType="yellow"
+                  iconForMobile={<ExpandMore />}
+                  onClick={openActions}
+                  disabled={selectedRecords?.length === 0}
+                  endIcon={<ExpandMore />}
+                >
+                  Actions
+                </ThemeButton>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -918,9 +919,9 @@ const Quotation = ({
             refreshGrid={fetchData}
             hideSelection={
               !allowedToEdit ||
-              [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+              (repairOrderData?.addQuotationStep && [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
-              )
+              ))
             }
             hideAction={invoiceStep}
             hideExportTable={repairOrderData?.addQuotationStep && !invoiceStep ? true : false}

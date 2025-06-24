@@ -68,6 +68,7 @@ import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import MultiFileUpload from './FormTypes/MultiFileUpload';
 
 type MultiFileType = {
   fileName: string;
@@ -482,7 +483,7 @@ const FormTypes = (props) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
 
-      let urls: any = values[name] ? values[name] : [];
+      let urls = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -506,9 +507,9 @@ const FormTypes = (props) => {
         }
         if (!url) return;
         if (isMultiple) {
-          urls.push(url);
+          urls?.push(url);
         } else {
-          urls = url;
+          urls = [url];
         }
       }
       setFieldValue(name, urls);
@@ -2626,6 +2627,21 @@ const FormTypes = (props) => {
           </Grid>
         </Box>
       </Fragment>
+    ) : type === 'multiFileUploadNew' ? (
+      <MultiFileUpload
+        name={name}
+        label={label}
+        handleUploadFile={handleUploadFile}
+        isFileUploading={isFileUploading}
+        fileUploadProgress={fileUploadProgress}
+        values={values}
+        errors={errors}
+        touched={touched}
+        required={required}
+        setFieldValue={setFieldValue}
+        doNotShowUploadedFile={false}
+        disabled={false}
+      />
     ) : type === 'url' ? (
       <InfoLabel
         info={tooltipMessage}

@@ -523,6 +523,28 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
+      {fieldData.type === 'currencyAmount' &&
+        <Box>
+          <Grid container>
+            <Grid item xs={12} md={6}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="showTotalInCard"
+                    checked={values['showTotalInCard']}
+                    onChange={(e) => {
+                      setFieldValue('showTotalInCard', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Show Total In Card"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}></Grid>
+          </Grid>
+        </Box>
+      }
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>

@@ -17,7 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, DOA_STATUS, getEmailsFromContacts, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -212,28 +212,42 @@ const Material = ({
     setAllFields(data);
   };
 
+  useEffect(() => {
+    handleCheckNextPrev()
+  }, [DOAData])
+
+  const handleCheckNextPrev = () => {
+    if (currentStep === 'DOA') {
+      if (!DOAData) {
+        setNextStep(false);
+        setPrevStep(true);
+      } else if (DOAData?.status === DOA_STATUS.approved) {
+        setPrevStep(false);
+        setNextStep(true);
+      } else {
+        setPrevStep(false);
+        setNextStep(false);
+      }
+    }
+    else {
+      setPrevStep(true);
+    }
+  };
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    if (currentStep === 'DOA') {
-      setNextStep(false);
-      setPrevStep(false);
-    }
+    setNextStep(false);
+    setPrevStep(false);
     var data: any = [];
     var nextStepMessage = null;
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
 
-    let costData: any = await axiosInstance().get(`${routes.purchaseRequisition.path}/cost/${purchaseRequisitionData._id}`);
-    costData = costData?.data?.data || [];
-    costData?.forEach((e) => {
-      e.type = MATERIAL_TYPE.manualEntry;
-    });
 
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
-    let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows, ...costData];
+    let rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -253,18 +267,21 @@ const Material = ({
         nextStepMessage = rentalManagementMessage.validPrice;
       }
     });
-    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-      setNextStep(false);
-      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
-    } else {
-      setNextStep(true);
-      setNextStepToolTip(null);
+    if (currentStep === 'Add') {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+        setNextStep(false);
+        setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
+      } else {
+        setNextStep(true);
+        setNextStepToolTip(null);
+      }
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     if (updateDOASetup) {
       updateDOASetup(data?.doaSetup);
     }
+    handleCheckNextPrev()
   };
 
   const onMaterialEdit = (row, rows) => {
@@ -477,10 +494,13 @@ const Material = ({
   };
 
   const previewDownloadProps = {
-    fileName: `${resources?.purchaseRequisition?.titlePlural}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
+    fileName: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`,
     resource: sidebarResource.purchaseRequisition,
     referenceId: purchaseRequisitionData?._id,
-    columns: columns
+    columns: columns,
+    isSendEmail: true,
+    toEmails: getEmailsFromContacts(purchaseRequisitionData),
+    subject: `${resources?.purchaseRequisition?.titleSingular}-${purchaseRequisitionData?.purchaseRequisitionNumber}`
   };
 
   const actionButtonMenuItems = () => {
@@ -522,8 +542,7 @@ const Material = ({
             resource={sidebarResource.purchaseRequisition}
             id={purchaseRequisitionData._id}
             entity={purchaseRequisitionData.entity}
-            processStatus={currentStep}
-            fetchParentData={fetchParentData}
+            fetchData={fetchParentData}
           />
         )}
       </>

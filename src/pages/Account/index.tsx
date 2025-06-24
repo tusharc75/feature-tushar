@@ -137,7 +137,7 @@ export default function Account(props) {
       }
     });
 
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   useEffect(() => {

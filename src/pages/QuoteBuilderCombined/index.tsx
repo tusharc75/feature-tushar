@@ -151,7 +151,7 @@ const QuoteBuilders = () => {
         )
       }
     ];
-    let staticFields = getStaticFields();
+    let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       columns.push(checkStaticField(sidebarResource.projectSales, field));
     });
