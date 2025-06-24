@@ -253,7 +253,6 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
             type={openUpdateResourceActions.type}
           />
         )}
-
         {openNotifications && (
           <Notifications
             onClose={() => {

@@ -20,6 +20,7 @@ import { startCase } from 'lodash';
 import { DATE_VALUE, RESOURCE_ACTION_TYPE } from 'src/components/FormBuilder/Tabs/helper';
 
 export default function UpdateResourceActions({ onClose, onSuccess, resource, resourceData, type }) {
+
   const OPERATOR = [
     {
       optionLabel: 'Less than',
@@ -407,72 +408,71 @@ const Card = ({ values, index, parentRemove, setFieldValue, errors, touched, fie
 };
 
 const DynamicFormField = ({ fieldName, value, field, setFieldValue, formikField, error, touched, label }) => {
-  return (
-    field?.type === FieldList.DATE.type ? (
-      <>
-        <Autocomplete
-          options={Object.values(DATE_VALUE)}
-          getOptionLabel={(option) => option || ''}
-          value={value === DATE_VALUE.currentDate ? DATE_VALUE.currentDate : DATE_VALUE.custom}
-          fullWidth
-          onChange={(event, newValue) => {
-            setFieldValue(formikField, newValue);
-          }}
-          size="small"
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Value"
-              margin="none"
-              size="small"
-              variant="outlined"
-            />
-          )}
-        />
-        {value != DATE_VALUE.currentDate && (
-          <FormTypes
-            {...field}
-            values={{ [fieldName]: value }}
-            errors={{ [fieldName]: error }}
-            touched={{ [fieldName]: touched }}
-            fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
-            label={label}
-            name={field.fieldName}
-            type={field.type}
-            options={field.option || []}
-            disabled={false}
-            setFieldValue={(name, value) => {
-              setFieldValue(formikField, value);
-            }}
-            required={false}
-            fullWidth
-            isTooltip={field?.isTooltip || false}
-            tooltipMessage={field?.tooltipMessage || ''}
+  return (field?.type === FieldList.DATE.type ? (
+    <>
+      <Autocomplete
+        options={Object.values(DATE_VALUE)}
+        getOptionLabel={(option) => option || ''}
+        value={value}
+        fullWidth
+        onChange={(event, newValue) => {
+          setFieldValue(formikField, newValue);
+        }}
+        size="small"
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Value"
+            margin="none"
             size="small"
+            variant="outlined"
           />
         )}
-      </>
-    ) : (
-      <FormTypes
-        {...field}
-        values={{ [fieldName]: value }}
-        errors={{ [fieldName]: error }}
-        touched={{ [fieldName]: touched }}
-        fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
-        label={label}
-        name={field.fieldName}
-        type={field.type}
-        options={field.option || []}
-        disabled={false}
-        setFieldValue={(name, value) => {
-          setFieldValue(formikField, value);
-        }}
-        required={false}
-        fullWidth
-        isTooltip={field?.isTooltip || false}
-        tooltipMessage={field?.tooltipMessage || ''}
-        size="small"
       />
-    )
+      {value === DATE_VALUE.custom && (
+        <FormTypes
+          {...field}
+          values={{ [fieldName]: value }}
+          errors={{ [fieldName]: error }}
+          touched={{ [fieldName]: touched }}
+          fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
+          label={label}
+          name={field.fieldName}
+          type={field.type}
+          options={field.option || []}
+          disabled={false}
+          setFieldValue={(name, value) => {
+            setFieldValue(formikField, value);
+          }}
+          required={false}
+          fullWidth
+          isTooltip={field?.isTooltip || false}
+          tooltipMessage={field?.tooltipMessage || ''}
+          size="small"
+        />
+      )}
+    </>
+  ) : (
+    <FormTypes
+      {...field}
+      values={{ [fieldName]: value }}
+      errors={{ [fieldName]: error }}
+      touched={{ [fieldName]: touched }}
+      fieldData={{ ...field, required: false, isUneditable: false, disableOnEdit: false }}
+      label={label}
+      name={field.fieldName}
+      type={field.type}
+      options={field.option || []}
+      disabled={false}
+      setFieldValue={(name, value) => {
+        setFieldValue(formikField, value);
+      }}
+      required={false}
+      fullWidth
+      isTooltip={field?.isTooltip || false}
+      tooltipMessage={field?.tooltipMessage || ''}
+      size="small"
+    />
+  )
   );
 };
