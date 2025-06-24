@@ -11,7 +11,6 @@ import { CustomDialogTransition, productInventory, rentalManagement } from 'src/
 
 const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId, type = 'add', nonSerializedInventory = [] }) => {
 
-  console.log('aaaaa', selectedProducts, nonSerializedInventory)
   const toastConfig = useContext(CustomToastContext);
 
   const {
