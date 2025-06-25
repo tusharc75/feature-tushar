@@ -1,21 +1,18 @@
 import { Info } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import axios, { CancelTokenSource } from 'axios';
-import { isEqual, uniqBy } from 'lodash';
-import React, { Dispatch, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { camelCase, isEqual, uniqBy } from 'lodash';
+import React, { Dispatch, useCallback, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, TActios, TInitialState, useColumns } from 'src/components/CustomReactTable';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
   displayDate,
-  gridLoadingTimeout,
   MATERIAL_SUB_TYPE,
-  prepareDataForGrid,
   sidebarResource,
   workOrder,
   WORKORDER_SERVICE_STATUS,
@@ -41,6 +38,7 @@ type Props = {
   repairOrderDialog: boolean;
   setRepairOrderDialog: (value: boolean) => void;
   tableHead?: React.ReactNode;
+  columns: any[];
 };
 
 export type WorkOrderListRef = {
@@ -64,7 +62,8 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       consumablesDialog,
       setConsumablesDialog,
       setRepairOrderDialog,
-      tableHead = null
+      tableHead = null,
+      columns = [],
     },
     ref
   ) => {
@@ -77,8 +76,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     const { generateColumns } = useColumns();
 
-    const [workOrderColumns, setWorkOrderColumns] = useState(null);
-    const [columns, setColumns] = useState(null);
     const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
     const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
     const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
@@ -86,253 +83,105 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     useEffect(() => {
       const cancelToken = axios.CancelToken.source();
-      fetchWorkOrderColumns(cancelToken);
-      return () => cancelToken.cancel();
-    }, []);
-
-    useEffect(() => {
-      const cancelToken = axios.CancelToken.source();
       if (status) {
-        fetchData(cancelToken);
+        fetchData({ status, page, filterQuery, limit, cancelToken });
       }
       return () => cancelToken.cancel();
-    }, [page, limit, sorting, status, filterQuery, filters]);
+    }, [page, limit, sorting, status, filterQuery, filters,selectedResource]);
 
-    const fetchWorkOrderColumns = async (cancelToken?: CancelTokenSource) => {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
-      data = response?.data?.data?.filter(
-        (f) =>
-          !['workOrderNumber', 'type', 'status', 'serviceProcessStatus', 'pdfTemplate', 'owner', 'collaborator']?.includes(f?.fieldData?.fieldName)
-      );
-      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail.path);
-
-      const fixedInitialColumns = [
-        {
-          accessor: 'workOrderNumber',
-          Header: 'Work Order Number',
-          Cell: ({ row }) =>
-            row?.original?.workOrderNumber && row.original.workOrder ? (
-              <div>
-                <h5
-                  className="link text-truncate"
-                  onClick={() => {
-                    setServiceOpen({ open: true, id: row?.original?.workOrder });
-                  }}
-                >
-                  {row.original.workOrderNumber}
-                </h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes?.workOrderDetail?.path}/${row.original.workOrder}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-                <Box ml={1}>
-                  {row?.original?.canPerformInfo ? (
-                    <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                      <Info className="text-red-500 [font-size:20px_!important]" />
-                    </HtmlTooltip>
-                  ) : null}
-                </Box>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'service',
-          Header: 'Service',
-          Cell: ({ row }) =>
-            row.original['service'] && row.original.serviceId ? (
-              <div className="flex items-center gap-1">
-                <h5 className="text-truncate">{row.original.service}</h5>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes?.serviceMasterDetail?.path}/${row.original.serviceId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'status',
-          Header: 'Status',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['status'] ? (
-              <div className="flex items-center gap-1">
-                <h5 className="text-truncate">{row.original.status}</h5>
-              </div>
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'action',
-          Header: 'Actions',
-          minWidth: 100,
-          width: 100,
-          sticky: 'right',
-          disableFilters: true,
-          disableSortBy: true,
-          canDrag: false,
-          Cell: ({ row }) => (
-            <>
-              <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
-                <IconButton
-                  size="small"
-                  onClick={() => handlePdfPreview(row.original?.workOrder, user?.user, toastConfig)}
-                >
-                  <PictureAsPdfIcon fontSize={'small'} color='primary' />
-                </IconButton>
-              </HtmlTooltip>
-            </>
-          )
-        }
-      ];
-      setWorkOrderColumns([...fixedInitialColumns, ...newColumns]);
-    };
-
-    const fetchResourceColumns = async () => {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${selectedResource}&view=true`);
-      data = response?.data?.data?.filter((f) => ['customerAccount', 'rentalJob']?.includes(f?.fieldData?.fieldName));
-      const newColumns = generateColumns(renderedFrom, data);
-      const extraColumns = [
-        {
-          accessor: 'assignedWorkStations',
-          Header: 'Work Stations',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row.original['assignedWorkStations'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedWorkStations',
-                  lookupResource: sidebarResource.workStations
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        },
-        {
-          accessor: 'assignedUsers',
-          Header: 'Technician',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) =>
-            row?.original['assignedUsers'] ? (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'assignedUsers',
-                  lookupResource: sidebarResource.user
-                }}
-                original={row?.original}
-              />
-            ) : (
-              <NoDataCell />
-            )
-        }
-      ];
-      setColumns([...workOrderColumns, ...newColumns, ...extraColumns]);
-    };
-
-    useEffect(() => {
-      if (selectedResource && workOrderColumns?.length) {
-        fetchResourceColumns();
-      }
-    }, [selectedResource, workOrderColumns]);
-
-    const fetchData = (cancelToken?: CancelTokenSource) => {
+    const fetchData = useCallback(async ({
+      status,
+      page = 0,
+      filterQuery = '',
+      limit,
+      cancelToken
+    }: {
+      status: string;
+      page?: number;
+      filterQuery?: string;
+      limit: number;
+      cancelToken?: CancelTokenSource
+    }) => {
       dispatch({ type: 'selection', selectedRecords: [] });
       dispatch({ type: 'loading', loading: true });
-      const queryString = getQueryString();
-      let api = `${workOrderSupervisor.api}/work-order-service${queryString}`;
+      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${status}&limit=${limit}&resource=${selectedResource}${filterQuery}`;
+
       if (status === WORKORDER_SERVICE_STATUS.planned) {
-        api = `${workOrder.api}/work-order-planning${queryString}`;
+        const filterByIds = getQueryString(filterQuery);
+        api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
+          JSON.stringify([{ field: 'status', term: WORKORDER_SERVICE_STATUS.pending }])
+        )}`;
+        if (filterByIds?.length) {
+          api += `&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+        }
       }
-      axiosInstance()
-        .get(api, { cancelToken: cancelToken?.token })
-        .then(({ data: { data, count } }) => {
-          let rows: any = [];
-          let countC = count;
-          if (status === WORKORDER_SERVICE_STATUS.planned) {
-            const { data: dataD, count } = data;
-            countC = count;
-            rows = dataD?.map((u) => {
-              let finalObject: any = prepareDataForGrid(u, user);
-              finalObject['serializedAsset'] = u?.asset?.assetNumber || '';
-              finalObject['serializedAssetId'] = u?.asset?._id || '';
-              finalObject['warehouse'] = u?.asset?.warehouse || '';
-              finalObject['warehouseId'] = u?.asset?.warehouseId || '';
-              finalObject['assetStatus'] = u?.asset?.status;
-              finalObject['currentOwnerType'] = u?.asset?.currentOwnerType;
-              finalObject['ownerType'] = u?.asset?.ownerType;
-              return finalObject;
-            });
-          } else {
-            rows = data.map((u) => {
-              const resource =
-                selectedResource === sidebarResource?.repairOrder
-                  ? 'repairOrder'
-                  : selectedResource === sidebarResource?.productionOrder
-                    ? 'productionOrder'
-                    : selectedResource === sidebarResource?.assemblyOrder
-                      ? 'assemblyOrder'
-                      : '';
+      try {
 
-              const workOrderData = {
-                ...u?.workOrderDetail,
-                workOrder: u?.workOrderDetail?._id
-              };
-              delete workOrderData?.status;
-              delete workOrderData?.type;
-              delete workOrderData?.serviceProcessStatus;
-              delete workOrderData?.pdfTemplate;
-              delete workOrderData?.owner;
-              delete workOrderData?.collaborator;
-              delete workOrderData?._id;
+        const response = await axiosInstance().get(api, { cancelToken: cancelToken?.token });
+        if (response.status !== 200) {
+          throw new Error('Failed to fetch data');
+        }
+        let { data, count } = response.data;
+        if (status === WORKORDER_SERVICE_STATUS.planned) {
+          const { data: dataD, count: plannedCount } = data;
+          count = plannedCount;
+          data = dataD.map((item) => ({
+            ...item,
+            serializedAsset: item?.asset?.assetNumber,
+            serializedAssetId: item?.asset?._id,
+            repairOrderNumber: item?.repairOrder?.optionLabel,
+            warehouse: item?.asset?.warehouse || '',
+            warehouseId: item?.asset?.warehouseId || '',
+            assetStatus: item?.asset?.status,
+            currentOwnerType: item?.asset?.currentOwnerType,
+            ownerType: item?.asset?.ownerType,
+            serviceName: item?.service?.optionLabel,
+            assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
+            workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
+            status: WORKORDER_SERVICE_STATUS.planned
+          }));
+        } else {
+          data = data.map((item) => ({
+            ...item,
+            productionOrderId: item?.productionOrder?.productionOrderNumber,
+            productionOrderNumber: item?.productionOrder?._id,
+            repairOrder: item?.repairOrder?.repairOrderNumber,
+            repairOrderId: item?.repairOrder?._id,
+            repairOrderNumber: item?.repairOrder?.repairOrderNumber,
+            assemblyOrderId: item?.assemblyOrder?._id,
+            assemblyOrderNumber: item?.assemblyOrder?.assemblyOrderNumber,
+            workOrder: item?.workOrderDetail?._id,
+            workOrderNumber: item?.workOrderDetail?.workOrderNumber,
+            serviceName: item?.service?.optionLabel,
+            assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
+            workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
+            serializedAsset: item?.workOrderDetail?.serializedAsset?.optionLabel,
+            serializedAssetId: item?.workOrderDetail?.serializedAsset?.optionValue,
+            createDate: item?.workOrderDetail?.createDate,
+            warehouse: item?.workOrderDetail?.warehouse,
+            warehouseId: item?.workOrderDetail?.warehouse?.optionValue,
+            package: item?.workOrderDetail?.package?.optionLabel,
+            packageId: item?.workOrderDetail?.package?.optionValue,
+            priority: item?.workOrderDetail?.priority,
+            customerAccountName: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel,
+            customerAccountId: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue
+          }));
+        }
+        dispatch({ type: 'initialize', data: data, count: count });
+        dispatch({ type: 'loading', loading: false });
+      } catch (err) {
+        if (axios.isCancel(err)) {
+          console.warn('Request cancelled:', status, page);
+        } else {
+          toastConfig.setToastConfig(err);
+        }
+        dispatch({ type: 'loading', loading: false });
 
-              const resourceData = { customerAccount: u?.[resource]?.customerAccount, rentalJob: u?.[resource]?.rentalJob || {} };
+      }
+    }, [user, selectedResource]);
 
-              delete u?.workOrderDetail;
-              delete u?.[resource];
-              const finalObject: any = prepareDataForGrid({ ...u, ...workOrderData, ...resourceData }, user);
 
-              finalObject.assignedUsers = u?.assignedUsers;
-              finalObject.assignedWorkStations = u?.assignedWorkStations;
-
-              return finalObject;
-            });
-          }
-          dispatch({ type: 'initialize', data: rows, count: countC });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        })
-        .finally(() => {
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        });
-    };
-
-    const getQueryString = () => {
+    const getQueryString = (filterQuery: string) => {
       let deepFilter = `?page=${page}&limit=${limit}&resource=${selectedResource}`;
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
@@ -390,7 +239,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             type: 'success',
             message: data.message
           });
-          fetchData();
+          fetchData({ status, page: 0, filterQuery, limit });
           setSubmitting(false);
           setConsumablesDialog({ open: false, multiple: false });
         })
@@ -412,7 +261,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             type: 'success',
             message: data.message
           });
-          fetchData();
+          fetchData({ status, limit, page, filterQuery });
           setRepairOrderDialog(false);
         })
         .catch((err) => {
@@ -422,7 +271,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
 
     useImperativeHandle(ref, () => ({
       refreshGrid() {
-        fetchData();
+        fetchData({ status, limit, page, filterQuery });
       },
       handleAddConsumables(rows, records = []) {
         handleAddConsumables(rows, records);
@@ -435,11 +284,47 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       setWorkStationAssignDialog
     }));
 
+    const actionsColumn = {
+      accessor: 'actions',
+      Header: 'Actions',
+      disableFilters: true,
+      disableSortBy: true,
+      sticky: 'right',
+      minWidth: 100,
+      width: 120,
+      Cell: ({ row }) => (
+        <div className="flex items-center gap-1 justify-start">
+          {row?.original?.canPerformInfo && (
+            <Box ml={1}>
+              <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
+                <Info className="text-red-500 [font-size:20px_!important]" />
+              </HtmlTooltip>
+            </Box>
+          )}
+
+          <Box ml={1}>
+            <HtmlTooltip title="Preview PDF">
+              <IconButton
+                size="small"
+                color="primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePdfPreview(row?.original?.workOrder, user, toastConfig);
+                }}
+              >
+                <PictureAsPdfIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          </Box>
+        </div>
+      )
+    };
     const getColumns = (columns) => {
       if (status === WORKORDER_SERVICE_STATUS.planned) {
         const newColumn = columns?.filter((c) =>
           ['service', 'warehouse', 'repairOrder', 'status', 'product', 'assignedWorkStations', 'assignedUsers']?.includes(c?.accessor)
         );
+
         newColumn?.unshift({
           accessor: 'serializedAsset',
           Header: resources?.serializedAsset?.titleSingular,
@@ -460,26 +345,68 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
               <NoDataCell />
             )
         });
+
         newColumn.splice(6, 0, {
           accessor: 'dueDate',
           Header: 'Due Date',
           disableFilters: true,
           disableSortBy: true,
-          Cell: ({ row }) => (row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />)
+          Cell: ({ row }) =>
+            row.original['dueDate'] ? <h5 className="text-truncate">{displayDate(row.original.dueDate)}</h5> : <NoDataCell />
         });
 
         return newColumn;
       }
+
+      let filteredCols = [...columns];
+
+      filteredCols = filteredCols.map((col) => {
+        if (col.accessor === 'service') {
+          return {
+            ...col,
+            Cell: ({ row }) =>
+              row?.original?.serviceName ? (
+                <div className="flex items-center gap-1">
+                  <h5
+                    className="link text-truncate"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`);
+                    }}
+                  >
+                    {row?.original?.serviceName}
+                  </h5>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          };
+        }
+        return col;
+      });
+
       if (selectedResource === sidebarResource.repairOrder) {
-        return columns?.filter((c) => !['productionOrder', 'assemblyOrder']?.includes(c?.accessor));
+        filteredCols = filteredCols?.filter((c) => !['productionOrder', 'assemblyOrder'].includes(c?.accessor));
+      } else if (selectedResource === sidebarResource.productionOrder) {
+        filteredCols = filteredCols?.filter((c) =>
+          !['repairOrder', 'assemblyOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor)
+        );
+      } else if (selectedResource === sidebarResource.assemblyOrder) {
+        filteredCols = filteredCols?.filter((c) =>
+          !['productionOrder', 'repairOrder', 'serializedAsset', 'rentalJob'].includes(c?.accessor)
+        );
       }
-      if (selectedResource === sidebarResource.productionOrder) {
-        return columns?.filter((c) => !['repairOrder', 'assemblyOrder', 'serializedAsset', 'rentalJob']?.includes(c?.accessor));
-      }
-      if (selectedResource === sidebarResource.assemblyOrder) {
-        return columns?.filter((c) => !['productionOrder', 'repairOrder', 'serializedAsset', 'rentalJob']?.includes(c?.accessor));
-      }
-      return columns;
+
+      return [...filteredCols, actionsColumn];
     };
 
     return (
@@ -523,7 +450,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             }}
             handleSucess={() => {
               setAssignTechnicianDialog(false);
-              fetchData();
+              fetchData({ status, limit, page, filterQuery });
             }}
             competencies={selectedRecords[0]?.competencies}
           />
@@ -543,7 +470,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             }}
             handleSucess={() => {
               setWorkStationAssignDialog(false);
-              fetchData();
+              fetchData({ status, limit, page, filterQuery });
             }}
           />
         )}

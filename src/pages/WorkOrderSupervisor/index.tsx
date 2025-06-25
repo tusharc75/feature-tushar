@@ -286,7 +286,7 @@ const WorkOrderSupervisor = () => {
           Cell: ({ row }) =>
             row?.original?.serviceName ? (
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-1">
+                <div className="flex gap-1">
                   <h5
                     className="link text-truncate"
                     onClick={(e) => {
@@ -1123,9 +1123,62 @@ const WorkOrderSupervisor = () => {
             <WorkOrderCalendar filterQuery={filterQuery} reference={resourceType?.value} ref={ref} setOpen={setOpen} />
           </div>
         )}
+        {/* {viewType === 'table-view' && (
+          <div className="">
+            <GridView
+              columns={columnsDef}
+              renderedFrom={renderedFrom}
+              state={tableState}
+              tableHead={
+                <div className="max-md:w-full">
+                  <DetailsPageHeader
+                    isAddButtonVisible={false}
+                    className="flex-grow"
+                    isActionButtonVisible={false}
+                    isNewActionButtonVisible={selectedRecords.length > 0}
+                    newActionButtonProps={newActionButtonProps}
+                    actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                    leftSideContents={
+                      <>
+                        <ThemeButton
+                          mobileTooltip="Apply Filters"
+                          startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                          iconForMobile={<BiFilterAlt />}
+                          onClick={() => {
+                            setShowFilter(true);
+                          }}
+                        >
+                          Show Filters
+                        </ThemeButton>
+                        <DisplayFilterChip
+                          filterTerm={filterTerm}
+                          resourceColumns={FIELD_TO_FILTER}
+                          deepFilters={[]}
+                          filterByIds={filterByIds}
+                          fetchResourceData={(deepFilter, filterById) => {
+                            handleApplyFilter(filterById);
+                          }}
+                          setDeepFilters={null}
+                          setFilterByIds={setFilterByIds}
+                        />
+                      </>
+                    }
+                    hasXpadding={false}
+                    hasYpadding={false}
+                  />
+                </div>
+              }
+              ref={workOrderListRef}
+              dispatch={tableDispatch}
+              filterQuery={filterQuery}
+              permissions={permissions?.workOrderSupervisor}
+            />
+          </div>
+        )} */}
         {viewType === 'table-view' && (
           <div className="pt-4">
             <WorkOrderList
+              columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
               dispatch={tableDispatch}
