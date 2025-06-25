@@ -10,10 +10,11 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomDialogTransition, productInventory, rentalManagement } from 'src/constants/helpers';
 
 const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId, type = 'add', nonSerializedInventory = [] }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { resources }
+    state: { user, resources }
   }: any = useData();
 
   const [selectedProduct, setSelectedProduct] = useState(selectedProducts[0]);
@@ -54,9 +55,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               qty:
                 type === 'add'
                   ? (d?.inventory || 0) -
-                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty ||
+                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
                     0)
-                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0,
+                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty || 0,
               inventory: 0
             }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
@@ -72,37 +73,31 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
     if (data?.length > 0) {
       setSubmitting(true);
       if (type === 'add') {
-        axiosInstance()
-          .put(
-            `${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
-            data?.map((p) => ({
-              product: p?.materialId,
-              warehouse: p?.warehouseId,
-              storageLocation: p?.storageLocationId,
-              qty: p?.inventory,
-              _id: p?._id
-            }))
-          )
-          .then(() => {
-            setSubmitting(false);
-            onSuccess();
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setSubmitting(false);
-          });
+        axiosInstance().put(`${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
+          data?.map((p) => ({
+            product: p?.materialId,
+            warehouse: p?.warehouseId,
+            ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
+            qty: p?.inventory,
+            _id: p?._id
+          }))
+        ).then(() => {
+          setSubmitting(false);
+          onSuccess();
+        }).catch((error) => {
+          toastConfig.setToastConfig(error);
+          setSubmitting(false);
+        });
       } else {
-        axiosInstance()
-          .put(
-            `${rentalManagement.api}/${referenceId}/remove-non-serial-inventory`,
-            data?.map((p) => ({
-              product: p?.materialId,
-              warehouse: p?.warehouseId,
-              storageLocation: p?.storageLocationId,
-              qty: p?.inventory,
-              _id: p?._id
-            }))
-          )
+        axiosInstance().put(`${rentalManagement.api}/${referenceId}/remove-non-serial-inventory`,
+          data?.map((p) => ({
+            product: p?.materialId,
+            warehouse: p?.warehouseId,
+            ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
+            qty: p?.inventory,
+            _id: p?._id
+          }))
+        )
           .then(() => {
             setSubmitting(false);
             onSuccess();

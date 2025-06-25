@@ -745,7 +745,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           window.open(`${routes.planningDetail.path}/${data?.referenceId}`);
         }
       } else {
-        setShowDetail({ open: true, data: data, anchor: args.jsEvent });
+        setShowDetail({ open: true, data: args.event, anchor: args.jsEvent });
       }
     },
     [mapObjectToList, selectedLookUpResourceData?.product, selectedLookUpResourceData?.warehouse, selectedResource?.resource]

@@ -1937,7 +1937,14 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           fullWidth={true}
-          onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
+          onChange={onChange ? onChange : (e, val: any) => {
+            if (values?.pricingCondition) {
+              if (['customerAccount', 'warehouse', 'currency'].every((name) => allFields?.some((f) => f?.fieldName === name))) {
+                setFieldValue('pricingCondition', '');
+              }
+            }
+            handleChange(name, val && val.currencyCode ? val.currencyCode : '')
+          }}
           helperText={touched[name] && errors[name]}
           error={touched[name] && Boolean(errors[name])}
         />

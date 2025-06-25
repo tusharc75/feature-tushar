@@ -316,7 +316,8 @@ const SerializedAssetDetailsPage = () => {
 
   const handleStatusChange = (o) => {
     const { policy } = resourceData;
-    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === o.optionValue);
+    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === o.optionValue
+      && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue)));
     setStatus(o.optionValue);
     if (
       (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
