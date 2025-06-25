@@ -1,7 +1,7 @@
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
-import { map, uniq } from 'lodash';
+import { camelCase, map, uniq } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
@@ -11,6 +11,7 @@ import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 const renderedFrom = 'softHold';
 
@@ -19,6 +20,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
   const [value, setValue] = useState(0);
   const [softHoldData, setSoftHoldData] = useState([]);
   const { state, dispatch } = useTableReducer({ renderedFrom });
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   useEffect(() => {
     if (tabs?.length) {
@@ -71,20 +76,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         const result = [];
         data?.forEach((e) => {
           result.push({
-            path:
-              e.referenceType === sidebarResource.salesOrder
-                ? routes.salesOrderDetail.path
-                : e.referenceType === sidebarResource.transferInventory
-                  ? routes.transferInventoryDetail.path
-                  : e.referenceType === sidebarResource.transferAsset
-                    ? routes.transferAssetDetail.path
-                    : e.referenceType === sidebarResource.workOrder
-                      ? routes?.workOrderDetail?.path
-                      : e.referenceType === sidebarResource.subcontractAssembly
-                        ? routes.subcontractAssemblyDetail.path
-                        : e.referenceType === sidebarResource.rentalManagement
-                          ? routes.rentalManagementDetail.path
-                          : '',
+            path: e.referenceType === sidebarResource.transferInventory
+              ? routes.transferInventoryDetail.path
+              : e.referenceType === sidebarResource.rentalManagement
+                ? routes.rentalManagementDetail.path : '',
             inventory: e?.qty,
             referenceNumber: e?.reference?.optionLabel,
             referenceNumberId: e?.reference?.optionValue,
@@ -102,10 +97,9 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       <CustomDialogHeader title={'Soft Hold History'} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={value} onChange={handleChange}>
-          {tabs?.map((row, index) => <CustomTab value={index} label={row} />)}
+          {tabs?.map((row, index) => <CustomTab value={index} label={resources?.[camelCase(row)]?.titlePlural || row} />)}
         </CustomTabs>
-
-        <Grid size={{xs:12, md:12, sm:12}}>
+        <Grid size={{ xs: 12, md: 12, sm: 12 }}>
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 200px)'}
