@@ -180,37 +180,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       }
     }, [user, selectedResource]);
 
-
-    // const getQueryString = (filterQuery: string) => {
-    //   let deepFilter = `?page=${page}&limit=${limit}&resource=${selectedResource}`;
-
-    //   if (status === WORKORDER_SERVICE_STATUS.planned) {
-    //     const filterByIds = queryStringPlanned(filterQuery);
-    //     if (filterByIds?.length) {
-    //       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    //     }
-    //   } else {
-    //     deepFilter = `${deepFilter}&status=${status}${filterQuery}`;
-    //   }
-    //   const { deepFilters } = gridFilterParser(filters);
-
-    //   if (status === WORKORDER_SERVICE_STATUS.planned) {
-    //     deepFilters.push({
-    //       field: 'status',
-    //       term: WORKORDER_SERVICE_STATUS.pending
-    //     });
-    //   }
-
-    //   if (deepFilters?.length) {
-    //     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    //   }
-    //   if (deepFilters?.length || filterQuery) {
-    //     deepFilter = `${deepFilter}&filterType=and`;
-    //   }
-
-    //   return `${deepFilter}`;
-    // };
-
     const handleAddConsumables = (rows, records = []) => {
       setSubmitting(true);
       const data: any = [];
