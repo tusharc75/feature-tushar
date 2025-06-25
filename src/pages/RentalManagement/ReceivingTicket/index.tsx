@@ -2707,7 +2707,7 @@ const ReceivingTicket = ({
                 validateAction,
                 resources,
                 getFilterSelectedRecords,
-                handleChangeSubStatus,
+                handleChangeSubStatus
               }}
             />
           }
