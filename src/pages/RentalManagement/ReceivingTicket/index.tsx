@@ -2707,7 +2707,7 @@ const ReceivingTicket = ({
                 validateAction,
                 resources,
                 getFilterSelectedRecords,
-                handleChangeSubStatus
+                handleChangeSubStatus,
               }}
             />
           }
@@ -2961,7 +2961,7 @@ const ReceivingTicket = ({
       {confirmationDirectSendToSupplier.open && (
         <ConfirmationDialog
           open={confirmationDirectSendToSupplier.open}
-          message={`Are you sure you want to send direct to supplier ?`}
+          message={`Are you sure you want to send direct to supplier (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) ?`}
           onClose={() => {
             setConfirmationDirectSendToSupplier({ open: false, data: null });
             handleSwapAssets(confirmationDirectSendToSupplier.data, false)
