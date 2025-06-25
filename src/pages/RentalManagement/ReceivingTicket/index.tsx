@@ -86,6 +86,7 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import { flattenArray } from 'src/constants/columns';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
@@ -2488,7 +2489,7 @@ const ReceivingTicket = ({
           return { asset: e.newId, oldAssetParentId: e?.parentId };
         }),
         rentalJob: rentalManagementData?._id,
-        sendToSupplier: directSendToSupplier
+        directSendToSupplier: directSendToSupplier
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [], type: '' });
@@ -2957,23 +2958,22 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-
       {confirmationDirectSendToSupplier.open && (
-        <ConfirmationDialog
+
+        <SelectionConfirmationDialog
           open={confirmationDirectSendToSupplier.open}
-          message={`Are you sure you want to send direct to supplier (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) ?`}
+          message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          onOk={(type) => {
+            setOkBtnLoading(true)
+            handleSwapAssets(confirmationDirectSendToSupplier.data, type === 'Yes' ? true : false)
+          }}
           onClose={() => {
             setConfirmationDirectSendToSupplier({ open: false, data: null });
-            handleSwapAssets(confirmationDirectSendToSupplier.data, false)
           }}
-          onOk={() => {
-            setOkBtnLoading(true)
-            handleSwapAssets(confirmationDirectSendToSupplier.data, true)
-          }}
-          okBtnLoading={okBtnLoading}
+          selection1={'Yes'}
+          selection2={'No'}
         />
       )}
-
       {statusToUpdate.open && (
         <Dialog
           open
