@@ -107,7 +107,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${status}&limit=${limit}&resource=${selectedResource}${filterQuery}`;
 
       if (status === WORKORDER_SERVICE_STATUS.planned) {
-        const filterByIds = getQueryString(filterQuery);
+        const filterByIds = queryStringPlanned(filterQuery);
         api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
           JSON.stringify([{ field: 'status', term: WORKORDER_SERVICE_STATUS.pending }])
         )}`;
@@ -181,35 +181,35 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
     }, [user, selectedResource]);
 
 
-    const getQueryString = (filterQuery: string) => {
-      let deepFilter = `?page=${page}&limit=${limit}&resource=${selectedResource}`;
+    // const getQueryString = (filterQuery: string) => {
+    //   let deepFilter = `?page=${page}&limit=${limit}&resource=${selectedResource}`;
 
-      if (status === WORKORDER_SERVICE_STATUS.planned) {
-        const filterByIds = queryStringPlanned(filterQuery);
-        if (filterByIds?.length) {
-          deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-        }
-      } else {
-        deepFilter = `${deepFilter}&status=${status}${filterQuery}`;
-      }
-      const { deepFilters } = gridFilterParser(filters);
+    //   if (status === WORKORDER_SERVICE_STATUS.planned) {
+    //     const filterByIds = queryStringPlanned(filterQuery);
+    //     if (filterByIds?.length) {
+    //       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    //     }
+    //   } else {
+    //     deepFilter = `${deepFilter}&status=${status}${filterQuery}`;
+    //   }
+    //   const { deepFilters } = gridFilterParser(filters);
 
-      if (status === WORKORDER_SERVICE_STATUS.planned) {
-        deepFilters.push({
-          field: 'status',
-          term: WORKORDER_SERVICE_STATUS.pending
-        });
-      }
+    //   if (status === WORKORDER_SERVICE_STATUS.planned) {
+    //     deepFilters.push({
+    //       field: 'status',
+    //       term: WORKORDER_SERVICE_STATUS.pending
+    //     });
+    //   }
 
-      if (deepFilters?.length) {
-        deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-      }
-      if (deepFilters?.length || filterQuery) {
-        deepFilter = `${deepFilter}&filterType=and`;
-      }
+    //   if (deepFilters?.length) {
+    //     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    //   }
+    //   if (deepFilters?.length || filterQuery) {
+    //     deepFilter = `${deepFilter}&filterType=and`;
+    //   }
 
-      return `${deepFilter}`;
-    };
+    //   return `${deepFilter}`;
+    // };
 
     const handleAddConsumables = (rows, records = []) => {
       setSubmitting(true);
