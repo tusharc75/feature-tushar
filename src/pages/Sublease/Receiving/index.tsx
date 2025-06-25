@@ -97,12 +97,11 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
               aria-label="Details"
               onClick={() => {
                 window.open(
-                  `${
-                    row.original.type === MATERIAL_TYPE.product
-                      ? routes.productDetail.path
-                      : row.original.type === MATERIAL_TYPE.package
-                        ? routes.packagesDetail.path
-                        : routes.serializedAssetDetail.path
+                  `${row.original.type === MATERIAL_TYPE.product
+                    ? routes.productDetail.path
+                    : row.original.type === MATERIAL_TYPE.package
+                      ? routes.packagesDetail.path
+                      : routes.serializedAssetDetail.path
                   }/${row.original.materialId}`
                 );
               }}
@@ -193,12 +192,12 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${resources?.sublease?.titleSingular}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...columns?.filter((c) => c?.accessor != 'action'), ...pdfColumns],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
@@ -214,18 +213,15 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
             }}
             isExportAllOrSomeFeature={true}
             isDownloadExcel={false}
-            recordsToExport={
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                : treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length
+            recordsToExport={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              : treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length
             }
-            ids={
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-                ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d?._id)
-                : treeToFlatArray(dataRows, 'subRows')
-                    .filter((f) => f.type === MATERIAL_TYPE.serializedAsset)
-                    ?.map((d) => d?._id)
+            ids={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+              ? selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d?._id)
+              : treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d?._id)
             }
+            total={treeToFlatArray(dataRows, 'subRows').filter((f) => f.type === MATERIAL_TYPE.serializedAsset)?.length}
           />
         )}
         {allowedToEdit && (
