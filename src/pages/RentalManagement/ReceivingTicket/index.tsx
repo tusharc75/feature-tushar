@@ -3141,7 +3141,7 @@ const ReceivingTicket = ({
             if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
               handleOpenReplaceAssetReason(rows);
             } else {
-              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(d => d?.subleaseAsset)) {
+              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
                 setConfirmationDirectSendToSupplier({ open: true, data: rows })
               } else {
                 handleSwapAssets(rows);
