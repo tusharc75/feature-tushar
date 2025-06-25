@@ -143,6 +143,8 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         } else {
           data = data.map((item) => ({
             ...item,
+            product: item?.workOrderDetail?.product?.optionLabel,
+            productId: item?.workOrderDetail?.product?.optionValue,
             productionOrderId: item?.productionOrder?.productionOrderNumber,
             productionOrderNumber: item?.productionOrder?._id,
             repairOrder: item?.repairOrder?.repairOrderNumber,
