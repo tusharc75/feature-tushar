@@ -19,7 +19,7 @@ const StaticCards = ({ chartData }: any) => {
                   _key === 'Hit Ratio' ? (
                     <Box pl={2} key={_key + i}>
                       <p className={styles.hit_ratio}>
-                        {_key}: {obj[_key] ? obj[_key].toFixed(2) : 0} %
+                        {obj[_key] === '' ? <Box pt={2.5}></Box> : `${_key}: ${obj[_key] ? obj[_key].toFixed(2) : 0} %`}
                       </p>
                     </Box>
                   ) : (

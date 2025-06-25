@@ -384,7 +384,7 @@ const ChartTypes = ({
                 <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : chart.chartType === 'Funnel' ? (
                 <Box pr={2} pl={2} pb={2}>
-                  <FunnelChart data={chartData} showValues={false} />
+                  <FunnelChart data={chartData} showValues={false} getToolTip={() => null} />
                 </Box>
               ) : (
                 <>
