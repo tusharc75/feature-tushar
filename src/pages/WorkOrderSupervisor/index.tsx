@@ -58,6 +58,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 type StatusSelectorProps = {
   selectedServiceStatus: string[];
   setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
+  resourceType: string;
 };
 const LIMIT = 25;
 
@@ -1035,7 +1036,7 @@ const WorkOrderSupervisor = () => {
 
             <div className="ml-auto flex items-center gap-2">
               {viewType === 'card-view' && (
-                <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} />
+                <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} resourceType={selectedResource?.value} />
               )}
               <IconButtonTabs
                 onItemClick={resetSelectedRecords}
@@ -1322,7 +1323,7 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus }) => {
+const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus, resourceType }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const isStatusSelectorOpen = Boolean(anchorEl);
   const handleStatusSelectorClose = () => {
@@ -1374,14 +1375,17 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, 
           </div>
           <div className="p-[0_20px_20px]">
             {Object.values(WORKORDER_SERVICE_STATUS).map((s) => {
+              const isPlanned = s === WORKORDER_SERVICE_STATUS.planned;
+              const shouldDisable = isPlanned && resourceType !== 'Repair Order';
               return (
-                <FormGroup row>
+                <FormGroup row key={s}>
                   <FormControlLabel
                     control={
                       <Checkbox
                         checked={selectedServiceStatus?.includes(s)}
                         onChange={(e) => handleCheck(e, s)}
-                        inputProps={{ 'aria-label': 'primary checkbox' }}
+                        inputProps={{ 'aria-label': 'status checkbox' }}
+                        disabled={shouldDisable}
                       />
                     }
                     label={s}
@@ -1389,6 +1393,7 @@ const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, 
                 </FormGroup>
               );
             })}
+
           </div>
         </div>
       </Popover>
