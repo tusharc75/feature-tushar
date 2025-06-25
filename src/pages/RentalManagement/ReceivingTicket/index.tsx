@@ -177,6 +177,7 @@ const ReceivingTicket = ({
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [fieldLabels, setFieldLabels] = useState(null);
   const [rentalJobChildFields, setRentalJobChildFields] = useState(null);
+  const [confirmationDirectSendToSupplier, setConfirmationDirectSendToSupplier] = useState({ open: false, data: null })
 
   const {
     state: { user, permissions, resources }
@@ -2470,7 +2471,7 @@ const ReceivingTicket = ({
       });
   };
 
-  const handleSwapAssets = (rows) => {
+  const handleSwapAssets = (rows, directSendToSupplier = false) => {
     const data = [];
     getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
@@ -2486,11 +2487,14 @@ const ReceivingTicket = ({
         newAssets: data?.map((e) => {
           return { asset: e.newId, oldAssetParentId: e?.parentId };
         }),
-        rentalJob: rentalManagementData?._id
+        rentalJob: rentalManagementData?._id,
+        sendToSupplier: directSendToSupplier
       })
       .then(({ data }) => {
         setAddSerializedAssetDialog({ open: false, products: [], type: '' });
+        setConfirmationDirectSendToSupplier({ open: false, data: null });
         setIsSubmitting(false);
+        setOkBtnLoading(false)
         fetchRecords();
         toastConfig.setToastConfig({
           open: true,
@@ -2500,6 +2504,7 @@ const ReceivingTicket = ({
       })
       .catch((error) => {
         setIsSubmitting(false);
+        setOkBtnLoading(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -2953,6 +2958,22 @@ const ReceivingTicket = ({
         />
       )}
 
+      {confirmationDirectSendToSupplier.open && (
+        <ConfirmationDialog
+          open={confirmationDirectSendToSupplier.open}
+          message={`Are you sure you want to send direct to supplier (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) ?`}
+          onClose={() => {
+            setConfirmationDirectSendToSupplier({ open: false, data: null });
+            handleSwapAssets(confirmationDirectSendToSupplier.data, false)
+          }}
+          onOk={() => {
+            setOkBtnLoading(true)
+            handleSwapAssets(confirmationDirectSendToSupplier.data, true)
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
+
       {statusToUpdate.open && (
         <Dialog
           open
@@ -3120,7 +3141,11 @@ const ReceivingTicket = ({
             if (addSerializedAssetDialog.type === 'RentalJobReplaceAsset') {
               handleOpenReplaceAssetReason(rows);
             } else {
-              handleSwapAssets(rows);
+              if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.some(d => d?.subleaseAsset)) {
+                setConfirmationDirectSendToSupplier({ open: true, data: rows })
+              } else {
+                handleSwapAssets(rows);
+              }
             }
           }}
           handleSerializedAssetClose={() => {
