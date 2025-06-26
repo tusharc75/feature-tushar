@@ -483,7 +483,7 @@ const FormTypes = (props) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
 
-      let urls = Array.isArray(values[name]) ? [...values[name]] : [];
+      let urls: any = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -509,7 +509,7 @@ const FormTypes = (props) => {
         if (isMultiple) {
           urls?.push(url);
         } else {
-          urls = [url];
+          urls = url;
         }
       }
       setFieldValue(name, urls);
@@ -1948,7 +1948,14 @@ const FormTypes = (props) => {
           label={getLabel(label)}
           name={name}
           fullWidth={true}
-          onChange={onChange ? onChange : (e, val: any) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
+          onChange={onChange ? onChange : (e, val: any) => {
+            if (values?.pricingCondition) {
+              if (['customerAccount', 'warehouse', 'currency'].every((name) => allFields?.some((f) => f?.fieldName === name))) {
+                setFieldValue('pricingCondition', '');
+              }
+            }
+            handleChange(name, val && val.currencyCode ? val.currencyCode : '')
+          }}
           helperText={touched[name] && errors[name]}
           error={touched[name] && Boolean(errors[name])}
         />

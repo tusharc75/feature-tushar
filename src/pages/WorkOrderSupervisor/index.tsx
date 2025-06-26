@@ -1,5 +1,5 @@
-import { IconButton, Menu, MenuItem } from '@mui/material';
-import { MoreVert } from '@mui/icons-material';
+import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Popover } from '@mui/material';
+import { Close, Info, MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -9,34 +9,33 @@ import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ButtonMenu from 'src/components/ButtonMenu';
-import CardColTimeline, { datarowInterface, useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
 import IconButtonTabs from 'src/components/IconButtonTabs';
+import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import {
   ASSET_STATUS,
   INVENTORY_OWNER_TYPE,
   MATERIAL_SUB_TYPE,
   REPAIR_ORDER_TYPE,
+  WORKORDER_SUPERVISOR_STATUS,
   WORKORDER_SERVICE_STATUS,
   dateFormatToSend,
   sidebarResource,
   workOrder,
-  workOrderColormap,
   workOrderIconMap,
-  workOrderSupervisor
+  workOrderSupervisor,
+  prepareDataForGrid
 } from 'src/constants/helpers';
-import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
-import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
 import { camelCase, isEqual, map, uniq, uniqBy } from 'lodash';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import { useTableReducer } from 'src/components/CustomReactTable';
+import { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import WorkOrderSchedulerDialog from 'src/pages/WorkOrderSupervisor/WorkOrderSchedulerDialog';
@@ -50,8 +49,19 @@ import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { useCardColTimeline } from 'src/components/CardColTimeline1';
+import axios, { CancelToken } from 'axios';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CalendarView from 'src/pages/WorkOrderSupervisor/CalendarView';
+import CardView from 'src/pages/WorkOrderSupervisor//CardView';
+import GridView, { GridViewRef } from 'src/pages/WorkOrderSupervisor/GridView';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
-const LIMIT = 25;
+type StatusSelectorProps = {
+  selectedServiceStatus: string[];
+  setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
+  resourceType: string;
+};
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -64,17 +74,28 @@ type TableViewStatus =
 
 const renderedFrom = camelCase(sidebarResource?.workOrderSupervisor);
 
+const keyGetter = (d: any) => d?.['_id'] as string;
+
+const defaultVisibleRows = [
+  'customerAccount',
+  'workOrderNumber',
+  'warehouse',
+  'createDate',
+  'estimateCompleteDate',
+  'serializedAsset',
+  'product',
+  'package',
+  'repairOrder',
+  'assemblyOrder',
+  'productionOrder',
+  'assignedUsers',
+  'assignedWorkStations',
+];
+
+
 const WorkOrderSupervisor = () => {
-  const { state, dispatch } = useCardReducer();
-  const { limit, selectedRecords: cardSelectedRecords, visibleColumns, filterQuery } = state;
   const { state: tableState, dispatch: tableDispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords: tableSelectedRecords } = tableState;
-
-  const selectedRecords = useMemo(() => [...cardSelectedRecords, ...tableSelectedRecords], [cardSelectedRecords, tableSelectedRecords]);
-
-  const selectedRecordsP = useMemo(() => [...selectedRecords?.filter((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
-  const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
-
   const toastConfig = useContext(CustomToastContext);
   const {
     state: {
@@ -83,22 +104,35 @@ const WorkOrderSupervisor = () => {
       user: { user }
     }
   }: any = useData();
-  const workOrderListRef = useRef<WorkOrderListRef>();
+  const workOrderListRef = useRef<GridViewRef>();
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>(WORKORDER_SERVICE_STATUS.pending);
-
+  const { generateColumns } = useColumns();
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [viewType, setViewType] = useState<ViewType>(() => {
     return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
+
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, multiple: false });
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
+  const [onClickData, setOnClickData] = useState(null);
+  const [selectedServiceStatus, setSelectedServiceStatus] = useState<any[]>([]);
+  const [isOpen, setOpen] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [filterByIds, setFilterByIds] = useState([]);
+  const [filterTerm, setFilterTerm] = useState({});
+  const [filterQuery, setFilterQuery] = useState('');
+  const [columnsDef, setColumnsDef] = useState<any[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
+  }, [viewType]);
 
   const resetSelectedRecords = () => {
     setTableViewStatus(WORKORDER_SERVICE_STATUS.pending)
-    dispatch({ type: 'selection', selectedRecords: [] });
+    cardState.resetSelection();
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
 
@@ -113,19 +147,10 @@ const WorkOrderSupervisor = () => {
     value: sidebarResource.workOrder
   });
 
-  const [isOpen, setOpen] = useState({ open: false, id: null });
-  const [showFilter, setShowFilter] = useState(false);
-  const [filterByIds, setFilterByIds] = useState([]);
-  const [filterTerm, setFilterTerm] = useState({});
-
   const getDefaultSelectedResource = () => {
-    const _key = permissions?.repairOrder?.isRead
-      ? 'repairOrder'
-      : permissions?.productionOrder?.isRead
-        ? 'productionOrder'
-        : permissions?.assemblyOrder?.isRead
-          ? 'assemblyOrder'
-          : '';
+    const _key = permissions?.repairOrder?.isRead ? 'repairOrder'
+      : permissions?.productionOrder?.isRead ? 'productionOrder'
+        : permissions?.assemblyOrder?.isRead ? 'assemblyOrder' : '';
     if (_key) {
       return {
         label: resources?.[_key]?.titlePlural,
@@ -138,9 +163,302 @@ const WorkOrderSupervisor = () => {
 
   const [selectedResource, setSelectedResource] = useState(getDefaultSelectedResource());
 
+  const selectedStatusMemo = useMemo(() => {
+    const initial: any[] = [];
+    if (permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder) {
+      initial.push(WORKORDER_SERVICE_STATUS.planned);
+    }
+    return [
+      ...initial,
+      WORKORDER_SERVICE_STATUS.pending,
+      WORKORDER_SERVICE_STATUS.inProgress,
+      WORKORDER_SERVICE_STATUS.completed,
+      WORKORDER_SERVICE_STATUS.skipped
+    ];
+  }, [permissions?.workOrderPlanning?.isRead, selectedResource]);
+
   useEffect(() => {
-    resetSelectedRecords();
-  }, [globalFilters]);
+    setSelectedServiceStatus(selectedStatusMemo);
+  }, [selectedStatusMemo]);
+
+  useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+    fetchGridColumns(cancelToken.token);
+    return () => cancelToken.cancel();
+  }, [selectedResource]);
+
+
+  const fetchSingleColumnData = useCallback(async ({
+    column,
+    page = 0,
+    filterQuery = '',
+    limit,
+  }: {
+    column: string;
+    page?: number;
+    filterQuery?: string;
+    limit: number;
+  }): Promise<{ data: any[]; count: number }> => {
+    let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource?.value}${filterQuery}`;
+
+    if (column === WORKORDER_SERVICE_STATUS.planned) {
+      const filterByIds = queryStringPlanned(filterQuery);
+      api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
+        JSON.stringify([{ field: 'status', term: WORKORDER_SERVICE_STATUS.pending }])
+      )}`;
+      if (filterByIds?.length) {
+        api += `&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
+      }
+    }
+    try {
+
+      const response = await axiosInstance().get(api);
+      if (response.status !== 200) {
+        throw new Error('Failed to fetch data');
+      }
+      let { data, count } = response.data;
+      let rows = []
+
+      if (column === WORKORDER_SERVICE_STATUS.planned) {
+        const { data: dataD, count: plannedCount } = data;
+        count = plannedCount;
+        rows = dataD.map((item) => ({
+          ...item,
+          serializedAsset: item?.asset?.assetNumber,
+          serializedAssetId: item?.asset?._id,
+          repairOrderNumber: item?.repairOrder?.optionLabel,
+          warehouse: item?.asset?.warehouse || '',
+          warehouseId: item?.asset?.warehouseId || '',
+          assetStatus: item?.asset?.status,
+          currentOwnerType: item?.asset?.currentOwnerType,
+          ownerType: item?.asset?.ownerType,
+          serviceName: item?.service?.optionLabel,
+          assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
+          workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
+          status: WORKORDER_SERVICE_STATUS.planned
+        }));
+      } else {
+        rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+          finalObject['serviceName'] = u?.service?.optionLabel;
+          finalObject['serviceId'] = u?.service?.optionValue;
+          finalObject['customServiceStatus'] = u?.status;
+          finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          finalObject['uniqueId'] = u?._id;
+          finalObject['customerAccountName'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
+          finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
+          finalObject['oriAssignedUsers'] = u?.assignedUsers;
+          finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
+          delete workOrderDetailData?._id;
+          delete workOrderDetailData?.id;
+          return { ...finalObject, ...workOrderDetailData };
+        });
+      }
+      return { data: rows, count };
+    } catch (err) {
+      if (axios.isCancel(err)) {
+        console.warn('Request cancelled:', column, page);
+      } else {
+        toastConfig.setToastConfig(err);
+      }
+      return { data: [], count: 0 };
+    }
+  }, [user, selectedResource]);
+
+  const fetchGridColumns = async (cancelToken: CancelToken) => {
+    try {
+      let data;
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`, { cancelToken });
+      data = response?.data?.data;
+
+      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
+      const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
+
+      const extraColumns = [
+        {
+          accessor: 'serviceName',
+          Header: 'Service',
+          disabled: true,
+          Cell: ({ row }) =>
+            row?.original?.serviceName ? (
+              <div className="flex justify-between">
+                <h5
+                  className="link text-truncate"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`);
+                  }}
+                >
+                  {row?.original?.serviceName}
+                </h5>
+                <Box ml={1}>
+                  <HtmlTooltip title="Preview PDF">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePdfPreview(row?.original?.workOrder, user, toastConfig);
+                      }}
+                    >
+                      <PictureAsPdfIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+                {row?.original?.priority && (
+                  <Box ml={1}>
+                    <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High'
+                          ? 'bg-red-600'
+                          : row?.original?.priority === 'Low'
+                            ? 'bg-green-600'
+                            : 'bg-yellow-500'
+                          }`}
+                      >
+                        {row?.original?.priority}
+                      </span>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+                <RenderAssignOptions
+                  openAssignHandler={openAssignHandler}
+                  data={row?.original}
+                  permissions={permissions}
+                  resources={resources}
+                  isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
+                />
+              </div>
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'workOrderNumber',
+          Header: 'Work Order Number',
+          defaultVisible: true,
+          Cell: ({ row }) => (
+            <div className="flex items-center gap-1">
+              <p title={row?.original?.workOrderNumber}>{row?.original?.workOrderNumber}</p>
+              {row.original['workOrderNumber'] ? (
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        },
+        {
+          accessor: "customerAccountName",
+          Header: resources?.customerAccount?.titleSingular || 'Customer',
+          defaultVisible: true,
+          Cell: ({ row }) => {
+            const id = row?.original?.customerAccountId;
+            return row?.original?.customerAccountName ? (
+              <div className="flex items-center gap-1">
+                <p title={row?.original?.customerAccountName}>{row?.original?.customerAccountName}</p>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes.customerAccountDetail.path}/${row?.original?.customerAccountId}`, '_blank');
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              </div>
+            ) : (
+              <NoDataCell />
+            );
+          }
+        },
+        {
+          accessor: 'assignedUsers',
+          Header: 'Technician',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['assignedUsers'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedUsers',
+                  lookupResource: sidebarResource.user
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
+          accessor: 'assignedWorkStations',
+          Header: 'Work Stations',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['assignedWorkStations'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedWorkStations',
+                  lookupResource: sidebarResource.workStations
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
+        }
+      ];
+
+      const finalColumns = [...extraColumns.slice(0, 3), ...columns, ...extraColumns.slice(3)].map((c) => {
+        const id = c.id || c.accessor;
+        if (defaultVisibleRows.includes(id)) {
+          return { ...c, defaultVisible: true };
+        }
+        return c;
+      });
+      setColumnsDef(finalColumns);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const cardState = useCardColTimeline({
+    fetchSingleColumn: fetchSingleColumnData,
+    columns: WORKORDER_SUPERVISOR_STATUS,
+    initialVisibleColumns: selectedServiceStatus,
+    columnDef: columnsDef,
+    keyGetter
+  });
+
+  useEffect(() => {
+    cardState.setColumnDef(columnsDef);
+  }, [columnsDef]);
+
+  useEffect(() => {
+    cardState.setOrderAndVisibility({ order: tableState.columnOrder, visible: tableState.visibleColumns });
+  }, [tableState.columnOrder, tableState.visibleColumns]);
+
+  useEffect(() => {
+    cardState.setVisibleColumns(selectedServiceStatus);
+  }, [selectedServiceStatus]);
+
+  const selectedRecords = useMemo(() => [...tableSelectedRecords, ...cardState.selectedRecords], [tableSelectedRecords, cardState.selectedRecords]);
+  const selectedRecordsP = useMemo(() => [...selectedRecords?.filter((r) => r?.status === WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
+  const selectedRecordsS: any = useMemo(() => [...selectedRecords?.filter((r) => r?.status != WORKORDER_SERVICE_STATUS.planned)], [selectedRecords]);
 
   const ref: any = useRef();
 
@@ -219,20 +537,21 @@ const WorkOrderSupervisor = () => {
         }
       ]
       : []),
-    ...([sidebarResource.repairOrder, sidebarResource.productionOrder]?.includes(viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value)
-      ? [
-        {
-          fieldData: {
-            _id: '670dc2429gc87266052385b9',
-            fieldName: 'product',
-            fieldLabel: resources?.product?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.product,
-            type: 'dropDown'
-          },
-          isRead: permissions?.product?.isRead || false
-        }
-      ]
+    ...(([sidebarResource.repairOrder, sidebarResource.productionOrder] as const).includes(
+      (viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) as typeof sidebarResource.repairOrder | typeof sidebarResource.productionOrder
+    ) ? [
+      {
+        fieldData: {
+          _id: '670dc2429gc87266052385b9',
+          fieldName: 'product',
+          fieldLabel: resources?.product?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.product,
+          type: 'dropDown'
+        },
+        isRead: permissions?.product?.isRead || false
+      }
+    ]
       : []),
     ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.assemblyOrder
       ? [
@@ -284,150 +603,6 @@ const WorkOrderSupervisor = () => {
     }
   ];
 
-  useEffect(() => {
-    const cardDataRows: datarowInterface[] = [
-      {
-        accessor: 'serviceName',
-        title: resources?.serviceMaster?.titleSingular,
-        type: 'title',
-        renderer: (data) => (
-          <div className="flex items-center gap-1 ml-6">
-            <h5 className={` line-clamp-1  `}>{data.serviceName || '--'}</h5>
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`${routes?.serviceMasterDetail?.path}/${data?.service?.optionValue}`);
-              }}
-            >
-              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-            </IconButton>
-            <HtmlTooltip title="Preview PDF">
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePdfPreview(data?.workOrder, user, toastConfig);
-                }}
-              >
-                <PictureAsPdfIcon fontSize={'small'} color='primary' />
-              </IconButton>
-            </HtmlTooltip>
-            {data?.priority &&
-              <HtmlTooltip title={`${data?.priority} Priority`}>
-                <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${data?.priority === 'High' ? 'bg-red-600' :
-                  data?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'} `}>
-                  {data?.priority}
-                </span>
-              </HtmlTooltip>
-            }
-          </div>
-        )
-      },
-      {
-        accessor: 'customerAccountName',
-        title: resources?.customerAccount?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes?.customerAccountDetail?.path}/${data?.customerAccountId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'packageName',
-        title: resources?.packages?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes?.packagesDetail?.path}/${data?.packageId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'workOrderNumber',
-        title: resources?.workOrder?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes?.workOrderDetail?.path}/${data?.workOrder}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'warehouse',
-        title: resources?.warehouse?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes?.warehouseDetail?.path}/${data?.warehouseId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'repairOrderNumber',
-        type: 'link',
-        title: resources?.repairOrder?.titleSingular,
-        link: (data) => `${routes?.repairOrderDetail?.path}/${data?.repairOrderId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'productionOrderNumber',
-        type: 'link',
-        title: resources?.productionOrder?.titleSingular,
-        link: (data) => `${routes?.productionOrderDetail?.path}/${data?.productionOrderId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'assemblyOrderNumber',
-        type: 'link',
-        title: resources?.assemblyOrder?.titleSingular,
-        link: (data) => `${routes?.assemblyOrderDetail?.path}/${data?.assemblyOrderId}`,
-        target: '_blank'
-      },
-      {
-        accessor: 'serializedAsset',
-        title: resources?.serializedAsset?.titleSingular,
-        type: 'link',
-        link: (data) => `${routes.serializedAssetDetail.path}/${data?.serializedAssetId}`,
-        target: '_blank'
-      },
-      { accessor: 'spoolNumber', title: 'Spool Number', type: 'text' },
-      { accessor: 'assignedUser', title: 'Technician', type: 'text' },
-      { accessor: 'workStation', title: resources?.workStations?.titleSingular, type: 'text' },
-      { accessor: 'expectedCompletionDate', title: 'Due Date', type: 'date' },
-      { accessor: 'dueDate', title: 'Due Date', type: 'date' },
-      { accessor: 'createDate', title: 'Create Date', type: 'date' },
-      {
-        type: 'tooltip',
-        accessor: 'tooltip',
-        renderer: (data) => (
-          <RenderAssignOptions
-            openAssignHandler={openAssignHandler}
-            data={data}
-            permissions={permissions}
-            resources={resources}
-            isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
-          />
-        )
-      }
-    ];
-
-    let tempvisibleColumns = [];
-    if (permissions?.workOrderPlanning?.isRead) {
-      tempvisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
-    }
-    tempvisibleColumns = [
-      ...tempvisibleColumns,
-      WORKORDER_SERVICE_STATUS.pending,
-      WORKORDER_SERVICE_STATUS.inProgress,
-      WORKORDER_SERVICE_STATUS.completed,
-      WORKORDER_SERVICE_STATUS.skipped
-    ];
-
-    dispatch({
-      type: 'initialize',
-      columnOrder: Object.values(WORKORDER_SERVICE_STATUS),
-      rowDef: cardDataRows,
-      visibleColumns: tempvisibleColumns,
-      limit: LIMIT
-    });
-    localStorage.setItem(`${renderedFrom}_view`, viewType);
-
-    return () =>
-      dispatch({
-        type: 'reset'
-      });
-  }, [viewType]);
-
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
     if (value === 'assignTechnician') {
@@ -440,101 +615,6 @@ const WorkOrderSupervisor = () => {
       setWorkStationAssignDialog({ open: true, multiple: false });
     }
   };
-
-  const fetchSingleColumn = useCallback(
-    (column: string, page = 0, appendData = true, filterQuery) => {
-      let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource?.value}${filterQuery}`;
-      if (column === WORKORDER_SERVICE_STATUS.planned) {
-        const filterByIds = queryStringPlanned(filterQuery);
-        api = `${workOrder.api}/work-order-planning?page=${page}&limit=${limit}&deepFilter=${encodeURIComponent(
-          JSON.stringify([
-            {
-              field: 'status',
-              term: WORKORDER_SERVICE_STATUS.pending
-            }
-          ])
-        )}`;
-        if (filterByIds?.length) {
-          api = `${api}&filterById=${JSON.stringify(filterByIds)}&filterType=and`;
-        }
-      }
-      dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: true }) });
-      axiosInstance()
-        .get(api)
-        .then(({ data: { data, count } }) => {
-          let countC = count;
-          const setData = (prev: { [key: string]: any[] }, appendData: boolean) => {
-            let rows: any = [];
-            if (column === WORKORDER_SERVICE_STATUS.planned) {
-              const { data: dataD, count } = data;
-              countC = count;
-              rows = dataD?.map((item) => {
-                const newObj = { ...item };
-                newObj['serializedAsset'] = newObj?.asset?.assetNumber;
-                newObj['serializedAssetId'] = newObj?.asset?._id;
-                newObj['repairOrderNumber'] = newObj?.repairOrder?.optionLabel;
-                newObj['warehouse'] = newObj?.asset?.warehouse || '';
-                newObj['warehouseId'] = newObj?.asset?.warehouseId || '';
-                newObj['assetStatus'] = newObj?.asset?.status;
-                newObj['currentOwnerType'] = newObj?.asset?.currentOwnerType;
-                newObj['ownerType'] = newObj?.asset?.ownerType;
-                newObj['serviceName'] = newObj?.service?.optionLabel;
-                newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-                newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
-                newObj['status'] = WORKORDER_SERVICE_STATUS.planned;
-                return newObj;
-              });
-            } else {
-              rows = data.map((item) => {
-                const newObj = { ...item };
-                newObj['productionOrderId'] = newObj?.productionOrder?.productionOrderNumber;
-                newObj['productionOrderNumber'] = newObj?.productionOrder?._id;
-                newObj['repairOrderId'] = newObj?.repairOrder?._id;
-                newObj['repairOrderNumber'] = newObj?.repairOrder?.repairOrderNumber;
-                newObj['assemblyOrderId'] = newObj?.assemblyOrder?._id;
-                newObj['assemblyOrderNumber'] = newObj?.assemblyOrder?.assemblyOrderNumber;
-                newObj['workOrder'] = newObj?.workOrderDetail?._id;
-                newObj['workOrderNumber'] = newObj?.workOrderDetail?.workOrderNumber;
-                newObj['serviceName'] = newObj?.service?.optionLabel;
-                newObj['assignedUser'] = newObj?.assignedUsers?.map((e) => e?.optionLabel)?.toString();
-                newObj['workStation'] = newObj?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString();
-                newObj['serializedAsset'] = item?.workOrderDetail?.serializedAsset?.optionLabel;
-                newObj['serializedAssetId'] = item?.workOrderDetail?.serializedAsset?.optionValue;
-                newObj['createDate'] = item?.workOrderDetail?.createDate;
-                newObj['warehouse'] = item?.workOrderDetail?.warehouse?.optionLabel;
-                newObj['warehouseId'] = item?.workOrderDetail?.warehouse?.optionValue;
-                newObj['packageName'] = item?.workOrderDetail?.package?.optionLabel;
-                newObj['packageId'] = item?.workOrderDetail?.package?.optionValue;
-                newObj['priority'] = item?.workOrderDetail?.priority;
-                newObj['customerAccountName'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
-                newObj['customerAccountId'] = item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue;
-                return newObj;
-              });
-            }
-            const newData = prev;
-            if (!appendData) {
-              newData[column] = rows;
-            } else {
-              if (prev[column] && prev[column]?.length) {
-                newData[column] = [...prev[column], ...rows];
-              } else {
-                newData[column] = rows;
-              }
-            }
-            return newData;
-          };
-          dispatch({ type: 'setData', setData: (prev) => setData(prev, appendData), setCount: (prevCount) => ({ ...prevCount, [column]: countC }) });
-          dispatch({ type: 'page', setPage: (prev) => ({ ...prev, [column]: page }) });
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        })
-        .finally(() => {
-          dispatch({ type: 'loading', loading: (prev) => ({ ...prev, [column]: false }) });
-        });
-    },
-    [dispatch, limit, toastConfig, selectedResource]
-  );
 
   const getQueryString = useCallback(
     (selectDateFilter = true, filterByIdsP = filterByIds) => {
@@ -563,11 +643,11 @@ const WorkOrderSupervisor = () => {
   useEffect(() => {
     if (globalFilters) {
       const query = getQueryString();
-      dispatch({ type: 'setFilterQuery', filterQuery: query });
+      setFilterQuery(query);
     } else {
-      dispatch({ type: 'setFilterQuery', filterQuery: '' });
+      setFilterQuery('');
     }
-  }, [globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType]);
+  }, [globalFilters.from, globalFilters.to, getQueryString, globalFilters, viewType]);
 
   const onClickRefreshIcon = () => {
     if (viewType === 'calendar-view') {
@@ -577,31 +657,13 @@ const WorkOrderSupervisor = () => {
     } else if (viewType === 'table-view') {
       workOrderListRef?.current?.refreshGrid();
     } else {
-      dispatch({ type: 'refreshData' });
+      cardState.refreshAllColumns();
     }
   };
 
-  useEffect(() => {
-    const tempVisibleColumns = [];
-    if (permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder) {
-      tempVisibleColumns.push(WORKORDER_SERVICE_STATUS.planned);
-    }
-    dispatch({
-      type: 'visibleColumns',
-      visibleColumns: [
-        ...tempVisibleColumns,
-        WORKORDER_SERVICE_STATUS.pending,
-        WORKORDER_SERVICE_STATUS.inProgress,
-        WORKORDER_SERVICE_STATUS.completed,
-        WORKORDER_SERVICE_STATUS.skipped
-      ]
-    });
-    onClickRefreshIcon();
-  }, [selectedResource]);
-
   const handleAddConsumables = (rows, records = []) => {
     const data: any = [];
-    const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record?.workOrder);
+    const workOrderId: any = uniqBy(records, 'workOrderId').map((e) => e?.workOrderId);
     records?.forEach((s) => {
       rows?.forEach((e) => {
         data.push({
@@ -623,9 +685,7 @@ const WorkOrderSupervisor = () => {
           type: 'success',
           message: data.message
         });
-        visibleColumns?.map((c) => {
-          fetchSingleColumn(c, 0, false, filterQuery);
-        });
+        cardState.refreshAllColumns();
         setConsumablesDialog({ open: false, multiple: false });
       })
       .catch((error) => {
@@ -645,7 +705,7 @@ const WorkOrderSupervisor = () => {
           type: 'success',
           message: data.message
         });
-        fetchSingleColumn(WORKORDER_SERVICE_STATUS.planned, 0, false, filterQuery);
+        cardState.refreshAllColumns();
         setRepairOrderDialog(false);
       })
       .catch((err) => {
@@ -853,8 +913,9 @@ const WorkOrderSupervisor = () => {
   const handleApplyFilter = (filterByIdsP = filterByIds) => {
     setShowFilter(false);
     const queryString = getQueryString(true, filterByIdsP);
-    dispatch({ type: 'setFilterQuery', filterQuery: queryString });
+    setFilterQuery(queryString);
   };
+
 
   return (
     <section className="main-container-v1">
@@ -956,6 +1017,9 @@ const WorkOrderSupervisor = () => {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
+              {viewType === 'card-view' && (
+                <StatusSelector selectedServiceStatus={selectedServiceStatus} setSelectedServiceStatus={setSelectedServiceStatus} resourceType={selectedResource?.value} />
+              )}
               <IconButtonTabs
                 onItemClick={resetSelectedRecords}
                 items={
@@ -988,71 +1052,67 @@ const WorkOrderSupervisor = () => {
             </div>
           </div>
         </div>
-        {viewType !== 'table-view' && (
-          <div className="min-h-[32px]">
-            <DetailsPageHeader
-              isAddButtonVisible={false}
-              isActionButtonVisible={false}
-              isNewActionButtonVisible={selectedRecords.length > 0}
-              newActionButtonProps={newActionButtonProps}
-              actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
-              leftSideContents={
-                <div className="flex items-center gap-2">
-                  <ThemeButton
-                    mobileTooltip="Apply Filters"
-                    startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
-                    iconForMobile={<BiFilterAlt />}
-                    onClick={() => {
-                      setShowFilter(true);
-                    }}
-                  >
-                    Show Filters
-                  </ThemeButton>
-                  <DisplayFilterChip
-                    filterTerm={filterTerm}
-                    resourceColumns={FIELD_TO_FILTER}
-                    deepFilters={[]}
-                    filterByIds={filterByIds}
-                    fetchResourceData={(deepFilter, filterById) => {
-                      handleApplyFilter(filterById);
-                    }}
-                    setDeepFilters={null}
-                    setFilterByIds={setFilterByIds}
-                  />
-                </div>
-              }
-              hasXpadding={false}
-              hasYpadding={false}
-              className="pt-4"
-            />
-          </div>
-        )}
         {viewType === 'card-view' && (
           <div className="pt-2">
-            <CardColTimeline
-              height={'max(calc(100vh - 200px), 600px)'}
-              getColColors={(colName) => workOrderColormap[colName]}
-              fetchSingleColumn={fetchSingleColumn}
-              state={state}
-              dispatch={dispatch}
-              passFailStatus={true}
-              passFailAccessor="serviceStatus"
-              cardOnClick={(e, data) => {
-                if (data?.status != WORKORDER_SERVICE_STATUS.planned) {
-                  setOpen({ open: true, id: data.workOrder });
-                }
-              }}
+            <CardView
+              renderedFrom={renderedFrom}
+              headerSlot={<div className="min-h-[32px]">
+                <DetailsPageHeader
+                  isAddButtonVisible={false}
+                  isActionButtonVisible={false}
+                  isNewActionButtonVisible={selectedRecords.length > 0}
+                  newActionButtonProps={newActionButtonProps}
+                  actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
+                  leftSideContents={
+                    <div className="flex items-center gap-2">
+                      <ThemeButton
+                        mobileTooltip="Apply Filters"
+                        startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
+                        iconForMobile={<BiFilterAlt />}
+                        onClick={() => {
+                          setShowFilter(true);
+                        }}
+                      >
+                        Show Filters
+                      </ThemeButton>
+                      <DisplayFilterChip
+                        filterTerm={filterTerm}
+                        resourceColumns={FIELD_TO_FILTER}
+                        deepFilters={[]}
+                        filterByIds={filterByIds}
+                        fetchResourceData={(deepFilter, filterById) => {
+                          handleApplyFilter(filterById);
+                        }}
+                        setDeepFilters={null}
+                        setFilterByIds={setFilterByIds}
+                      />
+                    </div>
+                  }
+                  hasXpadding={false}
+                  hasYpadding={false}
+                  className="pt-4"
+                />
+              </div>}
+              state={cardState}
+              setOnClickData={setOnClickData}
+              setOpen={setOpen}
+              filterQuery={filterQuery}
             />
           </div>
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <WorkOrderCalendar filterQuery={filterQuery} reference={resourceType?.value} ref={ref} setOpen={setOpen} />
+            <CalendarView
+              filterQuery={filterQuery}
+              reference={resourceType?.value}
+              ref={ref}
+              setOpen={setOpen} />
           </div>
         )}
         {viewType === 'table-view' && (
           <div className="pt-4">
-            <WorkOrderList
+            <GridView
+              columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
               dispatch={tableDispatch}
@@ -1110,22 +1170,21 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
+                uniqueId: r?.uniqueId, workOrderId: r?.workOrderId
               }))
               : [
                 {
                   uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrder
+                  workOrderId: selectedServiceData?.workOrderId
                 }
               ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecordsS?.every((val) => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
-                ? selectedRecordsS[0]?.assignedUsers
+              ? selectedRecordsS?.every((val) => isEqual(val?.oriAssignedUsers, selectedRecordsS[0]?.oriAssignedUsers))
+                ? selectedRecordsS[0]?.oriAssignedUsers
                 : []
-              : selectedServiceData?.assignedUsers
+              : selectedServiceData?.oriAssignedUsers
           }
           reference={'service'}
           handleClose={() => {
@@ -1133,40 +1192,42 @@ const WorkOrderSupervisor = () => {
           }}
           handleSucess={() => {
             setAssignTechnicianDialog({ open: false, multiple: false });
-            dispatch({ type: 'refreshData' });
+            resetSelectedRecords();
+            onClickRefreshIcon();
           }}
           competencies={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.competencies : selectedServiceData?.competencies}
         />
       )}
-      {workStationAssignDialog.open && (
+      {workStationAssignDialog.open && selectedServiceData?.warehouseId && (
         <AssignWorkStationDialog
-          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
+          warehouse={workStationAssignDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
                 uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
+                workOrderId: r?.workOrderId
               }))
               : [
                 {
                   uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?._id
+                  workOrderId: selectedServiceData?.workOrderId
                 }
               ]
           }
           workStations={
             workStationAssignDialog.multiple
-              ? selectedRecordsS?.every((val) => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
-                ? selectedRecordsS[0]?.assignedWorkStations
+              ? selectedRecordsS?.every((val) => isEqual(val?.oriAssignedWorkStations, selectedRecordsS[0]?.oriAssignedWorkStations))
+                ? selectedRecordsS[0]?.oriAssignedWorkStations
                 : []
-              : selectedServiceData?.assignedWorkStations
+              : selectedServiceData?.oriAssignedWorkStations
           }
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
           }}
           handleSucess={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
-            dispatch({ type: 'refreshData' });
+            resetSelectedRecords();
+            onClickRefreshIcon();
           }}
         />
       )}
@@ -1179,11 +1240,12 @@ const WorkOrderSupervisor = () => {
           }}
         />
       )}
-      {isOpen.open && (
+      {isOpen && (
         <WorkOrderDetailDialog
-          workOrderId={isOpen?.id}
+          workOrderId={onClickData.workOrderId}
           handleClose={() => {
-            setOpen({ open: false, id: null });
+            setOpen(false);
+            resetSelectedRecords();
           }}
         />
       )}
@@ -1226,7 +1288,7 @@ const WorkOrderSupervisor = () => {
         <Filter
           onClose={() => {
             setShowFilter(false);
-            dispatch({ type: 'setFilterQuery', filterQuery: '' });
+            cardState.setFilterQuery('');
           }}
           loading={false}
           filterTitle={resources?.workOrderSupervisor?.titleSingular}
@@ -1246,6 +1308,85 @@ const WorkOrderSupervisor = () => {
 };
 
 export default WorkOrderSupervisor;
+
+const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus, resourceType }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isStatusSelectorOpen = Boolean(anchorEl);
+  const handleStatusSelectorClose = () => {
+    setAnchorEl(null);
+  };
+  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, status) => {
+    const checked = e.target.checked;
+    if (checked) {
+      setSelectedServiceStatus([...selectedServiceStatus, status]);
+      return;
+    }
+    setSelectedServiceStatus(selectedServiceStatus.filter((s) => s !== status));
+  };
+  return (
+    <>
+      <HtmlTooltip title={`Select Status`} arrow placement="top" enterTouchDelay={0}>
+        <IconButton size="small" aria-label="Status" onClick={(e) => setAnchorEl(e.currentTarget)}>
+          <DonutLargeIcon color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+      <Popover
+        PaperProps={{
+          className: 'w-[min(400px,100%)_!important]',
+          style: {
+            borderRadius: 0,
+            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
+          }
+        }}
+        open={isStatusSelectorOpen}
+        anchorEl={anchorEl}
+        onClose={handleStatusSelectorClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        <div className="">
+          <div className="flex items-center justify-between px-[20px] py-[10px] [border-bottom:1px_solid_var(--common-border-color)]">
+            <h6 className="text-[16px] font-semibold">Status</h6>
+            <HtmlTooltip title="Close" arrow placement="top" enterTouchDelay={0}>
+              <IconButton size="small" onClick={handleStatusSelectorClose}>
+                <Close />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
+          <div className="p-[0_20px_20px]">
+            {Object.values(WORKORDER_SERVICE_STATUS).map((s) => {
+              const isPlanned = s === WORKORDER_SERVICE_STATUS.planned;
+              const shouldDisable = isPlanned && resourceType !== 'Repair Order';
+              return (
+                <FormGroup row key={s}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedServiceStatus?.includes(s)}
+                        onChange={(e) => handleCheck(e, s)}
+                        inputProps={{ 'aria-label': 'status checkbox' }}
+                        disabled={shouldDisable}
+                      />
+                    }
+                    label={s}
+                  />
+                </FormGroup>
+              );
+            })}
+
+          </div>
+        </div>
+      </Popover>
+    </>
+  );
+};
+
 
 const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
