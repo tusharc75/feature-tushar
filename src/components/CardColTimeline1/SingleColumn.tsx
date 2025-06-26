@@ -193,7 +193,7 @@ const SingleCard = <D, C extends readonly string[]>({
         tabIndex={typeof cardOnClick === 'function' ? 0 : undefined}
       >
         <div className="flex w-full items-center justify-between border-b">
-          <div className="flex items-center">
+          <div className="flex flex-grow items-center">
             <Checkbox
               sx={{ ml: '-8px' }}
               size="small"
@@ -207,7 +207,7 @@ const SingleCard = <D, C extends readonly string[]>({
               checkedIcon={<CheckCircle />}
             />
             {primaryField && (
-              <div className="line-clamp-1">
+              <div className="line-clamp-1 flex-grow ">
                 <h4 className="quote-name line-clamp-1 [&>*]:![font-weight:700] [&>div>*+*]:flex-shrink-0 [&>div]:!flex [&>div]:min-w-0 [&>div]:items-center [&_*:not(.flex)]:line-clamp-1 [&_*]:![font-size:15px] [&_*]:[white-space:unset_!important]">
                   {renderCell(primaryField, rowData)}
                 </h4>
