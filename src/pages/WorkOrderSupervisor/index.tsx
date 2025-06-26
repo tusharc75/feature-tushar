@@ -227,8 +227,7 @@ const WorkOrderSupervisor = () => {
             currentOwnerType: item?.asset?.currentOwnerType,
             ownerType: item?.asset?.ownerType,
             serviceName: item?.service?.optionLabel,
-            assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
-            workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
+            serviceId: item?.service?.optionValue,
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
@@ -283,7 +282,8 @@ const WorkOrderSupervisor = () => {
                   className="link text-truncate"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`);
+                    setOnClickData({ workOrderId: row?.original?.workOrderId });
+                    setOpen(true);
                   }}
                 >
                   {row?.original?.serviceName}
@@ -301,18 +301,19 @@ const WorkOrderSupervisor = () => {
                   </Box>
                 )}
                 <div className="ml-auto flex items-center gap-1">
-                  <HtmlTooltip title="Preview PDF">
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePdfPreview(row?.original?.workOrder, user, toastConfig);
-                      }}
-                    >
-                      <PictureAsPdfIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
+                  {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned &&
+                    <HtmlTooltip title="Preview PDF">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePdfPreview(row?.original?.workOrder, user, toastConfig);
+                        }}
+                      >
+                        <PictureAsPdfIcon fontSize="small" color="primary" />
+                      </IconButton>
+                    </HtmlTooltip>}
                   <RenderAssignOptions
                     openAssignHandler={openAssignHandler}
                     data={row?.original}
