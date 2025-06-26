@@ -13,6 +13,8 @@ import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { useData } from 'src/StateProvider/Provider';
+import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
 
 const useStyles = makeStyles((theme: Theme) => ({
   tableCell: {
@@ -41,13 +43,13 @@ const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
 );
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid key={id} size={{sm:12, md:6, lg:4}} container>
-    <Grid size={{sm:3}} style={{ marginTop: '7px' }}>
+  <Grid key={id} size={{ sm: 12, md: 6, lg: 4 }} container>
+    <Grid size={{ sm: 3 }} style={{ marginTop: '7px' }}>
       {icon}
     </Grid>
-    <Grid size={{sm:7}} container>
-      <Grid size={{xs: 12, sm: 7}} container direction="column">
-        <Grid size={{xs: 12, sm: 7}} container>
+    <Grid size={{ sm: 7 }} container>
+      <Grid size={{ xs: 12, sm: 7 }} container direction="column">
+        <Grid size={{ xs: 12, sm: 7 }} container>
           <Typography align="left" variant="h6">
             <strong>{heading}</strong>
           </Typography>
@@ -81,6 +83,10 @@ export default function NotificationPreference({ notificationPreferenceData, use
     });
     setRows(tempRows);
   };
+
+  const {
+    state: { resources }
+  }: any = useData();
 
   const handleSelectAll = (columnName) => {
     setAllPreference((prevState) => {
@@ -215,6 +221,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
             </TableBody>
           </Table>
         </TableContainer>
+        <ResourceWiseNotificationPreference resourcesList={resources} />
       </Box>
     </>
   );
