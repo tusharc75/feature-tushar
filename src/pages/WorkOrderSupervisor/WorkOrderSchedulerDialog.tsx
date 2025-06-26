@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { ASSET_STATUS, CustomDialogTransition, serializedAsset, sidebarResource, workOrder, workOrderSupervisor } from '../../constants/helpers';
+import { ASSET_STATUS, CustomDialogTransition, serializedAsset, sidebarResource, workOrderSupervisor } from '../../constants/helpers';
 import { Dialog, TextField, Box, FormControlLabel, Checkbox } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';

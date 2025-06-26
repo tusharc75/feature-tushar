@@ -25,11 +25,10 @@ import {
   sidebarResource,
   workOrder,
   workOrderIconMap,
-  workOrderSupervisor
+  workOrderSupervisor,
+  prepareDataForGrid
 } from 'src/constants/helpers';
-import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
-import WorkOrderList, { WorkOrderListRef } from 'src/pages/WorkOrderSupervisor/WorkOrderList';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
@@ -51,16 +50,18 @@ import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { useCardColTimeline } from 'src/components/CardColTimeline1';
-import CardView from './CardView';
 import axios, { CancelToken } from 'axios';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import CalendarView from 'src/pages/WorkOrderSupervisor/CalendarView';
+import CardView from 'src/pages/WorkOrderSupervisor//CardView';
+import GridView, { GridViewRef } from 'src/pages/WorkOrderSupervisor/GridView';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 type StatusSelectorProps = {
   selectedServiceStatus: string[];
   setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
   resourceType: string;
 };
-const LIMIT = 25;
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -78,6 +79,7 @@ const keyGetter = (d: any) => d?.['_id'] as string;
 const defaultVisibleRows = [
   'customerAccount',
   'workOrderNumber',
+  'warehouse',
   'createDate',
   'estimateCompleteDate',
   'serializedAsset',
@@ -85,7 +87,9 @@ const defaultVisibleRows = [
   'package',
   'repairOrder',
   'assemblyOrder',
-  'productionOrder'
+  'productionOrder',
+  'assignedUsers',
+  'assignedWorkStations',
 ];
 
 
@@ -100,7 +104,7 @@ const WorkOrderSupervisor = () => {
       user: { user }
     }
   }: any = useData();
-  const workOrderListRef = useRef<WorkOrderListRef>();
+  const workOrderListRef = useRef<GridViewRef>();
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState({ open: false, multiple: false });
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, multiple: false });
   const [tableViewStatus, setTableViewStatus] = useState<TableViewStatus>(WORKORDER_SERVICE_STATUS.pending);
@@ -108,8 +112,9 @@ const WorkOrderSupervisor = () => {
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [openWorkOrderScheduler, setOpenWorkOrderScheduler] = useState(false);
   const [viewType, setViewType] = useState<ViewType>(() => {
-    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'table-view';
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'card-view';
   });
+
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, multiple: false });
   const [repairOrderDialog, setRepairOrderDialog] = useState(false);
   const [onClickData, setOnClickData] = useState(null);
@@ -120,6 +125,10 @@ const WorkOrderSupervisor = () => {
   const [filterTerm, setFilterTerm] = useState({});
   const [filterQuery, setFilterQuery] = useState('');
   const [columnsDef, setColumnsDef] = useState<any[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_view`, viewType);
+  }, [viewType]);
 
   const resetSelectedRecords = () => {
     setTableViewStatus(WORKORDER_SERVICE_STATUS.pending)
@@ -139,13 +148,9 @@ const WorkOrderSupervisor = () => {
   });
 
   const getDefaultSelectedResource = () => {
-    const _key = permissions?.repairOrder?.isRead
-      ? 'repairOrder'
-      : permissions?.productionOrder?.isRead
-        ? 'productionOrder'
-        : permissions?.assemblyOrder?.isRead
-          ? 'assemblyOrder'
-          : '';
+    const _key = permissions?.repairOrder?.isRead ? 'repairOrder'
+      : permissions?.productionOrder?.isRead ? 'productionOrder'
+        : permissions?.assemblyOrder?.isRead ? 'assemblyOrder' : '';
     if (_key) {
       return {
         label: resources?.[_key]?.titlePlural,
@@ -212,10 +217,12 @@ const WorkOrderSupervisor = () => {
         throw new Error('Failed to fetch data');
       }
       let { data, count } = response.data;
+      let rows = []
+
       if (column === WORKORDER_SERVICE_STATUS.planned) {
         const { data: dataD, count: plannedCount } = data;
         count = plannedCount;
-        data = dataD.map((item) => ({
+        rows = dataD.map((item) => ({
           ...item,
           serializedAsset: item?.asset?.assetNumber,
           serializedAssetId: item?.asset?._id,
@@ -231,36 +238,24 @@ const WorkOrderSupervisor = () => {
           status: WORKORDER_SERVICE_STATUS.planned
         }));
       } else {
-        data = data.map((item) => ({
-          ...item,
-          product: item?.workOrderDetail?.product?.optionLabel,
-          productId: item?.workOrderDetail?.product?.optionValue,
-          productionOrderId: item?.productionOrder?.productionOrderNumber,
-          productionOrderNumber: item?.productionOrder?._id,
-          repairOrder: item?.repairOrder?.repairOrderNumber,
-          repairOrderId: item?.repairOrder?._id,
-          repairOrderNumber: item?.repairOrder?.repairOrderNumber,
-          assemblyOrderId: item?.assemblyOrder?._id,
-          assemblyOrderNumber: item?.assemblyOrder?.assemblyOrderNumber,
-          workOrder: item?.workOrderDetail?._id,
-          workOrderNumber: item?.workOrderDetail?.workOrderNumber,
-          serviceName: item?.service?.optionLabel,
-          assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
-          workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
-          serializedAsset: item?.workOrderDetail?.serializedAsset?.optionLabel,
-          serializedAssetId: item?.workOrderDetail?.serializedAsset?.optionValue,
-          createDate: item?.workOrderDetail?.createDate,
-          warehouse: item?.workOrderDetail?.warehouse,
-          warehouseId: item?.workOrderDetail?.warehouse?.optionValue,
-          package: item?.workOrderDetail?.package?.optionLabel,
-          packageId: item?.workOrderDetail?.package?.optionValue,
-          priority: item?.workOrderDetail?.priority,
-          customerAccountName: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel,
-          customerAccountId: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue
-        }));
+        rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u, user);
+          let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+          finalObject['serviceName'] = u?.service?.optionLabel;
+          finalObject['serviceId'] = u?.service?.optionValue;
+          finalObject['customServiceStatus'] = u?.status;
+          finalObject['workOrderId'] = u?.workOrderDetail?._id;
+          finalObject['uniqueId'] = u?._id;
+          finalObject['customerAccountName'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
+          finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
+          finalObject['oriAssignedUsers'] = u?.assignedUsers;
+          finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
+          delete workOrderDetailData?._id;
+          delete workOrderDetailData?.id;
+          return { ...finalObject, ...workOrderDetailData };
+        });
       }
-
-      return { data, count };
+      return { data: rows, count };
     } catch (err) {
       if (axios.isCancel(err)) {
         console.warn('Request cancelled:', column, page);
@@ -274,7 +269,7 @@ const WorkOrderSupervisor = () => {
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
       let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken });
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`, { cancelToken });
       data = response?.data?.data;
 
       const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
@@ -282,72 +277,58 @@ const WorkOrderSupervisor = () => {
 
       const extraColumns = [
         {
-          accessor: 'service',
+          accessor: 'serviceName',
           Header: 'Service',
           disabled: true,
           Cell: ({ row }) =>
             row?.original?.serviceName ? (
-              <div className="flex flex-col gap-1">
-                <div className="flex gap-1">
-                  <h5
-                    className="link text-truncate"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.service?.optionValue}`);
-                    }}
-                  >
-                    {row?.original?.serviceName}
-                  </h5>
-
-                  {row?.original?.canPerformInfo && (
-                    <Box ml={1}>
-                      <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                        <Info className="text-red-500 [font-size:20px_!important]" />
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-
+              <div className="flex justify-between">
+                <h5
+                  className="link text-truncate"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes?.serviceMasterDetail?.path}/${row?.original?.serviceId}`);
+                  }}
+                >
+                  {row?.original?.serviceName}
+                </h5>
+                <Box ml={1}>
+                  <HtmlTooltip title="Preview PDF">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePdfPreview(row?.original?.workOrder, user, toastConfig);
+                      }}
+                    >
+                      <PictureAsPdfIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+                {row?.original?.priority && (
                   <Box ml={1}>
-                    <HtmlTooltip title="Preview PDF">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePdfPreview(row?.original?.workOrder, user, toastConfig);
-                        }}
+                    <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High'
+                          ? 'bg-red-600'
+                          : row?.original?.priority === 'Low'
+                            ? 'bg-green-600'
+                            : 'bg-yellow-500'
+                          }`}
                       >
-                        <PictureAsPdfIcon fontSize="small" color="primary" />
-                      </IconButton>
+                        {row?.original?.priority}
+                      </span>
                     </HtmlTooltip>
                   </Box>
-
-                  {row?.original?.priority && (
-                    <Box ml={1}>
-                      <HtmlTooltip title={`${row?.original?.priority} Priority`}>
-                        <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High'
-                            ? 'bg-red-600'
-                            : row?.original?.priority === 'Low'
-                              ? 'bg-green-600'
-                              : 'bg-yellow-500'
-                            }`}
-                        >
-                          {row?.original?.priority}
-                        </span>
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                  <Box ml="auto">
-                    <RenderAssignOptions
-                      openAssignHandler={openAssignHandler}
-                      data={row?.original}
-                      permissions={permissions}
-                      resources={resources}
-                      isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
-                    />
-                  </Box>
-                </div>
+                )}
+                <RenderAssignOptions
+                  openAssignHandler={openAssignHandler}
+                  data={row?.original}
+                  permissions={permissions}
+                  resources={resources}
+                  isCreateRepairOrderDisabled={isCreateRepairOrderDisabled}
+                />
               </div>
             ) : (
               <NoDataCell />
@@ -365,7 +346,7 @@ const WorkOrderSupervisor = () => {
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrder}`);
+                    window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
                   }}
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -381,23 +362,19 @@ const WorkOrderSupervisor = () => {
           Header: resources?.customerAccount?.titleSingular || 'Customer',
           defaultVisible: true,
           Cell: ({ row }) => {
-            const name = row?.original?.customerAccountName;
             const id = row?.original?.customerAccountId;
-
-            return name ? (
+            return row?.original?.customerAccountName ? (
               <div className="flex items-center gap-1">
-                <p title={name}>{name}</p>
-                {id && (
-                  <IconButton
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(`${routes.customerAccountDetail.path}/${id}`, '_blank');
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                )}
+                <p title={row?.original?.customerAccountName}>{row?.original?.customerAccountName}</p>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`${routes.customerAccountDetail.path}/${row?.original?.customerAccountId}`, '_blank');
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               </div>
             ) : (
               <NoDataCell />
@@ -405,46 +382,48 @@ const WorkOrderSupervisor = () => {
           }
         },
         {
+          accessor: 'assignedUsers',
+          Header: 'Technician',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) =>
+            row.original['assignedUsers'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedUsers',
+                  lookupResource: sidebarResource.user
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
+        },
+        {
           accessor: 'assignedWorkStations',
           Header: 'Work Stations',
           disableFilters: true,
           disableSortBy: true,
-          Cell: ({ row }) => {
-            const value = row?.original?.assignedWorkStations;
-            if (!value || !Array.isArray(value) || value.length === 0) {
-              return <span className="no-data-cell">--</span>;
-            }
-            const display = value.map((ws) => (typeof ws === 'string' ? ws : ws?.optionLabel)).filter(Boolean).join(', ');
-            return (
-              <span
-                className="line-clamp-1 max-w-[150px] inline-block"
-                title={display}
-              >
-                {display}
-              </span>
-            );
-          }
-        },
-        {
-          accessor: 'assignedUser',
-          Header: 'Technician',
-          type: 'text',
-          Cell: ({ row }) => {
-            const value = row?.original?.assignedUser;
-            if (!value) return <span className="no-data-cell">--</span>;
-            const display = Array.isArray(value) ? value.join(', ') : value;
-            return (
-              <span
-                className="line-clamp-1 max-w-[150px] inline-block"
-                title={display}
-              >
-                {display}
-              </span>
-            );
-          }
+          Cell: ({ row }) =>
+            row.original['assignedWorkStations'] ? (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'assignedWorkStations',
+                  lookupResource: sidebarResource.workStations
+                }}
+                original={row?.original}
+              />
+            ) : (
+              <NoDataCell />
+            )
         }
       ];
-      const finalColumns = [...extraColumns.slice(0, 2), ...columns, ...extraColumns.slice(2)].map((c) => {
+
+      const finalColumns = [...extraColumns.slice(0, 3), ...columns, ...extraColumns.slice(3)].map((c) => {
         const id = c.id || c.accessor;
         if (defaultVisibleRows.includes(id)) {
           return { ...c, defaultVisible: true };
@@ -684,7 +663,7 @@ const WorkOrderSupervisor = () => {
 
   const handleAddConsumables = (rows, records = []) => {
     const data: any = [];
-    const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record?.workOrder);
+    const workOrderId: any = uniqBy(records, 'workOrderId').map((e) => e?.workOrderId);
     records?.forEach((s) => {
       rows?.forEach((e) => {
         data.push({
@@ -937,6 +916,7 @@ const WorkOrderSupervisor = () => {
     setFilterQuery(queryString);
   };
 
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -1122,12 +1102,16 @@ const WorkOrderSupervisor = () => {
         )}
         {viewType === 'calendar-view' && (
           <div className="pt-2">
-            <WorkOrderCalendar filterQuery={filterQuery} reference={resourceType?.value} ref={ref} setOpen={setOpen} />
+            <CalendarView
+              filterQuery={filterQuery}
+              reference={resourceType?.value}
+              ref={ref}
+              setOpen={setOpen} />
           </div>
         )}
         {viewType === 'table-view' && (
           <div className="pt-4">
-            <WorkOrderList
+            <GridView
               columns={columnsDef}
               renderedFrom={renderedFrom}
               state={tableState}
@@ -1182,26 +1166,25 @@ const WorkOrderSupervisor = () => {
       </div>
       {assignTechnicianDialog.open && (
         <AssignTechniciansDialog
-          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse?.optionValue}
+          warehouse={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
+                uniqueId: r?.uniqueId, workOrderId: r?.workOrderId
               }))
               : [
                 {
                   uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrder
+                  workOrderId: selectedServiceData?.workOrderId
                 }
               ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
-              ? selectedRecordsS?.every((val) => isEqual(val?.assignedUsers, selectedRecordsS[0]?.assignedUsers))
-                ? selectedRecordsS[0]?.assignedUsers
+              ? selectedRecordsS?.every((val) => isEqual(val?.oriAssignedUsers, selectedRecordsS[0]?.oriAssignedUsers))
+                ? selectedRecordsS[0]?.oriAssignedUsers
                 : []
-              : selectedServiceData?.assignedUsers
+              : selectedServiceData?.oriAssignedUsers
           }
           reference={'service'}
           handleClose={() => {
@@ -1215,28 +1198,28 @@ const WorkOrderSupervisor = () => {
           competencies={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.competencies : selectedServiceData?.competencies}
         />
       )}
-      {workStationAssignDialog.open && (
+      {workStationAssignDialog.open && selectedServiceData?.warehouseId && (
         <AssignWorkStationDialog
-          warehouse={workStationAssignDialog.open ? selectedRecordsS[0]?.warehouse?.optionValue : selectedServiceData?.warehouse}
+          warehouse={workStationAssignDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
                 uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrder
+                workOrderId: r?.workOrderId
               }))
               : [
                 {
                   uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?._id
+                  workOrderId: selectedServiceData?.workOrderId
                 }
               ]
           }
           workStations={
             workStationAssignDialog.multiple
-              ? selectedRecordsS?.every((val) => isEqual(val?.assignedWorkStations, selectedRecordsS[0]?.assignedWorkStations))
-                ? selectedRecordsS[0]?.assignedWorkStations
+              ? selectedRecordsS?.every((val) => isEqual(val?.oriAssignedWorkStations, selectedRecordsS[0]?.oriAssignedWorkStations))
+                ? selectedRecordsS[0]?.oriAssignedWorkStations
                 : []
-              : selectedServiceData?.assignedWorkStations
+              : selectedServiceData?.oriAssignedWorkStations
           }
           handleClose={() => {
             setWorkStationAssignDialog({ open: false, multiple: false });
