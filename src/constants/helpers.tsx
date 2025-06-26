@@ -203,12 +203,9 @@ export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'C
 export const WORKORDER_SUPERVISOR_STATUS = [
   'Planned',
   'Pending',
-  'Backlog',
   'In-Progress',
   'Completed',
-  'Failed',
   'Skipped',
-  'In-Progress By Other'
 ] as const;
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
