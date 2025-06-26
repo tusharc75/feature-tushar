@@ -62,7 +62,10 @@ export default function ResourceWiseNotificationPreference() {
   const handleUpdate = async () => {
     setIsSaving(true);
     try {
-      await axiosInstance().post('/notification-setup', { preferences: prefs });
+      const payload = prefs.map(({ resourceLabel, ...rest }) => rest);
+      await axiosInstance().post('/notification-setup', {
+        preferences: payload
+      });
       toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preferences updated!' });
       setIsEdit(false);
     } catch (err) {
