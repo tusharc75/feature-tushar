@@ -615,7 +615,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return null;
             }
             let title = d[selectedResource.fieldName];
-            let start = dayjs.utc(d[selectedResource.start]).tz().toDate();
+            let start = dayjs.utc(d[selectedResource.start]).tz().startOf('day').toDate();
             let end = dayjs.utc(d[selectedResource.end]).tz().endOf('day').toDate();
             let fulfillStatus = d?.fulfillStatus;
 

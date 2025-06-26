@@ -113,11 +113,10 @@ const PurchaseRequisitionDetail = () => {
       setStepList(tempStepList);
       setCurrentStep(getIndex(data?.processStatus, tempStepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(
         data?.canDelete &&
-          permissions?.purchaseRequisition?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
+        permissions?.purchaseRequisition?.isDelete &&
+        checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
       );
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([
@@ -199,7 +198,7 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {purchaseRequisitionData?.material?.length > 0 &&
+              {purchaseRequisitionData?.material?.length > 0 && stepList[currentStep]?.name === 'End' &&
                 (purchaseRequisitionData?.doaSetup && DOAData?.status !== DOA_STATUS.approved ? null : (
                   <ThemeButton
                     onClick={() => {
