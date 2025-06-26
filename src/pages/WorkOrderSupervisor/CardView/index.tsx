@@ -24,9 +24,7 @@ const CardView = ({ filterQuery, setOnClickData, setOpen, state, headerSlot, ren
         passFailAccessor="serviceStatus"
         cardOnClick={(data: any) => {
           if (data?.status != WORKORDER_SERVICE_STATUS.planned) {
-            let tempServiceData = {};
-            tempServiceData['workOrderId'] = data?.workOrder;
-            setOnClickData(tempServiceData);
+            setOnClickData({ workOrderId: data?.workOrderId });
             setOpen(true);
           }
         }}

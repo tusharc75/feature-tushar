@@ -5,14 +5,14 @@ import { camelCase, isEqual, uniqBy } from 'lodash';
 import React, { Dispatch, useCallback, useContext, useEffect, useImperativeHandle, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, TActios, TInitialState, useColumns } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomReactTable, { TActios, TInitialState } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
   displayDate,
   MATERIAL_SUB_TYPE,
+  prepareDataForGrid,
   sidebarResource,
   workOrder,
   WORKORDER_SERVICE_STATUS,
@@ -20,11 +20,10 @@ import {
 } from 'src/constants/helpers';
 import AssignTechniciansDialog from 'src/pages/WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from 'src/pages/WorkOrder/Service/AssignWorkStationDialog';
-import { handlePdfPreview, queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
+import { queryStringPlanned } from 'src/pages/WorkOrderSupervisor/helper';
 import WorkOrderDetailDialog from 'src/pages/WorkOrderSupervisor/WorkOrderDetailDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 type Props = {
   filterQuery: any;
@@ -41,7 +40,7 @@ type Props = {
   columns: any[];
 };
 
-export type WorkOrderListRef = {
+export type GridViewRef = {
   refreshGrid: () => void;
   handleAddConsumables: (rows: any, records: any[]) => void;
   handleAddAssets: (row: any, records: any[]) => void;
@@ -50,7 +49,7 @@ export type WorkOrderListRef = {
   setWorkStationAssignDialog: (value: boolean) => void;
 };
 
-const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
+const GridView = React.forwardRef<GridViewRef, Props>(
   (
     {
       filterQuery,
@@ -69,12 +68,10 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
   ) => {
     const toastConfig = useContext(CustomToastContext);
     const {
-      state: { user, permissions, resources }
+      state: { user, resources }
     }: any = useData();
 
     const { page, limit, sorting, selectedRecords, filters } = state;
-
-    const { generateColumns } = useColumns();
 
     const [serviceOpen, setServiceOpen] = useState({ open: false, id: null });
     const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
@@ -87,7 +84,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         fetchData({ status, page, filterQuery, limit, cancelToken });
       }
       return () => cancelToken.cancel();
-    }, [page, limit, sorting, status, filterQuery, filters,selectedResource]);
+    }, [page, limit, sorting, status, filterQuery, filters, selectedResource]);
 
     const fetchData = useCallback(async ({
       status,
@@ -122,10 +119,11 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
           throw new Error('Failed to fetch data');
         }
         let { data, count } = response.data;
+        let rows = []
         if (status === WORKORDER_SERVICE_STATUS.planned) {
           const { data: dataD, count: plannedCount } = data;
           count = plannedCount;
-          data = dataD.map((item) => ({
+          rows = dataD.map((item) => ({
             ...item,
             serializedAsset: item?.asset?.assetNumber,
             serializedAssetId: item?.asset?._id,
@@ -141,35 +139,24 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
-          data = data.map((item) => ({
-            ...item,
-            product: item?.workOrderDetail?.product?.optionLabel,
-            productId: item?.workOrderDetail?.product?.optionValue,
-            productionOrderId: item?.productionOrder?.productionOrderNumber,
-            productionOrderNumber: item?.productionOrder?._id,
-            repairOrder: item?.repairOrder?.repairOrderNumber,
-            repairOrderId: item?.repairOrder?._id,
-            repairOrderNumber: item?.repairOrder?.repairOrderNumber,
-            assemblyOrderId: item?.assemblyOrder?._id,
-            assemblyOrderNumber: item?.assemblyOrder?.assemblyOrderNumber,
-            workOrder: item?.workOrderDetail?._id,
-            workOrderNumber: item?.workOrderDetail?.workOrderNumber,
-            serviceName: item?.service?.optionLabel,
-            assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
-            workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
-            serializedAsset: item?.workOrderDetail?.serializedAsset?.optionLabel,
-            serializedAssetId: item?.workOrderDetail?.serializedAsset?.optionValue,
-            createDate: item?.workOrderDetail?.createDate,
-            warehouse: item?.workOrderDetail?.warehouse,
-            warehouseId: item?.workOrderDetail?.warehouse?.optionValue,
-            package: item?.workOrderDetail?.package?.optionLabel,
-            packageId: item?.workOrderDetail?.package?.optionValue,
-            priority: item?.workOrderDetail?.priority,
-            customerAccountName: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionLabel,
-            customerAccountId: item?.[camelCase(item?.workOrderDetail?.type)]?.customerAccount?.optionValue
-          }));
+          rows = data.map((u) => {
+            let finalObject: any = prepareDataForGrid(u, user);
+            let workOrderDetailData: any = prepareDataForGrid(u?.workOrderDetail, user);
+            finalObject['serviceName'] = u?.service?.optionLabel;
+            finalObject['serviceId'] = u?.service?.optionValue;
+            finalObject['customServiceStatus'] = u?.status;
+            finalObject['workOrderId'] = u?.workOrderDetail?._id;
+            finalObject['customerAccountName'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionLabel;
+            finalObject['customerAccountId'] = u?.[camelCase(u?.workOrderDetail?.type)]?.customerAccount?.optionValue;
+            finalObject['oriAssignedUsers'] = u?.assignedUsers;
+            finalObject['oriAssignedWorkStations'] = u?.assignedWorkStations;
+            finalObject['uniqueId'] = u?._id;
+            delete workOrderDetailData?._id;
+            delete workOrderDetailData?.id;
+            return { ...finalObject, ...workOrderDetailData };
+          });
         }
-        dispatch({ type: 'initialize', data: data, count: count });
+        dispatch({ type: 'initialize', data: rows, count: count });
         dispatch({ type: 'loading', loading: false });
       } catch (err) {
         if (axios.isCancel(err)) {
@@ -185,7 +172,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
     const handleAddConsumables = (rows, records = []) => {
       setSubmitting(true);
       const data: any = [];
-      const workOrderId: any = uniqBy(records, 'workOrder').map((record) => record.workOrder);
+      const workOrderId: any = uniqBy(records, 'workOrderId').map((record) => record.workOrderId);
 
       records?.forEach((s) => {
         rows?.forEach((e) => {
@@ -255,41 +242,6 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
       setWorkStationAssignDialog
     }));
 
-    const actionsColumn = {
-      accessor: 'actions',
-      Header: 'Actions',
-      disableFilters: true,
-      disableSortBy: true,
-      sticky: 'right',
-      minWidth: 100,
-      width: 120,
-      Cell: ({ row }) => (
-        <div className="flex items-center gap-1 justify-start">
-          {row?.original?.canPerformInfo && (
-            <Box ml={1}>
-              <HtmlTooltip title={row?.original?.canPerformInfo} arrow placement="top" enterTouchDelay={0}>
-                <Info className="text-red-500 [font-size:20px_!important]" />
-              </HtmlTooltip>
-            </Box>
-          )}
-
-          <Box ml={1}>
-            <HtmlTooltip title="Preview PDF">
-              <IconButton
-                size="small"
-                color="primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handlePdfPreview(row?.original?.workOrder, user, toastConfig);
-                }}
-              >
-                <PictureAsPdfIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </Box>
-        </div>
-      )
-    };
     const getColumns = (columns) => {
       if (status === WORKORDER_SERVICE_STATUS.planned) {
         const newColumn = columns?.filter((c) =>
@@ -377,7 +329,7 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         );
       }
 
-      return [...filteredCols, actionsColumn];
+      return [...filteredCols];
     };
 
     return (
@@ -409,10 +361,10 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         {assignTechnicianDialog && (
           <AssignTechniciansDialog
             warehouse={selectedRecords[0]?.warehouseId}
-            workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
+            workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrderId }))}
             assignedUsers={
-              selectedRecords?.length === 1 || selectedRecords?.every((val) => isEqual(val?.assignedUsers, selectedRecords[0]?.assignedUsers))
-                ? selectedRecords[0]?.assignedUsers
+              selectedRecords?.length === 1 || selectedRecords?.every((val) => isEqual(val?.oriAssignedUsers, selectedRecords[0]?.oriAssignedUsers))
+                ? selectedRecords[0]?.oriAssignedUsers
                 : []
             }
             reference={'service'}
@@ -429,11 +381,11 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
         {workStationAssignDialog && (
           <AssignWorkStationDialog
             warehouse={selectedRecords[0]?.warehouseId}
-            workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrder }))}
+            workOrderData={selectedRecords?.map((r) => ({ uniqueId: r?.uniqueId, workOrderId: r?.workOrderId }))}
             workStations={
               selectedRecords?.length === 1 ||
-                selectedRecords?.every((val) => isEqual(val?.assignedWorkStations, selectedRecords[0]?.assignedWorkStations))
-                ? selectedRecords[0]?.assignedWorkStations
+                selectedRecords?.every((val) => isEqual(val?.oriAssignedWorkStations, selectedRecords[0]?.oriAssignedWorkStations))
+                ? selectedRecords[0]?.oriAssignedWorkStations
                 : []
             }
             handleClose={() => {
@@ -450,4 +402,4 @@ const WorkOrderList = React.forwardRef<WorkOrderListRef, Props>(
   }
 );
 
-export default WorkOrderList;
+export default GridView;
