@@ -483,7 +483,7 @@ const FormTypes = (props) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
 
-      let urls = Array.isArray(values[name]) ? [...values[name]] : [];
+      let urls: any = Array.isArray(values[name]) ? [...values[name]] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -509,7 +509,7 @@ const FormTypes = (props) => {
         if (isMultiple) {
           urls?.push(url);
         } else {
-          urls = [url];
+          urls = url;
         }
       }
       setFieldValue(name, urls);
