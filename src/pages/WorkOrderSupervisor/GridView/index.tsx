@@ -134,8 +134,7 @@ const GridView = React.forwardRef<GridViewRef, Props>(
             currentOwnerType: item?.asset?.currentOwnerType,
             ownerType: item?.asset?.ownerType,
             serviceName: item?.service?.optionLabel,
-            assignedUser: item?.assignedUsers?.map((e) => e?.optionLabel)?.toString(),
-            workStation: item?.assignedWorkStations?.map((e) => e?.optionLabel)?.toString(),
+            serviceId: item?.service?.optionValue,
             status: WORKORDER_SERVICE_STATUS.planned
           }));
         } else {
