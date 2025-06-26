@@ -12,12 +12,19 @@ import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
+import { useData } from 'src/StateProvider/Provider';
 
 const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { resources }
+  }: any = useData();
+
   const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, material: [], receiveDate: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmationDirectSendToCustomer, setConfirmationDirectSendToCustomer] = useState({ open: false, data: null })
 
   const handleSubmit = (values) => {
     const data: any = [];
@@ -38,7 +45,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
     }
   };
 
-  const handleReceive = (material, receiveDate) => {
+  const handleReceive = (material, receiveDate, directSendToCustomer = false) => {
     setIsSubmitting(true);
     axiosInstance()
       .put(`${sublease.api}/${subleaseId}/receive-sublease`, {
@@ -48,7 +55,8 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
           assetNumber: m?.assetNumber,
           assetNumberType: m?.assetNumberType
         })),
-        receiveDate: dateFormatToSend(receiveDate)
+        receiveDate: dateFormatToSend(receiveDate),
+        directSendToCustomer: directSendToCustomer
       })
       .then(({ data }) => {
         setIsSubmitting(false);
@@ -246,10 +254,29 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
           handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null })}
           products={assetNumberDialog.material}
           handleSuccess={(rows) => {
-            handleReceive(rows, assetNumberDialog.receiveDate);
+            if (subleaseData?.rentalJob) {
+              setConfirmationDirectSendToCustomer({ open: true, data: rows })
+            }
+            else {
+              handleReceive(rows, assetNumberDialog.receiveDate);
+            }
           }}
           loading={isSubmitting}
           subleaseId={subleaseId}
+        />
+      )}
+      {confirmationDirectSendToCustomer.open && (
+        <SelectionConfirmationDialog
+          open={confirmationDirectSendToCustomer.open}
+          message={`Would you like to send the ${resources?.serializedAsset?.titlePlural} directly to the customer of ${resources?.rentalManagement?.titleSingular} (${subleaseData?.rentalJob?.optionLabel}) ? Click 'Yes' to proceed, or 'No' to keep them internal.`}
+          onOk={(type) => {
+            handleReceive(confirmationDirectSendToCustomer.data, assetNumberDialog.receiveDate, type === 'Yes' ? true : false);
+          }}
+          onClose={() => {
+            setConfirmationDirectSendToCustomer({ open: false, data: null });
+          }}
+          selection1={'Yes'}
+          selection2={'No'}
         />
       )}
     </>
