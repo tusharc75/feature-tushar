@@ -1,9 +1,8 @@
-import { Close, MoreVert } from '@mui/icons-material';
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
+import { MoreVert } from '@mui/icons-material';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Box, Checkbox, FormControlLabel, FormGroup, IconButton, Menu, MenuItem, Popover } from '@mui/material';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, isEqual, map, uniq, uniqBy } from 'lodash';
@@ -55,12 +54,6 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
-
-type StatusSelectorProps = {
-  selectedServiceStatus: string[];
-  setSelectedServiceStatus: React.Dispatch<React.SetStateAction<string[]>>;
-  resourceType: string;
-};
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -295,6 +288,18 @@ const WorkOrderSupervisor = () => {
                 >
                   {row?.original?.serviceName}
                 </h5>
+                {row?.original?.priority && (
+                  <Box ml={1}>
+                    <HtmlTooltip title={`${row?.original?.priority} Priority`}>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                          }`}
+                      >
+                        {row?.original?.priority}
+                      </span>
+                    </HtmlTooltip>
+                  </Box>
+                )}
                 <div className="ml-auto flex items-center gap-1">
                   <HtmlTooltip title="Preview PDF">
                     <IconButton
@@ -308,21 +313,6 @@ const WorkOrderSupervisor = () => {
                       <PictureAsPdfIcon fontSize="small" color="primary" />
                     </IconButton>
                   </HtmlTooltip>
-
-                  {row?.original?.priority && (
-                    <Box ml={1}>
-                      <HtmlTooltip title={`${row?.original?.priority} Priority`}>
-                        <span
-                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
-                            row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          }`}
-                        >
-                          {row?.original?.priority}
-                        </span>
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-
                   <RenderAssignOptions
                     openAssignHandler={openAssignHandler}
                     data={row?.original}
@@ -500,89 +490,89 @@ const WorkOrderSupervisor = () => {
     },
     ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.repairOrder
       ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869052395b4',
-              fieldName: 'repairOrder',
-              fieldLabel: resources?.repairOrder?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.repairOrder,
-              type: 'dropDown'
-            },
-            isRead: permissions?.repairOrder?.isRead || false
+        {
+          fieldData: {
+            _id: '630dc2429ec41869052395b4',
+            fieldName: 'repairOrder',
+            fieldLabel: resources?.repairOrder?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.repairOrder,
+            type: 'dropDown'
           },
-          {
-            fieldData: {
-              _id: '630dc2429gc81869052385b5',
-              fieldName: 'serializedAsset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              type: 'dropDown'
-            },
-            isRead: permissions?.serializedAsset?.isRead || false
-          }
-        ]
+          isRead: permissions?.repairOrder?.isRead || false
+        },
+        {
+          fieldData: {
+            _id: '630dc2429gc81869052385b5',
+            fieldName: 'serializedAsset',
+            fieldLabel: resources?.serializedAsset?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.serializedAsset,
+            type: 'dropDown'
+          },
+          isRead: permissions?.serializedAsset?.isRead || false
+        }
+      ]
       : []),
     ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.productionOrder
       ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869052395b5',
-              fieldName: 'productionOrder',
-              fieldLabel: resources?.productionOrder?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.productionOrder,
-              type: 'dropDown'
-            },
-            isRead: permissions?.productionOrder?.isRead || false
-          }
-        ]
+        {
+          fieldData: {
+            _id: '630dc2429ec41869052395b5',
+            fieldName: 'productionOrder',
+            fieldLabel: resources?.productionOrder?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.productionOrder,
+            type: 'dropDown'
+          },
+          isRead: permissions?.productionOrder?.isRead || false
+        }
+      ]
       : []),
     ...(([sidebarResource.repairOrder, sidebarResource.productionOrder] as const).includes(
       (viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) as
-        | typeof sidebarResource.repairOrder
-        | typeof sidebarResource.productionOrder
+      | typeof sidebarResource.repairOrder
+      | typeof sidebarResource.productionOrder
     )
       ? [
-          {
-            fieldData: {
-              _id: '670dc2429gc87266052385b9',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              type: 'dropDown'
-            },
-            isRead: permissions?.product?.isRead || false
-          }
-        ]
+        {
+          fieldData: {
+            _id: '670dc2429gc87266052385b9',
+            fieldName: 'product',
+            fieldLabel: resources?.product?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.product,
+            type: 'dropDown'
+          },
+          isRead: permissions?.product?.isRead || false
+        }
+      ]
       : []),
     ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.assemblyOrder
       ? [
-          {
-            fieldData: {
-              _id: '630da2429ec41869052395b5',
-              fieldName: 'assemblyOrder',
-              fieldLabel: resources?.assemblyOrder?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.assemblyOrder,
-              type: 'dropDown'
-            },
-            isRead: permissions?.assemblyOrder?.isRead || false
+        {
+          fieldData: {
+            _id: '630da2429ec41869052395b5',
+            fieldName: 'assemblyOrder',
+            fieldLabel: resources?.assemblyOrder?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.assemblyOrder,
+            type: 'dropDown'
           },
-          {
-            fieldData: {
-              _id: '630da2429ec47869056395b5',
-              fieldName: 'package',
-              fieldLabel: resources?.packages?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.packages,
-              type: 'dropDown'
-            },
-            isRead: permissions?.packages?.isRead || false
-          }
-        ]
+          isRead: permissions?.assemblyOrder?.isRead || false
+        },
+        {
+          fieldData: {
+            _id: '630da2429ec47869056395b5',
+            fieldName: 'package',
+            fieldLabel: resources?.packages?.titlePlural,
+            lookup: true,
+            lookupResource: sidebarResource.packages,
+            type: 'dropDown'
+          },
+          isRead: permissions?.packages?.isRead || false
+        }
+      ]
       : []),
     {
       fieldData: {
@@ -805,15 +795,15 @@ const WorkOrderSupervisor = () => {
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
               ? [
-                  assignTechnicianButton,
-                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                  ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
-                ]
+                assignTechnicianButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+              ]
               : [
-                  assignTechnicianButton,
-                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-                ]
+                assignTechnicianButton,
+                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+              ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
@@ -822,13 +812,13 @@ const WorkOrderSupervisor = () => {
     return [
       ...(permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder
         ? [
-            {
-              label: WORKORDER_SERVICE_STATUS.planned,
-              selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-              value: WORKORDER_SERVICE_STATUS.planned,
-              startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-            }
-          ]
+          {
+            label: WORKORDER_SERVICE_STATUS.planned,
+            selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+            value: WORKORDER_SERVICE_STATUS.planned,
+            startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+          }
+        ]
         : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
@@ -862,39 +852,39 @@ const WorkOrderSupervisor = () => {
     return [
       ...(viewType === 'calendar-view'
         ? [
-            {
-              label: resources?.workOrder?.titlePlural,
-              selected: value === sidebarResource.workOrder,
-              value: sidebarResource.workOrder
-            }
-          ]
+          {
+            label: resources?.workOrder?.titlePlural,
+            selected: value === sidebarResource.workOrder,
+            value: sidebarResource.workOrder
+          }
+        ]
         : []),
       ...(permissions?.repairOrder?.isRead
         ? [
-            {
-              label: resources?.repairOrder?.titlePlural,
-              selected: value === sidebarResource.repairOrder,
-              value: sidebarResource.repairOrder
-            }
-          ]
+          {
+            label: resources?.repairOrder?.titlePlural,
+            selected: value === sidebarResource.repairOrder,
+            value: sidebarResource.repairOrder
+          }
+        ]
         : []),
       ...(permissions?.productionOrder?.isRead
         ? [
-            {
-              label: resources?.productionOrder?.titlePlural,
-              selected: value === sidebarResource.productionOrder,
-              value: sidebarResource.productionOrder
-            }
-          ]
+          {
+            label: resources?.productionOrder?.titlePlural,
+            selected: value === sidebarResource.productionOrder,
+            value: sidebarResource.productionOrder
+          }
+        ]
         : []),
       ...(permissions?.assemblyOrder?.isRead
         ? [
-            {
-              label: resources?.assemblyOrder?.titlePlural,
-              selected: value === sidebarResource.assemblyOrder,
-              value: sidebarResource.assemblyOrder
-            }
-          ]
+          {
+            label: resources?.assemblyOrder?.titlePlural,
+            selected: value === sidebarResource.assemblyOrder,
+            value: sidebarResource.assemblyOrder
+          }
+        ]
         : [])
     ];
   }, [selectedResource, resourceType, viewType]);
@@ -1023,15 +1013,7 @@ const WorkOrderSupervisor = () => {
                 </ButtonMenu>
               )}
             </div>
-
             <div className="ml-auto flex items-center gap-2">
-              {viewType === 'card-view' && (
-                <StatusSelector
-                  selectedServiceStatus={selectedServiceStatus}
-                  setSelectedServiceStatus={setSelectedServiceStatus}
-                  resourceType={selectedResource?.value}
-                />
-              )}
               <IconButtonTabs
                 onItemClick={resetSelectedRecords}
                 items={
@@ -1180,15 +1162,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrderId
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrderId
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?.workOrderId
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?.workOrderId
+                }
+              ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -1209,21 +1191,21 @@ const WorkOrderSupervisor = () => {
           competencies={assignTechnicianDialog.multiple ? selectedRecordsS[0]?.competencies : selectedServiceData?.competencies}
         />
       )}
-      {workStationAssignDialog.open && selectedServiceData?.warehouseId && (
+      {workStationAssignDialog.open && (
         <AssignWorkStationDialog
           warehouse={workStationAssignDialog.multiple ? selectedRecordsS[0]?.warehouseId : selectedServiceData?.warehouseId}
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                  uniqueId: r?.uniqueId,
-                  workOrderId: r?.workOrderId
-                }))
+                uniqueId: r?.uniqueId,
+                workOrderId: r?.workOrderId
+              }))
               : [
-                  {
-                    uniqueId: selectedServiceData?.uniqueId,
-                    workOrderId: selectedServiceData?.workOrderId
-                  }
-                ]
+                {
+                  uniqueId: selectedServiceData?.uniqueId,
+                  workOrderId: selectedServiceData?.workOrderId
+                }
+              ]
           }
           workStations={
             workStationAssignDialog.multiple
@@ -1320,82 +1302,6 @@ const WorkOrderSupervisor = () => {
 
 export default WorkOrderSupervisor;
 
-const StatusSelector: React.FC<StatusSelectorProps> = ({ selectedServiceStatus, setSelectedServiceStatus, resourceType }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const isStatusSelectorOpen = Boolean(anchorEl);
-  const handleStatusSelectorClose = () => {
-    setAnchorEl(null);
-  };
-  const handleCheck = (e: React.ChangeEvent<HTMLInputElement>, status) => {
-    const checked = e.target.checked;
-    if (checked) {
-      setSelectedServiceStatus([...selectedServiceStatus, status]);
-      return;
-    }
-    setSelectedServiceStatus(selectedServiceStatus.filter((s) => s !== status));
-  };
-  return (
-    <>
-      <HtmlTooltip title={`Select Status`} arrow placement="top" enterTouchDelay={0}>
-        <IconButton size="small" aria-label="Status" onClick={(e) => setAnchorEl(e.currentTarget)}>
-          <DonutLargeIcon color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-      <Popover
-        PaperProps={{
-          className: 'w-[min(400px,100%)_!important]',
-          style: {
-            borderRadius: 0,
-            boxShadow: '-4px 0px 40px 0px rgba(0, 0, 0, 0.06)'
-          }
-        }}
-        open={isStatusSelectorOpen}
-        anchorEl={anchorEl}
-        onClose={handleStatusSelectorClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-      >
-        <div className="">
-          <div className="flex items-center justify-between px-[20px] py-[10px] [border-bottom:1px_solid_var(--common-border-color)]">
-            <h6 className="text-[16px] font-semibold">Status</h6>
-            <HtmlTooltip title="Close" arrow placement="top" enterTouchDelay={0}>
-              <IconButton size="small" onClick={handleStatusSelectorClose}>
-                <Close />
-              </IconButton>
-            </HtmlTooltip>
-          </div>
-          <div className="p-[0_20px_20px]">
-            {Object.values(WORKORDER_SERVICE_STATUS).map((s) => {
-              const isPlanned = s === WORKORDER_SERVICE_STATUS.planned;
-              const shouldDisable = isPlanned && resourceType !== 'Repair Order';
-              return (
-                <FormGroup row key={s}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedServiceStatus?.includes(s)}
-                        onChange={(e) => handleCheck(e, s)}
-                        inputProps={{ 'aria-label': 'status checkbox' }}
-                        disabled={shouldDisable}
-                      />
-                    }
-                    label={s}
-                  />
-                </FormGroup>
-              );
-            })}
-          </div>
-        </div>
-      </Popover>
-    </>
-  );
-};
 
 const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
