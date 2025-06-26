@@ -170,14 +170,16 @@ const PurchaseRequisitionDetail = () => {
 
   const handleConvertSuccess = (data: any) => {
     setOrderDialog({ open: false });
+    const purchaseOrderId = data?._id
     axiosInstance()
       .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
         _id: id,
-        purchaseOrder: data?._id,
+        purchaseOrder: purchaseOrderId,
         status: PURCHASE_REQUISITION_STATUS.converted
       })
       .then(({ data }) => {
         fetchData();
+        window.open(`${routes.purchaseOrderDetail.path}/${purchaseOrderId}`)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -209,7 +211,7 @@ const PurchaseRequisitionDetail = () => {
                     {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                   </ThemeButton>
                 ))}
-              {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
+              {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && ![PURCHASE_REQUISITION_STATUS.converted]?.includes(purchaseRequisitionData?.status) && (
                 <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
@@ -361,6 +363,7 @@ const PurchaseRequisitionDetail = () => {
             })}
           currency={purchaseRequisitionData.currency}
           warehouseId={purchaseRequisitionData?.warehouse?.optionValue}
+          isRedirectTodetailPage={false}
         />
       )}
       {showConfirmBox && (
