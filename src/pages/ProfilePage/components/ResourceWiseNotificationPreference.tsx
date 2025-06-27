@@ -8,46 +8,21 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 const ACTIONS = ['create', 'update', 'delete'];
 const NOTIFY_TYPES = ['portal', 'email'];
 
-const getDefaultPref = (resourceName, resourceLabel) => ({
-  resource: resourceName,
-  resourceLabel,
-  create: { portal: false, email: false },
-  update: { portal: false, email: false },
-  delete: { portal: false, email: false }
-});
-
 export default function ResourceWiseNotificationPreference() {
   const toastConfig = useContext(CustomToastContext);
   const [prefs, setPrefs] = useState([]);
   const [expanded, setExpanded] = useState({});
   const [isEdit, setIsEdit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [resourcesList, setResourcesList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
       setIsLoading(true);
       try {
-        // resources
-        const res = await axiosInstance().get('/notification-setup/user-notification-resource');
+        const res = await axiosInstance().get('/notification-setup');
         const resources = res.data?.data || [];
-        setResourcesList(resources);
-
-        // preferences
-        const prefRes = await axiosInstance().get('/notification-setup');
-        const resourceArr = prefRes.data?.data[0]?.resources || [];
-
-        const mergedPrefs = resources.map((r) => {
-          const found = resourceArr.find((p) => p.resource === r.resource);
-          if (found) {
-            const { create, update, delete: del } = found;
-            return { resource: r.resource, resourceLabel: r.resourceLabel, create, update, delete: del };
-          }
-          return getDefaultPref(r.resource, r.resourceLabel);
-        });
-
-        setPrefs(mergedPrefs);
+        setPrefs(resources);
         setExpanded(Object.fromEntries(resources.map((k) => [k.resource, false])));
       } catch (err) {
         toastConfig.setToastConfig({ open: true, type: 'error', message: 'Failed to load resources or preferences.' });
@@ -135,9 +110,8 @@ export default function ResourceWiseNotificationPreference() {
   };
 
   return (
-    <Box className="mt-10">
-      <Typography variant="h5" >Resource-wise Notification Preferences</Typography>
-      <Box mb={2} display="flex" justifyContent="flex-end" gap={1}>
+    <Box className="mt-6">
+      <Box mb={1} display="flex" justifyContent="flex-end" gap={1}>
         {isEdit ? (
           <ThemeButton onClick={handleUpdate} disabled={isSaving || isLoading} isLoading={isSaving} buttonType='theme' style={{ minWidth: 100 }}>
             {isSaving ? 'Updating...' : 'Update'}
