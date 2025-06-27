@@ -65,11 +65,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '50px !important',
     width: '33.33% !important'
   },
-  imageList: {
-    flexWrap: 'nowrap',
-    // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
-    transform: 'translateZ(0)'
-  },
+
   popoverText: {
     textOverflow: 'ellipsis',
     overflow: 'hidden',
@@ -297,11 +293,11 @@ const Details = (props: DetailProps) => {
         if (files.length === 0) return '-';
         return (
           <div className={cn(classes.imageListContainer, 'p-[8.6px_10px] pt-0')}>
-            <ImageList className={classes.imageList} cols={2.5}>
+            <div className="flex flex-wrap gap-2">
               {val[fieldData.fieldName].map((item, i) => (
-                <ImageListItem className={classes.imageListItem} key={item}>
+                <ImageListItem style={{ height: '150px', width: '160px' }} className="overflow-hidden rounded-md border" key={item}>
                   <img
-                    className="cursor-pointer"
+                    className="max-w-[200px] cursor-pointer bg-cover"
                     onClick={() => {
                       setDialogData({ index: i, open: true, title: fieldData.fieldLabel, images: val[fieldData.fieldName] });
                     }}
@@ -310,7 +306,7 @@ const Details = (props: DetailProps) => {
                   />
                 </ImageListItem>
               ))}
-            </ImageList>
+            </div>
           </div>
         );
       }
@@ -664,11 +660,7 @@ const Details = (props: DetailProps) => {
             )
           );
         })}
-        <ShowModificationData
-          data={data}
-          containerPadding={containerPadding}
-          resource={resource}
-        />
+        <ShowModificationData data={data} containerPadding={containerPadding} resource={resource} />
         {dialogData && dialogData.open && (
           <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
         )}
