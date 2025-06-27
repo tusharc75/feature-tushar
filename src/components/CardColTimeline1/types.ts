@@ -1,6 +1,6 @@
-import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { CancelToken } from 'axios';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView';
+import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 
 export type SelectedView =
   | GridViewSavedData
@@ -16,13 +16,9 @@ export type SelectedView =
     };
 
 export type UseCardColState<D, C extends readonly string[]> = {
-  data: Partial<Record<C[number], D[]>>;
   columns: C;
+  resetSelectionSignal: boolean;
   visibleColumns: C[number][];
-  selectedRecordsObj: Record<C[number], Record<string, boolean>>;
-  count: Record<C[number], number>;
-  loading: Record<C[number], boolean>;
-  page: Record<C[number], number>;
   limit: number;
   columnDef: TColType[];
   filterQuery: string;
@@ -31,16 +27,16 @@ export type UseCardColState<D, C extends readonly string[]> = {
   order: string[] | null;
   visible: Record<string, boolean>;
   selectedView: SelectedView | null;
+  selectedRecordObj: Partial<Record<C[number], D[]>>;
 };
 
 export type UseCardColActions<D, C extends readonly string[]> =
+  | { type: 'resetSelection' }
+  | { type: 'setSelectedRecordObj'; payload: UseCardColState<D, C>['selectedRecordObj'] }
   | { type: 'setStateData'; payload: Partial<UseCardColState<D, C>> }
-  | { type: 'setData'; payload: UseCardColState<D, C>['data'] }
   | { type: 'setColumns'; payload: UseCardColState<D, C>['columns'] }
   | { type: 'setColumnDef'; payload: UseCardColState<D, C>['columnDef'] }
   | { type: 'setVisibleColumns'; payload: UseCardColState<D, C>['visibleColumns'] }
-  | { type: 'setSelectedRecordsObj'; payload: UseCardColState<D, C>['selectedRecordsObj'] }
-  | { type: 'setLoading'; payload: UseCardColState<D, C>['loading'] }
   | { type: 'setRefreshSignal'; payload: UseCardColState<D, C>['refreshSignal'] }
   | { type: 'setDefaultVisibleRows'; payload: UseCardColState<D, C>['defaultVisibleRows'] }
   | { type: 'setSelectedView'; payload: UseCardColState<D, C>['selectedView'] }
@@ -75,26 +71,20 @@ export type FetchSingleColumnProps<D, C extends readonly string[]> = {
 };
 
 export type UseCardColTimeline<D, C extends readonly string[]> = {
-  selectedRecords: D[];
-  handleFetchSingleColumnWrapper: (column: UseCardColState<D, C>['columns'][number], page?: number) => Promise<void>;
-  setData: (props: { column: UseCardColState<D, C>['columns'][number]; data: D[]; page: number; count?: number; pushData?: boolean }) => void;
   setColumns: (payload: C) => void;
   setVisibleColumns: (payload: UseCardColState<D, C>['visibleColumns']) => void;
-  handleSelect: (id: string, column: UseCardColState<D, C>['columns'][number]) => void;
-  setLoading: ({ column, loading }: { column: UseCardColState<D, C>['columns'][number]; loading: boolean }) => void;
+  refreshAllColumns: () => void;
   setLimit: (payload: UseCardColState<D, C>['limit']) => void;
   setColumnDef: (payload: UseCardColState<D, C>['columnDef']) => void;
-  setFilterQuery: (payload: UseCardColState<D, C>['filterQuery']) => void;
-  setState: React.Dispatch<UseCardColActions<D, C>>;
   setDefaultVisibleRows: (num: UseCardColState<D, C>['defaultVisibleRows']) => void;
-  refreshAllColumns: () => void;
-  handleSelectAll: (column: UseCardColState<D, C>['columns'][number]) => void;
-  isAllSelected: (column: UseCardColState<D, C>['columns'][number]) => boolean;
-  fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
+  setFilterQuery: (payload: UseCardColState<D, C>['filterQuery']) => void;
   keyGetter: (data: D) => string;
-  resetSelection: () => void;
+  fetchSingleColumn: (props: FetchSingleColumnProps<D, C>) => Promise<FetchSingleColumnReturnType<D>>;
+  setState: React.Dispatch<UseCardColActions<D, C>>;
   setOrderAndVisibility: (props: { order: string[]; visible: Record<string, boolean> }) => void;
   setSelectedView: (payload: UseCardColState<D, C>['selectedView']) => void;
+  resetSelection: () => void;
+  selectedRecords: D[];
 } & UseCardColState<D, C>;
 
 export type CardColTimelineProps<D, C extends readonly string[]> = {
