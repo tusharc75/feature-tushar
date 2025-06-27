@@ -1684,14 +1684,13 @@ const LoadingTicket = ({
   const handleSubStatusChange = (dates) => {
     setSubmitting(true)
     axiosInstance()
-      .put(`${serializedAsset.api}/update-sub-status`,
+      .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`,
         {
           assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
             _id: a?._id,
             uniqueId: a?.uniqueId,
             dates: dates
-          })),
-          rentalId: rentalManagementData?._id
+          }))
         })
       .then(({ data }) => {
         fetchRecords();
