@@ -116,7 +116,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
       .then(({ data: { data } }) => {
-        const statusField = data?.find(f => f?.fieldData?.fieldName === 'status')?.fieldData;
+        const statusField = data?.find(f => f?.fieldData?.fieldName === 'subStatus')?.fieldData;
         if (statusField) {
           setAssetStatusField(statusField)
         }
