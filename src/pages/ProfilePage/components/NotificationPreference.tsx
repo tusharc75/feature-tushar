@@ -23,23 +23,19 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid key={id} size={{ sm: 12, md: 6, lg: 4 }} container>
-    <Grid size={{ sm: 3 }} style={{ marginTop: '7px' }}>
+  <Grid key={id} size={{ sm: 12, md: 6, lg: 6 }} >
+    <Grid size={{ sm: 2, md: 2, lg: 2 }} style={{ marginTop: '7px' }}>
       {icon}
     </Grid>
-    <Grid size={{ sm: 7 }} container>
-      <Grid size={{ xs: 12, sm: 7 }} container direction="column">
-        <Grid size={{ xs: 12, sm: 7 }} container>
-          <Typography align="left" variant="h6">
-            <strong>{heading}</strong>
-          </Typography>
-          <Typography align="left" variant="body2" gutterBottom>
-            {subtitle}
-          </Typography>
-        </Grid>
-      </Grid>
+    <Grid size={{ sm: 9, md: 9, lg: 9 }} >
+      <Typography variant="h6">
+        <strong>{heading}</strong>
+      </Typography>
+      <Typography variant="body2" >
+        {subtitle}
+      </Typography>
     </Grid>
-  </Grid>
+  </Grid >
 );
 
 export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
