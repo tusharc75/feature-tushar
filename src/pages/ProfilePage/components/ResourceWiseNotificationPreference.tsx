@@ -110,9 +110,8 @@ export default function ResourceWiseNotificationPreference() {
   };
 
   return (
-    <Box className="mt-10">
-      <Typography variant="h5" >Resource-wise Notification Preferences</Typography>
-      <Box mb={2} display="flex" justifyContent="flex-end" gap={1}>
+    <Box className="mt-6">
+      <Box mb={1} display="flex" justifyContent="flex-end" gap={1}>
         {isEdit ? (
           <ThemeButton onClick={handleUpdate} disabled={isSaving || isLoading} isLoading={isSaving} buttonType='theme' style={{ minWidth: 100 }}>
             {isSaving ? 'Updating...' : 'Update'}
