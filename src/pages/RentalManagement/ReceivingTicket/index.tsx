@@ -539,7 +539,7 @@ const ReceivingTicket = ({
           },
           {
             resource: sidebarResource.serializedAsset,
-            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber', 'subStatus']
+            fieldNames: ['serialNumber', 'position', 'padName', 'wellNumber', 'warehouse', 'jobCount', 'currentGpsLocation', 'currentGpsWellNames', 'gpsNumber', 'subStatus', 'wellColor']
           }
         ]
       });
@@ -1733,6 +1733,15 @@ const ReceivingTicket = ({
                 original={row?.original}
               />
             )
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'wellColor')
+        ? [
+          {
+            accessor: 'wellColor',
+            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+            cell: ({ row }) => (row?.original?.wellColor ? <div><p className="text-truncate">{row?.original?.wellColor}</p></div> : <NoDataCell />)
           }
         ]
         : []),
