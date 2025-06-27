@@ -199,7 +199,8 @@ const LoadingTicket = ({
               'currentGpsLocation',
               'currentGpsWellNames',
               'gpsNumber',
-              'subStatus'
+              'subStatus',
+              'wellColor'
             ]
           }
         ]
@@ -496,6 +497,15 @@ const LoadingTicket = ({
                 original={row?.original}
               />
             )
+          }
+        ]
+        : []),
+      ...(assetFields?.find((f) => f.fieldName === 'wellColor')
+        ? [
+          {
+            accessor: 'wellColor',
+            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+            cell: ({ row }) => (row?.original?.wellColor ? <div><p className="text-truncate">{row?.original?.wellColor}</p></div> : <NoDataCell />)
           }
         ]
         : []),
