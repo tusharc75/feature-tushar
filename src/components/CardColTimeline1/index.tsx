@@ -72,7 +72,7 @@ const CardColTimeline = <D, C extends readonly string[]>({
           />
         )}
       </div>
-      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px]">
+      <div className="flex snap-x snap-mandatory gap-[10px] overflow-auto pb-4 md:scroll-px-[24px] [&_.show-in-export]:!hidden">
         {columns.map((c) => {
           if (!visibleColumns.includes(c)) return null;
           return (

@@ -292,8 +292,9 @@ const WorkOrderSupervisor = () => {
                   <Box ml={1}>
                     <HtmlTooltip title={`${row?.original?.priority} Priority`}>
                       <span
-                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
-                          }`}
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
+                          row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                        }`}
                       >
                         {row?.original?.priority}
                       </span>
@@ -301,7 +302,7 @@ const WorkOrderSupervisor = () => {
                   </Box>
                 )}
                 <div className="ml-auto flex items-center gap-1">
-                  {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned &&
+                  {row?.original?.status !== WORKORDER_SERVICE_STATUS.planned && (
                     <HtmlTooltip title="Preview PDF">
                       <IconButton
                         size="small"
@@ -313,7 +314,8 @@ const WorkOrderSupervisor = () => {
                       >
                         <PictureAsPdfIcon fontSize="small" color="primary" />
                       </IconButton>
-                    </HtmlTooltip>}
+                    </HtmlTooltip>
+                  )}
                   <RenderAssignOptions
                     openAssignHandler={openAssignHandler}
                     data={row?.original}
@@ -424,6 +426,7 @@ const WorkOrderSupervisor = () => {
         return c;
       });
       setColumnsDef(finalColumns);
+      cardState.setColumnDef(finalColumns);
     } catch (error) {
       console.error(error);
     }
@@ -436,10 +439,6 @@ const WorkOrderSupervisor = () => {
     columnDef: columnsDef,
     keyGetter
   });
-
-  useEffect(() => {
-    cardState.setColumnDef(columnsDef);
-  }, [columnsDef]);
 
   useEffect(() => {
     cardState.setOrderAndVisibility({ order: tableState.columnOrder, visible: tableState.visibleColumns });
@@ -455,149 +454,178 @@ const WorkOrderSupervisor = () => {
 
   const ref: any = useRef();
 
-  const FIELD_TO_FILTER = [
-    {
-      fieldData: {
-        _id: '630dc2429ec41869052395b1',
-        fieldName: 'user',
-        fieldLabel: resources?.employeeMaster?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.user,
-        type: 'dropDown'
-      },
-      isRead: permissions?.user?.isRead || false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869052395b2',
-        fieldName: 'service',
-        fieldLabel: resources?.serviceMaster?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.serviceMaster,
-        type: 'dropDown'
-      },
-      isRead: permissions?.serviceMaster?.isRead || false
-    },
-    {
-      fieldData: {
-        _id: '630dc2429ec41869052395b3',
-        fieldName: 'workOrder',
-        fieldLabel: resources?.workOrder?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.workOrder,
-        type: 'dropDown'
-      },
-      isRead: permissions?.workOrder?.isRead || false
-    },
-    ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.repairOrder
-      ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869052395b4',
-            fieldName: 'repairOrder',
-            fieldLabel: resources?.repairOrder?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.repairOrder,
-            type: 'dropDown'
-          },
-          isRead: permissions?.repairOrder?.isRead || false
+  const FIELD_TO_FILTER = useMemo(
+    () => [
+      {
+        fieldData: {
+          _id: '630dc2429ec41869052395b1',
+          fieldName: 'user',
+          fieldLabel: resources?.employeeMaster?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.user,
+          type: 'dropDown'
         },
-        {
-          fieldData: {
-            _id: '630dc2429gc81869052385b5',
-            fieldName: 'serializedAsset',
-            fieldLabel: resources?.serializedAsset?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.serializedAsset,
-            type: 'dropDown'
-          },
-          isRead: permissions?.serializedAsset?.isRead || false
-        }
-      ]
-      : []),
-    ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.productionOrder
-      ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869052395b5',
-            fieldName: 'productionOrder',
-            fieldLabel: resources?.productionOrder?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.productionOrder,
-            type: 'dropDown'
-          },
-          isRead: permissions?.productionOrder?.isRead || false
-        }
-      ]
-      : []),
-    ...(([sidebarResource.repairOrder, sidebarResource.productionOrder] as const).includes(
-      (viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) as
-      | typeof sidebarResource.repairOrder
-      | typeof sidebarResource.productionOrder
-    )
-      ? [
-        {
-          fieldData: {
-            _id: '670dc2429gc87266052385b9',
-            fieldName: 'product',
-            fieldLabel: resources?.product?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.product,
-            type: 'dropDown'
-          },
-          isRead: permissions?.product?.isRead || false
-        }
-      ]
-      : []),
-    ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.assemblyOrder
-      ? [
-        {
-          fieldData: {
-            _id: '630da2429ec41869052395b5',
-            fieldName: 'assemblyOrder',
-            fieldLabel: resources?.assemblyOrder?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.assemblyOrder,
-            type: 'dropDown'
-          },
-          isRead: permissions?.assemblyOrder?.isRead || false
+        isRead: permissions?.user?.isRead || false
+      },
+      {
+        fieldData: {
+          _id: '630dc2429ec41869052395b2',
+          fieldName: 'service',
+          fieldLabel: resources?.serviceMaster?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.serviceMaster,
+          type: 'dropDown'
         },
-        {
-          fieldData: {
-            _id: '630da2429ec47869056395b5',
-            fieldName: 'package',
-            fieldLabel: resources?.packages?.titlePlural,
-            lookup: true,
-            lookupResource: sidebarResource.packages,
-            type: 'dropDown'
-          },
-          isRead: permissions?.packages?.isRead || false
-        }
-      ]
-      : []),
-    {
-      fieldData: {
-        _id: '670dc2429gc88866052385b9',
-        fieldName: 'warehouse',
-        fieldLabel: resources?.warehouse?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.warehouse,
-        type: 'dropDown'
+        isRead: permissions?.serviceMaster?.isRead || false
       },
-      isRead: permissions?.warehouse?.isRead || false
-    },
-    {
-      fieldData: {
-        _id: '670dc2429gc81866052385b5',
-        fieldName: 'customerAccount',
-        fieldLabel: resources?.customerAccount?.titlePlural,
-        lookup: true,
-        lookupResource: sidebarResource.customerAccount,
-        type: 'dropDown'
+      {
+        fieldData: {
+          _id: '630dc2429ec41869052395b3',
+          fieldName: 'workOrder',
+          fieldLabel: resources?.workOrder?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.workOrder,
+          type: 'dropDown'
+        },
+        isRead: permissions?.workOrder?.isRead || false
       },
-      isRead: permissions?.customerAccount?.isRead || false
-    }
-  ];
+      ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.repairOrder
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869052395b4',
+                fieldName: 'repairOrder',
+                fieldLabel: resources?.repairOrder?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.repairOrder,
+                type: 'dropDown'
+              },
+              isRead: permissions?.repairOrder?.isRead || false
+            },
+            {
+              fieldData: {
+                _id: '630dc2429gc81869052385b5',
+                fieldName: 'serializedAsset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                type: 'dropDown'
+              },
+              isRead: permissions?.serializedAsset?.isRead || false
+            }
+          ]
+        : []),
+      ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.productionOrder
+        ? [
+            {
+              fieldData: {
+                _id: '630dc2429ec41869052395b5',
+                fieldName: 'productionOrder',
+                fieldLabel: resources?.productionOrder?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.productionOrder,
+                type: 'dropDown'
+              },
+              isRead: permissions?.productionOrder?.isRead || false
+            }
+          ]
+        : []),
+      ...(([sidebarResource.repairOrder, sidebarResource.productionOrder] as const).includes(
+        (viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) as
+          | typeof sidebarResource.repairOrder
+          | typeof sidebarResource.productionOrder
+      )
+        ? [
+            {
+              fieldData: {
+                _id: '670dc2429gc87266052385b9',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                type: 'dropDown'
+              },
+              isRead: permissions?.product?.isRead || false
+            }
+          ]
+        : []),
+      ...((viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value) === sidebarResource.assemblyOrder
+        ? [
+            {
+              fieldData: {
+                _id: '630da2429ec41869052395b5',
+                fieldName: 'assemblyOrder',
+                fieldLabel: resources?.assemblyOrder?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.assemblyOrder,
+                type: 'dropDown'
+              },
+              isRead: permissions?.assemblyOrder?.isRead || false
+            },
+            {
+              fieldData: {
+                _id: '630da2429ec47869056395b5',
+                fieldName: 'package',
+                fieldLabel: resources?.packages?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.packages,
+                type: 'dropDown'
+              },
+              isRead: permissions?.packages?.isRead || false
+            }
+          ]
+        : []),
+      {
+        fieldData: {
+          _id: '670dc2429gc88866052385b9',
+          fieldName: 'warehouse',
+          fieldLabel: resources?.warehouse?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.warehouse,
+          type: 'dropDown'
+        },
+        isRead: permissions?.warehouse?.isRead || false
+      },
+      {
+        fieldData: {
+          _id: '670dc2429gc81866052385b5',
+          fieldName: 'customerAccount',
+          fieldLabel: resources?.customerAccount?.titlePlural,
+          lookup: true,
+          lookupResource: sidebarResource.customerAccount,
+          type: 'dropDown'
+        },
+        isRead: permissions?.customerAccount?.isRead || false
+      }
+    ],
+    [
+      permissions?.assemblyOrder?.isRead,
+      permissions?.customerAccount?.isRead,
+      permissions?.packages?.isRead,
+      permissions?.product?.isRead,
+      permissions?.productionOrder?.isRead,
+      permissions?.repairOrder?.isRead,
+      permissions?.serializedAsset?.isRead,
+      permissions?.serviceMaster?.isRead,
+      permissions?.user?.isRead,
+      permissions?.warehouse?.isRead,
+      permissions?.workOrder?.isRead,
+      resourceType?.value,
+      resources?.assemblyOrder?.titlePlural,
+      resources?.customerAccount?.titlePlural,
+      resources?.employeeMaster?.titlePlural,
+      resources?.packages?.titlePlural,
+      resources?.product?.titlePlural,
+      resources?.productionOrder?.titlePlural,
+      resources?.repairOrder?.titlePlural,
+      resources?.serializedAsset?.titlePlural,
+      resources?.serviceMaster?.titlePlural,
+      resources?.warehouse?.titlePlural,
+      resources?.workOrder?.titlePlural,
+      selectedResource?.value,
+      viewType
+    ]
+  );
 
   const openAssignHandler = (value: any, data: any) => {
     setSelectedServiceData(data);
@@ -796,15 +824,15 @@ const WorkOrderSupervisor = () => {
             ? [...(viewType === 'card-view' ? [createRepairOrderButton] : [])]
             : selectedRecords?.every((r) => r?.status !== WORKORDER_SERVICE_STATUS.planned)
               ? [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
-              ]
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton] : [])
+                ]
               : [
-                assignTechnicianButton,
-                ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
-                ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
-              ]
+                  assignTechnicianButton,
+                  ...(canShowWorkStationButton ? [assignWorkStationButton] : []),
+                  ...(viewType === 'card-view' ? [addProductConsumablesButton, createRepairOrderButton] : [])
+                ]
     };
     return data;
   }, [resources?.workStations?.titlePlural, selectedRecords, selectedRecordsS, selectedRecordsP, viewType, tableViewStatus]);
@@ -813,13 +841,13 @@ const WorkOrderSupervisor = () => {
     return [
       ...(permissions?.workOrderPlanning?.isRead && selectedResource?.value === sidebarResource.repairOrder
         ? [
-          {
-            label: WORKORDER_SERVICE_STATUS.planned,
-            selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
-            value: WORKORDER_SERVICE_STATUS.planned,
-            startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
-          }
-        ]
+            {
+              label: WORKORDER_SERVICE_STATUS.planned,
+              selected: tableViewStatus === WORKORDER_SERVICE_STATUS.planned,
+              value: WORKORDER_SERVICE_STATUS.planned,
+              startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.planned]
+            }
+          ]
         : []),
       {
         label: WORKORDER_SERVICE_STATUS.pending,
@@ -846,49 +874,60 @@ const WorkOrderSupervisor = () => {
         startIcon: workOrderIconMap[WORKORDER_SERVICE_STATUS.skipped]
       }
     ] as NewActionButtonProps<string, any>['items'];
-  }, [tableViewStatus, selectedResource]);
+  }, [tableViewStatus, selectedResource, permissions?.workOrderPlanning?.isRead]);
 
   const resourceItems = useMemo(() => {
     const value = viewType === 'calendar-view' ? resourceType?.value : selectedResource?.value;
     return [
       ...(viewType === 'calendar-view'
         ? [
-          {
-            label: resources?.workOrder?.titlePlural,
-            selected: value === sidebarResource.workOrder,
-            value: sidebarResource.workOrder
-          }
-        ]
+            {
+              label: resources?.workOrder?.titlePlural,
+              selected: value === sidebarResource.workOrder,
+              value: sidebarResource.workOrder
+            }
+          ]
         : []),
       ...(permissions?.repairOrder?.isRead
         ? [
-          {
-            label: resources?.repairOrder?.titlePlural,
-            selected: value === sidebarResource.repairOrder,
-            value: sidebarResource.repairOrder
-          }
-        ]
+            {
+              label: resources?.repairOrder?.titlePlural,
+              selected: value === sidebarResource.repairOrder,
+              value: sidebarResource.repairOrder
+            }
+          ]
         : []),
       ...(permissions?.productionOrder?.isRead
         ? [
-          {
-            label: resources?.productionOrder?.titlePlural,
-            selected: value === sidebarResource.productionOrder,
-            value: sidebarResource.productionOrder
-          }
-        ]
+            {
+              label: resources?.productionOrder?.titlePlural,
+              selected: value === sidebarResource.productionOrder,
+              value: sidebarResource.productionOrder
+            }
+          ]
         : []),
       ...(permissions?.assemblyOrder?.isRead
         ? [
-          {
-            label: resources?.assemblyOrder?.titlePlural,
-            selected: value === sidebarResource.assemblyOrder,
-            value: sidebarResource.assemblyOrder
-          }
-        ]
+            {
+              label: resources?.assemblyOrder?.titlePlural,
+              selected: value === sidebarResource.assemblyOrder,
+              value: sidebarResource.assemblyOrder
+            }
+          ]
         : [])
     ];
-  }, [selectedResource, resourceType, viewType]);
+  }, [
+    viewType,
+    resourceType?.value,
+    selectedResource?.value,
+    resources?.workOrder?.titlePlural,
+    resources?.repairOrder?.titlePlural,
+    resources?.productionOrder?.titlePlural,
+    resources?.assemblyOrder?.titlePlural,
+    permissions?.repairOrder?.isRead,
+    permissions?.productionOrder?.isRead,
+    permissions?.assemblyOrder?.isRead
+  ]);
 
   const moreButtonMenuItems: NewActionButtonProps<string, any>['items'] = useMemo(() => {
     return [
@@ -1163,15 +1202,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             assignTechnicianDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrderId
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrderId
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrderId
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?.workOrderId
+                  }
+                ]
           }
           assignedUsers={
             assignTechnicianDialog.multiple
@@ -1198,15 +1237,15 @@ const WorkOrderSupervisor = () => {
           workOrderData={
             workStationAssignDialog.multiple
               ? selectedRecordsS?.map((r) => ({
-                uniqueId: r?.uniqueId,
-                workOrderId: r?.workOrderId
-              }))
+                  uniqueId: r?.uniqueId,
+                  workOrderId: r?.workOrderId
+                }))
               : [
-                {
-                  uniqueId: selectedServiceData?.uniqueId,
-                  workOrderId: selectedServiceData?.workOrderId
-                }
-              ]
+                  {
+                    uniqueId: selectedServiceData?.uniqueId,
+                    workOrderId: selectedServiceData?.workOrderId
+                  }
+                ]
           }
           workStations={
             workStationAssignDialog.multiple
@@ -1302,7 +1341,6 @@ const WorkOrderSupervisor = () => {
 };
 
 export default WorkOrderSupervisor;
-
 
 const RenderAssignOptions = ({ openAssignHandler, data, permissions, resources, isCreateRepairOrderDisabled }) => {
   const [anchorEl, setAnchorEl] = useState(null);
