@@ -1,6 +1,6 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, Checkbox, CircularProgress, Skeleton } from '@mui/material';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
@@ -18,36 +18,144 @@ type CommonProps<D, C extends readonly string[]> = {
 } & CardColTimelineProps<D, C>;
 
 const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, column, ...rest }: CommonProps<D, C>) => {
-  const { data, loading, isAllSelected, handleSelectAll, columnDef, selectedRecordsObj, count } = state;
+  const [data, setData] = useState<D[] | null>(null);
+  const [count, setCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const { keyGetter, fetchSingleColumn, refreshSignal, limit, filterQuery, columnDef, resetSelectionSignal, selectedRecordObj, setState } = state;
+  const [selectedRecordMap, setSelectedRecordmap] = useState<Map<string, boolean>>(new Map());
+
   const colors = getColColors(column);
-  const isDataLoading = loading[column];
-  const isInitialLoaded = data && data?.[column] && columnDef?.length > 0;
+  const isDataLoading = loading;
+  const isInitialLoading = initialLoading || columnDef?.length === 0;
+
+  const handleFetchSingleColumnWrapper = useCallback(
+    async (page = 0, pushData = false) => {
+      try {
+        setLoading(true);
+        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page });
+        if (pushData) {
+          setData((prev) => [...prev, ...data]);
+        } else {
+          setData(data);
+        }
+        setCount(count);
+        setPage(page);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [column, fetchSingleColumn, filterQuery, limit]
+  );
+
+  const isAllSelected = useMemo(() => {
+    return selectedRecordMap.size === data?.length;
+  }, [data?.length, selectedRecordMap]);
 
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [] } });
+      setSelectedRecordmap(new Map());
+    } else {
+      const newSelectedMap: Map<string, boolean> = new Map();
+      data?.forEach((d) => {
+        newSelectedMap.set(keyGetter(d), true);
+      });
+      setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: data } });
+      setSelectedRecordmap(newSelectedMap);
+    }
+  };
+
+  const handleSelectSingle = (data: D) => {
+    setSelectedRecordmap((prev) => {
+      const newData = new Map(prev);
+      if (prev.has(keyGetter(data))) {
+        newData.delete(keyGetter(data));
+        setState({
+          type: 'setSelectedRecordObj',
+          payload: { ...selectedRecordObj, [column]: selectedRecordObj[column].filter((d) => keyGetter(d) !== keyGetter(data)) }
+        });
+      } else {
+        newData.set(keyGetter(data), true);
+        if (selectedRecordObj[column]) {
+          setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [...selectedRecordObj[column], data] } });
+        } else {
+          setState({ type: 'setSelectedRecordObj', payload: { ...selectedRecordObj, [column]: [data] } });
+        }
+      }
+
+      return newData;
+    });
+  };
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setInitialLoading(true);
+      await handleFetchSingleColumnWrapper();
+      setInitialLoading(false);
+    };
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshSignal, filterQuery]);
+
+  useEffect(() => {
+    setSelectedRecordmap(new Map());
+  }, [resetSelectionSignal]);
+
+  useEffect(() => {
+    if (selectedRecordObj[column]?.length) {
+      const newSelectedMap: Map<string, boolean> = new Map();
+      selectedRecordObj[column]?.forEach((d) => {
+        newSelectedMap.set(keyGetter(d), true);
+      });
+      setSelectedRecordmap(newSelectedMap);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
   return (
     <div className="min-w-[min(90%,350px)] max-w-[350px] flex-shrink-0 snap-start ">
       <div className={cn('head mb-2 flex items-center rounded-md px-[11px] py-[5px]', colors.background, colors.color)}>
         <Checkbox
           size="small"
           id={`${column}-select-all`}
-          checked={isAllSelected(column)}
+          checked={isAllSelected && data?.length > 0}
           onClick={(e) => {
             e.stopPropagation();
-            handleSelectAll(column);
+            handleSelectAll();
           }}
-          indeterminate={!isAllSelected(column) && selectedRecordsObj[column] && Object.keys(selectedRecordsObj[column]).length > 0}
+          indeterminate={!isAllSelected && Object.keys(selectedRecordMap).length > 0}
           icon={<RadioButtonUnchecked />}
           indeterminateIcon={<CheckCircleOutline />}
           checkedIcon={<CheckCircle />}
-          disabled={isDataLoading || data?.[column]?.length === 0}
+          disabled={isDataLoading || data?.length === 0}
         />
         <label htmlFor={`${column}-select-all`} className="flex cursor-pointer text-[15px] font-bold">
-          {column} ({count[column] || count[column] === 0 ? count[column] : <Skeleton width={getRandomNumber(20, 50)} />})
+          {column} ({count || count === 0 ? count : <Skeleton width={getRandomNumber(20, 50)} />})
         </label>
       </div>
-      <div className={cn('h-[calc(100vh-270px)] min-h-[400px] flex-grow ', isInitialLoaded ? '' : 'overflow-hidden')} ref={setContainer}>
-        {isInitialLoaded ? (
-          <Column column={column} container={container} getColColors={getColColors} state={state} colors={colors} {...rest} />
+      <div className={cn('h-[calc(100vh-270px)] min-h-[400px] flex-grow ', !isInitialLoading ? '' : 'overflow-hidden')} ref={setContainer}>
+        {!isInitialLoading ? (
+          <Column
+            page={page}
+            count={count}
+            data={data}
+            handleFetchSingleColumnWrapper={handleFetchSingleColumnWrapper}
+            loading={loading}
+            column={column}
+            container={container}
+            getColColors={getColColors}
+            state={state}
+            handleSelectSingle={handleSelectSingle}
+            selectedRecordMap={selectedRecordMap}
+            colors={colors}
+            {...rest}
+          />
         ) : (
           <CardColTimelineLoader />
         )}
@@ -63,10 +171,27 @@ const Column = <D, C extends readonly string[]>({
   container,
   getColColors,
   colors,
+  data,
+  count,
+  handleFetchSingleColumnWrapper,
+  loading,
+  page,
+  handleSelectSingle,
+  selectedRecordMap,
   ...rest
-}: { container: HTMLDivElement | null; colors: ColumnColor } & CommonProps<D, C>) => {
+}: {
+  container: HTMLDivElement | null;
+  colors: ColumnColor;
+  data: D[];
+  count: number;
+  handleFetchSingleColumnWrapper: (page: number, pushData: boolean) => void;
+  loading: boolean;
+  page: number;
+  selectedRecordMap: Map<string, boolean>;
+  handleSelectSingle: (data: D) => void;
+} & CommonProps<D, C>) => {
   const [initialized, setInitialized] = useState(false);
-  const { data, count, handleFetchSingleColumnWrapper, page, loading } = state;
+
   const listRef = useRef<List>(null);
   const infiniteLoaderRef = useRef<InfiniteLoader>(null);
 
@@ -80,14 +205,15 @@ const Column = <D, C extends readonly string[]>({
     listRef.current?.resetAfterIndex(index);
   }, []);
   const getSize = (index) => sizeMap.current[index] || 50;
-  const hasNextPage = !data[column]?.length || !count[column] ? false : data[column]?.length < count[column];
-  const isItemLoaded = (index: number) => !hasNextPage || index < data[column].length;
-  const itemCount = hasNextPage ? data[column]?.length + 1 || 0 : data[column]?.length || 0;
+
+  const hasNextPage = !data?.length || !count ? false : data?.length < count;
+  const isItemLoaded = (index: number) => !hasNextPage || index < data.length;
+  const itemCount = hasNextPage ? data?.length + 1 || 0 : data?.length || 0;
 
   const loadMoreItems = useCallback(() => {
-    if (!initialized || loading[column] || !hasNextPage) return;
-    handleFetchSingleColumnWrapper(column, page[column] + 1);
-  }, [initialized, loading, column, hasNextPage, handleFetchSingleColumnWrapper, page]);
+    if (!initialized || loading || !hasNextPage) return;
+    handleFetchSingleColumnWrapper(page + 1, true);
+  }, [initialized, loading, hasNextPage, handleFetchSingleColumnWrapper, page]);
 
   return (
     <InfiniteLoader isItemLoaded={isItemLoaded} ref={infiniteLoaderRef} itemCount={itemCount} loadMoreItems={() => loadMoreItems()}>
@@ -102,13 +228,13 @@ const Column = <D, C extends readonly string[]>({
             listRef.current = elem;
           }}
           className="rounded-md bg-gray-100 dark:bg-gray-700"
-          itemData={data[column]}
+          itemData={data}
           itemSize={getSize}
           width={'100%'}
         >
           {({ data, index, style, ...restOfVirutalProps }) => (
             <li style={style} className="list-none">
-              {index === data?.length && loading[column] ? (
+              {index === data?.length && loading ? (
                 <div className="mt-2 flex items-center justify-center text-black/85 dark:text-[white]">
                   <CircularProgress size={25} />
                 </div>
@@ -120,6 +246,8 @@ const Column = <D, C extends readonly string[]>({
                   data={data}
                   index={index}
                   setSize={setSize}
+                  handleSelectSingle={handleSelectSingle}
+                  selectedRecordMap={selectedRecordMap}
                   key={index}
                   {...rest}
                   {...restOfVirutalProps}
@@ -149,13 +277,17 @@ const SingleCard = <D, C extends readonly string[]>({
   passFailAccessor,
   colors,
   column,
-
+  handleSelectSingle,
+  selectedRecordMap,
   passFailStatus,
   actionField,
   defaultDisplay,
   primaryField
-}: SingleCardProps<D, C>) => {
-  const { selectedRecordsObj, keyGetter, handleSelect } = state;
+}: SingleCardProps<D, C> & {
+  selectedRecordMap: Map<string, boolean>;
+  handleSelectSingle: (data: D) => void;
+}) => {
+  const { keyGetter } = state;
   const rowRef = useRef<HTMLDivElement>(null);
   const rowData = data[index];
 
@@ -173,7 +305,7 @@ const SingleCard = <D, C extends readonly string[]>({
           typeof cardOnClick === 'function'
             ? 'cursor-pointer outline-0 outline-[--new-theme-color] focus-visible:shadow-lg focus-visible:outline-2'
             : '',
-          selectedRecordsObj?.[column]?.[keyGetter(rowData)] ? `${colors.background} ${colors.color}` : ''
+          selectedRecordMap?.has(keyGetter(rowData)) ? `${colors.background} ${colors.color}` : ''
         )}
         onClick={(e) => {
           e.stopPropagation();
@@ -197,10 +329,10 @@ const SingleCard = <D, C extends readonly string[]>({
             <Checkbox
               sx={{ ml: '-8px' }}
               size="small"
-              checked={selectedRecordsObj?.[column]?.[keyGetter(rowData)] || false}
+              checked={selectedRecordMap?.has(keyGetter(rowData)) || false}
               onClick={(e) => {
                 e.stopPropagation();
-                handleSelect(keyGetter(rowData), column);
+                handleSelectSingle(rowData);
               }}
               icon={<RadioButtonUnchecked />}
               indeterminateIcon={<CheckCircleOutline />}
