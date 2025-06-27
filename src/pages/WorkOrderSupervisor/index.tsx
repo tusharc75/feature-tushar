@@ -1035,6 +1035,7 @@ const WorkOrderSupervisor = () => {
                       items={resourceItems}
                       onItemClick={(e, item: any) => {
                         setSelectedResource(item);
+                        cardState?.refreshAllColumns();
                       }}
                     >
                       <span className="flex items-center gap-2 [&_svg]:text-[18px]">{selectedResource?.label}</span>
