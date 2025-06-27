@@ -2959,7 +2959,6 @@ const ReceivingTicket = ({
         />
       )}
       {confirmationDirectSendToSupplier.open && (
-
         <SelectionConfirmationDialog
           open={confirmationDirectSendToSupplier.open}
           message={`Would you like to send the sublease assets (${getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.filter(a => a?.subleaseAsset)?.map(a => a?.assetNumber).join(', ')}) directly to the supplier? Click 'Yes' to proceed, or 'No' to keep them internal.`}

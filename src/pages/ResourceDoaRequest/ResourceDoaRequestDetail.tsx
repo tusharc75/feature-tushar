@@ -14,7 +14,7 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import CommentDialog from 'src/components/CommentDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { camelCase, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -23,10 +23,8 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 const ResourceDoaRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
-  const history = useHistory();
 
-  const { resource, currency } = history.location?.state;
-  const renderedFrom = `${camelCase(resource)}_doaRequest`
+  const renderedFrom = `resourceDoaRequestDetail`
 
   const {
     state: { user, resources }
@@ -40,11 +38,10 @@ const ResourceDoaRequestDetail = () => {
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchGridColumns();
     fetchData();
-  }, [id, resource]);
+  }, [id]);
 
-  const fetchGridColumns = async () => {
+  const fetchGridColumns = async (resource, currency = 'USD') => {
     if (resource === sidebarResource?.serializedAssetStatusChangeRequest) {
       axiosInstance()
         .get(`/field?resource=${resource}&view=true`)
@@ -136,7 +133,7 @@ const ResourceDoaRequestDetail = () => {
         userDOAstatus: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.status,
         canPerform: _data?.doaUsers?.find((u) => u?.users?.map((d) => d?._id)?.includes(user?.user?._id))?.isUpdate ? true : false,
       });
-      if ([sidebarResource?.purchaseRequisition, sidebarResource?.invoice]?.includes(resource)) {
+      if ([sidebarResource?.purchaseRequisition, sidebarResource?.invoice]?.includes(_data?.resource)) {
         let rows = _data.material.filter((e) => !e.parentId);
         rows.forEach((parent, i) => {
           parent.index = i + 1;
@@ -165,6 +162,7 @@ const ResourceDoaRequestDetail = () => {
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
       }
+      fetchGridColumns(_data?.resource, _data?.currency)
     }
   };
 
@@ -258,9 +256,9 @@ const ResourceDoaRequestDetail = () => {
       <Box className={`detail-container-v1`}>
         {doaData && fields?.length ? (
           <div className="p-2">
-            {resource === sidebarResource?.serializedAssetStatusChangeRequest ? (
+            {doaData?.resource === sidebarResource?.serializedAssetStatusChangeRequest ? (
               <DetailsPage data={doaData} fields={fields} />
-            ) : [sidebarResource?.purchaseRequisition, sidebarResource?.invoice]?.includes(resource) ? (
+            ) : [sidebarResource?.purchaseRequisition, sidebarResource?.invoice]?.includes(doaData?.resource) ? (
               <Box zIndex={5}>
                 <CustomReactTable
                   height={'calc(100vh - 300px)'}

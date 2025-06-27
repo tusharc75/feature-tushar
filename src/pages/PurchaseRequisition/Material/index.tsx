@@ -225,7 +225,7 @@ const Material = ({
         setPrevStep(false);
         setNextStep(true);
       } else {
-        setPrevStep(false);
+        setPrevStep(true);
         setNextStep(false);
       }
     }

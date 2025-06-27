@@ -170,7 +170,7 @@ const WorkOrderTechnician = () => {
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
       let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken });
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`, { cancelToken });
       data = response?.data?.data;
 
       const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
