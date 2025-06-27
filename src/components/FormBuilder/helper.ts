@@ -59,7 +59,7 @@ export const OPERATOR = [
 
 export const OPERATION_ON_LINE_ITEMS = {
   add: 'Add',
-  substract: 'Substract'
+  subtract: 'Subtract'
 };
 
 export const PRE_FILTER_CHECKBOX_OPTION = {
