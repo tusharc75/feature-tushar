@@ -588,7 +588,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                   color="primary"
                                 />
                               }
-                              label="Enable Asset Status Wise Pricing"
+                              label="Enable Asset Sub Status Wise Pricing"
                             />
                             {values['enableAssetStatusWisePricing'] && (
                               <div className='mt-2'>

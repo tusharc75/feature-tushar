@@ -6,7 +6,7 @@ import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqueId } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
@@ -70,6 +70,7 @@ import { flattenArray } from 'src/constants/columns';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -115,6 +116,8 @@ const LoadingTicket = ({
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorElSubStatus, setAnchorElSubStatus] = useState(null);
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: '' });
   const { isOffline } = useContext(CustomOfflineContext);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
@@ -138,6 +141,7 @@ const LoadingTicket = ({
   const [fieldLabels, setFieldLabels] = useState(null);
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
+  const [submitting, setSubmitting] = useState(false)
 
   const { generateColumns } = useColumns();
 
@@ -195,6 +199,8 @@ const LoadingTicket = ({
               'currentGpsLocation',
               'currentGpsWellNames',
               'gpsNumber',
+              'subStatus',
+              'wellColor'
             ]
           }
         ]
@@ -494,6 +500,15 @@ const LoadingTicket = ({
           }
         ]
         : []),
+      ...(assetFields?.find((f) => f.fieldName === 'wellColor')
+        ? [
+          {
+            accessor: 'wellColor',
+            Header: assetFields?.find((f) => f.fieldName === 'wellColor')?.fieldLabel || 'wellColor',
+            cell: ({ row }) => (row?.original?.wellColor ? <div><p className="text-truncate">{row?.original?.wellColor}</p></div> : <NoDataCell />)
+          }
+        ]
+        : []),
       ...(view === 'flat'
         ? [
           {
@@ -552,7 +567,16 @@ const LoadingTicket = ({
         accessor: 'status',
         Header: 'Asset Status',
         cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
-      }
+      },
+      ...(assetFields?.find((f) => f.fieldName === 'subStatus')
+        ? [
+          {
+            accessor: 'subStatus',
+            Header: `Asset ${assetFields?.find((f) => f.fieldName === 'subStatus')?.fieldLabel || 'Sub Status'}`,
+            cell: ({ row }) => (row?.original?.subStatus ? <h5 className="text-truncate">{row?.original?.subStatus}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
     ];
     if (assetFields?.find((f) => f.fieldName === 'mtrAttached')) {
       column.push({
@@ -1562,6 +1586,18 @@ const LoadingTicket = ({
             Change Status
           </ThemeButton>
         )}
+        {!isOffline && allowedToEdit && assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+          <ThemeButton
+            disabled={
+              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
+              !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((f) => f?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse && f?.status === ASSET_STATUS.inUse)
+            }
+            onClick={(event) => setAnchorElSubStatus(event.currentTarget)}
+            endIcon={<ExpandMore />}
+          >
+            Change Sub Status
+          </ThemeButton>
+        )}
         {(allowedToEdit || isProcessor) && (
           <>
             {getFilterSelectedRecords().length &&
@@ -1655,6 +1691,33 @@ const LoadingTicket = ({
       });
   };
 
+  const handleSubStatusChange = (dates) => {
+    setSubmitting(true)
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/update-sub-status`,
+        {
+          assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
+            _id: a?._id,
+            uniqueId: a?.uniqueId,
+            dates: dates
+          }))
+        })
+      .then(({ data }) => {
+        fetchRecords();
+        setSubmitting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setSubStatusToUpdate({ open: false, status: null });
+      })
+      .catch((error) => {
+        setSubmitting(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <>
       <DetailsPageHeader
@@ -1734,6 +1797,35 @@ const LoadingTicket = ({
               }}
             >
               {o.optionLabel}
+            </MenuItem>
+          )
+        })}
+      </Menu>
+
+      <Menu
+        id="sub-status-menu"
+        anchorEl={anchorElSubStatus}
+        keepMounted
+        open={Boolean(anchorElSubStatus)}
+        onClose={() => setAnchorElSubStatus(null)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {assetPolicyData?.policy?.inUseSubStatus?.map(o => {
+          return (
+            <MenuItem
+              onClick={() => {
+                setAnchorElSubStatus(null);
+                setSubStatusToUpdate({ open: true, status: o })
+              }}
+            >
+              {o}
             </MenuItem>
           )
         })}
@@ -1860,6 +1952,17 @@ const LoadingTicket = ({
             </ThemeButton>
           </CustomDialogFooter>
         </Dialog>
+      )}
+      {subStatusToUpdate.open && (
+        <SubStatusDatesDialog
+          handleClose={() => {
+            setSubStatusToUpdate({ open: false, status: null })
+          }}
+          subStatus={subStatusToUpdate.status}
+          options={assetPolicyData?.policy?.inUseSubStatus}
+          onSuccess={handleSubStatusChange}
+          submitting={submitting}
+        />
       )}
       {openDeliveryTicketDialog && (
         <MultipleTicket
