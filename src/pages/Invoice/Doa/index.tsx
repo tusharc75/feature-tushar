@@ -122,7 +122,7 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
       setPrevStep(false);
       setNextStep(true);
     } else {
-      setPrevStep(false);
+      setPrevStep(true);
       setNextStep(false);
     }
   }, [DOAData])

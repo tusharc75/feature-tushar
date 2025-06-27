@@ -70,10 +70,7 @@ const ResourceDoaRequest = () => {
                 <p
                   className="text-truncate link"
                   onClick={() => {
-                    history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
-                      resource: row?.original?.resource,
-                      currency: row?.original?.currency,
-                    });
+                    history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`);
                   }}
                 >
                   {row?.original?.refrenceFrom}

@@ -200,6 +200,13 @@ export const assemblyOrderSteps: stepInterface[] = [
 ];
 
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'Skipped', 'In-Progress By Other'] as const;
+export const WORKORDER_SUPERVISOR_STATUS = [
+  'Planned',
+  'Pending',
+  'In-Progress',
+  'Completed',
+  'Skipped',
+] as const;
 
 export const accountTemplateFileName = 'Accounts-Template.xlsx';
 export const accountImportErrorFileName = 'Accounts-Errors.xlsx';

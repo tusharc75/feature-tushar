@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Box, Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
@@ -13,7 +13,6 @@ import styles from '../profilePage.module.scss';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { useData } from 'src/StateProvider/Provider';
 import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -83,10 +82,6 @@ export default function NotificationPreference({ notificationPreferenceData, use
     });
     setRows(tempRows);
   };
-
-  const {
-    state: { resources }
-  }: any = useData();
 
   const handleSelectAll = (columnName) => {
     setAllPreference((prevState) => {
@@ -221,7 +216,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
             </TableBody>
           </Table>
         </TableContainer>
-        <ResourceWiseNotificationPreference resourcesList={resources} />
+        <ResourceWiseNotificationPreference />
       </Box>
     </>
   );
