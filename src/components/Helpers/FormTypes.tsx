@@ -519,61 +519,65 @@ const FormTypes = (props) => {
 
   // For public upload
   const getImageUrl = (file, multiple = null) => {
-    setImageUploadProgress(0);
-    let formData = new FormData();
-    formData.append('file', file);
-    setImgUploading(true);
-    if (imageOrFileUploadCompletePercentage) {
-      imageOrFileUploadCompletePercentage(1);
-    }
-    axiosInstance()
-      .post('/user/upload-public', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        onUploadProgress: (pE) => {
-          const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
-          setImageUploadProgress(completedPercent);
-          if (imageOrFileUploadCompletePercentage) {
-            imageOrFileUploadCompletePercentage(completedPercent);
+    return new Promise((resolve, reject) => {
+      setImageUploadProgress(0);
+      let formData = new FormData();
+      formData.append('file', file);
+      setImgUploading(true);
+      if (imageOrFileUploadCompletePercentage) {
+        imageOrFileUploadCompletePercentage(1);
+      }
+      axiosInstance()
+        .post('/user/upload-public', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          onUploadProgress: (pE) => {
+            const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
+            setImageUploadProgress(completedPercent);
+            if (imageOrFileUploadCompletePercentage) {
+              imageOrFileUploadCompletePercentage(completedPercent);
+            }
+            if (completedPercent === 100) {
+              setTimeout(() => {
+                setImageUploadProgress(0);
+                if (imageOrFileUploadCompletePercentage) {
+                  imageOrFileUploadCompletePercentage(0);
+                }
+              }, 4000);
+            }
           }
-          if (completedPercent === 100) {
-            setTimeout(() => {
-              setImageUploadProgress(0);
-              if (imageOrFileUploadCompletePercentage) {
-                imageOrFileUploadCompletePercentage(0);
-              }
-            }, 4000);
-          }
-        }
-      })
-      .then(({ data }) => {
-        if (!multiple) {
-          setFieldValue(name, data.fileUrl);
-        } else {
-          if (values[name]) {
-            setImage('');
-            setFieldValue(name, [...values[name], data.fileUrl]);
-            setImageFileName('');
+        })
+        .then(({ data }) => {
+          if (!multiple) {
+            setFieldValue(name, data.fileUrl);
           } else {
-            let currentData = values[name] ? values[name] : [];
+            if (values[name]) {
+              setImage('');
+              setFieldValue(name, [...values[name], data.fileUrl]);
+              setImageFileName('');
+            } else {
+              let currentData = values[name] ? values[name] : [];
+              setImage('');
+              setFieldValue(name, [...currentData, data.fileUrl]);
+              setImageFileName('');
+            }
+          }
+          setImgUploading(false);
+          resolve(data.fileUrl);
+        })
+        .catch((err) => {
+          if (multiple) {
             setImage('');
-            setFieldValue(name, [...currentData, data.fileUrl]);
             setImageFileName('');
           }
-        }
-        setImgUploading(false);
-      })
-      .catch((err) => {
-        if (multiple) {
-          setImage('');
-          setImageFileName('');
-        }
-        setImgUploading(false);
-        setToastConfig(err);
-        setImageUploadProgress(0);
-        if (imageOrFileUploadCompletePercentage) {
-          imageOrFileUploadCompletePercentage(0);
-        }
-      });
+          setImgUploading(false);
+          setToastConfig(err);
+          setImageUploadProgress(0);
+          if (imageOrFileUploadCompletePercentage) {
+            imageOrFileUploadCompletePercentage(0);
+          }
+          resolve(null);
+        });
+    });
   };
 
   // const getFileUrl = (file, isMultiple = false) => {
@@ -700,21 +704,28 @@ const FormTypes = (props) => {
     axiosInstance().post('field/add-field-option', data);
   };
 
-  const readImageFile = (e) => {
+  const readImageFile = async (e) => {
     setReadingImage(true);
-    const file = e.target.files[0];
-    setImageFileName(file.name.toString().split('.')[0]);
-    let reader = new FileReader();
-
-    reader.onload = async (e) => {
-      const result = await e.target?.result;
-      setImage(result);
-      setReadingImage(false);
-    };
-
-    if (file) {
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files) {
+      let uploadedUrls = Array.isArray(values[name]) ? [...values[name]] : [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > imageUploadMaxSize.size) {
+          setToastConfig({
+            open: true,
+            type: 'error',
+            message: `Image must be less than ${imageUploadMaxSize.text} size`
+          });
+          continue;
+        }
+        const url = await getImageUrl(file);
+        if (url) uploadedUrls.push(url);
+      }
+      setFieldValue(name, uploadedUrls);
     }
+    setReadingImage(false);
+    e.target.value = '';
   };
 
   const removeImage = (img) => {
@@ -2418,10 +2429,10 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Typography color="textSecondary">{label}</Typography>
-        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
+        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={true} type="file" onChange={readImageFile} />
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
-            <ThemeButton disabled={readingImage} buttonType="theme" component="span">
+            <ThemeButton disabled={readingImage || isImgUploading} buttonType="theme" component="span">
               Upload image(s)
             </ThemeButton>
           </label>
@@ -2429,7 +2440,7 @@ const FormTypes = (props) => {
         <Box mt={1}>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
             <ImageList style={{ transform: 'translateZ(0)', width: '100%' }}>
-              {values[name]
+              {Array.isArray(values[name])
                 ? values[name].map((item, i) => (
                   <ImageListItem style={{ height: '150px', width: '160px' }} key={item}>
                     <img src={item} alt={`demo ${i + 1}`} />
@@ -2447,26 +2458,6 @@ const FormTypes = (props) => {
             </ImageList>
           </Box>
         </Box>
-        <Dialog
-          TransitionComponent={CustomDialogTransition}
-          fullWidth
-          maxWidth="md"
-          open={Boolean(image) || isImgUploading}
-          onClose={() => {
-            if (!isImgUploading) {
-              setImage('');
-            }
-          }}
-        >
-          <ImageCropTool
-            image={image}
-            setImage={setImage}
-            getImageUrl={getImageUrl}
-            isImgUploading={isImgUploading}
-            imageUploadProgress={imageUploadProgress}
-            imageFileName={imageFileName}
-          />
-        </Dialog>
         {touched[name] && Boolean(errors[name]) && (
           <Box>
             <Typography variant="body2" className="text-truncate" color={'error'}>
