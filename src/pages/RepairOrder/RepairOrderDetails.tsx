@@ -174,7 +174,7 @@ const RepairOrderDetails = () => {
         setisAnyMaterial(data?.canDelete ? false : true);
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairOrder, data));
         var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
-        if (data?.type === REPAIR_ORDER_TYPE.internal) {
+        if (data?.type === REPAIR_ORDER_TYPE.internal || data?.onFieldRepair) {
           steps = steps?.filter((e) => !['Loading Ticket']?.includes(e.name));
         }
         if (!user?.user?.brandPolicy?.repairOrderPrice && !data?.addQuotationStep) {
