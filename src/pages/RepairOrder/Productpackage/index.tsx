@@ -25,6 +25,7 @@ import { MATERIAL_TYPE, REPAIR_ORDER_TYPE, repairOrder } from '../../../constant
 import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+import { repairOrderMessage } from 'src/constants/messageHelpers';
 
 const dataAdded = {
   nextButtonAdded: false
@@ -302,8 +303,9 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-    setNextStepToolTip(null)
+    setNextStepToolTip(null);
     var data: any = [];
+    var nextStepMessage = null;
     const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
     data = response?.data?.data;
 
@@ -339,19 +341,42 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
       parent.canDelete = parent.workOrder || !allowedToEdit ? false : true;
       parent.subRows = generateNestedData(data.material, parent);
       parent.status = parent?.serializedAssetDetail?.status || null;
+      if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
+        nextStepMessage = repairOrderMessage.addProductAndAssetsInPackage;
+      }
+    });
+
+    const materialTypesPresent = data.material?.reduce((acc, item) => {
+      if ([MATERIAL_TYPE.product, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset].includes(item.type)) {
+        acc[item.type] = true;
+      }
+      return acc;
+    }, {
+      [MATERIAL_TYPE.product]: false,
+      [MATERIAL_TYPE.package]: false,
+      [MATERIAL_TYPE.serializedAsset]: false
     });
 
     if (rows.length !== 0) {
       setHasAssetsAdded(true);
-      if (
-        rows.filter((_rows) => _rows.isValid === false).length > 0 ||
-        !data.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-      ) {
+      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || !materialTypesPresent?.[MATERIAL_TYPE.serializedAsset]) {
+        if (materialTypesPresent?.[MATERIAL_TYPE.product] && !materialTypesPresent[MATERIAL_TYPE.package] && !nextStepMessage) {
+          setNextStepToolTip(repairOrderMessage.assignAssets);
+        }
+        else {
+          if (nextStepMessage) {
+            setNextStepToolTip(nextStepMessage);
+          }
+          else {
+            setNextStepToolTip(repairOrderMessage.assignAssets);
+          }
+        }
         setNextStep(false);
       } else {
         setNextStep(true);
       }
     } else {
+      setNextStepToolTip(repairOrderMessage.assignAssets);
       setHasAssetsAdded(false);
       setNextStep(false);
     }
