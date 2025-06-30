@@ -10,10 +10,10 @@ import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { ThemeButton } from "src/components/Helpers/Buttons";
-import { CustomDialogTransition } from "src/constants/helpers";
+import { CustomDialogTransition, dateFormat } from "src/constants/helpers";
 import { useData } from "src/StateProvider/Provider";
 
-const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, submitting }) => {
+const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, submitting, minDate }) => {
 
   const {
     state: { resources }
@@ -67,6 +67,18 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
               errors['dates'] = [];
             }
             errors.dates[i] = { endDate: 'End Date must be after Start Date' };
+          }
+        }
+
+        if (i === 0 && minDate && d?.startDate) {
+          const start = dayjs.tz(new Date(d?.startDate)).startOf('day');
+          const min = dayjs.tz(new Date(minDate)).startOf('day');
+
+          if (start.isBefore(min)) {
+            if (!errors?.dates) {
+              errors['dates'] = [];
+            }
+            errors.dates[i] = { startDate: `Start Date cannot be before ${min.format(dateFormat)}` };
           }
         }
 
@@ -134,6 +146,7 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
                                       ['startDate']: value || null
                                     });
                                   }}
+                                  {...(minDate ? { minDate: minDate } : {})}
                                   error={touched?.dates && touched?.dates[index]?.startDate && errors?.dates && Boolean(errors?.dates[index]?.startDate)}
                                   helperText={touched?.dates && touched?.dates[index]?.startDate && errors?.dates && errors?.dates[index]?.startDate}
                                 />
@@ -152,6 +165,7 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
                                       ['endDate']: value || null
                                     });
                                   }}
+                                  {...(_date?.startDate ? { minDate: _date?.startDate } : {})}
                                   error={touched?.dates && touched?.dates[index]?.endDate && errors?.dates && Boolean(errors?.dates[index]?.endDate)}
                                   helperText={touched?.dates && touched?.dates[index]?.endDate && errors?.dates && errors?.dates[index]?.endDate}
                                 />
