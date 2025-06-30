@@ -36,7 +36,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
           {options.map((curPreference, i) => (
             <div className="relative" key={curPreference.id}>
               <PreferenceOptions id={curPreference.id} icon={curPreference.icon} heading={curPreference.heading} subtitle={curPreference.subtitle} />
-              {i < options.length - 1 && <div className="absolute bottom-0 right-0 top-0 border-r"></div>}
+              {i < options.length - 1 && <div className="absolute bottom-0 right-0 top-0 border-r max-sm:opacity-0"></div>}
             </div>
           ))}
         </div>
