@@ -194,6 +194,7 @@ export default function CreateCustomPdfTemplate() {
           });
           setIsUpdating(false);
           setIsEdit(false);
+          history.push(routes.customPdfTemplate.path);
         })
         .catch((error) => {
           setIsUpdating(false);
