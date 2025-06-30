@@ -1,55 +1,27 @@
-import { Box, Typography, Theme } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { makeStyles } from '@mui/styles';
-import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
-import styles from '../profilePage.module.scss';
+import { Box } from '@mui/material';
+import { BsDisplay, BsEnvelopeOpen } from 'react-icons/bs';
 import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  tableCell: {
-    fontSize: 'medium'
-  },
-  notificationIcon: {
-    color: theme.palette.primary.light
-  },
-  preferenceOptions: {
-    color: 'primary',
-    marginBottom: '12px',
-    marginLeft: '5px'
-  },
-  label: {
-    marginLeft: '1px'
-  }
-}));
-
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid key={id} size={{ sm: 12, md: 6, lg: 6 }} >
-    <Grid size={{ sm: 2, md: 2, lg: 2 }} style={{ marginTop: '7px' }}>
-      {icon}
-    </Grid>
-    <Grid size={{ sm: 9, md: 9, lg: 9 }} >
-      <Typography variant="h6">
-        <strong>{heading}</strong>
-      </Typography>
-      <Typography variant="body2" >
-        {subtitle}
-      </Typography>
-    </Grid>
-  </Grid >
+  <div className="flex items-center gap-4 ">
+    <span className="flex-shrink-0">{icon}</span>
+    <div>
+      <h6 className="text-lg font-bold ">{heading}</h6>
+      <p className="text-[13px] text-gray-500">{subtitle}</p>
+    </div>
+  </div>
 );
 
 export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
-  const classes = useStyles();
-
   const options = [
     {
-      icon: <BsDisplay size={60} className={classes.notificationIcon} />,
+      icon: <BsDisplay size={55} />,
       heading: 'Portal',
       subtitle: 'A banner in corner of your website',
       id: 'Portal'
     },
     {
-      icon: <BsEnvelopeOpen size={50} className={classes.notificationIcon} />,
+      icon: <BsEnvelopeOpen size={50} />,
       heading: 'Email',
       subtitle: 'Conversation sent to your mail',
       id: 'Email3'
@@ -58,23 +30,16 @@ export default function NotificationPreference({ notificationPreferenceData, use
 
   return (
     <>
-      <div className={styles.preferenceHeader}>
-        <Typography variant="h5">Your Notification Preference</Typography>
-      </div>
+      <h5 className="text-[18px] font-medium md:text-[24px]">Your Notification Preference</h5>
       <Box style={{ padding: '8px' }}>
-        <Box className={styles.preferenceOptionsBox}>
-          <Grid container spacing={3} className={classes.preferenceOptions}>
-            {options.map((curPreference) => (
-              <PreferenceOptions
-                key={curPreference.id}
-                id={curPreference.id}
-                icon={curPreference.icon}
-                heading={curPreference.heading}
-                subtitle={curPreference.subtitle}
-              />
-            ))}
-          </Grid>
-        </Box>
+        <div className="grid grid-cols-1 gap-4 rounded-md border px-2 py-2 sm:grid-cols-2 md:px-4">
+          {options.map((curPreference, i) => (
+            <div className="relative" key={curPreference.id}>
+              <PreferenceOptions id={curPreference.id} icon={curPreference.icon} heading={curPreference.heading} subtitle={curPreference.subtitle} />
+              {i < options.length - 1 && <div className="absolute bottom-0 right-0 top-0 border-r"></div>}
+            </div>
+          ))}
+        </div>
         <ResourceWiseNotificationPreference />
       </Box>
     </>
