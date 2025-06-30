@@ -31,16 +31,16 @@ export default function Sidebar({ onItemClick, activeLink, userData, onFetchUser
 
   return (
     <Grid container justifyContent="center">
-      <Grid size={{sm:12, lg:12, md:12}}>
+      <Grid size={{ sm: 12, lg: 12, md: 12 }}>
         <ManageProfile displayUserProfileImage={true} userData={userData} onFetchUserData={onFetchUserData} otherDetails={otherDetails} />
       </Grid>
-      <Grid size={{sm:12, lg:12, md:12}} className="profileBox">
+      <Grid size={{ sm: 12, lg: 12, md: 12 }} className="profileBox">
         <div className="d-flex flex-column px-4 pb-3 pt-2">
           {userMenu.map((k, index) => {
             return (
               <div key={index} className={`font-size-3 link d-flex align-items-center mb-3 gap-1 ${styles.profileSidebarLink}`}>
                 <span className={`${styles.menuLink} ${activeLink === k.id ? styles.active : ''}`}>
-                  <Icon>{k.icon}</Icon>
+                  {k.icon}
                   <Typography className={styles.linkLabel} align="left" key={index} onClick={() => onItemClick(k)}>
                     {k.label}{' '}
                   </Typography>
