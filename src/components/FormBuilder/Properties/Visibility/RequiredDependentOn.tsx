@@ -53,109 +53,110 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
       <Box>
         {values['enableRequiredDependentOn'] && (
           <>
-            <Autocomplete
-              id="required-dependent-on"
-              options={fields && fields.filter((_f) => _f._id !== values['_id'] && ['dropDown', 'multiSelect']?.includes(_f.type) && _f?.lookup)}
-              getOptionLabel={(option: any) => (option ? option.fieldLabel || '' : '')}
-              isOptionEqualToValue={(option: any, val) => option.fieldName === val}
-              value={
-                fields && fields.filter((data) => data.fieldName === values['requiredDependentOn']).length
-                  ? fields && fields.filter((data) => data.fieldName === values['requiredDependentOn'])[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                setFieldValue('requiredDependentOn', val && val.fieldName ? val.fieldName : '');
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  margin="dense"
-                  variant="outlined"
-                  label="Required Dependent On"
-                  placeholder="Required Dependent On"
-                  size="small"
-                  error={touched['requiredDependentOn'] && Boolean(errors['requiredDependentOn'])}
-                  helperText={touched['requiredDependentOn'] && errors['requiredDependentOn']}
+            <Grid container spacing={1}>
+              <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+                <Autocomplete
+                  id="required-dependent-on"
+                  options={fields && fields.filter((_f) => _f._id !== values['_id'] && ['dropDown', 'multiSelect']?.includes(_f.type) && _f?.lookup)}
+                  getOptionLabel={(option: any) => (option ? option.fieldLabel || '' : '')}
+                  isOptionEqualToValue={(option: any, val) => option.fieldName === val}
+                  value={
+                    fields && fields.filter((data) => data.fieldName === values['requiredDependentOn']).length
+                      ? fields && fields.filter((data) => data.fieldName === values['requiredDependentOn'])[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setFieldValue('requiredDependentOn', val && val.fieldName ? val.fieldName : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      variant="outlined"
+                      label="Required Dependent On"
+                      placeholder="Required Dependent On"
+                      size="small"
+                      error={touched['requiredDependentOn'] && Boolean(errors['requiredDependentOn'])}
+                      helperText={touched['requiredDependentOn'] && errors['requiredDependentOn']}
+                    />
+                  )}
                 />
-              )}
-            />
-            {values['requiredDependentOn'] && (
-              <Grid container spacing={1}>
-                <Grid size={{ xs: 6, sm: 6, md: 6 }}>
-                  <Autocomplete
-                    id="required-dependent-on-field"
-                    options={requiredDependentOnFields}
-                    disabled={requiredDependentOnFieldsLoading}
-                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
-                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
-                    value={
-                      requiredDependentOnFields &&
-                        requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField']).length
-                        ? requiredDependentOnFields &&
-                        requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField'])[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setFieldValue('requiredDependentOnField', val && val?.fieldName ? val?.fieldName : '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        size="small"
-                        variant="outlined"
-                        label="Required Dependent On Field"
-                        placeholder="Required Dependent On Field"
-                        error={touched['requiredDependentOnField'] && Boolean(errors['requiredDependentOnField'])}
-                        helperText={touched['requiredDependentOnField'] && errors['requiredDependentOnField']}
-                        slotProps={{
-                          input: {
-                            ...params.InputProps,
-                            endAdornment: (
-                              <React.Fragment>
-                                {requiredDependentOnFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                              </React.Fragment>
-                            )
-                          }
-                        }}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid size={{ xs: 6, sm: 6, md: 6 }}>
-                  <Autocomplete
-                    id="requiredDependentOnFieldValue"
-                    disabled={values['requiredDependentOnField'] ? false : true}
-                    options={checkBoxOptions}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                    value={
-                      checkBoxOptions?.filter((f) => f?.optionValue === values?.requiredDependentOnFieldValue)?.length > 0
-                        ? checkBoxOptions?.filter((f) => f?.optionValue === values?.requiredDependentOnFieldValue)[0]
-                        : ''
-                    }
-                    onChange={(e: any, value) => {
-                      setFieldValue('requiredDependentOnFieldValue', value && value?.optionValue ? value.optionValue : '');
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        size="small"
-                        variant="outlined"
-                        label="Required Dependent On Field Value"
-                        placeholder="Required Dependent On Field Value"
-                        name="requiredDependentOnFieldValue"
-                        required
-                        error={touched['requiredDependentOnFieldValue'] && Boolean(errors['requiredDependentOnFieldValue'])}
-                        helperText={touched['requiredDependentOnFieldValue'] && errors['requiredDependentOnFieldValue']}
-                      />
-                    )}
-                  />
-                </Grid>
               </Grid>
-            )}
+              <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+                <Autocomplete
+                  id="required-dependent-on-field"
+                  options={requiredDependentOnFields}
+                  disabled={requiredDependentOnFieldsLoading}
+                  getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                  isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
+                  value={
+                    requiredDependentOnFields &&
+                      requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField']).length
+                      ? requiredDependentOnFields &&
+                      requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField'])[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setFieldValue('requiredDependentOnField', val && val?.fieldName ? val?.fieldName : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      size="small"
+                      variant="outlined"
+                      label="Required Dependent On Field"
+                      placeholder="Required Dependent On Field"
+                      error={touched['requiredDependentOnField'] && Boolean(errors['requiredDependentOnField'])}
+                      helperText={touched['requiredDependentOnField'] && errors['requiredDependentOnField']}
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          endAdornment: (
+                            <React.Fragment>
+                              {requiredDependentOnFieldsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </React.Fragment>
+                          )
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid size={{ xs: 4, sm: 4, md: 4 }}>
+                <Autocomplete
+                  id="requiredDependentOnFieldValue"
+                  disabled={values['requiredDependentOnField'] ? false : true}
+                  options={checkBoxOptions}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                  isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                  value={
+                    checkBoxOptions?.filter((f) => f?.optionValue === values?.requiredDependentOnFieldValue)?.length > 0
+                      ? checkBoxOptions?.filter((f) => f?.optionValue === values?.requiredDependentOnFieldValue)[0]
+                      : ''
+                  }
+                  onChange={(e: any, value) => {
+                    setFieldValue('requiredDependentOnFieldValue', value && value?.optionValue ? value.optionValue : '');
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      margin="dense"
+                      size="small"
+                      variant="outlined"
+                      label="Required Dependent On Field Value"
+                      placeholder="Required Dependent On Field Value"
+                      name="requiredDependentOnFieldValue"
+                      required
+                      error={touched['requiredDependentOnFieldValue'] && Boolean(errors['requiredDependentOnFieldValue'])}
+                      helperText={touched['requiredDependentOnFieldValue'] && errors['requiredDependentOnFieldValue']}
+                    />
+                  )}
+                />
+              </Grid>
+            </Grid>
+
           </>
         )}
       </Box>
