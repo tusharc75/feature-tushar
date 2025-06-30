@@ -90,14 +90,14 @@ function DropdownCellImpl({ permissions, permissionForLinks, field, original }) 
         data.forEach((o, index) =>
           o?.optionLabel
             ? resultComponents.push(
-              <ExternalLinkCell
-                key={o?.optionLabel}
-                link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
-                value={o?.optionLabel}
-                endComma={index !== data?.length - 1}
-                startComma={index === 0}
-              />
-            )
+                <ExternalLinkCell
+                  key={o?.optionLabel}
+                  link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
+                  value={o?.optionLabel}
+                  endComma={index !== data?.length - 1}
+                  startComma={index === 0}
+                />
+              )
             : typeof o !== 'string'
               ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
               : ''
@@ -127,7 +127,7 @@ function DropdownCellImpl({ permissions, permissionForLinks, field, original }) 
           {more?.length > 0 && (
             <>
               <span
-                className="createdAtTime badge-date hide-in-export max-w-fit cursor-pointer select-none !p-[4px_6px] md:!p-[0_6px]"
+                className="createdAtTime badge-date hide-in-export max-w-fit flex-shrink-0 cursor-pointer select-none !p-[4px_6px] md:!p-[0_6px]"
                 onClick={(e) => {
                   handleClick(e);
                 }}

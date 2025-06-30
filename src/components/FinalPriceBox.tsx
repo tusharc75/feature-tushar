@@ -56,8 +56,8 @@ const FinalPriceBox = ({ allFields, data, childFields = [], material = [] }) => 
             {fields?.map((f) => {
               return (<div className="flex justify-between items-center mb-2">
                 <span className="font-medium text-gray-700 dark:text-gray-300">{f?.fieldData?.fieldLabel} {`(${data[f?.fieldData?.fieldName]}%)`}</span>
-                <span className={`font-semibold ${f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.substract ? ` text-red-600` : ` text-gray-900 dark:text-gray-100`}`}>
-                  {f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.substract ? '- ' : ''}
+                <span className={`font-semibold ${f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.subtract ? ` text-red-600` : ` text-gray-900 dark:text-gray-100`}`}>
+                  {f?.fieldData?.operationOnLineItems === OPERATION_ON_LINE_ITEMS.subtract ? '- ' : ''}
                   {formatAmountWithCurrency(data?.currency, data[`${camelCase(f?.fieldData?.fieldName)}Amount`])?.fullFormatAmount || ''}</span>
               </div>
               );

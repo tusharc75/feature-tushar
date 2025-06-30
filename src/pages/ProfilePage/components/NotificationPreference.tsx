@@ -1,18 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
+import { Box, Typography, Theme } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
 import styles from '../profilePage.module.scss';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../axios/axiosInstance';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -32,69 +22,24 @@ const useStyles = makeStyles((theme: Theme) => ({
   }
 }));
 
-const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
-  // <FormControlLabel
-  //     control={<Checkbox size="small" checked={val}
-  //         onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
-  //     label={name}
-  // />
-  <Checkbox disabled={isDisable} checked={val} onChange={(e) => onChange(e.target.checked, id, name)} name={name} />
-);
-
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid key={id} size={{ sm: 12, md: 6, lg: 4 }} container>
-    <Grid size={{ sm: 3 }} style={{ marginTop: '7px' }}>
+  <Grid key={id} size={{ sm: 12, md: 6, lg: 6 }} >
+    <Grid size={{ sm: 2, md: 2, lg: 2 }} style={{ marginTop: '7px' }}>
       {icon}
     </Grid>
-    <Grid size={{ sm: 7 }} container>
-      <Grid size={{ xs: 12, sm: 7 }} container direction="column">
-        <Grid size={{ xs: 12, sm: 7 }} container>
-          <Typography align="left" variant="h6">
-            <strong>{heading}</strong>
-          </Typography>
-          <Typography align="left" variant="body2" gutterBottom>
-            {subtitle}
-          </Typography>
-        </Grid>
-      </Grid>
+    <Grid size={{ sm: 9, md: 9, lg: 9 }} >
+      <Typography variant="h6">
+        <strong>{heading}</strong>
+      </Typography>
+      <Typography variant="body2" >
+        {subtitle}
+      </Typography>
     </Grid>
-  </Grid>
+  </Grid >
 );
 
 export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
-  const toastConfig = useContext(CustomToastContext);
-  const [rows, setRows] = useState(notificationPreferenceData);
-  const [isUpdating, setUpdating] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isAllPreference, setAllPreference] = useState({
-    portal: notificationPreferenceData.every((d) => d.portal),
-    email: notificationPreferenceData.every((d) => d.email)
-  });
   const classes = useStyles();
-  const handleChange = (isChecked, id, columnName) => {
-    let tempRows = rows.map((obj) => {
-      if (obj.id === id) return { ...obj, [columnName]: isChecked };
-      else return obj;
-    });
-    setAllPreference({
-      portal: tempRows.every((d) => d.portal),
-      email: tempRows.every((d) => d.email)
-    });
-    setRows(tempRows);
-  };
-
-  const handleSelectAll = (columnName) => {
-    setAllPreference((prevState) => {
-      return {
-        ...prevState,
-        [columnName]: !prevState[columnName]
-      };
-    });
-    let tempRows = rows.map((obj) => {
-      return { ...obj, [columnName]: !isAllPreference[columnName] };
-    });
-    setRows(tempRows);
-  };
 
   const options = [
     {
@@ -110,30 +55,6 @@ export default function NotificationPreference({ notificationPreferenceData, use
       id: 'Email3'
     }
   ];
-
-  const updateNotificationPref = () => {
-    setUpdating(true);
-    let dataObj = {
-      _id: user,
-      notificationPref: rows
-    };
-    axiosInstance()
-      .put(`/user/notification`, dataObj)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        onSuccess();
-        setUpdating(false);
-        setIsEdit(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
 
   return (
     <>
@@ -154,68 +75,6 @@ export default function NotificationPreference({ notificationPreferenceData, use
             ))}
           </Grid>
         </Box>
-        <div className="header-panel">
-          <div className="flex flex-wrap justify-end gap-[8px]">
-            {isEdit && (
-              <ThemeButton
-                onClick={() => {
-                  updateNotificationPref();
-                }}
-                disabled={isUpdating}
-                isLoading={isUpdating}
-                buttonType='theme'
-              >
-                Update
-              </ThemeButton>
-            )}
-            {!isEdit && (
-              <ThemeButton
-                onClick={() => {
-                  setIsEdit(!isEdit);
-                }}
-                buttonType='theme'
-              >
-                Edit
-              </ThemeButton>
-            )}
-          </div>
-        </div>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableRow>
-              <TableCell component="th" scope="row" className={classes.tableCell}></TableCell>
-              <TableCell padding="checkbox">
-                <FormControlLabel
-                  className={classes.label}
-                  control={<Checkbox checked={isAllPreference.portal} disabled={!isEdit} onChange={() => handleSelectAll('portal')} title="Portal" />}
-                  label="Portal"
-                />
-              </TableCell>
-              <TableCell padding="checkbox">
-                <FormControlLabel
-                  className={classes.label}
-                  control={<Checkbox checked={isAllPreference.email} disabled={!isEdit} onChange={() => handleSelectAll('email')} title="Email" />}
-                  label="Email"
-                />
-              </TableCell>
-            </TableRow>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row?.id}>
-                  <TableCell component="th" scope="row" className={classes.tableCell}>
-                    {row.name}
-                  </TableCell>
-                  <TableCell padding="checkbox">
-                    <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} isDisable={!isEdit} />
-                  </TableCell>
-                  <TableCell padding="checkbox">
-                    <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} isDisable={!isEdit} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
         <ResourceWiseNotificationPreference />
       </Box>
     </>
