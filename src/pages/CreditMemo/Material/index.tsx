@@ -553,7 +553,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         fetchData();
       })
       .catch((error) => {
-        console.log("error ...", error);
         toastConfig.setToastConfig(error);
       });
   };
