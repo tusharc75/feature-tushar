@@ -30,7 +30,7 @@ export default function NotificationPreference({ notificationPreferenceData, use
 
   return (
     <>
-      <h5 className="text-[18px] font-medium md:text-[24px]">Your Notification Preference</h5>
+      <h5 className="mb-2 text-[18px] font-medium md:text-[20px]">Your Notification Preference</h5>
       <Box style={{ padding: '8px' }}>
         <div className="grid grid-cols-1 gap-4 rounded-md border px-2 py-2 sm:grid-cols-2 md:px-4">
           {options.map((curPreference, i) => (
