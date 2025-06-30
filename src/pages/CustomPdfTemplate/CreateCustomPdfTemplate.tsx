@@ -12,7 +12,6 @@ import { Autocomplete } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit, customPdfTemplate } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { useLocation } from 'react-router-dom';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -26,7 +25,6 @@ const PdfTemplateSchema = object().shape({
 export default function CreateCustomPdfTemplate() {
   const { id } = useParams();
   const history = useHistory();
-  const location = useLocation();
   const [initialValues, setInitialValues] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -45,22 +43,6 @@ export default function CreateCustomPdfTemplate() {
 
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
-
-  const onBackButtonEvent = (e) => {
-    if (allowedToEdit) {
-      e.preventDefault();
-      window.history.pushState(null, null, window.location.pathname);
-      setShowConfirmDialog(true);
-    }
-  };
-
-  useEffect(() => {
-    window.history.pushState(null, null, window.location.pathname);
-    window.addEventListener('popstate', onBackButtonEvent);
-    return () => {
-      window.removeEventListener('popstate', onBackButtonEvent);
-    };
-  }, []);
 
   // useEffect(() => {
   //   const options = [];
@@ -206,7 +188,6 @@ export default function CreateCustomPdfTemplate() {
   const handleClose = () => {
     history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.customPdfTemplate.path });
   };
-  console.log(resources)
   return initialValues && (
     <>
       <DeviceMessage backPath={routes.customPdfTemplate.path} />
