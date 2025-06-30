@@ -1,5 +1,6 @@
 import { CheckCircle, CheckCircleOutline, RadioButtonUnchecked } from '@mui/icons-material';
 import { Box, Checkbox, CircularProgress, Skeleton } from '@mui/material';
+import axios, { CancelToken } from 'axios';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AiFillCheckCircle, AiFillExclamationCircle } from 'react-icons/ai';
 import { VariableSizeList as List, ListChildComponentProps } from 'react-window';
@@ -31,10 +32,10 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   const isInitialLoading = initialLoading || columnDef?.length === 0;
 
   const handleFetchSingleColumnWrapper = useCallback(
-    async (page = 0, pushData = false) => {
+    async (page = 0, pushData = false, cancelToken?: CancelToken) => {
       try {
         setLoading(true);
-        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page });
+        const { count, data } = await fetchSingleColumn({ column, filterQuery, limit, page, cancelToken });
         if (pushData) {
           setData((prev) => [...prev, ...data]);
         } else {
@@ -94,12 +95,17 @@ const SingleColumn = <D, C extends readonly string[]>({ state, getColColors, col
   };
 
   useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
     const fetchInitialData = async () => {
       setInitialLoading(true);
-      await handleFetchSingleColumnWrapper();
+      await handleFetchSingleColumnWrapper(0, false, cancelToken.token);
       setInitialLoading(false);
     };
     fetchInitialData();
+
+    return () => {
+      cancelToken.cancel();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshSignal, filterQuery]);
 
@@ -184,7 +190,7 @@ const Column = <D, C extends readonly string[]>({
   colors: ColumnColor;
   data: D[];
   count: number;
-  handleFetchSingleColumnWrapper: (page: number, pushData: boolean) => void;
+  handleFetchSingleColumnWrapper: (page: number, pushData: boolean, cancelToken?: CancelToken) => void;
   loading: boolean;
   page: number;
   selectedRecordMap: Map<string, boolean>;
