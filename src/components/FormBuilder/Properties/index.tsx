@@ -136,6 +136,12 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         }
         setInitialValues(values);
       }
+      if (values.requiredDependentOn?.length > 0) {
+        values.requiredDependentOnField = values.requiredDependentOn[0].field;
+        values.requiredDependentOnFieldValue = values.requiredDependentOn[0].value;
+        values.requiredDependentOn = values.requiredDependentOn[0].lookupField;
+        values.enableRequiredDependentOn = true;
+      }
       return () => setInitialValues(null);
     }
   }, [fieldData]);
@@ -238,9 +244,19 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.servicesAddOnBasedOnValue = values?.enableServicesAddOnBasedOnValue ? values?.servicesAddOnBasedOnValue || [] : [];
             ele.isDropdown = values.isDropdown || false;
             ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
+            ele.requiredDependentOn =
+              values?.requiredDependentOn && values?.requiredDependentOnField && values?.requiredDependentOnFieldValue
+                ? [
+                    {
+                      lookupField: values?.requiredDependentOn,
+                      field: values?.requiredDependentOnField,
+                      value: values?.requiredDependentOnFieldValue
+                    }
+                  ]
+                : [];
             ele.restrictFutureDate = values.restrictFutureDate || false;
             ele.restrictBackDate = values.restrictBackDate || false;
-            ele.restrictCurrentDateAutoSelect = values?.restrictCurrentDateAutoSelect || false
+            ele.restrictCurrentDateAutoSelect = values?.restrictCurrentDateAutoSelect || false;
             ele.dateValidation = values.dateValidation?.length > 0 ? values?.dateValidation : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
@@ -542,7 +558,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
           const getTabWithErrors = (errors, touched) => {
             if (!errors || !touched) return 0;
             const generalErrors = ['defaultValue', 'tooltipMessage', 'warningTooltipMessage'];
-            if (generalErrors.some(field => errors[field] && touched[field])) {
+            if (generalErrors.some((field) => errors[field] && touched[field])) {
               return 3;
             }
             return 0;
@@ -554,7 +570,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               3: ['defaultValue', 'tooltipMessage', 'warningTooltipMessage']
             };
             const tabErrors = errorFields[tabIndex] || [];
-            return tabErrors.filter(field => errors[field] && touched[field]).length;
+            return tabErrors.filter((field) => errors[field] && touched[field]).length;
           };
 
           useEffect(() => {
@@ -592,11 +608,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           label={
                             <span>
                               General
-                              {getErrorCountForTab(0) > 0 && (
-                                <span style={{ color: 'red', marginLeft: '4px' }}>
-                                  ({getErrorCountForTab(0)})
-                                </span>
-                              )}
+                              {getErrorCountForTab(0) > 0 && <span style={{ color: 'red', marginLeft: '4px' }}>({getErrorCountForTab(0)})</span>}
                             </span>
                           }
                         />
@@ -605,11 +617,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           label={
                             <span>
                               Visibility
-                              {getErrorCountForTab(1) > 0 && (
-                                <span style={{ color: 'red', marginLeft: '4px' }}>
-                                  ({getErrorCountForTab(1)})
-                                </span>
-                              )}
+                              {getErrorCountForTab(1) > 0 && <span style={{ color: 'red', marginLeft: '4px' }}>({getErrorCountForTab(1)})</span>}
                             </span>
                           }
                         />
@@ -619,11 +627,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                             label={
                               <span>
                                 Validation
-                                {getErrorCountForTab(2) > 0 && (
-                                  <span style={{ color: 'red', marginLeft: '4px' }}>
-                                    ({getErrorCountForTab(2)})
-                                  </span>
-                                )}
+                                {getErrorCountForTab(2) > 0 && <span style={{ color: 'red', marginLeft: '4px' }}>({getErrorCountForTab(2)})</span>}
                               </span>
                             }
                           />
@@ -633,11 +637,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                           label={
                             <span>
                               Setting
-                              {getErrorCountForTab(3) > 0 && (
-                                <span style={{ color: 'red', marginLeft: '4px' }}>
-                                  ({getErrorCountForTab(3)})
-                                </span>
-                              )}
+                              {getErrorCountForTab(3) > 0 && <span style={{ color: 'red', marginLeft: '4px' }}>({getErrorCountForTab(3)})</span>}
                             </span>
                           }
                         />
