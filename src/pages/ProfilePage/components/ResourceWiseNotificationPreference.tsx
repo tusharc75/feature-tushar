@@ -4,7 +4,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { UnCamelCase } from 'src/constants/helpers';
+import { cn, UnCamelCase } from 'src/constants/helpers';
 
 const NOTIFY_TYPES = ['portal', 'email'];
 
@@ -41,26 +41,31 @@ export default function ResourceWiseNotificationPreference() {
   const handleUpdate = async () => {
     setIsSaving(true);
     const data = notificationPreferenceData.map(({ resourceLabel, ...rest }) => rest);
-    axiosInstance().post('/notification-setup', data).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+    axiosInstance()
+      .post('/notification-setup', data)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        setIsSaving(false);
+        setIsEdit(false);
+        fetchAll();
+      })
+      .catch((error) => {
+        setIsSaving(false);
+        toastConfig.setToastConfig(error);
       });
-      setIsSaving(false);
-      setIsEdit(false);
-      fetchAll()
-    }).catch((error) => {
-      setIsSaving(false);
-      toastConfig.setToastConfig(error);
-    })
   };
 
   const getSelectAllState = (notifyType) => {
-    const all = notificationPreferenceData.length > 0
-      && notificationPreferenceData.every((element) => Object.keys(element?.actions).every((key) => element?.actions[key][notifyType]));
-    const none = notificationPreferenceData.length > 0
-      && notificationPreferenceData.every((element) => Object.keys(element?.actions).every((key) => !element?.actions[key][notifyType]));
+    const all =
+      notificationPreferenceData.length > 0 &&
+      notificationPreferenceData.every((element) => Object.keys(element?.actions).every((key) => element?.actions[key][notifyType]));
+    const none =
+      notificationPreferenceData.length > 0 &&
+      notificationPreferenceData.every((element) => Object.keys(element?.actions).every((key) => !element?.actions[key][notifyType]));
     return {
       checked: all,
       indeterminate: !all && !none
@@ -68,39 +73,39 @@ export default function ResourceWiseNotificationPreference() {
   };
 
   const handleSelectAll = (notifyType, checked) => {
-    const temp = [...notificationPreferenceData]
+    const temp = [...notificationPreferenceData];
     temp?.forEach((element) => {
       Object.keys(element?.actions)?.forEach((key) => {
         element.actions[key][notifyType] = checked;
-      })
-    })
-    setNotificationPreferenceData(temp)
+      });
+    });
+    setNotificationPreferenceData(temp);
   };
 
   const handleParentCheckbox = (resource, notifyType, checked) => {
-    const temp = [...notificationPreferenceData]
+    const temp = [...notificationPreferenceData];
     temp?.forEach((element) => {
       if (element.resource === resource) {
         Object.keys(element?.actions)?.forEach((key) => {
           element.actions[key][notifyType] = checked;
-        })
+        });
       }
-    })
-    setNotificationPreferenceData(temp)
+    });
+    setNotificationPreferenceData(temp);
   };
 
   const handleCheckbox = (resource, action, notifyType, checked) => {
-    const temp = [...notificationPreferenceData]
+    const temp = [...notificationPreferenceData];
     temp?.forEach((element) => {
       if (element.resource === resource) {
         Object.keys(element?.actions)?.forEach((key) => {
           if (key === action) {
             element.actions[key][notifyType] = checked;
           }
-        })
+        });
       }
-    })
-    setNotificationPreferenceData(temp)
+    });
+    setNotificationPreferenceData(temp);
   };
 
   const getParentCheckboxState = (element, notifyType) => {
@@ -118,37 +123,38 @@ export default function ResourceWiseNotificationPreference() {
   };
 
   return (
-    <Box className="mt-6">
+    <Box className="mt-2">
       <Box mb={1} display="flex" justifyContent="flex-end" gap={1}>
         {isEdit ? (
-          <ThemeButton
-            onClick={handleUpdate}
-            disabled={isSaving || isLoading}
-            isLoading={isSaving}
-            buttonType='theme'
-          >
+          <ThemeButton onClick={handleUpdate} disabled={isSaving || isLoading} isLoading={isSaving} buttonType="theme">
             {isSaving ? 'Updating...' : 'Update'}
           </ThemeButton>
         ) : (
-          <ThemeButton onClick={handleEdit} buttonType='theme' disabled={isLoading}>
+          <ThemeButton onClick={handleEdit} buttonType="theme" disabled={isLoading}>
             Edit
           </ThemeButton>
         )}
       </Box>
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={(props) => <div {...props} className={cn('min-h-[300px] rounded-md border', props.className)} />}
+        style={{ maxHeight: 'calc(100vh - 300px)' }}
+      >
         <Table
           sx={{
             '& .MuiTableCell-root': { py: 0.5, px: 1 },
             '& .MuiTableRow-root': { height: 32 }
           }}
+          stickyHeader
         >
           <TableHead>
             <TableRow>
-              <TableCell style={{ paddingLeft: 14 }} className='h-12'><strong>Resource</strong></TableCell>
+              <TableCell style={{ paddingLeft: 14 }} className="h-12">
+                <strong>Resource</strong>
+              </TableCell>
               {NOTIFY_TYPES.map((notifyType) => {
                 const { checked, indeterminate } = getSelectAllState(notifyType);
                 return (
-                  <TableCell align="center" key={notifyType}>
+                  <TableCell key={notifyType}>
                     <Checkbox
                       checked={checked}
                       indeterminate={indeterminate}
@@ -163,7 +169,13 @@ export default function ResourceWiseNotificationPreference() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {isLoading ? (<TableRow><TableCell style={{ paddingLeft: 14 }} colSpan={4}>Loading...</TableCell></TableRow>) : (
+            {isLoading ? (
+              <TableRow>
+                <TableCell style={{ paddingLeft: 14 }} colSpan={4}>
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : (
               notificationPreferenceData?.map((element) => (
                 <React.Fragment key={element.resource}>
                   <TableRow>
@@ -178,7 +190,7 @@ export default function ResourceWiseNotificationPreference() {
                     {NOTIFY_TYPES.map((notifyType) => {
                       const { checked, indeterminate } = getParentCheckboxState(element, notifyType);
                       return (
-                        <TableCell align="center" key={notifyType}>
+                        <TableCell key={notifyType}>
                           <Checkbox
                             checked={checked}
                             indeterminate={indeterminate}
@@ -195,20 +207,17 @@ export default function ResourceWiseNotificationPreference() {
                       <TableRow key={element.resource + '-' + key}>
                         <TableCell style={{ paddingLeft: 50 }}>{UnCamelCase(key)}</TableCell>
                         {NOTIFY_TYPES.map((notifyType) => (
-                          <TableCell align="center" key={notifyType}>
+                          <TableCell key={notifyType}>
                             <Checkbox
                               checked={!!element?.actions[key][notifyType]}
                               disabled={!isEdit || isLoading}
-                              onChange={(e) =>
-                                handleCheckbox(element.resource, key, notifyType, e.target.checked)
-                              }
+                              onChange={(e) => handleCheckbox(element.resource, key, notifyType, e.target.checked)}
                             />
                           </TableCell>
                         ))}
                         <TableCell />
                       </TableRow>
-                    ))
-                  }
+                    ))}
                 </React.Fragment>
               ))
             )}
