@@ -179,6 +179,6 @@ export const repairOrderMessage = {
   workOrderComplete: 'Complete work order to proceed',
   deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
   assignAssets: 'Assign Assets to proceed',
-  addProductAndAssetsInPackage :' Add Product and Assign Asset in Pakage to Proceed',
+  addProductAndAssetsInPackage :'Add Product and Assign Asset in Package to Proceed',
 };
 
