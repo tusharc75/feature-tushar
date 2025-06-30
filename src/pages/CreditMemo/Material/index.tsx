@@ -553,6 +553,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         fetchData();
       })
       .catch((error) => {
+        console.log("error ...", error);
         toastConfig.setToastConfig(error);
       });
   };
@@ -585,14 +586,16 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          color="primary"
-          onClick={() => {
-            handleAddInvoiceLineItems();
-          }}
-        >
-          {`Add Invoice Line Items`}
-        </MenuItem>
+        {creditMemoData?.invoice && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              handleAddInvoiceLineItems();
+            }}
+          >
+            {`Add Invoice Line Items`}
+          </MenuItem>
+        )}
         {permissions?.product?.isRead && (
           <MenuItem
             color="primary"
