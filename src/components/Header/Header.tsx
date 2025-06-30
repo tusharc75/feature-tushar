@@ -4,7 +4,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SyncIcon from '@mui/icons-material/Sync';
 import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@mui/material';
 import { isEmpty } from 'lodash';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
@@ -33,6 +33,7 @@ import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
 import { useSocket } from 'src/hooks/useSocket';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -235,6 +236,14 @@ const Header = () => {
         });
     }
   };
+
+  const quickBookLogin = useCallback(async () => {
+    const res = await axiosInstance().post('/integration/quick-books/login', {
+      frontendUrl: `${window.location.origin}`,
+      backendUrl: backendApi
+    });
+    window.location = res.data.loginUrl;
+  }, []);
 
   function handleListKeyDown(event) {
     if (event.key === 'Tab') {
@@ -509,6 +518,14 @@ const Header = () => {
                   </HtmlTooltip>
                 </ButtonBase>
               )}
+            </Box>
+          )}
+
+          {!user?.isIntuitLogin && user?.user?.brandPolicy?.quickBooksIntegration && (
+            <Box>
+              <ThemeButton id="collaborator-button" onClick={quickBookLogin} buttonType="theme">
+                Connect Quick Books
+              </ThemeButton>
             </Box>
           )}
 
