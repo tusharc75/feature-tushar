@@ -1426,7 +1426,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         schema[input.fieldName] = string().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
           then: string().required(`${input.fieldLabel} is required`).nullable(),
-          otherwise: dateValidation
+          otherwise: string().nullable()
         });
       } else {
         schema[input.fieldName] = dateValidation;
