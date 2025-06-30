@@ -1964,7 +1964,6 @@ const LoadingTicket = ({
           onSuccess={handleSubStatusChange}
           submitting={submitting}
           minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
-        // minDate={null}
         />
       )}
       {openDeliveryTicketDialog && (
