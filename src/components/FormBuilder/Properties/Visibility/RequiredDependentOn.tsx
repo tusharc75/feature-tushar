@@ -25,10 +25,10 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
   };
 
   useEffect(() => {
-    if (values['requiredDependentOn']) {
+    if (values?.['requiredDependentOn']) {
       getRequiredDependentOnFields();
     }
-  }, [values['requiredDependentOn']]);
+  }, [values?.['requiredDependentOn']]);
 
   return (
     <Box>
@@ -37,10 +37,12 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
           control={
             <Checkbox
               name="enableRequiredDependentOn"
-              checked={values['enableRequiredDependentOn']}
+              checked={values?.['enableRequiredDependentOn']}
               onChange={(e) => {
                 setFieldValue('enableRequiredDependentOn', e.target.checked);
                 setFieldValue('requiredDependentOn', []);
+                setFieldValue('requiredDependentOnField', '');
+                setFieldValue('requiredDependentOnFieldValue', '');
               }}
               color="primary"
             />
@@ -72,6 +74,8 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
                   label="Required Dependent On"
                   placeholder="Required Dependent On"
                   size="small"
+                  error={touched['requiredDependentOn'] && Boolean(errors['requiredDependentOn'])}
+                  helperText={touched['requiredDependentOn'] && errors['requiredDependentOn']}
                 />
               )}
             />
@@ -86,9 +90,9 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
                     isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
                     value={
                       requiredDependentOnFields &&
-                      requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField']).length
+                        requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField']).length
                         ? requiredDependentOnFields &&
-                          requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField'])[0]
+                        requiredDependentOnFields.filter((data) => data?.fieldName === values['requiredDependentOnField'])[0]
                         : ''
                     }
                     onChange={(e, val) => {
@@ -102,6 +106,8 @@ const RequiredDependentOn = ({ values, setFieldValue, touched, errors, fields })
                         variant="outlined"
                         label="Required Dependent On Field"
                         placeholder="Required Dependent On Field"
+                        error={touched['requiredDependentOnField'] && Boolean(errors['requiredDependentOnField'])}
+                        helperText={touched['requiredDependentOnField'] && errors['requiredDependentOnField']}
                         slotProps={{
                           input: {
                             ...params.InputProps,

@@ -505,6 +505,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
 
+    if (values?.enableRequiredDependentOn) {
+      if (!values?.requiredDependentOn) {
+        errors['requiredDependentOn'] = 'Please select Required DependentOn';
+      }
+      if (!values?.requiredDependentOnField) {
+        errors['requiredDependentOnField'] = 'Please select Required Dependent On Field';
+      }
+      if (!values?.requiredDependentOnFieldValue) {
+        errors['requiredDependentOnFieldValue'] =  `Required Dependent On Field value can't be empty`;
+      }
+    }
+
     return errors;
   }
 
@@ -558,8 +570,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
           const getTabWithErrors = (errors, touched) => {
             if (!errors || !touched) return 0;
             const generalErrors = ['defaultValue', 'tooltipMessage', 'warningTooltipMessage'];
+            const requiredDependentOnErrors = ['requiredDependentOn', 'requiredDependentOnField', 'requiredDependentOnFieldValue'];
             if (generalErrors.some((field) => errors[field] && touched[field])) {
               return 3;
+            } else if (requiredDependentOnErrors.some((field) => errors[field] && touched[field])) {
+              return 1;
             }
             return 0;
           };
