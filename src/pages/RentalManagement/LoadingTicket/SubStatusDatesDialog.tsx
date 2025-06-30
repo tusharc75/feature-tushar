@@ -2,18 +2,22 @@ import { Remove } from "@mui/icons-material";
 import { Autocomplete, Dialog, IconButton, TextField } from "@mui/material";
 import dayjs from "dayjs";
 import { FieldArray, Form, Formik } from "formik";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
+import axiosInstance from "src/axios/axiosInstance";
 import CustomDatePicker from "src/components/CustomDatePicker";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { ThemeButton } from "src/components/Helpers/Buttons";
-import { CustomDialogTransition, dateFormat } from "src/constants/helpers";
+import { CustomDialogTransition, dateFormat, rentalManagement } from "src/constants/helpers";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 
-const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, submitting, minDate }) => {
+const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, submitting, rentalId, assets }) => {
+
+  const toastConfig = useContext(CustomToastContext);
 
   const {
     state: { resources }
@@ -21,6 +25,7 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [dates, setDates] = useState([{ startDate: null, endDate: null, subStatus: subStatus }])
+  const [minDate, setMinDate] = useState(null)
 
   const addRemove = (values, type, index) => {
     let dates = [...values];
@@ -35,6 +40,21 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
     }
     setDates([...dates]);
   };
+
+  useEffect(() => {
+    fetchLogs()
+  }, [])
+
+  const fetchLogs = () => {
+    axiosInstance()
+      .get(`${rentalManagement.api}/${rentalId}/inventory/latest-logs?assets=${JSON.stringify(assets)}`)
+      .then(({ data: { data } }) => {
+        setMinDate(data?.endDate)
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const handleSubmit = (values) => {
     onSuccess(values?.dates)
