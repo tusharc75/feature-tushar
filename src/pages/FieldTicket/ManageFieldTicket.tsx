@@ -139,10 +139,6 @@ const ManageFieldTicket = ({
                 e.disableOnEdit = true;
                 e.isUneditable = true;
               }
-              if (['currency']?.includes(e.fieldName) && !mainData?.canDelete) {
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
             });
           }
         }
