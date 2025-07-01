@@ -25,7 +25,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { useData } from 'src/StateProvider/Provider';
 
-const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField }) => {
+const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField, productList }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -518,6 +518,40 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                             errors={errors}
                           />
                         </div>
+                        {values.materialType === 'service' && (
+                          <Grid container spacing={3} className="mt-2">
+                            <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                              <Autocomplete
+                                multiple
+                                id="products-autocomplete"
+                                disableCloseOnSelect={true}
+                                options={productList || []}
+                                getOptionLabel={(option) => option.optionLabel || ''}
+                                isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                                value={productList?.filter(p => values.products?.includes(p.optionValue)) || []}
+                                onChange={(e, val) => {
+                                  setFieldValue('products', val ? val.map(v => v.optionValue) : []);
+                                }}
+                                renderTags={(value: any[], getTagProps) =>
+                                  value.map((option: any, index: number) => (
+                                    <Chip variant="outlined" label={option.optionLabel} {...getTagProps({ index })} />
+                                  ))
+                                }
+                                disabled={!allowedToEdit}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    size="small"
+                                    name="products"
+                                    variant="outlined"
+                                    label="Products"
+                                  />
+                                )}
+                              />
+                            </Grid>
+                          </Grid>
+                        )}
                         <div className='mt-2 border p-2'>
                           <FormControlLabel
                             control={

@@ -46,6 +46,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [resourceData, setResourceData] = useState(null);
   const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
   const [assetStatusField, setAssetStatusField] = useState(null)
+  const [productList, setProductList] = useState([]);
 
   useEffect(() => {
     fetchCondition();
@@ -122,6 +123,18 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
         }
       });
   }, [])
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.product}`)
+      .then(({ data: { data } }) => {
+        setProductList(data.Product || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+    , []);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -635,6 +648,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             fetchCondition();
           }}
           assetStatusField={assetStatusField}
+          productList={productList}
         />
       )}
       {showDeleteConfirmBox && (
