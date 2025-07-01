@@ -15,7 +15,7 @@ export const getResourceField = async (resource, view = false) => {
     data: { data }
   } = await axiosInstance().get(`/field?resource=${resource}&view=${view}`);
   return data?.map((e) => {
-    return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel, lookup: e.fieldData.lookup };
+    return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel, lookup: e.fieldData.lookup, type: e.fieldData.type };
   });
 };
 
@@ -66,3 +66,8 @@ export const PRE_FILTER_CHECKBOX_OPTION = {
   yes: 'YES',
   no: 'NO'
 }
+
+export const checkBoxOptions = [
+  { optionLabel: 'YES', optionValue: 'yes' },
+  { optionLabel: 'NO', optionValue: 'no' }
+];

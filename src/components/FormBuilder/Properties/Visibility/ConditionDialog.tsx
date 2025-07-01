@@ -6,7 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, getUniqueCurrencies, sidebarResource } from 'src/constants/helpers';
-import { getLookupOption } from '../../helper';
+import { checkBoxOptions, getLookupOption } from '../../helper';
 import { isEmpty, uniqBy } from 'lodash';
 import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
@@ -106,10 +106,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
         setOptions(fields?.find((f) => f?.fieldName === selectedField?.fieldName)?.option || []);
       }
     } else if (selectedField?.type === 'checkBox' || selectedField?.type === 'switch') {
-      setOptions([
-        { optionLabel: 'YES', optionValue: 'yes' },
-        { optionLabel: 'NO', optionValue: 'no' }
-      ]);
+      setOptions(checkBoxOptions);
     } else if (selectedField?.type === 'currency') {
       const sortedArr = getUniqueCurrencies().sort((a, b) =>
         a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0

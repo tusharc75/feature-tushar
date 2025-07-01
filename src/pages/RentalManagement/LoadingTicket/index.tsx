@@ -71,6 +71,7 @@ import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
+import dayjs from 'dayjs';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -1703,6 +1704,7 @@ const LoadingTicket = ({
           }))
         })
       .then(({ data }) => {
+        setSubStatusToUpdate({ open: false, status: null });
         fetchRecords();
         setSubmitting(false)
         toastConfig.setToastConfig({
@@ -1710,7 +1712,6 @@ const LoadingTicket = ({
           type: 'success',
           message: data.message
         });
-        setSubStatusToUpdate({ open: false, status: null });
       })
       .catch((error) => {
         setSubmitting(false)
@@ -1962,6 +1963,7 @@ const LoadingTicket = ({
           options={assetPolicyData?.policy?.inUseSubStatus}
           onSuccess={handleSubStatusChange}
           submitting={submitting}
+          minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
         />
       )}
       {openDeliveryTicketDialog && (

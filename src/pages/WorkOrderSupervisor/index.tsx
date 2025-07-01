@@ -187,12 +187,14 @@ const WorkOrderSupervisor = () => {
       column,
       page = 0,
       filterQuery = '',
-      limit
+      limit,
+      cancelToken
     }: {
       column: string;
       page?: number;
       filterQuery?: string;
       limit: number;
+      cancelToken?: CancelToken;
     }): Promise<{ data: any[]; count: number }> => {
       let api = `${workOrderSupervisor.api}/work-order-service?page=${page}&status=${column}&limit=${limit}&resource=${selectedResource?.value}${filterQuery}`;
 
@@ -206,7 +208,7 @@ const WorkOrderSupervisor = () => {
         }
       }
       try {
-        const response = await axiosInstance().get(api);
+        const response = await axiosInstance().get(api, { cancelToken });
         if (response.status !== 200) {
           throw new Error('Failed to fetch data');
         }

@@ -8,6 +8,7 @@ import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Entity } from 'src/components/FormBuilder/AddField/entity';
 import { makeStyles } from '@mui/styles';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import RequiredDependentOn from 'src/components/FormBuilder/Properties/Visibility/RequiredDependentOn';
 
 const useStyles = makeStyles({
   group: {
@@ -244,6 +245,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude, touched, e
           Add Group
         </ThemeButton>
       </Box>
+      <RequiredDependentOn values={values} setFieldValue={setFieldValue} touched={touched} errors={errors} fields={fields} />
       {open?.open && (
         <ConditionDialog
           onClose={() => {

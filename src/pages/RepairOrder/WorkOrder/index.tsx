@@ -333,8 +333,13 @@ const WorkOrder = ({
         }
       },
       {
+        accessor: 'assetStatus',
+        Header: 'Asset Status',
+        Cell: ({ row }) => (row.original['assetStatus'] ? <p> {row.original.assetStatus}</p> : <NoDataCell />)
+      },
+      {
         accessor: 'status',
-        Header: 'Status',
+        Header: 'Work Order Status',
         Cell: ({ row }) => (row.original['status'] ? <p> {row.original.status}</p> : <NoDataCell />)
       },
       {
@@ -699,6 +704,7 @@ const WorkOrder = ({
                 : '';
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
+      parent.assetStatus = parent?.serializedAssetDetail?.status || '';
       parent.qty = parent.qty;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
       parent.status = parent?.workOrder?.status;
@@ -787,6 +793,7 @@ const WorkOrder = ({
               : '';
       _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
       _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
+      _subRow.assetStatus = _subRow?.serializedAssetDetail?.status || '';
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.preWork = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.preWork : false;
       _subRow.workOrder = parent?.workOrder;
