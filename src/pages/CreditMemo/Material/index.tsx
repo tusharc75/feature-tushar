@@ -412,6 +412,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       if (!showNext) {
         const { data } = await axiosInstance().put(`${routes.creditMemo.path}/material/${creditMemoData._id}`, { material: rows });
         fetchData();
+        fetchCreditMemoData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
