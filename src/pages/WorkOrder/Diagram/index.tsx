@@ -219,8 +219,18 @@ const Diagram = ({
   };
 
   const customhandleAdd = (request, setLoading) => {
-    const serviceId = selectedService ? selectedService?.uniqueId : uniqueId;
+    let serviceId = selectedService ? selectedService?.uniqueId : uniqueId;
+    let tempStepId = stepId
     const serviceName = selectedService ? selectedService?.optionLabel : referenceLabel;
+    if (attachemntDialog?.isClone) {
+      const cloneRelatedTo = attachemntDialog?.file?.relatedTo?.find((e) => e.type === ACTIVITY_RESOURCE.workOrder)
+      if (cloneRelatedTo?.uniqueServiceId) {
+        serviceId = cloneRelatedTo?.uniqueServiceId
+      }
+      if (cloneRelatedTo?.stepId) {
+        tempStepId = cloneRelatedTo?.stepId
+      }
+    }
     const data: any = {
       name: request?.name,
       attachmentType: request?.attachmentType,
@@ -228,7 +238,7 @@ const Diagram = ({
       workOrderId: referenceId,
       serviceName: serviceName,
       ...(serviceId && { uniqueServiceId: serviceId }),
-      ...(stepId && { stepId: stepId })
+      ...(tempStepId && { stepId: tempStepId })
     };
     axiosInstance()
       .post(`${workOrder.api}/step/attachment`, data)
@@ -398,9 +408,9 @@ const Diagram = ({
                       selectedFiles?.length === 0 ||
                       selectedFiles?.find((e) =>
                         !isEmpty(e?.deleteRequest) ||
-                        (!checkSuperAdminAccess(user, sidebarResource.attachment) &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?.user?._id) &&
-                          !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))
+                          (!checkSuperAdminAccess(user, sidebarResource.attachment) &&
+                            !selectedFiles?.every((e) => e?.createdBy?.user?._id === user?.user?._id) &&
+                            !selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))
                           ? true
                           : false
                       )
@@ -417,7 +427,7 @@ const Diagram = ({
                           element={MenuItem}
                         >
                           {!checkSuperAdminAccess(user, sidebarResource.attachment) &&
-                          selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id)
+                            selectedFiles?.every((e) => e?.createdBy?.user?._id !== user?.user?._id)
                             ? `Delete Request`
                             : `Delete`}
                         </AttachmentDeleteButton>
@@ -442,11 +452,10 @@ const Diagram = ({
                   return (
                     <div key={file._id} className="rounded-md border shadow-[0px_17.7266px_35.4532px_rgba(0,_0,_0,_0.03)]">
                       <div
-                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${
-                          expended[file?._id]
-                            ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
-                            : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
-                        }`}
+                        className={`head relative isolate flex w-full cursor-pointer items-center justify-between p-[8px_15px] ${expended[file?._id]
+                          ? 'rounded-[4px_4px_0_0] bg-[var(--accordion-expanded-summary-bg,_#f1f5ff)]'
+                          : 'rounded-[4px] bg-[var(--accordion-summary-bg,#fff)]'
+                          }`}
                       >
                         <button
                           title={file?.name}
@@ -604,7 +613,7 @@ const Diagram = ({
             showManimizeMaximize={true}
             fetchData={fetchData}
             attachmentType={attachmentType}
-            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && !attachemntDialog.file && !showMaterialFilter ? customhandleAdd : null}
+            customhandleAdd={resource === ACTIVITY_RESOURCE.workOrder && (attachemntDialog.isClone || !attachemntDialog.file) && !showMaterialFilter ? customhandleAdd : null}
           />
         </Dialog>
       )}
