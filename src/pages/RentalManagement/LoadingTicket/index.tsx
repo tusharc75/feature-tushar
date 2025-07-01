@@ -1700,8 +1700,8 @@ const LoadingTicket = ({
           assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
             _id: a?._id,
             uniqueId: a?.uniqueId,
-            dates: dates
-          }))
+          })),
+          dates: dates
         })
       .then(({ data }) => {
         setSubStatusToUpdate({ open: false, status: null });
@@ -1963,7 +1963,9 @@ const LoadingTicket = ({
           options={assetPolicyData?.policy?.inUseSubStatus}
           onSuccess={handleSubStatusChange}
           submitting={submitting}
-          minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
+          rentalId={rentalManagementData?._id}
+          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
+        // minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
         />
       )}
       {openDeliveryTicketDialog && (
