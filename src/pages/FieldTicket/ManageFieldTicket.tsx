@@ -139,9 +139,19 @@ const ManageFieldTicket = ({
                 e.disableOnEdit = true;
                 e.isUneditable = true;
               }
+              if (['currency']?.includes(e.fieldName) && !mainData?.canDelete) {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
             });
           }
         }
+        fields?.forEach((e) => {
+          if (['currency']?.includes(e.fieldName) && !mainData?.canDelete) {
+            e.disableOnEdit = true;
+            e.isUneditable = true;
+          }
+        });
         tempData?.service && fetchServiceSteps(tempData?.service?.optionValue);
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
@@ -317,13 +327,12 @@ const ManageFieldTicket = ({
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
-                    : `Create ${resources?.fieldTicket?.titleSingular}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.fieldTicketNumber ? `(${initialData.values?.fieldTicketNumber})` : ''}`
+                  : `Create ${resources?.fieldTicket?.titleSingular}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
