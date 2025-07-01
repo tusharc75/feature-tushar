@@ -49,7 +49,8 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
     axiosInstance()
       .get(`${rentalManagement.api}/${rentalId}/inventory/latest-logs?assets=${JSON.stringify(assets)}`)
       .then(({ data: { data } }) => {
-        setMinDate(data?.endDate)
+        const newDate = dayjs.utc(data?.endDate).add(1, 'day');
+        setMinDate(newDate)
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -106,7 +107,7 @@ const SubStatusDatesDialog = ({ handleClose, subStatus, options, onSuccess, subm
           const currentStart = dayjs.tz(new Date(d.startDate));
           const prevEnd = dayjs.tz(new Date(values?.dates[i - 1].endDate));
 
-          if (currentStart.isBefore(prevEnd)) {
+          if (currentStart.isSameOrBefore(prevEnd)) {
             if (!errors?.dates) {
               errors['dates'] = [];
             }

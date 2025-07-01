@@ -64,7 +64,7 @@ import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCe
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ExpandMore } from '@mui/icons-material';
+import { ExpandMore, Visibility } from '@mui/icons-material';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { flattenArray } from 'src/constants/columns';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
@@ -72,6 +72,7 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import dayjs from 'dayjs';
+import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -143,6 +144,7 @@ const LoadingTicket = ({
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [submitting, setSubmitting] = useState(false)
+  const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
 
   const { generateColumns } = useColumns();
 
@@ -596,32 +598,40 @@ const LoadingTicket = ({
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
-        user?.user?.brandPolicy?.assetDeliveredStatus &&
-          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-            row?.original?.rentalAssetStatus
-          ) &&
-          row?.original?.type === MATERIAL_TYPE.serializedAsset ? (
-          <HtmlTooltip title={`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}>
+        <>
+          {user?.user?.brandPolicy?.assetDeliveredStatus &&
+            [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(row?.original?.rentalAssetStatus) &&
+            row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+              <HtmlTooltip title={`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    setOpenDateDialog({
+                      open: true,
+                      type: 'changeDate',
+                      status: row?.original?.detail,
+                      prevStatus: '',
+                      assets: [row?.original?._id],
+                      loading: false
+                    });
+                  }}
+                >
+                  <Edit fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          <HtmlTooltip title={'View Logs'}>
             <IconButton
               size="small"
-              color="primary"
               onClick={() => {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeDate',
-                  status: row?.original?.detail,
-                  prevStatus: '',
-                  assets: [row?.original?._id],
-                  loading: false
-                });
+                setSubStatusLog({ open: true, data: row?.original })
               }}
             >
-              <Edit fontSize="small" />
+              <Visibility fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-        ) : (
-          ''
-        )
+        </>
     });
     setColumns(column);
     setCheckMTRValidation(assetFields?.some((e) => e?.fieldName === 'mtrAttached'));
@@ -1965,7 +1975,16 @@ const LoadingTicket = ({
           submitting={submitting}
           rentalId={rentalManagementData?._id}
           assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
-        // minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
+        />
+      )}
+      {subStatusLog.open && (
+        <SubStatusLog
+          onClose={() => {
+            setSubStatusLog({ open: false, data: null })
+          }}
+          asset={{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }}
+          rentalId={rentalManagementData?._id}
+          title={subStatusLog.data?.assetNumber}
         />
       )}
       {openDeliveryTicketDialog && (
