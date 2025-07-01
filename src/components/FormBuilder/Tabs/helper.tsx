@@ -295,6 +295,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'subStatusDateWiseCapture',
+        fieldLabel: 'Sub Status Date Wise Capture',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'loadingReceivingDefaultView',
         fieldLabel: 'Loading Receiving Default View',
         type: 'dropDown',
