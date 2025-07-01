@@ -343,7 +343,8 @@ const Consumables = ({
       }
     ];
 
-    setColumns([...column, ...extracolumns]);
+    setColumns(null);
+    setTimeout(() => setColumns([...column, ...extracolumns]), 0);
   };
 
   const fetchData = async () => {

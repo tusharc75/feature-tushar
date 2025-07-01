@@ -377,7 +377,8 @@ const Material = ({
         );
       }
     });
-    setColumns(column);
+    setColumns(null);
+    setTimeout(() => setColumns(column), 0);
   };
 
   const fetchMaterial = async () => {
