@@ -118,8 +118,7 @@ const LoadingTicket = ({
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorElSubStatus, setAnchorElSubStatus] = useState(null);
-  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: '' });
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
@@ -621,16 +620,18 @@ const LoadingTicket = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-          <HtmlTooltip title={'View Logs'}>
-            <IconButton
-              size="small"
-              onClick={() => {
-                setSubStatusLog({ open: true, data: row?.original })
-              }}
-            >
-              <Visibility fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
+          {rentalPolicyData?.subStatusDateWiseCapture && (
+            <HtmlTooltip title={'View Logs'}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setSubStatusLog({ open: true, data: row?.original })
+                }}
+              >
+                <Visibility fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
         </>
     });
     setColumns(column);
@@ -1556,6 +1557,10 @@ const LoadingTicket = ({
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
           }
         }
+      } else if (action === rentalManagementActions.changeSubStatus) {
+        if (e?.rentalAssetStatus != RENTAL_INTERNAL_ASSET_STATUS.inUse || e?.status != ASSET_STATUS.inUse) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyInUseAssetsChangeSubStatus });
+        }
       }
     });
     if (errorMessages?.length) {
@@ -1595,18 +1600,6 @@ const LoadingTicket = ({
             endIcon={<ExpandMore />}
           >
             Change Status
-          </ThemeButton>
-        )}
-        {!isOffline && allowedToEdit && assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
-          <ThemeButton
-            disabled={
-              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
-              !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((f) => f?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse && f?.status === ASSET_STATUS.inUse)
-            }
-            onClick={(event) => setAnchorElSubStatus(event.currentTarget)}
-            endIcon={<ExpandMore />}
-          >
-            Change Sub Status
           </ThemeButton>
         )}
         {(allowedToEdit || isProcessor) && (
@@ -1714,7 +1707,7 @@ const LoadingTicket = ({
           dates: dates
         })
       .then(({ data }) => {
-        setSubStatusToUpdate({ open: false, status: null });
+        setSubStatusToUpdate(false);
         fetchRecords();
         setSubmitting(false)
         toastConfig.setToastConfig({
@@ -1753,7 +1746,9 @@ const LoadingTicket = ({
               assetPolicyData,
               setOpenAssetDataDialog,
               resources,
-              getFilterSelectedRecords
+              getFilterSelectedRecords,
+              rentalPolicyData,
+              setSubStatusToUpdate
             }}
           />
         }
@@ -1813,34 +1808,6 @@ const LoadingTicket = ({
         })}
       </Menu>
 
-      <Menu
-        id="sub-status-menu"
-        anchorEl={anchorElSubStatus}
-        keepMounted
-        open={Boolean(anchorElSubStatus)}
-        onClose={() => setAnchorElSubStatus(null)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-      >
-        {assetPolicyData?.policy?.inUseSubStatus?.map(o => {
-          return (
-            <MenuItem
-              onClick={() => {
-                setAnchorElSubStatus(null);
-                setSubStatusToUpdate({ open: true, status: o })
-              }}
-            >
-              {o}
-            </MenuItem>
-          )
-        })}
-      </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.loading}
@@ -1964,17 +1931,17 @@ const LoadingTicket = ({
           </CustomDialogFooter>
         </Dialog>
       )}
-      {subStatusToUpdate.open && (
+      {subStatusToUpdate && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate({ open: false, status: null })
+            setSubStatusToUpdate(false)
           }}
-          subStatus={subStatusToUpdate.status}
           options={assetPolicyData?.policy?.inUseSubStatus}
           onSuccess={handleSubStatusChange}
           submitting={submitting}
           rentalId={rentalManagementData?._id}
           assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
+          showDates={rentalPolicyData?.subStatusDateWiseCapture}
         />
       )}
       {subStatusLog.open && (
@@ -2144,7 +2111,9 @@ const ActionButtonMenuItems = ({
   assetPolicyData,
   setOpenAssetDataDialog,
   resources,
-  getFilterSelectedRecords
+  getFilterSelectedRecords,
+  rentalPolicyData,
+  setSubStatusToUpdate
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0) {
@@ -2390,6 +2359,19 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
+      {rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+        <MenuItem
+          onClick={() => {
+            if (!validateAction(rentalManagementActions.changeSubStatus)) {
+              setSubStatusToUpdate(true)
+            }
+          }}
+          id={'change-sub-status-menu-item'}
+          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
+        >
+          Change Sub Status
+        </MenuItem>
+      )}
     </>
   );
 };
