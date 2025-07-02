@@ -6,9 +6,8 @@ export class Inspector {
   started: boolean;
   isValid: boolean;
   selector: string;
-  private boundMousedown: (e: MouseEvent) => void = () => {};
-  private boundMouseMove: (e: MouseEvent) => void = () => {};
   private boundClick: (e: MouseEvent) => void = () => {};
+  private boundMouseMove: (e: MouseEvent) => void = () => {};
   showOverlay: ShowOverlay;
   constructor({ onElementClick }: { onElementClick: (data: { selector: string; url: string }) => void }) {
     this.onElementClick = onElementClick;
@@ -25,37 +24,26 @@ export class Inspector {
     this.isValid = this.showOverlay.animate({ selector: this.selector, target: currentElement });
   }
 
-  private handleMouseDown(e: MouseEvent) {
+  private handleClick(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    const blockClick = (clickEvent: MouseEvent) => {
-      clickEvent.preventDefault();
-      clickEvent.stopPropagation();
-      window.removeEventListener('click', blockClick, true);
-    };
-    window.addEventListener('click', blockClick, true);
-
     if (!this.showOverlay.isValid || !this.selector) return;
     const url = replaceAllMongoIds();
     this.onElementClick({ selector: this.selector, url });
     this.stop();
   }
 
-  private handleMouseClick(e: MouseEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
   private addListeners() {
-    this.boundMouseMove = this.handleMouseMove;
-    this.boundMousedown = this.handleMouseDown;
-    this.boundClick = this.handleMouseClick;
-    window?.document.addEventListener('mousemove', this.boundMouseMove.bind(this));
-    window?.document.addEventListener('mousedown', this.boundMousedown.bind(this));
+    this.boundMouseMove = this.handleMouseMove.bind(this);
+    this.boundClick = this.handleClick.bind(this);
+    console.log('attached updated new');
+    window?.document.addEventListener('mousemove', this.boundMouseMove);
+    window?.document.addEventListener('click', this.boundClick, true);
   }
   private removeListeners() {
-    window?.document.removeEventListener('mousemove', this.boundMouseMove.bind(this));
-    window?.document.removeEventListener('mousedown', this.boundMousedown.bind(this));
+    console.log('cleared updated new');
+    window?.document.removeEventListener('mousemove', this.boundMouseMove);
+    window?.document.removeEventListener('click', this.boundClick, true);
   }
 
   private getSelector(element: HTMLElement) {
