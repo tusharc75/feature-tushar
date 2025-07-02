@@ -15,12 +15,16 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { isEqual } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import PdfEditor from './PdfEditor.tsx';
+import { CUSTOM_A4_PDF } from '@pdfme/common';
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
   owner: string().required('Owner is required'),
   type: string().required('Type is required')
 });
+  const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
+
 
 export default function CreateCustomPdfTemplate() {
   const { id } = useParams();
@@ -39,7 +43,40 @@ export default function CreateCustomPdfTemplate() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   // const [pdfResourceOption, setPdfResourceOption] = useState(null);
+
   const [formValues, setFormValues] = useState(null);
+
+  const [template, setTemplate] = useState<any>(() => {
+    try {
+      const storedTemplate = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      if (storedTemplate) {
+        // Parse as 'any' first to avoid strict type issues with JSON.parse
+        const parsed: any = JSON.parse(storedTemplate);
+        // Basic check to ensure it loosely resembles a Template type
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+          return parsed as any; // Cast to Template if basic structure is there
+        }
+      }
+    } catch (error) {
+      // Handle parsing errors gracefully
+      console.error('Failed to parse template from localStorage:', error);
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY); // Clear potentially corrupted data
+    }
+    // Fallback to initialTemplate prop or default empty template
+    return { schemas: [[]], basePdf: CUSTOM_A4_PDF };
+  });
+  const handleTemplateChange = (tpl: any) => {
+    setTemplate(tpl);
+  };
+
+  useEffect(() => {
+    if (template) {
+      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
+    } else {
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    }
+  }, [template]);
+
 
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -419,6 +456,12 @@ export default function CreateCustomPdfTemplate() {
                       </Grid>
                     </Grid>
                   </Grid>
+                </div>
+                <div className='mt-4'>
+                  <PdfEditor
+                    template={template}
+                    onTemplateChange={handleTemplateChange}
+                  />
                 </div>
               </div>
               {showConfirmDialog ? (

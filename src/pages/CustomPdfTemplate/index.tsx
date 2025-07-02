@@ -28,7 +28,6 @@ const CustomPdfTemplate = () => {
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-  console.log(permissions)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
