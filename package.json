@@ -23,6 +23,8 @@
     "@fullcalendar/interaction": "^6.1.17",
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
+    "@milkdown/crepe": "^7.15.0",
+    "@milkdown/react": "^7.15.0",
     "@mui/icons-material": "^6.3.0",
     "@mui/material": "^6.3.0",
     "@mui/styles": "^6.3.0",

@@ -6,6 +6,7 @@ import Unauthorized from '../pages/Unauthorized';
 import Layout from './Layout';
 import NotFound from 'src/pages/NotFound';
 import UserManual from '../pages/UserManual';
+import UserManualNew from 'src/pages/UserManualNew';
 
 const ProtectedRoute = ({ children, ...rest }) => {
   const {
@@ -41,6 +42,7 @@ const ProtectedRoute = ({ children, ...rest }) => {
         'case',
         'task',
         'user-manual',
+        'user-manual-new',
         'attachment',
         'note',
         'event',
@@ -91,6 +93,9 @@ const ProtectedRoute = ({ children, ...rest }) => {
             </div>
           ) : access && rest?.userManual ? (
             <UserManual />
+          ) 
+          : access && rest?.userManualNew ? (
+            <UserManualNew /> 
           ) : access ? (
             <Layout>{children}</Layout>
           ) : error ? (
