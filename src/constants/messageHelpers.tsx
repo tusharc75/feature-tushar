@@ -40,7 +40,8 @@ export const rentalManagementActions = {
   updateStartDateEndDate: 'Update Start Date/End Date',
   startService: 'Start Service',
   stopService: 'Stop Service',
-  deleteServiceLog: 'Delete Service Log'
+  deleteServiceLog: 'Delete Service Log',
+  changeSubStatus: 'Change Sub Status'
 };
 
 export const rentalManagementMessage = {
@@ -100,7 +101,8 @@ export const rentalManagementMessage = {
   canNotChangeStartDate: `Can not change Start Date`,
   canNotChangeEndDate: `Can not change End Date`,
   invoiceCreated: `Invoice already created`,
-  sameAssetsSelected: `Same Assets Selected`
+  sameAssetsSelected: `Same Assets Selected`,
+  onlyInUseAssetsChangeSubStatus: `Sub status can be changed only In-Use assets`
 };
 
 export const subleaseActions = {
@@ -179,6 +181,6 @@ export const repairOrderMessage = {
   workOrderComplete: 'Complete work order to proceed',
   deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
   assignAssets: 'Assign Assets to proceed',
-  addProductAndAssetsInPackage :'Add Product and Assign Asset in Package to Proceed',
+  addProductAndAssetsInPackage: 'Add Product and Assign Asset in Package to Proceed',
 };
 
