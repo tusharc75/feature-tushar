@@ -9,7 +9,7 @@ import { useWindowScroll } from 'src/hooks/useWindowScroll';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const InfoSidebar = () => {
-  const [store, setStore] = useInforSidebar((store) => store.data);
+  const [{ data: store, content }, setStore] = useInforSidebar((store) => store);
 
   const [{ y }] = useWindowScroll();
   const toastConfig = useContext(CustomToastContext);
@@ -21,26 +21,26 @@ const InfoSidebar = () => {
 
   useEffect(() => {
     if (store) {
-      setIsLoading(true)
-      axiosInstance().get(`/resource-information/actions?resource=${store.resource}&actionId=${store.actionId}`)
+      setIsLoading(true);
+      axiosInstance()
+        .get(`/resource-information/actions?resource=${store.resource}&actionId=${store.actionId}`)
         .then(({ data: { data } }) => {
           if (data?.content) {
-            setResourceData({ actionName: data?.actionName, content: data?.content })
+            setResourceData({ actionName: data?.actionName, content: data?.content });
+          } else {
+            setResourceData({ actionName: '', content: 'No information available' });
           }
-          else {
-            setResourceData({ actionName: '', content: 'No information available' })
-          }
-          setIsLoading(false)
+          setIsLoading(false);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
-          setIsLoading(false)
+          setIsLoading(false);
         });
     }
   }, [store]);
 
   const handleClose = useCallback(() => {
-    setStore({ data: null });
+    setStore({ data: null, content: null });
   }, [setStore]);
 
   return (
@@ -51,11 +51,13 @@ const InfoSidebar = () => {
           <Close />
         </IconButton>
       </div>
-      {isLoading ? <Box p={2} >
-        <CommonSkeleton sm={12} md={12} lg={12} xs={12} lenArray={[...Array(10).keys()]} />
-      </Box> :
-        <div className="content px-[--px] py-[--py]" dangerouslySetInnerHTML={{ __html: resourceData?.content }} />
-      }
+      {isLoading && !content ? (
+        <Box p={2}>
+          <CommonSkeleton sm={12} md={12} lg={12} xs={12} lenArray={[...Array(10).keys()]} />
+        </Box>
+      ) : (
+        <div className="content px-[--px] py-[--py]" dangerouslySetInnerHTML={{ __html: content ? content : resourceData?.content }} />
+      )}
     </div>
   );
 };

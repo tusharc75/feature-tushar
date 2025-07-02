@@ -288,6 +288,8 @@ import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
 import FieldView from 'src/pages/FieldView';
 import { firebaseConfig } from './firebase';
+import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
+import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
 var notificationInterval: any = null;
 
 function App() {
@@ -364,7 +366,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1306,6 +1308,8 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
           {user && <DesktopDM />}
+          <RenderAllInfoButtons />
+          <RenderInfoInspector />
         </ErrorBoundaryComponent>
       </AnimatePresence>
 

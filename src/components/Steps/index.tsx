@@ -7,6 +7,7 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { LeftIcon, RightIcon, getIcon, stepIconInterface, getColorOficon, StepCompleteIcon } from './icons';
+import { kebabCase } from 'lodash';
 
 const STEP_GAP = 15;
 
@@ -82,7 +83,7 @@ const Steps = ({
         document.body.classList.remove('has-mobile-step');
       };
     } else {
-      return () => { };
+      return () => {};
     }
   }, [isMobile && !isTablet]);
 
@@ -110,11 +111,12 @@ const Steps = ({
     <div>
       {isMobile && !isTablet ? (
         <MobileSteps
-          id={steps[currentStep]?.title ? steps[currentStep]?.title : ''}
-          stepName={`${activeStep + 1 > steps.length || isStepEnded
-            ? 'Completed'
-            : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
-            }`}
+          id={`mobile-step-${kebabCase(steps[currentStep]?.name)}`}
+          stepName={`${
+            activeStep + 1 > steps.length || isStepEnded
+              ? 'Completed'
+              : `${activeStep + 1}/${steps.length} ${steps[currentStep]?.title ? steps[currentStep]?.title : ''}`
+          }`}
           nextButton={
             <Button
               size="small"
@@ -189,7 +191,8 @@ const Steps = ({
                 `}
                     style={{ '--line-color': i < currentStep ? 'var(--new_theme_color)' : 'unset' } as React.CSSProperties}
                     key={step.name}
-                    id={step.name}
+                    id={`step-${kebabCase(step.name)}${i === currentStep && !isStepEnded ? '-active' : ''}`}
+                    data-active={i === currentStep && !isStepEnded}
                     aria-disabled={i > currentStep && !isStepEnded}
                     onClick={() => {
                       if (i < currentStep && !isStepEnded && isPrevStep) {

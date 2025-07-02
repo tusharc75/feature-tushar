@@ -5,13 +5,15 @@ type SidebarResource = typeof sidebarResource;
 
 export type InfoSidebarState = {
   data: null | {
-    resource: SidebarResource[keyof SidebarResource];
-    actionId: string;
+    resource?: SidebarResource[keyof SidebarResource];
+    actionId?: string;
   };
+  content?: string;
 };
 
 const initialState: InfoSidebarState = {
-  data: null
+  data: null,
+  content: null
 };
 
 export const { Provider: InfoSidebarProvider, useStore: useInforSidebar } = createFastContext(initialState);
