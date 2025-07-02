@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
-import { createPortal, render } from 'react-dom';
+import { useContext, useEffect, useMemo, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import { useUrlParser } from 'src/components/InfoSidebar/RenderAllInfoButtons/hooks';
-import { tempInfoData } from 'src/components/InfoSidebar/RenderAllInfoButtons/tempData';
-import { RenderInfoButton } from 'src/components/InfoSidebar/RenderAllInfoButtons/templates';
 import { useInforSidebar } from 'src/components/InfoSidebar/store';
-import { applyStyles } from 'src/components/InfoSidebar/utils';
+import { ApiFormData } from 'src/components/InfoSidebar/types';
+import { handleInsertInfoButtonPreview } from 'src/components/InfoSidebar/utils';
 import { throttle } from 'src/hooks/useThrottle';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const callback = (
   mutationList: MutationRecord[],
@@ -15,16 +15,32 @@ const callback = (
   for (const mutation of mutationList) {
     if (mutation.type === 'childList') {
       onChildChange(mutationList, observer);
-      // console.log('A child node has been added or removed in the root element.');
     }
   }
 };
 
 const RenderAllInfoButtons = () => {
   const parsedUrl = useUrlParser();
-  const data = useMemo(() => tempInfoData.filter((d) => d.url === parsedUrl), [parsedUrl]);
+  const toastConfig = useContext(CustomToastContext);
+  const [allData, setAllData] = useState([]);
+  const data = useMemo(() => allData.filter((d) => d.url === parsedUrl), [parsedUrl, allData]);
   const [changedSignal, setChangedSignal] = useState(0);
   const [, setStore] = useInforSidebar((state) => state.data);
+
+  useEffect(() => {
+    const getAllData = async () => {
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get<{ data: ApiFormData[] }>(`/resource-information/all`);
+        const newData = data.map((d) => d.actions.filter((action) => action.targetSelector)).flat();
+        setAllData(newData);
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    };
+    getAllData();
+  }, []);
 
   useEffect(() => {
     const root = document.querySelector('#root');
@@ -46,34 +62,12 @@ const RenderAllInfoButtons = () => {
       observer.disconnect();
     };
   }, [data]);
+  //
 
   useEffect(() => {
     const handleInsert = () => {
       for (const d of data) {
-        const element = document.querySelector<HTMLElement>(d.itemSelector);
-        if (!element) continue;
-        if (element.querySelector(`#info-sidebar-button-${d._id}`)) continue;
-        applyStyles(element, { ...d.anchorElementPadding, position: 'relative' });
-        const buttonContainer = document.createElement('div');
-        buttonContainer.classList.add('info-sidebar-action-container');
-        buttonContainer.id = `info-sidebar-button-${d._id}`;
-        applyStyles(buttonContainer, { ...d.buttonPosition, position: 'absolute' });
-
-        element.appendChild(buttonContainer);
-        render(
-          createPortal(
-            <RenderInfoButton
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setStore({ content: d.data });
-              }}
-            />,
-            buttonContainer
-          ),
-          buttonContainer
-        );
-        console.log(element);
+        handleInsertInfoButtonPreview({ ...d, id: d._id, onClick: () => setStore({ item: d }), tooltip: d.label });
       }
     };
     if (data.length > 0) {

@@ -9,7 +9,7 @@ import { useWindowScroll } from 'src/hooks/useWindowScroll';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const InfoSidebar = () => {
-  const [{ data: store, content }, setStore] = useInforSidebar((store) => store);
+  const [{ data: store, item }, setStore] = useInforSidebar((store) => store);
 
   const [{ y }] = useWindowScroll();
   const toastConfig = useContext(CustomToastContext);
@@ -40,23 +40,26 @@ const InfoSidebar = () => {
   }, [store]);
 
   const handleClose = useCallback(() => {
-    setStore({ data: null, content: null });
+    setStore({ data: null, item: null });
   }, [setStore]);
 
   return (
-    <div className="max-h-[calc(100vh-111px)] flex-grow [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
+    <div className="flex max-h-[calc(100vh-111px)] flex-grow flex-col [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
       <div className="flex items-center justify-between gap-2 border-b px-[--px] py-[--py]">
-        <h6 className="line-clamp-1 text-base font-semibold">{resourceData?.actionName}</h6>
+        <h6 className="line-clamp-1 text-base font-semibold">{resourceData?.actionName || item?.label}</h6>
         <IconButton color="primary" size="small" onClick={handleClose} sx={{ borderRadius: '5px' }}>
           <Close />
         </IconButton>
       </div>
-      {isLoading && !content ? (
+      {isLoading && !item ? (
         <Box p={2}>
           <CommonSkeleton sm={12} md={12} lg={12} xs={12} lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (
-        <div className="content px-[--px] py-[--py]" dangerouslySetInnerHTML={{ __html: content ? content : resourceData?.content }} />
+        <div
+          className="content flex-grow overflow-y-auto px-[--px] py-[--py]"
+          dangerouslySetInnerHTML={{ __html: item ? item.content : resourceData?.content }}
+        />
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import { Action } from 'src/components/InfoSidebar/types';
 import { sidebarResource } from 'src/constants/helpers';
 import createFastContext from 'src/StateProvider/createFastContext';
 
@@ -8,12 +9,12 @@ export type InfoSidebarState = {
     resource?: SidebarResource[keyof SidebarResource];
     actionId?: string;
   };
-  content?: string;
+  item?: Action;
 };
 
 const initialState: InfoSidebarState = {
   data: null,
-  content: null
+  item: null
 };
 
 export const { Provider: InfoSidebarProvider, useStore: useInforSidebar } = createFastContext(initialState);

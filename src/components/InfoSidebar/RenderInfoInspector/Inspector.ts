@@ -8,6 +8,7 @@ export class Inspector {
   selector: string;
   private boundMousedown: (e: MouseEvent) => void = () => {};
   private boundMouseMove: (e: MouseEvent) => void = () => {};
+  private boundClick: (e: MouseEvent) => void = () => {};
   showOverlay: ShowOverlay;
   constructor({ onElementClick }: { onElementClick: (data: { selector: string; url: string }) => void }) {
     this.onElementClick = onElementClick;
@@ -21,15 +22,18 @@ export class Inspector {
     if (!this.started) return;
     const currentElement = e.target as HTMLElement;
     this.selector = this.getSelector(currentElement);
-    console.log(this.selector);
     this.isValid = this.showOverlay.animate({ selector: this.selector, target: currentElement });
   }
 
   private handleMouseDown(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-
-    console.log({ selector: this.selector, valid: this.showOverlay.isValid });
+    const blockClick = (clickEvent: MouseEvent) => {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+      window.removeEventListener('click', blockClick, true);
+    };
+    window.addEventListener('click', blockClick, true);
 
     if (!this.showOverlay.isValid || !this.selector) return;
     const url = replaceAllMongoIds();
@@ -37,9 +41,15 @@ export class Inspector {
     this.stop();
   }
 
+  private handleMouseClick(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   private addListeners() {
     this.boundMouseMove = this.handleMouseMove;
     this.boundMousedown = this.handleMouseDown;
+    this.boundClick = this.handleMouseClick;
     window?.document.addEventListener('mousemove', this.boundMouseMove.bind(this));
     window?.document.addEventListener('mousedown', this.boundMousedown.bind(this));
   }
