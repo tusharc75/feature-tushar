@@ -441,7 +441,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
           materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
 
-          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+          const row: any = invoiceData[0]?.material?.find((m) => m._id === e._id);
           if (row) {
             const actualEndDate = new Date(product?.endDate);
             actualEndDate.setDate(actualEndDate.getDate() + 1);
