@@ -103,6 +103,7 @@ const LoadingTicket = ({
   stepFullScreen,
   rentalPolicyData,
   assetStatusOptions,
+  assetPolicyData
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -135,7 +136,6 @@ const LoadingTicket = ({
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
@@ -154,7 +154,6 @@ const LoadingTicket = ({
   }, [rentalPolicyData]);
 
   useEffect(() => {
-    fetchPolicy();
     fetchFieldLabels();
   }, []);
 
@@ -164,19 +163,6 @@ const LoadingTicket = ({
       fetchRecords();
     }
   }, [view, fieldLabels]);
-
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
 
   const fetchFieldLabels = async () => {
     try {

@@ -652,6 +652,7 @@ const RentalManagementDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   rentalPolicyData={resourceData?.policy}
                   assetStatusOptions={assetStatusOptions?.filter(o => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
+                  assetPolicyData={assetPolicyData}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
@@ -669,6 +670,7 @@ const RentalManagementDetailsPage = () => {
                   rentalPolicyData={resourceData?.policy}
                   assetStatusOptions={assetStatusOptions}
                   setAssetStatusOptions={setAssetStatusOptions}
+                  assetPolicyData={assetPolicyData}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
