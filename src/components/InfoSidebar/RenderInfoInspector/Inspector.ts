@@ -36,12 +36,10 @@ export class Inspector {
   private addListeners() {
     this.boundMouseMove = this.handleMouseMove.bind(this);
     this.boundClick = this.handleClick.bind(this);
-    console.log('attached updated new');
     window?.document.addEventListener('mousemove', this.boundMouseMove);
     window?.document.addEventListener('click', this.boundClick, true);
   }
   private removeListeners() {
-    console.log('cleared updated new');
     window?.document.removeEventListener('mousemove', this.boundMouseMove);
     window?.document.removeEventListener('click', this.boundClick, true);
   }
