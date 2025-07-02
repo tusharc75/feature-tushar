@@ -24,8 +24,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { useData } from 'src/StateProvider/Provider';
+import InfoIcon from '@mui/icons-material/Info';
 
-const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField }) => {
+const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit, assetStatusField, productList }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -465,6 +466,47 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                 ))
                             )}
                         </Grid>
+                        {values.materialType === MATERIAL_TYPE.service && (
+                          <Grid container spacing={3} className="mt-2">
+                            <Grid size={{ xs: 11, sm: 11, md: 11 }}>
+                              <Autocomplete
+                                multiple
+                                id="products-autocomplete"
+                                disableCloseOnSelect={true}
+                                options={productList || []}
+                                getOptionLabel={(option) => option.optionLabel || ''}
+                                isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                                value={productList?.filter(p => values.products?.includes(p.optionValue)) || []}
+                                onChange={(e, val) => {
+                                  setFieldValue('products', val ? val.map(v => v.optionValue) : []);
+                                }}
+                                renderTags={(value: any[], getTagProps) =>
+                                  value.map((option: any, index: number) => (
+                                    <Chip variant="outlined" label={option.optionLabel} {...getTagProps({ index })} />
+                                  ))
+                                }
+                                disabled={!allowedToEdit}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="dense"
+                                    size="small"
+                                    name="products"
+                                    variant="outlined"
+                                    label="Products"
+                                  />
+                                )}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 1, sm: 1, md: 1 }}>
+                              <Box pt={2}>
+                                <HtmlTooltip title='When this service is linked to a selected product (Repair Order), this price will be used.'>
+                                  <InfoIcon color='primary' fontSize='small' />
+                                </HtmlTooltip>
+                              </Box>
+                            </Grid>
+                          </Grid>
+                        )}
                       </Box>
                     </Fragment>
                   )}

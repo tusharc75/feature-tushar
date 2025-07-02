@@ -64,7 +64,7 @@ import GpsLocationCell from 'src/components/CustomReactTable/Cells/GpsLocationCe
 import WarningIcon from '@mui/icons-material/Warning';
 import FreeStyleMultiSelect from 'src/components/CustomReactTable/Cells/FreeStyleMultiSelect';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { ExpandMore } from '@mui/icons-material';
+import { ExpandMore, Visibility } from '@mui/icons-material';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { flattenArray } from 'src/constants/columns';
 import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
@@ -72,6 +72,7 @@ import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
 import dayjs from 'dayjs';
+import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -117,8 +118,7 @@ const LoadingTicket = ({
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
-  const [anchorElSubStatus, setAnchorElSubStatus] = useState(null);
-  const [subStatusToUpdate, setSubStatusToUpdate] = useState({ open: false, status: '' });
+  const [subStatusToUpdate, setSubStatusToUpdate] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [showRemoveTicketDialog, setShowRemoveTicketDialog] = useState(false);
@@ -143,6 +143,7 @@ const LoadingTicket = ({
 
   const [view, setView] = useState(rentalPolicyData?.loadingReceivingDefaultView || 'flat');
   const [submitting, setSubmitting] = useState(false)
+  const [subStatusLog, setSubStatusLog] = useState({ open: false, data: null })
 
   const { generateColumns } = useColumns();
 
@@ -596,32 +597,42 @@ const LoadingTicket = ({
       disableSortBy: true,
       canDrag: false,
       Cell: ({ row }) =>
-        user?.user?.brandPolicy?.assetDeliveredStatus &&
-          [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-            row?.original?.rentalAssetStatus
-          ) &&
-          row?.original?.type === MATERIAL_TYPE.serializedAsset ? (
-          <HtmlTooltip title={`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}>
-            <IconButton
-              size="small"
-              color="primary"
-              onClick={() => {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeDate',
-                  status: row?.original?.detail,
-                  prevStatus: '',
-                  assets: [row?.original?._id],
-                  loading: false
-                });
-              }}
-            >
-              <Edit fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          ''
-        )
+        <>
+          {user?.user?.brandPolicy?.assetDeliveredStatus &&
+            [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(row?.original?.rentalAssetStatus) &&
+            row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+              <HtmlTooltip title={`Change ${resources?.serializedAsset?.titleSingular} Last Status Date`}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+                    setOpenDateDialog({
+                      open: true,
+                      type: 'changeDate',
+                      status: row?.original?.detail,
+                      prevStatus: '',
+                      assets: [row?.original?._id],
+                      loading: false
+                    });
+                  }}
+                >
+                  <Edit fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+          {rentalPolicyData?.subStatusDateWiseCapture && (
+            <HtmlTooltip title={'View Logs'}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setSubStatusLog({ open: true, data: row?.original })
+                }}
+              >
+                <Visibility fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
+        </>
     });
     setColumns(column);
     setCheckMTRValidation(assetFields?.some((e) => e?.fieldName === 'mtrAttached'));
@@ -1546,6 +1557,10 @@ const LoadingTicket = ({
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusInUseCancelLoading });
           }
         }
+      } else if (action === rentalManagementActions.changeSubStatus) {
+        if (e?.rentalAssetStatus != RENTAL_INTERNAL_ASSET_STATUS.inUse || e?.status != ASSET_STATUS.inUse) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.onlyInUseAssetsChangeSubStatus });
+        }
       }
     });
     if (errorMessages?.length) {
@@ -1585,18 +1600,6 @@ const LoadingTicket = ({
             endIcon={<ExpandMore />}
           >
             Change Status
-          </ThemeButton>
-        )}
-        {!isOffline && allowedToEdit && assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
-          <ThemeButton
-            disabled={
-              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0 ||
-              !getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every((f) => f?.rentalAssetStatus === RENTAL_INTERNAL_ASSET_STATUS.inUse && f?.status === ASSET_STATUS.inUse)
-            }
-            onClick={(event) => setAnchorElSubStatus(event.currentTarget)}
-            endIcon={<ExpandMore />}
-          >
-            Change Sub Status
           </ThemeButton>
         )}
         {(allowedToEdit || isProcessor) && (
@@ -1700,11 +1703,11 @@ const LoadingTicket = ({
           assets: getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({
             _id: a?._id,
             uniqueId: a?.uniqueId,
-            dates: dates
-          }))
+          })),
+          dates: dates
         })
       .then(({ data }) => {
-        setSubStatusToUpdate({ open: false, status: null });
+        setSubStatusToUpdate(false);
         fetchRecords();
         setSubmitting(false)
         toastConfig.setToastConfig({
@@ -1743,7 +1746,9 @@ const LoadingTicket = ({
               assetPolicyData,
               setOpenAssetDataDialog,
               resources,
-              getFilterSelectedRecords
+              getFilterSelectedRecords,
+              rentalPolicyData,
+              setSubStatusToUpdate
             }}
           />
         }
@@ -1803,34 +1808,6 @@ const LoadingTicket = ({
         })}
       </Menu>
 
-      <Menu
-        id="sub-status-menu"
-        anchorEl={anchorElSubStatus}
-        keepMounted
-        open={Boolean(anchorElSubStatus)}
-        onClose={() => setAnchorElSubStatus(null)}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right'
-        }}
-      >
-        {assetPolicyData?.policy?.inUseSubStatus?.map(o => {
-          return (
-            <MenuItem
-              onClick={() => {
-                setAnchorElSubStatus(null);
-                setSubStatusToUpdate({ open: true, status: o })
-              }}
-            >
-              {o}
-            </MenuItem>
-          )
-        })}
-      </Menu>
       {showTicketDialog.open && (
         <ManageDeliveryTicket
           ticketType={DELIVERY_TICKET_TYPE.loading}
@@ -1954,16 +1931,27 @@ const LoadingTicket = ({
           </CustomDialogFooter>
         </Dialog>
       )}
-      {subStatusToUpdate.open && (
+      {subStatusToUpdate && (
         <SubStatusDatesDialog
           handleClose={() => {
-            setSubStatusToUpdate({ open: false, status: null })
+            setSubStatusToUpdate(false)
           }}
-          subStatus={subStatusToUpdate.status}
           options={assetPolicyData?.policy?.inUseSubStatus}
           onSuccess={handleSubStatusChange}
           submitting={submitting}
-          minDate={dayjs(Math.max(...selectedRecords?.map(r => dayjs(r?.startDate)?.valueOf())))?.toISOString()}
+          rentalId={rentalManagementData?._id}
+          assets={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.map(a => ({ _id: a?._id, uniqueId: a?.uniqueId }))}
+          showDates={rentalPolicyData?.subStatusDateWiseCapture}
+        />
+      )}
+      {subStatusLog.open && (
+        <SubStatusLog
+          onClose={() => {
+            setSubStatusLog({ open: false, data: null })
+          }}
+          asset={{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }}
+          rentalId={rentalManagementData?._id}
+          title={subStatusLog.data?.assetNumber}
         />
       )}
       {openDeliveryTicketDialog && (
@@ -2123,7 +2111,9 @@ const ActionButtonMenuItems = ({
   assetPolicyData,
   setOpenAssetDataDialog,
   resources,
-  getFilterSelectedRecords
+  getFilterSelectedRecords,
+  rentalPolicyData,
+  setSubStatusToUpdate
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0) {
@@ -2369,6 +2359,19 @@ const ActionButtonMenuItems = ({
             Change Assets Data
           </MenuItem>
         )}
+      {rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+        <MenuItem
+          onClick={() => {
+            if (!validateAction(rentalManagementActions.changeSubStatus)) {
+              setSubStatusToUpdate(true)
+            }
+          }}
+          id={'change-sub-status-menu-item'}
+          disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
+        >
+          Change Sub Status
+        </MenuItem>
+      )}
     </>
   );
 };

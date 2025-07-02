@@ -318,9 +318,8 @@ const RepairOrderDetails = () => {
                   permissions?.transferAsset?.isCreate &&
                   resourceData?.policy?.showTransferAssets &&
                   repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
-                  repairOrderData?.material
-                    ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
-                    ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
+                  repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) &&
+                  (isQuotationStep ? QUOTATION_STATUS.acceptByCustomer === quotationVersionData?.status : true) && (
                     <ThemeButton
                       onClick={() => {
                         setShowTransferAssetDialog(true);
