@@ -455,8 +455,8 @@ const Quotation = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : _subRow.type === MATERIAL_TYPE.manualEntry
                 ? _subRow?.description : '';
-      _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
-      _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
+      _subRow.productName = _subRow?.type === MATERIAL_TYPE.service ? '' : _subRow?.serializedAssetDetail?.product?.optionLabel || '';
+      _subRow.productId = _subRow?.type === MATERIAL_TYPE.service ? parent?.productId : _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -955,6 +955,7 @@ const Quotation = ({
           selectedProducts={selectedRecords}
           isInlineEdit={isInlineEdit}
           showSaveAndNext={isProductEdit.showSaveAndNext}
+          parentProduct={recordToUpdate?.type === MATERIAL_TYPE.service ? recordToUpdate?.productId || null : null}
         />
       )}
       {quotationData && showAllVersionStatus && (
