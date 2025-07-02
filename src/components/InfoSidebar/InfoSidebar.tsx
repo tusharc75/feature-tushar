@@ -1,6 +1,7 @@
 import { Close } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import { useCallback, useContext, useEffect, useState } from 'react';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useInforSidebar } from 'src/components/InfoSidebar';
@@ -8,7 +9,7 @@ import useLockBodyScroll from 'src/hooks/useLockBodyScroll';
 import { useWindowScroll } from 'src/hooks/useWindowScroll';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const InfoSidebar = () => {
+const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () => void; isFullScreen: boolean }) => {
   const [{ data: store, item }, setStore] = useInforSidebar((store) => store);
 
   const [{ y }] = useWindowScroll();
@@ -47,9 +48,14 @@ const InfoSidebar = () => {
     <div className="flex max-h-[calc(100vh-111px)] flex-grow flex-col [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
       <div className="flex items-center justify-between gap-2 border-b px-[--px] py-[--py]">
         <h6 className="line-clamp-1 text-base font-semibold">{resourceData?.actionName || item?.label}</h6>
-        <IconButton color="primary" size="small" onClick={handleClose} sx={{ borderRadius: '5px' }}>
-          <Close />
-        </IconButton>
+        <div className="flex flex-shrink-0 items-center">
+          <IconButton onClick={toggleFullScreen} color="primary" size="small">
+            {!isFullScreen ? <FiMaximize2 /> : <FiMinimize2 />}
+          </IconButton>
+          <IconButton color="primary" size="small" onClick={handleClose} sx={{ borderRadius: '5px' }}>
+            <Close />
+          </IconButton>
+        </div>
       </div>
       {isLoading && !item ? (
         <Box p={2}>
