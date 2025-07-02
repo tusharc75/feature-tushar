@@ -17,9 +17,11 @@ import { createFilterSetData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AiButton from 'src/components/Helpers/Buttons/AiButton';
 import routes from 'src/components/Helpers/Routes';
 import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, sidebarResource } from 'src/constants/helpers';
+import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
@@ -32,6 +34,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const {
     state: { user, permissions, resources }
   }: any = useData();
+
+  const [aiSuggestionDialog, setAiSuggestionDialog] = useState(false);
 
   const mapObjectToList = useCallback(
     (obj: { [key: string]: OnSelectDataType[] }) => {
@@ -102,6 +106,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
+
+  let productIds = [];
+  if (selectedLookUpResourceData?.product?.length) {
+    productIds = selectedLookUpResourceData.product.map((item) => item.optionValue);
+  }
 
   const prevDateRangeRef = useRef(dateRange);
 
@@ -974,6 +983,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     </HtmlTooltip>
                   </span>
                   <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
+                  <AiButton onClick={() => setAiSuggestionDialog(true)}>AI Suggestions</AiButton>
                 </Box>
               )}
           </div>
@@ -1076,6 +1086,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             fetchUserFilters={fetchUserFilters}
             userFilters={userFilters}
             selectedFilter={selectedFilter}
+          />
+        )}
+        {aiSuggestionDialog && (
+          <AiSuggestionsDialog
+            handleClose={() => {
+              setAiSuggestionDialog(false);
+            }}
+            productIds={productIds}
+            dateRange={dateRange}
           />
         )}
       </div>
