@@ -394,6 +394,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         setUpdating(false);
         fetchData();
         setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
+        fetchCreditMemoData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -412,6 +413,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       if (!showNext) {
         const { data } = await axiosInstance().put(`${routes.creditMemo.path}/material/${creditMemoData._id}`, { material: rows });
         fetchData();
+        fetchCreditMemoData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -467,7 +469,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           type: 'success',
           message: data.message
         });
-
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
           if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -485,6 +486,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         }
         fetchData();
+        fetchCreditMemoData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -502,7 +504,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         .then(() => {
           setDeleting(false);
           fetchData();
-          fetchCreditMemoData();
           setDeleteData(null);
         })
         .catch((error) => {
@@ -527,6 +528,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           toastConfig.setToastConfig(error);
         });
     }
+    fetchCreditMemoData();
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -551,6 +553,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           message: data?.message
         });
         fetchData();
+        fetchCreditMemoData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
