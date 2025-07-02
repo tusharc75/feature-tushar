@@ -4,7 +4,7 @@ import { Inspector } from 'src/components/InfoSidebar/RenderInfoInspector/Inspec
 import { HostMessage, PostMessage } from 'src/components/InfoSidebar/types';
 import { handleInsertInfoButtonPreview, handleRemoveInfoButtonFromDom, isInIframe } from 'src/components/InfoSidebar/utils';
 
-const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai/';
+const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai';
 
 const handlePostMessage = (data: PostMessage) => {
   window.parent.postMessage(data, targetOrigin);
