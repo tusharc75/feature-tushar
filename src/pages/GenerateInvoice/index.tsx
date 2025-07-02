@@ -54,29 +54,29 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   const GENERATE_RESOURCE = [
     ...(user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'rentalManagement',
-            resource: sidebarResource.rentalManagement,
-            fieldName: 'rentalJobName',
-            invoiceFieldName: 'rentalJob',
-            progressiveBilling: true,
-            path: routes.rentalManagementDetail.path,
-            title: resources?.rentalManagement?.titlePlural
-          }
-        ]
+        {
+          key: 'rentalManagement',
+          resource: sidebarResource.rentalManagement,
+          fieldName: 'rentalJobName',
+          invoiceFieldName: 'rentalJob',
+          progressiveBilling: true,
+          path: routes.rentalManagementDetail.path,
+          title: resources?.rentalManagement?.titlePlural
+        }
+      ]
       : []),
     ...(user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead
       ? [
-          {
-            key: 'sublease',
-            resource: sidebarResource.sublease,
-            fieldName: 'subleaseName',
-            invoiceFieldName: 'sublease',
-            progressiveBilling: true,
-            path: routes.subleaseDetail.path,
-            title: resources?.sublease?.titlePlural
-          }
-        ]
+        {
+          key: 'sublease',
+          resource: sidebarResource.sublease,
+          fieldName: 'subleaseName',
+          invoiceFieldName: 'sublease',
+          progressiveBilling: true,
+          path: routes.subleaseDetail.path,
+          title: resources?.sublease?.titlePlural
+        }
+      ]
       : []),
     {
       key: 'repairOrder',
@@ -332,7 +332,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
               </IconButton>
             </span>
           </HtmlTooltip>
-        ) : (
+        ) : (row?.original?.invoiceId || row?.original?.invoice) && (
           <HtmlTooltip title="View Invoice">
             <span>
               <IconButton
