@@ -28,7 +28,10 @@ const RenderInfoInspector = () => {
     });
 
     const handleMessageFromHost = (event: MessageEvent<any>) => {
-      if (event.origin !== targetOrigin) return;
+      if (event.origin !== targetOrigin) {
+        console.error('origin error', event);
+        return;
+      }
       const { type, payload } = event.data as HostMessage;
       switch (type) {
         case 'start': {
