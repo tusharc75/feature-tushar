@@ -4,7 +4,7 @@ import { Inspector } from 'src/components/InfoSidebar/RenderInfoInspector/Inspec
 import { HostMessage, PostMessage } from 'src/components/InfoSidebar/types';
 import { handleInsertInfoButtonPreview, handleRemoveInfoButtonFromDom, isInIframe } from 'src/components/InfoSidebar/utils';
 
-const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai/';
+const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai';
 
 const handlePostMessage = (data: PostMessage) => {
   window.parent.postMessage(data, targetOrigin);
@@ -28,7 +28,10 @@ const RenderInfoInspector = () => {
     });
 
     const handleMessageFromHost = (event: MessageEvent<any>) => {
-      if (event.origin !== targetOrigin) return;
+      if (event.origin !== targetOrigin) {
+        console.error('origin error', event);
+        return;
+      }
       const { type, payload } = event.data as HostMessage;
       switch (type) {
         case 'start': {
