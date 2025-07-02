@@ -288,6 +288,10 @@ import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
 import FieldView from 'src/pages/FieldView';
 import { firebaseConfig } from './firebase';
+import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
+import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
+import UserManualNew from 'src/pages/UserManualNew';
+
 var notificationInterval: any = null;
 
 function App() {
@@ -364,7 +368,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -561,6 +565,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/user">
               <User />
+            </PrivateRoute>
+            <PrivateRoute exact path="/user-manual-new*" userManualNew={true}>
+              <UserManualNew />
             </PrivateRoute>
             <PrivateRoute exact path="/user-manual*" userManual={true}>
               <UserManual />
@@ -1306,6 +1313,8 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
           {user && <DesktopDM />}
+          <RenderAllInfoButtons />
+          <RenderInfoInspector />
         </ErrorBoundaryComponent>
       </AnimatePresence>
 

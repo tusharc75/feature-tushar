@@ -5,15 +5,16 @@ import { cn } from 'src/constants/helpers';
 
 const InfoSidebarContainer = () => {
   const [infoSidebarData] = useInforSidebar((state) => state.data);
+  const [item] = useInforSidebar((state) => state.item);
   return (
     <div
       className={cn(
         'max-sm: absolute bottom-0 right-0 top-0 flex h-screen flex-shrink-0 overflow-hidden transition-[width] duration-0 motion-safe:duration-300 sm:static',
-        infoSidebarData ? 'w-[--info-sidebar-w]' : 'w-0'
+        infoSidebarData || item ? 'w-[--info-sidebar-w]' : 'w-0'
       )}
     >
       <div className="sticky top-0 z-10 flex w-[--info-sidebar-w] flex-grow border bg-[var(--dark-primary,white)]">
-        {infoSidebarData && <InfoSidebar />}
+        {(infoSidebarData || item) && <InfoSidebar />}
       </div>
     </div>
   );
