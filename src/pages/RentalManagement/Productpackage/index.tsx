@@ -112,10 +112,12 @@ const Productpackage = ({
   const { isOffline } = useContext(CustomOfflineContext);
   const [submitState, setSubmitState] = useState({ open: false, values: null, rowData: null });
   const [showAttachmentDialog, setShowAttachmentDialog] = useState({ open: false, _id: null, label: '' });
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
 
   useEffect(() => {
     fetchFields();
     setWalkmeData([generateAddExistingProduct()]);
+    fetchPolicy();
   }, []);
 
   const addWalkmeData = (rows: any[]) => {
@@ -391,6 +393,19 @@ const Productpackage = ({
       }
     });
     setColumns(column);
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchData = async () => {
@@ -701,7 +716,7 @@ const Productpackage = ({
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
         } else {
-          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields, assetPolicyData?.policy?.inUseSubStatus);
           Object.assign(element, calValues);
         }
         delete element.listPrice;
@@ -1095,6 +1110,7 @@ const Productpackage = ({
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
+          assetPolicyData={assetPolicyData}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (

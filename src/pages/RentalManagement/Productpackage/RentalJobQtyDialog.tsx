@@ -38,6 +38,7 @@ interface EditDialogProps {
   isQtyOnly?: Boolean;
   showSaveAndNext?: Boolean;
   dataRows?: any
+  assetPolicyData?: any
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -55,7 +56,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   isQtyOnly = false,
   from,
   showSaveAndNext = false,
-  dataRows = []
+  dataRows = [],
+  assetPolicyData = null
 }) => {
   const ref = useRef(null);
 
@@ -468,7 +470,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             const result = autoCalculateSpecificFields(
                                               { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
-                                              initialData.fields
+                                              initialData.fields,
+                                              { subStatusFields: assetPolicyData?.policy?.inUseSubStatus, priceValue: priceValue, currency: rentalManagementData?.currency }
                                             );
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {

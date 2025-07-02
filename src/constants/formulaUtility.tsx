@@ -734,7 +734,7 @@ export const autoCalculate = (values: any, fieldList: any) => {
   return returnvalues;
 };
 
-export const autoCalculateSpecificFields = (inputValues: any, values: any, fieldList: any) => {
+export const autoCalculateSpecificFields = (inputValues: any, values: any, fieldList: any, subStatusFieldsValues: any = {}) => {
   const returnvalues: any = { ...inputValues };
   for (var _fieldName in inputValues) {
     const field: any = fieldList.filter((_f) => _f.fieldName === _fieldName || _f.fieldName === _fieldName.split('_')[0]);
@@ -771,6 +771,17 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
         inputValues[_fieldName]
       );
       Object.assign(returnvalues, calValues);
+    }
+  }
+  if (!isEmpty(subStatusFieldsValues)) {
+    const { subStatusFields, priceValue, currency } = subStatusFieldsValues
+    if (subStatusFields?.length > 0) {
+      subStatusFields?.forEach(sf => {
+        const field = fieldList?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
+        if (field) {
+          returnvalues[`${field?.fieldName}_${currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
+        }
+      });
     }
   }
   return returnvalues;
