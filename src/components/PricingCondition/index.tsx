@@ -10,11 +10,14 @@ export const getPricingConditions = (resource: any, referenceData: any, material
     data.conditionType = [conditionType];
     const rows: any = []
     material?.forEach((ele) => {
-      const obj = {
+      const obj: any = {
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty || 1,
         currency: referenceData?.currency
+      }
+      if (ele?.product) {
+        obj.product = ele.product
       }
       rows.push(obj)
     })
