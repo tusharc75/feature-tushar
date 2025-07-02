@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { isArray, uniqBy } from 'lodash';
+import { camelCase, isArray, uniqBy } from 'lodash';
 import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
@@ -470,9 +470,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             const result = autoCalculateSpecificFields(
                                               { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
-                                              initialData.fields,
-                                              { subStatusFields: assetPolicyData?.policy?.inUseSubStatus, priceValue: priceValue, currency: rentalManagementData?.currency }
+                                              initialData.fields
                                             );
+
+                                            if (assetPolicyData?.inUseSubStatus?.length > 0) {
+                                              assetPolicyData?.inUseSubStatus?.forEach(sf => {
+                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
+                                                if (field) {
+                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
+                                                }
+                                              });
+                                            }
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
                                                 setFieldValue(x, result[x]);

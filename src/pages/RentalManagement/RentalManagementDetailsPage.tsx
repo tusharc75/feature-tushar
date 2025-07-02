@@ -98,6 +98,7 @@ const RentalManagementDetailsPage = () => {
   const [reOpening, setReOpening] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [assets, setAssets] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
   const [isQuotationStep, setIsQuotationStep] = useState(false)
@@ -259,9 +260,12 @@ const RentalManagementDetailsPage = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
-      if (data) {
-        setResourceData(data);
+      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
+      if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+        setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+      }
+      if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
+        setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -583,6 +587,7 @@ const RentalManagementDetailsPage = () => {
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
                   rentalPolicyData={resourceData?.policy}
+                  assetPolicyData={assetPolicyData?.policy}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -608,6 +613,7 @@ const RentalManagementDetailsPage = () => {
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
                   rentalPolicyData={resourceData?.policy}
+                  assetPolicyData={assetPolicyData?.policy}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
