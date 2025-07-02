@@ -59,7 +59,8 @@ const Services = ({
   quotationApproved,
   quotationStatus,
   fetchRentalManagementData,
-  rentalPolicyData
+  rentalPolicyData,
+  assetPolicyData
 }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const { setWalkmeData } = useSetWalkmeData();
@@ -573,7 +574,7 @@ const Services = ({
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
         } else {
-          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields, assetPolicyData?.inUseSubStatus);
           Object.assign(element, calValues);
         }
       });
@@ -871,6 +872,7 @@ const Services = ({
           loading={isUpdating}
           from={'service'}
           showSaveAndNext={isProductEdit.showSaveAndNext}
+          assetPolicyData={assetPolicyData}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (

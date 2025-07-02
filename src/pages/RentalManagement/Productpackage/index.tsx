@@ -75,7 +75,8 @@ const Productpackage = ({
   quotationApproved,
   quotationStatus,
   fetchRentalManagementData,
-  rentalPolicyData
+  rentalPolicyData,
+  assetPolicyData
 }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -701,7 +702,7 @@ const Productpackage = ({
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: element.listPrice }, element, allFields);
           Object.assign(element, calValues);
         } else {
-          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields);
+          const calValues = getPricingValue(element, priceData, rentalManagementData?.currency, allFields, assetPolicyData?.inUseSubStatus);
           Object.assign(element, calValues);
         }
         delete element.listPrice;
@@ -1095,6 +1096,7 @@ const Productpackage = ({
           loading={isUpdating}
           showSaveAndNext={isProductEdit.showSaveAndNext}
           from={'product'}
+          assetPolicyData={assetPolicyData}
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type === 'newPackage' && (

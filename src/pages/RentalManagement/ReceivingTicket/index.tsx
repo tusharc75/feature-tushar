@@ -117,7 +117,8 @@ const ReceivingTicket = ({
   stepFullScreen,
   rentalPolicyData,
   assetStatusOptions,
-  setAssetStatusOptions
+  setAssetStatusOptions,
+  assetPolicyData
 }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
@@ -160,7 +161,6 @@ const ReceivingTicket = ({
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
 
   const [columns, setColumns] = useState(null);
-  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({
     open: false,
     statusPolicy: null,
@@ -207,7 +207,6 @@ const ReceivingTicket = ({
   };
 
   useEffect(() => {
-    fetchPolicy();
     fetchFieldLabels();
   }, []);
 
@@ -552,19 +551,6 @@ const ReceivingTicket = ({
         ]
       });
       setFieldLabels(data);
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
-      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
