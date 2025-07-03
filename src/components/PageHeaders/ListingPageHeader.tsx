@@ -285,7 +285,7 @@ const RenderTabs = ({
   return (
     <>
       <RippleButton
-        className="flex items-center gap-1 rounded-[6px] bg-[var(--dark-secondary,#f0f0f0)] p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[#5b5b5b] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent dark:text-[white]"
+        className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
         {toggleButtonList[selectedType - 1]?.key}
