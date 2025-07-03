@@ -285,7 +285,7 @@ const RenderTabs = ({
   return (
     <>
       <RippleButton
-        className="flex items-center gap-1 rounded-[6px] bg-[var(--dark-secondary,#f0f0f0)] p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[#5b5b5b] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent dark:text-[white]"
+        className="flex items-center gap-1 rounded-[6px] bg-theme p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[white] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent "
         onClick={handleClick}
       >
         {toggleButtonList[selectedType - 1]?.key}
@@ -303,12 +303,13 @@ const RenderTabs = ({
         <ul className="list-none py-1">
           {toggleButtonList?.map((d) => (
             <RippleButton
-              className="list-none px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+              className="list-none px-4 py-2 hover:bg-gray-200 data-[active=true]:bg-gray-200 dark:hover:bg-gray-900  data-[active=true]:dark:bg-gray-900"
               component="li"
               onClick={(e) => {
                 handleClose();
                 handleToggle(e, d);
               }}
+              data-active={toggleButtonList[selectedType - 1]?.value === d.value}
             >
               {d.key}
             </RippleButton>
