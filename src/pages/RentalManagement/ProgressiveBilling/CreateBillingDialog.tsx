@@ -105,17 +105,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
-        setRentalResourceData(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
-      .then(({ data: { data } }) => {
-        setInvoiceResourceData(data);
+        if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+          setRentalResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+        }
+        if (data?.find((e) => e.resource === sidebarResource.invoice)) {
+          setInvoiceResourceData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -337,8 +334,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
 
-    const logs: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/logs?assets=${JSON.stringify(data?.inventory?.map(m => ({ asset: m?.inventory, uniqueId: m?._id })))}`);
-    setLogs(logs?.data?.data)
+    if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
+      const logs: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/logs?assets=${JSON.stringify(data?.inventory?.map(m => ({ asset: m?.inventory, uniqueId: m?._id })))}`);
+      setLogs(logs?.data?.data)
+    }
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
@@ -775,7 +774,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
-        getMaterialLogs(element, logs, rows)
+        if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
+          getMaterialLogs(element, logs, rows)
+        }
         if (extraRows?.length) {
           rows = [...rows, ...extraRows];
         }
