@@ -41,13 +41,11 @@ export function generateUniqueMongoId(): string {
 export const handleRemoveInfoButtonFromDom = (id: string) => {
   try {
     const element = document.querySelector(`#info-sidebar-button-${id}`);
-
     if (element) {
       const parent = element.parentElement;
       parent?.removeChild(element);
     }
   } catch (error) {
-    console.log(error);
   }
 };
 
@@ -186,7 +184,7 @@ export const handleInsertInfoButtonPreview = ({
   manualPosition,
   insideAnchor,
   tooltip,
-  onClick = () => {}
+  onClick = () => { }
 }: {
   targetSelector: string;
   id: string;
