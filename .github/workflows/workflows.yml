@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - uat
-      - staging
+      - stable
 
 permissions:
   id-token: write
