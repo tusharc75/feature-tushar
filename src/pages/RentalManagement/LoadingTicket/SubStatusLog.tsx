@@ -12,7 +12,7 @@ import { useContext, useEffect } from "react";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 
-const SubStatusLog = ({ onClose, asset, title, rentalId }) => {
+const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
 
   const renderedFrom = `${camelCase(sidebarResource.serializedAsset)}_subStatus_logs`;
   const toastConfig = useContext(CustomToastContext);
@@ -128,7 +128,7 @@ const SubStatusLog = ({ onClose, asset, title, rentalId }) => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${rentalManagement.api}/${rentalId}/inventory/logs?asset=${JSON.stringify(asset)}`)
+      .get(`${rentalManagement.api}/${rentalId}/inventory/logs?assets=${JSON.stringify(assets)}`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });

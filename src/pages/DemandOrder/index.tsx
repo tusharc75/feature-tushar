@@ -42,13 +42,17 @@ const DemandOrder = () => {
       value: 1
     },
     {
-      key: `All ${resources?.demandOrder?.titlePlural}`,
+      key: `Open ${resources?.demandOrder?.titlePlural}`,
       value: 2
     },
     {
-      key: `Converted ${resources?.demandOrder?.titlePlural}`,
+      key: `All ${resources?.demandOrder?.titlePlural}`,
       value: 3
     },
+    {
+      key: `Converted ${resources?.demandOrder?.titlePlural}`,
+      value: 4
+    }
   ];
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -122,7 +126,7 @@ const DemandOrder = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon fontSize='small' color={row?.original?.canDelete ? 'error' : 'disabled'} />
+            <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -136,10 +140,9 @@ const DemandOrder = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
@@ -174,8 +177,11 @@ const DemandOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
-            u?.canDelete && ![DEMAND_ORDER_STATUS.converted]?.includes(finalObject?.status);
+          finalObject['canDelete'] =
+            permissions?.demandOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
+            u?.canDelete &&
+            ![DEMAND_ORDER_STATUS.converted]?.includes(finalObject?.status);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -240,7 +246,6 @@ const DemandOrder = () => {
       </>
     );
   };
-
 
   const LeftSideButtons = () => {
     return (
@@ -323,11 +328,12 @@ const DemandOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.demandOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.demandOrderNumber || ''}`
-            : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.demandOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

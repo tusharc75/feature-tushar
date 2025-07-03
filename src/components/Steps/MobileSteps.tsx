@@ -30,7 +30,7 @@ const useStyles = makeStyles(() => ({
 export default function MobileSteps({ nextButton, backButton, stepName, id }) {
   const classes = useStyles();
   return (
-    <div className={classes.createLayout}>
+    <div className={`${classes.createLayout} single-step-item`}>
       {backButton}
       <span className={classes.stepLayout} id={id}>
         {stepName}

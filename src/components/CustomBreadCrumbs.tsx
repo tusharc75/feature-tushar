@@ -13,11 +13,11 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
       className="site-breadcrumb"
     >
       {isConfirmBeforeClick ? (
-        <span className={`${linkClassName} flex items-center gap-[6px]`} onClick={() => onBreadCrumbClick('/')}>
+        <span id="bread-crumb-home" className={`${linkClassName} flex items-center gap-[6px]`} onClick={() => onBreadCrumbClick('/')}>
           <HomeIconBreadcrumb /> Home
         </span>
       ) : (
-        <Link to="/" className={`${linkClassName}  flex items-center gap-[6px]`}>
+        <Link id="bread-crumb-home" to="/" className={`${linkClassName}  flex items-center gap-[6px]`}>
           <HomeIconBreadcrumb /> Home
         </Link>
       )}
@@ -25,11 +25,11 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
       {routes.map((route, index) => {
         return index !== routes.length - 1 ? (
           isConfirmBeforeClick ? (
-            <span key={index} className={linkClassName} onClick={() => onBreadCrumbClick(route.path)}>
+            <span key={index} id={`bread-crumb-${index + 1}`} className={linkClassName} onClick={() => onBreadCrumbClick(route.path)}>
               {route.title}
             </span>
           ) : (
-            <Link key={index} to={route.path} className={linkClassName}>
+            <Link key={index} id={`bread-crumb-${index + 1}`} to={route.path} className={linkClassName}>
               {route.title}
             </Link>
           )
@@ -40,6 +40,7 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
                 onRouteClick();
               }
             }}
+            id={`bread-crumb-${index + 1}`}
             key={index}
             className={lastLinkClassName}
           >

@@ -65,11 +65,16 @@ const ServiceOrder = () => {
       value: 1
     },
     {
-      key: `All ${resources?.fieldServiceOrder?.titlePlural}`,
+      key: `Open ${resources?.fieldServiceOrder?.titlePlural}`,
       value: 2
-    }, {
-      key: `Closed ${resources?.fieldServiceOrder?.titlePlural}`,
+    },
+    {
+      key: `All ${resources?.fieldServiceOrder?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.fieldServiceOrder?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -223,13 +228,9 @@ const ServiceOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-
-
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    }
-    else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 

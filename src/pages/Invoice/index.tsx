@@ -67,12 +67,16 @@ const Invoice = () => {
       value: 1
     },
     {
-      key: `All ${resources?.invoice?.titlePlural}`,
+      key: `Open ${resources?.invoice?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.invoice?.titlePlural}`,
+      key: `All ${resources?.invoice?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.invoice?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -86,8 +90,17 @@ const Invoice = () => {
     data = response?.data?.data;
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
-        const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.new, INVOICE_STATUS.inProgress, INVOICE_STATUS.cancelled,
-        INVOICE_STATUS.acceptedbyDOA, INVOICE_STATUS.rejectedbyDOA, INVOICE_STATUS.sentForDoa].includes(e.optionValue));
+        const statusOps = d?.fieldData?.option?.filter(
+          (e) =>
+            ![
+              INVOICE_STATUS.new,
+              INVOICE_STATUS.inProgress,
+              INVOICE_STATUS.cancelled,
+              INVOICE_STATUS.acceptedbyDOA,
+              INVOICE_STATUS.rejectedbyDOA,
+              INVOICE_STATUS.sentForDoa
+            ].includes(e.optionValue)
+        );
         setStatusOptions(statusOps);
       }
     });
@@ -96,27 +109,23 @@ const Invoice = () => {
       if (o?.accessor === 'invoiceNumber') {
         o.cell = ({ row }) => (
           <div>
-            <Link
-              className="link text-truncate"
-              title={row?.original?.invoiceNumber}
-              to={`${routes.invoiceDetail.path}/${row?.original?._id}`}
-            >
+            <Link className="link text-truncate" title={row?.original?.invoiceNumber} to={`${routes.invoiceDetail.path}/${row?.original?._id}`}>
               {row?.original?.invoiceNumber}
             </Link>
-            {(row?.original?.toOpenInvoice && row?.original?.sendToOpenInvoiceError && (
+            {row?.original?.toOpenInvoice && row?.original?.sendToOpenInvoiceError && (
               <Box ml={1}>
                 <HtmlTooltip title="Error in post to open invoice">
                   <IconButton
                     size="small"
                     onClick={() => {
-                      setOpenOpenInvoiceError({ open: true, data: row?.original })
+                      setOpenOpenInvoiceError({ open: true, data: row?.original });
                     }}
                   >
                     <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
                   </IconButton>
                 </HtmlTooltip>
               </Box>
-            ))}
+            )}
           </div>
         );
       }
@@ -224,11 +233,9 @@ const Invoice = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    }
-    else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     if (showFilteredRecordsOnly) {
@@ -327,9 +334,10 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.invoice?.isUpdate && selectedRecords?.length
-          && !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed)
-          && selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
+        {permissions?.invoice?.isUpdate &&
+          selectedRecords?.length &&
+          !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed) &&
+          selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
             <>
               {statusOptions?.map((status) => {
                 return (
@@ -456,11 +464,12 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.invoiceNumber}`
-              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
