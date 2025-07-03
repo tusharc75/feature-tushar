@@ -303,12 +303,13 @@ const RenderTabs = ({
         <ul className="list-none py-1">
           {toggleButtonList?.map((d) => (
             <RippleButton
-              className="list-none px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+              className="list-none px-4 py-2 hover:bg-gray-200 data-[active=true]:bg-gray-200 dark:hover:bg-gray-900  data-[active=true]:dark:bg-gray-900"
               component="li"
               onClick={(e) => {
                 handleClose();
                 handleToggle(e, d);
               }}
+              data-active={toggleButtonList[selectedType - 1]?.value === d.value}
             >
               {d.key}
             </RippleButton>
