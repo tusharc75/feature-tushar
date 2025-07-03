@@ -14,7 +14,7 @@ import { camelCase } from 'lodash';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
 import dayjs from 'dayjs';
 
-function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
+function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString, topRightSlot }, ref) {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity, resources }
@@ -293,53 +293,56 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
 
   return (
     <>
-      <div className="flex gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
-        <Autocomplete
-          options={resourceList}
-          getOptionLabel={(option) => (option && option?.title) || ''}
-          style={{ width: '350px' }}
-          value={selectedResource}
-          onChange={(event, newValue) => {
-            setSelectedResource(newValue);
-          }}
-          size="small"
-          renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
-        />
-        {selectedResource?.resource === sidebarResource?.serializedAsset && (
-          <>
-            <DateRangePicker horizontal="left" date={selectedDate} setDate={setSelectedDate} />
-            <Autocomplete
-              options={lookupResource ? lookupResource[sidebarResource?.serializedAsset] : []}
-              multiple
-              disableCloseOnSelect
-              style={{ width: '300px' }}
-              getOptionLabel={(option: any) => option?.optionLabel}
-              value={selectedAssets}
-              onChange={(event, newValue) => {
-                setSelectedAssets(newValue);
-              }}
-              size="small"
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={`Select ${resources?.serializedAsset?.titlePlural}`}
-                  variant="outlined"
-                  slotProps={{
-                    input: {
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                          {params.InputProps.endAdornment}
-                        </>
-                      )
-                    }
-                  }}
-                />
-              )}
-            />
-          </>
-        )}
+      <div className="flex items-center justify-between gap-2 max-md:flex-wrap">
+        <div className="flex gap-2">
+          <Autocomplete
+            options={resourceList}
+            getOptionLabel={(option) => (option && option?.title) || ''}
+            style={{ width: '350px' }}
+            value={selectedResource}
+            onChange={(event, newValue) => {
+              setSelectedResource(newValue);
+            }}
+            size="small"
+            renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
+          />
+          {selectedResource?.resource === sidebarResource?.serializedAsset && (
+            <>
+              <DateRangePicker horizontal="left" date={selectedDate} setDate={setSelectedDate} />
+              <Autocomplete
+                options={lookupResource ? lookupResource[sidebarResource?.serializedAsset] : []}
+                multiple
+                disableCloseOnSelect
+                style={{ width: '300px' }}
+                getOptionLabel={(option: any) => option?.optionLabel}
+                value={selectedAssets}
+                onChange={(event, newValue) => {
+                  setSelectedAssets(newValue);
+                }}
+                size="small"
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={`Select ${resources?.serializedAsset?.titlePlural}`}
+                    variant="outlined"
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {lookupLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }
+                    }}
+                  />
+                )}
+              />
+            </>
+          )}
+        </div>
+        {topRightSlot}
       </div>
       {columns ? (
         <CustomReactTable
