@@ -1,19 +1,19 @@
-import { ButtonProps, CircularProgress, Menu, useMediaQuery } from '@mui/material';
-import { AddOutlined, ExpandMore } from '@mui/icons-material';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { AddOutlined } from '@mui/icons-material';
+import { ButtonProps, CircularProgress, Popover, ToggleButton, ToggleButtonGroup, useMediaQuery } from '@mui/material';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useHistory } from 'react-router-dom';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import useSearch from 'src/components/Header/SearchBar/useSearch';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 import { SearchFilter } from 'src/components/SearchFilter';
+import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
-import { cn } from 'src/constants/helpers';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import useSearch from 'src/components/Header/SearchBar/useSearch';
-import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
+import RippleButton from 'src/components/RippleButton';
+import { BiChevronDown } from 'react-icons/bi';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -99,11 +99,11 @@ const ListingPageHeader = ({
     ...restOfAddButtonProps
   } = addButtonProps;
 
-  const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, value: string) => {
-    const data = toggleButtonList.find((d) => d.key === value).value;
-    if (setQueryString) history.push(`?type=${data}`);
-    setSelectedType && setSelectedType(data);
-    onToggle && onToggle(event, value);
+  const handleToggle = (event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>, data: { key: string; value: number }) => {
+    const newData = data.value;
+    if (setQueryString) history.push(`?type=${newData}`);
+    setSelectedType && setSelectedType(newData);
+    onToggle && onToggle(event, data.key);
   };
 
   useEffect(() => {
@@ -170,21 +170,7 @@ const ListingPageHeader = ({
             <div className={'flex flex-grow flex-wrap items-center gap-2'}>
               {toggleButtonList ? (
                 <HideWhenOffline>
-                  <ToggleButtonGroup
-                    size="small"
-                    className="align-items-center"
-                    value={toggleButtonList[selectedType - 1]?.key}
-                    exclusive
-                    onChange={(e, value) => handleToggle(e, value)}
-                  >
-                    {toggleButtonList.map((k, index) => {
-                      return (
-                        <ToggleButton value={k.key} key={index}>
-                          {k.key}
-                        </ToggleButton>
-                      );
-                    })}
-                  </ToggleButtonGroup>
+                  <RenderTabs handleToggle={handleToggle} selectedType={selectedType} toggleButtonList={toggleButtonList} />
                 </HideWhenOffline>
               ) : null}
               {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
@@ -271,3 +257,64 @@ const ListingPageHeader = ({
 };
 
 export default ListingPageHeader;
+
+const RenderTabs = ({
+  toggleButtonList,
+  handleToggle,
+  selectedType
+}: {
+  handleToggle: (
+    event: React.MouseEvent<HTMLElement, globalThis.MouseEvent>,
+    data: {
+      key: string;
+      value: number;
+    }
+  ) => void;
+} & Pick<ListingPageHeaderProps, 'toggleButtonList' | 'selectedType'>) => {
+  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  return (
+    <>
+      <RippleButton
+        className="flex items-center gap-1 rounded-[6px] bg-[var(--dark-secondary,#f0f0f0)] p-[4px_5px_4px_10px] text-[13px] font-medium leading-[22.4px] text-[#5b5b5b] outline-transparent focus-within:outline-transparent focus-visible:outline-transparent dark:text-[white]"
+        onClick={handleClick}
+      >
+        {toggleButtonList[selectedType - 1]?.key}
+        <BiChevronDown size={22} className={cn('transition-transform', open ? '[transform:rotate(180deg)]' : '')} />
+      </RippleButton>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+      >
+        <ul className="list-none py-1">
+          {toggleButtonList?.map((d) => (
+            <RippleButton
+              className="list-none px-4 py-2 hover:bg-gray-200 dark:hover:bg-gray-900"
+              component="li"
+              onClick={(e) => {
+                handleClose();
+                handleToggle(e, d);
+              }}
+            >
+              {d.key}
+            </RippleButton>
+          ))}
+        </ul>
+      </Popover>
+    </>
+  );
+};
