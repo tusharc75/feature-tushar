@@ -3100,7 +3100,7 @@ const ReceivingTicket = ({
           onClose={() => {
             setSubStatusLog({ open: false, data: null })
           }}
-          asset={{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }}
+          assets={[{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }]}
           rentalId={rentalManagementData?._id}
           title={subStatusLog.data?.assetNumber}
         />
