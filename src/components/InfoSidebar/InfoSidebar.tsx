@@ -47,7 +47,7 @@ const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () 
   return (
     <div className="flex max-h-[calc(100vh-111px)] flex-grow flex-col [--px:8px] [--py:8px] md:max-h-[calc(100vh-64px)] " style={{ marginTop: y }}>
       <div className="flex items-center justify-between gap-2 border-b px-[--px] py-[--py]">
-        <h6 className="line-clamp-1 text-base font-semibold">{resourceData?.actionName || item?.label}</h6>
+        <h6 className="line-clamp-1 text-base font-semibold">{resourceData?.actionName || item?.actionName}</h6>
         <div className="flex flex-shrink-0 items-center">
           <IconButton onClick={toggleFullScreen} color="primary" size="small">
             {!isFullScreen ? <FiMaximize2 /> : <FiMinimize2 />}
