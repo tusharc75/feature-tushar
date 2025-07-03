@@ -247,7 +247,7 @@ function PlanningView() {
 
   useEffect(() => {
     if ([sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && view === 'list') {
-      setView('calendar')
+      setView('calendar');
     }
   }, [selectedResource]);
 
@@ -263,58 +263,26 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
           )}
         </Box>
         <Box className={`detail-container-v1`}>
-          <div className="absolute right-0 top-0 flex justify-end gap-1 ">
-            {selectedResource &&
-              permissions[selectedResource?.key]?.isCreate &&
-              ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
-                <ThemeButton
-                  className="mr-2"
-                  buttonType="theme"
-                  id={'add-button'}
-                  onClick={(e) => {
-                    setCreateDialog(true);
-                  }}
-                  startIcon={<AddOutlined />}
-                >
-                  Create
-                </ThemeButton>
-              )}
-            {![sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) &&
-              <IconButtonTabs
-                onItemClick={resetSelectedRecords}
-                items={
-                  [
-                    {
-                      value: 'calendar',
-                      icon: <FaRegCalendar />,
-                      tooltip: 'Calendar View'
-                    },
-                    {
-                      value: 'list',
-                      icon: <TfiLayoutListThumbAlt />,
-                      tooltip: 'List View'
-                    }
-                  ] as const
-                }
-                setValue={setView}
-                value={view}
-              />}
-            <HtmlTooltip title={'Refresh'}>
-              <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
-                <RefreshIcon fontSize="small" color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </div>
           {view === 'calendar' && (
             <CalendarView
+              topRightSlot={
+                <TopRightButtons
+                  onClickRefreshIcon={onClickRefreshIcon}
+                  resetSelectedRecords={resetSelectedRecords}
+                  selectedResource={selectedResource}
+                  setCreateDialog={setCreateDialog}
+                  setView={setView}
+                  view={view}
+                />
+              }
               resourceList={resourceList}
               selectedResource={selectedResource}
               setSelectedResource={setSelectedResource}
@@ -325,6 +293,16 @@ function PlanningView() {
           )}
           {view === 'list' && (
             <ListView
+              topRightSlot={
+                <TopRightButtons
+                  onClickRefreshIcon={onClickRefreshIcon}
+                  resetSelectedRecords={resetSelectedRecords}
+                  selectedResource={selectedResource}
+                  setCreateDialog={setCreateDialog}
+                  setView={setView}
+                  view={view}
+                />
+              }
               resourceList={resourceList}
               selectedResource={selectedResource}
               setSelectedResource={setSelectedResource}
@@ -431,7 +409,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => { }}
+          fetchData={() => {}}
           onSuccess={() => {
             onClickRefreshIcon();
           }}
@@ -488,3 +466,54 @@ function PlanningView() {
 }
 
 export default PlanningView;
+
+const TopRightButtons = ({ selectedResource, setCreateDialog, resetSelectedRecords, setView, view, onClickRefreshIcon }) => {
+  const {
+    state: { permissions }
+  }: any = useData();
+  return (
+    <div className="flex justify-end gap-1 ">
+      {selectedResource &&
+        permissions[selectedResource?.key]?.isCreate &&
+        ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
+          <ThemeButton
+            className="mr-2"
+            buttonType="theme"
+            id={'add-button'}
+            onClick={(e) => {
+              setCreateDialog(true);
+            }}
+            startIcon={<AddOutlined />}
+          >
+            Create
+          </ThemeButton>
+        )}
+      {![sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && (
+        <IconButtonTabs
+          onItemClick={resetSelectedRecords}
+          items={
+            [
+              {
+                value: 'calendar',
+                icon: <FaRegCalendar />,
+                tooltip: 'Calendar View'
+              },
+              {
+                value: 'list',
+                icon: <TfiLayoutListThumbAlt />,
+                tooltip: 'List View'
+              }
+            ] as const
+          }
+          setValue={setView}
+          value={view}
+        />
+      )}
+      <HtmlTooltip title={'Refresh'}>
+        <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
+          <RefreshIcon fontSize="small" color="primary" />
+        </IconButton>
+      </HtmlTooltip>
+    </div>
+  );
+};
