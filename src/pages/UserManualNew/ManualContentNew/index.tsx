@@ -4,6 +4,7 @@ import Markdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import { cn } from "src/constants/helpers";
 import MarkdownTOC from "src/pages/UserManualNew/hooks/MarkdownTOC";
+import remarkGfm from "remark-gfm";
 
 export const ManualContentNew = ({ state }) => {
   const { pageData, loading, isMobile } = state;
@@ -16,7 +17,9 @@ export const ManualContentNew = ({ state }) => {
     return <div>Equipt - User Manual</div>;
   }
 
-  const content = pageData[0]?.content || '';
+  const rawContent = pageData[0]?.content || '';
+
+  const content = rawContent.replace(/<[^>]*>/g, '');
 
   return (
     <div
@@ -27,7 +30,13 @@ export const ManualContentNew = ({ state }) => {
     >
       <div className="mx-auto flex w-full flex-grow flex-wrap p-2">
         <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
-          <Markdown rehypePlugins={[rehypeSlug]}>{content}</Markdown>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeSlug]}
+            className="prose dark:prose-invert max-w-none"
+          >
+            {content}
+          </Markdown>
         </div>
         <div className="basis-full px-4 lg:basis-1/4">
           {isMobile ? (

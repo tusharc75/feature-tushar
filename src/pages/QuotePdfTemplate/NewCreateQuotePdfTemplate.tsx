@@ -14,9 +14,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import TinyMce from './../../components/TinyMCE/index';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete, Theme } from '@mui/material';
+import { Autocomplete, CircularProgress, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit, serviceMaster } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -84,6 +84,11 @@ export default function NewCreateQuotePdfTemplate() {
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
 
+  const [services, setServices] = useState([]);
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [stepFields, setStepFields] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const onBackButtonEvent = (e) => {
     if (allowedToEdit) {
       e.preventDefault();
@@ -124,6 +129,20 @@ export default function NewCreateQuotePdfTemplate() {
   }, []);
 
   useEffect(() => {
+    if (selectedServices?.length > 0) {
+      axiosInstance()
+        .get(`${serviceMaster.api}/fields?serviceIds=${selectedServices}`)
+        .then(({ data: { data } }) => {
+          setStepFields(data);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }, [selectedServices]);
+
+
+  useEffect(() => {
     if (formValues && formValues.type) {
       let resource: string = formValues.type;
       if (resource) {
@@ -136,6 +155,27 @@ export default function NewCreateQuotePdfTemplate() {
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
+          });
+      }
+      if (resource === sidebarResource.workOrder) {
+        setLoading(true);
+        axiosInstance()
+          .get(`${serviceMaster.api}`)
+          .then(({ data: { data } }) => {
+            const services =
+              data?.map((service) => {
+                return {
+                  optionValue: service._id,
+                  optionLabel: service.serviceName
+                };
+              }) || [];
+            setServices(services);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          })
+          .finally(() => {
+            setLoading(false);
           });
       }
     }
@@ -168,7 +208,8 @@ export default function NewCreateQuotePdfTemplate() {
       entity: selectedEntity ? [selectedEntity] : [],
       type: '',
       owner: user.user._id,
-      collaborator: []
+      collaborator: [],
+      services: []
     };
     if (id && id !== '0') {
       let tempPdfTemplate = null;
@@ -232,6 +273,7 @@ export default function NewCreateQuotePdfTemplate() {
         initialValues.type = tempPdfTemplate?.type;
         initialValues.owner = tempPdfTemplate?.owner && tempPdfTemplate?.owner !== undefined ? tempPdfTemplate?.owner : user.user._id;
         initialValues.collaborator = tempPdfTemplate?.collaborator ? tempPdfTemplate?.collaborator : [];
+        initialValues.services = tempPdfTemplate?.services ? tempPdfTemplate?.services : [];
 
         setDetails({
           header: tempPdfTemplate?.header,
@@ -268,6 +310,7 @@ export default function NewCreateQuotePdfTemplate() {
           initialValues.type = data?.type;
           initialValues.owner = isClone ? user.user._id : data?.owner || user.user._id;
           initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
+          initialValues.services = data?.services ? data?.services : [];
           setDetails({
             header: data?.header,
             footer: data?.footer,
@@ -290,7 +333,7 @@ export default function NewCreateQuotePdfTemplate() {
               })
             );
             if (isClone) {
-              setAllowedToEdit(true)
+              setAllowedToEdit(true);
               setIsEdit(true);
             }
           }
@@ -300,6 +343,7 @@ export default function NewCreateQuotePdfTemplate() {
       }
     }
     setInitialValues({ ...initialValues });
+    setSelectedServices(initialValues?.services);
   };
 
   const fetchUser = () => {
@@ -379,10 +423,12 @@ export default function NewCreateQuotePdfTemplate() {
               type: importedData?.type,
               owner: initialValues?.owner,
               collaborator: initialValues?.collaborator,
+              services: initialValues?.services,
               entity: initialValues?.entity,
               tabelSummaryLeftSide: importedData?.tabelSummaryLeftSide
             };
             setInitialValues(newInitialValues);
+            setSelectedServices(newInitialValues?.services);
             setIsLandscapChecked(importedData?.landscape);
             setDetails({
               header: importedData?.header,
@@ -460,6 +506,7 @@ export default function NewCreateQuotePdfTemplate() {
           type: values?.type,
           owner: values?.owner,
           collaborator: values?.collaborator,
+          services: values?.services,
           landscape: values?.landscape,
           hideTaxSection: values?.hideTaxSection,
           hideAmountTotalSection: values?.hideAmountTotalSection,
@@ -510,6 +557,7 @@ export default function NewCreateQuotePdfTemplate() {
           type: values?.type,
           owner: values?.owner,
           collaborator: values?.collaborator,
+          services: values?.services,
           landscape: values?.landscape,
           hideTaxSection: values?.hideTaxSection,
           hideAmountTotalSection: values?.hideAmountTotalSection,
@@ -725,10 +773,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -762,10 +810,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -801,10 +849,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -824,6 +872,50 @@ export default function NewCreateQuotePdfTemplate() {
                             </Grid>
                           </Grid>
                         </Grid>
+                        {values?.type === sidebarResource.workOrder && (
+                          <Grid container spacing={2}>
+                            <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                              <Autocomplete
+                                multiple
+                                disabled={!allowedToEdit || !isEdit || loading}
+                                getOptionLabel={(option) => option?.optionLabel}
+                                isOptionEqualToValue={(option, value) => option?.optionValue === value?.optionValue}
+                                value={
+                                  services?.length > 0 ? services?.filter((data) => selectedServices?.some((d) => d === data?.optionValue)) || [] : []
+                                }
+                                options={services || []}
+                                onChange={(e, val: any) => {
+                                  setSelectedServices(val && val?.map((d) => d.optionValue));
+                                  setFieldValue('services', val && val?.map((d) => d.optionValue));
+                                }}
+                                renderInput={(params) => (
+                                  <TextField
+                                    {...params}
+                                    margin="none"
+                                    size="small"
+                                    name="services"
+                                    label="Services"
+                                    variant="outlined"
+                                    error={touched['services'] && Boolean(errors['services'])}
+                                    helperText={touched['services'] && errors['services']}
+                                    fullWidth
+                                    slotProps={{
+                                      input: {
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                          <>
+                                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                            {params.InputProps.endAdornment}
+                                          </>
+                                        )
+                                      }
+                                    }}
+                                  />
+                                )}
+                              />
+                            </Grid>
+                          </Grid>
+                        )}
                       </>
                     )}
                     <Grid>
@@ -1063,7 +1155,7 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         doNotShowUploadFile={true}
-                        variables={variables}
+                        variables={[...variables, ...stepFields]}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1081,7 +1173,7 @@ export default function NewCreateQuotePdfTemplate() {
                         height={400}
                         initialValue={initialValues?.aboveTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                        variables={variables}
+                        variables={[...variables, ...stepFields]}
                         doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
@@ -1101,7 +1193,7 @@ export default function NewCreateQuotePdfTemplate() {
                         height={400}
                         initialValue={initialValues?.belowTable}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
-                        variables={variables}
+                        variables={[...variables, ...stepFields]}
                         doNotShowUploadFile={true}
                         showVariableDropdown={true}
                       />
@@ -1123,7 +1215,7 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         doNotShowUploadFile={true}
-                        variables={variables}
+                        variables={[...variables, ...stepFields]}
                       />
                     </Box>
                     <Box className={classes.tinyMCEContainer}>
@@ -1143,7 +1235,7 @@ export default function NewCreateQuotePdfTemplate() {
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         doNotShowUploadFile={true}
-                        variables={variables}
+                        variables={[...variables, ...stepFields]}
                       />
                     </Box>
                   </div>
