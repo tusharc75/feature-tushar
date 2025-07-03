@@ -85,7 +85,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
-  const [logs, setLogs] = useState([])
+  const [assetLogs, setAsetLogs] = useState([])
   const [columns, setColumns] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [materialFields, setMaterialFields] = useState([]);
@@ -280,48 +280,38 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     );
   };
 
-  const calculateJobDuration = (ele, materialEle) => {
-    const value: any = {}
-
-    if (ele?.length > 0 && materialEle) {
-      value[`price_${rentalManagementData?.currency?.toLowerCase()}`] = materialEle[`${camelCase(ele[0]?.status)}Price_${rentalManagementData?.currency?.toLowerCase()}`]
-      value.actualJobDuration = sum(ele?.map(item => {
-        const start = dayjs(item.startDate).startOf('day');
-        const end = dayjs(item.endDate).endOf('day');
-        const diffInDays = end.diff(start, 'day');
-        return diffInDays + 1;
-      }))
-      let finalPrice = value?.[`price_${rentalManagementData?.currency?.toLowerCase()}`]
-      if (materialEle?.pricingMethod === 'Per Day') {
-        finalPrice = finalPrice * value.actualJobDuration
-      } else if (materialEle?.pricingMethod === 'Per Week') {
-        finalPrice = finalPrice * (value.actualJobDuration / 7)
-      }
-      value[`totalPrice_${rentalManagementData?.currency?.toLowerCase()}`] = finalPrice
-      value[`finalPrice_${rentalManagementData?.currency?.toLowerCase()}`] = finalPrice
-    }
-
-    return value
-  }
-
   const getMaterialLogs = (element, logs, rows) => {
+    const currency = rentalManagementData?.currency?.toLowerCase();
     const start = dayjs.tz(new Date(element.actualStartDate)).startOf("day");
     const end = dayjs(new Date(endDate));;
-
-    const filtered = logs?.filter(item => {
+    const filteredLogs = logs?.filter(item => {
       const itemStart = dayjs(item?.startDate);
       const itemEnd = dayjs(item?.endDate);
       return item?.uniqueId === element?.uniqueId && item?.inventory === element?.inventory && itemStart.isSameOrAfter(start) && itemEnd.isSameOrBefore(end);
     });
-
-    const groupedByStatus = groupBy(filtered, 'status');
-
-    Object.values(groupedByStatus)?.forEach(ele => {
-      rows.push({
-        ...element,
-        ...calculateJobDuration(ele, element)
-      })
-    });
+    if (filteredLogs?.length) {
+      const groupedByStatus = groupBy(filteredLogs, 'status');
+      for (const [key, value] of Object.entries(groupedByStatus)) {
+        const values: any = {}
+        let calValues: any = {}
+        if (value?.length > 0) {
+          if (key !== ASSET_STATUS.inUse) {
+            values[`price_${currency}`] = element[`${camelCase(key)}Price_${currency}`]
+          }
+          values.actualJobDuration = sum(value?.map(item => {
+            const start = dayjs(item.startDate).startOf('day');
+            const end = dayjs(item.endDate).endOf('day');
+            const diffInDays = end.diff(start, 'day');
+            return diffInDays + 1;
+          }))
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
+          rows.push({ ...element, ...calValues })
+        }
+      }
+    }
+    else {
+      rows.push({ ...element })
+    }
   }
 
   const fetchData = async () => {
@@ -336,7 +326,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
       const logs: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/logs?assets=${JSON.stringify(data?.inventory?.map(m => ({ asset: m?.inventory, uniqueId: m?._id })))}`);
-      setLogs(logs?.data?.data)
+      setAsetLogs(logs?.data?.data)
     }
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
@@ -773,9 +763,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
         }
         element.isAppliedBill = true;
-        rows.push({ ...element, ...calValues });
-        if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
-          getMaterialLogs(element, logs, rows)
+        if (rentalResourceData?.policy?.subStatusDateWiseCapture && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory)) {
+          getMaterialLogs({ ...element, ...calValues }, assetLogs, rows)
+        }
+        else {
+          rows.push({ ...element, ...calValues });
         }
         if (extraRows?.length) {
           rows = [...rows, ...extraRows];
