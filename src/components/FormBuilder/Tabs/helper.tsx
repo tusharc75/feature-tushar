@@ -57,7 +57,13 @@ export const resourcePolicy = [
         fieldLabel: 'Show Transfer Assets',
         type: 'checkBox',
         defaultValue: false
-      }
+      },
+      {
+        fieldName: 'onlyConsumedConsumablesAddInCost',
+        fieldLabel: 'Only Consumed Consumables Add In Cost',
+        type: 'checkBox',
+        defaultValue: false
+      },
     ]
   },
   {
