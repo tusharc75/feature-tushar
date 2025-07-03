@@ -1,19 +1,19 @@
 import { AddOutlined } from '@mui/icons-material';
-import { ButtonProps, CircularProgress, Popover, ToggleButton, ToggleButtonGroup, useMediaQuery } from '@mui/material';
+import { ButtonProps, CircularProgress, Popover, useMediaQuery } from '@mui/material';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { BiChevronDown } from 'react-icons/bi';
 import { useHistory } from 'react-router-dom';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+// import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
+import RippleButton from 'src/components/RippleButton';
 import { SearchFilter } from 'src/components/SearchFilter';
 import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
-import RippleButton from 'src/components/RippleButton';
-import { BiChevronDown } from 'react-icons/bi';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -74,7 +74,7 @@ const ListingPageHeader = ({
   actionMenuItems,
   showSearchInMobile = false
 }: ListingPageHeaderProps) => {
-  const walkmeInstance = useGetWalkmeInstance();
+  // const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
 
