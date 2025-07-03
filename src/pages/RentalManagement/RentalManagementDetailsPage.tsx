@@ -100,8 +100,8 @@ const RentalManagementDetailsPage = () => {
   const [resourceData, setResourceData] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [assets, setAssets] = useState(null);
-  const [assetStatusOptions, setAssetStatusOptions] = useState([])
-  const [isQuotationStep, setIsQuotationStep] = useState(false)
+  const [assetStatusOptions, setAssetStatusOptions] = useState([]);
+  const [isQuotationStep, setIsQuotationStep] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -193,17 +193,21 @@ const RentalManagementDetailsPage = () => {
           data.data.some((o) => {
             if (o?.fieldData?.fieldName === 'status') {
               setAllowUpdateStatus(o?.isUpdate);
-              let options = o?.fieldData?.option?.filter(_o => [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(_o?.optionValue))
+              let options = o?.fieldData?.option?.filter((_o) =>
+                [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.lost]?.includes(
+                  _o?.optionValue
+                )
+              );
               if (user?.user?.brandPolicy?.serializedAssetScrapApproval) {
-                options = options?.filter(_o => _o?.optionValue != ASSET_STATUS.scrap)
+                options = options?.filter((_o) => _o?.optionValue != ASSET_STATUS.scrap);
               }
-              setAssetStatusOptions([...options])
+              setAssetStatusOptions([...options]);
               return true;
             }
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -221,14 +225,14 @@ const RentalManagementDetailsPage = () => {
       } else {
         data = await findOne(objectStore.rentalManagement, id);
       }
-      var steps = user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
-        ? rentalManagementSteps
-        : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
+      var steps =
+        user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep
+          ? rentalManagementSteps
+          : rentalManagementSteps?.filter((e) => !['Quotation'].includes(e.name));
       if (user?.user?.brandPolicy?.rentalQuotation || data?.addQuotationStep) {
-        setIsQuotationStep(true)
-      }
-      else {
-        setIsQuotationStep(false)
+        setIsQuotationStep(true);
+      } else {
+        setIsQuotationStep(false);
       }
       if (!user?.user?.brandPolicy?.rentalService) {
         steps = steps?.filter((e) => !['Add Services'].includes(e.name));
@@ -260,7 +264,9 @@ const RentalManagementDetailsPage = () => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
+      } = await axiosInstance().get(
+        `/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`
+      );
       if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
         setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
       }
@@ -546,11 +552,11 @@ const RentalManagementDetailsPage = () => {
                 setCurrentStep={setCurrentStep}
                 handlePrev={
                   rentalSteps[currentStep]?.name === 'Quotation' &&
-                    allowedToEdit &&
-                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
+                  allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                     ? () => {
-                      setShowCancelConfirmBox({ open: true, isQuote: true });
-                    }
+                        setShowCancelConfirmBox({ open: true, isQuote: true });
+                      }
                     : null
                 }
                 isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -575,13 +581,15 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? isQuotationStep ? true : false
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? isQuotationStep
+                        ? true
+                        : false
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
@@ -601,13 +609,15 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? isQuotationStep ? true : false
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      ? isQuotationStep
+                        ? true
+                        : false
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
@@ -651,7 +661,7 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
                   rentalPolicyData={resourceData?.policy}
-                  assetStatusOptions={assetStatusOptions?.filter(o => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
+                  assetStatusOptions={assetStatusOptions?.filter((o) => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
                   assetPolicyData={assetPolicyData}
                 />
               )}
