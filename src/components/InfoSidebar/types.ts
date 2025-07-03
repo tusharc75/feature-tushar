@@ -1,10 +1,7 @@
+import React from 'react';
+
 export type PositionType = 'top' | 'bottom' | 'left' | 'right';
-export type PositionValues = Partial<{
-  top: string;
-  bottom: string;
-  left: string;
-  right: string;
-}>;
+export type PositionValues = React.CSSProperties;
 
 export type AutoPosition = PositionType | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
@@ -60,17 +57,16 @@ export type AtedBy = {
 };
 export type Action = {
   _id?: string;
-  actionName?: string;
-  actionId?: string;
-  content?: string;
-  anchorElementPadding?: React.CSSProperties;
-  autoPosition?: string;
-  buttonPosition?: React.CSSProperties;
-  insideAnchor?: boolean;
-  label?: string;
-  manualPosition?: boolean;
-  originalUrl?: string;
-  targetSelector?: string;
-  tooltip?: string;
-  url?: string;
+  actionName: string;
+  targetSelector: string;
+  url: string;
+  originalUrl: string;
+  anchorElementPadding: React.CSSProperties;
+  buttonPosition: React.CSSProperties;
+  tooltip: string;
+  manualPosition: boolean;
+  insideAnchor: boolean;
+  autoPosition: AutoPosition;
+  content: string;
+  actionId: string;
 };
