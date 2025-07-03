@@ -23,7 +23,7 @@ const RenderInfoInspector = () => {
       onElementClick: ({ selector, url }) =>
         handlePostMessage({
           type: 'select',
-          payload: { targetSelector: selector, url, originalUrl: window.location.href }
+          payload: { targetSelector: selector, url, originalUrl: `${window.location.pathname}${window.location.search}${window.location.hash}` }
         })
     });
 
