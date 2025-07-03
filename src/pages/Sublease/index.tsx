@@ -46,11 +46,16 @@ const Sublease = () => {
       value: 1
     },
     {
-      key: `All ${resources?.sublease?.titlePlural}`,
+      key: `Open ${resources?.sublease?.titlePlural}`,
       value: 2
-    }, {
-      key: `Closed ${resources?.sublease?.titlePlural}`,
+    },
+    {
+      key: `All ${resources?.sublease?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.sublease?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -138,11 +143,9 @@ const Sublease = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    }
-    else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -280,12 +283,7 @@ const Sublease = () => {
             <span>{`Calendar`}</span>
           </Button>
         )}
-        {referenceType ? <Chip
-          className="ml-3"
-          color="primary"
-          label={`Rental Job : ${referenceType}`}
-          onDelete={updateQueryParams} />
-          : null}
+        {referenceType ? <Chip className="ml-3" color="primary" label={`Rental Job : ${referenceType}`} onDelete={updateQueryParams} /> : null}
       </>
     );
   };
@@ -364,11 +362,12 @@ const Sublease = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.sublease?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.subleaseName || ''}`
-            : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.sublease?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

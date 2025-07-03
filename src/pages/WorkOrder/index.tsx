@@ -63,23 +63,30 @@ const WorkOrder = () => {
       value: 1
     },
     {
-      key: `All ${resources?.workOrder?.titlePlural}`,
+      key: `Open ${resources?.workOrder?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.workOrder?.titlePlural}`,
+      key: `All ${resources?.workOrder?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.workOrder?.titlePlural}`,
+      value: 4
     }
   ];
 
-  const [selectedResource, setSelectedResource] = useState({ 'value': '', label: 'All' });
+  const [selectedResource, setSelectedResource] = useState({ value: '', label: 'All' });
 
-  const resourceItems = useMemo(() => [
-    { label: 'All', value: '' },
-    ...(permissions?.repairOrder?.isRead ? [{ label: resources?.repairOrder?.titlePlural, value: sidebarResource.repairOrder }] : []),
-    ...(permissions?.productionOrder?.isRead ? [{ label: resources?.productionOrder?.titlePlural, value: sidebarResource.productionOrder }] : []),
-    ...(permissions?.assemblyOrder?.isRead ? [{ label: resources?.assemblyOrder?.titlePlural, value: sidebarResource.assemblyOrder }] : []),
-  ], [permissions, resources]);
+  const resourceItems = useMemo(
+    () => [
+      { label: 'All', value: '' },
+      ...(permissions?.repairOrder?.isRead ? [{ label: resources?.repairOrder?.titlePlural, value: sidebarResource.repairOrder }] : []),
+      ...(permissions?.productionOrder?.isRead ? [{ label: resources?.productionOrder?.titlePlural, value: sidebarResource.productionOrder }] : []),
+      ...(permissions?.assemblyOrder?.isRead ? [{ label: resources?.assemblyOrder?.titlePlural, value: sidebarResource.assemblyOrder }] : [])
+    ],
+    [permissions, resources]
+  );
 
   useEffect(() => {
     fetchGridColumns();
@@ -207,17 +214,16 @@ const WorkOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (selectedResource?.value !== '') {
-      deepFilters.push({ field: 'type', term: [selectedResource.value] })
+      deepFilters.push({ field: 'type', term: [selectedResource.value] });
     }
 
     if (filterByIds?.length) {
@@ -439,11 +445,12 @@ const WorkOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.workOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.workOrderNumber || ''}`
-              : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.workOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

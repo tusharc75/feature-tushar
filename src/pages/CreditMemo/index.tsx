@@ -45,24 +45,35 @@ const CreditMemo = () => {
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
-  const [allFields, setAllFields] = useState(null)
+  const [allFields, setAllFields] = useState(null);
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
 
-  const types = useMemo(() => [
-    {
-      key: `My ${resources?.creditMemo?.titlePlural}`,
-      value: 1
-    },
-    {
-      key: `All ${resources?.creditMemo?.titlePlural}`,
-      value: 2
-    },
-    ...(allFields?.some(f => f?.fieldData?.fieldName === 'status') ? [{
-      key: `Closed ${resources?.creditMemo?.titlePlural}`,
-      value: 3
-    }] : [])
-  ], [allFields])
+  const types = useMemo(
+    () => [
+      {
+        key: `My ${resources?.creditMemo?.titlePlural}`,
+        value: 1
+      },
+      {
+        key: `Open ${resources?.creditMemo?.titlePlural}`,
+        value: 2
+      },
+      {
+        key: `All ${resources?.creditMemo?.titlePlural}`,
+        value: 3
+      },
+      ...(allFields?.some((f) => f?.fieldData?.fieldName === 'status')
+        ? [
+            {
+              key: `Closed ${resources?.creditMemo?.titlePlural}`,
+              value: 4
+            }
+          ]
+        : [])
+    ],
+    [allFields]
+  );
 
   useEffect(() => {
     fetchGridColumns();
@@ -78,7 +89,7 @@ const CreditMemo = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
     data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)))
+    setAllFields(JSON.parse(JSON.stringify(data)));
     data?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
         const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
@@ -135,14 +146,14 @@ const CreditMemo = () => {
       deepFilter = `?`;
     }
 
-    if (allFields?.filter(f => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2) {
+    if (allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2) {
       if (selectedType === 1) {
         deepFilter = deepFilter + `&myRecords=1`;
       }
-      if (allFields?.some(f => f?.fieldData?.fieldName === 'status')) {
-        if (selectedType === 1 || selectedType === 2) {
+      if (allFields?.some((f) => f?.fieldData?.fieldName === 'status')) {
+        if (selectedType === 2) {
           deepFilter = deepFilter + `&openRecords=1`;
-        } else {
+        } else if (selectedType === 4) {
           deepFilter = deepFilter + `&closedRecords=1`;
         }
       }
@@ -319,7 +330,7 @@ const CreditMemo = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={allFields?.filter(f => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : []}
+          toggleButtonList={allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : []}
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
