@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - uat
+      - staging
 
 permissions:
   id-token: write
@@ -12,7 +13,7 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment: uat
+    environment: ${{ github.ref_name }}
     steps:
       - name: 'Checkout GitHub repository'
         uses: actions/checkout@v3
@@ -27,26 +28,36 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Env Secrets
+        id: secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v2
+        with:
+          secret-ids: ENV_SECRETS, ${{vars.AWS_SECRET_ARN}}
+
       - name: 'Build and Push Image to ECR'
         if: success()
         id: build
+        env:
+          CONTAINER_PREFIX: ${{ vars.CONTAINER_PREFIX }}
         run: |
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY=${{ secrets.ECR_REPOSITORY }}
-          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$TIMESTAMP
+          IMAGE_URI=$ECR_REGISTRY/$ECR_REPOSITORY:$CONTAINER_PREFIX-$TIMESTAMP
+          IMAGE_URI_LATEST=$ECR_REGISTRY/$ECR_REPOSITORY:$CONTAINER_PREFIX-latest
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
           echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-          echo "${{ vars.ENV_VAR }}" >> .env
+          echo "$ENV_SECRETS" >> .env
           # Build the Docker image
-          docker build -t $IMAGE_URI .
+          docker build -t $IMAGE_URI  -t $IMAGE_URI_LATEST .
           # Push the Docker image to ECR
           docker push $IMAGE_URI
+          docker push "$IMAGE_URI_LATEST"
 
       - name: 'Deploy to EKS'
         if: success()
         env:
-          DEPLOYMENT_NAME: frontend-deployment
+          DEPLOYMENT_NAME: ${{vars.DEPLOYMENT_NAME}}
           AWS_REGION: ${{ secrets.AWS_REGION }}
           EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
         run: |
