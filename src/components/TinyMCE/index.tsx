@@ -412,12 +412,20 @@ export default function TinyMCE(props) {
                           onClose={closeActions}
                         >
                           {variables &&
-                            variables.map((o) => {
-                              return (
-                                <MenuItem onClick={() => handleVaribleSelect(o)} value={o}>
-                                  {o === 'pDFTemplate' ? 'PDF Template' : startCase(o)}
-                                </MenuItem>
-                              );
+                            variables?.map((o) => {
+                              if (typeof o === 'object') {
+                                return (
+                                  <MenuItem onClick={() => handleVaribleSelect(o.fieldName)} value={o.fieldName}>
+                                    {o.fieldLabel}
+                                  </MenuItem>
+                                );
+                              } else {
+                                return (
+                                  <MenuItem onClick={() => handleVaribleSelect(o)} value={o}>
+                                    {o === 'pDFTemplate' ? 'PDF Template' : startCase(o)}
+                                  </MenuItem>
+                                );
+                              }
                             })}
                         </Menu>
                       </Box>
