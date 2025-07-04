@@ -290,6 +290,10 @@ import FieldView from 'src/pages/FieldView';
 import { firebaseConfig } from './firebase';
 import CustomPdfTemplate from './pages/CustomPdfTemplate';
 import CreateCustomPdfTemplate from './pages/CustomPdfTemplate/CreateCustomPdfTemplate';
+import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
+import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
+import UserManualNew from 'src/pages/UserManualNew';
+
 var notificationInterval: any = null;
 
 function App() {
@@ -366,7 +370,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -563,6 +567,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path="/user">
               <User />
+            </PrivateRoute>
+            <PrivateRoute exact path="/user-manual-new*" userManualNew={true}>
+              <UserManualNew />
             </PrivateRoute>
             <PrivateRoute exact path="/user-manual*" userManual={true}>
               <UserManual />
@@ -1314,6 +1321,8 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
           {user && <DesktopDM />}
+          <RenderAllInfoButtons />
+          <RenderInfoInspector />
         </ErrorBoundaryComponent>
       </AnimatePresence>
 

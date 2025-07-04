@@ -64,9 +64,9 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
-        if (element.fieldName === 'competence') {
-          element.option = technicianData.competenciesWithIds;
-        }
+        // if (element.fieldName === 'competence') {
+        //   element.option = technicianData.competenciesWithIds;
+        // }
       });
       setInitialData({
         fields: data,

@@ -13,13 +13,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import {
-  checkIsAllowedToDelete,
-  getDefaultMyRecordType,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from '../../constants/helpers';
+import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
@@ -37,12 +31,16 @@ const PurchaseRequisition = () => {
       value: 1
     },
     {
-      key: `All ${resources?.purchaseRequisition.titlePlural}`,
+      key: `Open ${resources?.purchaseRequisition.titlePlural}`,
       value: 2
     },
     {
-      key: `Converted ${resources?.purchaseRequisition?.titlePlural}`,
+      key: `All ${resources?.purchaseRequisition.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Converted ${resources?.purchaseRequisition?.titlePlural}`,
+      value: 4
     }
   ];
   const renderedFrom = camelCase(sidebarResource.purchaseRequisition);
@@ -117,7 +115,7 @@ const PurchaseRequisition = () => {
               setShowDeleteConfirmBox(true);
             }}
           >
-            <DeleteIcon color={row?.original?.canDelete ? "error" : 'disabled'} fontSize='small' />
+            <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} fontSize="small" />
           </IconButton>
         </HtmlTooltip>
       </>
@@ -131,10 +129,9 @@ const PurchaseRequisition = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -170,7 +167,10 @@ const PurchaseRequisition = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = u?.canDelete && permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
+          finalObject['canDelete'] =
+            u?.canDelete &&
+            permissions?.purchaseRequisition?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, finalObject?.ownerId);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -235,7 +235,6 @@ const PurchaseRequisition = () => {
       </>
     );
   };
-
 
   const LeftSideButtons = () => {
     return (

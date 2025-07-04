@@ -1,3 +1,4 @@
+import { camelCase, orderBy } from "lodash";
 import axiosInstance from "src/axios/axiosInstance";
 import routes from "src/components/Helpers/Routes";
 import { autoCalculateSpecificFields } from "src/constants/formulaUtility";
@@ -9,11 +10,14 @@ export const getPricingConditions = (resource: any, referenceData: any, material
     data.conditionType = [conditionType];
     const rows: any = []
     material?.forEach((ele) => {
-      const obj = {
+      const obj: any = {
         materialId: ele?.materialId,
         materialType: ele?.type,
         qty: ele?.qty || 1,
         currency: referenceData?.currency
+      }
+      if (ele?.product) {
+        obj.product = ele.product
       }
       rows.push(obj)
     })
@@ -51,7 +55,7 @@ export const getPricingConditions = (resource: any, referenceData: any, material
   }
 };
 
-export const getPricingValue = (row: any, priceData: any, currency: any, fields: any[]) => {
+export const getPricingValue = (row: any, priceData: any, currency: any, fields: any[], subStatusFields: any[] = []) => {
   let rateList = [];
   let changeUnit = false;
   rateList = priceData?.filter((e) => e.materialId === row.materialId && e.materialType === row.type && e.unit === row.unit);
@@ -67,13 +71,57 @@ export const getPricingValue = (row: any, priceData: any, currency: any, fields:
     row[priceFieldName] = rateList[0].mrp;
     row['pricingCondition'] = rateList[0].conditionId;
     row['pricingMethod'] = rateList[0].pricingMethod?.trim();
+    if (subStatusFields?.length > 0) {
+      subStatusFields?.forEach(sf => {
+        const field = fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
+        if (field) {
+          row[`${field?.fieldName}_${currency?.toLowerCase()}`] = rateList[0]?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
+        }
+      });
+    }
     const calValues1 = autoCalculateSpecificFields({ pricingMethod: row['pricingMethod'] }, row, fields);
     Object.assign(row, calValues1);
     const calValues2 = autoCalculateSpecificFields({ [priceFieldName]: rateList[0].mrp }, row, fields);
     Object.assign(row, calValues2);
+    if (rateList[0]?.durationBasedPricing?.length > 0) {
+      let price = 0
+      const durationBasedPricing = orderBy(rateList[0]?.durationBasedPricing, ['duration'], ['asc'])
+      for (let i = 0; i < durationBasedPricing?.length; i++) {
+        if (row?.estimateJobDuration === durationBasedPricing[i].duration) {
+          return durationBasedPricing[i].price;
+        }
+        if (row?.estimateJobDuration < durationBasedPricing[i].duration) {
+          return price ? price : 0;
+        }
+        price = durationBasedPricing[i]?.price;
+      }
+      if (price) {
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: price }, row, fields);
+        Object.assign(row, calValues);
+      }
+    }
   }
   return row;
 };
+
+export const getDurationBasedPrice = (row: any, pricingList: any[]) => {
+  let price = 0
+  const priceValue = pricingList?.find(d => row?.materialId === d?.materialId && row?.type === d?.materialType && d.conditionId === row['pricingCondition'] && d.pricingMethod === row['pricingMethod'] && d.unit === row['unit'])
+  if (priceValue && priceValue?.durationBasedPricing?.length > 0) {
+    const durationBasedPricing = orderBy(priceValue?.durationBasedPricing, ['duration'], ['asc'])
+    for (let i = 0; i < durationBasedPricing?.length; i++) {
+      if (row?.estimateJobDuration === durationBasedPricing[i].duration) {
+        return durationBasedPricing[i].price;
+      }
+      if (row?.estimateJobDuration < durationBasedPricing[i].duration) {
+        return price ? price : 0;
+      }
+      price = durationBasedPricing[i]?.price;
+    }
+  }
+
+  return price
+}
 
 export const getTaxList = async (user: any, referenceData: any, fields: any, materialType: any, taxApplicableField = 'billingAddress') => {
   let data = []

@@ -16,6 +16,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import {
   ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
+  DOA_STATUS,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
@@ -503,6 +504,7 @@ const Service = ({
 
   const isAllowedToServiceEdit =
     !completed &&
+    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
     (allowedToEdit ||
       selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
       (!selectedService?.assignedUsers?.length && !selectedService?.competencies?.length) ||
@@ -539,7 +541,7 @@ const Service = ({
       id: '1',
       onClick: openAddServiceActions,
       iconForMobile: <Add />,
-      disabled: allowedToEdit && !completed ? false : true,
+      disabled: allowedToEdit && !completed && quotationData?.status != QUOTATION_STATUS.sentToCustomer ? false : true,
       children: (
         <>
           <ExpandMore fontSize="small" className="-ml-2" /> Add
@@ -838,6 +840,7 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
                     ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
                     !completed
                     ? false
@@ -858,7 +861,7 @@ const Service = ({
                 id={'assignTechnicians'}
                 group="Add/Assign"
                 disabled={
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed && quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -875,7 +878,7 @@ const Service = ({
               <ActionMenuItem
                 group="Add/Assign"
                 id={'AssignWorkStations'}
-                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) ? false : true}
+                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && quotationData?.status != QUOTATION_STATUS.sentToCustomer ? false : true}
                 onClick={() => {
                   setWorkStationAssignDialog(true);
                   setAnchorEl(null);
@@ -1013,7 +1016,7 @@ const Service = ({
               <ActionMenuItem
                 group="Service Actions"
                 id={'delete'}
-                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
+                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed && quotationData?.status != QUOTATION_STATUS.sentToCustomer ? false : true}
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);

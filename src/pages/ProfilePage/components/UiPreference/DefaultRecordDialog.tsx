@@ -26,7 +26,7 @@ import SearchBox from 'src/components/Helpers/SearchBox';
 import Grid from '@mui/material/Grid2';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-const recordOptions: string[] = ['All', 'My'];
+const recordOptions: string[] = ['All', 'My', 'Open'];
 
 const DefaultRecordDialog = ({ userData, handleClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);

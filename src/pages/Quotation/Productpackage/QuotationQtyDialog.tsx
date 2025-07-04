@@ -41,6 +41,7 @@ interface EditDialogProps {
   isInlineEdit?: Boolean;
   showSaveAndNext?: Boolean;
   loadingEdit?: Boolean;
+  parentProduct?: any;
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -56,7 +57,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   isBulkedit,
   isInlineEdit = false,
   showSaveAndNext,
-  loadingEdit
+  loadingEdit,
+  parentProduct = null
 }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -99,6 +101,11 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
+
+    if ([QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)) {
+      data = data?.filter((e) => !['pricingMethod', 'estimateStartDate', 'estimateEndDate', 'estimateJobDuration']?.includes(e?.fieldName))
+    }
+
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     if (isBulkedit) {
@@ -213,7 +220,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
           {
             materialId: rowData.materialId,
             type: rowData.type,
-            qty: 1
+            qty: 1,
+            ...(parentProduct ? { product: parentProduct } : {})
           }
         ],
         conditionType
@@ -228,7 +236,7 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
     if (values['unit'] && values['unit'] !== '') {
       tempPriceCondition = tempPriceCondition?.filter((e) => e.unit === values['unit']);
     }
-    if (values['pricingMethod'] && values['pricingMethod'] !== '') {
+    if (values['pricingMethod'] && values['pricingMethod'] !== '' && ![QUOTATION_TYPE.salesOrder, QUOTATION_TYPE.repairOrder].includes(quotationData.type)) {
       tempPriceCondition = tempPriceCondition?.filter((e) => e.pricingMethod === values['pricingMethod']);
     }
     tempPriceCondition = uniqBy(

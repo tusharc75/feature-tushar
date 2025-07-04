@@ -12,12 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
-import CustomReactTable, {
-  getStaticFields,
-  gridFilterParser,
-  useColumns,
-  useTableReducer
-} from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -57,12 +52,16 @@ const RepairOrder = () => {
       value: 1
     },
     {
-      key: `All ${resources?.repairOrder?.titlePlural}`,
+      key: `Open ${resources?.repairOrder?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.repairOrder?.titlePlural}`,
+      key: `All ${resources?.repairOrder?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.repairOrder?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -149,10 +148,9 @@ const RepairOrder = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
@@ -195,7 +193,10 @@ const RepairOrder = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
           finalObject['canDelete'] =
-            permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete && !u?.deleted;
+            permissions?.repairOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) &&
+            u?.canDelete &&
+            !u?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -360,11 +361,12 @@ const RepairOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.repairOrder?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.repairOrderNumber}`
-              : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.repairOrder?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

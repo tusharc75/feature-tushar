@@ -1,7 +1,8 @@
-import { Box, CircularProgress, Grid, TextField } from '@mui/material';
+import { Box, CircularProgress, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import React from 'react';
 import { getResourceField } from '../helper';
+import Grid from '@mui/material/Grid2';
 
 function FieldDependent({ fields, values, fieldSet }) {
   const [resourceFields, setResourceFields] = React.useState([]);
@@ -28,7 +29,7 @@ function FieldDependent({ fields, values, fieldSet }) {
   return (
     <Box pt={1} pb={1}>
       <Grid container spacing={1}>
-        <Grid item xs={6} sm={6} md={6}>
+        <Grid size={{ xs: 6, sm: 6, md: 6 }}>
           <Autocomplete
             id="lookup-dependent-on"
             options={fields && fields.filter((_f) => _f._id !== values['_id'] && ['dropDown', 'multiSelect']?.includes(_f.type) && _f?.lookup)}
@@ -48,7 +49,7 @@ function FieldDependent({ fields, values, fieldSet }) {
           />
         </Grid>
         {values['lookupDependentOn'] && (
-          <Grid item xs={6} sm={6} md={6}>
+          <Grid size={{ xs: 6, sm: 6, md: 6 }}>
             <Autocomplete
               id="lookup-dependent-on-field"
               options={resourceFields}
