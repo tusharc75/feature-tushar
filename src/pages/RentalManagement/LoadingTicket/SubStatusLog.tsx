@@ -4,7 +4,7 @@ import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
-import { CustomDialogTransition, displayDate, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { CustomDialogTransition, displayDate, displayDateTime, rentalManagement, sidebarResource } from "src/constants/helpers";
 import { Link } from 'react-router-dom';
 import routes from "src/components/Helpers/Routes";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
@@ -101,7 +101,7 @@ const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
     },
     {
       accessor: 'transDate',
-      Header: 'Updated Date',
+      Header: 'Rransaction date',
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
@@ -110,7 +110,7 @@ const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
           <>
             {row?.original?.transDate ? (
               <>
-                <h5 className="text-truncate">{displayDate(row.original?.transDate)}</h5>
+                <h5 className="text-truncate">{displayDateTime(row.original?.transDate)}</h5>
               </>
             ) : (
               <NoDataCell />
