@@ -5,6 +5,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   ASSET_STATUS,
   checkIsAllowedToEdit,
+  RENTAL_STATUS,
   RENTAL_STEPS,
   rentalManagement,
   serializedAsset,
@@ -92,7 +93,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
         data = await findOne(objectStore.rentalManagement, rentalJob);
       }
       setLoading(false);
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData));
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData) && ![RENTAL_STATUS.closed]?.includes(data?.status));
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
