@@ -25,11 +25,16 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
       {routes.map((route, index) => {
         return index !== routes.length - 1 ? (
           isConfirmBeforeClick ? (
-            <span key={index} id={`bread-crumb-${index + 1}`} className={linkClassName} onClick={() => onBreadCrumbClick(route.path)}>
+            <span
+              key={index}
+              id={`bread-crumb-${index + 1}`}
+              className={`${linkClassName} flex items-center`}
+              onClick={() => onBreadCrumbClick(route.path)}
+            >
               {route.title}
             </span>
           ) : (
-            <Link key={index} id={`bread-crumb-${index + 1}`} to={route.path} className={linkClassName}>
+            <Link key={index} id={`bread-crumb-${index + 1}`} to={route.path} className={`${linkClassName} flex items-center`}>
               {route.title}
             </Link>
           )
@@ -42,7 +47,7 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
             }}
             id={`bread-crumb-${index + 1}`}
             key={index}
-            className={lastLinkClassName}
+            className={`${linkClassName} flex items-center`}
           >
             {route.title}
           </span>
