@@ -106,9 +106,7 @@ export const getStylesReactMethod = ({
           containerStyle = {
             ...containerStyle,
             paddingLeft: `calc(${buttonSize}px + ${computedStyle.paddingLeft})`,
-            minHeight: `${buttonSize}px`,
-            display: 'flex',
-            alignItems: 'center'
+            minHeight: `${buttonSize}px`
           };
           buttonStyle = { top: '50%', transform: 'translateY(-50%)', left: '0px' };
         } else {
@@ -121,9 +119,7 @@ export const getStylesReactMethod = ({
           containerStyle = {
             ...containerStyle,
             paddingRight: `calc(${buttonSize}px + ${computedStyle.paddingRight})`,
-            minHeight: `${buttonSize}px`,
-            display: 'flex',
-            alignItems: 'center'
+            minHeight: `${buttonSize}px`
           };
           buttonStyle = { top: '50%', transform: 'translateY(-50%)', right: '0px' };
         } else {
