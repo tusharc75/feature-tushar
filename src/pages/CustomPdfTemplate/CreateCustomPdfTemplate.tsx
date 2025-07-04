@@ -10,21 +10,26 @@ import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit, customPdfTemplate } from '../../constants/helpers';
+import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { isEqual } from 'lodash';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import PdfEditor from './PdfEditor.tsx';
+import PdfEditor from './PdfEditor';
 import { CUSTOM_A4_PDF } from '@pdfme/common';
+import { generate } from '@pdfme/generator';
+import { getPlugins } from './PdfEditor/plugin';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
   owner: string().required('Owner is required'),
   type: string().required('Type is required')
 });
-  const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
+const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
 
+const DEFAULT_EMPTY_PDFME_TEMPLATE = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
 
 export default function CreateCustomPdfTemplate() {
   const { id } = useParams();
@@ -35,36 +40,36 @@ export default function CreateCustomPdfTemplate() {
   const [isClone] = useState(history.location.state?.isClone ? true : false);
 
   const {
-    state: { user, selectedEntity, permissions, resources }
+    state: { user, selectedEntity }
   }: any = useData();
 
+  const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
+  const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
   const [ownerCollaboratorDataConst, setOwnerCollaboratorDataConst] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
-  // const [pdfResourceOption, setPdfResourceOption] = useState(null);
-
   const [formValues, setFormValues] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
 
   const [template, setTemplate] = useState<any>(() => {
+    if (id === '0') {
+      return DEFAULT_EMPTY_PDFME_TEMPLATE;
+    }
     try {
       const storedTemplate = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       if (storedTemplate) {
-        // Parse as 'any' first to avoid strict type issues with JSON.parse
         const parsed: any = JSON.parse(storedTemplate);
-        // Basic check to ensure it loosely resembles a Template type
         if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-          return parsed as any; // Cast to Template if basic structure is there
+          return parsed as any;
         }
       }
     } catch (error) {
-      // Handle parsing errors gracefully
-      console.error('Failed to parse template from localStorage:', error);
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY); // Clear potentially corrupted data
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
     }
-    // Fallback to initialTemplate prop or default empty template
-    return { schemas: [[]], basePdf: CUSTOM_A4_PDF };
+    return DEFAULT_EMPTY_PDFME_TEMPLATE;
   });
+
   const handleTemplateChange = (tpl: any) => {
     setTemplate(tpl);
   };
@@ -77,40 +82,16 @@ export default function CreateCustomPdfTemplate() {
     }
   }, [template]);
 
-
-  const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
-  const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
-
-  // useEffect(() => {
-  //   const options = [];
-  //   PDF_RESOURCE_LIST?.forEach((item) => {
-  //     if (permissions[item.key] && permissions[item.key]?.isRead === true) {
-  //       options.push({ title: resources[item.key] ? resources[item.key]?.titleSingular : item.title, value: item.value });
-  //     }
-  //   });
-  //   for (const [key] of Object.entries(permissions)) {
-  //     let result = key?.replace(/ /g, '').toLowerCase();
-  //     let foundFlag = false;
-  //     for (const [key2, value2] of Object.entries(sidebarResource)) {
-  //       if (value2?.replace(/ /g, '').toLowerCase() === result) {
-  //         foundFlag = true;
-  //         break;
-  //       }
-  //     }
-  //     if (!foundFlag) {
-  //       options.push({ title: startCase(camelCase(key)), value: startCase(camelCase(key)) });
-  //     }
-  //   }
-  //   setPdfResourceOption(options);
-  // }, []);
-
   useEffect(() => {
     fetchData();
     fetchUser();
+    return () => {
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    };
   }, [id]);
 
   const fetchData = async () => {
-    const initialValues = {
+    const initialValuesData = {
       name: '',
       entity: selectedEntity ? [selectedEntity] : [],
       type: '',
@@ -125,18 +106,26 @@ export default function CreateCustomPdfTemplate() {
           data: { data }
         } = res;
 
-        initialValues.name = !isClone ? data?.name : '';
-        initialValues.entity = data?.entity ? data?.entity : [];
-        initialValues.type = data?.type;
-        initialValues.owner = isClone ? user.user._id : data?.owner || user.user._id;
-        initialValues.collaborator = data?.collaborator ? data?.collaborator : [];
+        initialValuesData.name = !isClone ? data?.name : '';
+        initialValuesData.entity = data?.entity ? data?.entity : [];
+        initialValuesData.type = data?.type;
+        initialValuesData.owner = isClone ? user.user._id : data?.owner || user.user._id;
+        initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
+
+        if (data?.template) {
+          setTemplate(data.template);
+          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
+        } else {
+          setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
+          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+        }
 
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.CustomPdfTemplate, {
             owner: {
-              optionValue: initialValues.owner
+              optionValue: initialValuesData.owner
             },
-            collaborator: initialValues.collaborator?.map((e) => {
+            collaborator: initialValuesData.collaborator?.map((e) => {
               return { optionValue: e };
             })
           })
@@ -148,10 +137,14 @@ export default function CreateCustomPdfTemplate() {
         }
       } catch (e) {
         toastConfig.setToastConfig(e);
+        setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
+        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
+    } else {
+      setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
     }
-
-    setInitialValues({ ...initialValues });
+    setInitialValues({ ...initialValuesData });
   };
 
   const fetchUser = () => {
@@ -165,8 +158,38 @@ export default function CreateCustomPdfTemplate() {
         toastConfig.setToastConfig(error);
       });
   };
+  const generatePreviewPdf = async () => {
+    try {
+      setBtnLoading(true);
+      const inputsForPreview = template?.schemas?.map(pageSchema => {
+        const pageInput = {};
+        pageSchema.forEach(field => {
+          if (field.name && field.content !== undefined) {
+            pageInput[field.name] = field.content;
+          }
+        });
+        return pageInput;
+      });
 
-  const handleSubmit = (values) => {
+      const finalInputs = inputsForPreview?.length > 0 ? inputsForPreview : [{}];
+      const pdf = await generate({ template: template, inputs: finalInputs, plugins: getPlugins() });
+
+      const pdfBytes = new Uint8Array(pdf.buffer);
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      setBtnLoading(false);
+      window.open(URL.createObjectURL(blob));
+
+    } catch (error) {
+      setBtnLoading(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: `Failed to generate PDF preview: ${error.message || 'An unknown error occurred.'}`
+      });
+    }
+  };
+
+  const handleSubmit = async (values) => {
     const trimmedName = values.name.trim();
     setIsUpdating(true);
 
@@ -175,56 +198,47 @@ export default function CreateCustomPdfTemplate() {
       entity: values?.entity,
       type: values?.type,
       owner: values?.owner,
-      collaborator: values?.collaborator
+      collaborator: values?.collaborator,
+      template: template
     };
 
-    if (id === '0' || isClone === true) {
-      axiosInstance()
-        .post(`${customPdfTemplate.api}`, submitData)
-        .then(({ data: { data, message } }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-          setIsUpdating(false);
-          history.push(routes.customPdfTemplate.path);
-        })
-        .catch((error) => {
-          setIsUpdating(false);
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .put(`${customPdfTemplate.api}`, {
+    try {
+      let response;
+      if (id === '0' || isClone === true) {
+        response = await axiosInstance().post(`${customPdfTemplate.api}`, submitData);
+      } else {
+        response = await axiosInstance().put(`${customPdfTemplate.api}`, {
           _id: id,
           ...submitData
-        })
-        .then(({ data: { data, message } }) => {
-          if (isBreakCrumbPath) {
-            history.push({ pathname: isBreakCrumbPath });
-          } else {
-            fetchData();
-          }
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-          setIsUpdating(false);
-          setIsEdit(false);
-          history.push(routes.customPdfTemplate.path);
-        })
-        .catch((error) => {
-          setIsUpdating(false);
-          toastConfig.setToastConfig(error);
         });
+      }
+
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: response.data.message
+      });
+
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+
+      setIsUpdating(false);
+      if (isBreakCrumbPath && !isClone) {
+        history.push({ pathname: isBreakCrumbPath });
+      } else {
+        history.push(routes.customPdfTemplate.path);
+      }
+      setIsEdit(false);
+    } catch (error) {
+      setIsUpdating(false);
+      toastConfig.setToastConfig(error);
     }
   };
 
   const handleClose = () => {
     history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.customPdfTemplate.path });
+    localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
   };
+
   return initialValues && (
     <>
       <DeviceMessage backPath={routes.customPdfTemplate.path} />
@@ -274,6 +288,17 @@ export default function CreateCustomPdfTemplate() {
                       Edit
                     </ThemeButton>
                   )}
+                  {!isEdit && (
+                    <ThemeButton
+                      mobileTooltip="Preview"
+                      iconForMobile={<VisibilityIcon />}
+                      startIcon={<VisibilityIcon />}
+                      disabled={btnLoading}
+                      onClick={generatePreviewPdf}
+                    >
+                      {btnLoading ? 'Please wait...' : 'Preview'}
+                    </ThemeButton>
+                  )}
                   <ThemeButton
                     onClick={() => {
                       if (allowedToEdit && !isEqual(values, initialValues)) {
@@ -287,7 +312,7 @@ export default function CreateCustomPdfTemplate() {
                   </ThemeButton>
                 </div>
               </div>
-              <div className={`main-container`}>
+              <div className="main-container">
                 <div className="mt-4">
                   <Grid container spacing={2} direction={'column'}>
                     <Grid>
@@ -315,7 +340,11 @@ export default function CreateCustomPdfTemplate() {
                             options={[{ title: 'Work Order', value: 'Work Order' }]}
                             getOptionLabel={(option) => option.title}
                             isOptionEqualToValue={(option, value) => option.value === value.value}
-                            value={{ title: 'Work Order', value: 'Work Order' }} // force-fixed
+                            value={values.type
+                              ? [{ title: 'Work Order', value: 'Work Order' }].find(
+                                (option) => option.value === values.type
+                              ) || null
+                              : null}
                             onChange={(e, val) => {
                               setFieldValue('type', val ? val.value : '');
                             }}
@@ -461,6 +490,7 @@ export default function CreateCustomPdfTemplate() {
                   <PdfEditor
                     template={template}
                     onTemplateChange={handleTemplateChange}
+                    disabled={!isEdit || !allowedToEdit}
                   />
                 </div>
               </div>
@@ -481,5 +511,5 @@ export default function CreateCustomPdfTemplate() {
         )}
       </Formik>
     </>
-  )
+  );
 }

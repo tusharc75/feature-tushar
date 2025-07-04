@@ -1,4 +1,4 @@
-import { text, image } from '@pdfme/schemas';
+import { text, image, table ,line} from '@pdfme/schemas'; 
 import type { Plugin, Schema } from '@pdfme/common';
 
 type DesignerPluginSchema = Schema & {
@@ -15,6 +15,8 @@ export const getPlugins = () => {
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: text as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
+        Table: table as DesignerExpectedPlugin, 
+        Line : line as DesignerExpectedPlugin
     };
     return plugins;
 };
