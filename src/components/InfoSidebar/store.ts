@@ -9,7 +9,7 @@ export type InfoSidebarState = {
     resource?: SidebarResource[keyof SidebarResource];
     actionId?: string;
   };
-  item?: Action;
+  item?: Partial<Action>;
 };
 
 const initialState: InfoSidebarState = {

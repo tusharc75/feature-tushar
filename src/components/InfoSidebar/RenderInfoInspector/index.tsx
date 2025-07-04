@@ -1,17 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUrlParser } from 'src/components/InfoSidebar/RenderAllInfoButtons/hooks';
+import InfoButton from 'src/components/InfoSidebar/RenderAllInfoButtons/InfoButton';
 import { Inspector } from 'src/components/InfoSidebar/RenderInfoInspector/Inspector';
 import { HostMessage, PostMessage } from 'src/components/InfoSidebar/types';
-import { handleInsertInfoButtonPreview, handleRemoveInfoButtonFromDom, isInIframe } from 'src/components/InfoSidebar/utils';
-
-const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai';
+import { isInIframe, targetOrigin } from 'src/components/InfoSidebar/utils';
+import { throttle } from 'src/hooks/useThrottle';
 
 const handlePostMessage = (data: PostMessage) => {
   window.parent.postMessage(data, targetOrigin);
 };
 
+const SINGNAL_MAX_COUNT = 100;
+
 const RenderInfoInspector = () => {
+  const [resizeSignal, setResizeSignal] = useState(0);
   const parsedUrl = useUrlParser();
+  const [data, setData] = useState<Extract<HostMessage, { type: 'update' }>['payload']>();
 
   useEffect(() => {
     const fromIframe = isInIframe();
@@ -28,10 +32,7 @@ const RenderInfoInspector = () => {
     });
 
     const handleMessageFromHost = (event: MessageEvent<any>) => {
-      if (event.origin !== targetOrigin) {
-        console.error('origin error', event);
-        return;
-      }
+      if (event.origin !== targetOrigin) return;
       const { type, payload } = event.data as HostMessage;
       switch (type) {
         case 'start': {
@@ -42,13 +43,12 @@ const RenderInfoInspector = () => {
           inspector.stop();
           break;
         }
-        case 'delete': {
-          handleRemoveInfoButtonFromDom(payload);
+        case 'add': {
+          setData(payload);
           break;
         }
-        case 'add': {
-          handleInsertInfoButtonPreview({ ...payload });
-          break;
+        case 'update': {
+          setData(payload);
         }
       }
     };
@@ -66,7 +66,20 @@ const RenderInfoInspector = () => {
     }
   }, [parsedUrl]);
 
-  return <></>;
+  useEffect(() => {
+    if (!data) return;
+    const resizeCallback = throttle(() => {
+      setResizeSignal((prev) => (prev > SINGNAL_MAX_COUNT ? 0 : prev + 1));
+    });
+    window.addEventListener('resize', resizeCallback);
+    return () => {
+      window.removeEventListener('resize', resizeCallback);
+    };
+  }, [data]);
+
+  if (!data) return null;
+
+  return <InfoButton item={data} key={`${resizeSignal}-${data.insideAnchor}${data.autoPosition}`} />;
 };
 
 export default RenderInfoInspector;
