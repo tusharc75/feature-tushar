@@ -1,9 +1,9 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useUrlParser } from 'src/components/InfoSidebar/RenderAllInfoButtons/hooks';
-import { useInforSidebar } from 'src/components/InfoSidebar/store';
-import { Action, ApiFormData } from 'src/components/InfoSidebar/types';
-import { handleInsertInfoButtonPreview } from 'src/components/InfoSidebar/utils';
+import InfoButton from 'src/components/InfoSidebar/RenderAllInfoButtons/InfoButton';
+import { Action, ApiFormData, HostMessage } from 'src/components/InfoSidebar/types';
+import { isInIframe, targetOrigin } from 'src/components/InfoSidebar/utils';
 import { throttle } from 'src/hooks/useThrottle';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -20,6 +20,8 @@ const callback = (
   }
 };
 
+const SINGNAL_MAX_COUNT = 100;
+
 const RenderAllInfoButtons = () => {
   const {
     state: { user }
@@ -27,9 +29,10 @@ const RenderAllInfoButtons = () => {
   const parsedUrl = useUrlParser();
   const toastConfig = useContext(CustomToastContext);
   const [allData, setAllData] = useState<Action[]>([]);
-  const data = useMemo(() => allData.filter((d) => d.url === parsedUrl), [parsedUrl, allData]);
-  const [changedSignal, setChangedSignal] = useState(0);
-  const [, setStore] = useInforSidebar((state) => state.data);
+  const [data, setData] = useState<Action[]>([]);
+  const [mutationSignal, setMutationSignal] = useState(0);
+  const [resizeSignal, setResizeSignal] = useState(0);
+  const [deletedIds, setDeletedIds] = useState(new Set<string>());
 
   useEffect(() => {
     const getAllData = async () => {
@@ -46,14 +49,25 @@ const RenderAllInfoButtons = () => {
     if (user) {
       getAllData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+
+  useEffect(() => {
+    if (allData.length === 0) return;
+    const currentUrl = new URL(parsedUrl, window.location.origin);
+    const newData = allData.filter((d) => {
+      const dataUrl = new URL(d.url, window.location.origin);
+      return (dataUrl.pathname === currentUrl.pathname || d.url === parsedUrl) && !deletedIds.has(d._id);
+    });
+    setData(newData);
+  }, [allData, parsedUrl, deletedIds]);
 
   useEffect(() => {
     const root = document.querySelector('#root');
     if (!root) return;
 
     const onChildChange = throttle(() => {
-      setChangedSignal((prev) => (prev > 10 ? 0 : prev + 1));
+      setMutationSignal((prev) => (prev > SINGNAL_MAX_COUNT ? 0 : prev + 1));
     });
 
     const observer = new MutationObserver((mutationList, observer) => callback(mutationList, observer, onChildChange));
@@ -68,21 +82,42 @@ const RenderAllInfoButtons = () => {
       observer.disconnect();
     };
   }, [data]);
-  //
 
   useEffect(() => {
-    const handleInsert = () => {
-      for (const d of data) {
-        handleInsertInfoButtonPreview({ ...d, id: d._id, onClick: () => setStore({ item: d }), tooltip: d.tooltip });
+    if (allData.length === 0) return;
+    const resizeCallback = throttle(() => {
+      setResizeSignal((prev) => (prev > SINGNAL_MAX_COUNT ? 0 : prev + 1));
+    });
+    window.addEventListener('resize', resizeCallback);
+    return () => {
+      window.removeEventListener('resize', resizeCallback);
+    };
+  }, [allData]);
+
+  useEffect(() => {
+    const fromIframe = isInIframe();
+    if (!fromIframe) return;
+    const handleMessageFromHost = (event: MessageEvent<any>) => {
+      if (event.origin !== targetOrigin) return;
+      const { type, payload } = event.data as HostMessage;
+      switch (type) {
+        case 'update': {
+          setDeletedIds((prev) => new Set([...prev, payload.id]));
+          break;
+        }
       }
     };
-    if (data.length > 0) {
-      handleInsert();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [changedSignal, data]);
+    window.addEventListener('message', handleMessageFromHost);
+    return () => {
+      window.removeEventListener('message', handleMessageFromHost);
+    };
+  }, []);
 
-  return null; // cleaner than empty fragment for no rendering
+  return <RenderButtons data={data} key={`${mutationSignal}-${resizeSignal}`} />;
+};
+
+const RenderButtons = ({ data }: { data: Action[] }) => {
+  return <>{data?.map((d) => <InfoButton item={d} />)}</>;
 };
 
 export default RenderAllInfoButtons;

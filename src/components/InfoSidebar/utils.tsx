@@ -1,6 +1,6 @@
-import { createPortal, render } from 'react-dom';
-import { RenderInfoButton } from 'src/components/InfoSidebar/RenderAllInfoButtons/templates';
 import { AutoPosition, PositionValues } from 'src/components/InfoSidebar/types';
+
+export const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai';
 
 export function replaceAllMongoIds(
   url: string = `${window.location.pathname}${window.location.search}${window.location.hash}`,
@@ -11,10 +11,7 @@ export function replaceAllMongoIds(
 }
 
 export const applyStyles = (element: HTMLElement, styles: React.CSSProperties) => {
-  Object.entries(styles).forEach(([key, value]) => {
-    // Type assertion because element.style only accepts specific string values
-    (element.style as any)[key] = value;
-  });
+  Object.assign(element.style, styles);
 };
 
 export function isInIframe(): boolean {
@@ -26,29 +23,6 @@ export function isInIframe(): boolean {
   }
 }
 
-export function generateUniqueMongoId(): string {
-  // 4-byte (8 hex chars) Unix timestamp
-  const timestamp = Math.floor(Date.now() / 1000)
-    .toString(16)
-    .padStart(8, '0');
-
-  // 16 random hex characters (8 bytes)
-  const randomPart = crypto.getRandomValues(new Uint8Array(12)).reduce((acc, byte) => acc + byte.toString(16).padStart(2, '0'), '');
-
-  return timestamp + randomPart;
-}
-
-export const handleRemoveInfoButtonFromDom = (id: string) => {
-  try {
-    const element = document.querySelector(`#info-sidebar-button-${id}`);
-    if (element) {
-      const parent = element.parentElement;
-      parent?.removeChild(element);
-    }
-  } catch (error) {
-  }
-};
-
 type GetStyleProps = {
   anchorElementPadding: PositionValues;
   buttonPosition: PositionValues;
@@ -59,9 +33,21 @@ type GetStyleProps = {
   id: string;
 };
 
-const originalComputedStyle = new Map<string, { paddingBottom: string; paddingTop: string; paddingLeft: string; paddingRight: string }>();
-export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, manualPosition, insideAnchor, container, id }: GetStyleProps) => {
+const originalComputedStyleReactMethod = new Map<string, { paddingBottom: string; paddingTop: string; paddingLeft: string; paddingRight: string }>();
+export const getStylesReactMethod = ({
+  anchorElementPadding,
+  autoPosition,
+  buttonPosition,
+  manualPosition,
+  insideAnchor,
+  container,
+  id
+}: GetStyleProps) => {
   const computedStyles = getComputedStyle(container);
+  if (insideAnchor && !['absolute', 'relative'].includes(computedStyles.position)) {
+    container.style.position = 'relative';
+  }
+
   let computedStyle = {
     paddingLeft: computedStyles.paddingLeft,
     paddingRight: computedStyles.paddingRight,
@@ -69,11 +55,11 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
     paddingTop: computedStyles.paddingTop
   };
 
-  if (originalComputedStyle.has(id)) {
-    computedStyle = originalComputedStyle.get(id);
+  if (originalComputedStyleReactMethod.has(id)) {
+    computedStyle = originalComputedStyleReactMethod.get(id);
   } else {
     const { paddingLeft, paddingRight, paddingBottom, paddingTop } = computedStyles;
-    originalComputedStyle.set(id, { paddingLeft, paddingRight, paddingBottom, paddingTop });
+    originalComputedStyleReactMethod.set(id, { paddingLeft, paddingRight, paddingBottom, paddingTop });
   }
 
   let containerStyle = {
@@ -83,9 +69,15 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
     paddingRight: computedStyle.paddingRight
   } as React.CSSProperties;
 
+  const rect = container.getBoundingClientRect();
+  const top = rect.top + window.scrollY;
+  const bottom = top + rect.height;
+  const left = rect.left + window.scrollX;
+  const right = left + rect.width;
+  const buttonSize = 30;
+
   let buttonStyle = {} as React.CSSProperties;
 
-  const buttonSize = '30px';
   if (manualPosition) {
     containerStyle = { ...anchorElementPadding };
     buttonStyle = { ...buttonPosition };
@@ -93,47 +85,49 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
     switch (autoPosition) {
       case 'bottom': {
         if (insideAnchor) {
-          containerStyle.paddingBottom = `calc(${buttonSize} + ${computedStyle.paddingBottom})`;
+          containerStyle.paddingBottom = `calc(${buttonSize}px + ${computedStyle.paddingBottom})`;
           buttonStyle = { left: '50%', transform: 'translateX(-50%)', bottom: '0px' };
         } else {
-          buttonStyle = { left: '50%', transform: 'translateX(-50%)', bottom: `-${buttonSize}` };
+          buttonStyle = { left: `${left + rect.width / 2 - buttonSize * 0.5}px`, top: `${bottom}px` };
         }
         break;
       }
       case 'top': {
         if (insideAnchor) {
-          containerStyle.paddingTop = `calc(${buttonSize} + ${computedStyle.paddingTop})`;
+          containerStyle.paddingTop = `calc(${buttonSize}px + ${computedStyle.paddingTop})`;
           buttonStyle = { left: '50%', transform: 'translateX(-50%)', top: '0px' };
         } else {
-          buttonStyle = { left: '50%', transform: 'translateX(-50%)', top: `-${buttonSize}` };
+          buttonStyle = { left: `${left + rect.width / 2 - buttonSize * 0.5}px`, top: `${top - buttonSize}px` };
         }
         break;
       }
       case 'left': {
         if (insideAnchor) {
           containerStyle = {
-            paddingLeft: `calc(${buttonSize} + ${computedStyle.paddingLeft})`,
-            minHeight: buttonSize,
+            ...containerStyle,
+            paddingLeft: `calc(${buttonSize}px + ${computedStyle.paddingLeft})`,
+            minHeight: `${buttonSize}px`,
             display: 'flex',
             alignItems: 'center'
           };
           buttonStyle = { top: '50%', transform: 'translateY(-50%)', left: '0px' };
         } else {
-          buttonStyle = { top: '50%', transform: 'translateY(-50%)', left: `-${buttonSize}` };
+          buttonStyle = { top: `${top + rect.height / 2 - buttonSize * 0.5}px`, left: `${left - buttonSize}px` };
         }
         break;
       }
       case 'right': {
         if (insideAnchor) {
           containerStyle = {
-            paddingRight: `calc(${buttonSize} + ${computedStyle.paddingRight})`,
-            minHeight: buttonSize,
+            ...containerStyle,
+            paddingRight: `calc(${buttonSize}px + ${computedStyle.paddingRight})`,
+            minHeight: `${buttonSize}px`,
             display: 'flex',
             alignItems: 'center'
           };
           buttonStyle = { top: '50%', transform: 'translateY(-50%)', right: '0px' };
         } else {
-          buttonStyle = { top: '50%', transform: 'translateY(-50%)', right: `-${buttonSize}` };
+          buttonStyle = { top: `${top + rect.height / 2 - buttonSize * 0.5}px`, left: `${right}px` };
         }
         break;
       }
@@ -141,7 +135,7 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
         if (insideAnchor) {
           buttonStyle = { top: '0px', left: '0px' };
         } else {
-          buttonStyle = { top: `-${buttonSize}`, left: `-${buttonSize}` };
+          buttonStyle = { top: `${top - buttonSize}px`, left: `${left - buttonSize}px` };
         }
         break;
       }
@@ -149,7 +143,7 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
         if (insideAnchor) {
           buttonStyle = { top: '0px', right: '0px' };
         } else {
-          buttonStyle = { top: `-${buttonSize}`, right: `-${buttonSize}` };
+          buttonStyle = { top: `${top - buttonSize}px`, left: `${right}px` };
         }
         break;
       }
@@ -157,7 +151,7 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
         if (insideAnchor) {
           buttonStyle = { bottom: '0px', left: '0px' };
         } else {
-          buttonStyle = { bottom: `-${buttonSize}`, left: `-${buttonSize}` };
+          buttonStyle = { top: `${bottom}px`, left: `${left - buttonSize}px` };
         }
         break;
       }
@@ -165,75 +159,13 @@ export const getStyles = ({ anchorElementPadding, autoPosition, buttonPosition, 
         if (insideAnchor) {
           buttonStyle = { bottom: '0px', right: '0px' };
         } else {
-          buttonStyle = { bottom: `-${buttonSize}`, right: `-${buttonSize}` };
+          buttonStyle = { top: `${bottom}px`, left: `${right}px` };
         }
         break;
       }
     }
   }
 
+  applyStyles(container, containerStyle);
   return { containerStyle, buttonStyle };
-};
-
-export const handleInsertInfoButtonPreview = ({
-  id,
-  targetSelector,
-  anchorElementPadding,
-  autoPosition,
-  buttonPosition,
-  manualPosition,
-  insideAnchor,
-  tooltip,
-  onClick = () => { }
-}: {
-  targetSelector: string;
-  id: string;
-  anchorElementPadding: PositionValues;
-  buttonPosition: PositionValues;
-  manualPosition: boolean;
-  autoPosition: AutoPosition;
-  insideAnchor: boolean;
-  tooltip?: string;
-  onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}) => {
-  const element = document.querySelector<HTMLElement>(targetSelector);
-  if (!element) return;
-  if (element.querySelector(`#info-sidebar-button-${id}`)) return;
-
-  const { buttonStyle, containerStyle } = getStyles({
-    anchorElementPadding,
-    autoPosition,
-    buttonPosition,
-    insideAnchor,
-    manualPosition,
-    container: element,
-    id
-  });
-  applyStyles(element, { position: 'relative', ...containerStyle });
-
-  const buttonContainer = document.createElement('div');
-  buttonContainer.classList.add('info-sidebar-action-container');
-  buttonContainer.id = `info-sidebar-button-${id}`;
-  const computedStyle = getComputedStyle(element);
-  const anchorElementStyles = {} as React.CSSProperties;
-  if (!['absolute', 'relative'].includes(computedStyle.position)) {
-    anchorElementStyles.position = 'relative';
-  }
-  applyStyles(buttonContainer, { ...buttonStyle, ...anchorElementStyles, position: 'absolute' });
-
-  element.appendChild(buttonContainer);
-  render(
-    createPortal(
-      <RenderInfoButton
-        tooltip={tooltip}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onClick(e);
-        }}
-      />,
-      buttonContainer
-    ),
-    buttonContainer
-  );
 };
