@@ -31,7 +31,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, isEqual, startCase } from 'lodash';
+import { camelCase, groupBy, isEqual, startCase, sum } from 'lodash';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -85,6 +85,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
+  const [assetLogs, setAsetLogs] = useState([])
   const [columns, setColumns] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [materialFields, setMaterialFields] = useState([]);
@@ -104,17 +105,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
-        setRentalResourceData(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
-      .then(({ data: { data } }) => {
-        setInvoiceResourceData(data);
+        if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+          setRentalResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+        }
+        if (data?.find((e) => e.resource === sidebarResource.invoice)) {
+          setInvoiceResourceData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -282,6 +280,40 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     );
   };
 
+  const getMaterialLogs = (element, logs, rows) => {
+    const currency = rentalManagementData?.currency?.toLowerCase();
+    const start = dayjs.tz(new Date(element.actualStartDate)).startOf("day");
+    const end = dayjs(new Date(endDate));;
+    const filteredLogs = logs?.filter(item => {
+      const itemStart = dayjs(item?.startDate);
+      const itemEnd = dayjs(item?.endDate);
+      return item?.uniqueId === element?.uniqueId && item?.inventory === element?.inventory && itemStart.isSameOrAfter(start) && itemEnd.isSameOrBefore(end);
+    });
+    if (filteredLogs?.length) {
+      const groupedByStatus = groupBy(filteredLogs, 'status');
+      for (const [key, value] of Object.entries(groupedByStatus)) {
+        const values: any = {}
+        let calValues: any = {}
+        if (value?.length > 0) {
+          if (key !== ASSET_STATUS.inUse) {
+            values[`price_${currency}`] = element[`${camelCase(key)}Price_${currency}`]
+          }
+          values.actualJobDuration = sum(value?.map(item => {
+            const start = dayjs(item.startDate).startOf('day');
+            const end = dayjs(item.endDate).endOf('day');
+            const diffInDays = end.diff(start, 'day');
+            return diffInDays + 1;
+          }))
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
+          rows.push({ ...element, ...calValues })
+        }
+      }
+    }
+    else {
+      rows.push({ ...element })
+    }
+  }
+
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -291,6 +323,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let additionalCost: any = [];
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
     data = response?.data?.data;
+
+    if (rentalResourceData?.policy?.subStatusDateWiseCapture) {
+      const logs: any = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData?._id}/inventory/logs?assets=${JSON.stringify(data?.inventory?.map(m => ({ asset: m?.inventory, uniqueId: m?._id })))}`);
+      setAsetLogs(logs?.data?.data)
+    }
 
     const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData?._id}/invoice/material-end-date-qty`);
     invoicedProducts = invoiceResponse?.data?.data?.material;
@@ -358,6 +395,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             ele._id = ele?.inventoryDetail?._id;
             ele.materialId = ele?.inventoryDetail?._id;
             ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
+            ele.uniqueId = element?._id
             let values = { qty: 1 };
             values['actualStartDate'] = ele?.manualStartDate;
             values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
@@ -388,6 +426,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 ele.type = MATERIAL_TYPE.serializedAsset;
                 ele.qty = 1;
                 ele._id = ele?.inventoryDetail?._id;
+                ele.uniqueId = element?._id
                 ele.materialId = ele?.inventoryDetail?._id;
                 let values = { qty: 1 };
                 values['actualStartDate'] = ele?.manualStartDate;
@@ -441,7 +480,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
           materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
 
-          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+          const row: any = invoiceData[0]?.material?.find((m) => m._id === e._id);
           if (row) {
             const actualEndDate = new Date(product?.endDate);
             actualEndDate.setDate(actualEndDate.getDate() + 1);
@@ -724,7 +763,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, materialFields);
         }
         element.isAppliedBill = true;
-        rows.push({ ...element, ...calValues });
+        if (rentalResourceData?.policy?.subStatusDateWiseCapture && assetLogs?.find((e) => e?.uniqueId === element?.uniqueId && e?.inventory === element?.inventory)) {
+          getMaterialLogs({ ...element, ...calValues }, assetLogs, rows)
+        }
+        else {
+          rows.push({ ...element, ...calValues });
+        }
         if (extraRows?.length) {
           rows = [...rows, ...extraRows];
         }

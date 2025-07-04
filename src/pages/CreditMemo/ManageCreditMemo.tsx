@@ -53,6 +53,14 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               setCloneHeading(rest.creditMemoNumber || data?.creditMemoNumber);
               tempData = rest;
             }
+            if (!data?.canDelete) {
+              fields?.forEach((field) => {
+                if (field?.fieldName === 'amount') {
+                  field.disableOnEdit = true;
+                  field.isUneditable = true;
+                }
+              });
+            }
             setInitialData({
               fields: fields,
               values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fieldsDataAll)

@@ -57,7 +57,13 @@ export const resourcePolicy = [
         fieldLabel: 'Show Transfer Assets',
         type: 'checkBox',
         defaultValue: false
-      }
+      },
+      {
+        fieldName: 'onlyConsumedConsumablesAddInCost',
+        fieldLabel: 'Only Consumed Consumables Add In Cost',
+        type: 'checkBox',
+        defaultValue: false
+      },
     ]
   },
   {
@@ -291,6 +297,12 @@ export const resourcePolicy = [
       {
         fieldName: 'allowOnFieldUpdateFieldJobTicket',
         fieldLabel: 'Allow On Field Update In Field Job/Ticket',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'subStatusDateWiseCapture',
+        fieldLabel: 'Sub Status Date Wise Capture',
         type: 'checkBox',
         defaultValue: false
       },

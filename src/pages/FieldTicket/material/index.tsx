@@ -146,6 +146,7 @@ const Material = ({
   }, [dataRows]);
 
   const fetchFields = async () => {
+    setColumns(null)
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
