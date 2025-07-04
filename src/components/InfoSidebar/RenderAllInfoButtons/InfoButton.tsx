@@ -39,7 +39,6 @@ const InfoButton = ({ item }: { item: Partial<Action> }) => {
     parent.appendChild(portalEl);
 
     return () => {
-      console.log('cleanup');
       const mountedParent = containerRef.current;
       if (mountedParent?.contains(portalEl)) {
         mountedParent.removeChild(portalEl);
