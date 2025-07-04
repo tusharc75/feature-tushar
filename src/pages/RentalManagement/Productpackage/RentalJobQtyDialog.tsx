@@ -21,7 +21,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList, getDurationBasedPrice } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
@@ -467,8 +467,10 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                               );
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+
+                                            const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                             const result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
                                               initialData.fields
                                             );
@@ -481,6 +483,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 }
                                               });
                                             }
+
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
                                                 setFieldValue(x, result[x]);
@@ -516,6 +519,22 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             setFieldValue(name, value).then(() => {
                                               validateForm();
                                             });
+                                            if (!isBulkedit && name === 'estimateJobDuration') {
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
+                                              if (durationPrice) {
+                                                const result = autoCalculateSpecificFields(
+                                                  { [priceFieldName]: durationPrice },
+                                                  { ...values, estimateJobDuration: value },
+                                                  initialData.fields
+                                                );
+                                                if (Object.keys(result).length >= 1) {
+                                                  for (var x in result) {
+                                                    setFieldValue(x, result[x]);
+                                                  }
+                                                }
+                                              }
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth
