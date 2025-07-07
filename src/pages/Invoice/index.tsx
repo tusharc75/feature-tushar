@@ -33,6 +33,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
+import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 
 let invoiceTimeout;
 
@@ -60,6 +61,8 @@ const Invoice = () => {
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
   const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
 
   const types = [
     {
@@ -334,6 +337,12 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
+        <MenuItem
+          disabled={!selectedRecords?.length}
+          onClick={() => setPreviewDialogOpen(true)}
+        >
+          Generate PDF
+        </MenuItem>
         {permissions?.invoice?.isUpdate &&
           selectedRecords?.length &&
           !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed) &&
@@ -388,6 +397,28 @@ const Invoice = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+  };
+
+  const handlePreviewDialogDownload = async (visibleColumnsPdf, visibleColumnsExcel, sortBy, orderBy, operation = 'Regular') => {
+    setIsDownloadingPdf(true);
+    try {
+      const columnsPayload = visibleColumnsPdf?.map(col => ({ name: col.fieldName }));
+      const idsPayload = selectedRecords.map(inv => inv._id);
+      const url = `/pdf/multiple?resource=${sidebarResource.invoice}&columns=${JSON.stringify(columnsPayload)}&ids=${idsPayload}`;
+      const response = await axiosInstance().get(url, { responseType: 'blob' });
+      const mergedBlob = new Blob([response.data], { type: 'application/pdf' });
+      const downloadUrl = window.URL.createObjectURL(mergedBlob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'invoices_merged.pdf');
+      document.body.appendChild(link);
+      link.click();
+      setIsDownloadingPdf(false);
+      setPreviewDialogOpen(false);
+    } catch (err) {
+      setIsDownloadingPdf(false);
+      toastConfig.setToastConfig(err);
+    }
   };
 
   return (
@@ -464,12 +495,11 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.invoiceNumber}`
-                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -495,6 +525,43 @@ const Invoice = () => {
           invoiceNumber={openOpenInvoiceError.data.invoiceNumber}
           invoiceId={openOpenInvoiceError.data._id}
           onClose={() => setOpenOpenInvoiceError({ open: false, data: null })}
+        />
+      )}
+      {previewDialogOpen && (
+        <PreviewDialog
+          type="PDF"
+          handleClose={() => setPreviewDialogOpen(false)}
+          handleView={(operation, visibleColumnsPdf, visibleColumnsExcel, sortBy, orderBy) => {
+            if (operation === 'Regular') {
+              handlePreviewDialogDownload(visibleColumnsPdf, visibleColumnsExcel, sortBy, orderBy);
+            }
+          }}
+          loadingType={isDownloadingPdf ? 'Regular' : null}
+          hideDetailButton={true}
+          allColumn={
+            columns
+              ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
+              ?.map((d) => ({
+                fieldLabel: d?.Header || d?.headerName,
+                fieldName: d?.accessor || d?.field
+              }))
+          }
+          resource={sidebarResource.invoice}
+          referenceId={null}
+          defaultColumns={[]}
+          columns={
+            columns
+              ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
+              ?.map((d) => ({
+                fieldLabel: d?.Header || d?.headerName,
+                fieldName: d?.accessor || d?.field
+              }))
+          }
+          button1Title="Regular Download"
+          button2Title="Detail Download"
+          operation="Download"
+          isExcelDownload={false}
+          isAsyncDownload={false}
         />
       )}
     </section>
