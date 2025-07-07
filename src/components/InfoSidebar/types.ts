@@ -8,7 +8,6 @@ export type AutoPosition = PositionType | 'top-left' | 'top-right' | 'bottom-lef
 export type HostMessage =
   | { type: 'start'; payload: null }
   | { type: 'stop'; payload: null }
-  | { type: 'delete'; payload: string }
   | {
       type: 'update';
       payload: {

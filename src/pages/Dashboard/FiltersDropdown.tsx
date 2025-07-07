@@ -55,13 +55,15 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       setInputValues(selectedKpiFilter.filterValue);
     } else {
       setValues(() => {
-        return filters.reduce((acc, filter) => {
+        return filters.reduce((acc, filter: any) => {
           return {
             ...acc,
             [filter.key]: filter?.multiple
               ? []
               : filter.key === 'status' && isCRM
-                ? { optionValue: 'open', optionLabel: 'Open' }
+                ? kpi === 'statusTypeQuotesBySalesRep'
+                  ? filter.options[0]
+                  : { optionValue: 'open', optionLabel: 'Open' }
                 : filter?.defaultValue
           };
         }, {});
