@@ -402,9 +402,12 @@ const Invoice = () => {
   const handlePreviewDialogDownload = async (visibleColumnsPdf, visibleColumnsExcel, sortBy, orderBy, operation = 'Regular') => {
     setIsDownloadingPdf(true);
     try {
-      const columnsPayload = visibleColumnsPdf?.map(col => ({ name: col.fieldName }));
+      const columnsPayload = visibleColumnsPdf?.map(col => ({
+        name: col.fieldName,
+      })) || [];
+
       const idsPayload = selectedRecords.map(inv => inv._id);
-      const url = `/pdf/multiple?resource=${sidebarResource.invoice}&columns=${JSON.stringify(columnsPayload)}&ids=${idsPayload}`;
+      const url = `/pdf/multiple?resource=${sidebarResource.invoice}&columns=${encodeURIComponent(JSON.stringify(columnsPayload))}&ids=${idsPayload}`;
       const response = await axiosInstance().get(url, { responseType: 'blob' });
       const mergedBlob = new Blob([response.data], { type: 'application/pdf' });
       const downloadUrl = window.URL.createObjectURL(mergedBlob);
