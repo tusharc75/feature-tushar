@@ -54,19 +54,17 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       setValues(selectedKpiFilter.filterValue);
       setInputValues(selectedKpiFilter.filterValue);
     } else {
-      setValues(() => {
-        return filters.reduce((acc, filter: any) => {
-          return {
-            ...acc,
-            [filter.key]: filter?.multiple
-              ? []
-              : filter.key === 'status' && isCRM
-                ? kpi === 'statusTypeQuotesBySalesRep'
-                  ? filter.options[0]
-                  : { optionValue: 'open', optionLabel: 'Open' }
-                : filter?.defaultValue
-          };
-        }, {});
+       setValues(() => {
+          return filters.reduce((acc, filter) => {
+            return {
+              ...acc,
+              [filter.key]: filter?.multiple
+                ? []
+                : filter.key === 'status' && isCRM
+                  ? { optionValue: 'open', optionLabel: 'Open' }
+                  : filter?.defaultValue
+            };
+          }, {});
       });
       setInputValues({});
     }
