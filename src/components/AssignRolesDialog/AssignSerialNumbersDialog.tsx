@@ -51,7 +51,7 @@ const AssignSerialNumbersDialog = ({
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
-  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(referenceData?.storageLocation ? referenceData?.storageLocation : null);
 
   const [showTransferInventoryDialog, setShowTransferInventoryDialog] = useState(false);
   const [serialNumberCount, setSerialNumberCount] = useState(0);
