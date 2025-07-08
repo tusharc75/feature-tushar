@@ -288,10 +288,11 @@ import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
 import FieldView from 'src/pages/FieldView';
 import { firebaseConfig } from './firebase';
+import CustomPdfTemplate from './pages/CustomPdfTemplate';
+import CreateCustomPdfTemplate from './pages/CustomPdfTemplate/CreateCustomPdfTemplate';
+import UserManualNew from './pages/UserManualNew';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
-import UserManualNew from 'src/pages/UserManualNew';
-
 var notificationInterval: any = null;
 
 function App() {
@@ -667,6 +668,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.quotePdfTemplateDetail.path}/:id`}>
               <CreateNewQuotePdfTemplate />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.customPdfTemplate.path}>
+              <CustomPdfTemplate />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.customPdfTemplate.path}/:id`}>
+              <CreateCustomPdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>
               <FormBuilder />

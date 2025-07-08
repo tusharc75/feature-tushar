@@ -1,5 +1,5 @@
-import { Box, Dialog, useMediaQuery } from '@mui/material';
-import { useContext, useState } from 'react';
+import { Box, Dialog, MenuItem, useMediaQuery } from '@mui/material';
+import { Fragment, useContext, useState } from 'react';
 import { MdEmail } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
@@ -30,7 +30,9 @@ function PreviewDownload({
   ccEmails = [],
   isAsyncDownload = false,
   referenceLabel = '',
-  hideDialog = false
+  hideDialog = false,
+  isMenuItem = false,
+  ids = null
 }) {
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -76,23 +78,34 @@ function PreviewDownload({
     );
 
     let api = '';
-    if (type === 'Excel') {
-      api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
-    } else {
-      if (isAsyncDownload) {
-        if (subType === 'Detail') {
-          api = `/pdf/async-download/${referenceId}/detail?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
-        } else {
-          api = `/pdf/async-download/${referenceId}?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
-        }
+    if (Array.isArray(ids) && ids.length > 0) {
+      if (subType === 'Detail') {
+        api = `/pdf/multiple/detail?resource=${resource}&columns=${showColumns}&ids=${ids}`;
       } else {
-        if (subType === 'Detail') {
-          api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+        api = `/pdf/multiple?resource=${resource}&columns=${showColumns}&ids=${ids}`;
+      }
+    }
+    else {
+      if (type === 'Excel') {
+        api = `/excel/${referenceId}?resource=${resource}&columns=${showColumns}`;
+      }
+      else {
+        if (isAsyncDownload) {
+          if (subType === 'Detail') {
+            api = `/pdf/async-download/${referenceId}/detail?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
+          } else {
+            api = `/pdf/async-download/${referenceId}?resource=${resource}&columns=${showColumns}&referenceLabel=${referenceLabel}`;
+          }
         } else {
-          api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+          if (subType === 'Detail') {
+            api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
+          } else {
+            api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+          }
         }
       }
     }
+
     if (sortBy && orderBy) {
       api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
     }
@@ -172,15 +185,10 @@ function PreviewDownload({
   };
 
   return (
-    <Box display="flex" justifyContent="space-between">
-      <Box display="flex" alignItems="center">
-        <div className="flex flex-wrap gap-2">
-          <ThemeButton
-            id={'details-page-preview-button'}
-            mobileTooltip="Preview"
-            iconForMobile={<VisibilityIcon />}
-            startIcon={<VisibilityIcon />}
-            disabled={btnLoading === 'Preview'}
+    <Fragment>
+      {isMenuItem ?
+        <Fragment>
+          <MenuItem
             onClick={(e) => {
               if (hideDialog) {
                 handleView('PDF', 'Preview', 'Regular', []);
@@ -189,14 +197,9 @@ function PreviewDownload({
               }
             }}
           >
-            {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
-          </ThemeButton>
-          <ThemeButton
-            iconForMobile={<DownloadIcon />}
-            id={'details-page-download-button'}
-            mobileTooltip="Download"
-            startIcon={<DownloadIcon />}
-            disabled={btnLoading === 'Download'}
+            Preview PDF
+          </MenuItem>
+          <MenuItem
             onClick={(e) => {
               if (hideDialog) {
                 handleView('PDF', 'Download', 'Regular', []);
@@ -205,42 +208,81 @@ function PreviewDownload({
               }
             }}
           >
-            {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
-          </ThemeButton>
-          {isExcelDownload && (
-            <ThemeButton
-              id={'details-page-export-to-excel-button'}
-              iconForMobile={<ExportIcon />}
-              mobileTooltip="Export To Excel"
-              startIcon={<ExportIcon />}
-              disabled={btnLoading === 'Download'}
-              onClick={(e) => {
-                setShowColumnsDialog({ open: true, type: 'Excel', operation: 'Download' });
-              }}
-            >
-              {btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
-            </ThemeButton>
-          )}
-          {isSendEmail && (
-            <ThemeButton
-              iconForMobile={<MdEmail />}
-              id={'details-page-send-email-button'}
-              disabled={btnLoading === 'Send Email'}
-              startIcon={<MdEmail />}
-              mobileTooltip="Send Email"
-              onClick={() => {
-                if (isAsyncDownload) {
-                  setSendEmail(true);
-                } else {
-                  setShowColumnsDialog({ open: true, type: isExcelDownload ? 'PDF-Excel' : 'PDF', operation: 'Send Email' });
-                }
-              }}
-            >
-              {btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
-            </ThemeButton>
-          )}
-        </div>
-      </Box>
+            Download PDF
+          </MenuItem>
+        </Fragment>
+        : (
+          <Box display="flex" justifyContent="space-between">
+            <Box display="flex" alignItems="center">
+              <div className="flex flex-wrap gap-2">
+                <ThemeButton
+                  id={'details-page-preview-button'}
+                  mobileTooltip="Preview"
+                  iconForMobile={<VisibilityIcon />}
+                  startIcon={<VisibilityIcon />}
+                  disabled={btnLoading === 'Preview'}
+                  onClick={(e) => {
+                    if (hideDialog) {
+                      handleView('PDF', 'Preview', 'Regular', []);
+                    } else {
+                      setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Preview' });
+                    }
+                  }}
+                >
+                  {btnLoading === 'Preview' ? 'Please wait...' : 'Preview'}
+                </ThemeButton>
+                <ThemeButton
+                  iconForMobile={<DownloadIcon />}
+                  id={'details-page-download-button'}
+                  mobileTooltip="Download"
+                  startIcon={<DownloadIcon />}
+                  disabled={btnLoading === 'Download'}
+                  onClick={(e) => {
+                    if (hideDialog) {
+                      handleView('PDF', 'Download', 'Regular', []);
+                    } else {
+                      setShowColumnsDialog({ open: true, type: 'PDF', operation: 'Download' });
+                    }
+                  }}
+                >
+                  {btnLoading === 'Download' ? 'Please wait...' : 'Download'}
+                </ThemeButton>
+                {isExcelDownload && (
+                  <ThemeButton
+                    id={'details-page-export-to-excel-button'}
+                    iconForMobile={<ExportIcon />}
+                    mobileTooltip="Export To Excel"
+                    startIcon={<ExportIcon />}
+                    disabled={btnLoading === 'Download'}
+                    onClick={(e) => {
+                      setShowColumnsDialog({ open: true, type: 'Excel', operation: 'Download' });
+                    }}
+                  >
+                    {btnLoading === 'Download' ? 'Please wait...' : 'Export To Excel'}
+                  </ThemeButton>
+                )}
+                {isSendEmail && (
+                  <ThemeButton
+                    iconForMobile={<MdEmail />}
+                    id={'details-page-send-email-button'}
+                    disabled={btnLoading === 'Send Email'}
+                    startIcon={<MdEmail />}
+                    mobileTooltip="Send Email"
+                    onClick={() => {
+                      if (isAsyncDownload) {
+                        setSendEmail(true);
+                      } else {
+                        setShowColumnsDialog({ open: true, type: isExcelDownload ? 'PDF-Excel' : 'PDF', operation: 'Send Email' });
+                      }
+                    }}
+                  >
+                    {btnLoading === 'Send Email' ? 'Please wait...' : `Send Email`}
+                  </ThemeButton>
+                )}
+              </div>
+            </Box>
+          </Box>)
+      }
       {showColumnsDialog.open && (
         <PreviewDialog
           type={showColumnsDialog.type}
@@ -331,7 +373,7 @@ function PreviewDownload({
           />
         </Dialog>
       )}
-    </Box>
+    </Fragment>
   );
 }
 

@@ -420,7 +420,8 @@ export const sidebarResource = {
   technicianUnavailability: 'Technician Unavailability',
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
-  fieldView: 'Field View'
+  fieldView: 'Field View',
+  CustomPdfTemplate : 'Custom Pdf Templates'
 } as const;
 
 export const primaryFields = {
@@ -516,6 +517,12 @@ export const quoteBuilder = {
   qbResource: 'quoteBuilder',
   qbApi: '/quote-builder'
 };
+
+export const customPdfTemplate = {
+  resource: 'CustomPdfTemplate',
+  api: '/custom-pdf-template'
+};
+
 
 export const rentalManagement = {
   api: '/rental-management',
