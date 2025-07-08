@@ -110,7 +110,6 @@ const ListingPageHeader = ({
     const { type }: any = queryString.parse(history.location.search);
     if (type && setSelectedType) setSelectedType(parseInt(type));
 
-
     return history.listen((location) => {
       if (history.action === 'PUSH') {
         setLocationKeys([location.key]);
@@ -127,7 +126,7 @@ const ListingPageHeader = ({
         }
       }
     });
-  }, [locationKeys, toggleButtonList]);
+  }, [locationKeys]);
 
   const renderButtonText = ({ text, startIcon = null, loading, iconText = null, endIcon = null, mobileIcon = null }) => {
     if (isMobile) {
