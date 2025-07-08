@@ -39,12 +39,18 @@ export default defineConfig({
       }
     }
   },
-
+  define: {
+    'global': 'window', // This replaces 'global' with 'window' during bundling
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
   build: {
     outDir: 'build'
   },
   server: {
     open: true,
     port: 3000
+  },
+  optimizeDeps: {
+    include: ['buffer'],
   }
 });
