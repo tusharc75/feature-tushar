@@ -467,6 +467,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
         setProductSerialNumbers(data.productSerialNumbers);
         setNonSerializedInventory(data.nonSerializedInventory);
+        console.log("data", data);
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
@@ -1596,7 +1597,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           onClose={() => {
             setShowAssignNonSerializedInventory({ open: false, data: null });
           }}
-          data={[showAssignNonSerializedInventory?.data]}
+          data={nonSerializedInventory?.filter(
+            (inv) =>
+              inv?._id === showAssignNonSerializedInventory?.data?._id &&
+              inv?.product?.optionValue === showAssignNonSerializedInventory?.data?.materialId
+          )}
           productName={showAssignNonSerializedInventory?.data?.detail}
         />
       )}
