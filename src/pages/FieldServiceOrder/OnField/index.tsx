@@ -5,7 +5,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   ASSET_STATUS,
   checkIsAllowedToEdit,
-  RENTAL_STATUS,
   RENTAL_STEPS,
   rentalManagement,
   serializedAsset,
