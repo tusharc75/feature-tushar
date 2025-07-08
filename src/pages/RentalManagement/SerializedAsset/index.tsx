@@ -1596,7 +1596,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           onClose={() => {
             setShowAssignNonSerializedInventory({ open: false, data: null });
           }}
-          data={[showAssignNonSerializedInventory?.data]}
+          data={nonSerializedInventory?.filter(
+            (inv) =>
+              inv?._id === showAssignNonSerializedInventory?.data?._id &&
+              inv?.product?.optionValue === showAssignNonSerializedInventory?.data?.materialId
+          )}
           productName={showAssignNonSerializedInventory?.data?.detail}
         />
       )}

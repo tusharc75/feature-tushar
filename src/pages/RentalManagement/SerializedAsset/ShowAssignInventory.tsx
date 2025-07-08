@@ -64,7 +64,7 @@ const ShowAssignInventory = ({ data, onClose, productName }) => {
                     {element?.warehouse?.optionLabel}
                     {permissions?.warehouse?.isRead &&
                       <IconButton
-                        size="small" onClick={() => { window.open(`${routes.warehouseDetail.path}/${element?.subRows[0].warehouseId}`); }}>
+                        size="small" onClick={() => { window.open(`${routes.warehouseDetail.path}/${element?.warehouse?.optionValue}`); }}>
                         <FiExternalLink size={16} className="-mt-[2px] ml-1 text-gray-500 dark:text-gray-300" />
                       </IconButton>
                     }
