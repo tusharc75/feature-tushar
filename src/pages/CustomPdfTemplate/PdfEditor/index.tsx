@@ -1,7 +1,7 @@
+import type { Template } from '@pdfme/common';
+import type { Designer, Viewer } from '@pdfme/ui';
 import { Suspense, useEffect, useRef } from 'react';
 import { getPlugins } from './plugin';
-import type { Template } from '@pdfme/common';
-import type { Designer } from '@pdfme/ui';
 
 interface PdfEditorProps {
   initialTemplate?: any;
@@ -12,33 +12,68 @@ interface PdfEditorProps {
 const PdfEditorImpl = ({ initialTemplate, onTemplateChange, disabled }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerRef = useRef<Designer>(null);
+  const viewerRef = useRef<Viewer>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
     let isMounted = true;
-
     // dynamically load the Designer class
-    import('@pdfme/ui').then(({ Designer }) => {
-      if (!isMounted) return;
-      designerRef.current = new Designer({
-        domContainer: containerRef.current!,
-        template: initialTemplate,
-        options: { zoomLevel: 1, sidebarOpen: true },
-        plugins: getPlugins()
+    if (!disabled) {
+      viewerRef.current?.destroy();
+      viewerRef.current = null;
+      import('@pdfme/ui').then(({ Designer }) => {
+        if (!isMounted) return;
+        designerRef.current = new Designer({
+          domContainer: containerRef.current!,
+          template: initialTemplate,
+          options: { zoomLevel: 1, sidebarOpen: true },
+          plugins: getPlugins()
+        });
+        designerRef.current.onChangeTemplate((newTpl: Template) => {
+          onTemplateChange?.(newTpl);
+        });
       });
-
-      designerRef.current.onChangeTemplate((newTpl: Template) => {
-        onTemplateChange?.(newTpl);
-      });
-    });
+    }
 
     return () => {
       isMounted = false;
       designerRef.current?.destroy();
       designerRef.current = null;
     };
-  }, []);
+  }, [disabled]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    let isMounted = true;
+    if (disabled) {
+      designerRef.current?.destroy();
+      designerRef.current = null;
+      import('@pdfme/ui').then(({ Viewer }) => {
+        if (!isMounted) return;
+        const inputsForPreview = initialTemplate?.schemas?.map((pageSchema) => {
+          const pageInput = {};
+          pageSchema.forEach((field) => {
+            if (field.name && field.content !== undefined) {
+              pageInput[field.name] = field.content;
+            }
+          });
+          return pageInput;
+        });
+        const finalInputs = inputsForPreview?.length > 0 ? inputsForPreview : [{}];
+        viewerRef.current = new Viewer({
+          domContainer: containerRef.current!,
+          template: initialTemplate,
+          inputs: finalInputs,
+          plugins: getPlugins()
+        });
+      });
+    }
+    return () => {
+      isMounted = false;
+      viewerRef.current?.destroy();
+      viewerRef.current = null;
+    };
+  }, [initialTemplate, disabled]);
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -51,28 +86,6 @@ const PdfEditorImpl = ({ initialTemplate, onTemplateChange, disabled }: PdfEdito
           overflow: 'hidden'
         }}
       />
-
-      {disabled && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(128, 128, 128, 0.3)',
-            zIndex: 9999,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#fff',
-            fontSize: '1.2rem',
-            fontWeight: 'bold',
-            pointerEvents: 'all',
-            cursor: 'not-allowed'
-          }}
-        ></div>
-      )}
     </div>
   );
 };
