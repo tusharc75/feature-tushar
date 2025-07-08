@@ -792,6 +792,7 @@ const Consumables = ({
             consumeRequest={consumeRequest}
             serialNumberRequired={serialNumberRequired}
             canChangeWarehouse={false}
+            minDate={workOrderData?.createDate}
           />
         )}
         {openLogDialog.open && (
