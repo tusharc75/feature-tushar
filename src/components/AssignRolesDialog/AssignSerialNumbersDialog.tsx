@@ -149,7 +149,7 @@ const AssignSerialNumbersDialog = ({
     }
     axiosInstance().get(api).then(({ data: { data } }) => {
       if (typeof data === 'object') {
-        const count = data?.inventory - (data?.softHold || 0) - (data?.serialNumber || 0);
+        const count = data?.inventory - (data?.serialNumber || 0);
         if (count > 0) {
           setSerialNumberCount(count);
         } else {
