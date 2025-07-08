@@ -93,7 +93,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
         data = await findOne(objectStore.rentalManagement, rentalJob);
       }
       setLoading(false);
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData) && ![RENTAL_STATUS.closed]?.includes(data?.status));
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData));
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
