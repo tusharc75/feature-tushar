@@ -16,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   checkIsAllowedToDelete,
+  CHILD_RESOURCE,
   customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
@@ -34,6 +35,7 @@ import { Link } from 'react-router-dom';
 import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 let invoiceTimeout;
 
@@ -63,6 +65,7 @@ const Invoice = () => {
   const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [pdfColumns, setPdfColumns] = useState([]);
 
   const types = [
     {
@@ -134,6 +137,21 @@ const Invoice = () => {
       }
     });
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
+
+    try {
+      const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
+      let newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
+
+      newPdfColumns = (newPdfColumns.map((col) => ({
+        fieldName: col.Header,
+        fieldLabel: col.id,
+      })
+      ));
+      setPdfColumns([...newPdfColumns, { fieldLabel: 'Index', fieldName: 'index' }, { fieldLabel: 'Type', fieldName: 'type' }]);
+    } catch (error) {
+      console.error('Error fetching invoice fields:', error);
+      toastConfig.setToastConfig(error);
+    }
   };
 
   useEffect(() => {
@@ -403,9 +421,8 @@ const Invoice = () => {
     setIsDownloadingPdf(true);
     try {
       const columnsPayload = visibleColumnsPdf?.map(col => ({
-        name: col.fieldName,
+        name: col.fieldLabel,
       })) || [];
-
       const idsPayload = selectedRecords.map(inv => inv._id);
       const url = `/pdf/multiple?resource=${sidebarResource.invoice}&columns=${encodeURIComponent(JSON.stringify(columnsPayload))}&ids=${idsPayload}`;
       const response = await axiosInstance().get(url, { responseType: 'blob' });
@@ -541,25 +558,11 @@ const Invoice = () => {
           }}
           loadingType={isDownloadingPdf ? 'Regular' : null}
           hideDetailButton={true}
-          allColumn={
-            columns
-              ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
-              ?.map((d) => ({
-                fieldLabel: d?.Header || d?.headerName,
-                fieldName: d?.accessor || d?.field
-              }))
-          }
+          allColumn={pdfColumns}
           resource={sidebarResource.invoice}
           referenceId={null}
           defaultColumns={[]}
-          columns={
-            columns
-              ?.filter((d) => !['Actions'].includes(d?.Header || d?.headerName))
-              ?.map((d) => ({
-                fieldLabel: d?.Header || d?.headerName,
-                fieldName: d?.accessor || d?.field
-              }))
-          }
+          columns={pdfColumns}
           button1Title="Regular Download"
           button2Title="Detail Download"
           operation="Download"
