@@ -101,7 +101,7 @@ const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
     },
     {
       accessor: 'transDate',
-      Header: 'Rransaction date',
+      Header: 'Transaction Date',
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
