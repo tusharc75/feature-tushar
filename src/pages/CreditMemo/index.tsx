@@ -65,11 +65,11 @@ const CreditMemo = () => {
       },
       ...(allFields?.some((f) => f?.fieldData?.fieldName === 'status')
         ? [
-            {
-              key: `Closed ${resources?.creditMemo?.titlePlural}`,
-              value: 4
-            }
-          ]
+          {
+            key: `Closed ${resources?.creditMemo?.titlePlural}`,
+            value: 4
+          }
+        ]
         : [])
     ],
     [allFields]
@@ -330,7 +330,7 @@ const CreditMemo = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : []}
+          toggleButtonList={allFields?.filter((f) => ['owner', 'collaborator']?.includes(f?.fieldData?.fieldName))?.length === 2 ? types : null}
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
