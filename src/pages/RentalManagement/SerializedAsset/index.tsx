@@ -467,7 +467,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
         setProductSerialNumbers(data.productSerialNumbers);
         setNonSerializedInventory(data.nonSerializedInventory);
-        console.log("data", data);
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
