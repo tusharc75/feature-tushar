@@ -20,7 +20,6 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
   const [value, setValue] = useState(0);
   const [softHoldData, setSoftHoldData] = useState([]);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-
   const {
     state: { resources }
   }: any = useData();
@@ -64,6 +63,27 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       disabled: true,
       width: 120,
       Cell: ({ row }) => <div>{row.original?.inventory}</div>
+    },
+    {
+      accessor: 'product',
+      Header: 'Product',
+      disabled: true,
+      width: 150,
+      Cell: ({ row }) => <div>{row.original?.product}</div>
+    },
+    {
+      accessor: 'warehouse',
+      Header: 'Warehouse',
+      disabled: true,
+      width: 120,
+      Cell: ({ row }) => <div>{row.original?.warehouse}</div>
+    },
+    {
+      accessor: 'storageLocation',
+      Header: 'Storage Location',
+      disabled: true,
+      width: 140,
+      Cell: ({ row }) => <div>{row.original?.storageLocation}</div>
     }
   ];
 
@@ -76,10 +96,15 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         const result = [];
         data?.forEach((e) => {
           result.push({
-            path: e.referenceType === sidebarResource.transferInventory
-              ? routes.transferInventoryDetail.path
-              : e.referenceType === sidebarResource.rentalManagement
-                ? routes.rentalManagementDetail.path : '',
+            path:
+              e.referenceType === sidebarResource.transferInventory
+                ? routes.transferInventoryDetail.path
+                : e.referenceType === sidebarResource.rentalManagement
+                  ? routes.rentalManagementDetail.path
+                  : '',
+            product: e?.productName?.optionLabel,
+            warehouse: e?.warehouse?.optionLabel,
+            storageLocation: e?.storageLocation?.optionLabel,
             inventory: e?.qty,
             referenceNumber: e?.reference?.optionLabel,
             referenceNumberId: e?.reference?.optionValue,
@@ -94,7 +119,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
-      <CustomDialogHeader title={'Soft Hold History'} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
+      <CustomDialogHeader title={`Soft Hold History (${data?.productName})`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={value} onChange={handleChange}>
           {tabs?.map((row, index) => <CustomTab value={index} label={resources?.[camelCase(row)]?.titlePlural || row} />)}
