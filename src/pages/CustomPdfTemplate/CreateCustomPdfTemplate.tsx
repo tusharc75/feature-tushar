@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import Grid from '@mui/material/Grid2';
 import TextField from '@mui/material/TextField';
 import axiosInstance from '../../axios/axiosInstance';
@@ -8,19 +8,21 @@ import { object, string } from 'yup';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete } from '@mui/material';
+import { Autocomplete, IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { isEqual } from 'lodash';
 import PdfEditor from './PdfEditor';
-import { CUSTOM_A4_PDF } from '@pdfme/common';
+import { CUSTOM_A4_PDF, Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';
 import { getPlugins } from './PdfEditor/plugin';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
@@ -28,21 +30,18 @@ const PdfTemplateSchema = object().shape({
   type: string().required('Type is required')
 });
 const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
-
-const DEFAULT_EMPTY_PDFME_TEMPLATE = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
+const DEFAULT_EMPTY_PDFME_TEMPLATE: Template = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
 
 export default function CreateCustomPdfTemplate() {
   const { id } = useParams();
   const history = useHistory();
-  const [initialValues, setInitialValues] = useState(null);
+  const [initialValues, setInitialValues] = useState<any>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
-
   const {
-    state: { user, selectedEntity }
+    state: { user, permissions, selectedEntity, resources }
   }: any = useData();
-
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
   const [ownerCollaboratorData, setOwnerCollaboratorData] = useState([]);
@@ -51,26 +50,13 @@ export default function CreateCustomPdfTemplate() {
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [formValues, setFormValues] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [template, setTemplate] = useState<any | null>(null);
+  const [showProps, setShowProps] = useState<boolean>(false);
+  const [noOfPages, setNoOfPages] = useState<number>(1);
+  const noOfPagesInputRef = useRef<HTMLInputElement>(null);
+  const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
 
-  const [template, setTemplate] = useState<any>(() => {
-    if (id === '0') {
-      return DEFAULT_EMPTY_PDFME_TEMPLATE;
-    }
-    try {
-      const storedTemplate = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-      if (storedTemplate) {
-        const parsed: any = JSON.parse(storedTemplate);
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-          return parsed as any;
-        }
-      }
-    } catch (error) {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    }
-    return DEFAULT_EMPTY_PDFME_TEMPLATE;
-  });
-
-  const handleTemplateChange = (tpl: any) => {
+  const handleTemplateChange = (tpl: Template) => {
     setTemplate(tpl);
   };
 
@@ -90,34 +76,56 @@ export default function CreateCustomPdfTemplate() {
     };
   }, [id]);
 
+  const generateInitialTemplate = (numPages: number): Template => {
+    if (numPages <= 0) {
+      return DEFAULT_EMPTY_PDFME_TEMPLATE;
+    }
+    const A4_WIDTH = 215;
+    const A4_HEIGHT = 300;
+    const DEFAULT_PADDING: [number, number, number, number] = [0, 0, 0, 0];
+    const schemas: any[][] = Array.from({ length: numPages }, () => []);
+    const newTemplate: Template = {
+      basePdf: {
+        width: A4_WIDTH,
+        height: A4_HEIGHT,
+        padding: DEFAULT_PADDING,
+      },
+      schemas: schemas,
+    };
+    return newTemplate;
+  };
+
   const fetchData = async () => {
     const initialValuesData = {
       name: '',
       entity: selectedEntity ? [selectedEntity] : [],
       type: '',
       owner: user.user._id,
-      collaborator: []
+      collaborator: [],
+      noOfPages: 1
     };
-
     if (id && id !== '0') {
       try {
         const res = await axiosInstance().get(`${customPdfTemplate.api}/${id}`);
         const {
           data: { data }
         } = res;
-
         initialValuesData.name = !isClone ? data?.name : '';
         initialValuesData.entity = data?.entity ? data?.entity : [];
         initialValuesData.type = data?.type;
         initialValuesData.owner = isClone ? user.user._id : data?.owner || user.user._id;
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
+        initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
 
         if (data?.template) {
           setTemplate(data.template);
+          setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
           localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
         } else {
-          setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
-          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+          setTemplate(newTemplate);
+          setNoOfPages(initialValuesData.noOfPages);
+          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
         }
 
         setAllowedToEdit(
@@ -130,18 +138,20 @@ export default function CreateCustomPdfTemplate() {
             })
           })
         );
-
         if (isClone) {
           setAllowedToEdit(true);
           setIsEdit(true);
         }
       } catch (e) {
         toastConfig.setToastConfig(e);
-        setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
+        setTemplate(null);
+        setNoOfPages(0);
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
-      setTemplate(DEFAULT_EMPTY_PDFME_TEMPLATE);
+      const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+      setTemplate(newTemplate);
+      setNoOfPages(initialValuesData.noOfPages);
       localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
     }
     setInitialValues({ ...initialValuesData });
@@ -158,28 +168,33 @@ export default function CreateCustomPdfTemplate() {
         toastConfig.setToastConfig(error);
       });
   };
+
   const generatePreviewPdf = async () => {
     try {
       setBtnLoading(true);
-      const inputsForPreview = template?.schemas?.map(pageSchema => {
-        const pageInput = {};
+      const singleInput: { [key: string]: any } = {};
+      if (!template) {
+        throw new Error("No template available for preview.");
+      }
+      template.schemas.forEach(pageSchema => {
         pageSchema.forEach(field => {
           if (field.name && field.content !== undefined) {
-            pageInput[field.name] = field.content;
+            singleInput[field.name] = field.content;
           }
         });
-        return pageInput;
       });
-
-      const finalInputs = inputsForPreview?.length > 0 ? inputsForPreview : [{}];
-      const pdf = await generate({ template: template, inputs: finalInputs, plugins: getPlugins() });
-
+      const finalInputs = [singleInput];
+      const pdf = await generate({
+        template: template,
+        inputs: finalInputs,
+        plugins: getPlugins()
+      });
       const pdfBytes = new Uint8Array(pdf.buffer);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setBtnLoading(false);
       window.open(URL.createObjectURL(blob));
 
-    } catch (error) {
+    } catch (error: any) {
       setBtnLoading(false);
       toastConfig.setToastConfig({
         open: true,
@@ -199,7 +214,8 @@ export default function CreateCustomPdfTemplate() {
       type: values?.type,
       owner: values?.owner,
       collaborator: values?.collaborator,
-      template: template
+      template: template,
+      noOfPages: noOfPages
     };
 
     try {
@@ -220,7 +236,6 @@ export default function CreateCustomPdfTemplate() {
       });
 
       localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-
       setIsUpdating(false);
       if (isBreakCrumbPath && !isClone) {
         history.push({ pathname: isBreakCrumbPath });
@@ -288,12 +303,12 @@ export default function CreateCustomPdfTemplate() {
                       Edit
                     </ThemeButton>
                   )}
-                  {!isEdit && (
+                  {template && (
                     <ThemeButton
                       mobileTooltip="Preview"
                       iconForMobile={<VisibilityIcon />}
                       startIcon={<VisibilityIcon />}
-                      disabled={btnLoading}
+                      disabled={btnLoading || !template}
                       onClick={generatePreviewPdf}
                     >
                       {btnLoading ? 'Please wait...' : 'Preview'}
@@ -364,10 +379,6 @@ export default function CreateCustomPdfTemplate() {
                             )}
                           />
                         </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid>
-                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                           <Autocomplete
                             disabled={!allowedToEdit || !isEdit}
@@ -406,6 +417,10 @@ export default function CreateCustomPdfTemplate() {
                             )}
                           />
                         </Grid>
+                      </Grid>
+                    </Grid>
+                    <Grid>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
                           <Autocomplete
                             disabled={!allowedToEdit || !isEdit}
@@ -482,17 +497,71 @@ export default function CreateCustomPdfTemplate() {
                             )}
                           />
                         </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                          <TextField
+                            disabled={!allowedToEdit || !isEdit || (id !== '0' && !isClone)}
+                            variant="outlined"
+                            type="number"
+                            label="No of Pages"
+                            required
+                            name="noOfPages"
+                            fullWidth
+                            margin="none"
+                            size="small"
+                            value={noOfPagesInputRef.current ? noOfPagesInputRef.current.value : noOfPages}
+                            inputRef={noOfPagesInputRef}
+                            onChange={(e) => {
+                              setShowProps(true);
+                              setFieldValue('noOfPages', parseInt(e.target.value || '0', 10));
+                            }}
+                            InputProps={{
+                              endAdornment: showProps && (
+                                <>
+                                  <IconButton
+                                    size="small"
+                                    color="success"
+                                    onClick={() => {
+                                      const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
+                                      if (newPageCount !== noOfPages) {
+                                        setShowConfirmNoOfpages(true);
+                                      } else {
+                                        setShowProps(false);
+                                      }
+                                    }}
+                                  >
+                                    <CheckIcon fontSize="small" />
+                                  </IconButton>
+                                  <IconButton
+                                    size="small"
+                                    color="error"
+                                    onClick={() => {
+                                      if (noOfPagesInputRef.current) {
+                                        noOfPagesInputRef.current.value = String(noOfPages);
+                                      }
+                                      setFieldValue('noOfPages', noOfPages);
+                                      setShowProps(false);
+                                    }}
+                                  >
+                                    <CloseIcon fontSize="small" />
+                                  </IconButton>
+                                </>
+                              )
+                            }}
+                          />
+                        </Grid>
                       </Grid>
                     </Grid>
                   </Grid>
                 </div>
-                <div className='mt-4'>
-                  <PdfEditor
-                    template={template}
-                    onTemplateChange={handleTemplateChange}
-                    disabled={!isEdit || !allowedToEdit}
-                  />
-                </div>
+                {template &&
+                  <div className='mt-4'>
+                    <PdfEditor
+                      template={template}
+                      onTemplateChange={handleTemplateChange}
+                      disabled={!isEdit || !allowedToEdit}
+                      noOfPages={noOfPages}
+                    />
+                  </div>}
               </div>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
@@ -506,6 +575,27 @@ export default function CreateCustomPdfTemplate() {
                   }}
                 />
               ) : null}
+              {showConfirmNoOfPages && (
+                <ConfirmationDialog
+                  open={showConfirmNoOfPages}
+                  message={'Changing the number of pages will discard your current template design. Do you want to proceed?'}
+                  onClose={() => {
+                    setShowConfirmNoOfpages(false);
+                    if (noOfPagesInputRef.current) {
+                      noOfPagesInputRef.current.value = String(noOfPages);
+                    }
+                    setFieldValue('noOfPages', noOfPages);
+                  }}
+                  onOk={() => {
+                    const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
+                    const newTemplate = generateInitialTemplate(newPageCount);
+                    setTemplate(newTemplate);
+                    setNoOfPages(newPageCount);
+                    setShowConfirmNoOfpages(false);
+                    setShowProps(false);
+                  }}
+                />
+              )}
             </div>
           </Form>
         )}

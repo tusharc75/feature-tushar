@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef } from 'react'; 
 import { Designer } from '@pdfme/ui';
 import { getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
@@ -7,9 +7,10 @@ interface PdfEditorProps {
   template?: any;
   onTemplateChange?: (tpl: Template) => void;
   disabled: boolean;
+  noOfPages: number;
 }
 
-const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => {
+const PdfEditor = forwardRef(({ template, onTemplateChange, disabled, noOfPages }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
 
@@ -32,6 +33,10 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
           onTemplateChange(newTemplate);
         }
       });
+    } else {
+      if (template && designerInstanceRef.current.getTemplate() !== template) {
+        designerInstanceRef.current.onChangeTemplate(template);
+      }
     }
 
     return () => {
@@ -40,7 +45,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
         designerInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [noOfPages]); 
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -78,6 +83,6 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
       )}
     </div>
   );
-};
+});
 
 export default PdfEditor;
