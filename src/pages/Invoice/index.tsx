@@ -36,6 +36,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 let invoiceTimeout;
 
@@ -140,14 +141,21 @@ const Invoice = () => {
 
     try {
       const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
-      let newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
+      const newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
 
-      newPdfColumns = (newPdfColumns.map((col) => ({
-        fieldName: col.Header,
-        fieldLabel: col.id,
-      })
-      ));
-      setPdfColumns([...newPdfColumns, { fieldLabel: 'Index', fieldName: 'index' }, { fieldLabel: 'Type', fieldName: 'type' }]);
+      setPdfColumns([{
+        accessor: 'index',
+        Header: 'Index',
+      }, {
+        accessor: 'type',
+        Header: 'Type',
+      }, {
+        accessor: 'detail',
+        Header: 'Detail',
+      }, {
+        accessor: 'description',
+        Header: 'Description',
+      }, ...newPdfColumns]);
     } catch (error) {
       console.error('Error fetching invoice fields:', error);
       toastConfig.setToastConfig(error);
@@ -355,12 +363,17 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        <MenuItem
-          disabled={!selectedRecords?.length}
-          onClick={() => setPreviewDialogOpen(true)}
-        >
-          Generate PDF
-        </MenuItem>
+        {selectedRecords?.length > 0 && (
+          <PreviewDownload
+            resource={sidebarResource.invoice}
+            fileName={`Invoices_${new Date().toISOString()}`}
+            referenceId={null}
+            defaultColumns={[]}
+            columns={pdfColumns}
+            isMenuItem={true}
+            ids={selectedRecords.map((s) => s._id)}
+          />
+        )}
         {permissions?.invoice?.isUpdate &&
           selectedRecords?.length &&
           !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed) &&
