@@ -138,7 +138,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}
+              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Serial Number' : `${startCase(row.original?.type)} `}
               {row.original['type'] === 'product'
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
@@ -245,7 +245,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 </IconButton>
               </HtmlTooltip>
             )}
-            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.serializedProduct && row?.original?.assetAssignedQty > 0 && (
+            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.serializedProduct && row?.original?.nonSerializedInventoryQty > 0 && (
               <HtmlTooltip title={`Show assigned inventory`}>
                 <IconButton
                   size="small"
@@ -530,6 +530,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           ? assets?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter((e) => e._id === parent._id)?.length
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
+        parent.nonSerializeAssetQty = data.nonSerializeAsset?.filter((e) => e._id === parent._id).length
+        parent.nonSerializedInventoryQty = data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0)
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty =
           parent.type === MATERIAL_TYPE.product &&
@@ -721,12 +723,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         inventory: _inventory.id,
         index: `${parent.index}.${subRows?.length + 1}`,
         detail: _inventory?.assetNumber,
-        description: parent?.description,
         type: 'asset',
         isNonSerializeAsset: true,
         status: _inventory?.status,
-        warehouse: rentalManagementData?.warehouse?.optionLabel,
-        warehouseId: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
         canRemove: parent?.status ? false : true
       });
@@ -782,6 +781,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         ? assets?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e?._id === _subRow._id)?.length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
         nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
+      _subRow.nonSerializeAssetQty = nonSerializeAsset?.filter((e) => e._id === _subRow._id).length
+      _subRow.nonSerializedInventoryQty = nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0)
       _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type)
         ? _subRow.qty * parent.realAssetQty
         : 0;

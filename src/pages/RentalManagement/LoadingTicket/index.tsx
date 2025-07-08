@@ -126,7 +126,7 @@ const LoadingTicket = ({
   const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
-  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializeAsset: null });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
@@ -330,7 +330,7 @@ const LoadingTicket = ({
                             productName: row?.original?.productName,
                             data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
                           },
-                          type: `Serial Numbers`
+                          isNonSerializeAsset: row?.original?.nonSerializeAsset?.length > 0 ? true : false
                         });
                       }}
                     >
@@ -606,7 +606,7 @@ const LoadingTicket = ({
                 </IconButton>
               </HtmlTooltip>
             )}
-          {rentalPolicyData?.subStatusDateWiseCapture && (
+          {(rentalPolicyData?.subStatusDateWiseCapture && row?.original?.type === MATERIAL_TYPE.serializedAsset) && (
             <HtmlTooltip title={'View Logs'}>
               <IconButton
                 size="small"
@@ -1938,6 +1938,7 @@ const LoadingTicket = ({
           assets={[{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }]}
           rentalId={rentalManagementData?._id}
           title={subStatusLog.data?.assetNumber}
+          rentalAssetStatus={subStatusLog.data?.rentalAssetStatus}
         />
       )}
       {openDeliveryTicketDialog && (
@@ -1952,7 +1953,11 @@ const LoadingTicket = ({
         />
       )}
       {showInfo.open && (
-        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo.type} />
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializeAsset: null })}
+          isNonSerializeAsset={showInfo.isNonSerializeAsset}
+        />
       )}
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset

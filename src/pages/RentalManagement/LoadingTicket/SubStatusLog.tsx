@@ -4,7 +4,7 @@ import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
-import { CustomDialogTransition, displayDate, displayDateTime, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { CustomDialogTransition, displayDate, displayDateTime, RENTAL_INTERNAL_ASSET_STATUS, rentalManagement, sidebarResource } from "src/constants/helpers";
 import { Link } from 'react-router-dom';
 import routes from "src/components/Helpers/Routes";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
@@ -12,7 +12,7 @@ import { useContext, useEffect } from "react";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 
-const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
+const SubStatusLog = ({ onClose, assets, title, rentalId, rentalAssetStatus }) => {
 
   const renderedFrom = `${camelCase(sidebarResource.serializedAsset)}_subStatus_logs`;
   const toastConfig = useContext(CustomToastContext);
@@ -130,6 +130,9 @@ const SubStatusLog = ({ onClose, assets, title, rentalId }) => {
     axiosInstance()
       .get(`${rentalManagement.api}/${rentalId}/inventory/logs?assets=${JSON.stringify(assets)}`)
       .then(({ data: { data } }) => {
+        if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return]?.includes(rentalAssetStatus) && data?.length) {
+          data[0].endDate = ''
+        }
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
       })

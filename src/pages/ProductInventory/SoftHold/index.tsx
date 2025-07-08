@@ -8,7 +8,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, prepareDataForGrid, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
@@ -43,21 +43,20 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
 
   const columns = [
     {
-      accessor: 'referenceNumber',
+      accessor: 'reference',
       Header: 'Reference Number',
-      width: 120,
       disabled: true,
       Cell: ({ row }) => (
         <>
-          {row.original?.referenceNumber ? (
+          {row.original?.reference ? (
             <div>
-              <p className="text-truncate" title={row?.original?.referenceNumber}>
-                {row.original?.referenceNumber}
+              <p className="text-truncate" title={row?.original?.reference}>
+                {row.original?.reference}
               </p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${row.original.path}/${row?.original?.referenceNumberId}`);
+                  window.open(`${row.original.path}/${row?.original?.referenceId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -70,37 +69,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       )
     },
     {
-      accessor: 'inventory',
-      Header: 'Inventory',
+      accessor: 'qty',
+      Header: 'Quantity',
       disabled: true,
-      width: 120,
-      Cell: ({ row }) => <>{row.original?.inventory ? <div>{row.original?.inventory}</div> : <NoDataCell />}</>
-    },
-    {
-      accessor: 'product',
-      Header: resources?.product?.titleSingular,
-      disabled: true,
-      Cell: ({ row }) => (
-        <>
-          {row.original?.product ? (
-            <div>
-              <p className="text-truncate" title={row?.original?.product}>
-                {row.original?.product?.optionLabel}
-              </p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes?.productDetail.path}/${row?.original?.product?.optionValue}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )}
-        </>
-      )
+      Cell: ({ row }) => <>{row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />}</>
     },
     {
       accessor: 'warehouse',
@@ -130,33 +102,33 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-          {
-            accessor: 'storageLocation',
-            Header: resources?.storageLocation?.titleSingular,
-            disabled: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.storageLocation ? (
-                  <div>
-                    <p className="text-truncate" title={row?.original?.storageLocation}>
-                      {row.original?.storageLocation?.optionLabel}
-                    </p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes?.storageLocationDetail.path}/${row?.original?.storageLocation?.optionValue}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          }
-        ]
+        {
+          accessor: 'storageLocation',
+          Header: resources?.storageLocation?.titleSingular,
+          disabled: true,
+          Cell: ({ row }) => (
+            <>
+              {row?.original?.storageLocation ? (
+                <div>
+                  <p className="text-truncate" title={row?.original?.storageLocation}>
+                    {row.original?.storageLocation}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes?.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        }
+      ]
       : [])
   ];
 
@@ -168,20 +140,14 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         setTabs(unique);
         const result = [];
         data?.forEach((e) => {
+          let finalObject: any = prepareDataForGrid(e);
           result.push({
-            path:
-              e.referenceType === sidebarResource.transferInventory
-                ? routes.transferInventoryDetail.path
-                : e.referenceType === sidebarResource.rentalManagement
-                  ? routes.rentalManagementDetail.path
-                  : '',
-            product: e?.product,
-            warehouse: e?.warehouse,
-            storageLocation: e?.storageLocation,
-            inventory: e?.qty,
-            referenceNumber: e?.reference?.optionLabel,
-            referenceNumberId: e?.reference?.optionValue,
-            referenceType: e?.referenceType
+            path: e.referenceType === sidebarResource.transferInventory
+              ? routes.transferInventoryDetail.path
+              : e.referenceType === sidebarResource.rentalManagement
+                ? routes.rentalManagementDetail.path
+                : '',
+            ...finalObject,
           });
         });
         setSoftHoldData(result);
@@ -192,7 +158,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
-      <CustomDialogHeader title={`Soft Hold History (${data?.productName})`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
+      <CustomDialogHeader title={`Soft Hold History - ${data?.productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={value} onChange={handleChange}>
           {tabs?.map((row, index) => <CustomTab value={index} label={resources?.[camelCase(row)]?.titlePlural || row} />)}
