@@ -215,8 +215,9 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   return (
     <Dialog open onClose={closeDialog} TransitionComponent={CustomDialogTransition} fullScreen>
       <CustomDialogHeader
-        title={isOffline ? `Assign ${resources?.serializedAsset?.titlePlural}` : `Create Non ${resources?.serializedAsset?.titlePlural}`}
+        title={isOffline ? `Assign ${resources?.serializedAsset?.titlePlural}` : `Assign Serial Numbers`}
         onClose={closeDialog}
+        showRequiredLabel={false}
       />
       <CustomDialogContent isFooterPresent={false}>
         <Box display="flex" flexDirection="column" component={'form'} onSubmit={handleSubmit}>
@@ -227,7 +228,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
               buttonType='theme'
               isLoading={isSubmitting}
             >
-              Add
+              Assign
             </ThemeButton>
           </Box>
           <Box display="flex" justifyContent="space-between" alignItems="center">
