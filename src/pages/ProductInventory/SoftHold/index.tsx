@@ -83,12 +83,12 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           {row.original?.warehouse ? (
             <div>
               <p className="text-truncate" title={row?.original?.warehouse}>
-                {row.original?.warehouse?.optionLabel}
+                {row.original?.warehouse}
               </p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes?.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`);
+                  window.open(`${routes?.warehouseDetail.path}/${row?.original?.warehouseId}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
