@@ -146,7 +146,7 @@ const ReceivingTicket = ({
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, inUseAsset: false });
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializeAsset: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, records: null, isBulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
@@ -1440,7 +1440,7 @@ const ReceivingTicket = ({
                             productName: row?.original?.productName,
                             data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
                           },
-                          type: `Serial Numbers`
+                          isNonSerializeAsset: row?.original?.nonSerializeAsset?.length > 0 ? true : false
                         });
                       }}
                     >
@@ -1839,7 +1839,7 @@ const ReceivingTicket = ({
                 </span>
               </HtmlTooltip>
             ) : null}
-            {rentalPolicyData?.subStatusDateWiseCapture && (
+            {(rentalPolicyData?.subStatusDateWiseCapture && row?.original?.type === MATERIAL_TYPE.serializedAsset) && (
               <HtmlTooltip title={'View Logs'}>
                 <IconButton
                   size="small"
@@ -3103,6 +3103,7 @@ const ReceivingTicket = ({
           assets={[{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }]}
           rentalId={rentalManagementData?._id}
           title={subStatusLog.data?.assetNumber}
+          rentalAssetStatus={subStatusLog.data?.rentalAssetStatus}
         />
       )}
       {showConformationConsume?.open && (
@@ -3117,7 +3118,10 @@ const ReceivingTicket = ({
         />
       )}
       {showInfo.open && (
-        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo?.type} />
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializeAsset: null })}
+          isNonSerializeAsset={showInfo?.isNonSerializeAsset} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
