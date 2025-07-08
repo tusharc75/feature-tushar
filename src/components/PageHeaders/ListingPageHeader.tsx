@@ -108,8 +108,8 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(history.location.search);
+    if (type && setSelectedType) setSelectedType(parseInt(type));
 
-    if (type && setSelectedType && toggleButtonList.find((d) => d.value === parseInt(type))) setSelectedType(parseInt(type));
 
     return history.listen((location) => {
       if (history.action === 'PUSH') {
