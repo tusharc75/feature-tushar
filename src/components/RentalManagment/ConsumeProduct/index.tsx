@@ -16,7 +16,7 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
   function validate(values) {
     const errors = {};
     var qty = products?.length ? (type === 'revert' ? products[0].consumeQty : products[0].qty - products[0].consumeQty - products[0].returnQty) : 0;
-    if (!values.qty || values.qty === '') {
+    if (!values.qty) {
       errors['qty'] = 'Please enter qty';
     }
     if (values.qty > qty) {
@@ -46,7 +46,8 @@ const ConsumeProduct = ({ handleClose, type, loading, handleSucess, products }) 
                   value={values['qty']}
                   error={touched['qty'] && Boolean(errors['qty'])}
                   helperText={touched['qty'] && errors['qty']}
-                  onChange={(e) => setFieldValue('qty', e.target.value)}
+                  onChange={(e) => setFieldValue('qty', parseInt(e.target.value))}
+                  slotProps={{ input: { inputProps: { min: 0 } } }}
                 />
               </Box>
             </CustomDialogContent>
