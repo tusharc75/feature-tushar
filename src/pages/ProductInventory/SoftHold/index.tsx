@@ -85,12 +85,12 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           {row.original?.product ? (
             <div>
               <p className="text-truncate" title={row?.original?.product}>
-                {row.original?.product}
+                {row.original?.product?.optionLabel}
               </p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes?.productDetail.path}/${row?.original?.productId}`);
+                  window.open(`${routes?.productDetail.path}/${row?.original?.product?.optionValue}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -111,12 +111,12 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           {row.original?.warehouse ? (
             <div>
               <p className="text-truncate" title={row?.original?.warehouse}>
-                {row.original?.warehouse}
+                {row.original?.warehouse?.optionLabel}
               </p>
               <IconButton
                 size="small"
                 onClick={() => {
-                  window.open(`${routes?.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                  window.open(`${routes?.warehouseDetail.path}/${row?.original?.warehouse?.optionValue}`);
                 }}
               >
                 <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -139,12 +139,12 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                 {row?.original?.storageLocation ? (
                   <div>
                     <p className="text-truncate" title={row?.original?.storageLocation}>
-                      {row.original?.storageLocation}
+                      {row.original?.storageLocation?.optionLabel}
                     </p>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes?.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                        window.open(`${routes?.storageLocationDetail.path}/${row?.original?.storageLocation?.optionValue}`);
                       }}
                     >
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -175,12 +175,9 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                 : e.referenceType === sidebarResource.rentalManagement
                   ? routes.rentalManagementDetail.path
                   : '',
-            product: e?.productName?.optionLabel,
-            productId: e?.productName?.optionValue,
-            warehouse: e?.warehouse?.optionLabel,
-            warehouseId: e?.warehouse?.optionValue,
-            storageLocation: e?.storageLocation?.optionLabel,
-            storageLocationId: e?.storageLocation?.optionValue,
+            product: e?.product,
+            warehouse: e?.warehouse,
+            storageLocation: e?.storageLocation,
             inventory: e?.qty,
             referenceNumber: e?.reference?.optionLabel,
             referenceNumberId: e?.reference?.optionValue,
