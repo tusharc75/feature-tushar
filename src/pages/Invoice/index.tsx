@@ -63,6 +63,7 @@ const Invoice = () => {
   const [columns, setColumns] = useState(null);
   const [statusOptions, setStatusOptions] = useState(null);
   const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
+
   const [pdfColumns, setPdfColumns] = useState([]);
 
   const types = [
@@ -87,6 +88,28 @@ const Invoice = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchChildColumn()
+  }, []);
+
+  const fetchChildColumn = async () => {
+    const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
+    const newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
+    setPdfColumns([{
+      accessor: 'index',
+      Header: 'Index',
+    }, {
+      accessor: 'type',
+      Header: 'Type',
+    }, {
+      accessor: 'detail',
+      Header: 'Detail',
+    }, {
+      accessor: 'description',
+      Header: 'Description',
+    }, ...newPdfColumns]);
+  }
 
   const fetchGridColumns = async () => {
     let data;
@@ -135,28 +158,6 @@ const Invoice = () => {
       }
     });
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
-
-    try {
-      const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
-      const newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
-
-      setPdfColumns([{
-        accessor: 'index',
-        Header: 'Index',
-      }, {
-        accessor: 'type',
-        Header: 'Type',
-      }, {
-        accessor: 'detail',
-        Header: 'Detail',
-      }, {
-        accessor: 'description',
-        Header: 'Description',
-      }, ...newPdfColumns]);
-    } catch (error) {
-      console.error('Error fetching invoice fields:', error);
-      toastConfig.setToastConfig(error);
-    }
   };
 
   useEffect(() => {
@@ -360,17 +361,6 @@ const Invoice = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {selectedRecords?.length > 0 && (
-          <PreviewDownload
-            resource={sidebarResource.invoice}
-            fileName={`Invoices_${new Date().toISOString()}`}
-            referenceId={null}
-            defaultColumns={[]}
-            columns={pdfColumns}
-            isMenuItem={true}
-            ids={selectedRecords.map((s) => s._id)}
-          />
-        )}
         {permissions?.invoice?.isUpdate &&
           selectedRecords?.length &&
           !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed) &&
@@ -390,6 +380,17 @@ const Invoice = () => {
               })}
             </>
           )}
+        {selectedRecords?.length > 0 && (
+          <PreviewDownload
+            resource={sidebarResource.invoice}
+            fileName={`${resources?.invoice?.titlePlural}`}
+            referenceId={null}
+            defaultColumns={[]}
+            columns={pdfColumns}
+            isMenuItem={true}
+            ids={selectedRecords.map((s) => s._id)}
+          />
+        )}
       </>
     );
   };
