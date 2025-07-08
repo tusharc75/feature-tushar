@@ -155,7 +155,7 @@ export default function DeliveryTicketDetail(props) {
         return true;
       });
 
-      if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
+      if ([DELIVERY_TICKET_REFERENCE_TYPE.transferInventory, DELIVERY_TICKET_REFERENCE_TYPE.rentalJob]?.includes(ticket?.type)) {
       } else {
         data = data.filter((fields: any) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(fields.fieldData.fieldName));
       }
@@ -525,7 +525,7 @@ export default function DeliveryTicketDetail(props) {
                 }
                 subject={`${resources?.deliveryTicket?.titleSingular}-${deliveryTicketData?.ticketName}`}
                 isSendEmail={true}
-                toEmails = {getEmailsFromContacts(deliveryTicketData)}
+                toEmails={getEmailsFromContacts(deliveryTicketData)}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}

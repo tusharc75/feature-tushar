@@ -16,6 +16,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   checkIsAllowedToDelete,
+  CHILD_RESOURCE,
   customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
@@ -33,6 +34,8 @@ import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import PreviewDownload from 'src/components/PreviewDownload';
 
 let invoiceTimeout;
 
@@ -61,6 +64,8 @@ const Invoice = () => {
   const [statusOptions, setStatusOptions] = useState(null);
   const [openOpenInvoiceError, setOpenOpenInvoiceError] = useState({ open: false, data: null });
 
+  const [pdfColumns, setPdfColumns] = useState([]);
+
   const types = [
     {
       key: `My ${resources?.invoice?.titlePlural}`,
@@ -83,6 +88,28 @@ const Invoice = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
+
+  useEffect(() => {
+    fetchChildColumn()
+  }, []);
+
+  const fetchChildColumn = async () => {
+    const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
+    const newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
+    setPdfColumns([{
+      accessor: 'index',
+      Header: 'Index',
+    }, {
+      accessor: 'type',
+      Header: 'Type',
+    }, {
+      accessor: 'detail',
+      Header: 'Detail',
+    }, {
+      accessor: 'description',
+      Header: 'Description',
+    }, ...newPdfColumns]);
+  }
 
   const fetchGridColumns = async () => {
     let data;
@@ -353,6 +380,17 @@ const Invoice = () => {
               })}
             </>
           )}
+        {selectedRecords?.length > 0 && (
+          <PreviewDownload
+            resource={sidebarResource.invoice}
+            fileName={`${resources?.invoice?.titlePlural}`}
+            referenceId={null}
+            defaultColumns={[]}
+            columns={pdfColumns}
+            isMenuItem={true}
+            ids={selectedRecords.map((s) => s._id)}
+          />
+        )}
       </>
     );
   };
@@ -464,12 +502,11 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.invoiceNumber}`
-                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
