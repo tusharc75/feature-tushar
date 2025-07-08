@@ -901,6 +901,7 @@ const Consumables = ({
           consumeRequest={consumeRequest}
           serialNumberRequired={false}
           canChangeWarehouse={true}
+          minDate={fieldTicketData?.createDate}
         />
       )}
       {openLogDialog.open && (

@@ -31,6 +31,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +44,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const [invoiceData, setInvoiceData] = useState(null);
+  const [resourceFields, setResourceFields] = useState(null);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -80,6 +82,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const fetchFields = async () => {
     try {
+
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}&view=true`);
+      setResourceFields(response?.data?.data)
+
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
 
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
@@ -386,7 +392,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                       {columns ? (
                         <Box zIndex={5} width={'100%'} pt={1}>
                           <CustomReactTable
-                            height={'calc(100vh - 300px)'}
+                            //height={'calc(100vh - 300px)'}
                             columns={columns}
                             state={state}
                             dispatch={dispatch}
@@ -404,6 +410,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                         </Box>
                       )}
                     </Fragment>
+                    {(invoiceData && resourceFields) &&
+                      <FinalPriceBox allFields={resourceFields} data={invoiceData} />}
                   </TabPanel>
                   <TabPanel value={tabValue} index={1}>
                     <CreditMemo

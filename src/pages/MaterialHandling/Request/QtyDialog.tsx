@@ -1,14 +1,17 @@
 import { Box, Dialog, TextField } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import dayjs from 'dayjs';
 import { Form, Formik } from 'formik';
+import CustomDatePicker from 'src/components/CustomDatePicker';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
-import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
+import { convertDateTimToDate, CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
-function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
+function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate }) {
+
   const serialNumberOptions = data?.serialNumber?.filter((s: any) => s?.status === PRODUCT_SERIAL_NUMBER_STATUS.available) || [];
 
   function validate(values) {
@@ -20,6 +23,19 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
       if (parseInt(values.qty) > parseInt(data?.qty) - parseInt(data?.processedQty || 0)) {
         errors['qty'] = 'Insufficient Quantity !';
       }
+
+      if (!values?.processedDate) {
+        errors['processedDate'] = `Processed Date is required`;
+      }
+
+      if (dayjs(values?.processedDate).isBefore(convertDateTimToDate(minDate))) {
+        errors['processedDate'] = `Date entered prior to the request date`;
+      }
+
+      if (dayjs(values?.processedDate).isAfter(dayjs())) {
+        errors['processedDate'] = `Please select valid date`;
+      }
+
     }
     if (status === MATERIAL_REQUEST_STATUS.closed) {
       if (!values.comment) {
@@ -41,7 +57,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         showRequiredLabel={true}
       />
       <Formik
-        initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '', serialNumber: [] }}
+        initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '', serialNumber: [], processedDate: new Date() }}
         onSubmit={onSuccess}
         validateOnMount
         validate={validate}
@@ -97,6 +113,27 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   />
                 </Box>
               ) : null}
+              {status === MATERIAL_REQUEST_STATUS.processed && (
+                <div className="datepicker mt-[10px]">
+                  <CustomDatePicker
+                    label={`Processed Date`}
+                    required
+                    autoOk
+                    size="small"
+                    margin="dense"
+                    name='processedDate'
+                    placeholder={`Processed Date`}
+                    value={values?.processedDate}
+                    minDate={minDate}
+                    maxDate={new Date()}
+                    onChange={(value) => {
+                      setFieldValue('processedDate', value);
+                    }}
+                    error={touched['processedDate'] && Boolean(errors['processedDate'])}
+                    helperText={touched['processedDate'] && errors['processedDate']}
+                  />
+                </div>
+              )}
               <Box pt={2}>
                 <MultiLine
                   label="Comment"
