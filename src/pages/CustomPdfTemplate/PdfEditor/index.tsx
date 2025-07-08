@@ -1,44 +1,42 @@
-import { useEffect, useRef } from 'react';
-import { Designer } from '@pdfme/ui';
+import { Suspense, useEffect, useRef } from 'react';
 import { getPlugins } from './plugin';
-import { Template } from '@pdfme/common';
+import type { Template } from '@pdfme/common';
+import type { Designer } from '@pdfme/ui';
 
 interface PdfEditorProps {
-  template?: any;
+  initialTemplate?: any;
   onTemplateChange?: (tpl: Template) => void;
   disabled: boolean;
 }
 
-const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => {
+const PdfEditorImpl = ({ initialTemplate, onTemplateChange, disabled }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const designerInstanceRef = useRef<Designer | null>(null);
+  const designerRef = useRef<Designer>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    if (!designerInstanceRef.current) {
-      designerInstanceRef.current = new Designer({
-        domContainer: containerRef.current,
-        template: template,
-        options: {
-          zoomLevel: 1,
-          sidebarOpen: true
-        },
+    let isMounted = true;
+
+    // dynamically load the Designer class
+    import('@pdfme/ui').then(({ Designer }) => {
+      if (!isMounted) return;
+      designerRef.current = new Designer({
+        domContainer: containerRef.current!,
+        template: initialTemplate,
+        options: { zoomLevel: 1, sidebarOpen: true },
         plugins: getPlugins()
       });
 
-      designerInstanceRef.current.onChangeTemplate((newTemplate) => {
-        if (onTemplateChange) {
-          onTemplateChange(newTemplate);
-        }
+      designerRef.current.onChangeTemplate((newTpl: Template) => {
+        onTemplateChange?.(newTpl);
       });
-    }
+    });
 
     return () => {
-      if (designerInstanceRef.current) {
-        designerInstanceRef.current.destroy();
-        designerInstanceRef.current = null;
-      }
+      isMounted = false;
+      designerRef.current?.destroy();
+      designerRef.current = null;
     };
   }, []);
 
@@ -50,7 +48,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
           height: '100%',
           width: '100%',
           position: 'relative',
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       />
 
@@ -71,13 +69,18 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
             fontSize: '1.2rem',
             fontWeight: 'bold',
             pointerEvents: 'all',
-            cursor: 'not-allowed',
+            cursor: 'not-allowed'
           }}
-        >
-        </div>
+        ></div>
       )}
     </div>
   );
 };
+
+const PdfEditor = (props: PdfEditorProps) => (
+  <Suspense fallback={<>Loading...</>}>
+    <PdfEditorImpl {...props} />
+  </Suspense>
+);
 
 export default PdfEditor;

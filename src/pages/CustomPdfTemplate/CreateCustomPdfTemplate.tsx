@@ -21,7 +21,6 @@ import { getPlugins } from './PdfEditor/plugin';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
-
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
   owner: string().required('Owner is required'),
@@ -161,9 +160,9 @@ export default function CreateCustomPdfTemplate() {
   const generatePreviewPdf = async () => {
     try {
       setBtnLoading(true);
-      const inputsForPreview = template?.schemas?.map(pageSchema => {
+      const inputsForPreview = template?.schemas?.map((pageSchema) => {
         const pageInput = {};
-        pageSchema.forEach(field => {
+        pageSchema.forEach((field) => {
           if (field.name && field.content !== undefined) {
             pageInput[field.name] = field.content;
           }
@@ -178,7 +177,6 @@ export default function CreateCustomPdfTemplate() {
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       setBtnLoading(false);
       window.open(URL.createObjectURL(blob));
-
     } catch (error) {
       setBtnLoading(false);
       toastConfig.setToastConfig({
@@ -239,277 +237,275 @@ export default function CreateCustomPdfTemplate() {
     localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
   };
 
-  return initialValues && (
-    <>
-      <DeviceMessage backPath={routes.customPdfTemplate.path} />
-      <Formik
-        innerRef={(ref) => ref && setFormValues(ref.values)}
-        initialValues={initialValues}
-        validationSchema={PdfTemplateSchema}
-        onSubmit={handleSubmit}
-        enableReinitialize={true}
-      >
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <Form>
-            <div className="main-container-v1">
-              <div className="headerbox-v1">
-                <div className="nav-v1">
-                  <CustomBreadCrumbs
-                    routes={[
-                      {
-                        title: "Custom Pdf Templates",
-                        path: routes.customPdfTemplate.path
-                      },
-                      {
-                        title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
-                      }
-                    ]}
-                    isConfirmBeforeClick={allowedToEdit}
-                    onBreadCrumbClick={(path) => {
-                      setIsBreakCrumbPath(path);
-                      if (allowedToEdit) {
-                        if (!isEqual(values, initialValues)) {
+  return (
+    initialValues && (
+      <>
+        <DeviceMessage backPath={routes.customPdfTemplate.path} />
+        <Formik
+          innerRef={(ref) => ref && setFormValues(ref.values)}
+          initialValues={initialValues}
+          validationSchema={PdfTemplateSchema}
+          onSubmit={handleSubmit}
+          enableReinitialize={true}
+        >
+          {({ submitForm, touched, errors, setFieldValue, values }) => (
+            <Form>
+              <div className="main-container-v1">
+                <div className="headerbox-v1">
+                  <div className="nav-v1">
+                    <CustomBreadCrumbs
+                      routes={[
+                        {
+                          title: 'Custom Pdf Templates',
+                          path: routes.customPdfTemplate.path
+                        },
+                        {
+                          title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
+                        }
+                      ]}
+                      isConfirmBeforeClick={allowedToEdit}
+                      onBreadCrumbClick={(path) => {
+                        setIsBreakCrumbPath(path);
+                        if (allowedToEdit) {
+                          if (!isEqual(values, initialValues)) {
+                            setShowConfirmDialog(true);
+                          } else {
+                            handleClose();
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {isEdit && (
+                      <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={submitForm} buttonType="theme" isLoading={isUpdating}>
+                        Save
+                      </ThemeButton>
+                    )}
+                    {!isEdit && allowedToEdit && (
+                      <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
+                        Edit
+                      </ThemeButton>
+                    )}
+                    {!isEdit && (
+                      <ThemeButton
+                        mobileTooltip="Preview"
+                        iconForMobile={<VisibilityIcon />}
+                        startIcon={<VisibilityIcon />}
+                        disabled={btnLoading}
+                        onClick={generatePreviewPdf}
+                      >
+                        {btnLoading ? 'Please wait...' : 'Preview'}
+                      </ThemeButton>
+                    )}
+                    <ThemeButton
+                      onClick={() => {
+                        if (allowedToEdit && !isEqual(values, initialValues)) {
                           setShowConfirmDialog(true);
                         } else {
                           handleClose();
                         }
-                      }
-                    }}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {isEdit && (
-                    <ThemeButton disabled={isUpdating || !allowedToEdit} onClick={submitForm} buttonType="theme" isLoading={isUpdating}>
-                      Save
-                    </ThemeButton>
-                  )}
-                  {!isEdit && allowedToEdit && (
-                    <ThemeButton buttonType="theme" onClick={() => setIsEdit(true)}>
-                      Edit
-                    </ThemeButton>
-                  )}
-                  {!isEdit && (
-                    <ThemeButton
-                      mobileTooltip="Preview"
-                      iconForMobile={<VisibilityIcon />}
-                      startIcon={<VisibilityIcon />}
-                      disabled={btnLoading}
-                      onClick={generatePreviewPdf}
+                      }}
                     >
-                      {btnLoading ? 'Please wait...' : 'Preview'}
+                      Close
                     </ThemeButton>
-                  )}
-                  <ThemeButton
-                    onClick={() => {
-                      if (allowedToEdit && !isEqual(values, initialValues)) {
-                        setShowConfirmDialog(true);
-                      } else {
-                        handleClose();
-                      }
+                  </div>
+                </div>
+                <div className="main-container">
+                  <div className="mt-4">
+                    <Grid container spacing={2} direction={'column'}>
+                      <Grid>
+                        <Grid container spacing={2}>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <TextField
+                              disabled={!allowedToEdit || !isEdit}
+                              variant="outlined"
+                              type="text"
+                              label="PDF Template Name"
+                              required={true}
+                              name="name"
+                              fullWidth
+                              margin="none"
+                              size="small"
+                              value={values['name']}
+                              error={touched['name'] && Boolean(errors['name'])}
+                              helperText={touched['name'] && errors['name']}
+                              onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disabled={!allowedToEdit || !isEdit}
+                              options={[{ title: 'Work Order', value: 'Work Order' }]}
+                              getOptionLabel={(option) => option.title}
+                              isOptionEqualToValue={(option, value) => option.value === value.value}
+                              value={
+                                values.type
+                                  ? [{ title: 'Work Order', value: 'Work Order' }].find((option) => option.value === values.type) || null
+                                  : null
+                              }
+                              onChange={(e, val) => {
+                                setFieldValue('type', val ? val.value : '');
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required
+                                  margin="none"
+                                  size="small"
+                                  name="type"
+                                  label="Type"
+                                  variant="outlined"
+                                  error={touched['type'] && Boolean(errors['type'])}
+                                  helperText={touched['type'] && errors['type']}
+                                  fullWidth
+                                />
+                              )}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid>
+                        <Grid container spacing={2}>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disabled={!allowedToEdit || !isEdit}
+                              multiple
+                              options={user?.entity}
+                              getOptionLabel={(option: any) => (option ? option?.entityName : '')}
+                              value={
+                                user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
+                                  ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
+                                  : []
+                              }
+                              onChange={(e, val) => {
+                                setFieldValue('entity', val && val?.map((d) => d._id));
+                                setFieldValue('owner', '');
+                                setFieldValue('collaborator', []);
+                                val && val.length !== 0
+                                  ? setOwnerCollaboratorData(
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                      )
+                                    )
+                                  : setOwnerCollaboratorData(ownerCollaboratorDataConst);
+                              }}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  margin="none"
+                                  size="small"
+                                  name="entity"
+                                  label="Entity"
+                                  variant="outlined"
+                                  error={touched['entity'] && Boolean(errors['entity'])}
+                                  helperText={touched['entity'] && errors['entity']}
+                                  fullWidth
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disabled={!allowedToEdit || !isEdit}
+                              getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                              value={
+                                ownerCollaboratorData.filter((data) => data._id === values['owner']).length
+                                  ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
+                                  : ''
+                              }
+                              options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
+                              onChange={(e, val) => {
+                                setFieldValue('owner', val && val._id ? val._id : '');
+                              }}
+                              onOpen={() =>
+                                values['entity'] && values['entity'].length !== 0
+                                  ? setOwnerCollaboratorData(
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                      )
+                                    )
+                                  : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  required={true}
+                                  margin="none"
+                                  size="small"
+                                  name="owner"
+                                  label="Owner"
+                                  variant="outlined"
+                                  error={touched['owner'] && Boolean(errors['owner'])}
+                                  helperText={touched['owner'] && errors['owner']}
+                                  fullWidth
+                                />
+                              )}
+                            />
+                          </Grid>
+                          <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                            <Autocomplete
+                              disabled={!allowedToEdit || !isEdit}
+                              multiple
+                              options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
+                              getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                              value={
+                                ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
+                                  ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
+                                  : []
+                              }
+                              onChange={(e, val) => {
+                                setFieldValue('collaborator', val && val?.map((d) => d._id));
+                              }}
+                              onOpen={() =>
+                                values['entity'] && values['entity'].length !== 0
+                                  ? setOwnerCollaboratorData(
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                      )
+                                    )
+                                  : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  margin="none"
+                                  size="small"
+                                  name="collaborator"
+                                  label="Collaborator"
+                                  variant="outlined"
+                                  error={touched['collaborator'] && Boolean(errors['collaborator'])}
+                                  helperText={touched['collaborator'] && errors['collaborator']}
+                                  fullWidth
+                                />
+                              )}
+                            />
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                  </div>
+                  <div className="mt-4">
+                    <PdfEditor initialTemplate={template} onTemplateChange={handleTemplateChange} disabled={!isEdit || !allowedToEdit} />
+                  </div>
+                </div>
+                {showConfirmDialog ? (
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false);
+                      submitForm();
                     }}
-                  >
-                    Close
-                  </ThemeButton>
-                </div>
-              </div>
-              <div className="main-container">
-                <div className="mt-4">
-                  <Grid container spacing={2} direction={'column'}>
-                    <Grid>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <TextField
-                            disabled={!allowedToEdit || !isEdit}
-                            variant="outlined"
-                            type="text"
-                            label="PDF Template Name"
-                            required={true}
-                            name="name"
-                            fullWidth
-                            margin="none"
-                            size="small"
-                            value={values['name']}
-                            error={touched['name'] && Boolean(errors['name'])}
-                            helperText={touched['name'] && errors['name']}
-                            onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            options={[{ title: 'Work Order', value: 'Work Order' }]}
-                            getOptionLabel={(option) => option.title}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            value={values.type
-                              ? [{ title: 'Work Order', value: 'Work Order' }].find(
-                                (option) => option.value === values.type
-                              ) || null
-                              : null}
-                            onChange={(e, val) => {
-                              setFieldValue('type', val ? val.value : '');
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required
-                                margin="none"
-                                size="small"
-                                name="type"
-                                label="Type"
-                                variant="outlined"
-                                error={touched['type'] && Boolean(errors['type'])}
-                                helperText={touched['type'] && errors['type']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                    <Grid>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            multiple
-                            options={user?.entity}
-                            getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                            value={
-                              user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-                                ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('entity', val && val?.map((d) => d._id));
-                              setFieldValue('owner', '');
-                              setFieldValue('collaborator', []);
-                              val && val.length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="none"
-                                size="small"
-                                name="entity"
-                                label="Entity"
-                                variant="outlined"
-                                error={touched['entity'] && Boolean(errors['entity'])}
-                                helperText={touched['entity'] && errors['entity']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => data._id === values['owner']).length
-                                ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
-                                : ''
-                            }
-                            options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
-                            onChange={(e, val) => {
-                              setFieldValue('owner', val && val._id ? val._id : '');
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={true}
-                                margin="none"
-                                size="small"
-                                name="owner"
-                                label="Owner"
-                                variant="outlined"
-                                error={touched['owner'] && Boolean(errors['owner'])}
-                                helperText={touched['owner'] && errors['owner']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            multiple
-                            options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
-                                ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('collaborator', val && val?.map((d) => d._id));
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="none"
-                                size="small"
-                                name="collaborator"
-                                label="Collaborator"
-                                variant="outlined"
-                                error={touched['collaborator'] && Boolean(errors['collaborator'])}
-                                helperText={touched['collaborator'] && errors['collaborator']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </div>
-                <div className='mt-4'>
-                  <PdfEditor
-                    template={template}
-                    onTemplateChange={handleTemplateChange}
-                    disabled={!isEdit || !allowedToEdit}
+                    onClose={() => {
+                      handleClose();
+                    }}
                   />
-                </div>
+                ) : null}
               </div>
-              {showConfirmDialog ? (
-                <ConfirmCancelDialog
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false);
-                    submitForm();
-                  }}
-                  onClose={() => {
-                    handleClose();
-                  }}
-                />
-              ) : null}
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </>
+            </Form>
+          )}
+        </Formik>
+      </>
+    )
   );
 }
