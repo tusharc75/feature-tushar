@@ -20,7 +20,7 @@ import routes from '../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const CustomPdfTemplate = () => {
-  const renderedFrom = camelCase(sidebarResource?.CustomPdfTemplate);
+  const renderedFrom = camelCase(sidebarResource?.customPdfTemplate);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });

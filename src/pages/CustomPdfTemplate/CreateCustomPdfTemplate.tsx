@@ -129,7 +129,7 @@ export default function CreateCustomPdfTemplate() {
         }
 
         setAllowedToEdit(
-          checkIsAllowedToEdit(user, sidebarResource.CustomPdfTemplate, {
+          checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
             owner: {
               optionValue: initialValuesData.owner
             },
