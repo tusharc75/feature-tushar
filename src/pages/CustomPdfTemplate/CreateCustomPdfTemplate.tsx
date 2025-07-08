@@ -40,7 +40,7 @@ export default function CreateCustomPdfTemplate() {
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, selectedEntity }
   }: any = useData();
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -50,7 +50,22 @@ export default function CreateCustomPdfTemplate() {
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [formValues, setFormValues] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
-  const [template, setTemplate] = useState<any | null>(null);
+  const [template, setTemplate] = useState<any | null>(() => {
+    try {
+      const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+          return parsed;
+        } else {
+          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+        }
+      }
+    } catch (error) {
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    }
+    return null;
+  });
   const [showProps, setShowProps] = useState<boolean>(false);
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
@@ -63,17 +78,12 @@ export default function CreateCustomPdfTemplate() {
   useEffect(() => {
     if (template) {
       localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
-    } else {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
     }
   }, [template]);
 
   useEffect(() => {
     fetchData();
     fetchUser();
-    return () => {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    };
   }, [id]);
 
   const generateInitialTemplate = (numPages: number): Template => {
@@ -116,18 +126,18 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.owner = isClone ? user.user._id : data?.owner || user.user._id;
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
-
-        if (data?.template) {
-          setTemplate(data.template);
-          setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
-        } else {
-          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-          setTemplate(newTemplate);
-          setNoOfPages(initialValuesData.noOfPages);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+        if (!template) {
+          if (data?.template) {
+            setTemplate(data.template);
+            setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
+            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
+          } else {
+            const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+            setTemplate(newTemplate);
+            setNoOfPages(initialValuesData.noOfPages);
+            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+          }
         }
-
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
             owner: {
@@ -149,10 +159,12 @@ export default function CreateCustomPdfTemplate() {
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
-      const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-      setTemplate(newTemplate);
-      setNoOfPages(initialValuesData.noOfPages);
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      if (!template) {
+        const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+        setTemplate(newTemplate);
+        setNoOfPages(initialValuesData.noOfPages);
+        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      }
     }
     setInitialValues({ ...initialValuesData });
   };
