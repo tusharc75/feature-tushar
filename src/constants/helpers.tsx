@@ -421,7 +421,7 @@ export const sidebarResource = {
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
   fieldView: 'Field View',
-  CustomPdfTemplate : 'Custom Pdf Templates'
+  customPdfTemplate : 'Custom Pdf Templates'
 } as const;
 
 export const primaryFields = {

@@ -20,7 +20,7 @@ import routes from '../../components/Helpers/Routes';
 import axios, { CancelTokenSource } from 'axios';
 
 const CustomPdfTemplate = () => {
-  const renderedFrom = camelCase(sidebarResource?.quotePdfTemplate);
+  const renderedFrom = camelCase(sidebarResource?.customPdfTemplate);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -124,8 +124,8 @@ const CustomPdfTemplate = () => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.quotePdfTemplate?.isUpdate;
-          finalObject['canDelete'] = permissions?.quotePdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
+          finalObject['allowedToEdit'] = permissions?.customPdfTemplate?.isUpdate;
+          finalObject['canDelete'] = permissions?.customPdfTemplate.isDelete && user?.user?._id === finalObject['owner'];
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -204,11 +204,11 @@ const CustomPdfTemplate = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={permissions?.quotePdfTemplate?.isDelete}
+          isActionButtonVisible={permissions?.customPdfTemplate?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => CreateNew('0', false)}
-          isAddButtonVisible={permissions?.quotePdfTemplate?.isCreate}
+          isAddButtonVisible={permissions?.customPdfTemplate?.isCreate}
         />
         {columns ? (
           <CustomReactTable
@@ -231,7 +231,7 @@ const CustomPdfTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.quotePdfTemplate?.titleSingular?.toLowerCase()} : ${deleteRecord?.name || ''}` : `selected ${resources?.quotePdfTemplate?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `Custom Pdf Template : ${deleteRecord?.name || ''}` : `selected Custom Pdf Templates`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
