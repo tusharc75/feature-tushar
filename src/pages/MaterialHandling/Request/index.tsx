@@ -14,6 +14,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -369,9 +370,15 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                     }) || []
                 };
               });
-              handleUpdateStatus(qtyDialog.status, rows, data.comment || '');
+              handleUpdateStatus(qtyDialog.status, rows, data.comment || '', data?.processedDate);
             }
           }}
+          minDate={
+            qtyDialog.data ?
+              qtyDialog?.data?.requestDate :
+              selectedRecords?.map(d => d?.requestDate)?.reduce((max, item) => {
+                return dayjs(item).isAfter(dayjs(max)) ? item : max;
+              })}
         />
       )}
       {openProcessLogs.open && (

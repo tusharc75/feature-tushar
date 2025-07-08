@@ -10,7 +10,8 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { convertDateTimToDate, CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
-function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
+function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate }) {
+
   const serialNumberOptions = data?.serialNumber?.filter((s: any) => s?.status === PRODUCT_SERIAL_NUMBER_STATUS.available) || [];
 
   function validate(values) {
@@ -27,7 +28,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         errors['processedDate'] = `Processed Date is required`;
       }
 
-      if (dayjs(values?.processedDate).isBefore(convertDateTimToDate(data?.requestDate))) {
+      if (dayjs(values?.processedDate).isBefore(convertDateTimToDate(minDate))) {
         errors['processedDate'] = `Date entered prior to the request date`;
       }
 
@@ -112,7 +113,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   />
                 </Box>
               ) : null}
-              {status === MATERIAL_REQUEST_STATUS.processed && data && (
+              {status === MATERIAL_REQUEST_STATUS.processed && (
                 <div className="datepicker mt-[10px]">
                   <CustomDatePicker
                     label={`Processed Date`}
@@ -123,7 +124,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                     name='processedDate'
                     placeholder={`Processed Date`}
                     value={values?.processedDate}
-                    minDate={data?.requestDate}
+                    minDate={minDate}
                     maxDate={new Date()}
                     onChange={(value) => {
                       setFieldValue('processedDate', value);
