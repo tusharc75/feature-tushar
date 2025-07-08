@@ -35,7 +35,20 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
   }, [selectedProducts]);
 
   useEffect(() => {
-    fetchProductInventory();
+    if (type === 'add') {
+      fetchProductInventory();
+    } else {
+      setProductInventoryData(nonSerializedInventory?.map(s => ({
+        _id: selectedProduct?._id,
+        materialId: selectedProduct?.materialId,
+        warehouse: s?.warehouse?.optionLabel,
+        warehouseId: s?.warehouse?.optionValue,
+        storageLocation: s?.storageLocation?.optionLabel,
+        storageLocationId: s?.storageLocation?.optionValue,
+        qty: s?.qty,
+        inventory: 0
+      })))
+    }
   }, [selectedProduct]);
 
   const fetchProductInventory = () => {
@@ -52,12 +65,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               warehouseId: d?.warehouse?._id,
               storageLocation: d?.storageLocation?.storageLocationName,
               storageLocationId: d?.storageLocation?._id,
-              qty:
-                type === 'add'
-                  ? (d?.inventory || 0) -
-                  (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
-                    0)
-                  : nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty || 0,
+              qty: (d?.inventory || 0) -
+                (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
+                  0),
               inventory: 0
             }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);

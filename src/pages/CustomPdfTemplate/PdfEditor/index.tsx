@@ -1,46 +1,79 @@
-import { useEffect, useRef } from 'react';
-import { Designer } from '@pdfme/ui';
+import type { Template } from '@pdfme/common';
+import type { Designer, Viewer } from '@pdfme/ui';
+import { Suspense, useEffect, useRef } from 'react';
 import { getPlugins } from './plugin';
-import { Template } from '@pdfme/common';
 
 interface PdfEditorProps {
-  template?: any;
+  initialTemplate?: any;
   onTemplateChange?: (tpl: Template) => void;
   disabled: boolean;
 }
 
-const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => {
+const PdfEditorImpl = ({ initialTemplate, onTemplateChange, disabled }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const designerInstanceRef = useRef<Designer | null>(null);
+  const designerRef = useRef<Designer>(null);
+  const viewerRef = useRef<Viewer>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    if (!designerInstanceRef.current) {
-      designerInstanceRef.current = new Designer({
-        domContainer: containerRef.current,
-        template: template,
-        options: {
-          zoomLevel: 1,
-          sidebarOpen: true
-        },
-        plugins: getPlugins()
-      });
-
-      designerInstanceRef.current.onChangeTemplate((newTemplate) => {
-        if (onTemplateChange) {
-          onTemplateChange(newTemplate);
-        }
+    let isMounted = true;
+    // dynamically load the Designer class
+    if (!disabled) {
+      viewerRef.current?.destroy();
+      viewerRef.current = null;
+      import('@pdfme/ui').then(({ Designer }) => {
+        if (!isMounted) return;
+        designerRef.current = new Designer({
+          domContainer: containerRef.current!,
+          template: initialTemplate,
+          options: { zoomLevel: 1, sidebarOpen: true },
+          plugins: getPlugins()
+        });
+        designerRef.current.onChangeTemplate((newTpl: Template) => {
+          onTemplateChange?.(newTpl);
+        });
       });
     }
 
     return () => {
-      if (designerInstanceRef.current) {
-        designerInstanceRef.current.destroy();
-        designerInstanceRef.current = null;
-      }
+      isMounted = false;
+      designerRef.current?.destroy();
+      designerRef.current = null;
     };
-  }, []);
+  }, [disabled]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    let isMounted = true;
+    if (disabled) {
+      designerRef.current?.destroy();
+      designerRef.current = null;
+      import('@pdfme/ui').then(({ Viewer }) => {
+        if (!isMounted) return;
+        const inputsForPreview = initialTemplate?.schemas?.map((pageSchema) => {
+          const pageInput = {};
+          pageSchema.forEach((field) => {
+            if (field.name && field.content !== undefined) {
+              pageInput[field.name] = field.content;
+            }
+          });
+          return pageInput;
+        });
+        const finalInputs = inputsForPreview?.length > 0 ? inputsForPreview : [{}];
+        viewerRef.current = new Viewer({
+          domContainer: containerRef.current!,
+          template: initialTemplate,
+          inputs: finalInputs,
+          plugins: getPlugins()
+        });
+      });
+    }
+    return () => {
+      isMounted = false;
+      viewerRef.current?.destroy();
+      viewerRef.current = null;
+    };
+  }, [initialTemplate, disabled]);
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
@@ -50,34 +83,17 @@ const PdfEditor = ({ template, onTemplateChange, disabled }: PdfEditorProps) => 
           height: '100%',
           width: '100%',
           position: 'relative',
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       />
-
-      {disabled && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(128, 128, 128, 0.3)',
-            zIndex: 9999,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#fff',
-            fontSize: '1.2rem',
-            fontWeight: 'bold',
-            pointerEvents: 'all',
-            cursor: 'not-allowed',
-          }}
-        >
-        </div>
-      )}
     </div>
   );
 };
+
+const PdfEditor = (props: PdfEditorProps) => (
+  <Suspense fallback={<>Loading...</>}>
+    <PdfEditorImpl {...props} />
+  </Suspense>
+);
 
 export default PdfEditor;

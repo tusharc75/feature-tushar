@@ -51,7 +51,7 @@ const AssignSerialNumbersDialog = ({
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
 
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
-  const [selectedStorageLocation, setSelectedStorageLocation] = useState(null);
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState(referenceData?.storageLocation ? referenceData?.storageLocation : null);
 
   const [showTransferInventoryDialog, setShowTransferInventoryDialog] = useState(false);
   const [serialNumberCount, setSerialNumberCount] = useState(0);
@@ -149,7 +149,7 @@ const AssignSerialNumbersDialog = ({
     }
     axiosInstance().get(api).then(({ data: { data } }) => {
       if (typeof data === 'object') {
-        const count = data?.inventory - (data?.softHold || 0) - (data?.serialNumber || 0);
+        const count = data?.inventory - (data?.serialNumber || 0);
         if (count > 0) {
           setSerialNumberCount(count);
         } else {
