@@ -19,11 +19,13 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*'],
+        globIgnores: ['**/vendor-*.js', '**/*pdfme*.js'],
         maximumFileSizeToCacheInBytes: 20000000,
         importScripts: ['/firebase-messaging-sw.js']
       },
       includeAssets: ['**/*']
     }),
+
     viteTsconfigPaths(),
     splitVendorChunkPlugin()
   ],
@@ -40,8 +42,8 @@ export default defineConfig({
     }
   },
   define: {
-    'global': 'window', // This replaces 'global' with 'window' during bundling
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    global: 'window', // This replaces 'global' with 'window' during bundling
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
   },
   build: {
     outDir: 'build'
@@ -51,6 +53,6 @@ export default defineConfig({
     port: 3000
   },
   optimizeDeps: {
-    include: ['buffer'],
+    include: ['buffer']
   }
 });
