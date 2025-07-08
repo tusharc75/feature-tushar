@@ -1,4 +1,4 @@
-import { useEffect, useRef, forwardRef } from 'react'; 
+import { useEffect, useRef } from 'react'; 
 import { Designer } from '@pdfme/ui';
 import { getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
@@ -10,7 +10,7 @@ interface PdfEditorProps {
   noOfPages: number;
 }
 
-const PdfEditor = forwardRef(({ template, onTemplateChange, disabled, noOfPages }: PdfEditorProps) => {
+const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
 
@@ -83,6 +83,6 @@ const PdfEditor = forwardRef(({ template, onTemplateChange, disabled, noOfPages 
       )}
     </div>
   );
-});
+};
 
 export default PdfEditor;
