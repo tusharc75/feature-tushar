@@ -4,6 +4,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 import * as React from 'react';
 import { ListboxComponent, NoResultFound, StyledPopper } from 'src/components/Header/SearchBar/AutoCompleteComponents';
+import SearchDropDownList from 'src/components/Header/SearchBar/SearchDropDownList';
 import { Item } from 'src/components/Header/SearchBar/types';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
 import useSearchHistory from 'src/components/Header/SearchBar/useSearchHistory';
@@ -72,31 +73,54 @@ const SearchBar = () => {
           }}
         />
       ) : (
-        <TextField
-          className="[&_.MuiAutocomplete-endAdornment>button:last-child]:hidden"
-          placeholder="Type / to search"
-          fullWidth
-          inputRef={inputRef}
-          value={globalSearch}
-          onChange={(e) => setGlobalSearch(e?.target?.value)}
-          margin="none"
-          InputProps={{
-            endAdornment: globalSearch ? (
-              <IconButton onClick={() => setGlobalSearch('')} size="small" sx={{ p: '5px', width: 25, height: 25, mr: '5px' }}>
-                <Close fontSize="small" />
-              </IconButton>
-            ) : null
-          }}
-          sx={{
-            '& .MuiInputBase-root': {
-              height: 44,
-              padding: '0',
-              paddingRight: '8px !important',
-              background: 'transparent !important'
-            },
-            pr: '42px'
-          }}
-        />
+        <SearchDropDownList>
+          {({ ref, onChange, ...rest }) => (
+            <TextField
+              className="[&_.MuiAutocomplete-endAdornment>button:last-child]:hidden"
+              placeholder="Type / to search"
+              fullWidth
+              inputRef={(node) => {
+                if (node) {
+                  inputRef.current = node;
+                  ref.current = node;
+                } else {
+                  inputRef.current = null;
+                  ref.current = null;
+                }
+              }}
+              value={globalSearch}
+              onChange={(e) => {
+                onChange(e);
+                setGlobalSearch(e?.target?.value);
+              }}
+              margin="none"
+              InputProps={{
+                endAdornment: globalSearch ? (
+                  <IconButton
+                    onClick={() => {
+                      setGlobalSearch('');
+                      onChange(undefined, '');
+                    }}
+                    size="small"
+                    sx={{ p: '5px', width: 25, height: 25, mr: '5px' }}
+                  >
+                    <Close fontSize="small" />
+                  </IconButton>
+                ) : null
+              }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  height: 44,
+                  padding: '0',
+                  paddingRight: '8px !important',
+                  background: 'transparent !important'
+                },
+                pr: '42px'
+              }}
+              {...(rest as any)}
+            />
+          )}
+        </SearchDropDownList>
       )}
       <IconButton
         sx={{

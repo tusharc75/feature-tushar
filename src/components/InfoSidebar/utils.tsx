@@ -2,14 +2,6 @@ import { AutoPosition, PositionValues } from 'src/components/InfoSidebar/types';
 
 export const targetOrigin = import.meta.env.DEV ? 'http://localhost:5173' : 'https://uat-admin.equipt.ai';
 
-export function replaceAllMongoIds(
-  url: string = `${window.location.pathname}${window.location.search}${window.location.hash}`,
-  replaceWith = ':id'
-): string {
-  const objectIdRegex = /([/=])([a-f\d]{24})(?=[/?#&=]|$)/gi;
-  return url.replace(objectIdRegex, `$1${replaceWith}`);
-}
-
 export const applyStyles = (element: HTMLElement, styles: React.CSSProperties) => {
   Object.assign(element.style, styles);
 };

@@ -17,6 +17,7 @@ export type SearchKeyword = {
   keyword: string;
   timeStamp: number;
   frequency: number;
+  pathName: string;
 };
 
 export type Section = {
