@@ -10,10 +10,9 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import DashboardModal from 'src/components/DashboardModal';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
 
-const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
+const AiPriceSuggestionsDialog = ({ quotationData, versionId, handleClose }) => {
   const [aiPriceSuggestions, setAiPriceSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [themeColor] = useAppTheme();
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -26,7 +25,7 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response: any = await axiosInstance().get(`/quotation/suggestion/material/${quotationData?._id}`);
+      const response: any = await axiosInstance().get(`/generative-ai/quotation/price-suggestion/${quotationData?._id}/${versionId}`);
       setAiPriceSuggestions(response?.data?.data);
       setLoading(false);
     } catch (error) {
@@ -63,45 +62,25 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
         {!loading ? (
           aiPriceSuggestions.length > 0 ? (
             <Grid container spacing={1}>
-              <table className="w-full text-left text-sm rtl:text-right">
-                <thead className={`text-xs uppercase ${themeColor === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
-                  <tr>
-                    <th scope="col" className="px-6 py-3">
-                      Product
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Average Price
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Maximum Price
-                    </th>
-                    <th scope="col" className="px-6 py-3">
-                      Minimum Price
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aiPriceSuggestions.map((suggestion) => (
-                    <tr
-                      key={suggestion.id}
-                      className={`border-b ${themeColor === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}
-                    >
-                      <th scope="row" className={`whitespace-nowrap px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {suggestion?.product?.optionLabel}
-                      </th>
-                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.averagePrice || 0)?.fullFormatAmount || ''}
-                      </td>
-                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.maxPrice || 0)?.fullFormatAmount || ''}
-                      </td>
-                      <td className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                        {formatAmountWithCurrency(quotationData?.currency, suggestion?.minPrice || 0)?.fullFormatAmount || ''}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {aiPriceSuggestions?.map((ele) => (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 border rounded-lg">
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-4" colSpan={2}>
+                          <p className="font-bold text-gray-800">{ele?.name}</p>
+                        </td>
+                      </tr>
+                      {ele?.suggestions?.map((sug) => (
+                        <tr>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatAmountWithCurrency(quotationData?.currency, sug?.price || 0)?.fullFormatAmount || ''}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{sug?.reasoning}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
             </Grid>
           ) : (
             <div className="flex min-h-[230px] items-center justify-center">
@@ -109,8 +88,8 @@ const AiPriceSuggestionsDialog = ({ quotationData, handleClose }) => {
             </div>
           )
         ) : (
-          <Box height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          <Box height={200}>
+            <CommonSkeleton lenArray={[...Array(4).keys()]} />
           </Box>
         )}
       </DashboardModal>
