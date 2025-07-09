@@ -6,9 +6,11 @@ import * as React from 'react';
 import { ListboxComponent, NoResultFound, StyledPopper } from 'src/components/Header/SearchBar/AutoCompleteComponents';
 import { Item } from 'src/components/Header/SearchBar/types';
 import useSearch from 'src/components/Header/SearchBar/useSearch';
+import useSearchHistory from 'src/components/Header/SearchBar/useSearchHistory';
 
 const SearchBar = () => {
   const { items, globalSearch, setGlobalSearch, inputRef, inputValue, optionValue, setInputValue, setOptionValue } = useSearch();
+  const { handleSelectItem, historyItems } = useSearchHistory();
 
   return (
     <div className="relative flex flex-grow overflow-hidden rounded-[4px] max-md:my-1 md:max-w-[564px]">
@@ -16,8 +18,8 @@ const SearchBar = () => {
         <Autocomplete
           fullWidth
           disableListWrap
-          options={items}
-          groupBy={(option) => option.sectionName}
+          options={[...historyItems, ...items]}
+          groupBy={(option) => (option.type === 'history' ? 'History' : option.sectionName)}
           getOptionLabel={(option) => option.resourceLabel}
           size="small"
           renderInput={(params) => (
@@ -51,6 +53,7 @@ const SearchBar = () => {
           value={optionValue}
           onChange={(event: any, newValue: Item) => {
             setOptionValue(newValue);
+            handleSelectItem(newValue);
           }}
           renderOption={(props, option, state) => [props, option, state.index] as React.ReactNode}
           renderGroup={(params) => params as any}
@@ -61,10 +64,10 @@ const SearchBar = () => {
           slotProps={{
             paper: {
               elevation: 0,
-              className: inputValue ? '[--Paper-shadow:unset] border border-t-0 !bg-[--dark-primary,white]' : 'border-0 [--Paper-shadow:unset]'
+              className: '[--Paper-shadow:unset] border border-t-0 !bg-[--dark-primary,white]'
             },
             listbox: {
-              component: inputValue ? ListboxComponent : () => <></>
+              component: ListboxComponent
             }
           }}
         />
