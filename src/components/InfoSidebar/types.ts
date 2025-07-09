@@ -44,16 +44,27 @@ type SelectedItemData = {
 
 export type ApiFormData = {
   _id?: string;
+  actionName?: string;
+  targetSelector?: string;
+  url?: string;
+  originalUrl?: string;
+  anchorElementPadding?: AnchorElementPadding;
+  buttonPosition?: AnchorElementPadding;
+  tooltip?: string;
+  manualPosition?: boolean;
+  insideAnchor?: boolean;
+  autoPosition?: AutoPosition;
+  resourceId?: string;
   resource?: string;
-  actions?: Action[];
-  createdBy?: AtedBy;
-  updatedBy?: AtedBy;
 };
 
-export type AtedBy = {
-  user?: string;
-  date?: Date;
+export type AnchorElementPadding = {
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
 };
+
 export type Action = {
   _id?: string;
   actionName: string;
