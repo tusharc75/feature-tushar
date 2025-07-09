@@ -10,7 +10,7 @@ import { useWindowScroll } from 'src/hooks/useWindowScroll';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () => void; isFullScreen: boolean }) => {
-  const [{ data: store, item }, setStore] = useInforSidebar((store) => store);
+  const [item, setStore] = useInforSidebar((store) => store.item);
 
   const [{ y }] = useWindowScroll();
   const toastConfig = useContext(CustomToastContext);
@@ -21,10 +21,10 @@ const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () 
   useLockBodyScroll();
 
   useEffect(() => {
-    if (store) {
+    if (item) {
       setIsLoading(true);
       axiosInstance()
-        .get(`/resource-information/actions?resource=${store.resource}&actionId=${store.actionId}`)
+        .get(`/resource-information/actions?resourceId=${item.resourceId}&actionId=${item._id}`)
         .then(({ data: { data } }) => {
           if (data?.content) {
             setResourceData({ actionName: data?.actionName, content: data?.content });
@@ -38,10 +38,10 @@ const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () 
           setIsLoading(false);
         });
     }
-  }, [store]);
+  }, [item]);
 
   const handleClose = useCallback(() => {
-    setStore({ data: null, item: null });
+    setStore({ item: null });
   }, [setStore]);
 
   return (
@@ -57,15 +57,12 @@ const InfoSidebar = ({ isFullScreen, toggleFullScreen }: { toggleFullScreen: () 
           </IconButton>
         </div>
       </div>
-      {isLoading && !item ? (
+      {isLoading ? (
         <Box p={2}>
           <CommonSkeleton sm={12} md={12} lg={12} xs={12} lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (
-        <div
-          className="content flex-grow overflow-y-auto px-[--px] py-[--py]"
-          dangerouslySetInnerHTML={{ __html: item ? item.content : resourceData?.content }}
-        />
+        <div className="content flex-grow overflow-y-auto px-[--px] py-[--py]" dangerouslySetInnerHTML={{ __html: resourceData?.content }} />
       )}
     </div>
   );

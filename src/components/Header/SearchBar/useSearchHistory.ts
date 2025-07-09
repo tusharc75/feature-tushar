@@ -1,13 +1,28 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { Item, SearchKeyword } from 'src/components/Header/SearchBar/types';
+import useIndexedDb from 'src/hooks/useIndexedDb';
 import useLocalStorage from 'src/hooks/useLocalStore';
 import { useUrlWithoutMongoId } from 'src/hooks/useUrlWithoutMongoId';
-const SEARCH_ITEMS_KEY = 'equip_tSearchItems';
-const SEARCH_KEYWORDS_KEY = 'equip_tSearchKeywords';
+
+const SEARCH_DB_NAME = 'equipt_search_data';
+const SEARCH_ITEMS_STORE_NAME = 'equip_tSearchItems';
+const SEARCH_KEYWORDS_STORE_NAME = 'equip_tSearchKeywords';
 
 const useSearchHistory = () => {
-  const [searchedItems, setSearchItems] = useLocalStorage<Item[]>(SEARCH_ITEMS_KEY, []);
-  const [searchedKeywordsObject, setSearchKeywordsObject] = useLocalStorage<Record<string, SearchKeyword[]>>(SEARCH_KEYWORDS_KEY, {});
+  // const searchItemDb = useIndexedDb<Item, 'id'>({
+  //   dbName: SEARCH_DB_NAME,
+  //   storeName: SEARCH_ITEMS_STORE_NAME,
+  //   uniqueKey: 'id',
+  //   debug: import.meta.env.DEV
+  // });
+  // const searchKeywordDb = useIndexedDb<SearchKeyword, 'id'>({
+  //   dbName: SEARCH_DB_NAME,
+  //   storeName: SEARCH_KEYWORDS_STORE_NAME,
+  //   uniqueKey: 'id',
+  //   debug: import.meta.env.DEV
+  // });
+  const [searchedItems, setSearchItems] = useLocalStorage<Item[]>(SEARCH_ITEMS_STORE_NAME, []);
+  const [searchedKeywordsObject, setSearchKeywordsObject] = useLocalStorage<Record<string, SearchKeyword[]>>(SEARCH_KEYWORDS_STORE_NAME, {});
   const timeoutId = useRef<NodeJS.Timeout>(undefined);
   const { pathname } = useUrlWithoutMongoId();
 
@@ -35,7 +50,7 @@ const useSearchHistory = () => {
   }, [searchedItems]);
 
   const handleSelectItem = useCallback(
-    (data: Item) => {
+    async (data: Item) => {
       data = { ...data, timeStamp: Date.now(), type: 'history', sectionName: 'History', frequency: 1 };
       const indexInHitory = itemsSortedByTimeStamp.findIndex((d) => d.name === data.name);
 
@@ -53,6 +68,11 @@ const useSearchHistory = () => {
         newData.pop();
         setSearchItems([...newData, data]);
       } else {
+        // try {
+        //   await searchItemDb.add(data);
+        // } catch (error) {
+        //   console.log(error);
+        // }
         setSearchItems([...itemsSortedByTimeStamp, data]);
       }
     },
