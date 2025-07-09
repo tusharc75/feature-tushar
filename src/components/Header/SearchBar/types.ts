@@ -14,6 +14,7 @@ export type UseSearchActions =
   | { type: 'setInputValue'; payload: UseSearchState['inputValue'] };
 
 export type SearchKeyword = {
+  id: number;
   keyword: string;
   timeStamp: number;
   frequency: number;
@@ -25,6 +26,7 @@ export type Section = {
   items: Item[];
 };
 export type Item = {
+  id: number;
   name: string;
   resourceLabel: string;
   sectionName: string;
