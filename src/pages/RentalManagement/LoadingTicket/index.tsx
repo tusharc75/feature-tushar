@@ -6,7 +6,7 @@ import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqueId } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
@@ -38,13 +38,12 @@ import {
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
-  cn,
   dateFormatToSend,
   deliveryTicket,
   gridLoadingTimeout,
   rentalManagement,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -71,7 +70,6 @@ import FormatAlignJustifyIcon from '@mui/icons-material/FormatAlignJustify';
 import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import SubStatusDatesDialog from 'src/pages/RentalManagement/LoadingTicket/SubStatusDatesDialog';
-import dayjs from 'dayjs';
 import SubStatusLog from 'src/pages/RentalManagement/LoadingTicket/SubStatusLog';
 
 const stepGlobalDataAdded = {
@@ -533,19 +531,43 @@ const LoadingTicket = ({
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+              {permissions?.warehouse?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
             </div>
           ) : (
             <NoDataCell />
           )
       },
+      ...(user?.user?.brandPolicy?.storageLocation ? [{
+        accessor: 'storageLocation',
+        Header: resources?.storageLocation?.titleSingular,
+        cell: ({ row }) =>
+          row?.original?.storageLocation ? (
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+              {permissions?.storageLocation?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      }] : []),
       {
         accessor: 'rentalAssetStatus',
         Header: 'Rental Asset Status',
@@ -693,7 +715,8 @@ const LoadingTicket = ({
                 loadingTicketId: element._id,
                 loadingTicket: element?.ticketName,
                 loadingTicketStatus: element?.status,
-                warehouse: element?.pickupFrom
+                warehouse: element?.pickupFrom,
+                storageLocation: element?.pickupFromStorageLocation
               });
             });
           }
@@ -1021,7 +1044,7 @@ const LoadingTicket = ({
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
         warehouseProduct.forEach((element) => {
-          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse });
+          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse, storageLocation: element?.storageLocation });
         });
       } else {
         rows.push({ ...row, qty: getNestedQty(material, row) });
@@ -1034,11 +1057,17 @@ const LoadingTicket = ({
       var ticketProduct: any = [];
       let ticketProductSerialNumbers: any = [];
 
-      if (element?.warehouse) {
+      if (element?.warehouse && element?.storageLocation) {
         ticketProduct = loadingTicketProducts?.filter(
           (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
         );
-      } else {
+      }
+      else if (element?.warehouse) {
+        ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId
+          && e?.warehouse?.optionValue === element?.warehouse?.optionValue);
+      }
+      else {
         ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId);
       }
 
@@ -1064,8 +1093,9 @@ const LoadingTicket = ({
         obj.parentId = element?.parentId;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
-        obj.status =
-          element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
+        obj.status = element?.productDetail?.hasOwnProperty('serializedProduct') && element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
         obj.rentalAssetStatus = element?.status;
         obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
           ? ele.qty === consumeQty
@@ -1106,6 +1136,8 @@ const LoadingTicket = ({
         obj.productName = element?.productDetail?.productName;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
         obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
         obj.wellNumber = getParentWellNumber(material, element?._id);
         if (isSerialNumberProduct) {
@@ -1195,6 +1227,10 @@ const LoadingTicket = ({
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = records[0].warehouseId;
         data['pickupFromAddress'] = records[0].currentLocation;
+        if (records?.find((e) => e?.storageLocationId)) {
+          data['pickupFromStorageLocation'] = records?.find((e) => e?.storageLocationId)?.storageLocationId;
+          data['isPickupFromStorageLocationDisable'] = true;
+        }
       } else if (records[0].currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
         data['pickupFrom'] = records[0].currentOwner;
@@ -1475,6 +1511,13 @@ const LoadingTicket = ({
             index: e.index,
             message: rentalManagementMessage.repairSameWarehouse?.replace(sidebarResource?.warehouse, resources?.warehouse?.titleSingular)
           });
+        } else if (user?.user?.brandPolicy?.storageLocation && records?.find((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId)) {
+          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length !== 1) {
+            errorMessages.push({
+              index: e.index,
+              message: rentalManagementMessage.loadSameStorageLocation?.replace(sidebarResource?.storageLocation, resources?.storageLocation?.titleSingular)
+            });
+          }
         }
       } else if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {

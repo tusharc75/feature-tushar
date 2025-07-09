@@ -156,7 +156,14 @@ export default function DeliveryTicketDetail(props) {
       });
 
       if ([DELIVERY_TICKET_REFERENCE_TYPE.transferInventory, DELIVERY_TICKET_REFERENCE_TYPE.rentalJob]?.includes(ticket?.type)) {
-      } else {
+        if (ticket?.pickupFromType !== DELIVERY_FROM_TO_TYPE.plant) {
+          data = data.filter((e: any) => !['pickupFromStorageLocation']?.includes(e.fieldData.fieldName));
+        }
+        if (ticket?.deliveryToType !== DELIVERY_FROM_TO_TYPE.plant) {
+          data = data.filter((e: any) => !['deliveryToStorageLocation']?.includes(e.fieldData.fieldName));
+        }
+      }
+      else {
         data = data.filter((fields: any) => !['pickupFromStorageLocation', 'deliveryToStorageLocation']?.includes(fields.fieldData.fieldName));
       }
 

@@ -650,7 +650,8 @@ const ReceivingTicket = ({
                 loadingTicketId: element._id,
                 loadingTicket: element?.ticketName,
                 loadingTicketStatus: element?.status,
-                warehouse: element?.pickupFrom
+                warehouse: element?.pickupFrom,
+                storageLocation: element?.pickupFromStorageLocation
               });
             });
           }
@@ -673,7 +674,8 @@ const ReceivingTicket = ({
                 receivingTicketId: element._id,
                 receivingTicket: element?.ticketName,
                 receivingTicketStatus: element?.status,
-                warehouse: element?.deliveryTo
+                warehouse: element?.deliveryTo,
+                storageLocation: element?.deliveryToStorageLocation
               });
             });
           }
@@ -696,7 +698,8 @@ const ReceivingTicket = ({
                 returnTicketId: element._id,
                 returnTicket: element?.ticketName,
                 returnTicketStatus: element?.status,
-                warehouse: element?.deliveryTo
+                warehouse: element?.deliveryTo,
+                storageLocation: element?.deliveryToStorageLocation
               });
             });
           }
@@ -1122,7 +1125,7 @@ const ReceivingTicket = ({
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
         warehouseProduct.forEach((element) => {
-          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse });
+          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse, storageLocation: element?.storageLocation });
         });
       } else {
         rows.push({ ...row, qty: getNestedQty(material, row) });
@@ -1135,7 +1138,13 @@ const ReceivingTicket = ({
       var ticketProduct: any = [];
       let ticketProductSerialNumbers: any = [];
 
-      if (element?.warehouse) {
+      if (element?.warehouse && element?.storageLocation) {
+        ticketProduct = loadingTicketProducts?.filter(
+          (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
+        );
+      }
+      else if (element?.warehouse) {
         ticketProduct = loadingTicketProducts?.filter(
           (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
         );
@@ -1155,7 +1164,27 @@ const ReceivingTicket = ({
             (e) => e.qty <= ele.qty && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
           );
         } else {
-          if (ele?.warehouse) {
+          if (ele?.warehouse && ele?.storageLocation) {
+            returnTicket = returnTicketProducts?.find(
+              (e) =>
+                e.qty <= ele.qty &&
+                e.uniqueId === element._id &&
+                e.product === element.materialId &&
+                !e.isCount &&
+                e?.warehouse?.optionValue === ele?.warehouse?.optionValue &&
+                e?.storageLocation?.optionValue === ele?.storageLocation?.optionValue
+            );
+            receiveTicket = receiveTicketProducts?.find(
+              (e) =>
+                e.qty <= ele.qty &&
+                e.uniqueId === element._id &&
+                e.product === element.materialId &&
+                !e.isCount &&
+                e?.warehouse?.optionValue === ele?.warehouse?.optionValue &&
+                e?.storageLocation?.optionValue === ele?.storageLocation?.optionValue
+            );
+          }
+          else if (ele?.warehouse) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
@@ -1172,7 +1201,8 @@ const ReceivingTicket = ({
                 !e.isCount &&
                 e?.warehouse?.optionValue === ele?.warehouse?.optionValue
             );
-          } else {
+          }
+          else {
             returnTicket = returnTicketProducts?.find(
               (e) => e.qty <= ele.qty && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
             );
@@ -1182,11 +1212,9 @@ const ReceivingTicket = ({
           }
         }
         var consumeQty = 0;
-        consumeProducts
-          ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
-          ?.forEach((e) => {
-            consumeQty = consumeQty + e.qty;
-          });
+        consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+          consumeQty = consumeQty + e.qty;
+        });
 
         const obj: any = {};
         obj._id = element.materialId + '_' + ele.loadingTicketId;
@@ -1202,6 +1230,8 @@ const ReceivingTicket = ({
         obj.parentId = element?.parentId;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
         obj.consumeQty = consumeQty;
         obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || receiveTicket?.qty || 0 : 0;
         obj.status = ASSET_STATUS.notApplied;
@@ -1268,6 +1298,8 @@ const ReceivingTicket = ({
         obj.productName = element?.productDetail?.productName;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
         obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
         obj.status = ASSET_STATUS.notApplied;
         obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
@@ -1588,19 +1620,42 @@ const ReceivingTicket = ({
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+              {permissions?.warehouse?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>)}
             </div>
           ) : (
             <NoDataCell />
           )
       },
+      ...(user?.user?.brandPolicy?.storageLocation ? [{
+        accessor: 'storageLocation',
+        Header: resources?.storageLocation?.titleSingular,
+        cell: ({ row }) =>
+          row?.original?.storageLocation ? (
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+              {permissions?.storageLocation?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      }] : []),
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -1935,6 +1990,9 @@ const ReceivingTicket = ({
         if (records[0].warehouseId && ticketType === DELIVERY_TICKET_TYPE.return) {
           data['deliveryTo'] = records[0].warehouseId;
           data['deliveryToAddress'] = records[0].currentLocation;
+          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length === 1) {
+            data['deliveryToStorageLocation'] = uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId'))[0];
+          }
         } else {
           data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
           data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
