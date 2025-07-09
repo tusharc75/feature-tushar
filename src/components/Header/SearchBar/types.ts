@@ -13,6 +13,13 @@ export type UseSearchActions =
   | { type: 'setOptionValue'; payload: UseSearchState['optionValue'] }
   | { type: 'setInputValue'; payload: UseSearchState['inputValue'] };
 
+export type SearchKeyword = {
+  keyword: string;
+  timeStamp: number;
+  frequency: number;
+  pathName: string;
+};
+
 export type Section = {
   head: string;
   items: Item[];
@@ -32,6 +39,9 @@ export type Item = {
   isHidden?: boolean;
   resourceLabelLowerCase: string;
   sectionNameLowerCase: string;
+  frequency?: number;
+  timeStamp?: number;
+  type?: 'history';
 };
 
 export type SelectedEntityData = string;

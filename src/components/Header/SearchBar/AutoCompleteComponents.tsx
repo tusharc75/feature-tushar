@@ -1,4 +1,4 @@
-import { CallMade } from '@mui/icons-material';
+import { CallMade, Schedule } from '@mui/icons-material';
 import { ListItemIcon, ListItemText } from '@mui/material';
 import { autocompleteClasses } from '@mui/material/Autocomplete';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -7,9 +7,11 @@ import { styled, useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import * as React from 'react';
-import { ListChildComponentProps, VariableSizeList } from 'react-window';
-import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
 import { PiSmileySad } from 'react-icons/pi';
+import { ListChildComponentProps, VariableSizeList } from 'react-window';
+import RemoveFromHistoryButton from 'src/components/Header/SearchBar/RemoveFromHistoryButton';
+import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
+import { cn } from 'src/constants/helpers';
 
 const LISTBOX_PADDING = 8; // px
 
@@ -36,15 +38,23 @@ function renderRow(props: ListChildComponentProps) {
 
   const { key, ...optionProps } = dataSet[0];
 
+  const isFromHistory = dataSet[1].type === 'history';
+
   return (
-    <Typography component={'li'} key={key} {...optionProps} style={inlineStyle} noWrap>
-      <ListItemIcon sx={{ minWidth: 'unset', mr: 2 }}>
-        <CallMade style={{ fontSize: 16 }} />
+    <Typography component={'li'} key={key} {...optionProps} className={cn('group', optionProps.className)} style={inlineStyle} noWrap>
+      <ListItemIcon sx={{ minWidth: 'unset', mr: 1 }}>
+        {isFromHistory ? <Schedule style={{ fontSize: 16 }} /> : <CallMade style={{ fontSize: 16 }} />}
       </ListItemIcon>
       <ListItemText
-        primary={<p className="line-clamp-1 text-[15px] font-medium text-[#232529] dark:text-white">{`${dataSet[1].resourceLabel}`}</p>}
+        primary={<p className="line-clamp-1 text-[15px] font-medium text-[#232529] dark:text-white">{`${dataSet[1].resourceLabel}`} </p>}
       />
-      <UserFavoriteIcon item={dataSet[1]} />
+      {isFromHistory ? (
+        <span className="opacity-0 group-hover:opacity-100 group-[.Mui-focusVisible]:opacity-100">
+          <RemoveFromHistoryButton item={dataSet[1]} type="item" />
+        </span>
+      ) : (
+        <UserFavoriteIcon item={dataSet[1]} />
+      )}
     </Typography>
   );
 }
