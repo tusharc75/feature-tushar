@@ -182,11 +182,14 @@ const ManageDeliveryTicket = ({
     pickupFrom,
     deliveryTo,
     isPickupFromDisable,
+    pickupDisableMessage,
     isDeliveryToDisable,
     isPickupFromStorageLocationDisable,
+    pickupFromStorageLocationDisableMessage,
     isDeliveryToStorageLocationDisable,
     deliveryToLabel
   ) => {
+
     var warehouse = [];
     var customerAccount = [];
     var supplierAccount = [];
@@ -229,6 +232,10 @@ const ManageDeliveryTicket = ({
       }
       if (isPickupFromDisable && element.fieldName === 'pickupFrom') {
         element.isUneditable = true;
+        if (pickupDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = pickupDisableMessage;
+        }
       }
       if (isDeliveryToDisable && element.fieldName === 'deliveryTo') {
         element.isUneditable = true;
@@ -257,6 +264,10 @@ const ManageDeliveryTicket = ({
 
       if (isPickupFromStorageLocationDisable && element.fieldName === 'pickupFromStorageLocation') {
         element.isUneditable = true;
+        if (pickupFromStorageLocationDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = pickupFromStorageLocationDisableMessage;
+        }
       }
       if (isDeliveryToStorageLocationDisable && element.fieldName === 'deliveryToStorageLocation') {
         element.isUneditable = true;
@@ -307,8 +318,10 @@ const ManageDeliveryTicket = ({
           data?.pickupFrom,
           data?.deliveryTo,
           true,
+          '',
           true,
           true,
+          '',
           true,
           null
         );
@@ -319,8 +332,10 @@ const ManageDeliveryTicket = ({
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         var isPickupFromDisable = false;
+        var pickupDisableMessage = '';
         var isDeliveryToDisable = false;
         var isPickupFromStorageLocationDisable = false;
+        var pickupFromStorageLocationDisableMessage = '';
         var isDeliveryToStorageLocationDisable = false;
 
         if ((assets || products) && referenceType && referenceData) {
@@ -404,9 +419,11 @@ const ManageDeliveryTicket = ({
             tempInitialData['status'] = referenceData.status;
           }
           isPickupFromDisable = referenceData?.isPickupFromDisable ? true : false;
+          pickupDisableMessage = referenceData?.pickupDisableMessage || '';
           isDeliveryToDisable = referenceData?.isDeliveryToDisable ? true : false;
 
           isPickupFromStorageLocationDisable = referenceData?.isPickupFromStorageLocationDisable ? true : false;
+          pickupFromStorageLocationDisableMessage = referenceData?.pickupFromStorageLocationDisableMessage || '';
           isDeliveryToStorageLocationDisable = referenceData?.isDeliveryToStorageLocationDisable ? true : false;
 
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
@@ -487,8 +504,10 @@ const ManageDeliveryTicket = ({
           tempInitialData['pickupFrom'],
           tempInitialData['deliveryTo'],
           isPickupFromDisable,
+          pickupDisableMessage,
           isDeliveryToDisable,
           isPickupFromStorageLocationDisable,
+          pickupFromStorageLocationDisableMessage,
           isDeliveryToStorageLocationDisable,
           referenceData?.deliveryToLabel
         );
