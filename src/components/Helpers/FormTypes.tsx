@@ -105,8 +105,8 @@ const CustomFormat = (props: NumberFormatCustomProps | any) => {
 const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, warningMessage, warningTooltip }) => (
   <div className="form-types">
     {isTooltip && info ? (
-      <Grid container spacing={1}>
-        <Grid style={{ flexGrow: 1 }}>
+      <div className="flex items-center gap-1">
+        <div className="flex-grow">
           {children}
           {warningTooltip && (
             <Box ml={1}>
@@ -115,15 +115,11 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
               </Typography>
             </Box>
           )}
-        </Grid>
-        <Grid>
-          <Box>
-            <HtmlTooltip title={<Typography>{info}</Typography>}>
-              <InfoIcon color="disabled" />
-            </HtmlTooltip>
-          </Box>
-        </Grid>
-      </Grid>
+        </div>
+        <HtmlTooltip title={<Typography>{info}</Typography>}>
+          <InfoIcon color="primary" />
+        </HtmlTooltip>
+      </div>
     ) : doNotShowInfoTooltip ? (
       <>
         {children}

@@ -1252,6 +1252,7 @@ const LoadingTicket = ({
         if (records?.find((e) => e?.storageLocationId)) {
           data['pickupFromStorageLocation'] = records?.find((e) => e?.storageLocationId)?.storageLocationId;
           data['isPickupFromStorageLocationDisable'] = true;
+          data['pickupFromStorageLocationDisableMessage'] = `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
         }
       } else if (records[0].currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
@@ -1270,6 +1271,8 @@ const LoadingTicket = ({
       data['startDate'] = rentalManagementData?.estimateStartDate;
       data['endDate'] = rentalManagementData?.estimateStartDate;
       data['isPickupFromDisable'] = true;
+      data['pickupDisableMessage'] = `Changes to the ${resources.warehouse.titleSingular} are not allowed because inventory or asset assignments.`;
+
       data['isDeliveryToDisable'] = true;
 
       if (rentalManagementData?.padName?.optionValue) {

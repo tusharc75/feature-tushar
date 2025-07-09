@@ -27,7 +27,7 @@ const RenderAllInfoButtons = () => {
     state: { user }
   }: any = useData();
   const parsedUrl = useUrlParser();
-  const toastConfig = useContext(CustomToastContext);
+  // const toastConfig = useContext(CustomToastContext);
   const [allData, setAllData] = useState<Action[]>([]);
   const [data, setData] = useState<Action[]>([]);
   const [mutationSignal, setMutationSignal] = useState(0);
@@ -43,7 +43,7 @@ const RenderAllInfoButtons = () => {
         const newData = data.map((d) => d.actions.filter((action) => action.targetSelector)).flat();
         setAllData(newData);
       } catch (error) {
-        toastConfig.setToastConfig(error);
+        console.error(error);
       }
     };
     if (user) {
