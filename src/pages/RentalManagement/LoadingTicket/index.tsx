@@ -6,7 +6,7 @@ import Edit from '@mui/icons-material/Edit';
 import HelpIcon from '@mui/icons-material/HelpOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq, uniqBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
@@ -697,6 +697,10 @@ const LoadingTicket = ({
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
+        productSerialNumbers?.forEach((e) => {
+          e.warehouse = e?.productSerialNumberDetail?.warehouse
+          e.storageLocation = e?.productSerialNumberDetail?.storageLocation
+        })
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setHideDeliveryTicketDelivered(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
       }
@@ -1039,7 +1043,22 @@ const LoadingTicket = ({
     const isSerialNumberProduct = productSerialNumbers?.filter((e) => e?._id === row?._id)?.length ? true : false;
 
     if (isSerialNumberProduct) {
-      rows.push({ ...row, qty: getNestedQty(material, row) });
+      if (user?.user?.brandPolicy?.storageLocation) {
+        const uniqueWarehouseLocation = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}-${obj.storageLocation?.optionValue}`);
+        uniqueWarehouseLocation?.forEach((element) => {
+          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id
+            && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue)?.length
+          rows.push({ ...row, qty: qty, warehouse: element?.warehouse, storageLocation: element?.storageLocation });
+        })
+      }
+      else {
+        const uniqueWarehouse = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}`);
+        uniqueWarehouse?.forEach((element) => {
+          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id && e?.warehouse?.optionValue === element?.warehouse?.optionValue)?.length
+          rows.push({ ...row, qty: qty, warehouse: element?.warehouse });
+        })
+      }
     } else {
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
@@ -1052,7 +1071,7 @@ const LoadingTicket = ({
     }
 
     rows?.forEach((element) => {
-      var qty = isSerialNumberProduct ? productSerialNumbers?.filter((e) => e?._id === element?._id)?.length : element.qty;
+      var qty = element.qty;
 
       var ticketProduct: any = [];
       let ticketProductSerialNumbers: any = [];
@@ -1141,9 +1160,12 @@ const LoadingTicket = ({
         obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
         obj.wellNumber = getParentWellNumber(material, element?._id);
         if (isSerialNumberProduct) {
-          obj.productSerialNumbers = productSerialNumbers
-            ?.filter((e) => e?._id === element?._id && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
-            ?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
+          let productSerialNumbersMaterial = productSerialNumbers?.filter((e) => e?._id === element?._id &&
+            e?.warehouse?.optionValue === obj?.warehouseId && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
+          if (obj?.storageLocationId) {
+            productSerialNumbersMaterial = productSerialNumbersMaterial?.filter((e) => e?.storageLocation?.optionValue === obj?.storageLocationId)
+          }
+          obj.productSerialNumbers = productSerialNumbersMaterial?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
         }
         productRows.push(obj);
       }
