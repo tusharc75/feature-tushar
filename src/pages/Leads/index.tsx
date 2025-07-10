@@ -68,7 +68,7 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
@@ -78,7 +78,6 @@ const Leads = () => {
     message: null
   });
   const hasPermissionToConvertInOpportunity = user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity ?? false;
-  const [leadData, setLeadData] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -237,10 +236,10 @@ const Leads = () => {
         let data, count;
         const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
-        setLeadData(data);
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
+          finalObject['originalField'] = u
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
@@ -489,9 +488,9 @@ const Leads = () => {
   const handleSaveEdit = async (inputField, updatedRow) => {
     setOkButtonLoading(true);
 
-    const dataToUpdate = leadData.find((d) => d._id === updatedRow._id);
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-    const values = getObjKeysWithValues(dataToUpdate, fieldsDataAll)
+    const values = getObjKeysWithValues(dataToUpdate.originalField, fieldsDataAll)
 
     Object.keys(inputField).forEach((key) => {
       if (key in values) {
