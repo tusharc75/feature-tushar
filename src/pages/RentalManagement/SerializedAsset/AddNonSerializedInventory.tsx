@@ -164,7 +164,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
           isSubmitting ||
           !productInventoryData?.length ||
           products?.some((d) => d?.qty < 0) ||
-          productInventoryData?.some((p) => p?.inventory > p?.qty) ||
+          productInventoryData?.some((p) => p?.inventory > p?.qty || p?.serialNumbers?.length > p?.inventory) ||
           productInventoryData?.every((p) => p?.inventory === 0)
         }
         onClick={handleSubmit}
@@ -277,6 +277,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                                 variant="outlined"
                                 name="serialNumbers"
                                 label={'Serial Numbers'}
+                                error={_product?.serialNumbers?.length > _product?.inventory}
+                                helperText={_product?.serialNumbers?.length > _product?.inventory && 'Serial Number can not assign more than inventory'}
                               />
                             )}
                           />
