@@ -9,7 +9,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { convertDateTimToDate, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
@@ -48,8 +48,7 @@ const ConsumablesQtyDialog = ({
     if (user?.user?.brandPolicy?.storageLocation) {
       lookupResource = `${lookupResource},${sidebarResource?.storageLocation}`
     }
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
       .then(({ data: { data } }) => {
         setLookupResource(data)
       });
@@ -73,24 +72,21 @@ const ConsumablesQtyDialog = ({
     data.products = products;
     data.referenceId = referenceId;
     data.referenceType = referenceType;
-    data.consumeDate = values?.consumeDate
+    data.consumeDate = dateFormatToSend(values?.consumeDate)
     if (products?.length) {
       setIsSubmitting(true);
-      axiosInstance()
-        .put('/material-handling/consume', data)
-        .then(({ data }) => {
-          onSuccess();
-          setIsSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put('/material-handling/consume', data).then(({ data }) => {
+        onSuccess();
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -98,7 +94,7 @@ const ConsumablesQtyDialog = ({
     const data: any = {
       referenceType,
       referenceId,
-      requestDate: values?.requestDate
+      requestDate: dateFormatToSend(values?.requestDate)
     };
     const products: any = [];
     values?.products?.forEach((e) => {
@@ -169,15 +165,12 @@ const ConsumablesQtyDialog = ({
 
   const validateDate = (values) => {
     let errors: any = {};
-
     if (!values?.[dateFieldName]) {
       errors[dateFieldName] = `${consumeRequest ? 'Request' : 'Consume'} date is required`;
     }
-
-    if (minDate && dayjs(values[dateFieldName]).isBefore(convertDateTimToDate(minDate))) {
+    if (minDate && dayjs(values[dateFieldName]).isBefore(minDate, 'day')) {
       errors[dateFieldName] = `Date entered prior to the create date`;
     }
-
     if (dayjs(values[dateFieldName]).isAfter(dayjs())) {
       errors[dateFieldName] = `Please select valid date`;
     }
