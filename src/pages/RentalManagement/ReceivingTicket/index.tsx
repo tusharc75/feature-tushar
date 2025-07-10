@@ -146,7 +146,7 @@ const ReceivingTicket = ({
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, inUseAsset: false });
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializeAsset: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, records: null, isBulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
@@ -615,6 +615,10 @@ const ReceivingTicket = ({
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
+        productSerialNumbers?.forEach((e) => {
+          e.warehouse = e?.productSerialNumberDetail?.warehouse
+          e.storageLocation = e?.productSerialNumberDetail?.storageLocation
+        })
         nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
         setOnReceiveAssetDataCapture(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.inTransit ? true : false);
         setHideDeliveryTicketDelivered(productResponse?.data?.data?.defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
@@ -650,7 +654,8 @@ const ReceivingTicket = ({
                 loadingTicketId: element._id,
                 loadingTicket: element?.ticketName,
                 loadingTicketStatus: element?.status,
-                warehouse: element?.pickupFrom
+                warehouse: element?.pickupFrom,
+                storageLocation: element?.pickupFromStorageLocation
               });
             });
           }
@@ -673,7 +678,8 @@ const ReceivingTicket = ({
                 receivingTicketId: element._id,
                 receivingTicket: element?.ticketName,
                 receivingTicketStatus: element?.status,
-                warehouse: element?.deliveryTo
+                warehouse: element?.deliveryTo,
+                storageLocation: element?.deliveryToStorageLocation
               });
             });
           }
@@ -696,7 +702,8 @@ const ReceivingTicket = ({
                 returnTicketId: element._id,
                 returnTicket: element?.ticketName,
                 returnTicketStatus: element?.status,
-                warehouse: element?.deliveryTo
+                warehouse: element?.deliveryTo,
+                storageLocation: element?.deliveryToStorageLocation
               });
             });
           }
@@ -1117,12 +1124,27 @@ const ReceivingTicket = ({
     const isSerialNumberProduct = productSerialNumbers?.filter((e) => e?._id === row?._id)?.length ? true : false;
 
     if (isSerialNumberProduct) {
-      rows.push({ ...row, qty: getNestedQty(material, row) });
+      if (user?.user?.brandPolicy?.storageLocation) {
+        const uniqueWarehouseLocation = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}-${obj.storageLocation?.optionValue}`);
+        uniqueWarehouseLocation?.forEach((element) => {
+          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id
+            && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue)?.length
+          rows.push({ ...row, qty: qty, warehouse: element?.warehouse, storageLocation: element?.storageLocation });
+        })
+      }
+      else {
+        const uniqueWarehouse = uniqBy(productSerialNumbers, (obj: any) => `${obj?.warehouse?.optionValue}`);
+        uniqueWarehouse?.forEach((element) => {
+          const qty = productSerialNumbers?.filter((e) => e?._id === row?._id && e?.warehouse?.optionValue === element?.warehouse?.optionValue)?.length
+          rows.push({ ...row, qty: qty, warehouse: element?.warehouse });
+        })
+      }
     } else {
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
         warehouseProduct.forEach((element) => {
-          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse });
+          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse, storageLocation: element?.storageLocation });
         });
       } else {
         rows.push({ ...row, qty: getNestedQty(material, row) });
@@ -1130,12 +1152,18 @@ const ReceivingTicket = ({
     }
 
     rows?.forEach((element) => {
-      var qty = isSerialNumberProduct ? productSerialNumbers?.filter((e) => e?._id === element?._id)?.length : element.qty;
+      var qty = element.qty;
 
       var ticketProduct: any = [];
       let ticketProductSerialNumbers: any = [];
 
-      if (element?.warehouse) {
+      if (element?.warehouse && element?.storageLocation) {
+        ticketProduct = loadingTicketProducts?.filter(
+          (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
+            && e?.storageLocation?.optionValue === element?.storageLocation?.optionValue
+        );
+      }
+      else if (element?.warehouse) {
         ticketProduct = loadingTicketProducts?.filter(
           (e) => e.uniqueId === element._id && e.product === element.materialId && e?.warehouse?.optionValue === element?.warehouse?.optionValue
         );
@@ -1155,7 +1183,27 @@ const ReceivingTicket = ({
             (e) => e.qty <= ele.qty && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
           );
         } else {
-          if (ele?.warehouse) {
+          if (ele?.warehouse && ele?.storageLocation) {
+            returnTicket = returnTicketProducts?.find(
+              (e) =>
+                e.qty <= ele.qty &&
+                e.uniqueId === element._id &&
+                e.product === element.materialId &&
+                !e.isCount &&
+                e?.warehouse?.optionValue === ele?.warehouse?.optionValue &&
+                e?.storageLocation?.optionValue === ele?.storageLocation?.optionValue
+            );
+            receiveTicket = receiveTicketProducts?.find(
+              (e) =>
+                e.qty <= ele.qty &&
+                e.uniqueId === element._id &&
+                e.product === element.materialId &&
+                !e.isCount &&
+                e?.warehouse?.optionValue === ele?.warehouse?.optionValue &&
+                e?.storageLocation?.optionValue === ele?.storageLocation?.optionValue
+            );
+          }
+          else if (ele?.warehouse) {
             returnTicket = returnTicketProducts?.find(
               (e) =>
                 e.qty <= ele.qty &&
@@ -1172,7 +1220,8 @@ const ReceivingTicket = ({
                 !e.isCount &&
                 e?.warehouse?.optionValue === ele?.warehouse?.optionValue
             );
-          } else {
+          }
+          else {
             returnTicket = returnTicketProducts?.find(
               (e) => e.qty <= ele.qty && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
             );
@@ -1182,11 +1231,9 @@ const ReceivingTicket = ({
           }
         }
         var consumeQty = 0;
-        consumeProducts
-          ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
-          ?.forEach((e) => {
-            consumeQty = consumeQty + e.qty;
-          });
+        consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+          consumeQty = consumeQty + e.qty;
+        });
 
         const obj: any = {};
         obj._id = element.materialId + '_' + ele.loadingTicketId;
@@ -1202,6 +1249,8 @@ const ReceivingTicket = ({
         obj.parentId = element?.parentId;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
         obj.consumeQty = consumeQty;
         obj.returnQty = !element?.productDetail?.serializedProduct ? returnTicket?.qty || receiveTicket?.qty || 0 : 0;
         obj.status = ASSET_STATUS.notApplied;
@@ -1268,6 +1317,8 @@ const ReceivingTicket = ({
         obj.productName = element?.productDetail?.productName;
         obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
+        obj.storageLocation = element?.storageLocation?.optionLabel;
+        obj.storageLocationId = element?.storageLocation?.optionValue;
         obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
         obj.status = ASSET_STATUS.notApplied;
         obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
@@ -1278,9 +1329,12 @@ const ReceivingTicket = ({
         obj.wellNumber = getParentWellNumber(material, element?._id);
 
         if (isSerialNumberProduct) {
-          obj.productSerialNumbers = productSerialNumbers
-            ?.filter((e) => e?._id === element?._id && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
-            ?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
+          let productSerialNumbersMaterial = productSerialNumbers?.filter((e) => e?._id === element?._id &&
+            e?.warehouse?.optionValue === obj?.warehouseId && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
+          if (obj?.storageLocationId) {
+            productSerialNumbersMaterial = productSerialNumbersMaterial?.filter((e) => e?.storageLocation?.optionValue === obj?.storageLocationId)
+          }
+          obj.productSerialNumbers = productSerialNumbersMaterial?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
         }
         productRows.push(obj);
       }
@@ -1440,7 +1494,7 @@ const ReceivingTicket = ({
                             productName: row?.original?.productName,
                             data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
                           },
-                          type: `Serial Numbers`
+                          isNonSerializeAsset: row?.original?.nonSerializeAsset?.length > 0 ? true : false
                         });
                       }}
                     >
@@ -1588,19 +1642,42 @@ const ReceivingTicket = ({
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.warehouse}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+              {permissions?.warehouse?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>)}
             </div>
           ) : (
             <NoDataCell />
           )
       },
+      ...(user?.user?.brandPolicy?.storageLocation ? [{
+        accessor: 'storageLocation',
+        Header: resources?.storageLocation?.titleSingular,
+        cell: ({ row }) =>
+          row?.original?.storageLocation ? (
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row?.original?.storageLocation}</h5>
+              {permissions?.storageLocation?.isRead && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      }] : []),
       {
         accessor: 'loadingTicket',
         Header: 'Loading Ticket',
@@ -1839,7 +1916,7 @@ const ReceivingTicket = ({
                 </span>
               </HtmlTooltip>
             ) : null}
-            {rentalPolicyData?.subStatusDateWiseCapture && (
+            {(rentalPolicyData?.subStatusDateWiseCapture && row?.original?.type === MATERIAL_TYPE.serializedAsset) && (
               <HtmlTooltip title={'View Logs'}>
                 <IconButton
                   size="small"
@@ -1938,6 +2015,11 @@ const ReceivingTicket = ({
         } else {
           data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
           data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
+        }
+        if (records?.find((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId)) {
+          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length === 1) {
+            data['deliveryToStorageLocation'] = uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId'))[0];
+          }
         }
       }
       data['startDate'] = rentalManagementData?.estimateStartDate;
@@ -3103,6 +3185,7 @@ const ReceivingTicket = ({
           assets={[{ asset: subStatusLog.data?._id, uniqueId: subStatusLog.data?.uniqueId }]}
           rentalId={rentalManagementData?._id}
           title={subStatusLog.data?.assetNumber}
+          rentalAssetStatus={subStatusLog.data?.rentalAssetStatus}
         />
       )}
       {showConformationConsume?.open && (
@@ -3117,7 +3200,10 @@ const ReceivingTicket = ({
         />
       )}
       {showInfo.open && (
-        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo?.type} />
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializeAsset: null })}
+          isNonSerializeAsset={showInfo?.isNonSerializeAsset} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog

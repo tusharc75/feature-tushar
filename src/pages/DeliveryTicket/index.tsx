@@ -16,7 +16,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   DELIVERY_FROM_TO_TYPE,
   deliveryTicket,
@@ -392,12 +391,11 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${
-                deleteRecord
-                  ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
+              message={`Are you sure you want to delete ${deleteRecord
+                ? `${resources?.deliveryTicket?.titleSingular?.toLowerCase()} :
                   ${deleteRecord?.ticketName || ''}`
-                  : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.deliveryTicket?.titlePlural?.toLowerCase()}`
+                } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

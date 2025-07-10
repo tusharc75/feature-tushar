@@ -600,6 +600,7 @@ const Products = ({
           isAssigning={isAssigning}
           filterByPlant={transferInventoryData?.transferFromPlant}
           ids={productSerialNumbers?.map((e) => e._id)}
+          referenceData={{ storageLocation: transferInventoryData?.transferFromStorageLocation?.optionValue }}
         />
       )}
     </React.Fragment>

@@ -1,5 +1,5 @@
 import { ShowOverlay } from 'src/components/InfoSidebar/RenderInfoInspector/ShowOverlay';
-import { replaceAllMongoIds } from 'src/components/InfoSidebar/utils';
+import { replaceAllMongoIds } from 'src/constants/helpers';
 
 export class Inspector {
   onElementClick: (data: { selector: string; url: string }) => void;

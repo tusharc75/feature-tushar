@@ -104,6 +104,9 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
         returnData.push({ _id: element._id, productId: element.productId, ...calValues });
       });
     } else {
+      if (values?.rejectQuantity && values?.qty < productData?.qty && (((values?.actualReceived || 0) + values?.rejectQuantity) > values?.qty)) {
+        values.rejectQuantity = values?.rejectQuantity - (((values?.actualReceived || 0) + values?.rejectQuantity) - values?.qty)
+      }
       returnData = [{ ...values, _id: productData._id, productId: productData.productId }];
     }
     onSubmit(returnData, saveAndNext);
@@ -111,8 +114,8 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
 
   function validate(values) {
     const errors = {};
-    if (values?.qty < values?.actualReceived + values?.rejectQuantity || 0) {
-      errors['qty'] = 'Quantity should be greater than Actual Received and Reject Quantity';
+    if (values?.qty < values?.actualReceived) {
+      errors['qty'] = 'Quantity should be greater than Actual Received';
     }
     return errors;
   }
