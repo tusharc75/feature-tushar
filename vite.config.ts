@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import viteTsconfigPaths from 'vite-tsconfig-paths';
 import svgrPlugin from 'vite-plugin-svgr';
@@ -20,14 +20,14 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*'],
         globIgnores: ['**/*pdfme*.js'],
-        maximumFileSizeToCacheInBytes: 25 * 1024 * 1024, // 25 MB
+        maximumFileSizeToCacheInBytes: 26 * 1024 * 1024, // 26 MB
         importScripts: ['/firebase-messaging-sw.js']
       },
       includeAssets: ['**/*']
     }),
 
-    viteTsconfigPaths()
-    // splitVendorChunkPlugin()
+    viteTsconfigPaths(),
+    splitVendorChunkPlugin()
   ],
   css: {
     preprocessorOptions: {
@@ -46,21 +46,7 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
   },
   build: {
-    outDir: 'build',
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('/node_modules/@pdfme/')) {
-              return 'pdfme';
-            }
-            const dirs = id.split('node_modules/')[1].split('/');
-            // for scoped packages, include both segments: "@scope/name"
-            return dirs[0].startsWith('@') ? `${dirs[0]}/${dirs[1]}` : dirs[0];
-          }
-        }
-      }
-    }
+    outDir: 'build'
   },
   server: {
     open: true,
