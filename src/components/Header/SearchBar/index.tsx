@@ -11,7 +11,7 @@ import useSearchHistory from 'src/components/Header/SearchBar/useSearchHistory';
 
 const SearchBar = () => {
   const { items, globalSearch, setGlobalSearch, inputRef, inputValue, optionValue, setInputValue, setOptionValue } = useSearch();
-  const { handleSelectItem, historyItems } = useSearchHistory();
+  const { handleSelectItem, historyItems, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory();
 
   return (
     <div className="relative flex flex-grow overflow-hidden rounded-[4px] max-md:my-1 md:max-w-[564px]">
@@ -56,7 +56,9 @@ const SearchBar = () => {
             setOptionValue(newValue);
             handleSelectItem(newValue);
           }}
-          renderOption={(props, option, state) => [props, option, state.index] as React.ReactNode}
+          renderOption={(props, option, state) =>
+            ({ props, option, index: state.index, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory }) as React.ReactNode
+          }
           renderGroup={(params) => params as any}
           slots={{
             popper: StyledPopper
