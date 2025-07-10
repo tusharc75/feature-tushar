@@ -1,4 +1,4 @@
-import { Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Dialog, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -46,7 +46,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         storageLocation: s?.storageLocation?.optionLabel,
         storageLocationId: s?.storageLocation?.optionValue,
         qty: s?.qty,
-        inventory: s?.qty
+        inventory: s?.qty,
+        serialNumbers: s?.serialNumbers?.length ? s?.serialNumbers : []
       })))
     }
   }, [selectedProduct]);
@@ -65,9 +66,11 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               storageLocation: d?.storageLocation?.storageLocationName,
               storageLocationId: d?.storageLocation?._id,
               qty: (d?.inventory || 0) -
-                (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
+                (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id
+                  && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
                   0),
-              inventory: 0
+              inventory: 0,
+              serialNumbers: []
             }));
           setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
         }
@@ -88,7 +91,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             warehouse: p?.warehouseId,
             ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
             qty: p?.inventory,
-            _id: p?._id
+            _id: p?._id,
+            serialNumbers: p?.serialNumbers
           }))
         ).then(() => {
           setSubmitting(false);
@@ -104,7 +108,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             warehouse: p?.warehouseId,
             ...(user?.user?.brandPolicy?.storageLocation ? { storageLocation: p?.storageLocationId } : {}),
             qty: p?.inventory,
-            _id: p?._id
+            _id: p?._id,
+            serialNumbers: p?.serialNumbers
           }))
         )
           .then(() => {
@@ -185,9 +190,10 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
-                  <TableCell align="left">Qty</TableCell>
-                  <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
+                  <TableCell sx={{ width: '40%' }}>{resources?.warehouse?.titleSingular}</TableCell>
+                  <TableCell sx={{ width: '10%' }} align="left">Qty</TableCell>
+                  <TableCell sx={{ width: '10%' }} align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
+                  <TableCell sx={{ width: '40%' }} align="left">Serial Number</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -241,6 +247,38 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                                   : 'Removed inventory more than Assigned'
                                 : ''
                             }
+                          />
+                        </TableCell>
+                        <TableCell align="left">
+                          <Autocomplete
+                            size="small"
+                            options={[]}
+                            freeSolo={true}
+                            multiple={true}
+                            disableCloseOnSelect
+                            value={_product['serialNumbers']}
+                            onChange={(_, val) => {
+                              const serialNumbers = val?.length > 0 ? val : [];
+                              const tempProductInventoryData: any = productInventoryData?.map((_data) =>
+                                _data?._id === _product?._id &&
+                                  _data?.warehouseId === _product?.warehouseId &&
+                                  _data?.storageLocationId === _product?.storageLocationId
+                                  ? { ..._data, serialNumbers: serialNumbers }
+                                  : _data
+                              );
+                              setProductInventoryData(tempProductInventoryData);
+                            }}
+                            isOptionEqualToValue={(item, current) => item === current}
+                            getOptionLabel={(option) => option}
+                            renderInput={(props) => (
+                              <TextField
+                                {...props}
+                                placeholder={'Enter serial number and press enter'}
+                                variant="outlined"
+                                name="serialNumbers"
+                                label={'Serial Numbers'}
+                              />
+                            )}
                           />
                         </TableCell>
                       </TableRow>

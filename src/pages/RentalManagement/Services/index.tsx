@@ -317,7 +317,6 @@ const Services = ({
     try {
       var data: any = [];
       var inventory: any = [];
-      var nonSerializeAsset: any = [];
       var productSerialNumbers: any = [];
       const loadingTicketProducts: any = [];
       let nonSerializedInventory: any = []
@@ -335,7 +334,6 @@ const Services = ({
 
         setMaterial(JSON.parse(JSON.stringify(data.material)));
         inventory = data.inventory?.filter((e) => !e.isReplaced);
-        nonSerializeAsset = data.nonSerializeAsset;
         nonSerializedInventory = data?.nonSerializedInventory || []
         productSerialNumbers = data.productSerialNumbers;
         loadingTicketResult?.data?.data?.forEach((element) => {
@@ -381,8 +379,7 @@ const Services = ({
         }
         parent.assetQty = parent.serializedProduct
           ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
-          : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+          : nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
         parent.canDelete =
           parent.type === MATERIAL_TYPE.service && parent?.serviceLog?.length
             ? false
@@ -406,7 +403,6 @@ const Services = ({
         parent.subRows = generateNestedData(
           data.material,
           inventory,
-          nonSerializeAsset,
           parent,
           productSerialNumbers,
           isPriceRequired,
@@ -466,7 +462,7 @@ const Services = ({
     }
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, productSerialNumbers, isPriceRequired, loadingTicketProducts, nonSerializedInventory) => {
+  const generateNestedData = (material, inventory, parent, productSerialNumbers, isPriceRequired, loadingTicketProducts, nonSerializedInventory) => {
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);
@@ -493,8 +489,7 @@ const Services = ({
       }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
-        nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+        : nonSerializedInventory?.filter((d) => d?._id === _subRow?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       _subRow.canDelete =
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog?.length ? false : _subRow?.assetQty > 0 ? false : _subRow?.status ? false : true;
       _subRow.nonSerializedQty =
@@ -510,7 +505,6 @@ const Services = ({
       _subRow.subRows = generateNestedData(
         material,
         inventory,
-        nonSerializeAsset,
         _subRow,
         productSerialNumbers,
         isPriceRequired,
