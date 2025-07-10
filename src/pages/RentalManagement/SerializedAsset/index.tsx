@@ -50,7 +50,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ScanButtons from 'src/components/ScanButtons';
 import ShowAssignInventory from 'src/pages/RentalManagement/SerializedAsset/ShowAssignInventory';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData }) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, rentalPolicyData, assetPolicyData }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
@@ -76,7 +76,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [isAssigning, setIsAssigning] = useState(false);
   const [productSerialNumbers, setProductSerialNumbers] = useState([]);
   const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
-  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [allLoadingTicketProducts, setAllLoadingTicketProducts] = useState([]);
   const [showAssignNonSerializedInventory, setShowAssignNonSerializedInventory] = useState({ open: false, data: null });
   const {
@@ -89,13 +88,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    fetchPolicy();
-  }, []);
-
-  useEffect(() => {
-    if (assetPolicyData) {
-      fetchFields();
-    }
+    fetchFields();
   }, [assetPolicyData]);
 
   const OpenInNewWindow = (url) => {
@@ -410,19 +403,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           )}
         </>
       );
-    }
-  };
-
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setAssetPolicyData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
     }
   };
 
