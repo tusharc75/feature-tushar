@@ -54,9 +54,7 @@ export default defineConfig({
             if (id.includes('/node_modules/@pdfme/')) {
               return 'pdfme';
             }
-            const dirs = id.split('node_modules/')[1].split('/');
-            // for scoped packages, include both segments: "@scope/name"
-            return dirs[0].startsWith('@') ? `${dirs[0]}/${dirs[1]}` : dirs[0];
+            return 'vendor';
           }
         }
       }
