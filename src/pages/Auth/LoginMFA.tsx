@@ -1,4 +1,4 @@
-import { Box, CssBaseline, FormControl, MenuItem, Select } from '@mui/material';
+import { Box, CssBaseline, FormControl, MenuItem, Select, Checkbox } from '@mui/material';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useCallback, useContext, useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import OtpInput from 'src/components/OtpInput';
-import { MFA_METHOD } from 'src/constants/helpers';
+import { MFA_METHOD, getDeviceFingerprint } from 'src/constants/helpers';
 
 const LoginMFA = () => {
   const notification = useContext(CustomNotificationCountContext);
@@ -22,6 +22,7 @@ const LoginMFA = () => {
 
   const [selectedMethod, setSelectedMethod] = useState<any>(MFA_METHOD.emailOtp);
   const [otp, setOtp] = useState('');
+  const [rememberDevice, setRememberDevice] = useState(false);
 
   const [tokenData, settokenData] = useState(null);
 
@@ -93,14 +94,31 @@ const LoginMFA = () => {
   const handleSubmit = useCallback(
     async (otpProp = otp) => {
       setIsSubmitting(true);
+
+      const requestData: any = {
+        otp: otpProp,
+        token: token,
+        method: selectedMethod
+      };
+
+      if (rememberDevice) {
+        const deviceFingerprint = await getDeviceFingerprint();
+        requestData.deviceFingerprint = deviceFingerprint;
+        requestData.rememberDevice = true;
+      }
+
       axiosInstance()
-        .post('/user/mfa-auth/verify-otp', {
-          otp: otpProp,
-          token: token,
-          method: selectedMethod
-        })
+        .post('/user/mfa-auth/verify-otp', requestData)
         .then(async ({ data: { data } }) => {
           localStorage.setItem('token', data.token);
+
+          if (data?.deviceAdded) {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: 'Device remembered for 15 days - MFA will be skipped on future logins'
+            });
+          }
           if (data?.hasExistingSession) {
             toastConfig.setToastConfig({
               open: true,
@@ -150,7 +168,7 @@ const LoginMFA = () => {
           toastConfig.setToastConfig(error);
         });
     },
-    [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token]
+    [chatNotification, dispatch, history, notification, otp, selectedMethod, toastConfig, token, rememberDevice]
   );
 
   return (
@@ -224,6 +242,14 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
+
+                  <div className="mb-4 flex items-center justify-center gap-2">
+                    <Checkbox checked={rememberDevice} onChange={(e) => setRememberDevice(e.target.checked)} color="primary" size="small" />
+                    <span className="cursor-pointer text-sm text-gray-600" onClick={() => setRememberDevice(!rememberDevice)}>
+                      Remember this device for 15 days
+                    </span>
+                  </div>
+
                   <ThemeButton
                     buttonType="theme"
                     type="submit"
