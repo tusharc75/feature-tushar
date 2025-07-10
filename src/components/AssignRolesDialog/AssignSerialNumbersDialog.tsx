@@ -195,7 +195,7 @@ const AssignSerialNumbersDialog = ({
 
   const getQueryString = () => {
     const ignoreIds = ids && ids?.length > 0 ? ids : [];
-    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}`;
+    let deepFilter = `?page=${page}&limit=${limit}&ignoreIds=${JSON.stringify(ignoreIds)}&activeStorageLocation=true`;
     if (!selectedProduct) {
       deepFilter = `${deepFilter}&products=${selectedProducts?.map((p) => p?.id).join(',')}`;
     } else {
@@ -238,9 +238,21 @@ const AssignSerialNumbersDialog = ({
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse},${sidebarResource.storageLocation}`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
         setWarehouseOption(data[sidebarResource.warehouse]);
+      });
+  }, []);
+
+  useEffect(() => {
+    const deepFilter = [
+      {
+        field: 'status',
+        term: true
+      }
+    ];
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.storageLocation}&deepFilter=${JSON.stringify(deepFilter)}`)
+      .then(({ data: { data } }) => {
         setStorageLocationOptions(data[sidebarResource.storageLocation]);
       });
   }, []);

@@ -46,18 +46,17 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         storageLocation: s?.storageLocation?.optionLabel,
         storageLocationId: s?.storageLocation?.optionValue,
         qty: s?.qty,
-        inventory: 0
+        inventory: s?.qty
       })))
     }
   }, [selectedProduct]);
 
   const fetchProductInventory = () => {
     axiosInstance()
-      .get(`${productInventory.api}/product/${selectedProduct?.materialId}`)
+      .get(`${productInventory.api}/product/${selectedProduct?.materialId}?activeStorageLocation=true`)
       .then(async ({ data: { data } }) => {
         if (!productInventoryData?.find((e) => e._id === selectedProduct._id)) {
-          let nonExistingInventory = data
-            ?.filter((d) => d?.warehouse)
+          let nonExistingInventory = data?.filter((d) => d?.warehouse)
             ?.map((d) => ({
               _id: selectedProduct?._id,
               materialId: selectedProduct?.materialId,

@@ -40,7 +40,7 @@ export default function CreateCustomPdfTemplate() {
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
   const {
-    state: { user, permissions, selectedEntity, resources }
+    state: { user, selectedEntity }
   }: any = useData();
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -50,11 +50,27 @@ export default function CreateCustomPdfTemplate() {
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [formValues, setFormValues] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
-  const [template, setTemplate] = useState<any | null>(null);
+  const [template, setTemplate] = useState<any | null>(() => {
+    try {
+      const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+          return parsed;
+        } else {
+          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+        }
+      }
+    } catch (error) {
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    }
+    return null;
+  });
   const [showProps, setShowProps] = useState<boolean>(false);
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
+  const [serviceOptions, setServiceOptions] = useState([]);
 
   const handleTemplateChange = (tpl: Template) => {
     setTemplate(tpl);
@@ -63,18 +79,25 @@ export default function CreateCustomPdfTemplate() {
   useEffect(() => {
     if (template) {
       localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
-    } else {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
     }
   }, [template]);
 
   useEffect(() => {
     fetchData();
     fetchUser();
-    return () => {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    };
+    fetchServiceOptions();
   }, [id]);
+
+   const fetchServiceOptions = async () => {
+        await axiosInstance()
+          .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
+          .then(({ data: { data } }) => {
+            setServiceOptions(data[sidebarResource?.serviceMaster] || []);
+          })
+          .catch((e) => {
+            toastConfig.setToastConfig(e);
+          });
+    };
 
   const generateInitialTemplate = (numPages: number): Template => {
     if (numPages <= 0) {
@@ -102,6 +125,7 @@ export default function CreateCustomPdfTemplate() {
       type: '',
       owner: user.user._id,
       collaborator: [],
+      services: [],
       noOfPages: 1
     };
     if (id && id !== '0') {
@@ -116,18 +140,19 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.owner = isClone ? user.user._id : data?.owner || user.user._id;
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
-
-        if (data?.template) {
-          setTemplate(data.template);
-          setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
-        } else {
-          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-          setTemplate(newTemplate);
-          setNoOfPages(initialValuesData.noOfPages);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+        initialValuesData.services = data?.services ? data?.services : [];
+        if (!template) {
+          if (data?.template) {
+            setTemplate(data.template);
+            setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
+            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
+          } else {
+            const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+            setTemplate(newTemplate);
+            setNoOfPages(initialValuesData.noOfPages);
+            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+          }
         }
-
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
             owner: {
@@ -149,10 +174,12 @@ export default function CreateCustomPdfTemplate() {
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
-      const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-      setTemplate(newTemplate);
-      setNoOfPages(initialValuesData.noOfPages);
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      if (!template) {
+        const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+        setTemplate(newTemplate);
+        setNoOfPages(initialValuesData.noOfPages);
+        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      }
     }
     setInitialValues({ ...initialValuesData });
   };
@@ -215,6 +242,7 @@ export default function CreateCustomPdfTemplate() {
       owner: values?.owner,
       collaborator: values?.collaborator,
       template: template,
+      services: values?.services,
       noOfPages: noOfPages
     };
 
@@ -438,7 +466,7 @@ export default function CreateCustomPdfTemplate() {
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
                                   ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                    values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                   )
                                 )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
@@ -549,6 +577,37 @@ export default function CreateCustomPdfTemplate() {
                             }}
                           />
                         </Grid>
+                      </Grid>
+                      <Grid className="mt-5" size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                        {values.type === 'Work Order' && serviceOptions.length > 0 &&
+                          <Autocomplete
+                            limitTags={2}
+                            disabled={!allowedToEdit || !isEdit}
+                            multiple
+                            options={serviceOptions}
+                            getOptionLabel={(option: any) => option?.optionLabel || ''}
+                            isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                            value={
+                              serviceOptions.filter((opt) =>
+                                values['services']?.some((s) => s === opt.optionValue)
+                              )
+                            }
+                            onChange={(e, val) => {
+                              const selectedIds = val?.map((d) => d.optionValue) || [];
+                              setFieldValue('services', selectedIds);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Services"
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                margin="none"
+                                name="services"
+                              />
+                            )}
+                          />}
                       </Grid>
                     </Grid>
                   </Grid>

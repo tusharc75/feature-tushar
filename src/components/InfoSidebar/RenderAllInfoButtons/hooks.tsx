@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom';
-import { replaceAllMongoIds } from 'src/components/InfoSidebar/utils';
+import { replaceAllMongoIds } from 'src/constants/helpers';
 
 export const useUrlParser = () => {
   const { pathname, search, hash } = useLocation();

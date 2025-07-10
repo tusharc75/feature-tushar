@@ -90,6 +90,7 @@ export const rentalManagementMessage = {
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Available, Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
   repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
+  loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
   transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
   transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
   onlySwapAssets: 'Only Assets can be swapped',

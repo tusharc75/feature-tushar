@@ -1,20 +1,14 @@
-import { Action } from 'src/components/InfoSidebar/types';
-import { sidebarResource } from 'src/constants/helpers';
+import { ApiFormData } from 'src/components/InfoSidebar/types';
 import createFastContext from 'src/StateProvider/createFastContext';
 
-type SidebarResource = typeof sidebarResource;
-
 export type InfoSidebarState = {
-  data: null | {
-    resource?: SidebarResource[keyof SidebarResource];
-    actionId?: string;
-  };
-  item?: Partial<Action>;
+  item: Partial<ApiFormData>;
+  content: string;
 };
 
 const initialState: InfoSidebarState = {
-  data: null,
-  item: null
+  item: null,
+  content: ''
 };
 
 export const { Provider: InfoSidebarProvider, useStore: useInforSidebar } = createFastContext(initialState);

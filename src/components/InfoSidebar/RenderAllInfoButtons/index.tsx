@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useUrlParser } from 'src/components/InfoSidebar/RenderAllInfoButtons/hooks';
 import InfoButton from 'src/components/InfoSidebar/RenderAllInfoButtons/InfoButton';
-import { Action, ApiFormData, HostMessage } from 'src/components/InfoSidebar/types';
+import { ApiFormData, HostMessage } from 'src/components/InfoSidebar/types';
 import { isInIframe, targetOrigin } from 'src/components/InfoSidebar/utils';
 import { throttle } from 'src/hooks/useThrottle';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
 const callback = (
@@ -27,9 +26,8 @@ const RenderAllInfoButtons = () => {
     state: { user }
   }: any = useData();
   const parsedUrl = useUrlParser();
-  const toastConfig = useContext(CustomToastContext);
-  const [allData, setAllData] = useState<Action[]>([]);
-  const [data, setData] = useState<Action[]>([]);
+  const [allData, setAllData] = useState<ApiFormData[]>([]);
+  const [data, setData] = useState<ApiFormData[]>([]);
   const [mutationSignal, setMutationSignal] = useState(0);
   const [resizeSignal, setResizeSignal] = useState(0);
   const [deletedIds, setDeletedIds] = useState(new Set<string>());
@@ -40,10 +38,9 @@ const RenderAllInfoButtons = () => {
         const {
           data: { data }
         } = await axiosInstance().get<{ data: ApiFormData[] }>(`/resource-information/all`);
-        const newData = data.map((d) => d.actions.filter((action) => action.targetSelector)).flat();
-        setAllData(newData);
+        setAllData(data);
       } catch (error) {
-        toastConfig.setToastConfig(error);
+        console.error(error);
       }
     };
     if (user) {
@@ -116,7 +113,7 @@ const RenderAllInfoButtons = () => {
   return <RenderButtons data={data} key={`${mutationSignal}-${resizeSignal}`} />;
 };
 
-const RenderButtons = ({ data }: { data: Action[] }) => {
+const RenderButtons = ({ data }: { data: ApiFormData[] }) => {
   return <>{data?.map((d) => <InfoButton item={d} />)}</>;
 };
 

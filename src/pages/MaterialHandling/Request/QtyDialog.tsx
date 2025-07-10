@@ -8,7 +8,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
-import { convertDateTimToDate, CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
 function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate }) {
 
@@ -23,19 +23,17 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate })
       if (parseInt(values.qty) > parseInt(data?.qty) - parseInt(data?.processedQty || 0)) {
         errors['qty'] = 'Insufficient Quantity !';
       }
-
+    }
+    if (status === MATERIAL_REQUEST_STATUS.processed) {
       if (!values?.processedDate) {
         errors['processedDate'] = `Processed Date is required`;
       }
-
-      if (dayjs(values?.processedDate).isBefore(convertDateTimToDate(minDate))) {
+      if (dayjs(values?.processedDate).isBefore(minDate, 'day')) {
         errors['processedDate'] = `Date entered prior to the request date`;
       }
-
       if (dayjs(values?.processedDate).isAfter(dayjs())) {
         errors['processedDate'] = `Please select valid date`;
       }
-
     }
     if (status === MATERIAL_REQUEST_STATUS.closed) {
       if (!values.comment) {
@@ -57,7 +55,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate })
         showRequiredLabel={true}
       />
       <Formik
-        initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '', serialNumber: [], processedDate: new Date() }}
+        initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '', serialNumber: [], processedDate: data?.requestDate || new Date() }}
         onSubmit={onSuccess}
         validateOnMount
         validate={validate}
@@ -119,6 +117,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate })
                     label={`Processed Date`}
                     required
                     autoOk
+                    fullWidth
                     size="small"
                     margin="dense"
                     name='processedDate'

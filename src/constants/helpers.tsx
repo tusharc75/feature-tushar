@@ -421,7 +421,7 @@ export const sidebarResource = {
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
   fieldView: 'Field View',
-  customPdfTemplate : 'Custom Pdf Templates'
+  customPdfTemplate: 'Custom Pdf Templates'
 } as const;
 
 export const primaryFields = {
@@ -522,7 +522,6 @@ export const customPdfTemplate = {
   resource: 'CustomPdfTemplate',
   api: '/custom-pdf-template'
 };
-
 
 export const rentalManagement = {
   api: '/rental-management',
@@ -3730,8 +3729,7 @@ export const getDefaultMyRecordType = (user, resource) => {
     if (byDefaultRecord) {
       if (byDefaultRecord?.type === 'All') {
         return 3;
-      }
-      else if (byDefaultRecord?.type === 'Open') {
+      } else if (byDefaultRecord?.type === 'Open') {
         return 2;
       } else {
         return 1;
@@ -4307,3 +4305,11 @@ export const handleClearLocalStore = () => {
     localStorage.setItem(EQUIPT_BE_CONNECTED_WINDOW, beConnectedWindowData);
   }
 };
+
+export function replaceAllMongoIds(
+  url: string = `${window.location.pathname}${window.location.search}${window.location.hash}`,
+  replaceWith = ':id'
+): string {
+  const objectIdRegex = /([/=])([a-f\d]{24})(?=[/?#&=]|$)/gi;
+  return url.replace(objectIdRegex, `$1${replaceWith}`);
+}

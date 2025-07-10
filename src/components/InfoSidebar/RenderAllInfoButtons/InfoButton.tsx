@@ -3,12 +3,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useInforSidebar } from 'src/components/InfoSidebar/store';
-import { Action } from 'src/components/InfoSidebar/types';
+import { Action, ApiFormData } from 'src/components/InfoSidebar/types';
 import { getStylesReactMethod } from 'src/components/InfoSidebar/utils';
 
-const InfoButton = ({ item }: { item: Partial<Action> }) => {
+const InfoButton = ({ item }: { item: Partial<Action | ApiFormData> }) => {
   const { anchorElementPadding, autoPosition, buttonPosition, insideAnchor, manualPosition, targetSelector, _id } = item;
-  const [, setStore] = useInforSidebar((state) => state.data);
+  const [, setStore] = useInforSidebar((state) => state.item);
   const targetElement = useMemo(() => document.querySelector(targetSelector) as HTMLElement | null, [targetSelector]);
   const containerRef = useRef<HTMLElement | null>(null);
 
@@ -16,7 +16,7 @@ const InfoButton = ({ item }: { item: Partial<Action> }) => {
     (e) => {
       e.preventDefault();
       e.stopPropagation();
-      setStore({ item });
+      setStore({ item: item as ApiFormData });
     },
     [item, setStore]
   );
