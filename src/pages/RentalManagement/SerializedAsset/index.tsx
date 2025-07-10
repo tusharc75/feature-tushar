@@ -238,7 +238,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 </IconButton>
               </HtmlTooltip>
             )}
-            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.serializedProduct && row?.original?.nonSerializedInventoryQty > 0 && (
+            {row?.original?.type === MATERIAL_TYPE.product && !row?.original?.serializedProduct && row?.original?.assetAssignedQty > 0 && (
               <HtmlTooltip title={`Show assigned inventory`}>
                 <IconButton
                   size="small"
@@ -424,15 +424,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
         assets = data.productInventory;
-        data.nonSerializeAsset = data?.nonSerializeAsset;
 
         const offlineDataSync = await findOne(objectStore.offlineDataSync, rentalManagementData._id);
         if (offlineDataSync && offlineDataSync?.data) {
           offlineDataSync?.data?.forEach((element: any) => {
             if (element?.serializedProduct) {
               assets.push(element);
-            } else {
-              data.nonSerializeAsset.push(element);
             }
           });
         }
@@ -508,10 +505,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
           ? assets?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter((e) => e._id === parent._id)?.length
-          : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-          data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
-        parent.nonSerializeAssetQty = data.nonSerializeAsset?.filter((e) => e._id === parent._id).length
-        parent.nonSerializedInventoryQty = data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0)
+          : data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty =
           parent.type === MATERIAL_TYPE.product &&
@@ -536,7 +530,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           data.material,
           assets,
           data.productSerialNumbers,
-          data?.nonSerializeAsset,
           data?.nonSerializedInventory,
           parent,
           transferAssets,
@@ -632,7 +625,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     material,
     assets,
     productSerialNumbers,
-    nonSerializeAsset,
     nonSerializedInventory,
     parent,
     transferAssets,
@@ -695,22 +687,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       });
     });
 
-    const nonSerializeAsset_result = nonSerializeAsset?.filter((e) => e._id === parent._id);
-    nonSerializeAsset_result?.forEach((_inventory, k) => {
-      subRows.push({
-        _id: _inventory.id,
-        uniqueId: _inventory.id,
-        inventory: _inventory.id,
-        index: `${parent.index}.${subRows?.length + 1}`,
-        detail: _inventory?.assetNumber,
-        type: 'asset',
-        isNonSerializeAsset: true,
-        status: _inventory?.status,
-        isValid: true,
-        canRemove: parent?.status ? false : true
-      });
-    });
-
     const productSerialNumbers_result = productSerialNumbers?.filter((e) => e?._id === parent?._id);
     productSerialNumbers_result?.forEach((e) => {
       subRows.push({
@@ -759,10 +735,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? assets?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e?._id === _subRow._id)?.length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
-        nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
-      _subRow.nonSerializeAssetQty = nonSerializeAsset?.filter((e) => e._id === _subRow._id).length
-      _subRow.nonSerializedInventoryQty = nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0)
+        : nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
       _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type)
         ? _subRow.qty * parent.realAssetQty
         : 0;
@@ -789,7 +762,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         material,
         assets,
         productSerialNumbers,
-        nonSerializeAsset,
         nonSerializedInventory,
         _subRow,
         transferAssets,

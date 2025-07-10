@@ -79,7 +79,7 @@ const ShowAssignInventory = ({ data, onClose, productName }) => {
                       </IconButton>
                     }
                   </TableCell>}
-                  <TableCell align="left">{element?.serialNumbers?.join(', ')}</TableCell>
+                  <TableCell align="left">{element?.serialNumbers?.length ? element?.serialNumbers?.join(', ') : '---'}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

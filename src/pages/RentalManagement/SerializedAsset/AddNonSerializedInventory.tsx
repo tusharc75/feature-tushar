@@ -66,7 +66,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               storageLocation: d?.storageLocation?.storageLocationName,
               storageLocationId: d?.storageLocation?._id,
               qty: (d?.inventory || 0) -
-                (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
+                (nonSerializedInventory?.find((s) => s?._id === selectedProduct?._id
+                  && s?.warehouse?.optionValue === d?.warehouse?._id && (d?.storageLocation && user?.user?.brandPolicy?.storageLocation ? s?.storageLocation?.optionValue === d?.storageLocation?._id : true))?.qty ||
                   0),
               inventory: 0,
               serialNumbers: []
@@ -189,10 +190,10 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             <Table aria-label="customized table">
               <TableHead>
                 <TableRow>
-                  <TableCell>{resources?.warehouse?.titleSingular}</TableCell>
-                  <TableCell align="left">Qty</TableCell>
-                  <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
-                  <TableCell align="left">Serial Number</TableCell>
+                  <TableCell sx={{ width: '40%' }}>{resources?.warehouse?.titleSingular}</TableCell>
+                  <TableCell sx={{ width: '10%' }} align="left">Qty</TableCell>
+                  <TableCell sx={{ width: '10%' }} align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
+                  <TableCell sx={{ width: '40%' }} align="left">Serial Number</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
