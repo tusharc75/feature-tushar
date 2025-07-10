@@ -131,7 +131,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         Cell: ({ row }) =>
           row.original['type'] ? (
             <p>
-              {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Serial Number' : `${startCase(row.original?.type)} `}
+              {`${startCase(row.original?.type)} `}
               {row.original['type'] === 'product'
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
@@ -161,7 +161,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
-            {(row.original?.type === 'asset' && row.original?.isNonSerializeAsset) || row?.original?.type === 'serialNumber' ? null : (
+            {row?.original?.type === 'serialNumber' ? null : (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -369,7 +369,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                           _id: row.original.uniqueId,
                           assetId: row.original._id,
                           assetNumber: row.original.detail,
-                          isNonSerializeAsset: row.original.isNonSerializeAsset,
                           isTransferAsset: isTransferAsset,
                           isProductSerialNumbers: false,
                           type: 'asset'
@@ -380,7 +379,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                         {
                           _id: row.original.uniqueId,
                           assetId: row.original.serialNumber,
-                          isNonSerializeAsset: false,
                           isProductSerialNumbers: true,
                           type: 'serialNumber'
                         }
@@ -671,7 +669,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventory?.assetNumber,
         description: parent?.description,
         type: 'asset',
-        isNonSerializeAsset: false,
         status: _inventory.inventory?.status,
         rentalAssetStatus: _inventory?.status,
         manualStatus: _inventory.inventory?.manualStatus,
@@ -1225,7 +1222,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 _id: element.uniqueId,
                 assetId: element._id,
                 assetNumber: element?.detail,
-                isNonSerializeAsset: element?.isNonSerializeAsset,
                 isTransferAsset: isTransferAsset,
                 isProductSerialNumbers: false,
                 type: 'asset'
@@ -1235,7 +1231,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               dataTodelete.push({
                 _id: element.uniqueId,
                 assetId: element.serialNumber,
-                isNonSerializeAsset: false,
                 isProductSerialNumbers: true,
                 type: 'serialNumber'
               });

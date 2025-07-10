@@ -75,7 +75,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         width: 100,
         Cell: ({ row }) =>
           row.original['type'] ? (
-            <p>{row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? 'Inventory' : `${startCase(row.original?.type)} `}</p>
+            <p>{`${startCase(row.original?.type)}`}</p>
           ) : (
             <NoDataCell />
           )
@@ -270,7 +270,6 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         detail: _inventory?.assetNumber ? _inventory?.assetNumber : _inventory.inventoryDetail?.assetNumber,
         description: parent?.description,
         type: 'asset',
-        isNonSerializeAsset: false,
         status: _inventory.inventoryDetail?.status,
         rentalAssetStatus: _inventory?.status,
         manualStatus: _inventory.inventoryDetail?.manualStatus,
