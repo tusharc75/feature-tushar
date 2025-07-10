@@ -18,9 +18,7 @@ const useSearchHistory = () => {
     if (depth !== 2) return;
     try {
       await itemDb.open();
-      const data = (await itemDb.table<SearchKeyword>(tables.KEYWORDS_TABLE).where('pathName').equals(pathname).toArray()).sort(
-        (a, b) => b.timeStamp - a.timeStamp
-      );
+      const data = await itemDb.table<SearchKeyword>(tables.KEYWORDS_TABLE).where('pathName').equals(pathname).sortBy('timeStamp', 'desc').toArray();
       setSearchedKeywords(data);
     } catch (error) {
       console.error(error);
@@ -34,7 +32,7 @@ const useSearchHistory = () => {
   const fetchAllItemData = useCallback(async () => {
     try {
       await itemDb.open();
-      const data = (await itemDb.table<Item>(tables.ITEMS_TABLE).getAll()).sort((a, b) => b.timeStamp - a.timeStamp);
+      const data = await itemDb.table<Item>(tables.ITEMS_TABLE).sortBy('timeStamp', 'desc');
       setSearchItems(data);
     } catch (error) {
       console.error(error);
