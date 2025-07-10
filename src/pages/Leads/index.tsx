@@ -23,6 +23,7 @@ import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   getDefaultMyRecordType,
+  getObjKeysWithValues,
   gridLoadingTimeout,
   lead,
   prepareDataForGrid,
@@ -77,6 +78,7 @@ const Leads = () => {
     message: null
   });
   const hasPermissionToConvertInOpportunity = user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity ?? false;
+  const [leadData, setLeadData] = useState([]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -235,6 +237,7 @@ const Leads = () => {
         let data, count;
         const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
+        setLeadData(data);
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -485,43 +488,20 @@ const Leads = () => {
 
   const handleSaveEdit = async (inputField, updatedRow) => {
     setOkButtonLoading(true);
-    const collaboratorIds = [];
-    if (updatedRow.collaboratorId) collaboratorIds.push(updatedRow.collaboratorId);
-    if (Array.isArray(updatedRow.restcollaborator)) {
-      updatedRow.restcollaborator.forEach(item => {
-        if (item.optionValue) collaboratorIds.push(item.optionValue);
-      });
-    }
-    updatedRow.collaborator = collaboratorIds;
-    updatedRow.owner = updatedRow.ownerId || '';
-    updatedRow.marketSegment = updatedRow.marketSegmentId || '';
-    updatedRow.subMarketSegment = updatedRow.subMarketSegmentId || '';
 
-    const fieldsToRemove = [
-      'id',
-      'concatedName',
-      'createdBy',
-      'createdById',
-      'createdByDate',
-      'updatedBy',
-      'updatedByDate',
-      'isChecked',
-      'canDelete',
-      'canEdit',
-      'convertedToOpportunity',
-      'relatedOpportunity',
-      'relatedOpportunityId',
-      'ownerId',
-      'marketSegmentId',
-      'subMarketSegmentId',
-      'collaboratorId',
-      'restcollaborator',
-    ];
-    fieldsToRemove.forEach(field => delete updatedRow[field]);
+    const dataToUpdate = leadData.find((d) => d._id === updatedRow._id);
+    const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+    const values = getObjKeysWithValues(dataToUpdate, fieldsDataAll)
+
+    Object.keys(inputField).forEach((key) => {
+      if (key in values) {
+        values[key] = inputField[key];
+      }
+    });
 
 
     try {
-      await axiosInstance().put(`${lead.leadApi}?entity=${selectedEntity}`, updatedRow);
+      await axiosInstance().put(`${lead.leadApi}?entity=${selectedEntity}`, { ...values, _id: updatedRow._id });
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
