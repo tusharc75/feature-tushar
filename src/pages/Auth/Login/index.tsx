@@ -13,13 +13,19 @@ import { Logo } from 'src/assets/authenticationAssets';
 import axiosInstance from 'src/axios/axiosInstance';
 import { AzureLogin } from 'src/components/Azure/Azure';
 import getAzureAcessToken from 'src/components/Azure/getAzureAccessToken';
-import { getSubdomain } from 'src/constants/helpers';
+import { getDeviceFingerprint, getSubdomain } from 'src/constants/helpers';
 import BrandNotFound from 'src/pages/Auth/Login/BrandNotFound';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import { SET_USER, SET_SELECTED_ENTITY } from 'src/StateProvider/actionTypes';
 import AuthSlider from '../AuthSlider';
 import styles from '../index.module.scss';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { backendApi } from 'src/config';
+import routes from 'src/components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 
 export type BrandData = {
   companyName: string;
@@ -31,6 +37,9 @@ const MAIN_SUB_DOMAIN = ['portal', 'am-portal', 'master.portal', 'uat.portal', '
 
 const Login = () => {
   const toastConfig = useContext(CustomToastContext);
+  const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+  const { dispatch }: any = useData();
 
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
@@ -90,24 +99,75 @@ const Login = () => {
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
-    const data: any = {
-      email: values.email,
-      password: values.password
-    };
-    if (brandData) {
-      data.subDomain = brandData?.subDomain;
+
+    try {
+      const deviceFingerprint = await getDeviceFingerprint();
+
+      const data: any = {
+        email: values.email,
+        password: values.password,
+        deviceFingerprint: deviceFingerprint
+      };
+
+      if (brandData) {
+        data.subDomain = brandData?.subDomain;
+      }
+
+      const response = await axiosInstance().post('/user/auth', data);
+      const { data: responseData } = response.data;
+
+      if (responseData?.skipMFA && responseData?.token) {
+        localStorage.setItem('token', responseData.token);
+
+        if (responseData?.hasExistingSession) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: responseData.existingSessionMessage
+          });
+        }
+        const res = await axiosInstance().get(`/user/me`);
+        const {
+          data: { data: meData }
+        } = res;
+
+        dispatch({ type: SET_USER, payload: meData });
+        if (meData?.role?.selectedEntity?._id) {
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: responseData?.role?.selectedEntity?._id
+          });
+        }
+        if (responseData?.user?.defaultResource) {
+          if (routes[camelCase(responseData?.user?.defaultResource)]?.path) {
+            history.push({ pathname: routes[camelCase(responseData?.user?.defaultResource)]?.path });
+          }
+        }
+        axiosInstance()
+          .get(`/user/notification/unseen`)
+          .then(({ data: { count } }) => {
+            notification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+
+        axiosInstance()
+          .get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            chatNotification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        history.push({ pathname: '/login/mfa', search: `?token=${responseData?.token}` });
+      }
+      setSubmitting(false);
+    } catch (error) {
+      setSubmitting(false);
+      toastConfig.setToastConfig(error);
     }
-    axiosInstance()
-      .post('/user/auth', data)
-      .then(async ({ data: response }) => {
-        const { data } = response;
-        setSubmitting(false);
-        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const validateForm = (values) => {
@@ -143,7 +203,8 @@ const Login = () => {
               <Formik
                 initialValues={{
                   email: '',
-                  password: ''
+                  password: '',
+                  rememberDevice: false
                 }}
                 validate={validateForm}
                 onSubmit={handleSubmit}

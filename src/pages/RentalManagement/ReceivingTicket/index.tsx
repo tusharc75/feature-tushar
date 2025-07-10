@@ -146,7 +146,7 @@ const ReceivingTicket = ({
   const [showRepairOrderDialog, setShowRepairOrderDialog] = useState({ open: false, inUseAsset: false });
   const [isExistingRentalJob, setIsExistingRentalJob] = useState(false);
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
-  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializeAsset: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializedProductSerialNumbers: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, records: null, isBulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
@@ -567,7 +567,6 @@ const ReceivingTicket = ({
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var material: any = [];
-      var nonSerializeAsset: any = [];
       var productSerialNumbers: any = [];
       var consumeProducts: any = [];
       var transactionData: any = [];
@@ -612,7 +611,6 @@ const ReceivingTicket = ({
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
-        nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
         productSerialNumbers?.forEach((e) => {
@@ -740,7 +738,6 @@ const ReceivingTicket = ({
               receiveTicketProducts,
               returnTicketProducts,
               consumeProducts,
-              nonSerializeAsset,
               productSerialNumbers,
               invoiceData
             );
@@ -785,7 +782,6 @@ const ReceivingTicket = ({
               receiveTicketProducts,
               returnTicketProducts,
               consumeProducts,
-              nonSerializeAsset,
               productSerialNumbers,
               invoiceData
             );
@@ -807,7 +803,6 @@ const ReceivingTicket = ({
                 returnTicketProducts,
                 consumeProducts,
                 nonSerializedInventory,
-                nonSerializeAsset,
                 productSerialNumbers
               );
               newRows.push(parent);
@@ -849,7 +844,6 @@ const ReceivingTicket = ({
               returnTicketProducts,
               consumeProducts,
               nonSerializedInventory,
-              nonSerializeAsset,
               productSerialNumbers
             );
             newRows.push(parent);
@@ -938,7 +932,6 @@ const ReceivingTicket = ({
     returnTicketProducts,
     consumeProducts,
     nonSerializedInventory,
-    nonSerializeAsset,
     productSerialNumbers
   ) => {
     let subRows: any = [];
@@ -965,7 +958,6 @@ const ReceivingTicket = ({
           receiveTicketProducts,
           returnTicketProducts,
           consumeProducts,
-          nonSerializeAsset,
           productSerialNumbers,
           invoiceData
         );
@@ -1008,7 +1000,6 @@ const ReceivingTicket = ({
             returnTicketProducts,
             consumeProducts,
             nonSerializedInventory,
-            nonSerializeAsset,
             productSerialNumbers
           );
           subRows.push(_subRow);
@@ -1114,7 +1105,6 @@ const ReceivingTicket = ({
     receiveTicketProducts,
     returnTicketProducts,
     consumeProducts,
-    nonSerializeAsset,
     productSerialNumbers,
     invoiceData
   ) => {
@@ -1144,7 +1134,13 @@ const ReceivingTicket = ({
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
         warehouseProduct.forEach((element) => {
-          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse, storageLocation: element?.storageLocation });
+          rows.push({
+            ...row,
+            qty: element.qty,
+            warehouse: element.warehouse,
+            storageLocation: element?.storageLocation,
+            nonSerializedProductSerialNumbers: element?.serialNumbers
+          });
         });
       } else {
         rows.push({ ...row, qty: getNestedQty(material, row) });
@@ -1267,7 +1263,6 @@ const ReceivingTicket = ({
         obj.endDate = element?.manualEndDate || element?.actualEndDate;
         obj.manualStartDate = element?.actualStartDate;
         obj.manualEndDate = element?.actualEndDate;
-        obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
         obj.loadingTicket = ele?.loadingTicket;
         obj.loadingTicketId = ele?.loadingTicketId;
         obj.loadingTicketStatus = ele?.loadingTicketStatus;
@@ -1288,7 +1283,7 @@ const ReceivingTicket = ({
           obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
         }
         obj.wellNumber = getParentWellNumber(material, element?._id);
-
+        obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
           obj.productSerialNumbers = productSerialNumbers
             ?.filter((e) => e?._id === element?._id && ele?.serialNumber?.includes(e?.productSerialNumberDetail?._id))
@@ -1319,7 +1314,6 @@ const ReceivingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
-        obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
         obj.status = ASSET_STATUS.notApplied;
         obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
         obj.currentLocation =
@@ -1327,7 +1321,7 @@ const ReceivingTicket = ({
           rentalManagementData?.shippingAddress?.optionValue ||
           rentalManagementData?.billingAddress?.optionValue;
         obj.wellNumber = getParentWellNumber(material, element?._id);
-
+        obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
           let productSerialNumbersMaterial = productSerialNumbers?.filter((e) => e?._id === element?._id &&
             e?.warehouse?.optionValue === obj?.warehouseId && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
@@ -1342,7 +1336,6 @@ const ReceivingTicket = ({
 
     productRows?.forEach((element, index) => {
       element.index = parentIndex ? `${parentIndex}.${subRowsCount + index + 1}` : `${subRowsCount + index + 1}`;
-
       const invoiceMaterial = invoiceData?.find((e) => e?._id === element?._id || e?._id === element?.uniqueId);
       element.isInvoiceCreated = invoiceMaterial ? true : false;
       element.isAllowedStartDate = element?.manualStartDate && !invoiceMaterial ? true : false;
@@ -1481,7 +1474,7 @@ const ReceivingTicket = ({
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
-            {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
+            {((row?.original?.nonSerializedProductSerialNumbers && row?.original?.nonSerializedProductSerialNumbers?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
                 <Box>
                   <HtmlTooltip title={`Serial Numbers`}>
@@ -1492,9 +1485,10 @@ const ReceivingTicket = ({
                           open: true,
                           data: {
                             productName: row?.original?.productName,
-                            data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                            data: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ?
+                              row?.original?.nonSerializedProductSerialNumbers?.map((e) => { return { assetNumber: e } }) : row?.original?.productSerialNumbers
                           },
-                          isNonSerializeAsset: row?.original?.nonSerializeAsset?.length > 0 ? true : false
+                          isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
                         });
                       }}
                     >
@@ -3202,8 +3196,8 @@ const ReceivingTicket = ({
       {showInfo.open && (
         <ShowNonSerializeAssets
           data={showInfo.data}
-          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializeAsset: null })}
-          isNonSerializeAsset={showInfo?.isNonSerializeAsset} />
+          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializedProductSerialNumbers: null })}
+          isNonSerializedProductSerialNumbers={showInfo?.isNonSerializedProductSerialNumbers} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
