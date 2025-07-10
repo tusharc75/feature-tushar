@@ -70,6 +70,7 @@ export default function CreateCustomPdfTemplate() {
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
+  const [serviceOptions, setServiceOptions] = useState([]);
 
   const handleTemplateChange = (tpl: Template) => {
     setTemplate(tpl);
@@ -84,7 +85,19 @@ export default function CreateCustomPdfTemplate() {
   useEffect(() => {
     fetchData();
     fetchUser();
+    fetchServiceOptions();
   }, [id]);
+
+   const fetchServiceOptions = async () => {
+        await axiosInstance()
+          .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
+          .then(({ data: { data } }) => {
+            setServiceOptions(data[sidebarResource?.serviceMaster] || []);
+          })
+          .catch((e) => {
+            toastConfig.setToastConfig(e);
+          });
+    };
 
   const generateInitialTemplate = (numPages: number): Template => {
     if (numPages <= 0) {
@@ -112,6 +125,7 @@ export default function CreateCustomPdfTemplate() {
       type: '',
       owner: user.user._id,
       collaborator: [],
+      services: [],
       noOfPages: 1
     };
     if (id && id !== '0') {
@@ -126,6 +140,7 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.owner = isClone ? user.user._id : data?.owner || user.user._id;
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
+        initialValuesData.services = data?.services ? data?.services : [];
         if (!template) {
           if (data?.template) {
             setTemplate(data.template);
@@ -227,6 +242,7 @@ export default function CreateCustomPdfTemplate() {
       owner: values?.owner,
       collaborator: values?.collaborator,
       template: template,
+      services: values?.services,
       noOfPages: noOfPages
     };
 
@@ -450,7 +466,7 @@ export default function CreateCustomPdfTemplate() {
                               values['entity'] && values['entity'].length !== 0
                                 ? setOwnerCollaboratorData(
                                   ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                    values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                   )
                                 )
                                 : setOwnerCollaboratorData(ownerCollaboratorDataConst)
@@ -561,6 +577,37 @@ export default function CreateCustomPdfTemplate() {
                             }}
                           />
                         </Grid>
+                      </Grid>
+                      <Grid className="mt-5" size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                        {values.type === 'Work Order' && serviceOptions.length > 0 &&
+                          <Autocomplete
+                            limitTags={2}
+                            disabled={!allowedToEdit || !isEdit}
+                            multiple
+                            options={serviceOptions}
+                            getOptionLabel={(option: any) => option?.optionLabel || ''}
+                            isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                            value={
+                              serviceOptions.filter((opt) =>
+                                values['services']?.some((s) => s === opt.optionValue)
+                              )
+                            }
+                            onChange={(e, val) => {
+                              const selectedIds = val?.map((d) => d.optionValue) || [];
+                              setFieldValue('services', selectedIds);
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Services"
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                margin="none"
+                                name="services"
+                              />
+                            )}
+                          />}
                       </Grid>
                     </Grid>
                   </Grid>
