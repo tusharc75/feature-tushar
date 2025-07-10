@@ -16,6 +16,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -4313,3 +4314,13 @@ export function replaceAllMongoIds(
   const objectIdRegex = /([/=])([a-f\d]{24})(?=[/?#&=]|$)/gi;
   return url.replace(objectIdRegex, `$1${replaceWith}`);
 }
+
+export const getDeviceFingerprint = async () => {
+  try {
+    const fp = await FingerprintJS.load();
+    const result = await fp.get();
+    return result.visitorId;
+  } catch (error) {
+    return null;
+  }
+};
