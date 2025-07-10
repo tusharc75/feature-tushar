@@ -28,6 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
@@ -700,6 +701,12 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
+          />
+          <FinalPriceBox
+            allFields={creditMemoFields}
+            data={creditMemoData}
+            childFields={allFields}
+            material={dataRows}
           />
         </Box>
       ) : (
