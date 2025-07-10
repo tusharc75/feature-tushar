@@ -18,7 +18,7 @@ const SearchDropDownList = ({ children }: SearchDropDownListProps) => {
   const inputRef = useRef<HTMLElement | HTMLTextAreaElement | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [inputValue, setInputValue] = useState('');
-  const popoverRef = useRef<HTMLUListElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
     setAnchorEl(e.currentTarget);
@@ -56,8 +56,8 @@ type RenderListProps = {
   inputValue: string;
 };
 
-const RenderList = React.forwardRef<HTMLUListElement, RenderListProps>(({ anchorEl, setAnchorEl, inputValue }, ref) => {
-  const { historyKeywords, handleSetHistoryKeyword } = useSearchHistory();
+const RenderList = React.forwardRef<HTMLDivElement, RenderListProps>(({ anchorEl, setAnchorEl, inputValue }, ref) => {
+  const { historyKeywords, handleSetHistoryKeyword, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory();
   const [activeIndex, setActiveIndex] = useState(-1);
   const activeIndexRef = useRef(0);
   const filteredKeywords = useMemo(() => {
@@ -164,32 +164,40 @@ const RenderList = React.forwardRef<HTMLUListElement, RenderListProps>(({ anchor
         disableEnforceFocus
         disableScrollLock
       >
-        <ul ref={ref} className="list-none py-2" style={rect.width ? { minWidth: rect.width } : {}}>
-          {filteredKeywords.map((d, i) => (
-            <li
-              key={d.timeStamp}
-              className="group flex h-[36px] cursor-pointer list-none items-center justify-between gap-2 px-4 hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-900 dark:data-[active=true]:bg-gray-900"
-              data-active={activeIndex === i}
-              onClick={() => handleClick(d)}
-              onMouseEnter={() => {
-                setActiveIndex(i);
-                activeIndexRef.current = i;
-              }}
-              onMouseLeave={() => {
-                setActiveIndex(-1);
-                activeIndexRef.current = i;
-              }}
-            >
-              <div className="flex flex-grow items-center gap-3">
-                <Schedule style={{ fontSize: 16 }} />
-                <p className="line-clamp-1 text-[15px] font-medium text-[#232529] dark:text-white">{d.keyword}</p>
-              </div>
-              <span className="opacity-0 group-hover:opacity-100 group-[.Mui-focusVisible]:opacity-100">
-                <RemoveFromHistoryButton item={d} type="keyword" />
-              </span>
-            </li>
-          ))}
-        </ul>
+        <div ref={ref}>
+          <p className="mt-4 px-4 text-[14px] font-medium leading-[20px] text-gray-500">History</p>
+          <ul className="list-none py-2" style={rect.width ? { minWidth: rect.width } : {}}>
+            {filteredKeywords.map((d, i) => (
+              <li
+                key={d.timeStamp}
+                className="group flex h-[36px] cursor-pointer list-none items-center justify-between gap-2 px-4 hover:bg-gray-100 data-[active=true]:bg-gray-100 dark:hover:bg-gray-900 dark:data-[active=true]:bg-gray-900"
+                data-active={activeIndex === i}
+                onClick={() => handleClick(d)}
+                onMouseEnter={() => {
+                  setActiveIndex(i);
+                  activeIndexRef.current = i;
+                }}
+                onMouseLeave={() => {
+                  setActiveIndex(-1);
+                  activeIndexRef.current = i;
+                }}
+              >
+                <div className="flex flex-grow items-center gap-3">
+                  <Schedule style={{ fontSize: 16 }} />
+                  <p className="line-clamp-1 text-[15px] font-medium text-[#232529] dark:text-white">{d.keyword}</p>
+                </div>
+                <span className="opacity-0 group-hover:opacity-100 group-[.Mui-focusVisible]:opacity-100">
+                  <RemoveFromHistoryButton
+                    item={d}
+                    type="keyword"
+                    handleRemoveItemFromHistory={handleRemoveItemFromHistory}
+                    handleRemoveKeywordFromHistory={handleRemoveKeywordFromHistory}
+                  />
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </Popover>
     </>
   );
