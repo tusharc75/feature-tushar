@@ -689,7 +689,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
