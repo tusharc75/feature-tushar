@@ -30,7 +30,6 @@ interface DialogProps {
   closeDialog: () => void;
   products: any[];
   referenceId: string;
-  warehouse: string;
 }
 
 type TableContent = {
@@ -55,7 +54,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }: DialogProps) => {
+const AddNonSerializeAssets = ({ closeDialog, products, referenceId }: DialogProps) => {
   const [theme] = useAppTheme();
   const classes = useClasses();
   const { setToastConfig } = useContext(CustomToastContext);
@@ -68,7 +67,6 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
   const [tableData, setTableData] = useState<TableContent[]>([]);
   const [dataWithNumber, setDataWithNumber] = useState<TableContent[]>([]);
   const [isSubmitting, setSubmitting] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     if (!products) return;
@@ -184,38 +182,20 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
       });
       return false;
     } else {
-      if (isOffline) {
-        setSubmitting(true);
-        await addAssetsInRental(
-          referenceId,
-          dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
-        );
-        setSubmitting(false);
-        closeDialog();
-      } else {
-        setSubmitting(true);
-        const dataToSubmit = {
-          warehouse: warehouse,
-          assets: dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'] }))
-        };
-        axiosInstance()
-          .post(`${routes.rentalManagement.path}/${referenceId}/inventory/create-non-serialized-assets`, dataToSubmit)
-          .then(() => {
-            setSubmitting(false);
-            closeDialog();
-          })
-          .catch((err) => {
-            setSubmitting(false);
-            setToastConfig(err);
-          });
-      }
+      setSubmitting(true);
+      await addAssetsInRental(
+        referenceId,
+        dataWithNumber.map((t) => ({ _id: t._id, product: t.product, assetNumber: t['Asset Number'], serializedProduct: t.serializedProduct }))
+      );
+      setSubmitting(false);
+      closeDialog();
     }
   };
 
   return (
     <Dialog open onClose={closeDialog} TransitionComponent={CustomDialogTransition} fullScreen>
       <CustomDialogHeader
-        title={isOffline ? `Assign ${resources?.serializedAsset?.titlePlural}` : `Assign Serial Numbers`}
+        title={`Assign ${resources?.serializedAsset?.titlePlural}`}
         onClose={closeDialog}
         showRequiredLabel={false}
       />
@@ -252,7 +232,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                 <TableRow>
                   <TableCell>Sr.No.</TableCell>
                   <TableCell align="left">Product</TableCell>
-                  <TableCell align="left">{isOffline ? 'Asset Number' : 'Serial Number'}</TableCell>
+                  <TableCell align="left">{'Asset Number'}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -266,7 +246,7 @@ const AddNonSerializeAssets = ({ closeDialog, products, warehouse, referenceId }
                       <TextField
                         size="small"
                         variant="outlined"
-                        placeholder={isOffline ? 'Asset Number' : 'Serial Number'}
+                        placeholder={'Asset Number'}
                         value={data['Asset Number']}
                         autoComplete="off"
                         name={data.id}

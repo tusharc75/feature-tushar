@@ -1222,13 +1222,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           <>
             <MenuItem
               onClick={() => {
-                setAddNonSerializedAssetDialog(true);
-              }}
-            >
-              {`Assign Serial Numbers`}
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
                 setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
               }}
             >
@@ -1417,8 +1410,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setAddNonSerializedAssetDialog(false);
             fetchData();
           }}
-          products={isOffline ? [...assetAssignedProduct, ...nonSerializedProduct] : nonSerializedProduct}
-          warehouse={rentalManagementData?.warehouse?.optionValue}
+          products={[...assetAssignedProduct, ...nonSerializedProduct]}
           referenceId={rentalManagementData?._id}
         />
       )}
