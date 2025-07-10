@@ -14,6 +14,10 @@ const InfoSidebarContainer = () => {
   const [fullScreen, setFullScreen] = useState(false);
 
   useEffect(() => {
+    if (!item) setFullScreen(false);
+  }, [item]);
+
+  useEffect(() => {
     if (item) {
       const api = `/resource-information/actions?resourceId=${item.resourceId}&actionId=${item._id}`;
       if (cache.current[api]) {
@@ -39,7 +43,7 @@ const InfoSidebarContainer = () => {
 
   if (fullScreen && item) {
     return createPortal(
-      <div className="fixed inset-0 z-[1200] bg-[var(--dark-primary,white)]">
+      <div className="fixed inset-0 z-[1300] bg-[var(--dark-primary,white)]">
         <InfoSidebar toggleFullScreen={() => setFullScreen((prev) => !prev)} isFullScreen={fullScreen} />
       </div>,
       document.body
