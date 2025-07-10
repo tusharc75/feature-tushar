@@ -106,62 +106,47 @@ const LoginMFA = () => {
         requestData.deviceFingerprint = deviceFingerprint;
         requestData.rememberDevice = true;
       }
-
-      axiosInstance()
-        .post('/user/mfa-auth/verify-otp', requestData)
-        .then(async ({ data: { data } }) => {
-          localStorage.setItem('token', data.token);
-
-          if (data?.deviceAdded) {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: 'Device remembered for 15 days - MFA will be skipped on future logins'
-            });
+      axiosInstance().post('/user/mfa-auth/verify-otp', requestData).then(async ({ data: { data } }) => {
+        localStorage.setItem('token', data.token);
+        if (data?.hasExistingSession) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.existingSessionMessage
+          });
+        }
+        const res = await axiosInstance().get(`/user/me`);
+        const {
+          data: { data: meData }
+        } = res;
+        dispatch({ type: SET_USER, payload: meData });
+        if (meData?.role?.selectedEntity?._id) {
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id
+          });
+        }
+        if (data?.user?.defaultResource) {
+          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
           }
-          if (data?.hasExistingSession) {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: data.existingSessionMessage
-            });
-          }
-          const res = await axiosInstance().get(`/user/me`);
-          const {
-            data: { data: meData }
-          } = res;
+        }
+        axiosInstance().get(`/user/notification/unseen`)
+          .then(({ data: { count } }) => {
+            notification.setCount(count);
+          }).catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
 
-          dispatch({ type: SET_USER, payload: meData });
-          if (meData?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id
-            });
-          }
-          if (data?.user?.defaultResource) {
-            if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-              history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
-            }
-          }
-          axiosInstance()
-            .get(`/user/notification/unseen`)
-            .then(({ data: { count } }) => {
-              notification.setCount(count);
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-
-          axiosInstance()
-            .get(`/user/user-notification/unseen`)
-            .then(({ data: { count } }) => {
-              chatNotification.setCount(count);
-            })
-            .catch((error) => {
-              toastConfig.setToastConfig(error);
-            });
-          setIsSubmitting(false);
-        })
+        axiosInstance().get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            chatNotification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+        setIsSubmitting(false);
+      })
         .catch((error) => {
           setOtp('');
           setIsSubmitting(false);
@@ -242,14 +227,12 @@ const LoginMFA = () => {
                       {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
                     </div>
                   )}
-
                   <div className="mb-4 flex items-center justify-center gap-2">
                     <Checkbox checked={rememberDevice} onChange={(e) => setRememberDevice(e.target.checked)} color="primary" size="small" />
                     <span className="cursor-pointer text-sm text-gray-600" onClick={() => setRememberDevice(!rememberDevice)}>
-                      Remember this device for 15 days
+                      Don’t ask again on this device for 15 days.
                     </span>
                   </div>
-
                   <ThemeButton
                     buttonType="theme"
                     type="submit"
