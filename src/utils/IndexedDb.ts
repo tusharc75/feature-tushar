@@ -3,7 +3,7 @@ export class IndexedDb {
   private storesSchema: Record<string, string> = {};
   private dbVersion = 1;
 
-  constructor(private dbName: string) {}
+  constructor(private dbName: string) { }
 
   version(v: number): this {
     this.dbVersion = v;
@@ -25,7 +25,6 @@ export class IndexedDb {
           if (!db.objectStoreNames.contains(storeName)) {
             // parse schema string: "++id, title, author"
             const parts = def.split(',').map((s) => s.trim());
-            console.log(parts);
             let keyOptions: { keyPath?: string; autoIncrement?: boolean } = {};
             const indexes: string[] = [];
 
@@ -72,7 +71,7 @@ class Table<T> {
   constructor(
     private db: IDBDatabase,
     private name: string
-  ) {}
+  ) { }
 
   private store(mode: IDBTransactionMode) {
     return this.db.transaction(this.name, mode).objectStore(this.name);
@@ -148,7 +147,7 @@ class Query<T, V> {
     private db: IDBDatabase,
     private storeName: string,
     private filterIndex: string // the index used for .where()
-  ) {}
+  ) { }
 
   equals(val: V) {
     this.range = IDBKeyRange.only(val);

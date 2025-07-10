@@ -994,7 +994,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                 )}
             </div>
             <div className="right-side-content ml-auto flex flex-shrink-0 items-center gap-2">
-              <AiButton onClick={() => setAiSuggestionDialog(true)}>AI Suggestions</AiButton>
+              {(selectedResource?.resource === sidebarResource.product &&
+                !isEmpty(selectedLookUpResourceData) &&
+                selectedLookUpResourceData['product'] &&
+                selectedLookUpResourceData['product']?.length > 0) &&
+                <AiButton
+                  onClick={() => setAiSuggestionDialog(true)}>
+                  AI Suggestions
+                </AiButton>
+              }
               {topRightSlot}
             </div>
           </div>
@@ -1053,7 +1061,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             />
           </>
         )}
-
         {showDetail.open && (
           <DetailsPopover
             fields={fields}
