@@ -483,6 +483,63 @@ const Leads = () => {
     );
   }, [permissions, selectedRecords, user?.user?._id]);
 
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    setOkButtonLoading(true);
+    const collaboratorIds = [];
+    if (updatedRow.collaboratorId) collaboratorIds.push(updatedRow.collaboratorId);
+    if (Array.isArray(updatedRow.restcollaborator)) {
+      updatedRow.restcollaborator.forEach(item => {
+        if (item.optionValue) collaboratorIds.push(item.optionValue);
+      });
+    }
+    updatedRow.collaborator = collaboratorIds;
+    updatedRow.owner = updatedRow.ownerId || '';
+    updatedRow.marketSegment = updatedRow.marketSegmentId || '';
+    updatedRow.subMarketSegment = updatedRow.subMarketSegmentId || '';
+
+    const fieldsToRemove = [
+      'id',
+      'concatedName',
+      'createdBy',
+      'createdById',
+      'createdByDate',
+      'updatedBy',
+      'updatedByDate',
+      'isChecked',
+      'canDelete',
+      'canEdit',
+      'convertedToOpportunity',
+      'relatedOpportunity',
+      'relatedOpportunityId',
+      'ownerId',
+      'marketSegmentId',
+      'subMarketSegmentId',
+      'collaboratorId',
+      'restcollaborator',
+    ];
+    fieldsToRemove.forEach(field => delete updatedRow[field]);
+
+
+    try {
+      await axiosInstance().put(`${lead.leadApi}?entity=${selectedEntity}`, updatedRow);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Lead updated successfully.'
+      });
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: error.message || 'Failed to update lead.'
+      });
+    } finally {
+      setOkButtonLoading(false);
+    }
+  };
+
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -532,6 +589,7 @@ const Leads = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.lead}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
