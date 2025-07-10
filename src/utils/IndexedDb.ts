@@ -118,6 +118,19 @@ class Table<T> {
     });
   }
 
+  async sortBy<K extends keyof T>(key: K, direction: 'asc' | 'desc' = 'asc'): Promise<T[]> {
+    const arr = await this.getAll();
+    return arr.sort((a, b) => {
+      const va = a[key];
+      const vb = b[key];
+
+      // Numeric or string comparison
+      if (va > vb) return direction === 'asc' ? 1 : -1;
+      if (va < vb) return direction === 'asc' ? -1 : 1;
+      return 0;
+    });
+  }
+
   where<Key extends keyof T>(index: Key): Query<T, T[Key]> {
     return new Query<T, T[Key]>(this.db, this.name, index as string);
   }
@@ -127,75 +140,111 @@ class Query<T, V> {
   private range: IDBKeyRange | null = null;
   private dir: IDBCursorDirection = 'next';
 
+  // New properties for sorting
+  private sortField?: keyof T;
+  private sortDirection: 'asc' | 'desc' = 'asc';
+
   constructor(
     private db: IDBDatabase,
     private storeName: string,
-    private indexName: string
+    private filterIndex: string // the index used for .where()
   ) {}
 
-  equals(value: V) {
-    this.range = IDBKeyRange.only(value);
+  equals(val: V) {
+    this.range = IDBKeyRange.only(val);
     return this;
   }
-
-  between(lower: V, upper: V, lowerOpen = false, upperOpen = false) {
-    this.range = IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen);
-    return this;
-  }
-
   above(val: V) {
     this.range = IDBKeyRange.lowerBound(val, true);
     return this;
   }
-
   below(val: V) {
     this.range = IDBKeyRange.upperBound(val, true);
     return this;
   }
-
+  between(lo: V, hi: V, loOpen = false, hiOpen = false) {
+    this.range = IDBKeyRange.bound(lo, hi, loOpen, hiOpen);
+    return this;
+  }
   reverse() {
     this.dir = 'prev';
     return this;
   }
 
-  deleteAll(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      const txn = this.db.transaction(this.storeName, 'readwrite');
-      const idx = txn.objectStore(this.storeName).index(this.indexName);
-      const req = idx.openCursor(this.range, this.dir);
-      let count = 0;
-
-      req.onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest).result;
-        if (cursor) {
-          cursor.delete();
-          count++;
-          cursor.continue();
-        } else {
-          resolve(count);
-        }
-      };
-      req.onerror = () => reject(req.error);
-    });
+  /**
+   * Specify an optional sort key and direction.
+   */
+  sortBy<K extends keyof T>(field: K, direction: 'asc' | 'desc' = 'asc') {
+    this.sortField = field;
+    this.sortDirection = direction;
+    return this;
   }
 
+  /**
+   * Retrieve all filtered entries and then sort in JS if requested.
+   */
   toArray(): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const txn = this.db.transaction(this.storeName, 'readonly');
-      const index = txn.objectStore(this.storeName).index(this.indexName);
-      const req = index.openCursor(this.range, this.dir);
+      const store = txn.objectStore(this.storeName);
+      const source = store.indexNames.contains(this.filterIndex) ? store.index(this.filterIndex) : store;
+
+      const req = source.openCursor(this.range, this.dir);
       const out: T[] = [];
 
-      req.onsuccess = (e) => {
-        const cursor = (e.target as IDBRequest).result;
+      req.onsuccess = (ev) => {
+        const cursor = (ev.target as IDBRequest).result;
         if (cursor) {
           out.push(cursor.value);
           cursor.continue();
         } else {
+          // Perform JS‐side sort if requested
+          if (this.sortField) {
+            out.sort((a, b) => {
+              const va = a[this.sortField!];
+              const vb = b[this.sortField!];
+              if (va > vb) return this.sortDirection === 'asc' ? 1 : -1;
+              if (va < vb) return this.sortDirection === 'asc' ? -1 : 1;
+              return 0;
+            });
+          }
           resolve(out);
         }
       };
+
       req.onerror = () => reject(req.error);
+    });
+  }
+
+  deleteAll(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const txn = this.db.transaction(this.storeName, 'readwrite');
+      const store = txn.objectStore(this.storeName);
+      // if indexName exists on this store, use it; otherwise scan primary store
+      const source = store.indexNames.contains(this.filterIndex) ? store.index(this.filterIndex) : store;
+      const cursorReq = source.openCursor(this.range, this.dir);
+      let count = 0;
+      cursorReq.onsuccess = (ev) => {
+        const cursor = (ev.target as IDBRequest).result;
+        if (cursor) {
+          cursor.delete(); // schedule deletion
+          count++;
+          cursor.continue();
+        }
+      };
+      cursorReq.onerror = () => {
+        // cursor-level error
+        reject(cursorReq.error);
+      };
+      txn.oncomplete = () => {
+        resolve(count);
+      };
+      txn.onerror = () => {
+        reject(txn.error);
+      };
+      txn.onabort = () => {
+        reject(txn.error);
+      };
     });
   }
 }
