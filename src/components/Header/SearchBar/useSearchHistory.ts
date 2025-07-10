@@ -21,7 +21,6 @@ const useSearchHistory = () => {
       const data = (await itemDb.table<SearchKeyword>(tables.KEYWORDS_TABLE).where('pathName').equals(pathname).toArray()).sort(
         (a, b) => b.timeStamp - a.timeStamp
       );
-      console.log(data);
       setSearchedKeywords(data);
     } catch (error) {
       console.error(error);
@@ -38,7 +37,7 @@ const useSearchHistory = () => {
       const data = (await itemDb.table<Item>(tables.ITEMS_TABLE).getAll()).sort((a, b) => b.timeStamp - a.timeStamp);
       setSearchItems(data);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }, []);
 
