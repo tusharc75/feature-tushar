@@ -31,7 +31,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess, minDate })
       if (dayjs(values?.processedDate).isBefore(minDate, 'day')) {
         errors['processedDate'] = `Date entered prior to the request date`;
       }
-      if (dayjs(values?.processedDate).isAfter(dayjs())) {
+      if (dayjs(values?.processedDate).isAfter(dayjs(), 'day')) {
         errors['processedDate'] = `Please select valid date`;
       }
     }
