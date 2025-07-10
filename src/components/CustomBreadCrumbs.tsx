@@ -47,7 +47,7 @@ const CustomBreadCrumbs = ({ routes = [], isConfirmBeforeClick = false, onBreadC
             }}
             id={`bread-crumb-${index + 1}`}
             key={index}
-            className={`${linkClassName} flex items-center`}
+            className={`${lastLinkClassName} flex items-center`}
           >
             {route.title}
           </span>

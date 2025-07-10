@@ -33,7 +33,7 @@ function SearchBox(
         onChange(e);
       }, debounceTime);
     }
-    const [debouncedTracker, _] = debounceRef.current;
+    const [debouncedTracker] = debounceRef.current;
     debouncedTracker(e);
   };
 
