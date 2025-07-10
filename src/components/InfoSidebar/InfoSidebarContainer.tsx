@@ -39,7 +39,7 @@ const InfoSidebarContainer = () => {
 
   if (fullScreen && item) {
     return createPortal(
-      <div className="fixed inset-0 z-[9999] bg-[var(--dark-primary,white)]">
+      <div className="fixed inset-0 z-[1200] bg-[var(--dark-primary,white)]">
         <InfoSidebar toggleFullScreen={() => setFullScreen((prev) => !prev)} isFullScreen={fullScreen} />
       </div>,
       document.body
