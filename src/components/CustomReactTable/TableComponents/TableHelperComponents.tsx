@@ -546,7 +546,9 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
               : ''
           }
           onChange={(e, val) => {
+            console.log(val);
             setCellValue(val?.optionValue || '');
+            console.log(cellValue);
           }}
           renderInput={(params) => (
             <TextField
