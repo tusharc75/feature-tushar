@@ -224,7 +224,7 @@ const ProjectSales: FC = () => {
           let finalObject = prepareDataForGrid(project, user);
           finalObject['originalData'] = project
           finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id && permissions?.projectSales?.isDelete;
-          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, project);
+          finalObject['canEdit'] = permissions?.projectSales?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.projectSales, project);
           return {
             ...finalObject,
             isManager: user.user._id === project?.projectManager?.optionValue,

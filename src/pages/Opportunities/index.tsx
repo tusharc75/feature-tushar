@@ -225,7 +225,7 @@ const Opportunities = () => {
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
-          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
+          finalObject['canEdit'] = permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, u);
           let res = {
             ...finalObject,
             stage: u.stage,
