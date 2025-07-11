@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase, startCase } from 'lodash';
+import { capitalize, kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -596,10 +596,10 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv', 'pdf', 'web content']}
+                          options={['xslx', 'csv', 'pdf', 'emailBody']}
                           fullWidth
                           size="small"
-                          getOptionLabel={(option) => option}
+                          getOptionLabel={(option) => startCase(option)?.toUpperCase()}
                           isOptionEqualToValue={(option, value) => option === value}
                           value={values.fileType}
                           onChange={(_, newVal) => setFieldValue('fileType', newVal)}
