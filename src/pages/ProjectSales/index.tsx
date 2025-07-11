@@ -11,7 +11,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable, entityDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, editDisable, entityDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -20,7 +20,7 @@ import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { customerAccount, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { checkIsAllowedToEdit, customerAccount, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CreateProjectSales from './CreateProjectSales';
 import axios, { CancelTokenSource } from 'axios';
 
@@ -61,7 +61,8 @@ const ProjectSales: FC = () => {
     referenceName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const [allFields, setAllFields] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -71,6 +72,7 @@ const ProjectSales: FC = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.projectSales}`)
       .then(({ data: { data } }) => {
+        setAllFields(JSON.parse(JSON.stringify(data)));
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, routes.projectSalesDetail.path, true);
         columns = [...newColumns, ...getStaticFields(true)];
@@ -220,7 +222,9 @@ const ProjectSales: FC = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((project) => {
           let finalObject = prepareDataForGrid(project, user);
+          finalObject['originalData'] = project
           finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id && permissions?.projectSales?.isDelete;
+          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, project);
           return {
             ...finalObject,
             isManager: user.user._id === project?.projectManager?.optionValue,
@@ -360,6 +364,36 @@ const ProjectSales: FC = () => {
     );
   };
 
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${routes.projectSales.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -409,6 +443,7 @@ const ProjectSales: FC = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.projectSales}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
