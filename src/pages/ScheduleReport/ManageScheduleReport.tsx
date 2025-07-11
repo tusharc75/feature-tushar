@@ -596,7 +596,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv', 'pdf']}
+                          options={['xslx', 'csv', 'pdf', 'web content']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => option}
