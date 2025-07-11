@@ -8,7 +8,7 @@ import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,8 +18,10 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import {
   checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   customerAccount,
   getDefaultMyRecordType,
+  getObjKeysWithValues,
   gridLoadingTimeout,
   opportunity,
   prepareDataForGrid,
@@ -71,7 +73,8 @@ const Opportunities = () => {
   });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const [allFields, setAllFields] = useState(null);
 
   //  Grid Variables - End
   useEffect(() => {
@@ -81,6 +84,7 @@ const Opportunities = () => {
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
     let data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
@@ -217,9 +221,11 @@ const Opportunities = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
+          finalObject['originalData'] = u
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
+          finalObject['canEdit'] = permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, u);
           let res = {
             ...finalObject,
             stage: u.stage,
@@ -310,6 +316,36 @@ const Opportunities = () => {
     );
   };
 
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${opportunityApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -359,6 +395,7 @@ const Opportunities = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.opportunity}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
