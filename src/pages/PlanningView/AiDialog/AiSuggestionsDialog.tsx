@@ -1,5 +1,4 @@
 import { Avatar, Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import { cn } from 'src/constants/helpers';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -9,9 +8,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useAppTheme } from 'src/constants/AppConfig';
 import DashboardModal from 'src/components/DashboardModal';
 import genieImage from 'src/assets/dashboard_images/sidebar/genie.svg';
+import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const AiSuggestionsDialog = ({ handleClose, productIds, dateRange }) => {
-  const [aiSuggestions, setAiSuggestions] = useState([]);
+
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [themeColor] = useAppTheme();
 
@@ -34,7 +36,7 @@ const AiSuggestionsDialog = ({ handleClose, productIds, dateRange }) => {
       const response: any = await axiosInstance().get(
         `/generative-ai/planning-view/suggestion?product=${productIds.join(',')}&date=${JSON.stringify(apiDateRange)}`
       );
-      setAiSuggestions((response?.data?.data).split(/\n|\. /).filter(Boolean)); // remove empty lines
+      setData(response?.data?.data)
       setLoading(false);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -68,45 +70,10 @@ const AiSuggestionsDialog = ({ handleClose, productIds, dateRange }) => {
         }}
       >
         {!loading ? (
-          aiSuggestions ? (
-            <Grid container spacing={1}>
-              <table className="w-full text-left text-sm rtl:text-right">
-                <thead
-                  className={`text-xs uppercase ${themeColor === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'
-                    }`}
-                >
-                  <tr>
-                    <th scope="col" className="px-6 py-3">#</th>
-                    <th scope="col" className="px-6 py-3">Suggestion</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {aiSuggestions
-                    .map((line, index) => (
-                      <tr
-                        key={index}
-                        className={`border-b ${themeColor === 'dark'
-                          ? 'border-gray-700 bg-gray-800'
-                          : 'border-gray-200 bg-white'
-                          }`}
-                      >
-                        <td
-                          className={`px-6 py-4 font-medium ${themeColor === 'dark' ? 'text-white' : 'text-gray-900'
-                            }`}
-                        >
-                          {index + 1}
-                        </td>
-                        <td
-                          className={`px-6 py-4 ${themeColor === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                            }`}
-                        >
-                          {line.trim()}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </Grid>
+          data ? (
+            <Box>
+              <Markdown remarkPlugins={[remarkGfm]}>{data}</Markdown>
+            </Box>
           ) : (
             <div className="flex min-h-[230px] items-center justify-center">
               <p className="text-gray-500">No suggestions available</p>

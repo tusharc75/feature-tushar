@@ -18,7 +18,7 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 
-const ShowNonSerializeAssets = ({ data, onClose, isNonSerializeAsset }) => {
+const ShowNonSerializeAssets = ({ data, onClose, isNonSerializedProductSerialNumbers }) => {
   const {
     state: { resources, user, permissions }
   }: any = useData();
@@ -52,7 +52,7 @@ const ShowNonSerializeAssets = ({ data, onClose, isNonSerializeAsset }) => {
               <TableRow>
                 <TableCell>Index</TableCell>
                 <TableCell align="left">Serial Number</TableCell>
-                {!isNonSerializeAsset ?
+                {!isNonSerializedProductSerialNumbers ?
                   <>
                     <TableCell align="left">{resources?.warehouse?.titleSingular}</TableCell>
                     {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">{resources?.storageLocation?.titleSingular}</TableCell>}
@@ -66,7 +66,7 @@ const ShowNonSerializeAssets = ({ data, onClose, isNonSerializeAsset }) => {
                     {index + 1}
                   </TableCell>
                   <TableCell align="left">{element?.assetNumber}</TableCell>
-                  {!isNonSerializeAsset ?
+                  {!isNonSerializedProductSerialNumbers ?
                     <>
                       <TableCell align="left">
                         {element?.productSerialNumberDetail?.warehouse?.optionLabel}

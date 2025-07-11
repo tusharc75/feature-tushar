@@ -1,10 +1,17 @@
 import { Item, SearchKeyword } from 'src/components/Header/SearchBar/types';
-import useSearchHistory from 'src/components/Header/SearchBar/useSearchHistory';
 import RippleButton from 'src/components/RippleButton';
 
-const RemoveFromHistoryButton = ({ type, item }: { type: 'keyword' | 'item'; item: Item | SearchKeyword }) => {
-  const { handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory();
-
+const RemoveFromHistoryButton = ({
+  type,
+  item,
+  handleRemoveItemFromHistory,
+  handleRemoveKeywordFromHistory
+}: {
+  type: 'keyword' | 'item';
+  item: Item | SearchKeyword;
+  handleRemoveItemFromHistory: (item: Item) => void;
+  handleRemoveKeywordFromHistory: (item: SearchKeyword) => void;
+}) => {
   return (
     <RippleButton
       className="link py-2 text-xs"

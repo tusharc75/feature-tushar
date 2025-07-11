@@ -124,7 +124,7 @@ const LoadingTicket = ({
   const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
-  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializeAsset: null });
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, isNonSerializedProductSerialNumbers: null });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
@@ -315,7 +315,7 @@ const LoadingTicket = ({
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
-            {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
+            {((row?.original?.nonSerializedProductSerialNumbers && row?.original?.nonSerializedProductSerialNumbers?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
                 <Box>
                   <HtmlTooltip title={`Serial Numbers`}>
@@ -326,9 +326,10 @@ const LoadingTicket = ({
                           open: true,
                           data: {
                             productName: row?.original?.productName,
-                            data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                            data: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ?
+                              row?.original?.nonSerializedProductSerialNumbers?.map((e) => { return { assetNumber: e } }) : row?.original?.productSerialNumbers
                           },
-                          isNonSerializeAsset: row?.original?.nonSerializeAsset?.length > 0 ? true : false
+                          isNonSerializedProductSerialNumbers: row?.original?.nonSerializedProductSerialNumbers?.length > 0 ? true : false
                         });
                       }}
                     >
@@ -653,7 +654,6 @@ const LoadingTicket = ({
       var productAssets: any = [];
       var deliveryTicketList: any = [];
       var material: any = [];
-      var nonSerializeAsset: any = [];
       var productSerialNumbers: any = [];
       var consumeProducts: any = [];
       var nonSerializedInventory: any = [];
@@ -694,7 +694,6 @@ const LoadingTicket = ({
 
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
-        nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
         productSerialNumbers?.forEach((e) => {
@@ -758,7 +757,6 @@ const LoadingTicket = ({
               nonSerializedInventory,
               loadingTicketProducts,
               consumeProducts,
-              nonSerializeAsset,
               productSerialNumbers
             );
             newRows = [...newRows, ...subProductRows];
@@ -798,7 +796,6 @@ const LoadingTicket = ({
               nonSerializedInventory,
               loadingTicketProducts,
               consumeProducts,
-              nonSerializeAsset,
               productSerialNumbers
             );
             newRows = [...newRows, ...subProductRows];
@@ -818,7 +815,6 @@ const LoadingTicket = ({
                 loadingTicketProducts,
                 consumeProducts,
                 nonSerializedInventory,
-                nonSerializeAsset,
                 productSerialNumbers
               );
               newRows.push(parent);
@@ -854,7 +850,6 @@ const LoadingTicket = ({
               loadingTicketProducts,
               consumeProducts,
               nonSerializedInventory,
-              nonSerializeAsset,
               productSerialNumbers
             );
             newRows.push(parent);
@@ -909,7 +904,6 @@ const LoadingTicket = ({
     loadingTicketProducts,
     consumeProducts,
     nonSerializedInventory,
-    nonSerializeAsset,
     productSerialNumbers
   ) => {
     let subRows: any = [];
@@ -934,7 +928,6 @@ const LoadingTicket = ({
           nonSerializedInventory,
           loadingTicketProducts,
           consumeProducts,
-          nonSerializeAsset,
           productSerialNumbers
         );
         subRows = [...subRows, ...subProductRows];
@@ -970,7 +963,6 @@ const LoadingTicket = ({
             loadingTicketProducts,
             consumeProducts,
             nonSerializedInventory,
-            nonSerializeAsset,
             productSerialNumbers
           );
           subRows.push(_subRow);
@@ -1034,7 +1026,6 @@ const LoadingTicket = ({
     nonSerializedInventory,
     loadingTicketProducts,
     consumeProducts,
-    nonSerializeAsset,
     productSerialNumbers
   ) => {
     const productRows: any = [];
@@ -1063,7 +1054,13 @@ const LoadingTicket = ({
       const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === row._id);
       if (warehouseProduct?.length) {
         warehouseProduct.forEach((element) => {
-          rows.push({ ...row, qty: element.qty, warehouse: element.warehouse, storageLocation: element?.storageLocation });
+          rows.push({
+            ...row,
+            qty: element.qty,
+            warehouse: element.warehouse,
+            storageLocation: element?.storageLocation,
+            nonSerializedProductSerialNumbers: element?.serialNumbers
+          });
         });
       } else {
         rows.push({ ...row, qty: getNestedQty(material, row) });
@@ -1123,13 +1120,12 @@ const LoadingTicket = ({
               ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
               : element?.status
           : element?.status;
-        obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
         obj.loadingTicket = ele?.loadingTicket;
         obj.loadingTicketId = ele?.loadingTicketId;
         obj.loadingTicketStatus = ele?.loadingTicketStatus;
         obj.startDate = element?.actualStartDate;
         obj.wellNumber = getParentWellNumber(material, element?._id);
-
+        obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
           obj.productSerialNumbers = productSerialNumbers
             ?.filter((e) => e?._id === element?._id && ele?.serialNumber?.includes(e?.productSerialNumberDetail?._id))
@@ -1157,8 +1153,8 @@ const LoadingTicket = ({
         obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
         obj.storageLocation = element?.storageLocation?.optionLabel;
         obj.storageLocationId = element?.storageLocation?.optionValue;
-        obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
         obj.wellNumber = getParentWellNumber(material, element?._id);
+        obj.nonSerializedProductSerialNumbers = element?.nonSerializedProductSerialNumbers;
         if (isSerialNumberProduct) {
           let productSerialNumbersMaterial = productSerialNumbers?.filter((e) => e?._id === element?._id &&
             e?.warehouse?.optionValue === obj?.warehouseId && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
@@ -2023,8 +2019,8 @@ const LoadingTicket = ({
       {showInfo.open && (
         <ShowNonSerializeAssets
           data={showInfo.data}
-          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializeAsset: null })}
-          isNonSerializeAsset={showInfo.isNonSerializeAsset}
+          onClose={() => setShowInfo({ open: false, data: {}, isNonSerializedProductSerialNumbers: null })}
+          isNonSerializedProductSerialNumbers={showInfo.isNonSerializedProductSerialNumbers}
         />
       )}
       {addSerializedAssetDialog.open && (
