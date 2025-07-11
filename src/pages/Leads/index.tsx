@@ -23,6 +23,7 @@ import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   getDefaultMyRecordType,
+  getObjKeysWithValues,
   gridLoadingTimeout,
   lead,
   prepareDataForGrid,
@@ -67,7 +68,7 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
@@ -238,6 +239,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
+          finalObject['originalField'] = u
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
@@ -483,6 +485,40 @@ const Leads = () => {
     );
   }, [permissions, selectedRecords, user?.user?._id]);
 
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    setOkButtonLoading(true);
+
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+    const values = getObjKeysWithValues(dataToUpdate.originalField, fieldsDataAll)
+
+    Object.keys(inputField).forEach((key) => {
+      if (key in values) {
+        values[key] = inputField[key];
+      }
+    });
+
+
+    try {
+      await axiosInstance().put(`${lead.leadApi}?entity=${selectedEntity}`, { ...values, _id: updatedRow._id });
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Lead updated successfully.'
+      });
+      fetchData();
+    } catch (error) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: error.message || 'Failed to update lead.'
+      });
+    } finally {
+      setOkButtonLoading(false);
+    }
+  };
+
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -532,6 +568,7 @@ const Leads = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.lead}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
