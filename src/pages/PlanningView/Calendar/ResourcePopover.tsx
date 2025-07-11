@@ -13,14 +13,12 @@ import {
   DialogContent
 } from '@mui/material';
 import dayjs from 'dayjs';
-import { camelCase } from 'lodash';
 import { useMemo, useState } from 'react';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { useData } from 'src/StateProvider/Provider';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import routes from 'src/components/Helpers/Routes';
 import { cn, CustomDialogTransition, dateFormat, displayDate } from 'src/constants/helpers';
 
 const ResourcePopover = ({ anchorEl, data, eventData, open, onClose, resourceList }) => {
