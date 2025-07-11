@@ -49,6 +49,8 @@ const PlannedIncomingDialog = ({ handleClose, products, warehouses, resourceList
               const resource = resourceList?.find((r) => r.resource === row.original?.resource);
               if (resource) {
                 window.open(`${resource.path}/${row.original?.referenceId}`);
+              } else {
+                window.open(`${routes[`${camelCase(row?.original?.resource)}Detail`]?.path}/${row?.original?.referenceId}`);
               }
             }}
           >
