@@ -3,6 +3,19 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import { Box, Menu, MenuItem, useMediaQuery } from '@mui/material';
 import { isArray, reverse } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { AiOutlineDelete, AiOutlineUserAdd } from 'react-icons/ai';
+import {
+  PiBuildingOfficeThin,
+  PiCertificateLight,
+  PiChatDotsLight,
+  PiChecksLight,
+  PiFileArchiveLight,
+  PiInfoLight,
+  PiPlusLight,
+  PiSkipForwardLight,
+  PiUploadSimpleLight
+} from 'react-icons/pi';
+import { RiFileHistoryLine } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { FailIcon, PassIcon } from 'src/assets/svg/svgIcons';
@@ -13,10 +26,10 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import MenuWithGroupping, { ActionMenuItem } from 'src/components/MenuWithGroupping';
 import {
   ACTIVITY_RESOURCE,
   ATTACHMENT_TYPE,
-  DOA_STATUS,
   MATERIAL_SUB_TYPE,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
@@ -46,25 +59,6 @@ import RenderService, { ServicesButtons } from './RenderServices';
 import Steps from './Steps';
 import StepsInOtherServices from './StepsInOtherService';
 import ViewServiceStepDataDialog from './ViewServiceStepDataDialog';
-import MenuWithGroupping, { ActionMenuItem } from 'src/components/MenuWithGroupping';
-import { AiOutlineDelete, AiOutlineUserAdd } from 'react-icons/ai';
-import { GoLog, GoPlus } from 'react-icons/go';
-import {
-  PiBuildingOfficeThin,
-  PiCertificateLight,
-  PiChatCenteredDotsLight,
-  PiChatDotsLight,
-  PiChecksLight,
-  PiFileArchiveLight,
-  PiFilePlusLight,
-  PiInfoLight,
-  PiLinkLight,
-  PiPlusLight,
-  PiSkipForwardLight,
-  PiUploadSimpleLight
-} from 'react-icons/pi';
-import { BsCart2 } from 'react-icons/bs';
-import { RiFileHistoryLine } from 'react-icons/ri';
 
 type InnerTabs = 'steps' | 'productsConsumables' | 'drawing';
 
@@ -188,7 +182,9 @@ const Service = ({
                     allowedToEdit ||
                     element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
                     (!element?.assignedUsers?.length && !element?.competencies?.length) ||
-                    (!element?.assignedUsers?.length && element?.competencies?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+                    (!element?.assignedUsers?.length &&
+                      element?.competencies?.length &&
+                      element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
                   ) {
                     element.clickable = true;
                   } else {
@@ -207,7 +203,9 @@ const Service = ({
                 allowedToEdit ||
                 element?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
                 (!element?.assignedUsers?.length && !element?.competencies?.length) ||
-                (!element?.assignedUsers?.length && element?.competencies?.length && element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
+                (!element?.assignedUsers?.length &&
+                  element?.competencies?.length &&
+                  element?.competencies?.filter((e) => user?.competencies?.includes(e))?.length)
               ) {
                 element.clickable = true;
               } else {
@@ -508,7 +506,9 @@ const Service = ({
     (allowedToEdit ||
       selectedService?.assignedUsers?.some((u: any) => u?.optionValue === user?._id) ||
       (!selectedService?.assignedUsers?.length && !selectedService?.competencies?.length) ||
-      (!selectedService?.assignedUsers?.length && selectedService?.competencies?.length && selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
+      (!selectedService?.assignedUsers?.length &&
+        selectedService?.competencies?.length &&
+        selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
 
   const openAddServiceActions = (event) => {
     setAddServiceAnchorEl(event.currentTarget);
@@ -819,8 +819,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                  isAllowedToServiceEdit &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -840,9 +840,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  !completed
                     ? false
                     : true
                 }
@@ -861,7 +861,9 @@ const Service = ({
                 id={'assignTechnicians'}
                 group="Add/Assign"
                 disabled={
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && !completed && quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -878,7 +880,12 @@ const Service = ({
               <ActionMenuItem
                 group="Add/Assign"
                 id={'AssignWorkStations'}
-                disabled={![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) && quotationData?.status != QUOTATION_STATUS.sentToCustomer ? false : true}
+                disabled={
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   setWorkStationAssignDialog(true);
                   setAnchorEl(null);
@@ -915,8 +922,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -934,8 +941,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -1016,7 +1023,14 @@ const Service = ({
               <ActionMenuItem
                 group="Service Actions"
                 id={'delete'}
-                disabled={allowedToEdit && selectedService?.status === WORKORDER_SERVICE_STATUS.pending && !completed && quotationData?.status != QUOTATION_STATUS.sentToCustomer ? false : true}
+                disabled={
+                  allowedToEdit &&
+                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    ? false
+                    : true
+                }
                 onClick={() => {
                   handleRemoveService(selectedService?.uniqueId);
                   setAnchorEl(null);

@@ -1,12 +1,12 @@
+import { Delete } from '@mui/icons-material';
 import { Box, IconButton } from '@mui/material';
 import dayjs from 'dayjs';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
-import { camelCase } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { dateTimeFormat } from 'src/constants/helpers';
 
 export interface DateTimeRange {
   startDateTime: Date | null;
@@ -21,7 +21,7 @@ export interface DateValidationError {
 
 //Pass value as array of DateTimeRange to allow multiple ranges with multipleRanges prop as true or single DateTimeRange
 interface CustomDateTimeRangePickerProps {
-  value: any
+  value: any;
   onChange: (value: DateTimeRange[] | DateTimeRange) => void;
   required?: boolean;
   fullWidth?: boolean;
@@ -37,7 +37,6 @@ interface CustomDateTimeRangePickerProps {
 }
 
 const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
-
   const {
     value,
     onChange,
@@ -46,7 +45,7 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
     maxDateTime,
     disablePast = false,
     size = 'small',
-    margin = 'normal',
+    margin = 'none',
     startPlaceholder = 'Start Date & Time',
     endPlaceholder = 'End Date & Time',
     multipleRanges = false,
@@ -147,105 +146,61 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
     }
   }, [value, minDateTime, maxDateTime]);
 
-  const renderDateTimeRange = (
-    index: number,
-    range: DateTimeRange,
-    prevRange: DateTimeRange | null = null,
-    nextRange: DateTimeRange | null = null,
-    removeRows: any = null
-  ) => {
-    const startValue = range.startDateTime ? dayjs.tz(new Date(range.startDateTime)) : null;
-    const endValue = range.endDateTime ? dayjs.tz(new Date(range.endDateTime)) : null;
-
-    const minStartDateTime = prevRange?.endDateTime
-      ? dayjs.tz(new Date(prevRange.endDateTime)).add(1, 'minute')
-      : minDateTime
-        ? dayjs.tz(new Date(minDateTime))
-        : undefined;
-
-    const maxEndDateTime = nextRange?.startDateTime
-      ? dayjs.tz(new Date(nextRange.startDateTime)).subtract(1, 'minute')
-      : maxDateTime
-        ? dayjs.tz(new Date(maxDateTime))
-        : undefined;
-
-    const startError = errors.find((error) => error.index === index && error.field === 'startDateTime');
-    const endError = errors.find((error) => error.index === index && error.field === 'endDateTime');
-
-    return (
-      <Box key={index} mb={2} display="flex" gap={2} width={fullWidth ? '100%' : 'auto'}>
-        <CustomDateTimePicker
-          fullWidth={fullWidth}
-          required={true}
-          disablePast={disablePast}
-          value={startValue}
-          name={`${camelCase(startPlaceholder)}`}
-          label={startPlaceholder}
-          onChange={(date) => update(index, 'startDateTime', date)}
-          size={size}
-          margin={margin}
-          placeholder={startPlaceholder}
-          {...(minStartDateTime ? { minDateTime: minStartDateTime } : {})}
-          error={startError ? true : false}
-          helperText={startError ? startError?.message : ''}
-        />
-        <CustomDateTimePicker
-          fullWidth={fullWidth}
-          required={true}
-          disablePast={disablePast}
-          value={endValue}
-          name={`${camelCase(endPlaceholder)}`}
-          label={endPlaceholder}
-          onChange={(date) => update(index, 'endDateTime', date)}
-          size={size}
-          margin={margin}
-          placeholder={endPlaceholder}
-          {...(range.startDateTime ? { minDateTime: dayjs.tz(new Date(range.startDateTime)) } : {})}
-          {...(maxEndDateTime ? { maxDateTime: maxEndDateTime } : {})}
-          error={endError ? true : false}
-          helperText={endError ? endError?.message : ''}
-        />
-        <Box pt={2}>
-          <HtmlTooltip title='Remove'>
-            <IconButton
-              size="small"
-              onClick={() => {
-                removeRows(index)
-              }}
-              disabled={index === 0}
-              aria-label="Remove range"
-            >
-              <RemoveIcon fontSize="small" color={index === 0 ? 'disabled' : 'error'} />
-            </IconButton>
-          </HtmlTooltip>
-        </Box>
-      </Box>
-
-    );
-  };
-
   const removeRows = (index) => {
-    const newData = [
-      ...value.slice(0, index),
-      ...value.slice(index + 1)
-    ]
+    const newData = [...value.slice(0, index), ...value.slice(index + 1)];
     onChange(newData);
-  }
+  };
 
   return (
     <Box width={fullWidth ? '100%' : 'auto'}>
-      {Array.isArray(value)
-        ? value?.map((range, index) =>
-          renderDateTimeRange(index, range, index !== 0 ? value[index - 1] : null, index !== value.length - 1 ? value[index + 1] : null, removeRows)
-        )
-        : renderDateTimeRange(0, value)}
+      <div className="my-4 space-y-4">
+        {Array.isArray(value) ? (
+          value?.map((range, index) => (
+            <RenderDateTimeRange
+              index={index}
+              range={range}
+              prevRange={index !== 0 ? value[index - 1] : null}
+              nextRange={index !== value.length - 1 ? value[index + 1] : null}
+              removeRows={removeRows}
+              errors={errors}
+              minDateTime={minDateTime}
+              fullWidth={fullWidth}
+              maxDateTime={maxDateTime}
+              disablePast={disablePast}
+              startPlaceholder={startPlaceholder}
+              update={update}
+              endPlaceholder={endPlaceholder}
+              margin={margin}
+              size={size}
+            />
+          ))
+        ) : (
+          <RenderDateTimeRange
+            index={0}
+            range={value}
+            removeRows={removeRows}
+            errors={errors}
+            minDateTime={minDateTime}
+            fullWidth={fullWidth}
+            maxDateTime={maxDateTime}
+            disablePast={disablePast}
+            startPlaceholder={startPlaceholder}
+            update={update}
+            endPlaceholder={endPlaceholder}
+            margin={margin}
+            size={size}
+          />
+        )}
+      </div>
       {multipleRanges && Array.isArray(value) && (
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-end',
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-end'
+          }}
+        >
           <ThemeButton
             buttonType="themeBorder"
             onClick={() => {
@@ -262,9 +217,118 @@ const CustomDateTimeRangePicker = (props: CustomDateTimeRangePickerProps) => {
           </ThemeButton>
         </Box>
       )}
-
     </Box>
   );
 };
 
 export default CustomDateTimeRangePicker;
+
+const RenderDateTimeRange = ({
+  index,
+  range,
+  prevRange,
+  nextRange,
+  removeRows,
+  errors,
+  minDateTime,
+  fullWidth,
+  maxDateTime,
+  disablePast,
+  startPlaceholder,
+  update,
+  endPlaceholder,
+  margin,
+  size
+}: {
+  index: number;
+  range: DateTimeRange;
+  prevRange?: DateTimeRange | null;
+  nextRange?: DateTimeRange | null;
+  removeRows?: any;
+  minDateTime?: any;
+  errors?: any;
+  fullWidth?: boolean;
+  maxDateTime?: any;
+  disablePast?: boolean;
+  startPlaceholder?: string;
+  update?: any;
+  size?: string;
+  margin?: string;
+  endPlaceholder?: string;
+}) => {
+  const startValue = range.startDateTime ? dayjs.tz(new Date(range.startDateTime)) : null;
+  const endValue = range.endDateTime ? dayjs.tz(new Date(range.endDateTime)) : null;
+
+  const minStartDateTime = prevRange?.endDateTime
+    ? dayjs.tz(new Date(prevRange.endDateTime)).add(1, 'minute')
+    : minDateTime
+      ? dayjs.tz(new Date(minDateTime))
+      : undefined;
+
+  const maxEndDateTime = nextRange?.startDateTime
+    ? dayjs.tz(new Date(nextRange.startDateTime)).subtract(1, 'minute')
+    : maxDateTime
+      ? dayjs.tz(new Date(maxDateTime))
+      : undefined;
+
+  const startError = errors.find((error) => error.index === index && error.field === 'startDateTime');
+  const endError = errors.find((error) => error.index === index && error.field === 'endDateTime');
+
+  return (
+    <div
+      className="grid grid-cols-[1fr_30px] flex-wrap gap-2 rounded-md border bg-gray-50 p-4 dark:bg-gray-800 sm:grid-cols-[1fr_1fr_30px]"
+      key={index}
+    >
+      <div className="max-sm:col-start-1">
+        <CustomDateTimePicker
+          fullWidth={fullWidth}
+          required={true}
+          disablePast={disablePast}
+          value={startValue}
+          name={`${camelCase(startPlaceholder)}`}
+          label={startPlaceholder}
+          onChange={(date) => update(index, 'startDateTime', date)}
+          size={size}
+          margin={margin}
+          placeholder={startPlaceholder}
+          {...(minStartDateTime ? { minDateTime: minStartDateTime } : {})}
+          error={startError ? true : false}
+          helperText={startError ? startError?.message : ''}
+        />
+      </div>
+      <div className="max-sm:col-start-1">
+        <CustomDateTimePicker
+          fullWidth={fullWidth}
+          required={true}
+          disablePast={disablePast}
+          value={endValue}
+          name={`${camelCase(endPlaceholder)}`}
+          label={endPlaceholder}
+          onChange={(date) => update(index, 'endDateTime', date)}
+          size={size}
+          margin={margin}
+          placeholder={endPlaceholder}
+          {...(range.startDateTime ? { minDateTime: dayjs.tz(new Date(range.startDateTime)) } : {})}
+          {...(maxEndDateTime ? { maxDateTime: maxEndDateTime } : {})}
+          error={endError ? true : false}
+          helperText={endError ? endError?.message : ''}
+        />
+      </div>
+      <div className="mt-1 max-sm:col-start-2 max-sm:row-start-1">
+        <HtmlTooltip title="Remove">
+          <IconButton
+            size="small"
+            onClick={() => {
+              removeRows(index);
+            }}
+            disabled={index === 0}
+            color="error"
+            aria-label="Remove range"
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </HtmlTooltip>
+      </div>
+    </div>
+  );
+};

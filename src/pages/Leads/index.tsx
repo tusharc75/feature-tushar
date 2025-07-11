@@ -9,7 +9,7 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,6 +23,7 @@ import {
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   getDefaultMyRecordType,
+  getObjKeysWithValues,
   gridLoadingTimeout,
   lead,
   prepareDataForGrid,
@@ -67,7 +68,7 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
@@ -238,6 +239,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
+          finalObject['originalData'] = u
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
@@ -483,6 +485,36 @@ const Leads = () => {
     );
   }, [permissions, selectedRecords, user?.user?._id]);
 
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${lead.leadApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
+  };
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -520,7 +552,6 @@ const Leads = () => {
           }}
           isAddButtonVisible={permissions?.lead?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -532,6 +563,7 @@ const Leads = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.lead}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>

@@ -91,10 +91,10 @@ function SearchBox(
                 <span
                   className={cn('absolute right-[5px] cursor-pointer [top:50%] [transform:translateY(-50%)]')}
                   onClick={(e) => {
-                    const payload = { ...e, target: { ...e.target, value: '' } as any, currentTarget: { ...e.currentTarget, value: '' } as any };
+                    const payload = Object.assign(e, { target: { ...e.target, value: '' } as any, currentTarget: { ...e.currentTarget, value: '' } });
                     e.stopPropagation();
                     setInputValue('');
-                    onChangeWrapper(payload);
+                    onChangeWrapper(payload as any);
                     onChange(undefined, '');
                   }}
                 >
