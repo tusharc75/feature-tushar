@@ -111,8 +111,6 @@ const RenderTable = ({ data, resources, resourceList }) => {
                     const resource = resourceList?.find((r) => r.resource === row?.resource);
                     if (resource) {
                       window.open(`${resource.path}/${row?.referenceId}`);
-                    } else {
-                      window.open(`${routes[`${camelCase(row?.resource)}Detail`]?.path}/${row?.referenceId}`);
                     }
                   }}
                   className="link text-truncate"
