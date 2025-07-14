@@ -3,6 +3,7 @@ import { flexRender } from '@tanstack/react-table';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import RenderCellWithHeader from './RenderCellWithHeader';
 import { DEFAULT_DATA_ROWS_VISIBLE } from './index';
+import { useState } from 'react';
 
 const RenderSubCard = ({
   table,
@@ -29,11 +30,13 @@ const RenderSubCard = ({
   state,
   onRowClick
 }: any) => {
+  const [currentlyEditingCells, setCurrentlyEditingCells] = useState(new Set<string>());
   if (row.depth !== depth) return null;
   let expanderCell = null;
   if (expander && expanderCol) {
     expanderCell = row.getVisibleCells()[0];
   }
+
   return (
     <div
       className={`my-2 rounded-md px-3 py-2 shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
@@ -118,6 +121,8 @@ const RenderSubCard = ({
                 setCellValue={setCellValue}
                 state={state}
                 dispatch={dispatch}
+                currentlyEditingCells={currentlyEditingCells}
+                setCurrentlyEditingCells={setCurrentlyEditingCells}
               />
             );
           })}
@@ -135,6 +140,8 @@ const RenderSubCard = ({
                   setCellValue={setCellValue}
                   state={state}
                   dispatch={dispatch}
+                  currentlyEditingCells={currentlyEditingCells}
+                  setCurrentlyEditingCells={setCurrentlyEditingCells}
                 />
               );
             })}
