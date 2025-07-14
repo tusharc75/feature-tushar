@@ -29,6 +29,7 @@ const PdfTemplateSchema = object().shape({
   owner: string().required('Owner is required'),
   type: string().required('Type is required'),
 });
+
 const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
 const DEFAULT_EMPTY_PDFME_TEMPLATE: Template = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
 
@@ -40,7 +41,7 @@ export default function CreateCustomPdfTemplate() {
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -95,7 +96,6 @@ export default function CreateCustomPdfTemplate() {
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
             setVariables(['entity', 'currentDate', ...vars]);
-            console.log(variables);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -322,7 +322,7 @@ export default function CreateCustomPdfTemplate() {
                   <CustomBreadCrumbs
                     routes={[
                       {
-                        title: "Custom Pdf Templates",
+                        title: resources?.customPdfTemplate?.titlePlural,
                         path: routes.customPdfTemplate.path
                       },
                       {
