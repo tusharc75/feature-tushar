@@ -200,6 +200,8 @@ export function Filter({ column, table }: { column: Column<any, unknown>; table:
     }
   }, [isOpen]);
 
+  if (isOpen) console.log(column.getFilterValue(), column);
+
   return (
     <div className="search-container">
       <IconButton
