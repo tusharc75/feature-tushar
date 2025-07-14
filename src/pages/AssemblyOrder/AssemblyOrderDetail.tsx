@@ -38,7 +38,6 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 import { ExpandMore } from '@mui/icons-material';
-import { FaCircleChevronDown } from 'react-icons/fa6';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -68,9 +67,7 @@ const AssemblyOrderDetail = () => {
   const [openRentalDialog, setOpenRentalDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const assemblyOrderProcessStepsNames = useMemo(() => {
-    return assemblyOrderSteps.map((item) => item.name);
-  }, [assemblyOrderSteps]);
+  const [assemblySteps, setAssemblySteps] = useState([]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -106,11 +103,14 @@ const AssemblyOrderDetail = () => {
   };
 
   useEffect(() => {
+    fetchPolicy();
+  }, [id]);
+
+  useEffect(() => {
     if (id) {
       fetchData();
-      fetchPolicy();
     }
-  }, [id]);
+  }, [id, resourceData]);
 
   useEffect(() => {
     fetchFields();
@@ -128,15 +128,18 @@ const AssemblyOrderDetail = () => {
   };
 
   const fetchData = () => {
-    axiosInstance()
-      .get(`${routes.assemblyOrder.path}/${id}`)
+    axiosInstance().get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        if ([ASSEMBLY_ORDER_STATUS.converted]?.includes(data?.status)) {
-          setCurrentStep(assemblyOrderSteps?.length - 1);
-        } else {
-          setCurrentStep(getIndex(data?.processStatus, assemblyOrderSteps));
+        var steps = assemblyOrderSteps;
+        if (!resourceData?.policy?.loadingTicket) {
+          steps = steps?.filter((e) => !['Loading'].includes(e.name));
         }
-
+        setAssemblySteps(steps);
+        if ([ASSEMBLY_ORDER_STATUS.converted]?.includes(data?.status)) {
+          setCurrentStep(steps?.length - 1);
+        } else {
+          setCurrentStep(getIndex(data?.processStatus, steps));
+        }
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
@@ -323,17 +326,17 @@ const AssemblyOrderDetail = () => {
             <Steps
               isNextStep={false}
               nextStep={nextStep}
-              steps={assemblyOrderSteps}
+              steps={assemblySteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               isStepEnded={assemblyOrderData?.status === ASSEMBLY_ORDER_STATUS.converted}
               stepFullScreen={stepFullScreen}
               setStepFullScreen={() => setStepFullScreen(!stepFullScreen)}
               updateStatus={(step: number) => {
-                dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblyOrderProcessStepsNames[step], id);
+                dynamicFormUpdateProcessStatus(sidebarResource.assemblyOrder, assemblySteps[step]?.name, id);
               }}
             />
-            {assemblyOrderProcessStepsNames[currentStep] === 'Add' && assemblyOrderData && (
+            {assemblySteps[currentStep]?.name === 'Add' && assemblyOrderData && (
               <Material
                 assemblyOrderData={assemblyOrderData}
                 setNextStep={setNextStep}
@@ -343,7 +346,7 @@ const AssemblyOrderDetail = () => {
                 fetchAssembleOrderData={fetchData}
               />
             )}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Work Order' && assemblyOrderData && (
+            {assemblySteps[currentStep]?.name === 'Work Order' && assemblyOrderData && (
               <WorkOrder
                 renderedFrom={`${renderedFrom}_grid-2`}
                 assemblyOrderData={assemblyOrderData}
@@ -355,7 +358,7 @@ const AssemblyOrderDetail = () => {
                 fetchAssembleOrderData={fetchData}
               />
             )}
-            {/* {assemblyOrderProcessStepsNames[currentStep] === 'Loading' && assemblyOrderData && (
+            {assemblySteps[currentStep]?.name === 'Loading' && assemblyOrderData && (
               <Loading
                 renderedFrom={`${renderedFrom}_grid-3`}
                 assemblyOrderData={assemblyOrderData}
@@ -363,9 +366,12 @@ const AssemblyOrderDetail = () => {
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={allowedToEdit}
               />
-            )} */}
-            {assemblyOrderProcessStepsNames[currentStep] === 'Final Slip' && assemblyOrderData && (
-              <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
+            )}
+            {assemblySteps[currentStep]?.name === 'Final Slip' && assemblyOrderData && (
+              <Invoice
+                renderedFrom={`${renderedFrom}_grid-4`}
+                assemblyOrderData={assemblyOrderData}
+                stepFullScreen={stepFullScreen} />
             )}
           </TabPanel>
         </ContentFullScreen>

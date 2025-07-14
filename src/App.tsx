@@ -369,7 +369,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -672,7 +672,7 @@ function App() {
             <PrivateRoute exact path={routes.customPdfTemplate.path}>
               <CustomPdfTemplate />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.customPdfTemplate.path}/:id`}>
+            <PrivateRoute exact path={`${routes.customPdfTemplateDetail.path}/:id`}>
               <CreateCustomPdfTemplate />
             </PrivateRoute>
             <PrivateRoute exact path={routes.formBuilder.path}>

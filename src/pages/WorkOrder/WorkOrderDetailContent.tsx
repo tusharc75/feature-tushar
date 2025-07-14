@@ -49,6 +49,7 @@ import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket
 import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumberDialog';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import InfoIcon from '@mui/icons-material/Info';
+import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -399,12 +400,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          workOrderData?.serializedAsset &&
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -427,10 +428,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          !workOrderData?.currentRepairJob &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        !workOrderData?.currentRepairJob &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -506,9 +507,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -521,9 +522,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -540,14 +541,20 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       id: 'preview-download',
       type: 'element',
       component: (
-        <PreviewDownload
-          fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
-          resource={sidebarResource.workOrder}
-          referenceId={id}
-          columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
-          hideDetailButton={true}
-          hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
-        />
+        workOrderData?.customPdfTemplate ?
+          <PreviewDownloadNew
+            fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
+            resource={sidebarResource.workOrder}
+            referenceId={id}
+            hideDetailButton={true}
+          /> : <PreviewDownload
+            fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
+            resource={sidebarResource.workOrder}
+            referenceId={id}
+            columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
+            hideDetailButton={true}
+            hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
+          />
       )
     },
     {

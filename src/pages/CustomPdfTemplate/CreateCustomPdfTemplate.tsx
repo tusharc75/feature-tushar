@@ -10,10 +10,10 @@ import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate } from '../../constants/helpers';
+import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { isEqual } from 'lodash';
+import { isEqual, template } from 'lodash';
 import PdfEditor from './PdfEditor';
 import { CUSTOM_A4_PDF, Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';
@@ -29,6 +29,7 @@ const PdfTemplateSchema = object().shape({
   owner: string().required('Owner is required'),
   type: string().required('Type is required'),
 });
+
 const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
 const DEFAULT_EMPTY_PDFME_TEMPLATE: Template = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
 
@@ -40,7 +41,7 @@ export default function CreateCustomPdfTemplate() {
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources, permissions }
   }: any = useData();
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -50,22 +51,7 @@ export default function CreateCustomPdfTemplate() {
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [formValues, setFormValues] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
-  const [template, setTemplate] = useState<any | null>(() => {
-    try {
-      const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-          return parsed;
-        } else {
-          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-        }
-      }
-    } catch (error) {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    }
-    return null;
-  });
+  const [pdfResourceOption, setpdfResourceOption] = useState(null);
   const [showProps, setShowProps] = useState<boolean>(false);
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
@@ -73,18 +59,21 @@ export default function CreateCustomPdfTemplate() {
   const [serviceOptions, setServiceOptions] = useState([]);
   const [variables, setVariables] = useState([]);
 
-  const handleTemplateChange = (tpl: Template) => {
-    setTemplate(tpl);
-  };
+  useEffect(() => {
+    const options = [];
+    PDF_RESOURCE_LIST?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ title: resources[item.key] ? resources[item.key]?.titleSingular : item.title, value: item.value });
+      }
+    });
+    setpdfResourceOption(options);
+  }, []);
 
   useEffect(() => {
-    if (template) {
-      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
+    if (formValues?.template) {
+      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(formValues?.template));
     }
-    else {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    }
-  }, [template]);
+  }, [formValues?.template]);
 
   useEffect(() => {
     if (formValues && formValues.type) {
@@ -95,7 +84,6 @@ export default function CreateCustomPdfTemplate() {
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
             setVariables(['entity', 'currentDate', ...vars]);
-            console.log(variables);
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -151,7 +139,17 @@ export default function CreateCustomPdfTemplate() {
       collaborator: [],
       services: [],
       noOfPages: 1,
+      template: null,
     };
+    const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+        initialValuesData.template = parsed;
+      } else {
+        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      }
+    }
     if (id && id !== '0') {
       try {
         const res = await axiosInstance().get(`${customPdfTemplate.api}/${id}`);
@@ -165,15 +163,15 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
         initialValuesData.services = data?.services ? data?.services : [];
-        if (data?.template) {
-          setTemplate(data.template);
+        if (data?.template && !initialValuesData?.template) {
+          initialValuesData.template = data?.template;
           setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
         } else {
-          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-          setTemplate(newTemplate);
-          setNoOfPages(initialValuesData.noOfPages);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+          if (!initialValuesData.template) {
+            const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+            initialValuesData.template = newTemplate;
+            setNoOfPages(initialValuesData.noOfPages);
+          }
         }
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
@@ -191,16 +189,14 @@ export default function CreateCustomPdfTemplate() {
         }
       } catch (e) {
         toastConfig.setToastConfig(e);
-        setTemplate(null);
         setNoOfPages(0);
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
-      if (!template) {
+      if (!initialValuesData.template) {
         const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-        setTemplate(newTemplate);
+        initialValuesData.template = newTemplate;
         setNoOfPages(initialValuesData.noOfPages);
-        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     }
     setInitialValues({ ...initialValuesData });
@@ -222,10 +218,10 @@ export default function CreateCustomPdfTemplate() {
     try {
       setBtnLoading(true);
       const singleInput: { [key: string]: any } = {};
-      if (!template) {
+      if (!formValues || !formValues?.template) {
         throw new Error("No template available for preview.");
       }
-      template.schemas.forEach(pageSchema => {
+      formValues?.template.schemas.forEach(pageSchema => {
         pageSchema.forEach(field => {
           if (field.name && field.content !== undefined) {
             singleInput[field.name] = field.content;
@@ -234,7 +230,7 @@ export default function CreateCustomPdfTemplate() {
       });
       const finalInputs = [singleInput];
       const pdf = await generate({
-        template: template,
+        template: formValues?.template,
         inputs: finalInputs,
         plugins: getPlugins(variables)
       });
@@ -256,18 +252,16 @@ export default function CreateCustomPdfTemplate() {
   const handleSubmit = async (values) => {
     const trimmedName = values.name.trim();
     setIsUpdating(true);
-
     const submitData = {
       name: trimmedName,
       entity: values?.entity,
       type: values?.type,
       owner: values?.owner,
       collaborator: values?.collaborator,
-      template: template,
+      template: values?.template || generateInitialTemplate(values?.noOfPages),
       services: values?.services,
       noOfPages: noOfPages
     };
-
     try {
       let response;
       if (id === '0' || isClone === true) {
@@ -278,13 +272,11 @@ export default function CreateCustomPdfTemplate() {
           ...submitData
         });
       }
-
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
         message: response.data.message
       });
-
       localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       setIsUpdating(false);
       if (isBreakCrumbPath && !isClone) {
@@ -320,14 +312,8 @@ export default function CreateCustomPdfTemplate() {
               <div className="headerbox-v1">
                 <div className="nav-v1">
                   <CustomBreadCrumbs
-                    routes={[
-                      {
-                        title: "Custom Pdf Templates",
-                        path: routes.customPdfTemplate.path
-                      },
-                      {
-                        title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name
-                      }
+                    routes={[{ title: resources?.customPdfTemplate?.titlePlural, path: routes.customPdfTemplate.path },
+                    { title: id === '0' ? 'New' : isClone === true ? 'Clone' : initialValues && initialValues.name }
                     ]}
                     isConfirmBeforeClick={allowedToEdit}
                     onBreadCrumbClick={(path) => {
@@ -353,12 +339,12 @@ export default function CreateCustomPdfTemplate() {
                       Edit
                     </ThemeButton>
                   )}
-                  {template && (
+                  {formValues?.template && (
                     <ThemeButton
                       mobileTooltip="Preview"
                       iconForMobile={<VisibilityIcon />}
                       startIcon={<VisibilityIcon />}
-                      disabled={btnLoading || !template}
+                      disabled={btnLoading || !formValues?.template}
                       onClick={generatePreviewPdf}
                     >
                       {btnLoading ? 'Please wait...' : 'Preview'}
@@ -379,266 +365,251 @@ export default function CreateCustomPdfTemplate() {
               </div>
               <div className="main-container">
                 <div className="mt-4">
-                  <Grid container spacing={2} direction={'column'}>
-                    <Grid>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <TextField
-                            disabled={!allowedToEdit || !isEdit}
-                            variant="outlined"
-                            type="text"
-                            label="PDF Template Name"
-                            required={true}
-                            name="name"
-                            fullWidth
-                            margin="none"
-                            size="small"
-                            value={values['name']}
-                            error={touched['name'] && Boolean(errors['name'])}
-                            helperText={touched['name'] && errors['name']}
-                            onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            options={[{ title: 'Work Order', value: 'Work Order' }]}
-                            getOptionLabel={(option) => option.title}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            value={values.type
-                              ? [{ title: 'Work Order', value: 'Work Order' }].find(
-                                (option) => option.value === values.type
-                              ) || null
-                              : null}
-                            onChange={(e, val) => {
-                              setFieldValue('type', val ? val.value : '');
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required
-                                margin="none"
-                                size="small"
-                                name="type"
-                                label="Type"
-                                variant="outlined"
-                                error={touched['type'] && Boolean(errors['type'])}
-                                helperText={touched['type'] && errors['type']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            multiple
-                            options={user?.entity}
-                            getOptionLabel={(option: any) => (option ? option?.entityName : '')}
-                            value={
-                              user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
-                                ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('entity', val && val?.map((d) => d._id));
-                              setFieldValue('owner', '');
-                              setFieldValue('collaborator', []);
-                              val && val.length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="none"
-                                size="small"
-                                name="entity"
-                                label="Entity"
-                                variant="outlined"
-                                error={touched['entity'] && Boolean(errors['entity'])}
-                                helperText={touched['entity'] && errors['entity']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                      </Grid>
+                  <Grid container spacing={1} >
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <TextField
+                        disabled={!allowedToEdit || !isEdit}
+                        variant="outlined"
+                        type="text"
+                        label="PDF Template Name"
+                        required={true}
+                        name="name"
+                        fullWidth
+                        margin="none"
+                        size="small"
+                        value={values['name']}
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                        onChange={(e) => setFieldValue('name', e.target.value.trimStart())}
+                      />
                     </Grid>
-                    <Grid>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => data._id === values['owner']).length
-                                ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
-                                : ''
-                            }
-                            options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
-                            onChange={(e, val) => {
-                              setFieldValue('owner', val && val._id ? val._id : '');
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                required={true}
-                                margin="none"
-                                size="small"
-                                name="owner"
-                                label="Owner"
-                                variant="outlined"
-                                error={touched['owner'] && Boolean(errors['owner'])}
-                                helperText={touched['owner'] && errors['owner']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                          <Autocomplete
-                            disabled={!allowedToEdit || !isEdit}
-                            multiple
-                            options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
-                            getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
-                            value={
-                              ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
-                                ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
-                                : []
-                            }
-                            onChange={(e, val) => {
-                              setFieldValue('collaborator', val && val?.map((d) => d._id));
-                            }}
-                            onOpen={() =>
-                              values['entity'] && values['entity'].length !== 0
-                                ? setOwnerCollaboratorData(
-                                  ownerCollaboratorDataConst.filter((data) =>
-                                    values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                  )
-                                )
-                                : setOwnerCollaboratorData(ownerCollaboratorDataConst)
-                            }
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="none"
-                                size="small"
-                                name="collaborator"
-                                label="Collaborator"
-                                variant="outlined"
-                                error={touched['collaborator'] && Boolean(errors['collaborator'])}
-                                helperText={touched['collaborator'] && errors['collaborator']}
-                                fullWidth
-                              />
-                            )}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <Autocomplete
+                        disabled={!allowedToEdit || !isEdit}
+                        options={pdfResourceOption}
+                        getOptionLabel={(option) => option.title}
+                        isOptionEqualToValue={(option, value) => option.value === value.value}
+                        value={values.type ? pdfResourceOption.find((option) => option.value === values.type) || null : null}
+                        onChange={(e, val) => {
+                          setFieldValue('type', val ? val.value : '');
+                        }}
+                        renderInput={(params) => (
                           <TextField
-                            disabled={!allowedToEdit || !isEdit || (id !== '0' && !isClone)}
-                            variant="outlined"
-                            type="number"
-                            label="No of Pages"
+                            {...params}
                             required
-                            name="noOfPages"
-                            fullWidth
                             margin="none"
                             size="small"
-                            value={noOfPagesInputRef.current ? noOfPagesInputRef.current.value : noOfPages}
-                            inputRef={noOfPagesInputRef}
-                            onChange={(e) => {
-                              setShowProps(true);
-                              setFieldValue('noOfPages', parseInt(e.target.value || '0', 10));
-                            }}
-                            InputProps={{
-                              endAdornment: showProps && (
-                                <>
-                                  <IconButton
-                                    size="small"
-                                    color="success"
-                                    onClick={() => {
-                                      const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
-                                      if (newPageCount !== noOfPages) {
-                                        setShowConfirmNoOfpages(true);
-                                      } else {
-                                        setShowProps(false);
-                                      }
-                                    }}
-                                  >
-                                    <CheckIcon fontSize="small" />
-                                  </IconButton>
-                                  <IconButton
-                                    size="small"
-                                    color="error"
-                                    onClick={() => {
-                                      if (noOfPagesInputRef.current) {
-                                        noOfPagesInputRef.current.value = String(noOfPages);
-                                      }
-                                      setFieldValue('noOfPages', noOfPages);
-                                      setShowProps(false);
-                                    }}
-                                  >
-                                    <CloseIcon fontSize="small" />
-                                  </IconButton>
-                                </>
-                              )
-                            }}
+                            name="type"
+                            label="Type"
+                            variant="outlined"
+                            error={touched['type'] && Boolean(errors['type'])}
+                            helperText={touched['type'] && errors['type']}
+                            fullWidth
                           />
-                        </Grid>
-                      </Grid>
-                      <Grid className="mt-5" size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
-                        {values.type === 'Work Order' && serviceOptions.length > 0 &&
-                          <Autocomplete
-                            limitTags={2}
-                            disabled={!allowedToEdit || !isEdit}
-                            multiple
-                            options={serviceOptions}
-                            getOptionLabel={(option: any) => option?.optionLabel || ''}
-                            isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
-                            value={
-                              serviceOptions.filter((opt) =>
-                                values['services']?.some((s) => s === opt.optionValue)
+                        )}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <Autocomplete
+                        disabled={!allowedToEdit || !isEdit}
+                        multiple
+                        options={user?.entity}
+                        getOptionLabel={(option: any) => (option ? option?.entityName : '')}
+                        value={user?.entity.filter((data) => values['entity']?.some((d) => d === data._id)).length
+                          ? user?.entity.filter((data) => values['entity']?.some((d) => d === data._id))
+                          : []
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('entity', val && val?.map((d) => d._id));
+                          setFieldValue('owner', '');
+                          setFieldValue('collaborator', []);
+                          val && val.length !== 0 ? setOwnerCollaboratorData(
+                            ownerCollaboratorDataConst.filter((data) =>
+                              val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                            )
+                          ) : setOwnerCollaboratorData(ownerCollaboratorDataConst);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="none"
+                            size="small"
+                            name="entity"
+                            label="Entity"
+                            variant="outlined"
+                            error={touched['entity'] && Boolean(errors['entity'])}
+                            helperText={touched['entity'] && errors['entity']}
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <Autocomplete
+                        disabled={!allowedToEdit || !isEdit}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => data._id === values['owner']).length
+                            ? ownerCollaboratorData.filter((data) => data._id === values['owner'])[0]
+                            : ''
+                        }
+                        options={ownerCollaboratorData.filter((user) => !values['collaborator']?.some((d) => user._id === d))}
+                        onChange={(e, val) => {
+                          setFieldValue('owner', val && val._id ? val._id : '');
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                              ownerCollaboratorDataConst.filter((data) =>
+                                values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                               )
-                            }
-                            onChange={(e, val) => {
-                              const selectedIds = val?.map((d) => d.optionValue) || [];
-                              setFieldValue('services', selectedIds);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Services"
-                                variant="outlined"
+                            )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            required={true}
+                            margin="none"
+                            size="small"
+                            name="owner"
+                            label="Owner"
+                            variant="outlined"
+                            error={touched['owner'] && Boolean(errors['owner'])}
+                            helperText={touched['owner'] && errors['owner']}
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <Autocomplete
+                        disabled={!allowedToEdit || !isEdit}
+                        multiple
+                        options={ownerCollaboratorData.filter((d) => d._id !== values['owner'])}
+                        getOptionLabel={(option: any) => (option ? option?.concatedName : '')}
+                        value={
+                          ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id)).length
+                            ? ownerCollaboratorData.filter((data) => values['collaborator']?.some((d) => d === data._id))
+                            : []
+                        }
+                        onChange={(e, val) => {
+                          setFieldValue('collaborator', val && val?.map((d) => d._id));
+                        }}
+                        onOpen={() =>
+                          values['entity'] && values['entity'].length !== 0
+                            ? setOwnerCollaboratorData(
+                              ownerCollaboratorDataConst.filter((data) =>
+                                values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                              )
+                            )
+                            : setOwnerCollaboratorData(ownerCollaboratorDataConst)
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="none"
+                            size="small"
+                            name="collaborator"
+                            label="Collaborator"
+                            variant="outlined"
+                            error={touched['collaborator'] && Boolean(errors['collaborator'])}
+                            helperText={touched['collaborator'] && errors['collaborator']}
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      <TextField
+                        disabled={!allowedToEdit || !isEdit || (id !== '0' && !isClone)}
+                        variant="outlined"
+                        type="number"
+                        label="No of Pages"
+                        required
+                        name="noOfPages"
+                        fullWidth
+                        margin="none"
+                        size="small"
+                        value={noOfPagesInputRef.current ? noOfPagesInputRef.current.value : noOfPages}
+                        inputRef={noOfPagesInputRef}
+                        onChange={(e) => {
+                          setShowProps(true);
+                          setFieldValue('noOfPages', parseInt(e.target.value || '0', 10));
+                        }}
+                        InputProps={{
+                          endAdornment: showProps && (
+                            <>
+                              <IconButton
                                 size="small"
-                                fullWidth
-                                margin="none"
-                                name="services"
-                              />
-                            )}
-                          />}
-                      </Grid>
+                                color="success"
+                                onClick={() => {
+                                  const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
+                                  if (newPageCount !== noOfPages) {
+                                    setShowConfirmNoOfpages(true);
+                                  } else {
+                                    setShowProps(false);
+                                  }
+                                }}
+                              >
+                                <CheckIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => {
+                                  if (noOfPagesInputRef.current) {
+                                    noOfPagesInputRef.current.value = String(noOfPages);
+                                  }
+                                  setFieldValue('noOfPages', noOfPages);
+                                  setShowProps(false);
+                                }}
+                              >
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </>
+                          )
+                        }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 4, lg: 4 }}>
+                      {values.type === 'Work Order' && serviceOptions.length > 0 &&
+                        <Autocomplete
+                          limitTags={2}
+                          disabled={!allowedToEdit || !isEdit}
+                          multiple
+                          options={serviceOptions}
+                          getOptionLabel={(option: any) => option?.optionLabel || ''}
+                          isOptionEqualToValue={(option, value) => option.optionValue === value.optionValue}
+                          value={
+                            serviceOptions.filter((opt) =>
+                              values['services']?.some((s) => s === opt.optionValue)
+                            )
+                          }
+                          onChange={(e, val) => {
+                            const selectedIds = val?.map((d) => d.optionValue) || [];
+                            setFieldValue('services', selectedIds);
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Services"
+                              variant="outlined"
+                              size="small"
+                              fullWidth
+                              margin="none"
+                              name="services"
+                            />
+                          )}
+                        />}
                     </Grid>
                   </Grid>
                 </div>
-                {template &&
+                {values?.template &&
                   <div className='mt-4'>
                     <PdfEditor
-                      template={template}
-                      onTemplateChange={handleTemplateChange}
+                      template={values?.template as Template}
+                      onTemplateChange={(values: Template) => { setFieldValue('template', values); }}
                       disabled={!isEdit || !allowedToEdit}
                       noOfPages={noOfPages}
                       variables={variables}
@@ -671,17 +642,18 @@ export default function CreateCustomPdfTemplate() {
                   onOk={() => {
                     const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
                     const newTemplate = generateInitialTemplate(newPageCount);
-                    setTemplate(newTemplate);
+                    values.template = newTemplate;
                     setNoOfPages(newPageCount);
                     setShowConfirmNoOfpages(false);
                     setShowProps(false);
                   }}
                 />
               )}
-            </div>
-          </Form>
-        )}
-      </Formik>
+            </div >
+          </Form >
+        )
+        }
+      </Formik >
     </>
   );
 }
