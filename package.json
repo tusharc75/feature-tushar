@@ -331,6 +331,7 @@
     "@types/react": "17.0.40",
     "@types/web": "0.0.61",
     "@types/serviceworker": "0.0.41",
-    "@types/react-dom": "17.0.1"
+    "@types/react-dom": "17.0.1",
+    "rollup": "4.44.0"
   }
 }
