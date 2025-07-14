@@ -106,6 +106,14 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    if (values?.actualReceived && values?.qty < values?.actualReceived) {
+      errors['qty'] = `Quantity can't be less than Actual Received`;
+    }
+    return errors;
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -122,6 +130,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
           onSubmit={handleSubmit}
+          validate={validate}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
