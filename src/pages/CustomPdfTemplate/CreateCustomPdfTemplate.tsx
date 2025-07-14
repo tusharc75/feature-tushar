@@ -145,7 +145,6 @@ export default function CreateCustomPdfTemplate() {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-        console.log('Using stored template:', parsed);
         initialValuesData.template = parsed;
       } else {
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
