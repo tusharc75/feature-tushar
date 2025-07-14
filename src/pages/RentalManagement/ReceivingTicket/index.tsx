@@ -361,19 +361,25 @@ const ReceivingTicket = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.returnAlreadyCreated });
         } else if ([ASSET_STATUS.lost]?.includes(e?.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketNotForLost });
-        } else if (
-          ![
-            ASSET_STATUS.inUse,
-            ASSET_STATUS.standBy,
-            ASSET_STATUS.standByNotChargeable,
-            ASSET_STATUS.scrap,
-            ASSET_STATUS.needRepair,
-            ASSET_STATUS.needRecert,
-            ASSET_STATUS.notApplied
-          ]?.includes(e?.status) &&
+        } else if (![
+          ASSET_STATUS.inUse,
+          ASSET_STATUS.standBy,
+          ASSET_STATUS.standByNotChargeable,
+          ASSET_STATUS.scrap,
+          ASSET_STATUS.needRepair,
+          ASSET_STATUS.needRecert,
+          ASSET_STATUS.notApplied
+        ]?.includes(e?.status) &&
           !e?.isReplaced
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
+        } else if (user?.user?.brandPolicy?.storageLocation && records?.find((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId)) {
+          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length !== 1) {
+            errorMessages.push({
+              index: e.index,
+              message: rentalManagementMessage.loadSameStorageLocation?.replace(sidebarResource?.storageLocation, resources?.storageLocation?.titleSingular)
+            });
+          }
         }
       } else if (action === rentalManagementActions.receiveItems) {
         if (!e?.hasOwnProperty('loadingTicketId')) {
@@ -2011,8 +2017,12 @@ const ReceivingTicket = ({
           data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
         }
         if (records?.find((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId)) {
-          if (uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId')).length === 1) {
-            data['deliveryToStorageLocation'] = uniq(map(records?.filter((e) => e.type === MATERIAL_TYPE.product && e?.storageLocationId), 'storageLocationId'))[0];
+          if (records?.find((e) => e?.storageLocationId)) {
+            data['deliveryToStorageLocation'] = records?.find((e) => e?.storageLocationId)?.storageLocationId;
+            data['isDeliveryToDisable'] = true;
+            data['isDeliveryToStorageLocationDisable'] = true;
+            data['deliveryToDisableMessage'] = `Changes to the ${resources.warehouse.titleSingular} are not allowed because inventory or asset assignments.`;
+            data['deliveryToStorageLocationDisableMessage'] = `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
           }
         }
       }
