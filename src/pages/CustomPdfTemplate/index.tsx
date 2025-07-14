@@ -198,7 +198,7 @@ const CustomPdfTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.customPdfTemplate, title:"Custom Pdf Templates" }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.customPdfTemplate, title: resources?.customPdfTemplate?.titleSingular }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -231,7 +231,7 @@ const CustomPdfTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `Custom Pdf Template : ${deleteRecord?.name || ''}` : `selected Custom Pdf Templates`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.name || ''}` : `selected records`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -245,4 +245,3 @@ const CustomPdfTemplate = () => {
 };
 
 export default CustomPdfTemplate;
-                                                                                                                                                                                                            

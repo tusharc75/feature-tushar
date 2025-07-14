@@ -27,8 +27,9 @@ import CloseIcon from '@mui/icons-material/Close';
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
   owner: string().required('Owner is required'),
-  type: string().required('Type is required')
+  type: string().required('Type is required'),
 });
+
 const PDF_ME_TEMPLATE_STORAGE_KEY = 'pdfme_current_template';
 const DEFAULT_EMPTY_PDFME_TEMPLATE: Template = { schemas: [[]], basePdf: CUSTOM_A4_PDF };
 
@@ -40,7 +41,7 @@ export default function CreateCustomPdfTemplate() {
   const toastConfig = useContext(CustomToastContext);
   const [isClone] = useState(history.location.state?.isClone ? true : false);
   const {
-    state: { user, selectedEntity }
+    state: { user, selectedEntity, resources }
   }: any = useData();
   const [isEdit, setIsEdit] = useState(id === '0' ? true : false);
   const [allowedToEdit, setAllowedToEdit] = useState(id === '0' ? true : false);
@@ -71,6 +72,7 @@ export default function CreateCustomPdfTemplate() {
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
   const [serviceOptions, setServiceOptions] = useState([]);
+  const [variables, setVariables] = useState([]);
 
   const handleTemplateChange = (tpl: Template) => {
     setTemplate(tpl);
@@ -80,24 +82,46 @@ export default function CreateCustomPdfTemplate() {
     if (template) {
       localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
     }
+    else {
+      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    }
   }, [template]);
+
+  useEffect(() => {
+    if (formValues && formValues.type) {
+      let resource: string = formValues.type;
+      if (resource) {
+        axiosInstance()
+          .get(`/field?resource=${resource}`)
+          .then(({ data: { data } }) => {
+            const vars = data.map((field) => field.fieldData.fieldName);
+            setVariables(['entity', 'currentDate', ...vars]);
+          })
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      }
+    }
+    if (formValues && formValues.type === sidebarResource.workOrder) {
+      fetchServiceOptions();
+    }
+  }, [formValues?.type]);
 
   useEffect(() => {
     fetchData();
     fetchUser();
-    fetchServiceOptions();
   }, [id]);
 
-   const fetchServiceOptions = async () => {
-        await axiosInstance()
-          .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
-          .then(({ data: { data } }) => {
-            setServiceOptions(data[sidebarResource?.serviceMaster] || []);
-          })
-          .catch((e) => {
-            toastConfig.setToastConfig(e);
-          });
-    };
+  const fetchServiceOptions = async () => {
+    await axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
+      .then(({ data: { data } }) => {
+        setServiceOptions(data[sidebarResource?.serviceMaster] || []);
+      })
+      .catch((e) => {
+        toastConfig.setToastConfig(e);
+      });
+  };
 
   const generateInitialTemplate = (numPages: number): Template => {
     if (numPages <= 0) {
@@ -126,7 +150,7 @@ export default function CreateCustomPdfTemplate() {
       owner: user.user._id,
       collaborator: [],
       services: [],
-      noOfPages: 1
+      noOfPages: 1,
     };
     if (id && id !== '0') {
       try {
@@ -141,17 +165,15 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
         initialValuesData.services = data?.services ? data?.services : [];
-        if (!template) {
-          if (data?.template) {
-            setTemplate(data.template);
-            setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
-            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
-          } else {
-            const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-            setTemplate(newTemplate);
-            setNoOfPages(initialValuesData.noOfPages);
-            localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
-          }
+        if (data?.template) {
+          setTemplate(data.template);
+          setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
+          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
+        } else {
+          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+          setTemplate(newTemplate);
+          setNoOfPages(initialValuesData.noOfPages);
+          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
         }
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
@@ -214,7 +236,7 @@ export default function CreateCustomPdfTemplate() {
       const pdf = await generate({
         template: template,
         inputs: finalInputs,
-        plugins: getPlugins()
+        plugins: getPlugins(variables)
       });
       const pdfBytes = new Uint8Array(pdf.buffer);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -300,7 +322,7 @@ export default function CreateCustomPdfTemplate() {
                   <CustomBreadCrumbs
                     routes={[
                       {
-                        title: "Custom Pdf Templates",
+                        title: resources?.customPdfTemplate?.titlePlural,
                         path: routes.customPdfTemplate.path
                       },
                       {
@@ -619,6 +641,7 @@ export default function CreateCustomPdfTemplate() {
                       onTemplateChange={handleTemplateChange}
                       disabled={!isEdit || !allowedToEdit}
                       noOfPages={noOfPages}
+                      variables={variables}
                     />
                   </div>}
               </div>
