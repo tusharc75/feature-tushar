@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 
-const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCellPosition, onBlur }) => {
+const DataList = ({ columnDef, cellValue, setCellValue, cell, onBlur }) => {
   const [defaultOptions, setDefaultOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -84,7 +84,6 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       }}
       onKeyDown={(e) => {
         const target = e.target as HTMLInputElement;
-        if (!currentEditingCellPosition) return;
         if (e.key === 'Enter') {
           e.preventDefault();
           target.blur();
@@ -152,7 +151,6 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, currentEditingCell
       }}
       onKeyDown={(e) => {
         const target = e.target as HTMLInputElement;
-        if (!currentEditingCellPosition) return;
         if (e.key === 'Enter') {
           e.preventDefault();
           target.blur();

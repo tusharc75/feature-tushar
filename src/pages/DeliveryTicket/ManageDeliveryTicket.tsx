@@ -182,11 +182,13 @@ const ManageDeliveryTicket = ({
     pickupFrom,
     deliveryTo,
     isPickupFromDisable,
-    pickupDisableMessage,
     isDeliveryToDisable,
     isPickupFromStorageLocationDisable,
-    pickupFromStorageLocationDisableMessage,
     isDeliveryToStorageLocationDisable,
+    pickupDisableMessage,
+    deliveryToDisableMessage,
+    pickupFromStorageLocationDisableMessage,
+    deliveryToStorageLocationDisableMessage,
     deliveryToLabel
   ) => {
 
@@ -239,6 +241,10 @@ const ManageDeliveryTicket = ({
       }
       if (isDeliveryToDisable && element.fieldName === 'deliveryTo') {
         element.isUneditable = true;
+        if (deliveryToDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = deliveryToDisableMessage;
+        }
       }
       if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === 'pickupFromAddress') {
         element.isUneditable = true;
@@ -271,6 +277,10 @@ const ManageDeliveryTicket = ({
       }
       if (isDeliveryToStorageLocationDisable && element.fieldName === 'deliveryToStorageLocation') {
         element.isUneditable = true;
+        if (deliveryToStorageLocationDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = deliveryToStorageLocationDisableMessage;
+        }
       }
     });
     return fields;
@@ -318,11 +328,13 @@ const ManageDeliveryTicket = ({
           data?.pickupFrom,
           data?.deliveryTo,
           true,
+          true,
+          true,
+          true,
           '',
-          true,
-          true,
           '',
-          true,
+          '',
+          '',
           null
         );
         setInitialData({
@@ -332,11 +344,14 @@ const ManageDeliveryTicket = ({
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         var isPickupFromDisable = false;
-        var pickupDisableMessage = '';
         var isDeliveryToDisable = false;
         var isPickupFromStorageLocationDisable = false;
-        var pickupFromStorageLocationDisableMessage = '';
         var isDeliveryToStorageLocationDisable = false;
+
+        var pickupDisableMessage = '';
+        var deliveryToDisableMessage = '';
+        var pickupFromStorageLocationDisableMessage = '';
+        var deliveryToStorageLocationDisableMessage = '';
 
         if ((assets || products) && referenceType && referenceData) {
           if (user?.user?.brandPolicy?.storageLocation) {
@@ -419,12 +434,15 @@ const ManageDeliveryTicket = ({
             tempInitialData['status'] = referenceData.status;
           }
           isPickupFromDisable = referenceData?.isPickupFromDisable ? true : false;
-          pickupDisableMessage = referenceData?.pickupDisableMessage || '';
           isDeliveryToDisable = referenceData?.isDeliveryToDisable ? true : false;
-
           isPickupFromStorageLocationDisable = referenceData?.isPickupFromStorageLocationDisable ? true : false;
-          pickupFromStorageLocationDisableMessage = referenceData?.pickupFromStorageLocationDisableMessage || '';
           isDeliveryToStorageLocationDisable = referenceData?.isDeliveryToStorageLocationDisable ? true : false;
+
+
+          pickupDisableMessage = referenceData?.pickupDisableMessage || '';
+          deliveryToDisableMessage = referenceData?.deliveryToDisableMessage || '';
+          pickupFromStorageLocationDisableMessage = referenceData?.pickupFromStorageLocationDisableMessage || '';
+          deliveryToStorageLocationDisableMessage = referenceData?.deliveryToStorageLocationDisableMessage || '';
 
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
             tempInitialData['rentalJob'] = referenceData?.referenceId;
@@ -504,11 +522,13 @@ const ManageDeliveryTicket = ({
           tempInitialData['pickupFrom'],
           tempInitialData['deliveryTo'],
           isPickupFromDisable,
-          pickupDisableMessage,
           isDeliveryToDisable,
           isPickupFromStorageLocationDisable,
-          pickupFromStorageLocationDisableMessage,
           isDeliveryToStorageLocationDisable,
+          pickupDisableMessage,
+          deliveryToDisableMessage,
+          pickupFromStorageLocationDisableMessage,
+          deliveryToStorageLocationDisableMessage,
           referenceData?.deliveryToLabel
         );
         setInitialData({
