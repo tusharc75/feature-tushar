@@ -56,7 +56,7 @@ const CustomPdfTemplate = () => {
         disabled: true,
         Cell: ({ row }) => (
           <div>
-            <Link className="link" to={`${routes.customPdfTemplate.path}/${row?.original?._id}`} title={row?.original?.name}>
+            <Link className="link" to={`${routes.customPdfTemplateDetail.path}/${row?.original?._id}`} title={row?.original?.name}>
               {row?.original?.name}
             </Link>
           </div>
@@ -169,9 +169,9 @@ const CustomPdfTemplate = () => {
 
   const CreateNew = (id, isClone) => {
     if (isClone) {
-      history.push(routes.customPdfTemplate.path + '/' + id, { isClone: true });
+      history.push(routes.customPdfTemplateDetail.path + '/' + id, { isClone: true });
     } else {
-      history.push(routes.customPdfTemplate.path + '/0', { isClone: false });
+      history.push(routes.customPdfTemplateDetail.path + '/0', { isClone: false });
     }
   };
 
