@@ -18,6 +18,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
@@ -30,6 +31,8 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
     state: { user, resources }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
+  const [isChildItemsAvailable, setIsChildItemsAvailable] = useState(false)
 
   useEffect(() => {
     fetchFields();
@@ -53,6 +56,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
           if (isClone) {
             const { packageName, ...rest } = data;
             setPackageName(packageName);
+            setIsChildItemsAvailable(data?.packages?.length || data?.products?.length || data?.services?.length)
             setInitialData({
               fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -129,6 +133,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             history.push(`${routes.packagesDetail.path}/${data._id}`);
           }
           setSubmitting(false);
+          setShowConfirmCloneDetailsDialog(false)
           onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
@@ -170,8 +175,19 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       open={open}
     >
       {initialData?.fields?.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue, handleSubmit }) => (
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          onSubmit={(values) => {
+            if (packageId && isClone && isChildItemsAvailable && !showConfirmCloneDetailsDialog) {
+              setShowConfirmCloneDetailsDialog(true);
+            }
+            else {
+              handleSubmit(values)
+            }
+          }}>
+          {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 title={!packageId ? `Create ${resources?.packages?.titleSingular}` : `${isClone ? `Clone - ${packageName}` : 'Edit'}`}
@@ -216,7 +232,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
-                    handleSubmit();
+                    submitForm();
                   }}
                 >
                   Save
@@ -228,12 +244,26 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                   onSave={() => {
                     setShowConfirmDialog(false);
                     handleScroll(errors);
-                    handleSubmit();
+                    submitForm();
                   }}
                   onClose={() => {
                     setShowConfirmDialog(false);
                     onClose();
                   }}
+                />
+              )}
+              {showConfirmCloneDetailsDialog && (
+                <ConfirmationDialog
+                  open={true}
+                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
+                  onOk={() => {
+                    setFieldValue('packageId', packageId);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    submitForm();
+                  }}
+                  okBtnLoading={submitting}
                 />
               )}
             </Fragment>
