@@ -1,13 +1,12 @@
 import { Collapse, IconButton } from '@mui/material';
 import { flexRender } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { memo, useEffect } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
-import { DEFAULT_DATA_ROWS_VISIBLE } from 'src/components/CustomReactTable/SwipableListForMobile';
+import { throttle } from 'src/hooks/useThrottle';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import RenderCellWithHeader from './RenderCellWithHeader';
 import RenderSubCard from './RenderSubCard';
-import React, { memo, useEffect } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { throttle } from 'src/hooks/useThrottle';
 
 const VirtualSwipableList = ({
   dataRows,
@@ -33,6 +32,7 @@ const VirtualSwipableList = ({
   const { error } = state;
   const [expanded, setExpanded] = React.useState<string | false>(false);
   const parentRef = React.useRef<HTMLDivElement>(null);
+  const [currentlyEditingCells, setCurrentlyEditingCells] = React.useState(new Set<string>());
 
   const handleCollapse = (name: string) => {
     setExpanded((prev) => (prev !== name ? name : false));
@@ -154,11 +154,26 @@ const VirtualSwipableList = ({
                               setCellValue={setCellValue}
                               state={state}
                               dispatch={dispatch}
+                              currentlyEditingCells={currentlyEditingCells}
+                              setCurrentlyEditingCells={setCurrentlyEditingCells}
                             />
                           );
                         })}
                       </div>
-                      <RenderHiddenFields {...{ compareCollapse, row, collapsibleFields, submitInput, cellValue, setCellValue, state, dispatch }} />
+                      <RenderHiddenFields
+                        {...{
+                          compareCollapse,
+                          row,
+                          collapsibleFields,
+                          submitInput,
+                          cellValue,
+                          setCellValue,
+                          state,
+                          dispatch,
+                          currentlyEditingCells,
+                          setCurrentlyEditingCells
+                        }}
+                      />
                     </div>
                     {expander && (
                       <Collapse in={row.getIsExpanded()} unmountOnExit>
@@ -257,28 +272,43 @@ const RenderCollapseIcon = memo(
     prev.compareCollapse === next.compareCollapse
 );
 
-const RenderHiddenFields = memo(({ compareCollapse, row, collapsibleFields, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
-  return (
-    <Collapse in={compareCollapse(row.id)} unmountOnExit>
-      <div className="grid w-full gap-2">
-        {collapsibleFields.map((field) => {
-          return (
-            <RenderCellWithHeader
-              key={field.id}
-              field={field}
-              row={row}
-              submitInput={submitInput}
-              cellValue={cellValue}
-              setCellValue={setCellValue}
-              state={state}
-              dispatch={dispatch}
-            />
-          );
-        })}
-      </div>
-    </Collapse>
-  );
-});
+const RenderHiddenFields = memo(
+  ({
+    compareCollapse,
+    row,
+    collapsibleFields,
+    submitInput,
+    cellValue,
+    setCellValue,
+    state,
+    dispatch,
+    currentlyEditingCells,
+    setCurrentlyEditingCells
+  }: any) => {
+    return (
+      <Collapse in={compareCollapse(row.id)} unmountOnExit>
+        <div className="grid w-full gap-2">
+          {collapsibleFields.map((field) => {
+            return (
+              <RenderCellWithHeader
+                key={field.id}
+                field={field}
+                row={row}
+                submitInput={submitInput}
+                cellValue={cellValue}
+                setCellValue={setCellValue}
+                state={state}
+                dispatch={dispatch}
+                currentlyEditingCells={currentlyEditingCells}
+                setCurrentlyEditingCells={setCurrentlyEditingCells}
+              />
+            );
+          })}
+        </div>
+      </Collapse>
+    );
+  }
+);
 
 const RenderExpander = memo(({ expander, expanderCol, expanderCell }: any) => {
   if (expander && expanderCol) {
