@@ -62,7 +62,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.assemblyOrderMaterial, assemblyOrderData?.currency || 'USD', allowedToEdit);
     var data = response;
     setAllFields(JSON.parse(JSON.stringify(data)));
-    let newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
+    let newColumns = generateColumns(renderedFrom, data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName)), null, false, assemblyOrderData?.currency || 'USD');
 
     let coloum: any = [
       {
@@ -153,7 +153,9 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
+          return row.original['description'] ? <div>
+            <h5 className="text-truncate" title={row.original.description}>{row.original.description}</h5>
+          </div> : <NoDataCell />;
         }
       }
     ];
@@ -219,8 +221,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.packageDetail?.packageName || '';
-      parent.description = parent?.packageDetail?.packageDescription || '';
+      parent.detail = parent?.detail || parent.packageDetail?.packageName || '';
+      parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.canDelete = parent?.workOrder ? false : true;
@@ -247,18 +249,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : '';
-      _subRow.description =
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageDescription
-            : '';
+      _subRow.detail = _subRow?.detail || _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName : '';
+      _subRow.description = _subRow?.description || _subRow.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productDescription : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageDescription : '';
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
