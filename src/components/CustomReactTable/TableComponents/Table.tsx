@@ -117,6 +117,8 @@ const TableComponent = forwardRef(function (
   const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
   const isFooterVisible = isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero;
 
+  console.log(columns);
+
   return (
     <>
       {exportTableView ? (

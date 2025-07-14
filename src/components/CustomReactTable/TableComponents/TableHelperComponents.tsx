@@ -14,6 +14,7 @@ import { getCellValue, getStickyPosition } from '../utils';
 import DataList from './DataList';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
 import axiosInstance from 'src/axios/axiosInstance';
+import { RenderInputField, RenderTextInput, validInputs } from 'src/components/CustomReactTable/TableComponents/Inputs';
 
 export type TColType = {
   Header: string;
@@ -507,40 +508,37 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
     }
   }, [columnDef]);
 
-  const handleSetValue = () => {
-    handleStopEditing();
+  const handleSubmit = () => {
     if (!cellValue) return;
     const inputField = {
       [cell.column.id]: cellValue
     };
     const updatedData = { ...row.original, [cell.column.id]: cellValue };
+    submitInput({ inputField, updatedData });
 
-    if (getCellValue(cell) !== cellValue) {
-      submitInput({ inputField, updatedData });
-    }
+    // if (
+    //   (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
+    //   (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
+    // ) {
+    //   submitInput({ inputField, updatedData });
+    // } else if (getCellValue(cell) !== cellValue) {
+    //   submitInput({ inputField, updatedData });
+    // }
   };
 
   return (
     <div className="w-full">
-      {columnDef?.type === 'singleLine' ? (
-        <input
-          autoFocus
-          id={`${cell.column.id}-input-${row.index || 0}`}
-          type="text"
-          onBlur={() => handleSetValue()}
-          value={cellValue}
-          onKeyDown={(e) => {
-            const target = e.target as HTMLInputElement;
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              target.blur();
-            }
-          }}
-          className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
-          onChange={(e) => {
-            setCellValue(e.target.value || '');
-          }}
-        />
+      <RenderInputField
+        cell={cell}
+        cellValue={cellValue}
+        columnDef={columnDef}
+        handleStopEditing={handleStopEditing}
+        handleSubmit={handleSubmit}
+        row={row}
+        setCellValue={setCellValue}
+      />
+      {/* {columnDef?.type === 'singleLine' ? (
+        <></>
       ) : columnDef?.dataList && columnDef?.dataListId ? (
         <DataList
           columnDef={columnDef}
@@ -548,13 +546,7 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
           setCellValue={setCellValue}
           cell={cell}
           onBlur={() => {
-            if (
-              (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
-              (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
-            ) {
-              submitInput();
-            }
-            handleStopEditing();
+            handleSubmit();
           }}
         />
       ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
@@ -586,7 +578,7 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
               id={`${cell.column.id}-input-${row.index || 0}`}
               autoFocus
               onBlur={() => {
-                handleSetValue();
+                handleSubmit();
               }}
             />
           )}
@@ -662,7 +654,7 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
           type="number"
           id={`${cell.column.id}-input-${row.index || 0}`}
           min="0"
-          onBlur={() => handleSetValue()}
+          onBlur={() => handleSubmit()}
           value={cellValue}
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
@@ -678,7 +670,7 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
             setCellValue(value);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 };
@@ -708,6 +700,7 @@ export const CellRenderer = ({
   const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
   const [isEditing, setIsEditing] = useState(false);
 
+  const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
   const props = useMemo(
     () => ({
       id: cell.id,
@@ -725,7 +718,9 @@ export const CellRenderer = ({
         ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
       },
       onClick: () => {
-        if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable || cell?.column.id === 'selection') return;
+        const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
+        if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
+        console.log(cell.column.id);
         setIsEditing(true);
 
         setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
@@ -762,7 +757,7 @@ export const CellRenderer = ({
           </div>
         </td>
       );
-    case !['selection'].includes(cell?.column.id) && isEditing:
+    case !['selection'].includes(cell?.column.id) && isEditing && validInputs.has(columnDef.type as any):
       return (
         <td {...props}>
           <RenderInputs cell={cell} columnDef={columnDef} row={row} submitInput={submitInput} handleStopEditing={handleStopEditing} />
@@ -781,7 +776,7 @@ export const CellRenderer = ({
           </div>
         </td>
       );
-    case columnDef?.editable:
+    case isEditable:
       return (
         <td {...props}>
           <div className="w-full">
