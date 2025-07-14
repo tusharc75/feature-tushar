@@ -1,104 +1,78 @@
 import { Edit } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
-import { TColType } from '../TableComponents/TableHelperComponents';
-import { TInitialState } from '../hooks/useTableReducer';
-import { getCellValue, handleCellClick, handleKeyDown } from '../utils';
-import { memo } from 'react';
+import { memo, useMemo, useState } from 'react';
+import { RenderInputs, TColType } from '../TableComponents/TableHelperComponents';
 
-const CellShell = memo(({ children, field, currentEditingCellPosition, submitInput, cell, dispatch, row, setCellValue }: any) => {
-  return (
-    <h6 className=" grid max-w-full text-[12px]">
-      <span className="text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{field.header}: </span>
-      <span
-        onKeyDown={(e) => {
-          handleKeyDown({ e, currentEditingCellPosition, submitInput });
-        }}
-        onClick={() => {
-          handleCellClick({ cell, dispatch, row, setCellValue });
-        }}
-        className={`text-[12px_!important] [&>*]:[font-size:12px_!important] [&>div]:[flex-wrap:wrap_!important] [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`}
-      >
-        {children}
-      </span>
-    </h6>
-  );
-});
+const RenderCellWithHeader = memo(
+  ({ field, row, submitInput, cellValue, setCellValue, state, dispatch, currentlyEditingCells, setCurrentlyEditingCells }: any) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const cell = row.getVisibleCells().find((cell: any) => cell?.column?.id === field?.id);
 
-const RenderCellWithHeader = memo(({ field, row, submitInput, cellValue, setCellValue, state, dispatch }: any) => {
-  const { currentEditingCellPosition }: TInitialState = state;
-  const cell = row.getVisibleCells().find((cell: any) => cell?.column?.id === field?.id);
-  if (!cell) return null;
-  const columnDef: TColType = cell.column.columnDef as TColType;
+    const columnDef: TColType = cell.column.columnDef as TColType;
 
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
+    const handleStopEditing = () => {
+      currentlyEditingCells.delete(cell.column.id);
+      setCurrentlyEditingCells(new Set(currentlyEditingCells));
+      setIsEditing(false);
+    };
 
-  switch (true) {
-    case !['selection'].includes(cell?.column.id) &&
-      currentEditingCellPosition?.rowId === row.original._id &&
-      currentEditingCellPosition?.columnName === cell?.column.id:
-      return (
-        <CellShell
-          field={field}
-          currentEditingCellPosition={currentEditingCellPosition}
-          submitInput={submitInput}
-          cell={cell}
-          dispatch={dispatch}
-          row={row}
-          setCellValue={setCellValue}
-        >
-          <div className="w-full">
-            <input
-              title={`Edit-${cell.id}`}
-              autoFocus
-              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
-              value={cellValue}
-              className="shadow-0  w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
-              onChange={(e) => setCellValue(e.target.value)}
-            />
-          </div>
-        </CellShell>
-      );
-    case columnDef?.editable:
-      return (
-        <CellShell
-          field={field}
-          currentEditingCellPosition={currentEditingCellPosition}
-          submitInput={submitInput}
-          cell={cell}
-          dispatch={dispatch}
-          row={row}
-          setCellValue={setCellValue}
-        >
-          <div className="w-fit">
-            <div className=" ml-auto max-w-[max-content] cursor-pointer justify-end gap-[20px] [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important]">
-              <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
-              <span>
-                <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-              </span>
-            </div>
-          </div>
-        </CellShell>
-      );
-    default:
-      return (
-        <CellShell
-          field={field}
-          currentEditingCellPosition={currentEditingCellPosition}
-          submitInput={submitInput}
-          cell={cell}
-          dispatch={dispatch}
-          row={row}
-          setCellValue={setCellValue}
-        >
-          {flexRender(cell.column.columnDef.cell, cell?.getContext())}
-        </CellShell>
-      );
+    console.log(cell);
+
+    const props = useMemo(
+      () => ({
+        id: cell.id,
+        key: cell.id,
+        className: `text-[12px_!important] [&>*]:[font-size:12px_!important] [&>div]:[flex-wrap:wrap_!important] [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+        onClick: () => {
+          if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable || cell?.column.id === 'selection') return;
+          setIsEditing(true);
+
+          setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
+        }
+      }),
+      [cell, row.original, setCurrentlyEditingCells]
+    );
+
+    if (!cell) return null;
+
+    switch (true) {
+      case !['selection'].includes(cell?.column.id) && isEditing:
+        return (
+          <h6 className=" grid max-w-full text-[12px]">
+            <span className="text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{field.header}: </span>
+            <span {...props}>
+              {' '}
+              <div className="w-full">
+                <RenderInputs cell={cell} columnDef={columnDef} handleStopEditing={handleStopEditing} row={row} submitInput={submitInput} />
+              </div>
+            </span>
+          </h6>
+        );
+      case columnDef?.editable:
+        return (
+          <h6 className=" grid max-w-full text-[12px]">
+            <span className="text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{field.header}: </span>
+            <span {...props}>
+              <div className="w-fit">
+                <div className=" ml-auto max-w-[max-content] cursor-pointer justify-end gap-[20px] [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important]">
+                  <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
+                  <span>
+                    <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                  </span>
+                </div>
+              </div>
+            </span>
+          </h6>
+        );
+      default:
+        return (
+          <h6 className=" grid max-w-full text-[12px]">
+            <span className="text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]">{field.header}: </span>
+            <span {...props}>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</span>
+          </h6>
+        );
+    }
   }
-});
+);
 
 export default RenderCellWithHeader;

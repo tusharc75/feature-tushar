@@ -138,6 +138,7 @@ const Consumables = ({
   }, [selectedServiceOption, tabValue, refreshChild]);
 
   const fetchColumns = async () => {
+    setColumns(null)
     let fields = await fetch_child_resource_fields_perm(
       CHILD_RESOURCE.fieldTicketMateial,
       fieldTicketData?.currency,
@@ -900,6 +901,7 @@ const Consumables = ({
           consumeRequest={consumeRequest}
           serialNumberRequired={false}
           canChangeWarehouse={true}
+          minDate={fieldTicketData?.createDate}
         />
       )}
       {openLogDialog.open && (

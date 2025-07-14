@@ -76,7 +76,6 @@ const Quotation = ({
   const [isDeleting, setDeleting] = useState(false);
   const [material, setMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [allFields, setAllFields] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
@@ -90,6 +89,10 @@ const Quotation = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const [allFields, setAllFields] = useState([]);
+  const [allCostFields, setAllCostFields] = useState([]);
+
 
   useEffect(() => {
     setWalkmeData([]);
@@ -186,6 +189,9 @@ const Quotation = ({
 
     var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationInfo?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
+
+    var quotationCostFields = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, quotationInfo?.currency, true);
+    setAllCostFields(JSON.parse(JSON.stringify(quotationCostFields)));
 
     if (
       allowedToEdit === false ||
@@ -339,7 +345,7 @@ const Quotation = ({
                 </HtmlTooltip>
                 {[QUOTATION_STATUS.buildingQuote, QUOTATION_STATUS.customerAcceptanceNotRequired].includes(quotationInfo?.versions[tempCurrentVersion]?.status) && !invoiceStep &&
                   <>
-                    {row?.original?.parentId === null && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+                    {row?.original?.type === MATERIAL_TYPE.serializedAsset && (
                       <HtmlTooltip title="Add Manual Entry">
                         <IconButton
                           size="small"
@@ -449,8 +455,8 @@ const Quotation = ({
               ? _subRow?.packageDetail?.packageDescription || ''
               : _subRow.type === MATERIAL_TYPE.manualEntry
                 ? _subRow?.description : '';
-      _subRow.productName = _subRow?.serializedAssetDetail?.product?.optionLabel || '';
-      _subRow.productId = _subRow?.serializedAssetDetail?.product?.optionValue || '';
+      _subRow.productName = _subRow?.type === MATERIAL_TYPE.service ? '' : _subRow?.serializedAssetDetail?.product?.optionLabel || '';
+      _subRow.productId = _subRow?.type === MATERIAL_TYPE.service ? parent?.productId : _subRow?.serializedAssetDetail?.product?.optionValue || '';
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -522,57 +528,59 @@ const Quotation = ({
   const handleSaveCostData = async (rows: any, saveAndNext = false) => {
     const versionId = quotationData?.versions[currentVersion]?._id;
     setUpdating(true);
-    axiosInstance()
-      .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
-      .then(({ data }) => {
-        setUpdating(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        if (saveAndNext) {
-          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
-          if (!row?.parentId) {
-            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-            setRecordToUpdate(dataRows[rowIndex + 1]);
+    axiosInstance().put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows }).then(({ data }) => {
+      setUpdating(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      if (saveAndNext) {
+        const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+        if (!row?.parentId) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          setShowCostDialog({
+            open: true,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false,
+            parentId: null
+          });
+        } else {
+          const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+          const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+          setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+          if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setIsProductEdit({
+              open: false,
+              isBulkedit: false,
+              showSaveAndNext: false
+            });
             setShowCostDialog({
               open: true,
-              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false,
               parentId: null
             });
           } else {
-            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
-            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
-            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
-            if (allSubRowData[subRowIdx + 1]?.type === MATERIAL_TYPE.manualEntry) {
-              setIsProductEdit({
-                open: false,
-                isBulkedit: false,
-                showSaveAndNext: false
-              });
-              setShowCostDialog({
-                open: true,
-                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false,
-                parentId: null
-              });
-            } else {
-              setIsProductEdit({
-                open: true,
-                isBulkedit: false,
-                showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
-              });
-            }
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+            setShowCostDialog({
+              open: false,
+              showSaveAndNext: false,
+              parentId: null
+            });
           }
-        } else {
-          setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
         }
-        fetchData();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
+      } else {
+        setShowCostDialog({ open: false, showSaveAndNext: false, parentId: null });
+      }
+      fetchData();
+    }).catch((error) => {
+      setUpdating(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = (rows) => {
@@ -677,30 +685,7 @@ const Quotation = ({
 
   const onSaveInlineEdit = (inputField, updatedData) => {
     setIsInlineEdit(true);
-    const currency = quotationData?.currency.toLowerCase();
-    const requiredItems = [];
-    allFields.forEach(({ fieldName, required, type }) => {
-      fieldName = type === 'currencyAmount' ? `${fieldName}_${currency}` : fieldName;
-      if (required) {
-        if (isNaN(updatedData[fieldName]) && !updatedData[fieldName]) {
-          requiredItems.push(fieldName);
-        } else if (!isNaN(updatedData[fieldName]) && updatedData[fieldName] <= 0) {
-          requiredItems.push(fieldName);
-        }
-      }
-    });
-
-    if (requiredItems.length > 0) {
-      handleOpen(
-        {
-          ...updatedData,
-          detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
-        },
-        []
-      );
-    } else {
-      onConfirmSave(inputField, updatedData);
-    }
+    onConfirmSave(inputField, updatedData);
   };
 
   const onConfirmSave = async (inputField, updatedData) => {
@@ -715,8 +700,14 @@ const Quotation = ({
       });
     } else {
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, allFields, updatedData, quotationData?.currency);
-      handleSaveData(rows);
+      if (rowData?.type === MATERIAL_TYPE.manualEntry) {
+        rows = await calculateRowsField(material, inputField, allCostFields, updatedData, quotationData?.currency);
+        handleSaveCostData(rows);
+      }
+      else {
+        rows = await calculateRowsField(material, inputField, allFields, updatedData, quotationData?.currency);
+        handleSaveData(rows);
+      }
       setShowConfirmationDialog({ open: false, data: {} });
     }
   };
@@ -964,6 +955,7 @@ const Quotation = ({
           selectedProducts={selectedRecords}
           isInlineEdit={isInlineEdit}
           showSaveAndNext={isProductEdit.showSaveAndNext}
+          parentProduct={recordToUpdate?.type === MATERIAL_TYPE.service ? recordToUpdate?.productId || null : null}
         />
       )}
       {quotationData && showAllVersionStatus && (

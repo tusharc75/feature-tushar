@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Typography } from '@mui/material';
-import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
+import { dateFormatToSend, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -14,6 +14,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import ProcessLogs from 'src/pages/WorkOrder/Consumables/ProcessLogs';
 import CustomTableWithCard, { CardInterface, ColumnInterface, createBodyColumns } from 'src/components/CustomTableWithCard';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import dayjs from 'dayjs';
 
 const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,10 +37,14 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
     fetchData();
   }, [referenceId]);
 
-  const handleUpdateStatus = (status, ids, comment) => {
+  const handleUpdateStatus = (status, ids, comment, processedDate) => {
     setLoading(true);
-    axiosInstance()
-      .put(`/material-handling/status`, { status, ids, comment, referenceType, referenceId: referenceId })
+    axiosInstance().put(`/material-handling/status`, {
+      status,
+      ids, comment,
+      referenceType, referenceId: referenceId,
+      processedDate: dateFormatToSend(processedDate)
+    })
       .then(({ data }) => {
         setLoading(false);
         toastConfig.setToastConfig({
@@ -49,8 +54,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
         });
         setQtyDialog({ open: false, status: null, data: null });
         fetchDataMaster();
-      })
-      .catch((err) => {
+      }).catch((err) => {
         setLoading(false);
         toastConfig.setToastConfig(err);
       });
@@ -287,7 +291,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -301,7 +305,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
             <MenuItem
               disabled={
                 selectedRecords?.length > 0 &&
-                selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
+                  selectedRecords?.filter((e) => e.status === MATERIAL_REQUEST_STATUS.requested)?.length === selectedRecords?.length
                   ? false
                   : true
               }
@@ -352,7 +356,8 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
               handleUpdateStatus(
                 qtyDialog.status,
                 [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty), serialNumber: serialNumbers }],
-                data.comment || ''
+                data.comment || '',
+                data?.processedDate
               );
             } else if (selectedRecords?.length) {
               let rows = selectedRecords?.map((item) => {
@@ -368,9 +373,11 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
                     }) || []
                 };
               });
-              handleUpdateStatus(qtyDialog.status, rows, data.comment || '');
+              handleUpdateStatus(qtyDialog.status, rows, data.comment || '', data?.processedDate);
             }
           }}
+          minDate={qtyDialog.data ? qtyDialog?.data?.requestDate :
+            selectedRecords?.map(d => d?.requestDate)?.reduce((max, item) => { return dayjs(item).isAfter(dayjs(max)) ? item : max })}
         />
       )}
       {openProcessLogs.open && (

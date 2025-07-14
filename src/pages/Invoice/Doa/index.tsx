@@ -121,6 +121,9 @@ const Doa = ({ invoiceData, invoiceFields, setNextStep, setPrevStep, DOAData, fe
     } else if (DOAData?.status === DOA_STATUS.approved) {
       setPrevStep(false);
       setNextStep(true);
+    } else if (DOAData?.status === DOA_STATUS.rejected) {
+      setPrevStep(true);
+      setNextStep(false);
     } else {
       setPrevStep(false);
       setNextStep(false);

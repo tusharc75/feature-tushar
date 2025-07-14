@@ -1,6 +1,6 @@
 import { Collapse } from '@mui/material';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Fragment, memo, useEffect } from 'react';
+import { Fragment, memo, useEffect, useState } from 'react';
 import { CellRenderer } from '../TableHelperComponents';
 
 export const VirtualTableBody = memo(
@@ -11,7 +11,6 @@ export const VirtualTableBody = memo(
     state,
     setWholeRowsCellColor,
     table,
-    handleChangeCurrentEditingCellPosition,
     setCellValue,
     submitInput,
     cellValue,
@@ -75,7 +74,6 @@ export const VirtualTableBody = memo(
                   setWholeRowsCellColor={setWholeRowsCellColor}
                   row={row}
                   table={table}
-                  handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
                   setCellValue={setCellValue}
                   submitInput={submitInput}
                   cellValue={cellValue}
@@ -110,22 +108,8 @@ export const VirtualTableBody = memo(
 const MemoizedCellRenderer = memo(CellRenderer);
 
 export const MemoizedSingleRow = memo(
-  ({
-    virtualColumns,
-    state,
-    setWholeRowsCellColor,
-    row,
-    table,
-    handleChangeCurrentEditingCellPosition,
-    setCellValue,
-    submitInput,
-    cellValue,
-    resetField,
-    visibleCells,
-    vtableData,
-    virtualRow,
-    onRowClick
-  }: any) => {
+  ({ virtualColumns, state, setWholeRowsCellColor, row, table, submitInput, resetField, visibleCells, vtableData, virtualRow, onRowClick }: any) => {
+    const [currentlyEditingCells, setCurrentlyEditingCells] = useState(new Set<string>());
     return (
       <tr
         key={virtualRow.index}
@@ -151,12 +135,10 @@ export const MemoizedSingleRow = memo(
                   row={row}
                   index={virtualCell.index}
                   table={table}
-                  handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
-                  setCellValue={setCellValue}
                   submitInput={submitInput}
-                  cellValue={cellValue}
-                  resetField={resetField}
                   vtableData={vtableData}
+                  currentlyEditingCells={currentlyEditingCells}
+                  setCurrentlyEditingCells={setCurrentlyEditingCells}
                 />
               </Fragment>
             );

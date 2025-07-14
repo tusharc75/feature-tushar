@@ -79,6 +79,7 @@ export function useColumns() {
       const _fields = fields?.map((e) => e?.fieldData || e);
       _fields.forEach((field) => {
         let commonFieldData: any = {
+          ...field,
           id: field?.fieldName,
           ...(currency ? { currency: currency } : {}),
           accessorKey: field?.fieldName,
@@ -386,7 +387,11 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 <h5 className="text-truncate">
-                  {row.original[field?.fieldName] || row.original[field?.fieldName] === 0 ? row.original[field?.fieldName]?.toLocaleString() : <NoDataCell />}
+                  {row.original[field?.fieldName] || row.original[field?.fieldName] === 0 ? (
+                    row.original[field?.fieldName]?.toLocaleString()
+                  ) : (
+                    <NoDataCell />
+                  )}
                 </h5>
               </div>
             )
@@ -412,7 +417,12 @@ export function useColumns() {
           column.push({
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),
-            cell: ({ row }) => (row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? <p>{row.original[field.fieldName]?.toLocaleString()}</p> : <NoDataCell />),
+            cell: ({ row }) =>
+              row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? (
+                <p>{row.original[field.fieldName]?.toLocaleString()}</p>
+              ) : (
+                <NoDataCell />
+              ),
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows
@@ -521,7 +531,7 @@ export function useColumns() {
       return resources?.packages?.titleSingular || startCase(materialType);
     }
     return startCase(materialType);
-  }
+  };
 
   return { generateColumns, checkStaticField, getColumnHiddenStatus, getMaterialLabel };
 }
@@ -551,7 +561,7 @@ export const getSortedVisibleColumns = (columns, visibleColumns, columnOrder) =>
     }
   }
   if (isArray(columnOrder) && columnOrder?.length) {
-    newColumns = sortByAnotherArray(newColumns, columnOrder)
+    newColumns = sortByAnotherArray(newColumns, columnOrder);
   }
   return newColumns;
-}
+};

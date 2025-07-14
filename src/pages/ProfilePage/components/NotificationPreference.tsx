@@ -1,220 +1,46 @@
-import { useContext, useState } from 'react';
-import { Box, Checkbox, FormControlLabel, Typography, Theme } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { makeStyles } from '@mui/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { BsEnvelopeOpen, BsDisplay } from 'react-icons/bs';
-import styles from '../profilePage.module.scss';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../axios/axiosInstance';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-
-const useStyles = makeStyles((theme: Theme) => ({
-  tableCell: {
-    fontSize: 'medium'
-  },
-  notificationIcon: {
-    color: theme.palette.primary.light
-  },
-  preferenceOptions: {
-    color: 'primary',
-    marginBottom: '12px',
-    marginLeft: '5px'
-  },
-  label: {
-    marginLeft: '1px'
-  }
-}));
-
-const RenderCheckBox = ({ name, val, id, onChange, isDisable }) => (
-  // <FormControlLabel
-  //     control={<Checkbox size="small" checked={val}
-  //         onChange={(e) => onChange(e.target.checked, id, name)} name={name} />}
-  //     label={name}
-  // />
-  <Checkbox disabled={isDisable} checked={val} onChange={(e) => onChange(e.target.checked, id, name)} name={name} />
-);
+import { Box } from '@mui/material';
+import { BsDisplay, BsEnvelopeOpen } from 'react-icons/bs';
+import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
-  <Grid key={id} size={{sm:12, md:6, lg:4}} container>
-    <Grid size={{sm:3}} style={{ marginTop: '7px' }}>
-      {icon}
-    </Grid>
-    <Grid size={{sm:7}} container>
-      <Grid size={{xs: 12, sm: 7}} container direction="column">
-        <Grid size={{xs: 12, sm: 7}} container>
-          <Typography align="left" variant="h6">
-            <strong>{heading}</strong>
-          </Typography>
-          <Typography align="left" variant="body2" gutterBottom>
-            {subtitle}
-          </Typography>
-        </Grid>
-      </Grid>
-    </Grid>
-  </Grid>
+  <div className="flex items-center gap-4 ">
+    <span className="flex-shrink-0">{icon}</span>
+    <div>
+      <h6 className="text-lg font-bold ">{heading}</h6>
+      <p className="text-[13px] text-gray-500">{subtitle}</p>
+    </div>
+  </div>
 );
 
 export default function NotificationPreference({ notificationPreferenceData, user, onSuccess }) {
-  const toastConfig = useContext(CustomToastContext);
-  const [rows, setRows] = useState(notificationPreferenceData);
-  const [isUpdating, setUpdating] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isAllPreference, setAllPreference] = useState({
-    portal: notificationPreferenceData.every((d) => d.portal),
-    email: notificationPreferenceData.every((d) => d.email)
-  });
-  const classes = useStyles();
-  const handleChange = (isChecked, id, columnName) => {
-    let tempRows = rows.map((obj) => {
-      if (obj.id === id) return { ...obj, [columnName]: isChecked };
-      else return obj;
-    });
-    setAllPreference({
-      portal: tempRows.every((d) => d.portal),
-      email: tempRows.every((d) => d.email)
-    });
-    setRows(tempRows);
-  };
-
-  const handleSelectAll = (columnName) => {
-    setAllPreference((prevState) => {
-      return {
-        ...prevState,
-        [columnName]: !prevState[columnName]
-      };
-    });
-    let tempRows = rows.map((obj) => {
-      return { ...obj, [columnName]: !isAllPreference[columnName] };
-    });
-    setRows(tempRows);
-  };
-
   const options = [
     {
-      icon: <BsDisplay size={60} className={classes.notificationIcon} />,
+      icon: <BsDisplay size={55} />,
       heading: 'Portal',
       subtitle: 'A banner in corner of your website',
       id: 'Portal'
     },
     {
-      icon: <BsEnvelopeOpen size={50} className={classes.notificationIcon} />,
+      icon: <BsEnvelopeOpen size={50} />,
       heading: 'Email',
       subtitle: 'Conversation sent to your mail',
       id: 'Email3'
     }
   ];
 
-  const updateNotificationPref = () => {
-    setUpdating(true);
-    let dataObj = {
-      _id: user,
-      notificationPref: rows
-    };
-    axiosInstance()
-      .put(`/user/notification`, dataObj)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        onSuccess();
-        setUpdating(false);
-        setIsEdit(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setUpdating(false);
-      });
-  };
-
   return (
     <>
-      <div className={styles.preferenceHeader}>
-        <Typography variant="h5">Your Notification Preference</Typography>
-      </div>
+      <h5 className="mb-2 text-[18px] font-medium md:text-[20px]">Your Notification Preference</h5>
       <Box style={{ padding: '8px' }}>
-        <Box className={styles.preferenceOptionsBox}>
-          <Grid container spacing={3} className={classes.preferenceOptions}>
-            {options.map((curPreference) => (
-              <PreferenceOptions
-                key={curPreference.id}
-                id={curPreference.id}
-                icon={curPreference.icon}
-                heading={curPreference.heading}
-                subtitle={curPreference.subtitle}
-              />
-            ))}
-          </Grid>
-        </Box>
-        <div className="header-panel">
-          <div className="flex flex-wrap justify-end gap-[8px]">
-            {isEdit && (
-              <ThemeButton
-                onClick={() => {
-                  updateNotificationPref();
-                }}
-                disabled={isUpdating}
-                isLoading={isUpdating}
-                buttonType='theme'
-              >
-                Update
-              </ThemeButton>
-            )}
-            {!isEdit && (
-              <ThemeButton
-                onClick={() => {
-                  setIsEdit(!isEdit);
-                }}
-                buttonType='theme'
-              >
-                Edit
-              </ThemeButton>
-            )}
-          </div>
+        <div className="grid grid-cols-1 gap-4 rounded-md border px-2 py-2 sm:grid-cols-2 md:px-4">
+          {options.map((curPreference, i) => (
+            <div className="relative" key={curPreference.id}>
+              <PreferenceOptions id={curPreference.id} icon={curPreference.icon} heading={curPreference.heading} subtitle={curPreference.subtitle} />
+              {i < options.length - 1 && <div className="absolute bottom-0 right-0 top-0 border-r max-sm:opacity-0"></div>}
+            </div>
+          ))}
         </div>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableRow>
-              <TableCell component="th" scope="row" className={classes.tableCell}></TableCell>
-              <TableCell padding="checkbox">
-                <FormControlLabel
-                  className={classes.label}
-                  control={<Checkbox checked={isAllPreference.portal} disabled={!isEdit} onChange={() => handleSelectAll('portal')} title="Portal" />}
-                  label="Portal"
-                />
-              </TableCell>
-              <TableCell padding="checkbox">
-                <FormControlLabel
-                  className={classes.label}
-                  control={<Checkbox checked={isAllPreference.email} disabled={!isEdit} onChange={() => handleSelectAll('email')} title="Email" />}
-                  label="Email"
-                />
-              </TableCell>
-            </TableRow>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row?.id}>
-                  <TableCell component="th" scope="row" className={classes.tableCell}>
-                    {row.name}
-                  </TableCell>
-                  <TableCell padding="checkbox">
-                    <RenderCheckBox name="portal" val={row.portal} id={row.id} onChange={handleChange} isDisable={!isEdit} />
-                  </TableCell>
-                  <TableCell padding="checkbox">
-                    <RenderCheckBox name="email" val={row.email} onChange={handleChange} id={row.id} isDisable={!isEdit} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <ResourceWiseNotificationPreference />
       </Box>
     </>
   );

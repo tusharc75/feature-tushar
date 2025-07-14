@@ -28,6 +28,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
@@ -394,6 +395,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         setUpdating(false);
         fetchData();
         setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
+        fetchCreditMemoData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -412,6 +414,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       if (!showNext) {
         const { data } = await axiosInstance().put(`${routes.creditMemo.path}/material/${creditMemoData._id}`, { material: rows });
         fetchData();
+        fetchCreditMemoData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -467,7 +470,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           type: 'success',
           message: data.message
         });
-
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
           if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -485,6 +487,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           setAddCostDialog({ open: false, data: null, showSaveAndNext: false });
         }
         fetchData();
+        fetchCreditMemoData();
       })
       .catch((error) => {
         setUpdating(false);
@@ -502,7 +505,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         .then(() => {
           setDeleting(false);
           fetchData();
-          fetchCreditMemoData();
           setDeleteData(null);
         })
         .catch((error) => {
@@ -527,6 +529,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           toastConfig.setToastConfig(error);
         });
     }
+    fetchCreditMemoData();
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
@@ -551,6 +554,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           message: data?.message
         });
         fetchData();
+        fetchCreditMemoData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -585,14 +589,16 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem
-          color="primary"
-          onClick={() => {
-            handleAddInvoiceLineItems();
-          }}
-        >
-          {`Add Invoice Line Items`}
-        </MenuItem>
+        {creditMemoData?.invoice && (
+          <MenuItem
+            color="primary"
+            onClick={() => {
+              handleAddInvoiceLineItems();
+            }}
+          >
+            {`Add Invoice Line Items`}
+          </MenuItem>
+        )}
         {permissions?.product?.isRead && (
           <MenuItem
             color="primary"
@@ -683,7 +689,6 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
@@ -695,6 +700,12 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
+          />
+          <FinalPriceBox
+            allFields={creditMemoFields}
+            data={creditMemoData}
+            childFields={allFields}
+            material={dataRows}
           />
         </Box>
       ) : (

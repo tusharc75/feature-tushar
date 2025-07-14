@@ -46,6 +46,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
   const [resourceData, setResourceData] = useState(null);
   const [openConditionDetails, setOpenConditionDetails] = useState({ anchorEl: null, data: null });
   const [assetStatusField, setAssetStatusField] = useState(null)
+  const [productList, setProductList] = useState([]);
 
   useEffect(() => {
     fetchCondition();
@@ -116,12 +117,24 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.serializedAsset}&view=true`)
       .then(({ data: { data } }) => {
-        const statusField = data?.find(f => f?.fieldData?.fieldName === 'status')?.fieldData;
+        const statusField = data?.find(f => f?.fieldData?.fieldName === 'subStatus')?.fieldData;
         if (statusField) {
           setAssetStatusField(statusField)
         }
       });
   }, [])
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.product}`)
+      .then(({ data: { data } }) => {
+        setProductList(data.Product || []);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+    , []);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -635,6 +648,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             fetchCondition();
           }}
           assetStatusField={assetStatusField}
+          productList={productList}
         />
       )}
       {showDeleteConfirmBox && (

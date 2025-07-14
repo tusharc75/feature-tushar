@@ -185,8 +185,13 @@ const ManageDeliveryTicket = ({
     isDeliveryToDisable,
     isPickupFromStorageLocationDisable,
     isDeliveryToStorageLocationDisable,
+    pickupDisableMessage,
+    deliveryToDisableMessage,
+    pickupFromStorageLocationDisableMessage,
+    deliveryToStorageLocationDisableMessage,
     deliveryToLabel
   ) => {
+
     var warehouse = [];
     var customerAccount = [];
     var supplierAccount = [];
@@ -229,9 +234,17 @@ const ManageDeliveryTicket = ({
       }
       if (isPickupFromDisable && element.fieldName === 'pickupFrom') {
         element.isUneditable = true;
+        if (pickupDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = pickupDisableMessage;
+        }
       }
       if (isDeliveryToDisable && element.fieldName === 'deliveryTo') {
         element.isUneditable = true;
+        if (deliveryToDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = deliveryToDisableMessage;
+        }
       }
       if (pickupFromType === DELIVERY_FROM_TO_TYPE.plant && element.fieldName === 'pickupFromAddress') {
         element.isUneditable = true;
@@ -257,9 +270,17 @@ const ManageDeliveryTicket = ({
 
       if (isPickupFromStorageLocationDisable && element.fieldName === 'pickupFromStorageLocation') {
         element.isUneditable = true;
+        if (pickupFromStorageLocationDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = pickupFromStorageLocationDisableMessage;
+        }
       }
       if (isDeliveryToStorageLocationDisable && element.fieldName === 'deliveryToStorageLocation') {
         element.isUneditable = true;
+        if (deliveryToStorageLocationDisableMessage) {
+          element.isTooltip = true;
+          element.tooltipMessage = deliveryToStorageLocationDisableMessage;
+        }
       }
     });
     return fields;
@@ -310,6 +331,10 @@ const ManageDeliveryTicket = ({
           true,
           true,
           true,
+          '',
+          '',
+          '',
+          '',
           null
         );
         setInitialData({
@@ -322,6 +347,11 @@ const ManageDeliveryTicket = ({
         var isDeliveryToDisable = false;
         var isPickupFromStorageLocationDisable = false;
         var isDeliveryToStorageLocationDisable = false;
+
+        var pickupDisableMessage = '';
+        var deliveryToDisableMessage = '';
+        var pickupFromStorageLocationDisableMessage = '';
+        var deliveryToStorageLocationDisableMessage = '';
 
         if ((assets || products) && referenceType && referenceData) {
           if (user?.user?.brandPolicy?.storageLocation) {
@@ -405,9 +435,14 @@ const ManageDeliveryTicket = ({
           }
           isPickupFromDisable = referenceData?.isPickupFromDisable ? true : false;
           isDeliveryToDisable = referenceData?.isDeliveryToDisable ? true : false;
-
           isPickupFromStorageLocationDisable = referenceData?.isPickupFromStorageLocationDisable ? true : false;
           isDeliveryToStorageLocationDisable = referenceData?.isDeliveryToStorageLocationDisable ? true : false;
+
+
+          pickupDisableMessage = referenceData?.pickupDisableMessage || '';
+          deliveryToDisableMessage = referenceData?.deliveryToDisableMessage || '';
+          pickupFromStorageLocationDisableMessage = referenceData?.pickupFromStorageLocationDisableMessage || '';
+          deliveryToStorageLocationDisableMessage = referenceData?.deliveryToStorageLocationDisableMessage || '';
 
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
             tempInitialData['rentalJob'] = referenceData?.referenceId;
@@ -490,6 +525,10 @@ const ManageDeliveryTicket = ({
           isDeliveryToDisable,
           isPickupFromStorageLocationDisable,
           isDeliveryToStorageLocationDisable,
+          pickupDisableMessage,
+          deliveryToDisableMessage,
+          pickupFromStorageLocationDisableMessage,
+          deliveryToStorageLocationDisableMessage,
           referenceData?.deliveryToLabel
         );
         setInitialData({

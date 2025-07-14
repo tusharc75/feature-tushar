@@ -25,6 +25,7 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     let data = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseRequisitionDetail, purchaseRequisitionData?.currency, true);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (bulkEdit) {
       let unitArray: any = [];
       materialData?.forEach((element) => {
@@ -61,7 +62,6 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
           element.option = unitOptions;
         }
       });
-      setAllFields(JSON.parse(JSON.stringify(data)));
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(materialData, data)

@@ -23,6 +23,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import FinalPriceBox from 'src/components/FinalPriceBox';
 
 const renderedFrom = `${camelCase(sidebarResource.generateInvoice)}_create`;
 
@@ -38,6 +39,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
+
   const [appliedDate, setAppliedDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false);
@@ -45,6 +47,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  const [resourceFields, setResourceFields] = useState(null);
+  const [finalPriceData, setFinalPriceData] = useState(null);
+
 
   const {
     state: { permissions }
@@ -62,6 +68,10 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const fetchFields = async () => {
     setColumns(null);
+
+    const response = await axiosInstance().get(`/field?resource=${resource}&view=true`);
+    setResourceFields(response?.data?.data)
+
     let data;
 
     const childResourceName =
@@ -243,6 +253,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       newMaterial = data?.material;
     }
     setMaterial([...newMaterial, ...data?.manualEntry]);
+    setFinalPriceData(data?.finalPriceData)
     initializeTable([...newMaterial, ...data?.manualEntry]);
   };
 
@@ -458,7 +469,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             {columns ? (
               <Box zIndex={5} width={'100%'} p={1}>
                 <CustomReactTable
-                  height={progressiveBilling ? 'calc(100vh - 285px)' : 'calc(100vh - 180px)'}
+                  //height={progressiveBilling ? 'calc(100vh - 285px)' : 'calc(100vh - 180px)'}
                   state={state}
                   columns={columns}
                   setWholeRowsCellColor={(rowData) => {
@@ -480,6 +491,8 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
               </Box>
             )}
+            {(finalPriceData && resourceFields) &&
+              <FinalPriceBox allFields={resourceFields} data={finalPriceData} />}
           </Fragment>
         </CustomDialogContent>
         <CustomDialogFooter>

@@ -9,8 +9,10 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormatToSend, sidebarResource } from 'src/constants/helpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import dayjs from 'dayjs';
 
 const ConsumablesQtyDialog = ({
   referenceId,
@@ -22,7 +24,8 @@ const ConsumablesQtyDialog = ({
   serviceName,
   consumeRequest,
   serialNumberRequired,
-  canChangeWarehouse
+  canChangeWarehouse,
+  minDate = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -34,6 +37,8 @@ const ConsumablesQtyDialog = ({
   const [fullScreen, setFullScreen] = useState(true);
   const [lookupResource, setLookupResource] = useState(null)
 
+  const dateFieldName = consumeRequest ? 'requestDate' : 'consumeDate'
+
   useEffect(() => {
     getLookupResource();
   }, []);
@@ -43,8 +48,7 @@ const ConsumablesQtyDialog = ({
     if (user?.user?.brandPolicy?.storageLocation) {
       lookupResource = `${lookupResource},${sidebarResource?.storageLocation}`
     }
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+    axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
       .then(({ data: { data } }) => {
         setLookupResource(data)
       });
@@ -68,30 +72,29 @@ const ConsumablesQtyDialog = ({
     data.products = products;
     data.referenceId = referenceId;
     data.referenceType = referenceType;
+    data.consumeDate = dateFormatToSend(values?.consumeDate)
     if (products?.length) {
       setIsSubmitting(true);
-      axiosInstance()
-        .put('/material-handling/consume', data)
-        .then(({ data }) => {
-          onSuccess();
-          setIsSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put('/material-handling/consume', data).then(({ data }) => {
+        onSuccess();
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
   const handleRequest = (values) => {
     const data: any = {
       referenceType,
-      referenceId
+      referenceId,
+      requestDate: dateFormatToSend(values?.requestDate)
     };
     const products: any = [];
     values?.products?.forEach((e) => {
@@ -160,6 +163,20 @@ const ConsumablesQtyDialog = ({
     return errors;
   };
 
+  const validateDate = (values) => {
+    let errors: any = {};
+    if (!values?.[dateFieldName]) {
+      errors[dateFieldName] = `${consumeRequest ? 'Request' : 'Consume'} date is required`;
+    }
+    if (minDate && dayjs(values[dateFieldName]).isBefore(minDate, 'day')) {
+      errors[dateFieldName] = `Date entered prior to the create date`;
+    }
+    if (dayjs(values[dateFieldName]).isAfter(dayjs())) {
+      errors[dateFieldName] = `Please select valid date`;
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       open
@@ -193,12 +210,13 @@ const ConsumablesQtyDialog = ({
             storageLocation: null,
             warehouse: warehouse?.optionValue,
             serialNumber: []
-          }))
+          })),
+          [dateFieldName]: new Date(),
         }}
         enableReinitialize={true}
         onSubmit={() => { }}
       >
-        {({ values }) => (
+        {({ values, setFieldValue }) => (
           <>
             <CustomDialogContent>
               {values?.products && values?.products?.length ? (
@@ -562,6 +580,25 @@ const ConsumablesQtyDialog = ({
                         </>
                       )}
                     />
+                    <div className="datepicker mt-[14px]">
+                      <CustomDatePicker
+                        label={`${consumeRequest ? 'Request' : 'Consume'} Date`}
+                        required
+                        autoOk
+                        size="small"
+                        margin="dense"
+                        name={dateFieldName}
+                        placeholder={`${consumeRequest ? 'Request' : 'Consume'} Date`}
+                        value={values?.[dateFieldName]}
+                        {...(minDate ? { minDate: minDate } : {})}
+                        maxDate={new Date()}
+                        onChange={(value) => {
+                          setFieldValue(dateFieldName, value);
+                        }}
+                        error={validateDate(values)?.[dateFieldName]}
+                        helperText={validateDate(values)?.[dateFieldName] ? validateDate(values)?.[dateFieldName] : ''}
+                      />
+                    </div>
                   </Form>
                 </Box>
               ) : (
@@ -580,7 +617,8 @@ const ConsumablesQtyDialog = ({
                     if (
                       !validate(values.products).consumedQty &&
                       !validate(values.products).storageLocation &&
-                      !Boolean(validate(values.products).serialNumber)
+                      !Boolean(validate(values.products).serialNumber) &&
+                      !Boolean(validateDate(values)?.[dateFieldName])
                     ) {
                       handleRequest(values);
                     }
@@ -596,7 +634,8 @@ const ConsumablesQtyDialog = ({
                     if (
                       !Boolean(validate(values.products).consumedQty) &&
                       !Boolean(validate(values.products).storageLocation) &&
-                      !Boolean(validate(values.products).serialNumber)
+                      !Boolean(validate(values.products).serialNumber) &&
+                      !Boolean(validateDate(values)?.[dateFieldName])
                     ) {
                       handleSubmit(values);
                     }

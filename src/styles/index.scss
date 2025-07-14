@@ -4955,3 +4955,9 @@ td.google-visualization-orgchart-node {
 // .\@container {
 //   container-type: inline-size;
 // }
+
+.single-step-item:not([data-active='true']) {
+  .info-sidebar-action-container {
+    display: none;
+  }
+}

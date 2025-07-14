@@ -18,7 +18,7 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import { FiExternalLink } from 'react-icons/fi';
 
-const ShowNonSerializeAssets = ({ data, onClose, title }) => {
+const ShowNonSerializeAssets = ({ data, onClose, isNonSerializedProductSerialNumbers }) => {
   const {
     state: { resources, user, permissions }
   }: any = useData();
@@ -34,7 +34,7 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
       fullWidth
     >
       <CustomDialogHeader
-        title={`${title} - ${data?.productName}`}
+        title={`Serial Numbers - ${data?.productName}`}
         onClose={() => {
           onClose();
         }}
@@ -52,8 +52,11 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
               <TableRow>
                 <TableCell>Index</TableCell>
                 <TableCell align="left">Serial Number</TableCell>
-                <TableCell align="left">{resources?.warehouse?.titleSingular}</TableCell>
-                {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">{resources?.storageLocation?.titleSingular}</TableCell>}
+                {!isNonSerializedProductSerialNumbers ?
+                  <>
+                    <TableCell align="left">{resources?.warehouse?.titleSingular}</TableCell>
+                    {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">{resources?.storageLocation?.titleSingular}</TableCell>}
+                  </> : null}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -63,24 +66,27 @@ const ShowNonSerializeAssets = ({ data, onClose, title }) => {
                     {index + 1}
                   </TableCell>
                   <TableCell align="left">{element?.assetNumber}</TableCell>
-                  <TableCell align="left">
-                    {element?.productSerialNumberDetail?.warehouse?.optionLabel}
-                    {permissions?.warehouse?.isRead &&
-                      <IconButton
-                        size="small" onClick={() => { window.open(`${routes.warehouseDetail.path}/${element?.productSerialNumberDetail?.warehouse?.optionValue}`); }}>
-                        <FiExternalLink size={16} className="-mt-[2px] ml-1 text-gray-500 dark:text-gray-300" />
-                      </IconButton>
-                    }
-                  </TableCell>
-                  {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">
-                    {element?.productSerialNumberDetail?.storageLocation?.optionLabel}
-                    {permissions?.storageLocation?.isRead &&
-                      <IconButton
-                        size="small" onClick={() => { window.open(`${routes.storageLocationDetail.path}/${element?.productSerialNumberDetail?.storageLocation?.optionValue}`); }}>
-                        <FiExternalLink size={16} className="-mt-[2px] ml-1 text-gray-500 dark:text-gray-300" />
-                      </IconButton>
-                    }
-                  </TableCell>}
+                  {!isNonSerializedProductSerialNumbers ?
+                    <>
+                      <TableCell align="left">
+                        {element?.productSerialNumberDetail?.warehouse?.optionLabel}
+                        {permissions?.warehouse?.isRead &&
+                          <IconButton
+                            size="small" onClick={() => { window.open(`${routes.warehouseDetail.path}/${element?.productSerialNumberDetail?.warehouse?.optionValue}`); }}>
+                            <FiExternalLink size={16} className="-mt-[2px] ml-1 text-gray-500 dark:text-gray-300" />
+                          </IconButton>
+                        }
+                      </TableCell>
+                      {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">
+                        {element?.productSerialNumberDetail?.storageLocation?.optionLabel}
+                        {permissions?.storageLocation?.isRead &&
+                          <IconButton
+                            size="small" onClick={() => { window.open(`${routes.storageLocationDetail.path}/${element?.productSerialNumberDetail?.storageLocation?.optionValue}`); }}>
+                            <FiExternalLink size={16} className="-mt-[2px] ml-1 text-gray-500 dark:text-gray-300" />
+                          </IconButton>
+                        }
+                      </TableCell>}
+                    </> : null}
                 </TableRow>
               ))}
             </TableBody>

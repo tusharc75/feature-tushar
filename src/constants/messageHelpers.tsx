@@ -40,7 +40,8 @@ export const rentalManagementActions = {
   updateStartDateEndDate: 'Update Start Date/End Date',
   startService: 'Start Service',
   stopService: 'Stop Service',
-  deleteServiceLog: 'Delete Service Log'
+  deleteServiceLog: 'Delete Service Log',
+  changeSubStatus: 'Change Sub Status'
 };
 
 export const rentalManagementMessage = {
@@ -89,6 +90,7 @@ export const rentalManagementMessage = {
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Available, Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
   repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
+  loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
   transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
   transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
   onlySwapAssets: 'Only Assets can be swapped',
@@ -100,7 +102,8 @@ export const rentalManagementMessage = {
   canNotChangeStartDate: `Can not change Start Date`,
   canNotChangeEndDate: `Can not change End Date`,
   invoiceCreated: `Invoice already created`,
-  sameAssetsSelected: `Same Assets Selected`
+  sameAssetsSelected: `Same Assets Selected`,
+  onlyInUseAssetsChangeSubStatus: `Sub status can be changed only In-Use assets`
 };
 
 export const subleaseActions = {
@@ -178,5 +181,7 @@ export const repairJobMessage = {
 export const repairOrderMessage = {
   workOrderComplete: 'Complete work order to proceed',
   deliverLoadingTicketStep: 'Create and Deliver at least one Loading Ticket to proceed',
+  assignAssets: 'Assign Assets to proceed',
+  addProductAndAssetsInPackage: 'Add Product and Assign Asset in Package to Proceed',
 };
 

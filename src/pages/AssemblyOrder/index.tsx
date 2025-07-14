@@ -35,13 +35,17 @@ const AssemblyOrder = () => {
       value: 1
     },
     {
-      key: `All ${resources?.assemblyOrder?.titlePlural}`,
+      key: `Open ${resources?.assemblyOrder?.titlePlural}`,
       value: 2
     },
     {
-      key: `Converted ${resources?.assemblyOrder?.titlePlural}`,
+      key: `All ${resources?.assemblyOrder?.titlePlural}`,
       value: 3
     },
+    {
+      key: `Converted ${resources?.assemblyOrder?.titlePlural}`,
+      value: 4
+    }
   ];
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -132,10 +136,9 @@ const AssemblyOrder = () => {
     }
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -316,11 +319,12 @@ const AssemblyOrder = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.assemblyOrder?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.assemblyOrderNumber}`
-            : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.assemblyOrder?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

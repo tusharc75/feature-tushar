@@ -74,11 +74,7 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         loading: false
       };
-    case 'currentEditingCellPosition':
-      return {
-        ...state,
-        currentEditingCellPosition: action.cellPosition
-      };
+
     case 'showFilteredRecordsOnly':
       return {
         ...state,
@@ -125,7 +121,6 @@ const intialState = {
   filters: {},
   sorting: [],
   selectedRecords: [],
-  currentEditingCellPosition: null,
   error: false,
   showFilteredRecordsOnly: false,
   loadingExpanderRowId: null,
@@ -147,7 +142,6 @@ export type TInitialState = {
   filters: any;
   sorting: any[];
   selectedRecords: any[];
-  currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
   initialDataLoaded: boolean;
@@ -169,7 +163,6 @@ export type TActios =
   | { type: 'pageChange'; page: number }
   | { type: 'pageSizeChange'; limit: number; loading?: boolean }
   | { type: 'complete' }
-  | { type: 'currentEditingCellPosition'; cellPosition: { rowId: string; columnName: string } | null }
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
   | { type: 'hiddenColumns'; hiddenColumns: boolean }

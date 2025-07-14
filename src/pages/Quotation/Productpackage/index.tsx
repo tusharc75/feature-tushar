@@ -1054,6 +1054,7 @@ const Productpackage = ({
             setAiPriceSuggestionDialog(false);
           }}
           quotationData={quotationData}
+          versionId={versionId}
         />
       )}
       {leadTimeDialog.open && (

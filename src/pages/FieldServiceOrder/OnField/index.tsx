@@ -5,6 +5,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   ASSET_STATUS,
   checkIsAllowedToEdit,
+  RENTAL_STATUS,
   RENTAL_STEPS,
   rentalManagement,
   serializedAsset,
@@ -30,6 +31,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([])
 
   useEffect(() => {
@@ -48,9 +50,12 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
     try {
       const {
         data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
-      if (data) {
-        setResourceData(data);
+      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`);
+      if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+        setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+      }
+      if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
+        setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -88,7 +93,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
         data = await findOne(objectStore.rentalManagement, rentalJob);
       }
       setLoading(false);
-      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData));
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, referenceData) && ![RENTAL_STATUS.closed]?.includes(data?.status));
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -115,6 +120,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
           rentalPolicyData={resourceData?.policy}
           assetStatusOptions={assetStatusOptions}
           setAssetStatusOptions={setAssetStatusOptions}
+          assetPolicyData={assetPolicyData}
         />
       ) : (
         <Box p={2} height={500}>

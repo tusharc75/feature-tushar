@@ -2,6 +2,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@mui/material';
 import {
+  ColumnFiltersState,
   ExpandedState,
   Row,
   SortingState,
@@ -19,7 +20,6 @@ import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
-import { flattenArray } from 'src/constants/columns';
 import { useDebounce, useDndSensors } from 'src/hooks';
 import xlsx from 'xlsx-js-style';
 import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
@@ -95,7 +95,6 @@ const CustomReactTable = ({
   arrangeRowField = null
 }) => {
   const {
-    currentEditingCellPosition,
     dataRows: data,
     rowCount,
     selectedRecords,
@@ -140,6 +139,7 @@ const CustomReactTable = ({
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [columnFilterState, setColumnFilterState] = useState<ColumnFiltersState>([]);
 
   // initialize
   useEffect(() => {
@@ -191,29 +191,13 @@ const CustomReactTable = ({
     [isClientSideGrid, dispatch]
   );
 
-  // Editing cell functions
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
-
-  const submitInput = useCallback(() => {
-    skipAutoResetPageIndex();
-    if (!currentEditingCellPosition) return;
-    const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
-    updatedData[currentEditingCellPosition.columnName] = cellValue;
-    const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-
-    if (onSaveEdit && ![undefined, null].includes(cellValue)) {
+  const submitInput = useCallback(
+    ({ inputField, updatedData }: { inputField: Record<string, string>; updatedData: any }) => {
+      skipAutoResetPageIndex();
       onSaveEdit(inputField, updatedData);
-    }
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
+    },
+    [onSaveEdit, skipAutoResetPageIndex]
+  );
 
   useEffect(() => {
     if (enableGlobalSearch) {
@@ -237,8 +221,10 @@ const CustomReactTable = ({
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
       columnVisibility: visibleColumns,
-      rowSelection
+      rowSelection,
+      columnFilters: columnFilterState
     },
+
     // flags
     autoResetAll: false,
     enableExpanding: expander,
@@ -254,6 +240,7 @@ const CustomReactTable = ({
     globalFilterFn: isClientSideGrid ? fuzzyFilter : serverFilter,
 
     // state setter
+    onColumnFiltersChange: setColumnFilterState,
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -497,6 +484,7 @@ const CustomReactTable = ({
       {exportTableView && (
         <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
+            columnFilterState={columnFilterState}
             ref={tableRef}
             virtualization={false}
             state={state}
@@ -506,7 +494,6 @@ const CustomReactTable = ({
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             exportTableView={true}
@@ -552,6 +539,7 @@ const CustomReactTable = ({
           {!isMobileView && !showOnlyMobileView && (
             <div className="relative" ref={tableContainerRef}>
               <TableComponent
+                columnFilterState={columnFilterState}
                 virtualization={virtualization}
                 state={state}
                 setWholeRowsCellColor={setWholeRowsCellColor}
@@ -560,7 +548,6 @@ const CustomReactTable = ({
                 setCellValue={setCellValue}
                 submitInput={submitInput}
                 cellValue={cellValue}
-                resetField={resetField}
                 isClientSideGrid={isClientSideGrid}
                 loading={loading}
                 error={error}

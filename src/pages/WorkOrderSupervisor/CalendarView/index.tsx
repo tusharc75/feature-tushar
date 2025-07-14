@@ -1,11 +1,9 @@
 import { DatesSetArg } from '@fullcalendar/core';
-import FullCalendar from '@fullcalendar/react';
 import { ExpandMore } from '@mui/icons-material';
 import {
   Box,
   CircularProgress,
   IconButton,
-  ListItem,
   Popover,
   Table,
   TableBody,
@@ -26,7 +24,7 @@ import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, sidebarResource, workOrderSupervisor } from 'src/constants/helpers';
 
-function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
+function CalendarView({ filterQuery, reference, setOpen }, ref) {
   const {
     state: { resources }
   }: any = useData();
@@ -65,7 +63,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
           setOpenRepairPopup({ open: true, data: data });
         }
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -96,7 +94,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
         }));
         setEvents([...rows]);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -180,27 +178,27 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
           <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
             {openRepairPopup.data?.length
               ? openRepairPopup.data?.map((d) => (
-                  <Accordion key={d._id} defaultExpanded>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <div className="flex items-center gap-2">
-                        <p className="text-truncate" title={d.workOrderNumber}>
-                          {d.workOrderNumber}
-                        </p>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
-                          }}
-                        >
-                          <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                        </IconButton>
-                      </div>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <RenderTable data={d.competencies} resources={resources} />
-                    </AccordionDetails>
-                  </Accordion>
-                ))
+                <Accordion key={d._id} defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <div className="flex items-center gap-2">
+                      <p className="text-truncate" title={d.workOrderNumber}>
+                        {d.workOrderNumber}
+                      </p>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes?.workOrderDetail?.path}/${d?._id}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <RenderTable data={d.competencies} resources={resources} />
+                  </AccordionDetails>
+                </Accordion>
+              ))
               : null}
           </Box>
         </Popover>
@@ -209,20 +207,7 @@ function WorkOrderCalendar({ filterQuery, reference, setOpen }, ref) {
   );
 }
 
-function EventAgenda({ event, setOpen }) {
-  return (
-    <ListItem
-      component={'p'}
-      className="!-mx-[10px] !-my-[5px] !w-[calc(100%+20px)] cursor-pointer hover:bg-[var(--dark-secondary,gray)]"
-      onClick={() => setOpen({ open: true, id: event.id })}
-    >
-      <span>{event.title}</span>
-      <span className="font-normal text-gray-500">{event.desc}</span>
-    </ListItem>
-  );
-}
-
-export default forwardRef(WorkOrderCalendar);
+export default forwardRef(CalendarView);
 
 const RenderTable = ({ data, resources }) => {
   return (

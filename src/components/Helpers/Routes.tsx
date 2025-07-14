@@ -779,7 +779,13 @@ const routes = {
   },
   fieldView: {
     path: '/field-view'
-  }
+  },
+  customPdfTemplate: {
+    path: '/custom-pdf-template'
+  },
+  customPdfTemplateDetail: {
+    path: '/custom-pdf-template/detail'
+  },
 };
 
 export default routes;

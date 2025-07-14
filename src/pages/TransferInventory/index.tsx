@@ -55,12 +55,16 @@ const TransferInventory = () => {
       value: 1
     },
     {
-      key: `All ${resources?.transferInventory?.titlePlural}`,
+      key: `Open ${resources?.transferInventory?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.transferInventory?.titlePlural}`,
+      key: `All ${resources?.transferInventory?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.transferInventory?.titlePlural}`,
+      value: 4
     }
   ];
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.transferInventory));
@@ -162,10 +166,10 @@ const TransferInventory = () => {
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
-    if (selectedType === 1 || selectedType === 2) {
+    else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
     }
-    else {
+    else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     if (isExport) {

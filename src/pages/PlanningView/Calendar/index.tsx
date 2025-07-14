@@ -17,9 +17,11 @@ import { createFilterSetData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import AiButton from 'src/components/Helpers/Buttons/AiButton';
 import routes from 'src/components/Helpers/Routes';
 import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, sidebarResource } from 'src/constants/helpers';
+import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
 import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
@@ -28,10 +30,12 @@ import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/co
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy }, ref) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString, resourcePolicy, topRightSlot }, ref) {
   const {
     state: { user, permissions, resources }
   }: any = useData();
+
+  const [aiSuggestionDialog, setAiSuggestionDialog] = useState(false);
 
   const mapObjectToList = useCallback(
     (obj: { [key: string]: OnSelectDataType[] }) => {
@@ -102,6 +106,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
     estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
   });
+
+  let productIds = [];
+  if (selectedLookUpResourceData?.product?.length) {
+    productIds = selectedLookUpResourceData.product.map((item) => item.optionValue);
+  }
 
   const prevDateRangeRef = useRef(dateRange);
 
@@ -615,7 +624,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               return null;
             }
             let title = d[selectedResource.fieldName];
-            let start = dayjs.utc(d[selectedResource.start]).tz().toDate();
+            let start = dayjs.utc(d[selectedResource.start]).tz().startOf('day').toDate();
             let end = dayjs.utc(d[selectedResource.end]).tz().endOf('day').toDate();
             let fulfillStatus = d?.fulfillStatus;
 
@@ -624,8 +633,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               if (d?.parentAccount?.optionLabel) {
                 title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
               }
+              else if (d?.customerAccount?.optionLabel) {
+                title = `${title} (Customer-${d?.customerAccount?.optionLabel})`;
+              }
               if (d?.padName?.optionLabel) {
                 title = `${title}(Pad-${d?.padName?.optionLabel})`;
+              }
+              if (d?.warehouse?.optionLabel) {
+                title = `${title}(${resources.warehouse?.titleSingular}-${d?.warehouse?.optionLabel})`;
               }
               if (!d?.actualEndDate && dayjs.tz().isAfter(dayjs(d?.estimateEndDate))) {
                 fulfillStatus = 'ERROR';
@@ -917,65 +932,79 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex flex-wrap items-center gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[200px]">
-            <Autocomplete
-              options={resourceList}
-              getOptionLabel={(option) => (option && option?.title) || ''}
-              style={{ width: '300px' }}
-              value={selectedResource}
-              onChange={(event, newValue) => {
-                setSelectedResource(newValue);
-              }}
-              size="small"
-              renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
-            />
-            {selectedResource &&
-              ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
-                <ThemeButton
-                  iconForMobile={<MdFilterList />}
-                  onClick={() => {
-                    setShowFilters(true);
-                  }}
-                  startIcon={<MdFilterList />}
-                >
-                  Show Filters
-                </ThemeButton>
-              )}
-            {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
-              selectedFilters?.map((filtered) => {
-                return (
-                  <RenderFilter
-                    filtered={filtered}
-                    lookupResource={lookupResource}
-                    selectedLookUpResourceData={selectedLookUpResourceData}
-                    setSelectedLookUpResourceData={setSelectedLookUpResourceData}
-                    lookupLoading={lookupLoading}
-                  />
-                );
-              })}
-            {selectedResource?.resource === sidebarResource.product &&
-              !isEmpty(selectedLookUpResourceData) &&
-              selectedLookUpResourceData['product'] &&
-              selectedLookUpResourceData['product']?.length > 0 && (
-                <Box mt={0.5}>
-                  <span className="relative">
-                    <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
-                      <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+          <div className="flex items-center justify-between gap-2 max-md:flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
+              <Autocomplete
+                options={resourceList}
+                getOptionLabel={(option) => (option && option?.title) || ''}
+                style={{ width: '300px' }}
+                value={selectedResource}
+                onChange={(event, newValue) => {
+                  setSelectedResource(newValue);
+                }}
+                size="small"
+                renderInput={(params) => <TextField {...params} label="Select Resource" size="small" variant="outlined" />}
+              />
+              {selectedResource &&
+                ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
+                  <ThemeButton
+                    iconForMobile={<MdFilterList />}
+                    onClick={() => {
+                      setShowFilters(true);
+                    }}
+                    startIcon={<MdFilterList />}
+                  >
+                    Show Filters
+                  </ThemeButton>
+                )}
+              {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
+                selectedFilters?.map((filtered) => {
+                  return (
+                    <RenderFilter
+                      filtered={filtered}
+                      lookupResource={lookupResource}
+                      selectedLookUpResourceData={selectedLookUpResourceData}
+                      setSelectedLookUpResourceData={setSelectedLookUpResourceData}
+                      lookupLoading={lookupLoading}
+                    />
+                  );
+                })}
+              {selectedResource?.resource === sidebarResource.product &&
+                !isEmpty(selectedLookUpResourceData) &&
+                selectedLookUpResourceData['product'] &&
+                selectedLookUpResourceData['product']?.length > 0 && (
+                  <Box mt={0.5}>
+                    <span className="relative">
+                      <span className="absolute right-[3px] top-[3px] flex size-[5px] items-center justify-center rounded-full bg-red-500">
+                        <span className="size-2 flex-shrink-0 animate-ping rounded-full bg-red-500/70"></span>
+                      </span>
+                      <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
+                        <IconButton
+                          size={'small'}
+                          onClick={() => {
+                            setShowPlannedIncoming(true);
+                          }}
+                        >
+                          <InfoIcon fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </HtmlTooltip>
                     </span>
-                    <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
-                      <IconButton
-                        size={'small'}
-                        onClick={() => {
-                          setShowPlannedIncoming(true);
-                        }}
-                      >
-                        <InfoIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </span>
-                  <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
-                </Box>
-              )}
+                    <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
+                  </Box>
+                )}
+            </div>
+            <div className="right-side-content ml-auto flex flex-shrink-0 items-center gap-2">
+              {(selectedResource?.resource === sidebarResource.product &&
+                !isEmpty(selectedLookUpResourceData) &&
+                selectedLookUpResourceData['product'] &&
+                selectedLookUpResourceData['product']?.length > 0) &&
+                <AiButton
+                  onClick={() => setAiSuggestionDialog(true)}>
+                  AI Suggestions
+                </AiButton>
+              }
+              {topRightSlot}
+            </div>
           </div>
           <div className="mb-2 mt-2">
             <DisplayFilterChip
@@ -1032,7 +1061,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             />
           </>
         )}
-
         {showDetail.open && (
           <DetailsPopover
             fields={fields}
@@ -1076,6 +1104,15 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             fetchUserFilters={fetchUserFilters}
             userFilters={userFilters}
             selectedFilter={selectedFilter}
+          />
+        )}
+        {aiSuggestionDialog && (
+          <AiSuggestionsDialog
+            handleClose={() => {
+              setAiSuggestionDialog(false);
+            }}
+            productIds={productIds}
+            dateRange={dateRange}
           />
         )}
       </div>

@@ -1,4 +1,4 @@
-import { Row, Table } from '@tanstack/react-table';
+import { ColumnFiltersState, Row, Table } from '@tanstack/react-table';
 import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
@@ -14,9 +14,8 @@ type TTableProps = {
   dispatch: Dispatch<TActios>;
   table: Table<any>;
   setCellValue: React.Dispatch<React.SetStateAction<string>>;
-  submitInput: () => void;
+  submitInput: (data: { inputField: Record<string, string>; updatedData: any }) => void;
   cellValue: string;
-  resetField: () => void;
   isClientSideGrid: boolean;
   loading: boolean;
   error: boolean;
@@ -33,6 +32,7 @@ type TTableProps = {
   customContent: ({ row }: { row: any }) => React.ReactNode;
   renderedFrom: string;
   sortedColumns: TColType[];
+  columnFilterState: ColumnFiltersState;
 };
 
 const TableComponent = forwardRef(function (
@@ -44,7 +44,6 @@ const TableComponent = forwardRef(function (
     setCellValue,
     submitInput,
     cellValue,
-    resetField,
     isClientSideGrid,
     loading,
     error,
@@ -60,7 +59,8 @@ const TableComponent = forwardRef(function (
     customContentHeight,
     customContent,
     renderedFrom,
-    sortedColumns
+    sortedColumns,
+    columnFilterState
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -117,16 +117,6 @@ const TableComponent = forwardRef(function (
   const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
   const isFooterVisible = isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero;
 
-  const handleChangeCurrentEditingCellPosition = (rowid: string, columnId: string) => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: {
-        rowId: rowid,
-        columnName: columnId
-      }
-    });
-  };
-
   return (
     <>
       {exportTableView ? (
@@ -139,7 +129,6 @@ const TableComponent = forwardRef(function (
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             error={error}
@@ -158,6 +147,7 @@ const TableComponent = forwardRef(function (
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
             renderedFrom={renderedFrom}
+            columnFilterState={columnFilterState}
           />
         </>
       ) : (
@@ -172,7 +162,6 @@ const TableComponent = forwardRef(function (
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             error={error}
@@ -190,12 +179,12 @@ const TableComponent = forwardRef(function (
             excludedColumns={excludedColumns}
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
-            handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
             vtableData={vtableData}
             expanderWithCustomContent={expanderWithCustomContent}
             customContentHeight={customContentHeight}
             customContent={customContent}
             renderedFrom={renderedFrom}
+            columnFilterState={columnFilterState}
           />
         </>
       )}
@@ -209,9 +198,8 @@ export type RnderTableProps = {
   dispatch: Dispatch<TActios>;
   table: Table<any>;
   setCellValue: React.Dispatch<React.SetStateAction<string>>;
-  submitInput: () => void;
+  submitInput: (data: { inputField: Record<string, string>; updatedData: any }) => void;
   cellValue: string;
-  resetField: () => void;
   isClientSideGrid: boolean;
   loading: boolean;
   error: boolean;
@@ -230,6 +218,7 @@ export type RnderTableProps = {
   footerRowFound: boolean;
   stickyColumns: StickyColumns;
   renderedFrom: string;
+  columnFilterState: ColumnFiltersState;
 };
 
 export default React.memo(TableComponent);

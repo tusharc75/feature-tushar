@@ -42,12 +42,16 @@ const TransferAsset = () => {
       value: 1
     },
     {
-      key: `All ${resources?.transferAsset?.titlePlural}`,
+      key: `Open ${resources?.transferAsset?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.transferAsset?.titlePlural}`,
+      key: `All ${resources?.transferAsset?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.transferAsset?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -162,10 +166,9 @@ const TransferAsset = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
@@ -347,11 +350,12 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.transferAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''}`
-            : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.transferAsset?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

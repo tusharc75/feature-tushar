@@ -16,7 +16,6 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
   DELIVERY_FROM_TO_TYPE,
   deliveryTicket,
@@ -47,12 +46,16 @@ const DeliveryTicket = () => {
       value: 1
     },
     {
-      key: `All ${resources?.deliveryTicket?.titlePlural}`,
+      key: `Open ${resources?.deliveryTicket?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.deliveryTicket?.titlePlural}`,
+      key: `All ${resources?.deliveryTicket?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.deliveryTicket?.titlePlural}`,
+      value: 4
     }
   ];
 
@@ -238,10 +241,9 @@ const DeliveryTicket = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 

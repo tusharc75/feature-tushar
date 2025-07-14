@@ -319,7 +319,7 @@ const CreateFormBuilder = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }, { title: isNew ? 'New' : resource }]}
+              routes={[{ ...routes.formBuilder, title: resources?.formBuilder?.titlePlural }, { title: isNew ? 'New' : resourceLabel }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 if (!isEqual(orisection, section) && permissions?.isUpdate?.isUpdate) {

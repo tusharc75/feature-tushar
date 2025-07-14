@@ -42,12 +42,16 @@ const BulkAssetCreation = () => {
       value: 1
     },
     {
-      key: `All ${resources?.bulkAssetCreation?.titlePlural}`,
+      key: `Open ${resources?.bulkAssetCreation?.titlePlural}`,
       value: 2
     },
     {
-      key: `Closed ${resources?.bulkAssetCreation?.titlePlural}`,
+      key: `All ${resources?.bulkAssetCreation?.titlePlural}`,
       value: 3
+    },
+    {
+      key: `Closed ${resources?.bulkAssetCreation?.titlePlural}`,
+      value: 4
     }
   ];
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -163,10 +167,9 @@ const BulkAssetCreation = () => {
 
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    if (selectedType === 1 || selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    } else {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
 
@@ -347,11 +350,12 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.bulkAssetCreation?.titleSingular?.toLowerCase()} :
              ${deleteRecord?.baNumber}`
-            : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.bulkAssetCreation?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

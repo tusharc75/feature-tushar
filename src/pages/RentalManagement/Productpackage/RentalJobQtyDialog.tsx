@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { isArray, uniqBy } from 'lodash';
+import { camelCase, isArray, uniqBy } from 'lodash';
 import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName, PRICING_SETUP_TYPE, sidebarResource } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
@@ -21,7 +21,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import dayjs from 'dayjs';
 import { getParentMultiplier } from 'src/pages/RentalManagement/rentalOfflineHelper';
-import { getPricingConditions, getTaxList } from 'src/components/PricingCondition';
+import { getPricingConditions, getTaxList, getDurationBasedPrice } from 'src/components/PricingCondition';
 import MaterialUpdateActions from 'src/components/RentalManagment/MaterialUpdateActions';
 
 interface EditDialogProps {
@@ -38,6 +38,7 @@ interface EditDialogProps {
   isQtyOnly?: Boolean;
   showSaveAndNext?: Boolean;
   dataRows?: any
+  assetPolicyData?: any
 }
 
 const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
@@ -55,7 +56,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   isQtyOnly = false,
   from,
   showSaveAndNext = false,
-  dataRows = []
+  dataRows = [],
+  assetPolicyData = null
 }) => {
   const ref = useRef(null);
 
@@ -465,11 +467,23 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                               );
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+
+                                            const durationPrice = getDurationBasedPrice({ ...values, ...(field.fieldName === 'pricingCondition' ? { pricingCondition: value } : field.fieldName === 'pricingMethod' ? { pricingMethod: value } : { unit: value }), materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
                                             const result = autoCalculateSpecificFields(
-                                              { [priceFieldName]: priceValue?.mrp || 0, [field.fieldName]: value },
+                                              { [priceFieldName]: durationPrice || priceValue?.mrp || 0, [field.fieldName]: value },
                                               values,
                                               initialData.fields
                                             );
+
+                                            if (assetPolicyData?.inUseSubStatus?.length > 0) {
+                                              assetPolicyData?.inUseSubStatus?.forEach(sf => {
+                                                const field = initialData.fields?.find(f => f?.fieldName === `${camelCase(sf)}Price`)
+                                                if (field) {
+                                                  result[`${field?.fieldName}_${rentalManagementData?.currency?.toLowerCase()}`] = priceValue?.assetSubStatusPrice?.[`${camelCase(sf)}`] || 0
+                                                }
+                                              });
+                                            }
+
                                             if (Object.keys(result).length >= 1) {
                                               for (var x in result) {
                                                 setFieldValue(x, result[x]);
@@ -505,6 +519,22 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                             setFieldValue(name, value).then(() => {
                                               validateForm();
                                             });
+                                            if (!isBulkedit && name === 'estimateJobDuration') {
+                                              let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
+                                              const durationPrice = getDurationBasedPrice({ ...values, estimateJobDuration: value, materialId: rowData.materialId, type: rowData?.type }, priceConditionListConst)
+                                              if (durationPrice) {
+                                                const result = autoCalculateSpecificFields(
+                                                  { [priceFieldName]: durationPrice },
+                                                  { ...values, estimateJobDuration: value },
+                                                  initialData.fields
+                                                );
+                                                if (Object.keys(result).length >= 1) {
+                                                  for (var x in result) {
+                                                    setFieldValue(x, result[x]);
+                                                  }
+                                                }
+                                              }
+                                            }
                                           }}
                                           required={field.required}
                                           fullWidth

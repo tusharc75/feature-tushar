@@ -24,7 +24,7 @@ const ResourceDoaRequest = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
-    state: { user, resources }
+    state: { user, resources, permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
@@ -33,13 +33,24 @@ const ResourceDoaRequest = () => {
 
   const [openComment, setOpenComment] = useState({ open: false, status: '', data: null });
   const [columns, setColumns] = useState(null);
-  const resourceOptions = DOA_RESOURCE?.map((r) => ({ optionLabel: resources[r?.key]?.titlePlural, optionValue: r?.resorce }));
-  const [selectedResource, setSelectedResource] = useState({
-    optionLabel: resources[DOA_RESOURCE[0]?.key]?.titlePlural,
-    optionValue: DOA_RESOURCE[0]?.resorce
-  });
+
+  const [resourceOptions, setResourceOptions] = useState(null);
+  const [selectedResource, setSelectedResource] = useState(null);
 
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    const options: any = [];
+    DOA_RESOURCE?.forEach((item) => {
+      if (permissions[item.key] && permissions[item.key]?.isRead === true) {
+        options.push({ optionLabel: resources[item.key]?.titlePlural, optionValue: item?.resorce });
+      }
+    });
+    setResourceOptions(options)
+    if (options?.length) {
+      setSelectedResource(options[0])
+    }
+  }, []);
 
   useEffect(() => {
     if (selectedResource && selectedResource?.optionValue) {
@@ -70,10 +81,7 @@ const ResourceDoaRequest = () => {
                 <p
                   className="text-truncate link"
                   onClick={() => {
-                    history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`, {
-                      resource: row?.original?.resource,
-                      currency: row?.original?.currency,
-                    });
+                    history.push(`${routes.resourceDoaRequestDetail.path}/${row?.original?._id}`);
                   }}
                 >
                   {row?.original?.refrenceFrom}
@@ -223,7 +231,7 @@ const ResourceDoaRequest = () => {
 
   const leftSideContents = () => {
     return (
-      <>
+      resourceOptions && <>
         <Autocomplete
           options={resourceOptions}
           getOptionLabel={(option: any) => option?.optionLabel || ''}
