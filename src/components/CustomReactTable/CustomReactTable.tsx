@@ -2,6 +2,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@mui/material';
 import {
+  ColumnFiltersState,
   ExpandedState,
   Row,
   SortingState,
@@ -138,6 +139,7 @@ const CustomReactTable = ({
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [columnFilterState, setColumnFilterState] = useState<ColumnFiltersState>([]);
 
   // initialize
   useEffect(() => {
@@ -219,8 +221,10 @@ const CustomReactTable = ({
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
       columnVisibility: visibleColumns,
-      rowSelection
+      rowSelection,
+      columnFilters: columnFilterState
     },
+
     // flags
     autoResetAll: false,
     enableExpanding: expander,
@@ -236,6 +240,7 @@ const CustomReactTable = ({
     globalFilterFn: isClientSideGrid ? fuzzyFilter : serverFilter,
 
     // state setter
+    onColumnFiltersChange: setColumnFilterState,
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
@@ -479,6 +484,7 @@ const CustomReactTable = ({
       {exportTableView && (
         <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
+            columnFilterState={columnFilterState}
             ref={tableRef}
             virtualization={false}
             state={state}
@@ -533,6 +539,7 @@ const CustomReactTable = ({
           {!isMobileView && !showOnlyMobileView && (
             <div className="relative" ref={tableContainerRef}>
               <TableComponent
+                columnFilterState={columnFilterState}
                 virtualization={virtualization}
                 state={state}
                 setWholeRowsCellColor={setWholeRowsCellColor}
