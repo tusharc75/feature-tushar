@@ -1,4 +1,4 @@
-import { ColumnFiltersState, Row, Table } from '@tanstack/react-table';
+import { Row, Table } from '@tanstack/react-table';
 import React, { Dispatch, ForwardedRef, forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { NormalTable } from 'src/components/CustomReactTable/TableComponents/NormalTable';
 import { VirtualTable } from 'src/components/CustomReactTable/TableComponents/VirtualTable';
@@ -32,7 +32,6 @@ type TTableProps = {
   customContent: ({ row }: { row: any }) => React.ReactNode;
   renderedFrom: string;
   sortedColumns: TColType[];
-  columnFilterState: ColumnFiltersState;
 };
 
 const TableComponent = forwardRef(function (
@@ -59,8 +58,7 @@ const TableComponent = forwardRef(function (
     customContentHeight,
     customContent,
     renderedFrom,
-    sortedColumns,
-    columnFilterState
+    sortedColumns
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -147,7 +145,6 @@ const TableComponent = forwardRef(function (
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
             renderedFrom={renderedFrom}
-            columnFilterState={columnFilterState}
           />
         </>
       ) : (
@@ -184,7 +181,6 @@ const TableComponent = forwardRef(function (
             customContentHeight={customContentHeight}
             customContent={customContent}
             renderedFrom={renderedFrom}
-            columnFilterState={columnFilterState}
           />
         </>
       )}
@@ -218,7 +214,6 @@ export type RnderTableProps = {
   footerRowFound: boolean;
   stickyColumns: StickyColumns;
   renderedFrom: string;
-  columnFilterState: ColumnFiltersState;
 };
 
-export default React.memo(TableComponent);
+export default TableComponent;
