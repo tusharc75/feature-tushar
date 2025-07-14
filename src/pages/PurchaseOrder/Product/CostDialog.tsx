@@ -100,6 +100,9 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
         returnData = [{ ...values }];
         handleAddCost(returnData);
       } else {
+        if (values?.rejectQuantity && values?.qty < costData?.qty && (((values?.actualReceived || 0) + values?.rejectQuantity) > values?.qty)) {
+          values.rejectQuantity = values?.rejectQuantity - (((values?.actualReceived || 0) + values?.rejectQuantity) - values?.qty)
+        }
         returnData = [{ ...values, _id: costData._id }];
         handleUpdateCost(returnData, saveAndNext);
       }
