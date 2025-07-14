@@ -20,6 +20,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageServiceMaster = ({
   isClone = false,
@@ -41,6 +42,7 @@ const ManageServiceMaster = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [serviceMasterManage, setServiceMasterManage] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
   const isStepDataSet = useRef(false);
 
   useEffect(() => {
@@ -129,6 +131,7 @@ const ManageServiceMaster = ({
             history.push(`${routes.serviceMaster.path}/detail/${data?.data?._id}`);
           }
           setLoading(false);
+          setShowConfirmCloneDetailsDialog(false)
           onSuccess(data);
           toastConfig.setToastConfig({
             open: true,
@@ -175,7 +178,14 @@ const ManageServiceMaster = ({
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
-          onSubmit={handleSubmit}
+          onSubmit={(values) => {
+            if (serviceMasterId && isClone && !showConfirmCloneDetailsDialog) {
+              setShowConfirmCloneDetailsDialog(true);
+            }
+            else {
+              handleSubmit(values)
+            }
+          }}
         >
           {({ values, errors, touched, submitForm, setFieldValue }) => (
             <Fragment>
@@ -249,6 +259,20 @@ const ManageServiceMaster = ({
                   }}
                 />
               ) : null}
+              {showConfirmCloneDetailsDialog && (
+                <ConfirmationDialog
+                  open={true}
+                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
+                  onOk={() => {
+                    setFieldValue('serviceMasterId', serviceMasterId);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    submitForm();
+                  }}
+                  okBtnLoading={loading}
+                />
+              )}
             </Fragment>
           )}
         </Formik>

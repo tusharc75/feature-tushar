@@ -30,87 +30,87 @@ export const workOrderFields = [
         "value": "entity"
     },
     {
-        "label": "currentDate",
+        "label": "Current Date",
         "value": "currentDate"
     },
     {
-        "label": "workOrderNumber",
+        "label": "Work Order Number",
         "value": "workOrderNumber"
     },
     {
-        "label": "warehouse",
+        "label": "Warehouse",
         "value": "warehouse"
     },
     {
-        "label": "createDate",
+        "label": "Create Date",
         "value": "createDate"
     },
     {
-        "label": "estimateCompleteDate",
+        "label": "Estimate Complete Date",
         "value": "estimateCompleteDate"
     },
     {
-        "label": "priority",
+        "label": "Priority",
         "value": "priority"
     },
     {
-        "label": "type",
+        "label": "Type",
         "value": "type"
     },
     {
-        "label": "product",
+        "label": "Product",
         "value": "product"
     },
     {
-        "label": "serializedAsset",
+        "label": "Serialized Asset",
         "value": "serializedAsset"
     },
     {
-        "label": "package",
+        "label": "Package",
         "value": "package"
     },
     {
-        "label": "serializedPackage",
+        "label": "Serialized Package",
         "value": "serializedPackage"
     },
     {
-        "label": "status",
+        "label": "Status",
         "value": "status"
     },
     {
-        "label": "spoolNumber",
+        "label": "Spool Number",
         "value": "spoolNumber"
     },
     {
-        "label": "serviceProcessStatus",
+        "label": "Service Process Status",
         "value": "serviceProcessStatus"
     },
     {
-        "label": "pdfTemplate",
+        "label": "PDF Template",
         "value": "pdfTemplate"
     },
     {
-        "label": "serviceProcessCode",
+        "label": "Service Process Code",
         "value": "serviceProcessCode"
     },
     {
-        "label": "repairOrder",
+        "label": "Repair Order",
         "value": "repairOrder"
     },
     {
-        "label": "assemblyOrder",
+        "label": "Assembly Order",
         "value": "assemblyOrder"
     },
     {
-        "label": "productionOrder",
+        "label": "Production Order",
         "value": "productionOrder"
     },
     {
-        "label": "owner",
+        "label": "Owner",
         "value": "owner"
     },
     {
-        "label": "collaborator",
+        "label": "Collaborator",
         "value": "collaborator"
     }
 ]

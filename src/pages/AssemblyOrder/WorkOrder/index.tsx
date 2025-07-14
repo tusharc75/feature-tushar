@@ -137,7 +137,7 @@ const WorkOrder = ({
     });
     const serializedPackageField = serializedPackageFieldData?.find((d) => d.resource === sidebarResource.serializedPackages)?.fieldNames || [];
 
-    const newColumns = generateColumns(renderedFrom, data, null, false, assemblyOrderData?.currency || 'USD');
+    const newColumns = generateColumns(renderedFrom, data?.filter((e) => !['detail', 'description']?.includes(e?.fieldName)), null, false, assemblyOrderData?.currency || 'USD');
     let coloum: any = [
       {
         accessor: 'index',
@@ -193,7 +193,9 @@ const WorkOrder = ({
         width: 200,
         show: false,
         Cell: ({ row }) => {
-          return row.original['description'] ? <h5 className="text-truncate">{row.original.description}</h5> : <NoDataCell />;
+          return row.original['description'] ? <div>
+            <h5 className="text-truncate" title={row.original.description}>{row.original.description}</h5>
+          </div> : <NoDataCell />;
         }
       },
       {
@@ -419,8 +421,8 @@ const WorkOrder = ({
     let rows = data?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.packageDetail?.packageName || '';
-      parent.description = parent?.packageDetail?.packageDescription || '';
+      parent.detail = parent?.detail || parent.packageDetail?.packageName || '';
+      parent.description = parent?.description || parent?.packageDetail?.packageDescription || '';
       parent.qty = parent.qty;
       if (parent?.workOrder) {
         parent.workOrderId = parent?.workOrder?._id;
@@ -462,8 +464,8 @@ const WorkOrder = ({
     var subPackage: any = material.filter((e) => e?.parentId === parent?._id && e?.type === MATERIAL_TYPE.package);
     subPackage.forEach((_subPackage, index) => {
       _subPackage.index = parent.index + '.' + `${index + 1}`;
-      _subPackage.detail = _subPackage.packageDetail?.packageName || '';
-      _subPackage.description = _subPackage?.packageDetail?.packageDescription || '';
+      _subPackage.detail = _subPackage?.detail || _subPackage.packageDetail?.packageName || '';
+      _subPackage.description = _subPackage?.description || _subPackage?.packageDetail?.packageDescription || '';
       _subPackage.qty = _subPackage.qty;
       if (_subPackage?.workOrder) {
         _subPackage.workOrderId = _subPackage?.workOrder?._id;
