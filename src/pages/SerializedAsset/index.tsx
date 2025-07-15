@@ -518,11 +518,12 @@ const SerializedAsset = () => {
   const handleStatusChange = (status) => {
     const { policy } = resourceData;
     let statusPolicy = null;
-    let statusPolicyData = policy?.statusChangeFields?.filter((ele) => ele.status === status);
-    if (statusPolicyData?.length) {
-      if (statusPolicyData.find((e) => e?.products?.length)) {
-        const uniqProduct = uniqBy(selectedRecords, 'productId');
-        if (uniqProduct?.length !== 1) {
+    const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicyData) {
+      if (statusPolicyData?.products?.length > 0) {
+        if (selectedRecords?.every(r => statusPolicyData?.products?.includes(r?.productId))) {
+          statusPolicy = statusPolicyData
+        } else {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
@@ -530,14 +531,11 @@ const SerializedAsset = () => {
           });
           return;
         }
-        else {
-          statusPolicy = statusPolicyData?.find((e) => e?.products?.includes(uniqProduct[0]?.productId))
-        }
-      }
-      else {
-        statusPolicy = statusPolicyData[0]
+      } else {
+        statusPolicy = statusPolicyData
       }
     }
+
     setStatus(status);
     if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
       if (statusPolicy) {

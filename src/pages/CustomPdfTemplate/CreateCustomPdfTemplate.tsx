@@ -8,7 +8,7 @@ import { object, string } from 'yup';
 import { useParams, useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import { Autocomplete, IconButton } from '@mui/material';
+import { Autocomplete, Box, IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
 import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -23,6 +23,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name is required'),
@@ -50,15 +51,14 @@ export default function CreateCustomPdfTemplate() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isBreakCrumbPath, setIsBreakCrumbPath] = useState('');
   const [formValues, setFormValues] = useState(null);
-  const [btnLoading, setBtnLoading] = useState(false);
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
   const [showProps, setShowProps] = useState<boolean>(false);
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
   const [serviceOptions, setServiceOptions] = useState([]);
-  const [variables, setVariables] = useState([]);
-
+  const [resourceFields, setResourceFields] = useState(null);
+  const [btnLoading, setBtnLoading] = useState(false);
   useEffect(() => {
     const options = [];
     PDF_RESOURCE_LIST?.forEach((item) => {
@@ -79,15 +79,15 @@ export default function CreateCustomPdfTemplate() {
     if (formValues && formValues.type) {
       let resource: string = formValues.type;
       if (resource) {
-        axiosInstance()
-          .get(`/field?resource=${resource}`)
-          .then(({ data: { data } }) => {
-            const vars = data.map((field) => field.fieldData.fieldName);
-            setVariables(['entity', 'currentDate', ...vars]);
+        axiosInstance().get(`/field?resource=${resource}`).then(({ data: { data } }) => {
+          const variables = [{ label: "Entity", value: "entity" }, { label: "Current Date", value: "currentDate" }]
+          data?.forEach((e) => {
+            variables.push({ label: e.fieldData.fieldLabel, value: e.fieldData.fieldName })
           })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
+          setResourceFields(variables);
+        }).catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
       }
     }
     if (formValues && formValues.type === sidebarResource.workOrder) {
@@ -101,12 +101,10 @@ export default function CreateCustomPdfTemplate() {
   }, [id]);
 
   const fetchServiceOptions = async () => {
-    await axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
+    await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource?.serviceMaster}`)
       .then(({ data: { data } }) => {
         setServiceOptions(data[sidebarResource?.serviceMaster] || []);
-      })
-      .catch((e) => {
+      }).catch((e) => {
         toastConfig.setToastConfig(e);
       });
   };
@@ -214,41 +212,6 @@ export default function CreateCustomPdfTemplate() {
       });
   };
 
-  const generatePreviewPdf = async () => {
-    try {
-      setBtnLoading(true);
-      const singleInput: { [key: string]: any } = {};
-      if (!formValues || !formValues?.template) {
-        throw new Error("No template available for preview.");
-      }
-      formValues?.template.schemas.forEach(pageSchema => {
-        pageSchema.forEach(field => {
-          if (field.name && field.content !== undefined) {
-            singleInput[field.name] = field.content;
-          }
-        });
-      });
-      const finalInputs = [singleInput];
-      const pdf = await generate({
-        template: formValues?.template,
-        inputs: finalInputs,
-        plugins: getPlugins(variables)
-      });
-      const pdfBytes = new Uint8Array(pdf.buffer);
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      setBtnLoading(false);
-      window.open(URL.createObjectURL(blob));
-
-    } catch (error: any) {
-      setBtnLoading(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: `Failed to generate PDF preview: ${error.message || 'An unknown error occurred.'}`
-      });
-    }
-  };
-
   const handleSubmit = async (values) => {
     const trimmedName = values.name.trim();
     setIsUpdating(true);
@@ -288,6 +251,41 @@ export default function CreateCustomPdfTemplate() {
     } catch (error) {
       setIsUpdating(false);
       toastConfig.setToastConfig(error);
+    }
+  };
+
+  const generatePreviewPdf = async () => {
+    try {
+      setBtnLoading(true);
+      const singleInput: { [key: string]: any } = {};
+      if (!formValues || !formValues?.template) {
+        throw new Error("No template available for preview.");
+      }
+      formValues?.template.schemas.forEach(pageSchema => {
+        pageSchema.forEach(field => {
+          if (field.name && field.content !== undefined) {
+            singleInput[field.name] = field.content;
+          }
+        });
+      });
+      const finalInputs = [singleInput];
+      const pdf = await generate({
+        template: formValues?.template,
+        inputs: finalInputs,
+        plugins: getPlugins(resourceFields)
+      });
+      const pdfBytes = new Uint8Array(pdf.buffer);
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      setBtnLoading(false);
+      window.open(URL.createObjectURL(blob));
+
+    } catch (error: any) {
+      setBtnLoading(false);
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: `Failed to generate PDF preview: ${error.message || 'An unknown error occurred.'}`
+      });
     }
   };
 
@@ -605,16 +603,19 @@ export default function CreateCustomPdfTemplate() {
                     </Grid>
                   </Grid>
                 </div>
-                {values?.template &&
+                {values?.template && resourceFields ?
                   <div className='mt-4'>
                     <PdfEditor
                       template={values?.template as Template}
                       onTemplateChange={(values: Template) => { setFieldValue('template', values); }}
                       disabled={!isEdit || !allowedToEdit}
                       noOfPages={noOfPages}
-                      variables={variables}
+                      variables={resourceFields}
                     />
-                  </div>}
+                  </div> : <Box p={2} height={500}>
+                    <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                  </Box>
+                }
               </div>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
