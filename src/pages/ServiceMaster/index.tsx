@@ -13,7 +13,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
@@ -21,6 +21,7 @@ import FieldDialog from './Steps/FieldDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import { editDisable } from 'src/constants/messageHelpers';
 
 const renderedFrom = camelCase(sidebarResource?.serviceMaster);
 
@@ -28,7 +29,7 @@ const ServiceMaster = () => {
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -41,6 +42,7 @@ const ServiceMaster = () => {
   const [openFieldDialog, setOpenFieldDialog] = useState({ open: false, serviceIds: [] });
 
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -56,6 +58,7 @@ const ServiceMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource?.serviceMaster}`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
     setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, data, false, false)]);
     let newColumns = generateColumns(renderedFrom, data, routes?.serviceMasterDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
@@ -144,6 +147,7 @@ const ServiceMaster = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject['originalData'] = u
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serviceMaster?.isUpdate;
           finalObject['canDelete'] = permissions?.serviceMaster?.isDelete;
@@ -191,6 +195,36 @@ const ServiceMaster = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+  };
+
+    const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.allowedToEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${routes?.serviceMaster?.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const ActionMenuItems = () => {
@@ -299,6 +333,7 @@ const ServiceMaster = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.serviceMaster}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
