@@ -1,9 +1,9 @@
 import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { Error } from '@mui/icons-material';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@mui/material';
 import MaUTable from '@mui/material/Table';
-import { Error } from '@mui/icons-material';
 import { flexRender } from '@tanstack/react-table';
-import React, { ForwardedRef, forwardRef, memo } from 'react';
+import React, { ForwardedRef, forwardRef, useState } from 'react';
 import { RnderTableProps } from 'src/components/CustomReactTable/TableComponents/Table';
 import { getStickyPosition } from '../utils';
 import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
@@ -17,7 +17,6 @@ export const NormalTable = forwardRef(function (
     setCellValue,
     submitInput,
     cellValue,
-    resetField,
     isClientSideGrid,
     loading,
     error,
@@ -118,15 +117,12 @@ export const NormalTable = forwardRef(function (
             <NormalTableBody
               onRowClick={onRowClick}
               rows={rows}
-              virtualization={virtualization}
               state={state}
               setWholeRowsCellColor={setWholeRowsCellColor}
               table={table}
-              dispatch={dispatch}
               setCellValue={setCellValue}
               submitInput={submitInput}
               cellValue={cellValue}
-              resetField={resetField}
               exportTableView={exportTableView}
               excludedColumns={excludedColumns}
             />
@@ -176,18 +172,16 @@ export const NormalTable = forwardRef(function (
 const NormalTableBody = ({
   onRowClick,
   rows,
-  virtualization,
   state,
   setWholeRowsCellColor,
   table,
-  dispatch,
   setCellValue,
   submitInput,
   cellValue,
-  resetField,
   exportTableView,
   excludedColumns
 }) => {
+  const [currentlyEditingCells, setCurrentlyEditingCells] = useState(new Set<string>());
   return (
     <>
       {rows.map((row) => {
@@ -201,18 +195,16 @@ const NormalTableBody = ({
                   <CellRenderer
                     key={cell.id}
                     virtualStyles={{}}
-                    virtualization={virtualization}
+                    currentlyEditingCells={currentlyEditingCells}
+                    setCurrentlyEditingCells={setCurrentlyEditingCells}
                     state={state}
                     cell={cell}
                     setWholeRowsCellColor={setWholeRowsCellColor}
                     row={row}
                     index={index}
                     table={table}
-                    dispatch={dispatch}
-                    setCellValue={setCellValue}
+                    vtableData={[]}
                     submitInput={submitInput}
-                    cellValue={cellValue}
-                    resetField={resetField}
                     virtualTable={false}
                   />
                 </React.Fragment>

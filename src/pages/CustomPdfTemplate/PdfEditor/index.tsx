@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'; 
+import { useEffect, useMemo, useRef } from 'react';
 import { Designer } from '@pdfme/ui';
 import { getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
@@ -8,11 +8,14 @@ interface PdfEditorProps {
   onTemplateChange?: (tpl: Template) => void;
   disabled: boolean;
   noOfPages: number;
+  variables: any;
 }
 
-const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages }: PdfEditorProps) => {
+const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
+
+  const plugins = useMemo(() => getPlugins(variables), [variables]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -25,7 +28,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages }: PdfEdito
           zoomLevel: 1,
           sidebarOpen: true
         },
-        plugins: getPlugins()
+        plugins: plugins
       });
 
       designerInstanceRef.current.onChangeTemplate((newTemplate) => {
@@ -45,7 +48,15 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages }: PdfEdito
         designerInstanceRef.current = null;
       }
     };
-  }, [noOfPages]); 
+  }, [noOfPages]); // add variables here
+
+  // if (!variables || variables.length === 0) {
+  //   return (
+  //     <Box p={2} height={500}>
+  //       <CommonSkeleton lenArray={[...Array(10).keys()]} />
+  //     </Box>
+  //   );
+  // }
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>

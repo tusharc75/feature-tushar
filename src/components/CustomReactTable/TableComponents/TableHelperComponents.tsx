@@ -8,13 +8,12 @@ import { eq, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
-import { cn } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition } from '../utils';
 import DataList from './DataList';
 import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
-
-let cellId;
+import axiosInstance from 'src/axios/axiosInstance';
 
 export type TColType = {
   Header: string;
@@ -484,7 +483,43 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   );
 };
 
-const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField, currentEditingCellPosition, setCellValue }) => {
+export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEditing }) => {
+  // inputField, updatedData
+  const [cellValue, setCellValue] = React.useState(getCellValue(cell) || null);
+  const [lookupOptions, setLookupOptions] = useState([]);
+  const [loading, setLoading] = useState(columnDef.lookup);
+
+  useEffect(() => {
+    setLoading(true);
+    if (columnDef.lookup) {
+      const lookupResource = columnDef.lookupResource === 'Quote' ? 'quoteBuilder' : columnDef.lookupResource;
+      axiosInstance()
+        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+        .then(({ data: { data } }) => {
+          setLookupOptions(data[lookupResource] || []);
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [columnDef]);
+
+  const handleSetValue = () => {
+    handleStopEditing();
+    if (!cellValue) return;
+    const inputField = {
+      [cell.column.id]: cellValue
+    };
+    const updatedData = { ...row.original, [cell.column.id]: cellValue };
+
+    if (getCellValue(cell) !== cellValue) {
+      submitInput({ inputField, updatedData });
+    }
+  };
+
   return (
     <div className="w-full">
       {columnDef?.type === 'singleLine' ? (
@@ -492,11 +527,10 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           autoFocus
           id={`${cell.column.id}-input-${row.index || 0}`}
           type="text"
-          onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+          onBlur={() => handleSetValue()}
           value={cellValue}
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
-            if (!currentEditingCellPosition) return;
             if (e.key === 'Enter') {
               e.preventDefault();
               target.blur();
@@ -513,17 +547,14 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           cellValue={cellValue}
           setCellValue={setCellValue}
           cell={cell}
-          currentEditingCellPosition={currentEditingCellPosition}
           onBlur={() => {
             if (
               (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
               (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
             ) {
               submitInput();
-            } else {
-              resetField();
             }
-            cellId = null;
+            handleStopEditing();
           }}
         />
       ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
@@ -531,15 +562,15 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           fullWidth
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
-            if (!currentEditingCellPosition) return;
             if (e.key === 'Enter') {
               e.preventDefault();
               target.blur();
             }
           }}
-          options={columnDef?.option || []}
+          options={columnDef.lookup ? lookupOptions : columnDef?.option || []}
           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
           isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+          loading={loading}
           value={
             columnDef?.option?.filter((data) => data.optionValue === cellValue).length
               ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
@@ -555,12 +586,7 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
               id={`${cell.column.id}-input-${row.index || 0}`}
               autoFocus
               onBlur={() => {
-                if (getCellValue(cell) !== cellValue) {
-                  submitInput();
-                } else {
-                  resetField();
-                }
-                cellId = null;
+                handleSetValue();
               }}
             />
           )}
@@ -573,7 +599,6 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           limitTags={2}
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
-            if (!currentEditingCellPosition) return;
             if (e.key === 'Enter') {
               e.preventDefault();
               target.blur();
@@ -599,10 +624,8 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
               onBlur={() => {
                 if (!isEqual(getCellValue(cell), cellValue)) {
                   submitInput();
-                } else {
-                  resetField();
                 }
-                cellId = null;
+                handleStopEditing();
               }}
             />
           )}
@@ -615,7 +638,6 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
-            if (!currentEditingCellPosition) return;
             if (e.key === 'Enter') {
               e.preventDefault();
               target.blur();
@@ -625,10 +647,8 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           onBlur={() => {
             if (!eq(getCellValue(cell), cellValue)) {
               submitInput();
-            } else {
-              resetField();
             }
-            cellId = null;
+            handleStopEditing();
           }}
           onChange={(e) => {
             const date = new Date();
@@ -642,11 +662,10 @@ const RenderInputs = ({ columnDef, row, cell, cellValue, submitInput, resetField
           type="number"
           id={`${cell.column.id}-input-${row.index || 0}`}
           min="0"
-          onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+          onBlur={() => handleSetValue()}
           value={cellValue}
           onKeyDown={(e) => {
             const target = e.target as HTMLInputElement;
-            if (!currentEditingCellPosition) return;
             if (e.key === 'Enter') {
               e.preventDefault();
               target.blur();
@@ -675,21 +694,19 @@ export const CellRenderer = ({
   row,
   index,
   table,
-  setCellValue,
   submitInput,
-  cellValue,
-  resetField,
   virtualStyles,
   virtualTable = true,
-  handleChangeCurrentEditingCellPosition,
-  vtableData
+  vtableData,
+  currentlyEditingCells,
+  setCurrentlyEditingCells
 }) => {
   const columnDef: TColType = cell.column.columnDef as TColType;
 
-  const { currentEditingCellPosition } = state;
   const { style: stickyStyle, className: stickyClassName } =
     vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
   const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const props = useMemo(
     () => ({
@@ -708,26 +725,31 @@ export const CellRenderer = ({
         ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
       },
       onClick: () => {
-        if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable) return;
-        handleChangeCurrentEditingCellPosition(row.original._id, cell.column.id);
-        setCellValue(getCellValue(cell) || null);
-        cellId = cell.id;
+        if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable || cell?.column.id === 'selection') return;
+        setIsEditing(true);
+
+        setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
       }
     }),
     [
       cell,
       className,
       columnDef.sticky,
-      handleChangeCurrentEditingCellPosition,
       row.original,
-      setCellValue,
       setWholeRowsCellColor,
       stickyClassName,
       style,
       virtualStyles,
-      virtualTable
+      virtualTable,
+      setCurrentlyEditingCells
     ]
   );
+
+  const handleStopEditing = () => {
+    currentlyEditingCells.delete(cell.column.id);
+    setCurrentlyEditingCells(new Set(currentlyEditingCells));
+    setIsEditing(false);
+  };
 
   const args = { cell, column: cell.column, row, table };
 
@@ -740,26 +762,14 @@ export const CellRenderer = ({
           </div>
         </td>
       );
-    case !['selection'].includes(cell?.column.id) &&
-      currentEditingCellPosition?.rowId === row.original._id &&
-      currentEditingCellPosition?.columnName === cell?.column.id:
+    case !['selection'].includes(cell?.column.id) && isEditing:
       return (
         <td {...props}>
-          <RenderInputs
-            key={cellValue}
-            cell={cell}
-            cellValue={cellValue}
-            columnDef={columnDef}
-            currentEditingCellPosition={currentEditingCellPosition}
-            resetField={resetField}
-            row={row}
-            setCellValue={setCellValue}
-            submitInput={submitInput}
-          />
+          <RenderInputs cell={cell} columnDef={columnDef} row={row} submitInput={submitInput} handleStopEditing={handleStopEditing} />
         </td>
       );
 
-    case currentEditingCellPosition?.rowId === row.original._id && cell?.column.id === 'action' && currentEditingCellPosition?.rowId !== undefined:
+    case currentlyEditingCells.size > 0 && cell?.column.id === 'action':
       return (
         <td {...props}>
           <div className="action-cell">

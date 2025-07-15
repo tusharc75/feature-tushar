@@ -56,7 +56,7 @@ const CustomPdfTemplate = () => {
         disabled: true,
         Cell: ({ row }) => (
           <div>
-            <Link className="link" to={`${routes.customPdfTemplate.path}/${row?.original?._id}`} title={row?.original?.name}>
+            <Link className="link" to={`${routes.customPdfTemplateDetail.path}/${row?.original?._id}`} title={row?.original?.name}>
               {row?.original?.name}
             </Link>
           </div>
@@ -169,9 +169,9 @@ const CustomPdfTemplate = () => {
 
   const CreateNew = (id, isClone) => {
     if (isClone) {
-      history.push(routes.customPdfTemplate.path + '/' + id, { isClone: true });
+      history.push(routes.customPdfTemplateDetail.path + '/' + id, { isClone: true });
     } else {
-      history.push(routes.customPdfTemplate.path + '/0', { isClone: false });
+      history.push(routes.customPdfTemplateDetail.path + '/0', { isClone: false });
     }
   };
 
@@ -198,7 +198,7 @@ const CustomPdfTemplate = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ ...routes.customPdfTemplate, title:"Custom Pdf Templates" }]} />
+        <CustomBreadCrumbs routes={[{ ...routes.customPdfTemplate, title: resources?.customPdfTemplate?.titleSingular }]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -231,7 +231,7 @@ const CustomPdfTemplate = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord ? `Custom Pdf Template : ${deleteRecord?.name || ''}` : `selected Custom Pdf Templates`} ?`}
+          message={`Are you sure you want to delete ${deleteRecord ? `${deleteRecord?.name || ''}` : `selected records`} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -245,4 +245,3 @@ const CustomPdfTemplate = () => {
 };
 
 export default CustomPdfTemplate;
-                                                                                                                                                                                                            

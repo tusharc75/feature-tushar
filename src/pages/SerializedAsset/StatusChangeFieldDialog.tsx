@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import { CustomDialogTransition, getObjKeysWithValues, sidebarResource, yupSchema } from '../../constants/helpers';
+import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from '../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
@@ -21,7 +21,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
   useEffect(() => {
     let fieldsData = fields.filter((d) => statusPolicy?.fields.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-    let initialValues = getObjKeysWithValues(serializedAssetData, fieldsDataForUpdate);
+    let initialValues = serializedAssetData ? getObjKeysWithValues(serializedAssetData, fieldsDataForUpdate) : getObjKeys('', fieldsDataForUpdate);
     const decimalField = [];
 
     if (statusPolicy?.sumDecimalField || statusPolicy?.autoIncrementDecimalField) {
@@ -54,6 +54,13 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
         data[fieldName] = values[fieldName];
       }
     });
+    statusPolicy?.fieldsReset?.forEach(fieldName => {
+      if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
+        data[fieldName] = 0;
+      } else {
+        data[fieldName] = '';
+      }
+    });
     onSuccess(data);
     setSubmitting(false);
   };
@@ -79,7 +86,7 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${serializedAssetData?.assetNumber}`}
+                title={serializedAssetData ? `${serializedAssetData?.assetNumber}` : `Status change`}
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>

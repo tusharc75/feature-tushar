@@ -40,6 +40,7 @@ import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import StatusChangeFieldDialog from 'src/pages/SerializedAsset/StatusChangeFieldDialog';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -75,7 +76,7 @@ const SerializedAsset = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
   const [showScrapAsset, setShowScrapAsset] = useState(assetStatus && assetStatus === ASSET_STATUS.scrap ? true : false);
-
+  const [fields, setFields] = useState(null);
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
@@ -84,6 +85,8 @@ const SerializedAsset = () => {
   const [serializedAssetStatusChangeRequestFields, setSerializedAssetStatusChangeRequestFields] = useState(null);
   const [openStatusChangeRequestDialog, setStatusChangeRequestDialog] = useState(false);
   const [allStatusOptions, setAllStatusOptions] = useState(null);
+  const [resourceData, setResourceData] = useState(null);
+  const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
 
   useEffect(() => {
     const fetch = async () => {
@@ -217,6 +220,7 @@ const SerializedAsset = () => {
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
     const resourceData = resourceDataResponce?.data?.data;
+    setResourceData(resourceData)
 
     const statusColors = {};
     if (resourceData?.policy?.statusColor) {
@@ -234,6 +238,7 @@ const SerializedAsset = () => {
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
+        setFields(JSON.parse(JSON.stringify(data)));
         data?.some((o) => {
           if (o?.fieldData?.fieldName === 'status') {
             setAllStatusOptions(o.fieldData.option)
@@ -511,11 +516,31 @@ const SerializedAsset = () => {
   };
 
   const handleStatusChange = (status) => {
+    const { policy } = resourceData;
+    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === status);
+
+    if (statusPolicy?.products?.length > 0 && !selectedRecords?.every(r => statusPolicy?.products?.includes(r?.productId))) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'warning',
+        message: `Every selected ${resources?.serializedAsset?.titlePlural} should be in same product`
+      });
+      return;
+    }
+
+    setStatus(status);
     if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
-      setStatus(status);
-      setShowReasonDialog(true);
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        setShowReasonDialog(true);
+      }
     } else {
-      handleStatusUpdate({ status });
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy });
+      } else {
+        handleStatusUpdate({ status });
+      }
     }
   };
 
@@ -529,7 +554,8 @@ const SerializedAsset = () => {
         assets: ids,
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
-        reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets }
+        reference: { _id: '', type: INVENTORY_HISTORY_TYPE.serializedAssets },
+        assetData: obj?.assetData
       })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
@@ -877,6 +903,19 @@ const SerializedAsset = () => {
           onSuccess={() => {
             setStatusChangeRequestDialog(false);
             fetchData();
+          }}
+        />
+      )}
+      {openStatusChangeFieldDialog.open && (
+        <StatusChangeFieldDialog
+          fields={fields}
+          statusPolicy={openStatusChangeFieldDialog.statusPolicy}
+          serializedAssetData={null}
+          productInventoryId={null}
+          onClose={() => setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null })}
+          onSuccess={(values) => {
+            handleStatusUpdate({ status: status, assetData: values });
+            setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null });
           }}
         />
       )}

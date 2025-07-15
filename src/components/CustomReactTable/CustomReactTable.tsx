@@ -2,6 +2,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@mui/material';
 import {
+  ColumnFiltersState,
   ExpandedState,
   Row,
   SortingState,
@@ -19,7 +20,6 @@ import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
-import { flattenArray } from 'src/constants/columns';
 import { useDebounce, useDndSensors } from 'src/hooks';
 import xlsx from 'xlsx-js-style';
 import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
@@ -95,7 +95,6 @@ const CustomReactTable = ({
   arrangeRowField = null
 }) => {
   const {
-    currentEditingCellPosition,
     dataRows: data,
     rowCount,
     selectedRecords,
@@ -191,29 +190,13 @@ const CustomReactTable = ({
     [isClientSideGrid, dispatch]
   );
 
-  // Editing cell functions
-  const resetField = () => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  };
-
-  const submitInput = useCallback(() => {
-    skipAutoResetPageIndex();
-    if (!currentEditingCellPosition) return;
-    const updatedData = flattenArray(data)?.find((row) => row?._id === currentEditingCellPosition.rowId);
-    updatedData[currentEditingCellPosition.columnName] = cellValue;
-    const inputField = { [`${currentEditingCellPosition.columnName}`]: cellValue };
-
-    if (onSaveEdit && ![undefined, null].includes(cellValue)) {
+  const submitInput = useCallback(
+    ({ inputField, updatedData }: { inputField: Record<string, string>; updatedData: any }) => {
+      skipAutoResetPageIndex();
       onSaveEdit(inputField, updatedData);
-    }
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: null
-    });
-  }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
+    },
+    [onSaveEdit, skipAutoResetPageIndex]
+  );
 
   useEffect(() => {
     if (enableGlobalSearch) {
@@ -239,6 +222,7 @@ const CustomReactTable = ({
       columnVisibility: visibleColumns,
       rowSelection
     },
+
     // flags
     autoResetAll: false,
     enableExpanding: expander,
@@ -506,7 +490,6 @@ const CustomReactTable = ({
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             exportTableView={true}
@@ -560,7 +543,6 @@ const CustomReactTable = ({
                 setCellValue={setCellValue}
                 submitInput={submitInput}
                 cellValue={cellValue}
-                resetField={resetField}
                 isClientSideGrid={isClientSideGrid}
                 loading={loading}
                 error={error}

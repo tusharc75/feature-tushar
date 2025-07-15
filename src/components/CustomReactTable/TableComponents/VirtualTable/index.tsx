@@ -22,7 +22,6 @@ const VirtualTableImpl = forwardRef(function (
     setCellValue,
     submitInput,
     cellValue,
-    resetField,
     isClientSideGrid,
     loading,
     error,
@@ -40,7 +39,6 @@ const VirtualTableImpl = forwardRef(function (
     excludedColumns,
     footerRowFound,
     stickyColumns,
-    handleChangeCurrentEditingCellPosition,
     vtableData,
     expanderWithCustomContent = false,
     customContentHeight = 300,
@@ -49,7 +47,6 @@ const VirtualTableImpl = forwardRef(function (
   }: RnderTableProps & {
     columns: Column<any, unknown>[];
     sizes: number[];
-    handleChangeCurrentEditingCellPosition: (rowId: string, colId: string) => void;
     vtableData: any[];
     expanderWithCustomContent: boolean;
     customContentHeight: number;
@@ -145,11 +142,9 @@ const VirtualTableImpl = forwardRef(function (
             state={state}
             setWholeRowsCellColor={setWholeRowsCellColor}
             table={table}
-            handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             virtualColumns={virtualColumns}
             vtableData={vtableData}
             parentRef={parentRef}

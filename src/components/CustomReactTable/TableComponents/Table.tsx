@@ -14,9 +14,8 @@ type TTableProps = {
   dispatch: Dispatch<TActios>;
   table: Table<any>;
   setCellValue: React.Dispatch<React.SetStateAction<string>>;
-  submitInput: () => void;
+  submitInput: (data: { inputField: Record<string, string>; updatedData: any }) => void;
   cellValue: string;
-  resetField: () => void;
   isClientSideGrid: boolean;
   loading: boolean;
   error: boolean;
@@ -44,7 +43,6 @@ const TableComponent = forwardRef(function (
     setCellValue,
     submitInput,
     cellValue,
-    resetField,
     isClientSideGrid,
     loading,
     error,
@@ -117,16 +115,6 @@ const TableComponent = forwardRef(function (
   const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
   const isFooterVisible = isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero;
 
-  const handleChangeCurrentEditingCellPosition = (rowid: string, columnId: string) => {
-    dispatch({
-      type: 'currentEditingCellPosition',
-      cellPosition: {
-        rowId: rowid,
-        columnName: columnId
-      }
-    });
-  };
-
   return (
     <>
       {exportTableView ? (
@@ -139,7 +127,6 @@ const TableComponent = forwardRef(function (
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             error={error}
@@ -172,7 +159,6 @@ const TableComponent = forwardRef(function (
             setCellValue={setCellValue}
             submitInput={submitInput}
             cellValue={cellValue}
-            resetField={resetField}
             isClientSideGrid={isClientSideGrid}
             loading={loading}
             error={error}
@@ -190,7 +176,6 @@ const TableComponent = forwardRef(function (
             excludedColumns={excludedColumns}
             footerRowFound={footerRowFound}
             stickyColumns={stickyColumns}
-            handleChangeCurrentEditingCellPosition={handleChangeCurrentEditingCellPosition}
             vtableData={vtableData}
             expanderWithCustomContent={expanderWithCustomContent}
             customContentHeight={customContentHeight}
@@ -209,9 +194,8 @@ export type RnderTableProps = {
   dispatch: Dispatch<TActios>;
   table: Table<any>;
   setCellValue: React.Dispatch<React.SetStateAction<string>>;
-  submitInput: () => void;
+  submitInput: (data: { inputField: Record<string, string>; updatedData: any }) => void;
   cellValue: string;
-  resetField: () => void;
   isClientSideGrid: boolean;
   loading: boolean;
   error: boolean;
@@ -232,4 +216,4 @@ export type RnderTableProps = {
   renderedFrom: string;
 };
 
-export default React.memo(TableComponent);
+export default TableComponent;

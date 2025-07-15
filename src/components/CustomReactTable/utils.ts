@@ -138,23 +138,8 @@ export function useSkipper() {
   return [shouldSkip, skip] as const;
 }
 
-export const handleKeyDown = ({ e, currentEditingCellPosition, submitInput }) => {
-  if (!currentEditingCellPosition) return;
-  if (e.key === 'Enter') {
-    e.preventDefault();
-    submitInput();
-  }
-};
-
 export const handleCellClick = ({ cell, row, dispatch, setCellValue }) => {
   if (!cell.column.id || !row.original._id || !cell?.column?.columnDef.editable) return;
-  dispatch({
-    type: 'currentEditingCellPosition',
-    cellPosition: {
-      rowId: row.original._id,
-      columnName: cell.column.id
-    }
-  });
 
   setCellValue(getCellValue(cell) || null);
 };

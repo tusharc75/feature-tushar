@@ -783,6 +783,9 @@ const routes = {
   customPdfTemplate: {
     path: '/custom-pdf-template'
   },
+  customPdfTemplateDetail: {
+    path: '/custom-pdf-template/detail'
+  },
 };
 
 export default routes;

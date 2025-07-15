@@ -196,7 +196,7 @@ export const subcontractAssemblySteps: stepInterface[] = [
 export const assemblyOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Work Order', title: 'Work Order', icon: 'workOrder' },
-  // { name: 'Loading', title: 'Loading', icon: 'ticket' },
+  { name: 'Loading', title: 'Loading', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
@@ -422,7 +422,7 @@ export const sidebarResource = {
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
   fieldView: 'Field View',
-  customPdfTemplate: 'Custom Pdf Templates'
+  customPdfTemplate: 'Custom Pdf Template'
 } as const;
 
 export const primaryFields = {
