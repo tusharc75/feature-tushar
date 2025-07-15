@@ -10,6 +10,7 @@ import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'rea
 import axiosInstance from 'src/axios/axiosInstance';
 import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
 import { getCellValue } from 'src/components/CustomReactTable/utils';
+import CurrencyAutocomplete from 'src/components/Helpers/CurrencyAutocomplete';
 import { cn, dateFormat, dateTimeFormat, getUniqueCurrencies } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import * as yup from 'yup';
@@ -394,6 +395,70 @@ const CurrencyNumber = (props: InputProps) => {
   return <RenderTextInput {...props} prefixIcon={currencyIcon.symbolNative} />;
 };
 
+const RenderCurrencyAutoComplete = ({
+  cell,
+  cellValue,
+  columnDef,
+  handleStopEditing,
+  handleSubmit,
+  row,
+  setCellValue,
+  validationSchema
+}: InputProps) => {
+  const [isValid, setIsValid] = useState(true);
+
+  const handleBlur = async () => {
+    handleStopEditing();
+    if (!isValid) return;
+
+    if (getCellValue(cell) !== cellValue) {
+      handleSubmit();
+    }
+  };
+
+  const handleInput = async (value: string) => {
+    setCellValue(value);
+    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    setIsValid(isValidValue);
+  };
+
+  return (
+    <div className="w-full flex-grow">
+      <CurrencyAutocomplete
+        onKeyDown={(e) => {
+          const target = e.target as HTMLInputElement;
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            target.blur();
+          }
+        }}
+        textFieldParams={{
+          onBlur: () => {
+            handleBlur();
+          }
+        }}
+        size="small"
+        margin="none"
+        required={true}
+        value={cellValue}
+        fullWidth={true}
+        onChange={(e, val: any) => {
+          handleInput(val && val.currencyCode ? val.currencyCode : '');
+        }}
+      />
+    </div>
+  );
+};
+
+const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
+  console.log({ row: row.original, col: columnDef });
+  return (
+    <ClickAwayListener onClickAway={() => handleStopEditing()}>
+      <div></div>
+    </ClickAwayListener>
+  );
+};
+
 const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
   colorPicker: yup.string().min(7),
@@ -454,17 +519,10 @@ export const RenderInputField = memo((props: InputProps) => {
     case 'year': {
       return <DateInput {...props} validationSchema={validationSchema} />;
     }
-
+    case 'currency': {
+      return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
+    }
     default:
       return <EmptyField {...props} validationSchema={validationSchema} />;
   }
 });
-
-const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
-  console.log({ row: row.original, col: columnDef });
-  return (
-    <ClickAwayListener onClickAway={() => handleStopEditing()}>
-      <div></div>
-    </ClickAwayListener>
-  );
-};
