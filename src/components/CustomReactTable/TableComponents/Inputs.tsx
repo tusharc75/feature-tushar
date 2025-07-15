@@ -6,7 +6,7 @@ import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import dayjs from 'dayjs';
 import { find, isEqual } from 'lodash';
 import MuiPhoneInput from 'material-ui-phone-number';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
 import { getCellValue } from 'src/components/CustomReactTable/utils';
@@ -60,12 +60,14 @@ export const RenderTextInput = ({
   setCellValue,
   handleSubmit,
   handleStopEditing,
-  validationSchema = { isValid: () => new Promise((resove) => resove(true)) },
+  validationSchema,
   prefixIcon,
   suffixIcon,
   ...rest
 }: InputProps & Partial<React.InputHTMLAttributes<HTMLInputElement>> & { prefixIcon?: React.ReactNode; suffixIcon?: React.ReactNode }) => {
   const [isValid, setIsValid] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const invisibleContainerRef = useRef<HTMLDivElement>(null);
 
   const handleBlur = async () => {
     handleStopEditing();
@@ -78,23 +80,37 @@ export const RenderTextInput = ({
 
   const handleInput = async (value: string) => {
     setCellValue(value);
-    const isValidValue = (await validationSchema?.isValid?.(cellValue)) || true;
+    const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
   };
+
+  useLayoutEffect(() => {
+    const container = invisibleContainerRef.current;
+    const input = inputRef.current;
+    if (!container || !input) return;
+    input.style.width = `${container.getBoundingClientRect().width + 1}px`;
+  }, [cellValue]);
 
   return (
     <div
       className={cn(
-        'shadow-0 flex w-full appearance-none items-center justify-between gap-1 !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
+        'shadow-0 relative flex w-full appearance-none items-center justify-start gap-1 !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
         isValid ? '' : 'border-red-500 focus-within:outline-red-500'
       )}
+      onClick={() => {
+        inputRef.current?.focus();
+      }}
     >
+      <div className="pointer-events-none absolute -z-10 opacity-0" ref={invisibleContainerRef}>
+        {cellValue}
+      </div>
       {prefixIcon}
       <input
+        ref={inputRef}
         autoFocus
         id={`${cell.column.id}-input-${row.index || 0}`}
         type="text"
-        className="flex-grow border-none outline-none"
+        className="flex-shrink border-none outline-none"
         onBlur={() => handleBlur()}
         value={cellValue}
         onKeyDown={(e) => {
@@ -129,7 +145,7 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
   const handleInput = async (val: string) => {
     console.log(val);
     setCellValue(val);
-    const isValidValue = (await validationSchema?.isValid?.(cellValue)) || true;
+    const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
   };
 
@@ -206,7 +222,7 @@ const DropdownAndMultiSelect = ({
 
   const handleInput = async (value: string | string[]) => {
     setCellValue(value);
-    const isValidValue = (await validationSchema?.isValid?.(cellValue)) || true;
+    const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
   };
 
@@ -254,7 +270,7 @@ const DataListWrapper = ({ cell, cellValue, columnDef, handleStopEditing, handle
   const handleBlur = async () => {
     handleStopEditing();
 
-    const isValid = (await validationSchema?.isValid?.(cellValue)) || true;
+    const isValid = await validationSchema?.isValid?.(cellValue);
     if (!isValid) return;
 
     if (getCellValue(cell) !== cellValue) {
@@ -308,7 +324,7 @@ const DateInput = ({ cell, cellValue, columnDef, handleStopEditing, handleSubmit
   const handleInput = async (value: dayjs.Dayjs) => {
     setStateValue(value);
     setCellValue(value ? value.utc().toISOString() : null);
-    const isValidValue = (await validationSchema?.isValid?.(cellValue)) || true;
+    const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
   };
 
@@ -384,7 +400,7 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
 };
 
 export const RenderInputField = memo((props: InputProps) => {
-  const validationSchema = schemas[props.columnDef.type];
+  const validationSchema = schemas[props.columnDef.type] || { isValid: () => new Promise((resove) => resove(true)) };
 
   if (props.columnDef?.dataList && props.columnDef?.dataListId) {
     return <DataListWrapper {...props} />;
