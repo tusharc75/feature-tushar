@@ -1,22 +1,19 @@
-import { memo, useEffect, useMemo, useState } from 'react';
-import { getCellValue } from 'src/components/CustomReactTable/utils';
-import { cn } from 'src/constants/helpers';
-import * as yup from 'yup';
-import { ValidateOptions } from 'yup/lib/types';
-import MuiPhoneInput from 'material-ui-phone-number';
+import { CalendarToday } from '@mui/icons-material';
 import { Autocomplete, AutocompleteProps, ClickAwayListener, Popover, TextField } from '@mui/material';
-import { isEqual } from 'lodash';
-import axiosInstance from 'src/axios/axiosInstance';
-import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateView } from '@mui/x-date-pickers';
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
-import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
 import dayjs from 'dayjs';
-import { isEmpty } from 'lodash';
-import CustomDatePicker from 'src/components/CustomDatePicker';
-import { CalendarToday } from '@mui/icons-material';
-import { DateView } from '@mui/x-date-pickers';
+import { find, isEqual } from 'lodash';
+import MuiPhoneInput from 'material-ui-phone-number';
+import { memo, useEffect, useMemo, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
+import { getCellValue } from 'src/components/CustomReactTable/utils';
+import { cn, dateFormat, dateTimeFormat, getUniqueCurrencies } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import * as yup from 'yup';
+import { ValidateOptions } from 'yup/lib/types';
 
 type YupSchema = Partial<yup.AnySchema> & { isValid: (value: any, options?: ValidateOptions<any>) => Promise<boolean> };
 
@@ -64,8 +61,10 @@ export const RenderTextInput = ({
   handleSubmit,
   handleStopEditing,
   validationSchema = { isValid: () => new Promise((resove) => resove(true)) },
+  prefixIcon,
+  suffixIcon,
   ...rest
-}: InputProps & Partial<React.InputHTMLAttributes<HTMLInputElement>>) => {
+}: InputProps & Partial<React.InputHTMLAttributes<HTMLInputElement>> & { prefixIcon?: React.ReactNode; suffixIcon?: React.ReactNode }) => {
   const [isValid, setIsValid] = useState(true);
 
   const handleBlur = async () => {
@@ -84,28 +83,34 @@ export const RenderTextInput = ({
   };
 
   return (
-    <input
-      autoFocus
-      id={`${cell.column.id}-input-${row.index || 0}`}
-      type="text"
-      onBlur={() => handleBlur()}
-      value={cellValue}
-      onKeyDown={(e) => {
-        const target = e.target as HTMLInputElement;
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          target.blur();
-        }
-      }}
+    <div
       className={cn(
-        'shadow-0 w-full appearance-none !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
+        'shadow-0 flex w-full appearance-none items-center justify-between gap-1 !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
         isValid ? '' : 'border-red-500 focus-within:outline-red-500'
       )}
-      onChange={(e) => {
-        handleInput(e.target.value || '');
-      }}
-      {...rest}
-    />
+    >
+      {prefixIcon}
+      <input
+        autoFocus
+        id={`${cell.column.id}-input-${row.index || 0}`}
+        type="text"
+        className="flex-grow border-none outline-none"
+        onBlur={() => handleBlur()}
+        value={cellValue}
+        onKeyDown={(e) => {
+          const target = e.target as HTMLInputElement;
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            target.blur();
+          }
+        }}
+        onChange={(e) => {
+          handleInput(e.target.value || '');
+        }}
+        {...rest}
+      />
+      {suffixIcon}
+    </div>
   );
 };
 
@@ -357,6 +362,17 @@ const DateInput = ({ cell, cellValue, columnDef, handleStopEditing, handleSubmit
   );
 };
 
+const CurrencyNumber = (props: InputProps) => {
+  const {
+    state: { user }
+  }: any = useData();
+
+  const currencyIcon = find(getUniqueCurrencies(), function (obj) {
+    return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
+  });
+  return <RenderTextInput {...props} prefixIcon={currencyIcon.symbolNative} />;
+};
+
 const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
   colorPicker: yup.string().min(7),
@@ -378,9 +394,15 @@ export const RenderInputField = memo((props: InputProps) => {
     case 'singleLine':
     case 'multiLine':
     case 'name':
+    case 'email':
+    case 'url': {
       return <RenderTextInput {...props} validationSchema={validationSchema} />;
-    case 'email': {
-      return <RenderTextInput {...props} validationSchema={validationSchema} />;
+    }
+    case 'currencyNumber': {
+      return <CurrencyNumber {...props} validationSchema={validationSchema} />;
+    }
+    case 'percent': {
+      return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
     }
     case 'mobileNumber': {
       return <PhoneNumberInput {...props} validationSchema={validationSchema} />;
@@ -394,6 +416,7 @@ export const RenderInputField = memo((props: InputProps) => {
     case 'year': {
       return <DateInput {...props} validationSchema={validationSchema} />;
     }
+
     default:
       return <EmptyField {...props} validationSchema={validationSchema} />;
   }

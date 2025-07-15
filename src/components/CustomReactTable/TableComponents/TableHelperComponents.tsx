@@ -691,7 +691,6 @@ export const CellRenderer = React.memo(
         onClick: () => {
           const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
           if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
-          console.log(cell.column.id);
           setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
         }
       }),
@@ -716,12 +715,7 @@ export const CellRenderer = React.memo(
     const handleStopEditing = useCallback(() => {
       currentlyEditingCells.delete(cell.column.id);
       setCurrentlyEditingCells(new Set(currentlyEditingCells));
-      console.log('called', cell.column.id, currentlyEditingCells);
     }, [cell.column.id, currentlyEditingCells, setCurrentlyEditingCells]);
-
-    if (columnDef.type === 'date') {
-      console.log({ currentlyEditingCells });
-    }
 
     const args = { cell, column: cell.column, row, table };
 
