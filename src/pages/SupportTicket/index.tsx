@@ -185,7 +185,7 @@ const SupportTicket = () => {
           finalObject['canDelete'] =
             checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canEdit'] = permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.supportTicket, u);
+          finalObject['canEdit'] = permissions?.supportTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.supportTicket, u);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
