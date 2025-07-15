@@ -466,7 +466,7 @@ const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
 
 const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
-  colorPicker: yup.string().min(1),
+  colorPicker: yup.string().min(7),
   email: yup.string().email(),
   mobileNumber: yup.string().min(5),
   singleLine: yup.string().min(1),
