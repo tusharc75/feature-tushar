@@ -151,7 +151,6 @@ const ServiceMaster = () => {
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serviceMaster?.isUpdate;
           finalObject['canDelete'] = permissions?.serviceMaster?.isDelete;
-          finalObject['canEdit'] = permissions?.serviceMaster?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.serviceMaster, u);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -200,7 +199,7 @@ const ServiceMaster = () => {
 
     const handleSaveEdit = async (inputField, updatedRow) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
-    if (dataToUpdate?.canEdit) {
+    if (dataToUpdate?.allowedToEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
       const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
       Object.keys(inputField).forEach((key) => {
