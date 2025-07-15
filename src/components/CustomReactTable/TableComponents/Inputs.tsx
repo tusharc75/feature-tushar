@@ -52,7 +52,7 @@ type InputProps = {
   validationSchema?: YupSchema;
 };
 
-export const RenderTextInput = ({
+const RenderTextInput = ({
   columnDef,
   row,
   cell,
@@ -63,6 +63,7 @@ export const RenderTextInput = ({
   validationSchema,
   prefixIcon,
   suffixIcon,
+  type = 'text',
   ...rest
 }: InputProps & Partial<React.InputHTMLAttributes<HTMLInputElement>> & { prefixIcon?: React.ReactNode; suffixIcon?: React.ReactNode }) => {
   const [isValid, setIsValid] = useState(true);
@@ -99,6 +100,9 @@ export const RenderTextInput = ({
       )}
       onClick={() => {
         inputRef.current?.focus();
+        if (type === 'color') {
+          inputRef.current?.click();
+        }
       }}
     >
       <div className="pointer-events-none absolute -z-10 opacity-0" ref={invisibleContainerRef}>
@@ -109,8 +113,8 @@ export const RenderTextInput = ({
         ref={inputRef}
         autoFocus
         id={`${cell.column.id}-input-${row.index || 0}`}
-        type="text"
-        className="flex-shrink border-none outline-none"
+        type={type}
+        className={cn('flex-shrink border-none outline-none', type === 'color' ? 'cursor-pointer' : '')}
         onBlur={() => handleBlur()}
         value={cellValue}
         onKeyDown={(e) => {
@@ -125,6 +129,7 @@ export const RenderTextInput = ({
         }}
         {...rest}
       />
+      {type === 'color' && <p>{cellValue}</p>}
       {suffixIcon}
     </div>
   );
@@ -171,7 +176,7 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
   );
 };
 
-const DropdownAndMultiSelect = ({
+const DropdownMultiSelectAndRadio = ({
   cell,
   cellValue,
   columnDef,
@@ -206,7 +211,7 @@ const DropdownAndMultiSelect = ({
     if (!isValid) return;
     if (
       (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
-      (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
+      (['dropDown', 'radio'].includes(columnDef?.type) && getCellValue(cell) !== cellValue)
     ) {
       handleSubmit();
     }
@@ -399,6 +404,16 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   url: yup.string().url()
 };
 
+const decimalPlaceValidator = (decimalPlaces: number) =>
+  yup
+    .number()
+    .typeError('Value must be a number')
+    .test('decimal-places', `Must have no more than ${decimalPlaces} decimal place${decimalPlaces === 1 ? '' : 's'}`, (value) => {
+      if (value === undefined || value === null) return true;
+      const decimalPart = value.toString().split('.')[1];
+      return !decimalPart || decimalPart.length <= decimalPlaces;
+    });
+
 export const RenderInputField = memo((props: InputProps) => {
   const validationSchema = schemas[props.columnDef.type] || { isValid: () => new Promise((resove) => resove(true)) };
 
@@ -414,18 +429,25 @@ export const RenderInputField = memo((props: InputProps) => {
     case 'url': {
       return <RenderTextInput {...props} validationSchema={validationSchema} />;
     }
+    case 'colorPicker': {
+      return <RenderTextInput {...props} validationSchema={validationSchema} type="color" />;
+    }
     case 'currencyNumber': {
       return <CurrencyNumber {...props} validationSchema={validationSchema} />;
     }
     case 'percent': {
       return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
     }
+    case 'decimal': {
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} />;
+    }
     case 'mobileNumber': {
       return <PhoneNumberInput {...props} validationSchema={validationSchema} />;
     }
+    case 'radio':
     case 'dropDown':
     case 'multiSelect': {
-      return <DropdownAndMultiSelect {...props} validationSchema={validationSchema} />;
+      return <DropdownMultiSelectAndRadio {...props} validationSchema={validationSchema} />;
     }
     case 'date':
     case 'dateTime':

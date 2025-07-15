@@ -388,11 +388,18 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
-                    {row?.original?.[field?.fieldName]}
-                  </h5>
+                  <div className="flex items-center gap-1">
+                    <div
+                      style={{ background: row?.original?.[field?.fieldName] }}
+                      className="size-[16px] rounded-full border"
+                      title={row?.original?.[field?.fieldName]}
+                    ></div>
+                    <h5 className="text-truncate">{row?.original?.[field?.fieldName]}</h5>
+                  </div>
                 ) : (
-                  <NoDataCell />
+                  <div>
+                    <NoDataCell />
+                  </div>
                 )}
               </div>
             )
@@ -435,11 +442,7 @@ export function useColumns() {
             ...commonFieldData,
             editable: Boolean(field?.isColumnEditable),
             cell: ({ row }) =>
-              row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? (
-                <p>{row.original[field.fieldName]?.toLocaleString()}</p>
-              ) : (
-                <NoDataCell />
-              ),
+              row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />,
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows
