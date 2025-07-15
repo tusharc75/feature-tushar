@@ -1,5 +1,6 @@
 import { sortBy } from 'lodash';
 import axiosInstance from '../../axios/axiosInstance';
+import FieldList from 'src/components/FormBuilder/FieldList';
 
 export const getLookupResource = async () => {
   const {
@@ -71,3 +72,25 @@ export const checkBoxOptions = [
   { optionLabel: 'YES', optionValue: 'yes' },
   { optionLabel: 'NO', optionValue: 'no' }
 ];
+
+export const NOT_ALLOW_INLINE_EDIT_FIELD_TYPE = [
+  FieldList.FORMULA.type,
+  FieldList.VLOOKUPDROPDOWN.type,
+  FieldList.CONVERTER.type,
+  FieldList.SWITCH.type,
+  FieldList.CHECKBOX.type,
+  FieldList.IMAGEUPLOAD.type,
+  FieldList.MULTIIMAGEUPLOAD.type,
+  FieldList.FILEUPLOAD.type,
+  FieldList.MULTIFILEUPLOAD.type,
+  FieldList.LOCATION.type,
+  FieldList.GPSLOCATION.type,
+  FieldList.PROCESS.type,
+  FieldList.FREESTYLEMULTISELECT.type,
+  FieldList.RICHTEXTEDITOR.type,
+  FieldList.SIGNATURE.type,
+  FieldList.GROUPSIGNATURE.type,
+  FieldList.LOOKUPDISPLAY.type,
+  FieldList.COUNTER.type,
+  FieldList.DESCRIPTION.type
+]

@@ -4,7 +4,7 @@ import { ResourceDropdown } from '../resourceDropdown';
 import Autocomplete from '@mui/material/Autocomplete';
 import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 import FieldList from 'src/components/FormBuilder/FieldList';
-import { OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
+import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE, OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
   return (
@@ -207,6 +207,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                 <Checkbox
                   name="isColumnEditable"
                   checked={values['isColumnEditable']}
+                  disabled={NOT_ALLOW_INLINE_EDIT_FIELD_TYPE.includes(values?.type) || values?.isUneditable || values?.disableOnEdit || values?.isSystemGenerate}
                   onChange={(e) => {
                     setFieldValue('isColumnEditable', e.target.checked);
                   }}
@@ -270,6 +271,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   checked={values['isUneditable']}
                   onChange={(e) => {
                     setFieldValue('isUneditable', e.target.checked);
+                    setFieldValue('isColumnEditable', false);
                   }}
                   color="primary"
                 />
@@ -291,6 +293,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     checked={values['disableOnEdit']}
                     onChange={(e) => {
                       setFieldValue('disableOnEdit', e.target.checked);
+                      setFieldValue('isColumnEditable', false);
                     }}
                     color="primary"
                   />
@@ -357,6 +360,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     checked={values['isSystemGenerate']}
                     onChange={(e) => {
                       setFieldValue('isSystemGenerate', e.target.checked);
+                      setFieldValue('isColumnEditable', false);
                       if (!e.target.checked) {
                         setFieldValue('systemGeneratedPrefix', '');
                         setFieldValue('systemGeneratedAutoIncrement', false);

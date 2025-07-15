@@ -2,7 +2,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
-export const fetch_child_resource_fields = async (childResource, currency, allowedToEdit, isOffline= false) => {
+export const fetch_child_resource_fields = async (childResource, currency, allowedToEdit, isOffline = false) => {
     let data;
     if (isOffline) {
         data = await findOne(objectStore.resource, childResource);
@@ -19,7 +19,7 @@ export const fetch_child_resource_fields = async (childResource, currency, allow
     return data;
 }
 
-export const fetch_child_resource_fields_perm = async (childResource, currency, allowedToEdit, isOffline= false) => {
+export const fetch_child_resource_fields_perm = async (childResource, currency, allowedToEdit, isOffline = false) => {
     let data;
     if (isOffline) {
         data = await findOne(objectStore.resource, childResource);
