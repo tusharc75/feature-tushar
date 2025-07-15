@@ -7,7 +7,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import WarningIcon from '@mui/icons-material/Warning';
 import queryString from 'query-string';
 import Autocomplete from '@mui/material/Autocomplete';
-import { camelCase, isArray, isObject } from 'lodash';
+import { camelCase, isArray, isObject, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
@@ -517,17 +517,27 @@ const SerializedAsset = () => {
 
   const handleStatusChange = (status) => {
     const { policy } = resourceData;
-    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === status);
-
-    if (statusPolicy?.products?.length > 0 && !selectedRecords?.every(r => statusPolicy?.products?.includes(r?.productId))) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'warning',
-        message: `Every selected ${resources?.serializedAsset?.titlePlural} should be in same product`
-      });
-      return;
+    let statusPolicy = null;
+    let statusPolicyData = policy?.statusChangeFields?.filter((ele) => ele.status === status);
+    if (statusPolicyData?.length) {
+      if (statusPolicyData.find((e) => e?.products?.length)) {
+        const uniqProduct = uniqBy(selectedRecords, 'productId');
+        if (uniqProduct?.length !== 1) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: `All selected ${resources?.serializedAsset?.titlePlural} must belong to the same product.`
+          });
+          return;
+        }
+        else {
+          statusPolicy = statusPolicyData?.find((e) => e?.products?.includes(uniqProduct[0]?.productId))
+        }
+      }
+      else {
+        statusPolicy = statusPolicyData[0]
+      }
     }
-
     setStatus(status);
     if (status === ASSET_STATUS.scrap || status === ASSET_STATUS.lost) {
       if (statusPolicy) {
