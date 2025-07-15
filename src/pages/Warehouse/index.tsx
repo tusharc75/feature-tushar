@@ -15,7 +15,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWarehouse from './ManageWarehouse';
@@ -23,6 +23,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import { editDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.warehouse);
 
@@ -59,12 +60,10 @@ const Warehouse = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
-    setWalkmeData([createResourceFlow(sidebarResource.warehouse, data)]);
-    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions?.warehouse?.isUpdate)
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    setWalkmeData([createResourceFlow(sidebarResource.warehouse, fieldsDataForRead)]);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -178,7 +177,7 @@ const Warehouse = () => {
           finalObject['originalData'] = u
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['canEdit'] = permissions?.warehouse?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.warehouse, u);
+          finalObject['canEdit'] = u?.deleted ? false : true
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -220,7 +219,7 @@ const Warehouse = () => {
       });
   };
 
-    const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
@@ -374,9 +373,9 @@ const Warehouse = () => {
         <ConfirmationDialog
           open={showDeleteConfirmBox}
           message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
+            ? `${resources?.warehouse?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.warehouseName : ''}`
-              : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
+            : `selected ${resources?.warehouse?.titlePlural?.toLowerCase()}`
             } ?`}
           onClose={() => {
             setDeleteRecord(null);
