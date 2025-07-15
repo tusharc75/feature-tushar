@@ -1,6 +1,6 @@
 import { text, image, table, line } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
-import { productTableName, serviceTableName, tableNameOption, workOrderFields } from './optionhelper';
+import { productTableName, serviceTableName, tableNameOption } from './optionhelper';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -12,11 +12,7 @@ type DesignerPluginSchema = Schema & {
 
 type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
 
-
-
 export const getPlugins = (variables: string[]): Record<string, DesignerExpectedPlugin> => {
-
-    // const options = variables?.map((v) => ({ label: v, value: v })) ?? [];
 
     const customTablePlugin = {
         ...table,
@@ -54,7 +50,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
                         widget: 'select',
                         default: val,
                         props: {
-                            options : headerOptions,
+                            options: headerOptions,
                         },
                     };
                 });
@@ -72,7 +68,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
         height: 10,
         position: { x: 0, y: 0 },
         type: 'Variable',
-        name: workOrderFields[0].label || '',
+        name: '',
         content: textDefault.content,
         rotate: textDefault.rotate!,
         opacity: textDefault.opacity!,
@@ -97,7 +93,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
                     title: 'Name',
                     type: 'string',
                     widget: 'select',
-                    props: { options : workOrderFields },
+                    props: { options: variables },
                 }
                 return base
             },
@@ -111,5 +107,6 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
         Line: line as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as any,
     };
+
     return plugins;
 };
