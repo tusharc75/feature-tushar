@@ -671,7 +671,7 @@ export const CellRenderer = React.memo(
       vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
     const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
 
-    const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
+    const isEditable = cell?.column?.columnDef.editable;
     const props = useMemo(
       () => ({
         id: cell.id,
