@@ -8,14 +8,21 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSupportTicket from './ManageSupportTicket';
@@ -26,11 +33,11 @@ const SupportTicket = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity, resources }
+    state: { user, selectedEntity, resources, permissions }
   }: any = useData();
 
   const types = [
@@ -50,6 +57,7 @@ const SupportTicket = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
+  const [allFields, setAllFields] = useState(null);
 
   const [columns, setColumns] = useState(null);
 
@@ -69,6 +77,7 @@ const SupportTicket = () => {
     axiosInstance()
       .get(`${routes.supportTicket.path}/fields?brand=${user?.user?.brand}`)
       .then(({ data: { data } }) => {
+        setAllFields(JSON.parse(JSON.stringify(data)));
         const newColumns = generateColumns(
           renderedFrom,
           data?.filter((field) => field?.fieldData?.sectionName !== 'Internal Information'),
@@ -172,9 +181,11 @@ const SupportTicket = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['originalData'] = u;
           finalObject['canDelete'] =
             checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canEdit'] = permissions?.supportTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.supportTicket, u);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -191,6 +202,38 @@ const SupportTicket = () => {
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
+  };
+
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance()
+        .put(`${routes.supportTicket.path}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const handleDelete = () => {
@@ -287,6 +330,7 @@ const SupportTicket = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
