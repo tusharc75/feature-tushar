@@ -671,7 +671,7 @@ export const CellRenderer = React.memo(
       vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
     const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
 
-    const isEditable = cell?.column?.columnDef.editable;
+    const isEditable = cell?.column?.columnDef.editable && validInputs.has(columnDef.type as any);
     const props = useMemo(
       () => ({
         id: cell.id,
@@ -747,7 +747,7 @@ export const CellRenderer = React.memo(
             </div>
           </td>
         );
-      case isEditable:
+      case isEditable: {
         return (
           <td {...props}>
             <div className="w-full">
@@ -760,6 +760,7 @@ export const CellRenderer = React.memo(
             </div>
           </td>
         );
+      }
       case cell.column.id === 'action':
         return (
           <td {...props}>

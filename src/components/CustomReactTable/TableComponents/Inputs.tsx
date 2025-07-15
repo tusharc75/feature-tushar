@@ -35,7 +35,8 @@ export const validInputs = new Set([
   'name',
   'colorPicker',
   'url',
-  'currency'
+  'currency',
+  'currencyAmount'
 ] as const);
 
 const inputArray = Array.from(validInputs);
@@ -80,7 +81,7 @@ const RenderTextInput = ({
     }
   };
 
-  const handleInput = async (value: string) => {
+  const handleInput = async (value: string | number) => {
     setCellValue(value);
     const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
@@ -115,7 +116,7 @@ const RenderTextInput = ({
         autoFocus
         id={`${cell.column.id}-input-${row.index || 0}`}
         type={type}
-        className={cn('flex-shrink border-none outline-none', type === 'color' ? 'cursor-pointer' : '')}
+        className={cn('hide-number-input-arrow flex-shrink border-none bg-transparent outline-none', type === 'color' ? 'cursor-pointer' : '')}
         onBlur={() => handleBlur()}
         value={cellValue}
         onKeyDown={(e) => {
@@ -126,7 +127,11 @@ const RenderTextInput = ({
           }
         }}
         onChange={(e) => {
-          handleInput(e.target.value || '');
+          let value: string | number = e.target.value;
+          if (type === 'number' && value) {
+            value = Number(value);
+          }
+          handleInput(value || '');
         }}
         {...rest}
       />
@@ -392,7 +397,7 @@ const CurrencyNumber = (props: InputProps) => {
   const currencyIcon = find(getUniqueCurrencies(), function (obj) {
     return obj.currencyCode === (user?.user?.brandCurrency || 'USD');
   });
-  return <RenderTextInput {...props} prefixIcon={currencyIcon.symbolNative} />;
+  return <RenderTextInput {...props} prefixIcon={currencyIcon.symbolNative} type={'number'} />;
 };
 
 const RenderCurrencyAutoComplete = ({
@@ -504,7 +509,10 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
     }
     case 'decimal': {
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} />;
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} />;
+    }
+    case 'currencyAmount': {
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(2)} type={'number'} />;
     }
     case 'mobileNumber': {
       return <PhoneNumberInput {...props} validationSchema={validationSchema} />;
