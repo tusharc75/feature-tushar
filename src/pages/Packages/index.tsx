@@ -13,13 +13,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePackageDialog from './ManagePackageDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import { editDisable } from 'src/constants/messageHelpers';
 
 const renderedFrom = camelCase(sidebarResource?.packages);
 
@@ -27,7 +28,7 @@ const PackageList = () => {
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -40,6 +41,7 @@ const PackageList = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [renderCount, setRenderCount] = useState(0);
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -57,6 +59,7 @@ const PackageList = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&entity=${selectedEntity}&view=true`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
     setWalkmeData([createResourceFlow(sidebarResource.packages, data)]);
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
@@ -146,6 +149,7 @@ const PackageList = () => {
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['originalData'] = u
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = permissions?.packages?.isUpdate;
           finalObject['canDelete'] = permissions.packages.isDelete;
@@ -193,6 +197,36 @@ const PackageList = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+  };
+
+    const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.allowedToEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${routes.packages.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const ActionMenuItems = () => {
@@ -281,6 +315,7 @@ const PackageList = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.packages}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
