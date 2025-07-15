@@ -1,5 +1,22 @@
 import axiosInstance from '../../axios/axiosInstance';
 
+export const fetch_resource_view_fields = async (resource, allowedToEdit) => {
+
+    const response: any = await axiosInstance().get(`/field?resource=${resource}&view=true`);
+    let fieldData = response?.data?.data;
+
+    if (!allowedToEdit) {
+        fieldData?.forEach((e) => {
+            e.fieldData.isColumnEditable = false
+        })
+    }
+
+    const fieldsDataAll = fieldData;
+    const fieldsDataForRead = fieldData?.filter((obj) => obj.isRead);
+
+    return { fieldsDataAll, fieldsDataForRead };
+}
+
 export const fetch_resource_fields = async (resource, ignoreFields = []) => {
 
     const response: any = await axiosInstance().get(`/field?resource=${resource}`);
