@@ -513,6 +513,12 @@ export const resourcePolicy = [
     resource: sidebarResource.assemblyOrder,
     policy: [
       {
+        fieldName: 'loadingTicket',
+        fieldLabel: 'Loading Ticket',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'autoConvertInSameRentalJob',
         fieldLabel: 'Auto Convert In Same Rental Job',
         type: 'checkBox',

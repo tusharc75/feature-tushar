@@ -13,7 +13,7 @@ import { useData } from '../../StateProvider/Provider';
 import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { isEqual } from 'lodash';
+import { isEqual, template } from 'lodash';
 import PdfEditor from './PdfEditor';
 import { CUSTOM_A4_PDF, Template } from '@pdfme/common';
 import { generate } from '@pdfme/generator';
@@ -52,23 +52,6 @@ export default function CreateCustomPdfTemplate() {
   const [formValues, setFormValues] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
-
-  const [template, setTemplate] = useState<any | null>(() => {
-    try {
-      const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-          return parsed;
-        } else {
-          localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-        }
-      }
-    } catch (error) {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    }
-    return null;
-  });
   const [showProps, setShowProps] = useState<boolean>(false);
   const [noOfPages, setNoOfPages] = useState<number>(1);
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
@@ -86,18 +69,11 @@ export default function CreateCustomPdfTemplate() {
     setpdfResourceOption(options);
   }, []);
 
-  const handleTemplateChange = (tpl: Template) => {
-    setTemplate(tpl);
-  };
-
   useEffect(() => {
-    if (template) {
-      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(template));
+    if (formValues?.template) {
+      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(formValues?.template));
     }
-    else {
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    }
-  }, [template]);
+  }, [formValues?.template]);
 
   useEffect(() => {
     if (formValues && formValues.type) {
@@ -163,7 +139,17 @@ export default function CreateCustomPdfTemplate() {
       collaborator: [],
       services: [],
       noOfPages: 1,
+      template: null,
     };
+    const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+        initialValuesData.template = parsed;
+      } else {
+        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      }
+    }
     if (id && id !== '0') {
       try {
         const res = await axiosInstance().get(`${customPdfTemplate.api}/${id}`);
@@ -177,15 +163,15 @@ export default function CreateCustomPdfTemplate() {
         initialValuesData.collaborator = data?.collaborator ? data?.collaborator : [];
         initialValuesData.noOfPages = data?.noOfPages ? data?.noOfPages : 1;
         initialValuesData.services = data?.services ? data?.services : [];
-        if (data?.template) {
-          setTemplate(data.template);
+        if (data?.template && !initialValuesData?.template) {
+          initialValuesData.template = data?.template;
           setNoOfPages(data.template.schemas.length > 0 ? data.template.schemas.length : 1);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(data.template));
         } else {
-          const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-          setTemplate(newTemplate);
-          setNoOfPages(initialValuesData.noOfPages);
-          localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(newTemplate));
+          if (!initialValuesData.template) {
+            const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
+            initialValuesData.template = newTemplate;
+            setNoOfPages(initialValuesData.noOfPages);
+          }
         }
         setAllowedToEdit(
           checkIsAllowedToEdit(user, sidebarResource.customPdfTemplate, {
@@ -203,16 +189,14 @@ export default function CreateCustomPdfTemplate() {
         }
       } catch (e) {
         toastConfig.setToastConfig(e);
-        setTemplate(null);
         setNoOfPages(0);
         localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
-      if (!template) {
+      if (!initialValuesData.template) {
         const newTemplate = generateInitialTemplate(initialValuesData.noOfPages);
-        setTemplate(newTemplate);
+        initialValuesData.template = newTemplate;
         setNoOfPages(initialValuesData.noOfPages);
-        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     }
     setInitialValues({ ...initialValuesData });
@@ -234,10 +218,10 @@ export default function CreateCustomPdfTemplate() {
     try {
       setBtnLoading(true);
       const singleInput: { [key: string]: any } = {};
-      if (!template) {
+      if (!formValues || !formValues?.template) {
         throw new Error("No template available for preview.");
       }
-      template.schemas.forEach(pageSchema => {
+      formValues?.template.schemas.forEach(pageSchema => {
         pageSchema.forEach(field => {
           if (field.name && field.content !== undefined) {
             singleInput[field.name] = field.content;
@@ -246,7 +230,7 @@ export default function CreateCustomPdfTemplate() {
       });
       const finalInputs = [singleInput];
       const pdf = await generate({
-        template: template,
+        template: formValues?.template,
         inputs: finalInputs,
         plugins: getPlugins(variables)
       });
@@ -274,7 +258,7 @@ export default function CreateCustomPdfTemplate() {
       type: values?.type,
       owner: values?.owner,
       collaborator: values?.collaborator,
-      template: template,
+      template: values?.template || generateInitialTemplate(values?.noOfPages),
       services: values?.services,
       noOfPages: noOfPages
     };
@@ -355,12 +339,12 @@ export default function CreateCustomPdfTemplate() {
                       Edit
                     </ThemeButton>
                   )}
-                  {template && (
+                  {formValues?.template && (
                     <ThemeButton
                       mobileTooltip="Preview"
                       iconForMobile={<VisibilityIcon />}
                       startIcon={<VisibilityIcon />}
-                      disabled={btnLoading || !template}
+                      disabled={btnLoading || !formValues?.template}
                       onClick={generatePreviewPdf}
                     >
                       {btnLoading ? 'Please wait...' : 'Preview'}
@@ -621,11 +605,11 @@ export default function CreateCustomPdfTemplate() {
                     </Grid>
                   </Grid>
                 </div>
-                {template &&
+                {values?.template &&
                   <div className='mt-4'>
                     <PdfEditor
-                      template={template}
-                      onTemplateChange={handleTemplateChange}
+                      template={values?.template as Template}
+                      onTemplateChange={(values: Template) => { setFieldValue('template', values); }}
                       disabled={!isEdit || !allowedToEdit}
                       noOfPages={noOfPages}
                       variables={variables}
@@ -658,7 +642,7 @@ export default function CreateCustomPdfTemplate() {
                   onOk={() => {
                     const newPageCount = parseInt(noOfPagesInputRef.current?.value || '0', 10);
                     const newTemplate = generateInitialTemplate(newPageCount);
-                    setTemplate(newTemplate);
+                    values.template = newTemplate;
                     setNoOfPages(newPageCount);
                     setShowConfirmNoOfpages(false);
                     setShowProps(false);
