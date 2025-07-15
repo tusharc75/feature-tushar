@@ -26,7 +26,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
                 const selectedTableName = props.activeSchema.name;
                 const headerOptions =
-                    selectedTableName === 'product' ? productTableName : serviceTableName;
+                    selectedTableName === 'productTable' ? productTableName : serviceTableName;
 
                 baseSchema.name = {
                     title: 'Name',
