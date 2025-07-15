@@ -13,7 +13,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { childDisable, cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { childDisable, cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
@@ -45,7 +45,7 @@ const Product = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
 
   const [productCategoryList, setProductCategoryList] = useState([]);
   const [productTemplateList, setProductTemplateList] = useState([]);
@@ -57,6 +57,7 @@ const Product = () => {
   const [productTypeList, setProductTypeList] = useState([]);
   const [isProductType, setIsProductType] = useState(false);
   const [productColumns, setProductColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
   const {
     state: { user, permissions, selectedEntity, resources }
   }: any = useData();
@@ -103,6 +104,7 @@ const Product = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.product}&view=true`)
       .then(({ data: { data } }) => {
+        setAllFields(JSON.parse(JSON.stringify(data)));
         setWalkmeData([createResourceFlow(sidebarResource.product, data)]);
         if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
           setIsProductTemplate(false);
@@ -199,7 +201,9 @@ const Product = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
+          finalObject['originalData'] = u
           finalObject['canDelete'] = permissions?.product.isDelete;
+          finalObject['canEdit'] = permissions?.product.isUpdate && checkIsAllowedToEdit(user, sidebarResource.product, u);;
           return finalObject;
         });
         let columns = [...productColumns];
@@ -288,6 +292,36 @@ const Product = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
+  };
+
+    const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${routes.product.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const ActionMenuItems = () => {
@@ -460,6 +494,7 @@ const Product = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.product}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
