@@ -19,6 +19,7 @@ export type SearchKeyword = {
   timeStamp: number;
   frequency: number;
   pathName: string;
+  userAndBrandId: string;
 };
 
 export type Section = {
@@ -44,6 +45,7 @@ export type Item = {
   frequency?: number;
   timeStamp?: number;
   type?: 'history';
+  userAndBrandId: string;
 };
 
 export type SelectedEntityData = string;

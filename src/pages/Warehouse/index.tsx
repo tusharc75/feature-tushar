@@ -15,13 +15,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWarehouse from './ManageWarehouse';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import { editDisable } from 'src/constants/messageHelpers';
 
 const renderedFrom = camelCase(sidebarResource?.warehouse);
 
@@ -29,7 +30,7 @@ const Warehouse = () => {
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -42,6 +43,7 @@ const Warehouse = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
 
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
   const [isAssigning, setIsAssigning] = useState(false);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [showUpdateWarningConfirmBox, setShowUpdateWarningConfirmBox] = useState(false);
@@ -60,6 +62,7 @@ const Warehouse = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
     setWalkmeData([createResourceFlow(sidebarResource.warehouse, data)]);
     const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
@@ -172,8 +175,10 @@ const Warehouse = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject['originalData'] = u
           finalObject['canDelete'] = permissions?.warehouse?.isDelete;
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['canEdit'] = permissions?.warehouse?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.warehouse, u);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -213,6 +218,36 @@ const Warehouse = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
+  };
+
+    const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance().put(`${routes?.warehouse.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    }
+    else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const ActionMenuItems = () => {
@@ -315,6 +350,7 @@ const Warehouse = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.warehouse}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>
