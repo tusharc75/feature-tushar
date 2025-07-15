@@ -468,9 +468,9 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
   colorPicker: yup.string().min(7),
   email: yup.string().email(),
-  mobileNumber: yup.string().min(8),
+  mobileNumber: yup.string().min(5),
   singleLine: yup.string().min(1),
-  multiLine: yup.string().min(10),
+  multiLine: yup.string().min(1),
   url: yup.string().url()
 };
 
