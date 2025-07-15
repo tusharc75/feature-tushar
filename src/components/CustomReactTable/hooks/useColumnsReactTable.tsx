@@ -22,6 +22,7 @@ import {
   displayDate,
   displayDateTime,
   formatAmountWithCurrency,
+  formatDate,
   formatTotalforTableFooter,
   getUniqueCurrencies,
   MATERIAL_TYPE,
@@ -345,6 +346,22 @@ export function useColumns() {
                 {row?.original?.[field?.fieldName] ? (
                   <h5 className="createBy" title={`${displayDateTime(row?.original?.[field?.fieldName])}`}>
                     {displayDateTime(row?.original?.[field?.fieldName])}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            ),
+            disableFilters: true
+          });
+        } else if (field?.type === 'year') {
+          column.push({
+            ...commonFieldData,
+            cell: ({ row }) => (
+              <div>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.[field?.fieldName])}`}>
+                    {formatDate(row?.original?.[field?.fieldName], 'YYYY')}
                   </h5>
                 ) : (
                   <NoDataCell />
