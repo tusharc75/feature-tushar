@@ -28,6 +28,7 @@ export const validInputs = new Set([
   'date',
   'year',
   'dateTime',
+  'number',
   'decimal',
   'currencyNumber',
   'percent',
@@ -504,6 +505,9 @@ export const RenderInputField = memo((props: InputProps) => {
     }
     case 'currencyNumber': {
       return <CurrencyNumber {...props} validationSchema={validationSchema} />;
+    }
+    case 'number': {
+      return <RenderTextInput {...props} validationSchema={validationSchema} type={'number'} />;
     }
     case 'percent': {
       return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
