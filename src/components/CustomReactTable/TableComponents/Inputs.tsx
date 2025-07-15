@@ -1,13 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { getCellValue } from 'src/components/CustomReactTable/utils';
 import { cn } from 'src/constants/helpers';
 import * as yup from 'yup';
 import { ValidateOptions } from 'yup/lib/types';
 import MuiPhoneInput from 'material-ui-phone-number';
-import { Autocomplete, AutocompleteProps, ClickAwayListener, TextField } from '@mui/material';
+import { Autocomplete, AutocompleteProps, ClickAwayListener, Popover, TextField } from '@mui/material';
 import { isEqual } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
+import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
+import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import dayjs from 'dayjs';
+import { isEmpty } from 'lodash';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import { CalendarToday } from '@mui/icons-material';
+import { DateView } from '@mui/x-date-pickers';
 
 type YupSchema = Partial<yup.AnySchema> & { isValid: (value: any, options?: ValidateOptions<any>) => Promise<boolean> };
 
@@ -251,6 +260,103 @@ const DataListWrapper = ({ cell, cellValue, columnDef, handleStopEditing, handle
   return <DataList columnDef={columnDef} cellValue={cellValue} setCellValue={setCellValue} cell={cell} onBlur={handleBlur} />;
 };
 
+const DateInput = ({ cell, cellValue, columnDef, handleStopEditing, handleSubmit, row, setCellValue, validationSchema }: InputProps) => {
+  const [isValid, setIsValid] = useState(true);
+  const [stateValue, setStateValue] = useState(cellValue ? dayjs.tz(cellValue) : dayjs.tz());
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>(null);
+
+  const formatter = useMemo(() => {
+    switch (columnDef.type as ValidInputType) {
+      case 'date':
+        return dateFormat;
+      case 'dateTime':
+        return dateTimeFormat;
+      case 'year':
+        return 'YYYY';
+      default:
+        return dateFormat;
+    }
+  }, [columnDef.type]);
+
+  const views = useMemo((): DateView[] => {
+    switch (columnDef.type as ValidInputType) {
+      case 'date':
+        return ['year', 'month', 'day'] as const;
+      case 'year':
+        return ['year'] as const;
+      default:
+        return ['year', 'month', 'day'] as const;
+    }
+  }, [columnDef.type]);
+
+  const onAccept = async () => {
+    setTimeout(() => {
+      handleClose();
+    }, 100);
+
+    if (!isValid) return;
+    if (getCellValue(cell) !== cellValue) {
+      handleSubmit();
+    }
+  };
+
+  const handleInput = async (value: dayjs.Dayjs) => {
+    setStateValue(value);
+    setCellValue(value ? value.utc().toISOString() : null);
+    const isValidValue = (await validationSchema?.isValid?.(cellValue)) || true;
+    setIsValid(isValidValue);
+  };
+
+  const handleClose = () => {
+    handleStopEditing();
+    setAnchorEl(null);
+  };
+
+  return (
+    <>
+      <button
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        className={cn(
+          'shadow-0 w-ful flex w-full cursor-pointer appearance-none items-center justify-between !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
+          isValid ? '' : 'border-red-500 focus-within:outline-red-500'
+        )}
+      >
+        {stateValue.format(formatter)}
+        <CalendarToday fontSize="small" color="primary" />
+      </button>
+      <Popover
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        anchorEl={anchorEl}
+        open={!!anchorEl}
+      >
+        {columnDef.type === 'dateTime' ? (
+          <StaticDateTimePicker
+            value={stateValue}
+            {...(columnDef?.restrictFutureDate ? { maxDate: dayjs.tz(new Date()) } : {})}
+            {...(columnDef?.restrictBackDate ? { minDate: dayjs.tz(new Date()) } : {})}
+            onChange={handleInput}
+            onAccept={onAccept}
+            onClose={handleClose}
+          />
+        ) : (
+          <StaticDatePicker
+            views={views}
+            value={stateValue}
+            {...(columnDef?.restrictFutureDate ? { maxDate: dayjs.tz(new Date()) } : {})}
+            {...(columnDef?.restrictBackDate ? { minDate: dayjs.tz(new Date()) } : {})}
+            onChange={handleInput}
+            onAccept={onAccept}
+            onClose={handleClose}
+          />
+        )}
+      </Popover>
+    </>
+  );
+};
+
 const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
   colorPicker: yup.string().min(7),
@@ -261,7 +367,7 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   url: yup.string().url()
 };
 
-export const RenderInputField = (props: InputProps) => {
+export const RenderInputField = memo((props: InputProps) => {
   const validationSchema = schemas[props.columnDef.type];
 
   if (props.columnDef?.dataList && props.columnDef?.dataListId) {
@@ -283,10 +389,15 @@ export const RenderInputField = (props: InputProps) => {
     case 'multiSelect': {
       return <DropdownAndMultiSelect {...props} validationSchema={validationSchema} />;
     }
+    case 'date':
+    case 'dateTime':
+    case 'year': {
+      return <DateInput {...props} validationSchema={validationSchema} />;
+    }
     default:
       return <EmptyField {...props} validationSchema={validationSchema} />;
   }
-};
+});
 
 const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
   console.log({ row: row.original, col: columnDef });

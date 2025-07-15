@@ -5,7 +5,7 @@ import { Check, CheckBoxOutlined, DragIndicator, Edit, ExpandLess, ExpandMore } 
 import Autocomplete from '@mui/material/Autocomplete';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
 import { eq, isEqual } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import { cn, sidebarResource } from 'src/constants/helpers';
@@ -487,26 +487,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
 export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEditing }) => {
   // inputField, updatedData
   const [cellValue, setCellValue] = React.useState(getCellValue(cell) || null);
-  const [lookupOptions, setLookupOptions] = useState([]);
-  const [loading, setLoading] = useState(columnDef.lookup);
-
-  useEffect(() => {
-    setLoading(true);
-    if (columnDef.lookup) {
-      const lookupResource = columnDef.lookupResource === 'Quote' ? 'quoteBuilder' : columnDef.lookupResource;
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setLookupOptions(data[lookupResource] || []);
-        })
-        .catch((error) => {
-          console.error(error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-  }, [columnDef]);
 
   const handleSubmit = () => {
     if (!cellValue) return;
@@ -515,15 +495,6 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
     };
     const updatedData = { ...row.original, [cell.column.id]: cellValue };
     submitInput({ inputField, updatedData });
-
-    // if (
-    //   (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
-    //   (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
-    // ) {
-    //   submitInput({ inputField, updatedData });
-    // } else if (getCellValue(cell) !== cellValue) {
-    //   submitInput({ inputField, updatedData });
-    // }
   };
 
   return (
@@ -678,136 +649,143 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
 export const parseFromValuesOrFunc = <T, U>(fn: ((arg: U) => T) | T | undefined, arg: U): T | undefined => (fn instanceof Function ? fn(arg) : fn);
 
 // Cells
-export const CellRenderer = ({
-  className = '',
-  state,
-  cell,
-  setWholeRowsCellColor,
-  row,
-  index,
-  table,
-  submitInput,
-  virtualStyles,
-  virtualTable = true,
-  vtableData,
-  currentlyEditingCells,
-  setCurrentlyEditingCells
-}) => {
-  const columnDef: TColType = cell.column.columnDef as TColType;
+export const CellRenderer = React.memo(
+  ({
+    className = '',
+    state,
+    cell,
+    setWholeRowsCellColor,
+    row,
+    index,
+    table,
+    submitInput,
+    virtualStyles,
+    virtualTable = true,
+    vtableData,
+    currentlyEditingCells,
+    setCurrentlyEditingCells
+  }: any) => {
+    const columnDef: TColType = cell.column.columnDef as TColType;
 
-  const { style: stickyStyle, className: stickyClassName } =
-    vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
-  const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
-  const [isEditing, setIsEditing] = useState(false);
+    const { style: stickyStyle, className: stickyClassName } =
+      vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
+    const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
 
-  const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
-  const props = useMemo(
-    () => ({
-      id: cell.id,
-      key: cell.id,
-      className: cn(
-        `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
+    const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
+    const props = useMemo(
+      () => ({
+        id: cell.id,
+        key: cell.id,
+        className: cn(
+          `td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px]
   ${['left', 'right'].includes(columnDef.sticky) ? `${virtualTable ? 'z-10' : ''} bg-[var(--dark-primary,_white)]` : ''} 
    ${stickyClassName}`,
+          className,
+          setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
+        ),
+        style: {
+          minWidth: cell.column.getSize(),
+          maxWidth: cell.column.getSize(),
+          ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
+        },
+        onClick: () => {
+          const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
+          if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
+          console.log(cell.column.id);
+          setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
+        }
+      }),
+      [
+        cell,
         className,
-        setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''
-      ),
-      style: {
-        minWidth: cell.column.getSize(),
-        maxWidth: cell.column.getSize(),
-        ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
-      },
-      onClick: () => {
-        const isEditable = cell?.column?.columnDef.editable || cell?.column?.columnDef.editAble;
-        if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
-        console.log(cell.column.id);
-        setIsEditing(true);
+        columnDef.sticky,
+        row.original,
+        setWholeRowsCellColor,
+        stickyClassName,
+        style,
+        virtualStyles,
+        virtualTable,
+        setCurrentlyEditingCells
+      ]
+    );
 
-        setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
-      }
-    }),
-    [
-      cell,
-      className,
-      columnDef.sticky,
-      row.original,
-      setWholeRowsCellColor,
-      stickyClassName,
-      style,
-      virtualStyles,
-      virtualTable,
-      setCurrentlyEditingCells
-    ]
-  );
+    const submitInputWrapper = () => {
+      setCurrentlyEditingCells(new Set());
+    };
 
-  const handleStopEditing = () => {
-    currentlyEditingCells.delete(cell.column.id);
-    setCurrentlyEditingCells(new Set(currentlyEditingCells));
-    setIsEditing(false);
-  };
+    const handleStopEditing = useCallback(() => {
+      currentlyEditingCells.delete(cell.column.id);
+      setCurrentlyEditingCells(new Set(currentlyEditingCells));
+      console.log('called', cell.column.id, currentlyEditingCells);
+    }, [cell.column.id, currentlyEditingCells, setCurrentlyEditingCells]);
 
-  const args = { cell, column: cell.column, row, table };
+    if (columnDef.type === 'date') {
+      console.log({ currentlyEditingCells });
+    }
 
-  switch (true) {
-    case cell.getIsPlaceholder():
-      return (
-        <td {...props}>
-          <div className="p-[5px_10px]">
-            <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
-          </div>
-        </td>
-      );
-    case !['selection'].includes(cell?.column.id) && isEditing && validInputs.has(columnDef.type as any):
-      return (
-        <td {...props}>
-          <RenderInputs cell={cell} columnDef={columnDef} row={row} submitInput={submitInput} handleStopEditing={handleStopEditing} />
-        </td>
-      );
+    const args = { cell, column: cell.column, row, table };
 
-    case currentlyEditingCells.size > 0 && cell?.column.id === 'action':
-      return (
-        <td {...props}>
-          <div className="action-cell">
-            <HtmlTooltip title="Save">
-              <IconButton size="small" aria-label="Save" onClick={submitInput}>
-                <Check color="primary" />
-              </IconButton>
-            </HtmlTooltip>
-          </div>
-        </td>
-      );
-    case isEditable:
-      return (
-        <td {...props}>
-          <div className="w-full">
-            <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
-              <p>{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</p>
-              <span>
-                <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
-              </span>
+    switch (true) {
+      case cell.getIsPlaceholder():
+        return (
+          <td {...props}>
+            <div className="p-[5px_10px]">
+              <CircularProgress size={14} color="primary" style={{ padding: 0 }} />
             </div>
-          </div>
-        </td>
-      );
-    case cell.column.id === 'action':
-      return (
-        <td {...props}>
-          <div className="action-cell">{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</div>
-        </td>
-      );
-    default:
-      return (
-        <td
-          {...{
-            ...props,
-            className: cn(
-              props.className,
-              '[&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 '
-            )
-          }}
-        >
-          {parseFromValuesOrFunc(cell.column.columnDef.cell, args)}
-        </td>
-      );
+          </td>
+        );
+      case !['selection'].includes(cell?.column.id) && currentlyEditingCells.has(columnDef.id) && validInputs.has(columnDef.type as any):
+        return (
+          <td {...props}>
+            <RenderInputs cell={cell} columnDef={columnDef} row={row} submitInput={submitInput} handleStopEditing={handleStopEditing} />
+          </td>
+        );
+
+      case currentlyEditingCells.size > 0 && cell?.column.id === 'action':
+        return (
+          <td {...props}>
+            <div className="action-cell">
+              <HtmlTooltip title="Save">
+                <IconButton size="small" aria-label="Save" onClick={submitInputWrapper}>
+                  <Check color="primary" />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
+          </td>
+        );
+      case isEditable:
+        return (
+          <td {...props}>
+            <div className="w-full">
+              <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
+                <p>{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</p>
+                <span>
+                  <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                </span>
+              </div>
+            </div>
+          </td>
+        );
+      case cell.column.id === 'action':
+        return (
+          <td {...props}>
+            <div className="action-cell">{parseFromValuesOrFunc(cell.column.columnDef.cell, args)}</div>
+          </td>
+        );
+      default:
+        return (
+          <td
+            {...{
+              ...props,
+              className: cn(
+                props.className,
+                '[&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 '
+              )
+            }}
+          >
+            {parseFromValuesOrFunc(cell.column.columnDef.cell, args)}
+          </td>
+        );
+    }
   }
-};
+);

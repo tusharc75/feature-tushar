@@ -105,8 +105,6 @@ export const VirtualTableBody = memo(
   }
 );
 
-const MemoizedCellRenderer = memo(CellRenderer);
-
 export const MemoizedSingleRow = memo(
   ({ virtualColumns, state, setWholeRowsCellColor, row, table, submitInput, resetField, visibleCells, vtableData, virtualRow, onRowClick }: any) => {
     const [currentlyEditingCells, setCurrentlyEditingCells] = useState(new Set<string>());
@@ -126,7 +124,7 @@ export const MemoizedSingleRow = memo(
             if (!cell) return null;
             return (
               <Fragment key={virtualColumns.index}>
-                <MemoizedCellRenderer
+                <CellRenderer
                   key={virtualColumns.index}
                   virtualStyles={{ position: 'absolute', transform: `translateX(${virtualCell.start}px)`, willChange: 'transform' }}
                   state={state}
