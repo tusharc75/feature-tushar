@@ -3,7 +3,7 @@ export class IndexedDb {
   private storesSchema: Record<string, string> = {};
   private dbVersion = 1;
 
-  constructor(private dbName: string) { }
+  constructor(private dbName: string) {}
 
   version(v: number): this {
     this.dbVersion = v;
@@ -71,7 +71,7 @@ class Table<T> {
   constructor(
     private db: IDBDatabase,
     private name: string
-  ) { }
+  ) {}
 
   private store(mode: IDBTransactionMode) {
     return this.db.transaction(this.name, mode).objectStore(this.name);
@@ -130,78 +130,105 @@ class Table<T> {
     });
   }
 
-  where<Key extends keyof T>(index: Key): Query<T, T[Key]> {
-    return new Query<T, T[Key]>(this.db, this.name, index as string);
+  where<Key extends keyof T>(index: Key): Query<T> {
+    return new Query<T>(this.db, this.name, index as string);
   }
 }
 
-class Query<T, V> {
-  private range: IDBKeyRange | null = null;
-  private dir: IDBCursorDirection = 'next';
+type Condition = {
+  index: string;
+  range?: IDBKeyRange;
+  test: (v: any) => boolean;
+};
 
-  // New properties for sorting
+class Query<T> {
+  private conditions: Condition[] = [];
+  private dir: IDBCursorDirection = 'next';
   private sortField?: keyof T;
   private sortDirection: 'asc' | 'desc' = 'asc';
 
   constructor(
     private db: IDBDatabase,
     private storeName: string,
-    private filterIndex: string // the index used for .where()
-  ) { }
+    firstIndex: string
+  ) {
+    this.conditions.push({ index: firstIndex, test: () => true });
+  }
 
-  equals(val: V) {
-    this.range = IDBKeyRange.only(val);
+  where<K extends keyof T>(index: K): this {
+    this.conditions.push({ index: index as any, test: () => true });
     return this;
   }
-  above(val: V) {
-    this.range = IDBKeyRange.lowerBound(val, true);
+
+  equals<V extends T[keyof T]>(val: V): this {
+    const c = this.conditions[this.conditions.length - 1];
+    c.range = IDBKeyRange.only(val);
+    c.test = (x) => x === val;
     return this;
   }
-  below(val: V) {
-    this.range = IDBKeyRange.upperBound(val, true);
+
+  above<V extends T[keyof T]>(val: V): this {
+    const c = this.conditions[this.conditions.length - 1];
+    c.range = IDBKeyRange.lowerBound(val, true);
+    c.test = (x) => x > (val as any);
     return this;
   }
-  between(lo: V, hi: V, loOpen = false, hiOpen = false) {
-    this.range = IDBKeyRange.bound(lo, hi, loOpen, hiOpen);
+
+  below<V extends T[keyof T]>(val: V): this {
+    const c = this.conditions[this.conditions.length - 1];
+    c.range = IDBKeyRange.upperBound(val, true);
+    c.test = (x) => x < (val as any);
     return this;
   }
-  reverse() {
+
+  between<V extends T[keyof T]>(lo: V, hi: V, loOpen = false, hiOpen = false): this {
+    const c = this.conditions[this.conditions.length - 1];
+    c.range = IDBKeyRange.bound(lo, hi, loOpen, hiOpen);
+    c.test = (x) => {
+      if (x < (lo as any) || x > (hi as any)) return false;
+      if (loOpen && x === (lo as any)) return false;
+      if (hiOpen && x === (hi as any)) return false;
+      return true;
+    };
+    return this;
+  }
+
+  reverse(): this {
     this.dir = 'prev';
     return this;
   }
 
-  /**
-   * Specify an optional sort key and direction.
-   */
-  sortBy<K extends keyof T>(field: K, direction: 'asc' | 'desc' = 'asc') {
+  sortBy<K extends keyof T>(field: K, direction: 'asc' | 'desc' = 'asc'): this {
     this.sortField = field;
     this.sortDirection = direction;
     return this;
   }
 
-  /**
-   * Retrieve all filtered entries and then sort in JS if requested.
-   */
   toArray(): Promise<T[]> {
+    const primary = this.conditions[0];
     return new Promise((resolve, reject) => {
       const txn = this.db.transaction(this.storeName, 'readonly');
       const store = txn.objectStore(this.storeName);
-      const source = store.indexNames.contains(this.filterIndex) ? store.index(this.filterIndex) : store;
+      const useIndex = primary.range != null && store.indexNames.contains(primary.index);
+      const source = useIndex ? store.index(primary.index) : store;
+      const req = useIndex ? (source as IDBIndex).openCursor(primary.range!, this.dir) : store.openCursor();
 
-      const req = source.openCursor(this.range, this.dir);
       const out: T[] = [];
-
       req.onsuccess = (ev) => {
         const cursor = (ev.target as IDBRequest).result;
         if (cursor) {
-          out.push(cursor.value);
+          const record = cursor.value as T;
+          // all conditions must pass
+          if (this.conditions.every((c) => c.test((record as any)[c.index]))) {
+            out.push(record);
+          }
           cursor.continue();
         } else {
-          // Perform JS‐side sort if requested
+          // apply JS-side sort if needed
           if (this.sortField) {
             out.sort((a, b) => {
-              const va = a[this.sortField!];
-              const vb = b[this.sortField!];
+              const va = a[this.sortField!] as any;
+              const vb = b[this.sortField!] as any;
               if (va > vb) return this.sortDirection === 'asc' ? 1 : -1;
               if (va < vb) return this.sortDirection === 'asc' ? -1 : 1;
               return 0;
@@ -210,40 +237,35 @@ class Query<T, V> {
           resolve(out);
         }
       };
-
       req.onerror = () => reject(req.error);
     });
   }
 
   deleteAll(): Promise<number> {
+    const primary = this.conditions[0];
     return new Promise((resolve, reject) => {
       const txn = this.db.transaction(this.storeName, 'readwrite');
       const store = txn.objectStore(this.storeName);
-      // if indexName exists on this store, use it; otherwise scan primary store
-      const source = store.indexNames.contains(this.filterIndex) ? store.index(this.filterIndex) : store;
-      const cursorReq = source.openCursor(this.range, this.dir);
+      const useIndex = primary.range != null && store.indexNames.contains(primary.index);
+      const source = useIndex ? store.index(primary.index) : store;
+      const cursorReq = useIndex ? (source as IDBIndex).openCursor(primary.range!, this.dir) : store.openCursor();
+
       let count = 0;
       cursorReq.onsuccess = (ev) => {
         const cursor = (ev.target as IDBRequest).result;
         if (cursor) {
-          cursor.delete(); // schedule deletion
-          count++;
+          const record = cursor.value as T;
+          if (this.conditions.every((c) => c.test((record as any)[c.index]))) {
+            cursor.delete();
+            count++;
+          }
           cursor.continue();
         }
       };
-      cursorReq.onerror = () => {
-        // cursor-level error
-        reject(cursorReq.error);
-      };
-      txn.oncomplete = () => {
-        resolve(count);
-      };
-      txn.onerror = () => {
-        reject(txn.error);
-      };
-      txn.onabort = () => {
-        reject(txn.error);
-      };
+      cursorReq.onerror = () => reject(cursorReq.error);
+      txn.oncomplete = () => resolve(count);
+      txn.onerror = () => reject(txn.error);
+      txn.onabort = () => reject(txn.error);
     });
   }
 }

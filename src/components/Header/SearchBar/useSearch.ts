@@ -27,6 +27,10 @@ const reducer = (state: UseSearchState, action: UseSearchActions) => {
 };
 
 const useSearch = () => {
+  const {
+    state: { user, selectedEntity }
+  }: any = useData();
+
   const history = useHistory();
   const location = useLocation();
   const pathName = location.pathname;
@@ -62,10 +66,6 @@ const useSearch = () => {
     },
     [setStore]
   );
-
-  const {
-    state: { user, selectedEntity }
-  }: any = useData();
 
   const [state, setState] = React.useReducer(reducer, initialState);
 
