@@ -255,7 +255,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
               {showConfirmCloneDetailsDialog && (
                 <ConfirmationDialog
                   open={true}
-                  message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
+                  message="Please confirm if you'd like to proceed with cloning, including all the details. If not, click on cancel."
                   onOk={() => {
                     setFieldValue('packageId', packageId);
                     submitForm();
