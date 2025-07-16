@@ -2,7 +2,6 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@mui/material';
 import {
-  ColumnFiltersState,
   ExpandedState,
   Row,
   SortingState,

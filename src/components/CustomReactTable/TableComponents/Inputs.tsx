@@ -112,7 +112,7 @@ const RenderTextInput = ({
         id={`${cell.column.id}-input-${row.index || 0}`}
         type={type}
         className={cn(
-          'hide-number-input-arrow flex-shrink flex-grow border-none bg-transparent px-[2px] py-[1px] text-inherit outline-none',
+          'hide-number-input-arrow min-w-0 flex-shrink flex-grow border-none bg-transparent px-[2px] py-[1px] text-inherit outline-none',
           type === 'color' ? 'cursor-pointer' : ''
         )}
         onBlur={() => handleBlur()}
