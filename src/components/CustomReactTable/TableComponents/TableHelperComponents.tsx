@@ -685,9 +685,7 @@ export const CellRenderer = React.memo(
           ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
         },
         onClick: () => {
-          console.log('hi');
           if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
-          console.log('hi2');
           setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
         }
       }),
