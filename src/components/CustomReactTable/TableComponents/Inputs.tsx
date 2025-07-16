@@ -113,6 +113,7 @@ const RenderTextInput = ({
       </div>
       {prefixIcon}
       <input
+        autoComplete="off"
         ref={inputRef}
         autoFocus
         id={`${cell.column.id}-input-${row.index || 0}`}
@@ -167,6 +168,11 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
       variant="outlined"
       fullWidth
       label={'Value'}
+      slotProps={{
+        input: {
+          autoComplete: 'off'
+        }
+      }}
       name={'value'}
       required
       margin="dense"
@@ -264,6 +270,11 @@ const DropdownMultiSelectAndRadio = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          slotProps={{
+            input: {
+              autoComplete: 'off'
+            }
+          }}
           variant="standard"
           id={`${cell.column.id}-input-${row.index || 0}`}
           autoFocus
