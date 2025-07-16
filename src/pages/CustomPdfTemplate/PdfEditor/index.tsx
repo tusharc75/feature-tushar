@@ -93,8 +93,6 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
       }
       setDropdownPos(null);
       savedRangeRef.current = null;
-    } else {
-      console.warn('No saved range to insert variable');
     }
   };
 
