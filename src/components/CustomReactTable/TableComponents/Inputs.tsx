@@ -84,7 +84,7 @@ const RenderTextInput = ({
 
   const handleInput = async (value: string | number) => {
     setCellValue(value);
-    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    const isValidValue = await validationSchema?.isValid?.(value);
     setIsValid(isValidValue);
   };
 
@@ -92,7 +92,7 @@ const RenderTextInput = ({
     <div
       className={cn(
         'shadow-0 relative flex w-full appearance-none items-center justify-start gap-1 rounded-md border bg-[transparent] px-[2px] py-[4px] outline-none focus-within:border-2 focus-within:border-theme dark:text-[white]',
-        isValid ? '' : 'border-red-500 outline-red-500'
+        isValid ? '' : '!border-red-500 '
       )}
       onClick={() => {
         inputRef.current?.focus();
@@ -152,8 +152,9 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
   };
 
   const handleInput = async (val: string) => {
-    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    const isValidValue = await validationSchema?.isValid?.(val);
     setIsValid(isValidValue);
+    setCellValue(val);
   };
 
   return (
@@ -164,6 +165,13 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
       variant="outlined"
       fullWidth
       label={'Value'}
+      onKeyDown={(e) => {
+        const target = e.target as HTMLInputElement;
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          target.blur();
+        }
+      }}
       slotProps={{
         input: {
           autoComplete: 'off'
@@ -233,9 +241,9 @@ const DropdownMultiSelectAndRadio = ({
   }, [cellValue, options, columnDef]);
 
   const handleInput = async (value: string | string[]) => {
-    setCellValue(value);
-    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    const isValidValue = await validationSchema?.isValid?.(value);
     setIsValid(isValidValue);
+    setCellValue(value);
   };
 
   return (
@@ -338,7 +346,7 @@ const DateInput = ({ cell, cellValue, columnDef, handleStopEditing, handleSubmit
   const handleInput = async (value: dayjs.Dayjs) => {
     setStateValue(value);
     setCellValue(value ? value.utc().toISOString() : null);
-    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    const isValidValue = await validationSchema?.isValid?.(value ? value.utc().toISOString() : null);
     setIsValid(isValidValue);
   };
 
@@ -426,7 +434,7 @@ const RenderCurrencyAutoComplete = ({
 
   const handleInput = async (value: string) => {
     setCellValue(value);
-    const isValidValue = await validationSchema?.isValid?.(cellValue);
+    const isValidValue = await validationSchema?.isValid?.(value);
     setIsValid(isValidValue);
   };
 
