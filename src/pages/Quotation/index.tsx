@@ -7,7 +7,7 @@ import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -19,8 +19,10 @@ import routes from '../../components/Helpers/Routes';
 import {
   QUOTATION_TYPE,
   checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   customerAccount,
   getDefaultMyRecordType,
+  getObjKeysWithValues,
   gridLoadingTimeout,
   prepareDataForGrid,
   quotation,
@@ -51,9 +53,10 @@ const Quotation = () => {
     resource: history.location?.state?.resource
   });
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
 
   const types = [
     {
@@ -82,6 +85,7 @@ const Quotation = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Quotation`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
     let columns = [];
     let newColumns = generateColumns(renderedFrom, data, routes.quotationDetail.path, true);
     columns = [...newColumns, ...getStaticFields(true), ActionsRenderer];
@@ -276,9 +280,11 @@ const Quotation = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = false;
           finalObject['canDelete'] =
             permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canEdit'] = permissions?.quotation?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.quotation, u);
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -339,6 +345,38 @@ const Quotation = () => {
         ) : null}
       </>
     );
+  };
+
+  const handleSaveEdit = async (inputField, updatedRow) => {
+    const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
+    if (dataToUpdate?.canEdit) {
+      const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
+      Object.keys(inputField).forEach((key) => {
+        if (key in values) {
+          values[key] = inputField[key];
+        }
+      });
+      axiosInstance()
+        .put(`${routes?.quotation?.path}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: editDisable
+      });
+    }
   };
 
   const ActionMenuItems = () => {
@@ -410,6 +448,7 @@ const Quotation = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.quotation}
+            onSaveEdit={handleSaveEdit}
           />
         ) : (
           <Box p={2} height={500}>

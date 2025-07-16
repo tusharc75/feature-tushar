@@ -48,15 +48,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         designerInstanceRef.current = null;
       }
     };
-  }, [noOfPages]); // add variables here
-
-  // if (!variables || variables.length === 0) {
-  //   return (
-  //     <Box p={2} height={500}>
-  //       <CommonSkeleton lenArray={[...Array(10).keys()]} />
-  //     </Box>
-  //   );
-  // }
+  }, [noOfPages]);
 
   return (
     <div style={{ position: 'relative', height: '100vh', width: '100%' }}>

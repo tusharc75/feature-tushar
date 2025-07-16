@@ -1,6 +1,6 @@
 import { IndexedDb } from 'src/utils/IndexedDb';
 
-const SEARCH_DB_NAME = 'equipt_search_data';
+const SEARCH_DB_NAME = 'equipt_search_history';
 
 export const tables = {
   ITEMS_TABLE: 'searchedItems',
@@ -8,14 +8,15 @@ export const tables = {
 };
 
 export const itemDb = new IndexedDb(SEARCH_DB_NAME)
-  .version(1)
+  .version(3)
   .store({
     [tables.ITEMS_TABLE]: `
     ++id,
     name,
     resourceId,
     frequency,
-    timeStamp
+    timeStamp,
+    userAndBrandId
   `
   })
   .store({
@@ -24,6 +25,7 @@ export const itemDb = new IndexedDb(SEARCH_DB_NAME)
     keyword,
     timeStamp,
     frequency,
-    pathName
+    pathName,
+    userAndBrandId
   `
   });

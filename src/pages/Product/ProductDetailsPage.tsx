@@ -293,7 +293,7 @@ const ProductDetailsPage = () => {
                   <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }} className={'form-v1'}>
                     <Grid container spacing={2}>
                       {permissions?.productInventory?.isRead && !user?.user?.brandPolicy?.hideInventoryCount && (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <div style={{ overflow: 'hidden' }} className="single-form-v1">
                             <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
                               <Box display="flex" alignItems="center">
@@ -325,17 +325,19 @@ const ProductDetailsPage = () => {
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Typography className="table-head-v1">{resources?.storageLocation?.titleSingular}</Typography>
                                       )}
-                                      <Typography className="table-head-v1">Qty</Typography>
+                                      <Typography className="table-head-v1">Inventory</Typography>
+                                      <Typography className="table-head-v1">Available Inventory</Typography>
                                     </Box>
                                     {productInventoryData
                                       ?.filter((d) => d.inventory)
-                                      .map(({ inventory, warehouse, storageLocation }) => (
+                                      .map(({ inventory, softHold, warehouse, storageLocation }) => (
                                         <Box display="flex" justifyContent="space-between">
                                           <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
                                           {user?.user?.brandPolicy?.storageLocation && (
                                             <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
                                           )}
-                                          <Typography className="table-data-v1 bt-0">{inventory}</Typography>
+                                          <Typography className="table-data-v1 bt-0 br-0">{inventory}</Typography>
+                                          <Typography className="table-data-v1 bt-0">{(inventory - (softHold || 0))}</Typography>
                                         </Box>
                                       ))}
                                   </>
@@ -365,7 +367,7 @@ const ProductDetailsPage = () => {
                         </Grid>
                       )}
                       {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <Box className="single-form-v1">
                             <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
                               <Typography variant="subtitle2">{resources?.serializedAsset?.titlePlural}</Typography>
@@ -532,12 +534,12 @@ const ProductDetailsPage = () => {
                         </Grid>
                       ) : null}
                       {permissions?.productInventory?.isRead && (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <CostDetails product={id} productData={productData} minHeight={minHeight} />
                         </Grid>
                       )}
                       {user?.user?.brandPolicy?.leadTime && (
-                        <Grid size={{ xs: 12, sm: 6, md: 4, xl: 3 }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 6, xl: 4 }}>
                           <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
                         </Grid>
                       )}

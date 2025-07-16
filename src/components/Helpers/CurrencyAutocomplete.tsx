@@ -16,6 +16,7 @@ const CurrencyAutocomplete = (prop) => {
     placeholder,
     onChange,
     required,
+    textFieldParams = {},
     ...rest
   } = prop;
 
@@ -33,9 +34,7 @@ const CurrencyAutocomplete = (prop) => {
       {...rest}
       limitTags={2}
       fullWidth
-      value={
-        currencyData.find((data) => data.currencyCode === value) || null
-      }
+      value={currencyData.find((data) => data.currencyCode === value) || null}
       options={currencyData}
       getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
       isOptionEqualToValue={(option: any, val) => option.currencyCode === val}
@@ -43,6 +42,7 @@ const CurrencyAutocomplete = (prop) => {
       renderInput={(params) => (
         <TextField
           {...params}
+          {...textFieldParams}
           variant="outlined"
           name={name}
           label={label}
@@ -53,11 +53,7 @@ const CurrencyAutocomplete = (prop) => {
       )}
       renderOption={(props, option: any) => {
         const { currencyCode, currencyName, symbolNative } = option;
-        return (
-          <li {...props}>
-            {`${currencyCode} - ${currencyName} - (${symbolNative})`}
-          </li>
-        );
+        return <li {...props}>{`${currencyCode} - ${currencyName} - (${symbolNative})`}</li>;
       }}
     />
   );

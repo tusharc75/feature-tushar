@@ -22,6 +22,7 @@ import {
   displayDate,
   displayDateTime,
   formatAmountWithCurrency,
+  formatDate,
   formatTotalforTableFooter,
   getUniqueCurrencies,
   MATERIAL_TYPE,
@@ -33,6 +34,7 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import DataListCell from '../Cells/DataListCell';
 import { headerName } from 'src/components/CustomReactTable/hooks/hookUtils';
 import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
+import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE } from 'src/components/FormBuilder/helper';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -105,6 +107,14 @@ export function useColumns() {
           commonFieldData['disabled'] = true;
         }
 
+        commonFieldData['editable'] = false;
+        if (field?.isColumnEditable && !field?.isUneditable && !field?.disableOnEdit && !field?.isSystemGenerate && !NOT_ALLOW_INLINE_EDIT_FIELD_TYPE?.includes(field?.type)) {
+          commonFieldData['editable'] = field?.isColumnEditable;
+          if (['dropDown', 'multiSelect']?.includes(field.type)) {
+            commonFieldData['option'] = field?.option;
+          }
+        }
+
         if (hideColumns.indexOf(field?.fieldName) >= 0) {
         } else if (field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter === true) {
           const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
@@ -122,7 +132,6 @@ export function useColumns() {
                 cell: ({ row }) => {
                   return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
                 },
-                editable: Boolean(field?.isColumnEditable)
               });
             });
           } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -136,7 +145,6 @@ export function useColumns() {
                   accessorKey: fieldName,
                   accessor: fieldName,
                   Header: fieldLabel,
-                  editable: Boolean(field?.isColumnEditable),
                   cell: ({ row }) => {
                     return row?.original[fieldName] ? (
                       <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -157,7 +165,6 @@ export function useColumns() {
                 accessorKey: fieldName,
                 accessor: fieldName,
                 Header: fieldLabel,
-                editable: Boolean(field?.isColumnEditable),
                 cell: ({ row }) => {
                   return row?.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -230,10 +237,8 @@ export function useColumns() {
         } else if (field?.dataList) {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
             dataList: true,
-            ...(Boolean(field?.isColumnEditable) ? { dataListId: field?.dataListId } : ''),
-            ...(Boolean(field?.isColumnEditable) ? { option: [] } : {}),
+            dataListId: field?.dataListId,
             accessorFn: (original) => {
               return isArray(original?.[field?.fieldName])
                 ? original?.[field?.fieldName][0]?.optionLabel
@@ -246,8 +251,6 @@ export function useColumns() {
         } else if (field?.lookup) {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
-            ...(Boolean(field?.isColumnEditable) ? { option: field?.option } : {}),
             accessorFn: (original) => {
               return isArray(original?.[field?.fieldName])
                 ? original?.[field?.fieldName][0]?.optionLabel
@@ -323,7 +326,6 @@ export function useColumns() {
         } else if (field?.type === 'date') {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
@@ -353,6 +355,22 @@ export function useColumns() {
             ),
             disableFilters: true
           });
+        } else if (field?.type === 'year') {
+          column.push({
+            ...commonFieldData,
+            cell: ({ row }) => (
+              <div>
+                {row?.original?.[field?.fieldName] ? (
+                  <h5 className="createBy" title={`${displayDateTime(row?.original?.[field?.fieldName])}`}>
+                    {formatDate(row?.original?.[field?.fieldName], 'YYYY')}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            ),
+            disableFilters: true
+          });
         } else if (field?.type === 'checkBox') {
           column.push({
             ...commonFieldData,
@@ -371,11 +389,18 @@ export function useColumns() {
             cell: ({ row }) => (
               <div>
                 {row?.original?.[field?.fieldName] ? (
-                  <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
-                    {row?.original?.[field?.fieldName]}
-                  </h5>
+                  <div className="flex items-center gap-1">
+                    <div
+                      style={{ background: row?.original?.[field?.fieldName] }}
+                      className="size-[16px] rounded-full border"
+                      title={row?.original?.[field?.fieldName]}
+                    ></div>
+                    <h5 className="text-truncate">{row?.original?.[field?.fieldName]}</h5>
+                  </div>
                 ) : (
-                  <NoDataCell />
+                  <div>
+                    <NoDataCell />
+                  </div>
                 )}
               </div>
             )
@@ -383,7 +408,6 @@ export function useColumns() {
         } else if (field?.type === 'number') {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
             cell: ({ row }) => (
               <div>
                 <h5 className="text-truncate">
@@ -400,7 +424,6 @@ export function useColumns() {
           const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
           column.push({
             ...commonFieldData,
-            editable: false,
             disableFilters: true,
             disableSortBy: true,
             cell: ({ row }) => (
@@ -416,13 +439,8 @@ export function useColumns() {
         } else if (field.type === 'decimal') {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
             cell: ({ row }) =>
-              row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? (
-                <p>{row.original[field.fieldName]?.toLocaleString()}</p>
-              ) : (
-                <NoDataCell />
-              ),
+              row.original[field.fieldName] || row.original[field?.fieldName] === 0 ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />,
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows
@@ -472,7 +490,6 @@ export function useColumns() {
         } else if (field.type === 'percent') {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
             disableFilters: true,
             disableSortBy: true,
             cell: ({ row }) => (
@@ -490,33 +507,27 @@ export function useColumns() {
         } else if (field.type === 'lookUpDisplay') {
           column.push({
             ...commonFieldData,
-            editable: false,
             cell: ({ row }) => <LookupCell field={field} original={row?.original} />
           });
         } else if (field.type === 'switch') {
           column.push({
             ...commonFieldData,
-            editable: false,
             accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
             cell: ({ row }) => <SwitchCell field={field} original={row?.original} />
           });
         } else if (field.type === 'gpsLocation') {
           column.push({
             ...commonFieldData,
-            editable: false,
             cell: ({ row }) => <GpsLocationCell value={row?.original?.[field?.fieldName]} />
           });
         } else if (field.type === 'freeStyleMultiSelect') {
           column.push({
             ...commonFieldData,
-            disableFilters: true,
             cell: ({ row }) => <FreeStyleMultiSelect value={row?.original?.[field?.fieldName]} />
           });
         } else {
           column.push({
             ...commonFieldData,
-            editable: Boolean(field?.isColumnEditable),
-            ...(Boolean(field?.isColumnEditable) && ['dropDown', 'multiSelect']?.includes(field.type) ? { option: field?.option } : {}),
             cell: ({ row }: any) => <DropDownMultiSelect row={row} field={field} />
           });
         }
