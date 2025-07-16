@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
+import { Autocomplete, TextField } from '@mui/material';
 
 interface PdfEditorProps {
   template?: any;
@@ -17,6 +18,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
 
   const [dropdownPos, setDropdownPos] = useState<{ x: number; y: number } | null>(null);
   const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
+  const savedRangeRef = useRef<Range | null>(null);
 
   const plugins = useMemo(() => getPlugins(variables), [variables]);
 
@@ -47,11 +49,16 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === '{') {
+        e.preventDefault();
         const target = e.target as HTMLElement;
         const rect = target.getBoundingClientRect?.();
         if (rect) {
-          setDropdownPos({ x: rect.left - 80, y: rect.bottom - 250 });
+          setDropdownPos({ x: rect.left - 80, y: rect.bottom - 200 });
           setActiveElement(target);
+        }
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+          savedRangeRef.current = selection.getRangeAt(0).cloneRange();
         }
       }
     };
@@ -66,22 +73,27 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         designerInstanceRef.current = null;
       }
     };
-  }, [noOfPages, variables]);
+  }, [noOfPages]);
 
   const handleSelect = (value: string) => {
-    if (activeElement) {
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0) return;
-
-      const range = selection.getRangeAt(0);
+    const variableTag = `{${value}}`;
+    const range = savedRangeRef.current;
+    if (range) {
       range.deleteContents();
-      range.insertNode(document.createTextNode(`${value}}`));
+      range.insertNode(document.createTextNode(variableTag));
       range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
 
-    setDropdownPos(null);
+      const activeEl = activeElement;
+      if (activeEl) {
+        const event = new Event('input', { bubbles: true });
+        activeEl.dispatchEvent(event);
+      }
+      setDropdownPos(null);
+      savedRangeRef.current = null;
+    }
   };
 
   useEffect(() => {
@@ -122,21 +134,14 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
             borderRadius: '4px',
           }}
         >
-          {variables.map((opt) => (
-            <div
-              key={opt.value}
-              onClick={() => handleSelect(opt.value)}
-              style={{
-                padding: '4px 12px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                fontSize: '0.9rem',
-              }}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {opt.label}
-            </div>
-          ))}
+          <Autocomplete
+            disablePortal
+            options={variables}
+            getOptionLabel={(option: { label: string; value: string }) => option.label}
+            onChange={(_, value) => { handleSelect(value.value) }}
+            renderInput={(params) => <TextField {...params} label="Select a movie" variant="outlined" />}
+            style={{ width: 300 }}
+          />
         </div>
       )}
 
