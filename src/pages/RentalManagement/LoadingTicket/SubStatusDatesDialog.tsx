@@ -11,7 +11,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, dateFormat, rentalManagement } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, dateFormat, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -136,7 +136,7 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
     <Dialog
       open={true}
       fullWidth
-      maxWidth="md"
+      maxWidth={showDates ? 'md' : 'xs'}
       TransitionComponent={CustomDialogTransition}
       fullScreen={fullScreen || isMobile || isTablet}>
       <Formik initialValues={{ dates }} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
@@ -163,7 +163,7 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
                             return (
                               <div
                                 key={index}
-                                className="grid grid-cols-[1fr_30px] flex-wrap items-center gap-2 rounded-md border bg-gray-50 p-4 dark:bg-gray-800 sm:grid-cols-[1fr_1fr_1fr_30px]"
+                                className={cn("flex-wrap items-center", showDates ? "grid grid-cols-[1fr_30px] gap-2 rounded-md border bg-gray-50 p-4 dark:bg-gray-800 sm:grid-cols-[1fr_1fr_1fr_30px]" : '')}
                               >
                                 {showDates && (
                                   <>
@@ -260,21 +260,23 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
                                     )}
                                   />
                                 </div>
-                                <div className="max-sm:col-start-2 max-sm:row-start-2">
-                                  <HtmlTooltip title="Remove">
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => {
-                                        addRemove(values?.dates, 'remove', index);
-                                      }}
-                                      disabled={index === 0}
-                                      aria-label="Remove"
-                                      color={'error'}
-                                    >
-                                      <Delete fontSize="small" />
-                                    </IconButton>
-                                  </HtmlTooltip>
-                                </div>
+                                {showDates && (
+                                  <div className="max-sm:col-start-2 max-sm:row-start-2">
+                                    <HtmlTooltip title="Remove">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => {
+                                          addRemove(values?.dates, 'remove', index);
+                                        }}
+                                        disabled={index === 0}
+                                        aria-label="Remove"
+                                        color={'error'}
+                                      >
+                                        <Delete fontSize="small" />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </div>
+                                )}
                               </div>
                             );
                           })
@@ -283,18 +285,19 @@ const SubStatusDatesDialog = ({ handleClose, options, onSuccess, submitting, ren
                     )}
                   />
                 </Form>
-                <div className="mt-4">
-                  <ThemeButton
-                    buttonType="themeBorder"
-                    disabled={!showDates}
-                    startIcon={<Add />}
-                    onClick={() => {
-                      addRemove(values?.dates, 'add', values?.dates?.length);
-                    }}
-                  >
-                    Add Date
-                  </ThemeButton>
-                </div>
+                {showDates && (
+                  <div className="mt-4">
+                    <ThemeButton
+                      buttonType="themeBorder"
+                      startIcon={<Add />}
+                      onClick={() => {
+                        addRemove(values?.dates, 'add', values?.dates?.length);
+                      }}
+                    >
+                      Add Date
+                    </ThemeButton>
+                  </div>
+                )}
               </div>
             </CustomDialogContent>
             <CustomDialogFooter>
