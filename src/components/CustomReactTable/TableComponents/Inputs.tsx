@@ -67,8 +67,10 @@ const RenderTextInput = ({
   prefixIcon,
   suffixIcon,
   type = 'text',
+  forceUpdate = false,
   ...rest
-}: InputProps & Partial<React.InputHTMLAttributes<HTMLInputElement>> & { prefixIcon?: React.ReactNode; suffixIcon?: React.ReactNode }) => {
+}: InputProps &
+  Partial<React.InputHTMLAttributes<HTMLInputElement>> & { prefixIcon?: React.ReactNode; suffixIcon?: React.ReactNode; forceUpdate?: boolean }) => {
   const [isValid, setIsValid] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const invisibleContainerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,7 @@ const RenderTextInput = ({
     handleStopEditing();
     if (!isValid) return;
 
-    if (getCellValue(cell) !== cellValue) {
+    if (getCellValue(cell) !== cellValue || forceUpdate) {
       handleSubmit();
     }
   };
@@ -544,6 +546,6 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
     }
     default:
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} />;
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(0)} type={'number'} forceUpdate />;
   }
 });
