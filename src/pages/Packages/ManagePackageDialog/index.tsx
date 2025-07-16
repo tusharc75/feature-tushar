@@ -19,6 +19,7 @@ import { isEqual, isString } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
@@ -253,19 +254,21 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
                 />
               )}
               {showConfirmCloneDetailsDialog && (
-                <ConfirmationDialog
-                  open={true}
-                  message="Please confirm if you'd like to proceed with cloning, including all the details. If not, click on cancel."
-                  onOk={() => {
-                    setFieldValue('packageId', packageId);
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone with all details? Click 'Yes' to include header and details, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('packageId', packageId);
+                    }
                     submitForm();
                   }}
                   onClose={() => {
-                    submitForm();
+                    setShowConfirmCloneDetailsDialog(false)
                   }}
-                  okBtnLoading={submitting}
-                />
-              )}
+                  selection1={'Yes'}
+                  selection2={'No'}
+                />)}
             </Fragment>
           )}
         </Formik>
