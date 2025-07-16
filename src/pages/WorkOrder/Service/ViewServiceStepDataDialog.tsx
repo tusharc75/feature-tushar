@@ -4,7 +4,8 @@ import Autocomplete from '@mui/material/Autocomplete';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { convertMsToTime, CustomDialogTransition, displayDateTime, sidebarResource } from 'src/constants/helpers';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const renderedFrom = `${sidebarResource?.workOrder}_Service_StepData`;
 
@@ -18,16 +19,18 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
   useEffect(() => {
     const services = [];
     servicesData?.forEach((sd) => {
-      const rows = stepsData
-        ?.filter((s) => s.uniqueId === sd.uniqueId)
-        .map((e, index) => {
-          const matchingStep = sd?.steps?.find((item) => item?._id === e?.stepId);
-          return {
-            index: index + 1,
-            stepName: matchingStep?.stepName,
-            ...e
-          };
-        });
+      const rows = stepsData?.filter((s) => s.uniqueId === sd.uniqueId).map((e, index) => {
+        const matchingStep = sd?.steps?.find((item) => item?._id === e?.stepId);
+        return {
+          index: index + 1,
+          stepName: matchingStep?.stepName,
+          ...e,
+          startedById: e?.startedBy?.optionValue,
+          startedBy: e?.startedBy?.optionLabel,
+          endedById: e?.endedBy?.optionValue,
+          endedBy: e?.endedBy?.optionLabel,
+        };
+      });
       const columns = fetchGridColumns(sd?.steps);
       services.push({
         optionLabel: sd.serviceName,
@@ -45,7 +48,7 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
   }, [isMobile]);
 
   const fetchGridColumns = (steps: any) => {
-    const initialColumns = [
+    const initialColumns: any = [
       {
         accessor: 'index',
         Header: 'Index',
@@ -78,8 +81,40 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
         }
       });
     });
+    initialColumns.push({
+      accessor: 'passFailStatus',
+      Header: 'Status',
+      Cell: ({ row }) => row.original['passFailStatus'] ? <div><p className="text-truncate">{row.original.passFailStatus}</p></div> : <NoDataCell />
+    });
+    const endColumns = [{
+      accessor: 'startedBy',
+      Header: 'Started By',
+      Cell: ({ row }) => row.original['startedBy'] ? <div><p className="text-truncate">{row.original?.startedBy}</p></div> : <NoDataCell />
+    }, {
+      accessor: 'startDate',
+      Header: 'Start Date',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => row.original['startDate'] ? <div><p className="text-truncate">{displayDateTime(row.original?.startDate)}</p></div> : <NoDataCell />
+    }, {
+      accessor: 'endedBy',
+      Header: 'Ended By',
+      Cell: ({ row }) => row.original['endedBy'] ? <div><p className="text-truncate">{row.original?.endedBy}</p></div> : <NoDataCell />
+    }, {
+      accessor: 'endDate',
+      Header: 'End Date',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => row.original['endDate'] ? <div><p className="text-truncate">{displayDateTime(row.original?.endDate)}</p></div> : <NoDataCell />
+    }, {
+      accessor: 'duration',
+      Header: 'Duration',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => row.original['duration'] ? <div><p className="text-truncate">{convertMsToTime(row.original?.duration)}</p></div> : <NoDataCell />
+    }]
     let newColumns = generateColumns(renderedFrom, stepColumns);
-    return [...initialColumns, ...newColumns];
+    return [...initialColumns, ...newColumns, ...endColumns];
   };
 
   return (

@@ -42,7 +42,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
-  const [material, setMaterial] = useState([]);
+  const [oriMaterial, setOriMaterial] = useState([]);
   const [addDialog, setAddDialog] = useState({ open: false, parentId: null });
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -215,9 +215,12 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       data: { data, count }
     } = await axiosInstance().get(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`);
 
-    setMaterial(JSON.parse(JSON.stringify(data.material)));
-    let rows = data?.material?.filter((e) => e.parentId === null);
+    setOriMaterial(JSON.parse(JSON.stringify(data.material)));
+
+    const material = data?.material
     const serializedPackages = data?.serializedPackages || [];
+
+    let rows = material?.filter((e) => e.parentId === null);
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -226,7 +229,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       parent.qtyDisplay = parent.qty;
       parent.isValid = true;
       parent.canDelete = parent?.workOrder ? false : true;
-      parent.subRows = generateNestedData(data.material, serializedPackages, parent);
+      parent.subRows = generateNestedData(material, serializedPackages, parent);
       if (parent.subRows?.find((r) => !r?.canDelete)) {
         parent.canDelete = false;
       }
@@ -249,11 +252,11 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = _subRow?.detail || _subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName : '';
-      _subRow.description = _subRow?.description || _subRow.type === MATERIAL_TYPE.product
+      _subRow.detail = _subRow?.detail || (_subRow.type === MATERIAL_TYPE.product ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.package ? _subRow.packageDetail?.packageName : '');
+      _subRow.description = _subRow?.description || (_subRow.type === MATERIAL_TYPE.product
         ? _subRow?.productDetail?.productDescription : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageDescription : '';
+          ? _subRow.packageDetail?.packageDescription : '');
       _subRow.qty = _subRow.qty;
       _subRow.canDelete = _subRow?.workOrder ? false : true;
       _subRow.subRows = generateNestedData(material, serializedPackages, _subRow);
@@ -521,7 +524,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           handleSaveData={handleSaveData}
           loading={isUpdating}
           isBulkedit={false}
-          material={material}
+          material={oriMaterial}
         />
       )}
       {openSerializedPackagesDialog && (
