@@ -180,21 +180,21 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail = _subRow?.detail ||
-        _subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.service
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageName
-            : '';
-      _subRow.description = _subRow?.description ||
-        _subRow.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productDescription
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
+        (_subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.service
-            ? _subRow?.serviceDetail?.serviceDescription
-            : '';
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '');
+      _subRow.description = _subRow?.description ||
+        (_subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceDescription
+              : '');
       _subRow.qty = _subRow.qty || 1;
       _subRow.serializedPackageId = _subRow?.serializedPackage?.optionValue;
       _subRow.serializedPackage = _subRow?.serializedPackage?.optionLabel;
