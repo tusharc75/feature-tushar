@@ -1,20 +1,16 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@mui/material';
 import { Check, CheckBoxOutlined, DragIndicator, Edit, ExpandLess, ExpandMore } from '@mui/icons-material';
-import Autocomplete from '@mui/material/Autocomplete';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton } from '@mui/material';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import { eq, isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
-import { cn, sidebarResource } from 'src/constants/helpers';
+import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
+import { RenderInputField } from 'src/components/CustomReactTable/TableComponents/Inputs';
+import { cn } from 'src/constants/helpers';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition } from '../utils';
-import DataList from './DataList';
-import { useUserTempFilters } from 'src/components/CustomReactTable/GridFilter/utils';
-import axiosInstance from 'src/axios/axiosInstance';
-import { RenderInputField, RenderTextInput, validInputs } from 'src/components/CustomReactTable/TableComponents/Inputs';
 
 export type TColType = {
   Header: string;
@@ -671,7 +667,7 @@ export const CellRenderer = React.memo(
       vtableData && vtableData[index] ? vtableData[index] : getStickyPosition(columnDef, index, table);
     const style = useMemo(() => ({ position: 'static', ...stickyStyle }), [stickyStyle]);
 
-    const isEditable = cell?.column?.columnDef.editable && validInputs.has(columnDef.type as any);
+    const isEditable = cell?.column?.columnDef.editable;
     const props = useMemo(
       () => ({
         id: cell.id,
@@ -689,7 +685,9 @@ export const CellRenderer = React.memo(
           ...(style.position === 'sticky' ? { ...style } : { ...style, ...virtualStyles })
         },
         onClick: () => {
+          console.log('hi');
           if (!cell?.column.id || !row.original._id || !isEditable || cell?.column.id === 'selection') return;
+          console.log('hi2');
           setCurrentlyEditingCells((prev) => new Set([...prev, cell.column.id]));
         }
       }),
@@ -728,7 +726,7 @@ export const CellRenderer = React.memo(
             </div>
           </td>
         );
-      case !['selection'].includes(cell?.column.id) && currentlyEditingCells.has(columnDef.id) && validInputs.has(columnDef.type as any):
+      case !['selection'].includes(cell?.column.id) && currentlyEditingCells.has(columnDef.id) && isEditable:
         return (
           <td {...props}>
             <RenderInputs cell={cell} columnDef={columnDef} row={row} submitInput={submitInput} handleStopEditing={handleStopEditing} />

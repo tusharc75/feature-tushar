@@ -1,5 +1,5 @@
 import { CalendarToday } from '@mui/icons-material';
-import { Autocomplete, AutocompleteProps, ClickAwayListener, Popover, TextField } from '@mui/material';
+import { Autocomplete, AutocompleteProps, Popover, TextField } from '@mui/material';
 import { DateView } from '@mui/x-date-pickers';
 import { StaticDatePicker } from '@mui/x-date-pickers/StaticDatePicker';
 import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
@@ -18,7 +18,7 @@ import { ValidateOptions } from 'yup/lib/types';
 
 type YupSchema = Partial<yup.AnySchema> & { isValid: (value: any, options?: ValidateOptions<any>) => Promise<boolean> };
 
-export const validInputs = new Set([
+const validInputs = new Set([
   'singleLine',
   'multiLine',
   'email',
@@ -454,13 +454,13 @@ const RenderCurrencyAutoComplete = ({
   );
 };
 
-const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
-  return (
-    <ClickAwayListener onClickAway={() => handleStopEditing()}>
-      <div></div>
-    </ClickAwayListener>
-  );
-};
+// const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
+//   return (
+//     <ClickAwayListener onClickAway={() => handleStopEditing()}>
+//       <div></div>
+//     </ClickAwayListener>
+//   );
+// };
 
 const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   name: yup.string(),
@@ -532,6 +532,6 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
     }
     default:
-      return <EmptyField {...props} validationSchema={validationSchema} />;
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} />;
   }
 });
