@@ -486,7 +486,7 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   url: yup.string().url()
 };
 
-const decimalPlaceValidator = (decimalPlaces: number) =>
+const decimalPlaceValidator = (decimalPlaces: number = 0) =>
   yup
     .number()
     .typeError('Value must be a number')
@@ -546,6 +546,6 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
     }
     default:
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(0)} type={'number'} forceUpdate />;
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} forceUpdate />;
   }
 });
