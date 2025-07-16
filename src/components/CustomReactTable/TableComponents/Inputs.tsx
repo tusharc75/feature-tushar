@@ -155,8 +155,6 @@ const PhoneNumberInput = ({ cell, cellValue, columnDef, handleStopEditing, handl
   };
 
   const handleInput = async (val: string) => {
-    console.log(val);
-    setCellValue(val);
     const isValidValue = await validationSchema?.isValid?.(cellValue);
     setIsValid(isValidValue);
   };
@@ -457,7 +455,6 @@ const RenderCurrencyAutoComplete = ({
 };
 
 const EmptyField = ({ columnDef, handleStopEditing, row }: InputProps) => {
-  console.log({ row: row.original, col: columnDef });
   return (
     <ClickAwayListener onClickAway={() => handleStopEditing()}>
       <div></div>

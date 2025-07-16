@@ -16,7 +16,6 @@ const RenderCellWithHeader = memo(
       setIsEditing(false);
     };
 
-    console.log(cell);
 
     const props = useMemo(
       () => ({
