@@ -122,8 +122,7 @@ const DataList = ({ columnDef, cellValue, setCellValue, cell, onBlur }) => {
                   {loading ? <CircularProgress color="inherit" size={20} /> : null}
                   {params.InputProps.endAdornment}
                 </>
-              ),
-              autoComplete: 'off'
+              )
             }
           }}
           autoFocus

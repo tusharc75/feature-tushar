@@ -44,9 +44,6 @@ const CurrencyAutocomplete = (prop) => {
           {...params}
           {...textFieldParams}
           variant="outlined"
-          slotProps={{
-            autoComplete: 'off'
-          }}
           name={name}
           label={label}
           error={error}
