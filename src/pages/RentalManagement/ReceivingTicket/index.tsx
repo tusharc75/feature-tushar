@@ -2817,7 +2817,8 @@ const ReceivingTicket = ({
                 validateAction,
                 resources,
                 getFilterSelectedRecords,
-                setSubStatusToUpdate
+                setSubStatusToUpdate,
+                handleSubStatusChange
               }}
             />
           }
@@ -3394,6 +3395,7 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
+  rentalPolicyData,
   setTransferAnotherPackageialog,
   hideDeliveryTicketDelivered,
   openChangeActualDateDialog,
@@ -3403,7 +3405,8 @@ const ActionButtonMenuItems = ({
   validateAction,
   resources,
   getFilterSelectedRecords,
-  setSubStatusToUpdate
+  setSubStatusToUpdate,
+  handleSubStatusChange
 }) => {
   const checkUniqStatus = () => {
     if (getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset).length === 0) {
@@ -3925,13 +3928,17 @@ const ActionButtonMenuItems = ({
           <MenuItem
             onClick={() => {
               if (validateAction(rentalManagementActions.changeSubStatus)) {
-                setSubStatusToUpdate(true)
+                if (!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1) {
+                  handleSubStatusChange([{ startDate: null, endDate: null, subStatus: assetPolicyData?.policy?.inUseSubStatus[0] }])
+                } else {
+                  setSubStatusToUpdate(true)
+                }
               }
             }}
             id={'change-sub-status-menu-item'}
             disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
           >
-            Change Sub Status
+            {`Change Sub Status${!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1 ? ` - ${assetPolicyData?.policy?.inUseSubStatus[0]}` : ''}`}
           </MenuItem>
         )}
     </>
