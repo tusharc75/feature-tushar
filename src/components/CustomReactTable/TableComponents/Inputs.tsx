@@ -6,7 +6,7 @@ import { StaticDateTimePicker } from '@mui/x-date-pickers/StaticDateTimePicker';
 import dayjs from 'dayjs';
 import { find, isEqual } from 'lodash';
 import MuiPhoneInput from 'material-ui-phone-number';
-import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import DataList from 'src/components/CustomReactTable/TableComponents/DataList';
 import { getCellValue } from 'src/components/CustomReactTable/utils';
@@ -88,18 +88,11 @@ const RenderTextInput = ({
     setIsValid(isValidValue);
   };
 
-  useLayoutEffect(() => {
-    const container = invisibleContainerRef.current;
-    const input = inputRef.current;
-    if (!container || !input) return;
-    input.style.width = `${container.getBoundingClientRect().width + 1}px`;
-  }, [cellValue]);
-
   return (
     <div
       className={cn(
-        'shadow-0 relative flex w-full appearance-none items-center justify-start gap-1 !border-b bg-[transparent] px-[2px] py-[4px] outline-[transparent]  focus-within:outline-[var(--new-theme-color)] dark:text-[white]',
-        isValid ? '' : 'border-red-500 focus-within:outline-red-500'
+        'shadow-0 relative flex w-full appearance-none items-center justify-start gap-1 rounded-md border bg-[transparent] px-[2px] py-[4px] outline-none focus-within:border-2 focus-within:border-theme dark:text-[white]',
+        isValid ? '' : 'border-red-500 outline-red-500'
       )}
       onClick={() => {
         inputRef.current?.focus();
@@ -118,7 +111,10 @@ const RenderTextInput = ({
         autoFocus
         id={`${cell.column.id}-input-${row.index || 0}`}
         type={type}
-        className={cn('hide-number-input-arrow flex-shrink border-none bg-transparent outline-none', type === 'color' ? 'cursor-pointer' : '')}
+        className={cn(
+          'hide-number-input-arrow flex-shrink flex-grow border-none bg-transparent px-[2px] py-[1px] text-inherit outline-none',
+          type === 'color' ? 'cursor-pointer' : ''
+        )}
         onBlur={() => handleBlur()}
         value={cellValue}
         onKeyDown={(e) => {
@@ -256,6 +252,8 @@ const DropdownMultiSelectAndRadio = ({
           target.blur();
         }
       }}
+      {...(columnDef?.type === 'multiSelect' ? { limitTags: 1 } : {})}
+      size={'small'}
       selectOnFocus
       options={options ? options : []}
       getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
@@ -270,12 +268,7 @@ const DropdownMultiSelectAndRadio = ({
       renderInput={(params) => (
         <TextField
           {...params}
-          slotProps={{
-            input: {
-              autoComplete: 'off'
-            }
-          }}
-          variant="standard"
+          variant="outlined"
           id={`${cell.column.id}-input-${row.index || 0}`}
           autoFocus
           onBlur={() => {
