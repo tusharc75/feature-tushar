@@ -4,7 +4,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CHILD_RESOURCE, CustomDialogTransition, displayDate, prepareDataForGrid, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, displayDate, prepareDataForGrid, serializedAsset, serializedAssetsCertification, sidebarResource } from '../../../constants/helpers';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
@@ -12,10 +12,12 @@ import { isMobile, isTablet } from 'react-device-detect';
 import IssueCertificateDialog from '../../SerializedAssetsCertification/IssueCertificateDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAttachment from 'src/components/Activity/Attachments/ManageAttachment';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 
 const renderedFrom = `${camelCase(sidebarResource?.serializedAsset)}_certificationHistory`;
 
@@ -26,6 +28,8 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   const [openDialog, setOpenDialog] = useState({ open: false });
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { generateColumns } = useColumns();
 
@@ -147,13 +151,27 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
                 setOpenAttachment({ open: true, attachmentId: row.original?.attachmentId });
               }}
             >
-              <AttachFileIcon color="primary" />
+              <AttachFileIcon fontSize='small' color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+        {!!row?.original?.canDelete && canIssueCertificate && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setShowConfirmBox({ open: true, _id: row?.original?._id });
+              }}
+            >
+              <DeleteIcon fontSize='small' color="error" />
             </IconButton>
           </HtmlTooltip>
         )}
       </>
     )
   };
+
   const addButtonMenuItems = () => {
     return (
       <>
@@ -167,6 +185,23 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
       </>
     );
   };
+
+  const handleRemove = () => {
+    setIsDeleting(true);
+    axiosInstance()
+      .put(`${serializedAssetsCertification.api}/remove`, {
+        _id: showConfirmBox?._id
+      })
+      .then(() => {
+        setIsDeleting(false);
+        setShowConfirmBox({ open: false, _id: null });
+        fetchData();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setIsDeleting(false);
+      });
+  }
 
   return (
     <>
@@ -237,6 +272,17 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             type={openAttachment.attachmentId?.type}
           />
         </Dialog>
+      )}
+      {showConfirmBox.open && (
+        <ConfirmationDialogRaw
+          open={true}
+          message={`Are you sure you want to delete this certificate ?`}
+          okBtnLoading={isDeleting}
+          onClose={() => {
+            setShowConfirmBox({ open: false, _id: null });
+          }}
+          onOk={handleRemove}
+        />
       )}
     </>
   );
