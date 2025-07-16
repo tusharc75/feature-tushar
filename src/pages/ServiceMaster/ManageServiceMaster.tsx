@@ -21,6 +21,7 @@ import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageServiceMaster = ({
   isClone = false,
@@ -260,19 +261,21 @@ const ManageServiceMaster = ({
                 />
               ) : null}
               {showConfirmCloneDetailsDialog && (
-                <ConfirmationDialog
-                  open={true}
-                  message="Please confirm if you'd like to proceed with cloning, including all the details. If not, click on cancel."
-                  onOk={() => {
-                    setFieldValue('serviceMasterId', serviceMasterId);
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone with all details? Click 'Yes' to include header and details, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('serviceMasterId', serviceMasterId);
+                    }
                     submitForm();
                   }}
                   onClose={() => {
-                    submitForm();
+                    setShowConfirmCloneDetailsDialog(false)
                   }}
-                  okBtnLoading={loading}
-                />
-              )}
+                  selection1={'Yes'}
+                  selection2={'No'}
+                />)}
             </Fragment>
           )}
         </Formik>
