@@ -115,7 +115,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         Cell: ({ row }) => {
           return row.original?.serializedPackageNumber ? (
             <div className="flex items-center gap-2">
-              <h5 className="text-truncate">{row.original?.serializedPackageNumber}</h5>{' '}
+              <h5 className="text-truncate" title={row.original?.serializedPackageNumber}>{row.original?.serializedPackageNumber}</h5>{' '}
               <Box>
                 <IconButton
                   size="small"
@@ -194,18 +194,18 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow?.detail || _subRow.type === MATERIAL_TYPE.product
+        _subRow?.detail || (_subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.assetDetail?.assetNumber
             : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageName
-              : '';
-      _subRow.description = _subRow?.description || _subRow.type === MATERIAL_TYPE.product
+              : '');
+      _subRow.description = _subRow?.description || (_subRow.type === MATERIAL_TYPE.product
         ? _subRow?.productDetail?.productDescription
         : _subRow.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageDescription
-          : '';
+          : '');
       if (_subRow.type === MATERIAL_TYPE.package) {
         _subRow.serializedPackageId = _subRow?.serializedPackageDetail?._id;
         _subRow.serializedPackageNumber = _subRow?.serializedPackageDetail?.serializedPackageNumber;
