@@ -1,9 +1,9 @@
 import { useMediaQuery } from '@mui/material';
-import { uniq } from 'lodash';
+import { kebabCase, uniq } from 'lodash';
 import { useCallback, useContext, useEffect, useReducer } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { pageTitle } from 'src/pages/UserManual/constants';
-import { ManualActions, UseManualState } from 'src/pages/UserManual/type';
+import { ManualActions, Resource, SearchData, Section, SubSection, UseManualState } from 'src/pages/UserManual/type';
 import { createURl, getCurrentManualUrl, getPageDataByUrl, getSectionFromUrl } from 'src/pages/UserManual/utils';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -12,7 +12,18 @@ const initialState: UseManualState = {
   isSidebarOpen: false,
   currentRoute: '',
   pageData: [],
-  loading: false
+  loading: false,
+  searchData: []
+};
+
+const handleCreateData = (section: Section | SubSection, path: string, group: string) => {
+  const data: SearchData = {
+    ...section,
+    path,
+    group,
+    scrollKey: `#${kebabCase(`${section.sectionName}-section-id`)}`
+  };
+  return data;
 };
 
 const reducer = (state: UseManualState, action: ManualActions) => {
@@ -21,6 +32,9 @@ const reducer = (state: UseManualState, action: ManualActions) => {
       return { ...state, manualData: action.payload };
     case 'setIsSidebarOpen':
       return { ...state, isSidebarOpen: action.payload };
+    case 'setSearchData': {
+      return { ...state, searchData: action.payload };
+    }
     case 'setLoading':
       return { ...state, loading: action.payload };
     case 'setCurrentRoute': {
@@ -50,11 +64,30 @@ const useManual = () => {
     setState({ type: 'setIsSidebarOpen', payload: !isSidebarOpen });
   }, [isSidebarOpen]);
 
+  //  const commonPath = `/${u.sectionName}/${u.resourceLabel}`;
+
   const fetchData = useCallback(() => {
     setState({ type: 'setLoading', payload: true });
     axiosInstance()
       .get('/user/user-manual')
       .then(({ data: { data } }) => {
+        if (data?.resources) {
+          const searchData: SearchData[] = [];
+          for (const manual of data.resources as Resource[]) {
+            const path = `/${manual.sectionName}/${manual.resourceLabel}`;
+            if (manual.sections?.length > 0) {
+              for (const section of manual.sections) {
+                searchData.push(handleCreateData(section, path, manual.sectionName));
+                if (section.subSections?.length > 0) {
+                  for (const subSection of section.subSections) {
+                    searchData.push(handleCreateData(subSection, path, manual.sectionName));
+                  }
+                }
+              }
+            }
+          }
+          setState({ type: 'setSearchData', payload: searchData });
+        }
         const sectionNames = uniq(data?.resources?.map((e) => e?.sectionName)).filter((d) => !!d);
         const result = [];
         sectionNames?.forEach((ele) => {
@@ -73,9 +106,9 @@ const useManual = () => {
       });
   }, [toastConfig]);
 
-  const navigate = useCallback((url) => {
+  const navigate = useCallback((url, hash?: string) => {
     if (url) {
-      const parsedUrl = createURl(url);
+      const parsedUrl = createURl(url, hash);
       setState({ type: 'setCurrentRoute', payload: parsedUrl });
       window.history.pushState(null, '', parsedUrl);
     }

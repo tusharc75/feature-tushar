@@ -9,7 +9,7 @@ import { useAutoTOC } from 'src/pages/UserManual/hooks/useAutoTOC';
 import styles from '../userManual.module.scss';
 
 const ManualContent = ({ state }: ComponentCommonProps) => {
-  const { pageData, loading, isMobile } = state;
+  const { pageData, loading, isMobile, currentRoute } = state;
   const imagesLoaded = useRef(0);
   const totalImages = useRef(0);
   const mainContainerRef = useRef<HTMLElement>(null);
@@ -21,6 +21,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
       try {
         const hash = decodeURIComponent(window.location.hash);
         const targetElement = document.querySelector(hash);
+
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: 'smooth' });
         }
@@ -28,7 +29,7 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
         console.error('Error scrolling to hash:', error);
       }
     }
-  }, []);
+  }, [currentRoute]);
 
   const handleImageLoad = useCallback(() => {
     imagesLoaded.current++;
@@ -122,7 +123,6 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
     navigator.clipboard.writeText(url);
   };
 
-
   return (
     <main ref={mainContainerRef} className="relative flex min-h-screen flex-grow scroll-m-24 bg-[white] dark:bg-[#1b1b1d]">
       {loading ? (
@@ -135,13 +135,16 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
           <div className="basis-full px-4 max-lg:order-2 lg:basis-3/4">
             {pageData?.map((e, i) => (
               <div key={e._id}>
-                <div id={kebabCase(`${e.sectionName}-section-id`)} className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}>
+                <div
+                  id={kebabCase(`${e.sectionName}-section-id`)}
+                  className={cn('manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]', styles['manual-content-section'])}
+                >
                   <div className="group flex items-center gap-2">
                     <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{e.sectionName}</h2>
                     <IconButton
                       onClick={() => handleCopyLink(kebabCase(`${e.sectionName}-section-id`))}
                       size="small"
-                      className="!p-1 !text-gray-400 hover:!text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="!p-1 !text-gray-400 opacity-0 transition-opacity hover:!text-gray-600 group-hover:opacity-100"
                       title="Copy link"
                     >
                       <ContentCopy fontSize="small" />
@@ -158,14 +161,14 @@ const ManualContent = ({ state }: ComponentCommonProps) => {
                     <div
                       key={subSection._id}
                       id={kebabCase(`${subSection.sectionName}-section-id`)}
-                      className={cn("manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]", styles['manual-content-section'])}
+                      className={cn('manual-content-section scroll-m-[calc(var(--manual-head-height)+20px)]', styles['manual-content-section'])}
                     >
                       <div className="group flex items-center gap-2">
                         <h2 className="my-7 pb-2 text-[25px] font-bold leading-[1.25] text-gray-500 lg:text-[32px]">{subSection.sectionName}</h2>
                         <IconButton
                           onClick={() => handleCopyLink(kebabCase(`${subSection.sectionName}-section-id`))}
                           size="small"
-                          className="!p-1 !text-gray-400 hover:!text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="!p-1 !text-gray-400 opacity-0 transition-opacity hover:!text-gray-600 group-hover:opacity-100"
                           title="Copy link"
                         >
                           <ContentCopy fontSize="small" />
@@ -231,17 +234,14 @@ interface SectionTOC {
   toc: TOCItem[];
 }
 
-const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: SectionTOC[] }) => {
+const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[]; autoTOC: SectionTOC[] }) => {
   const hash = window.location.hash.split('#')[1];
 
   const renderTOCItems = (items: TOCItem[]) => (
     <ul className="mt-1 pl-4">
-      {items.map(item => (
+      {items.map((item) => (
         <li key={item.id} className="m-1.5 list-none">
-          <a
-            href={`#${item.id}`}
-            className={cn('text-[12px] hover:text-[var(--link)]', hash === item.id && 'font-bold')}
-          >
+          <a href={`#${item.id}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === item.id && 'font-bold')}>
             {item.text}
           </a>
           {item.children.length > 0 && renderTOCItems(item.children)}
@@ -251,31 +251,23 @@ const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: S
   );
 
   return (
-    <ul className="sticky top-[--manual-head-height] list-none pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)] overflow-y-auto h-[calc(100vh-2rem)]">
-      {pageData.map(section => {
+    <ul className="sticky top-[--manual-head-height] h-[calc(100vh-2rem)] list-none overflow-y-auto pb-2 pl-2 pr-0 pt-2 lg:[border-left:1px_solid_var(--common-border-color)]">
+      {pageData.map((section) => {
         const sectionId = `${kebabCase(section.sectionName)}-section-id`;
-        const tocEntry = autoTOC.find(t => t.sectionId === sectionId);
+        const tocEntry = autoTOC.find((t) => t.sectionId === sectionId);
         const sectionTOC = tocEntry ? tocEntry.toc : [];
 
         return (
-          <li
-            key={section._id}
-            className="mb-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100"
-          >
+          <li key={section._id} className="mb-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
             {sectionTOC.length === 0 && (
-              <a
-                href={`#${sectionId}`}
-                className={cn('text-[12px] hover:text-[var(--link)]', hash === sectionId && 'font-bold')}
-              >
+              <a href={`#${sectionId}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === sectionId && 'font-bold')}>
                 {section.sectionName}
               </a>
             )}
 
             {sectionTOC.length > 0 && renderTOCItems(sectionTOC)}
 
-            {section.subSections?.length > 0 && (
-              <SubOnThisPageImpl pageData={section.subSections} />
-            )}
+            {section.subSections?.length > 0 && <SubOnThisPageImpl pageData={section.subSections} />}
           </li>
         );
       })}
@@ -283,22 +275,15 @@ const OnThisPageImpl = ({ pageData, autoTOC }: { pageData: Section[], autoTOC: S
   );
 };
 
-
 const SubOnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
   const hash = window.location.hash.split('#')[1];
   return (
     <ul className="sticky top-[--manual-head-height] list-none pl-2 pr-0">
-      {pageData.map(section => {
+      {pageData.map((section) => {
         const link = `${kebabCase(section.sectionName)}-section-id`;
         return (
-          <li
-            key={section._id}
-            className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100"
-          >
-            <a
-              href={`#${link}`}
-              className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}
-            >
+          <li key={section._id} className="m-1.5 list-none text-[16px] font-normal leading-[1.25] text-gray-500 dark:text-gray-100">
+            <a href={`#${link}`} className={cn('text-[12px] hover:text-[var(--link)]', hash === link && 'font-bold')}>
               {section.sectionName}
             </a>
           </li>
@@ -307,5 +292,3 @@ const SubOnThisPageImpl = ({ pageData }: { pageData: Section[] }) => {
     </ul>
   );
 };
-
-

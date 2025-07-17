@@ -44,6 +44,17 @@ export type UseManualState = {
   currentRoute: string;
   pageData: Section[];
   loading: boolean;
+  searchData: SearchData[] | null;
+};
+
+export type SearchData = {
+  _id?: string;
+  sectionName?: string;
+  content?: string;
+  order?: number;
+  scrollKey?: string;
+  path: string;
+  group: string;
 };
 
 export type ManualActions =
@@ -51,4 +62,5 @@ export type ManualActions =
   | { type: 'setIsSidebarOpen'; payload: boolean }
   | { type: 'setLoading'; payload: boolean }
   | { type: 'setCurrentRoute'; payload: string }
-  | { type: 'setPageData'; payload: Section[] };
+  | { type: 'setPageData'; payload: Section[] }
+  | { type: 'setSearchData'; payload: SearchData[] };

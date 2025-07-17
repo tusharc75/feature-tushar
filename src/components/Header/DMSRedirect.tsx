@@ -3,8 +3,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import { PiDatabaseBold } from 'react-icons/pi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
+const envLink = import.meta.env.VITE_APP_DMS_URL;
+
 const DMSRedirect = () => {
-  const envLink = import.meta.env.VITE_APP_DMS_URL;
   if (!envLink) return null;
 
   const handleRedirect = () => {

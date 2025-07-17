@@ -10,11 +10,11 @@ function getLastPart(url: string): string | null {
   return lastPart;
 }
 
-
-export const createURl = (url: string) => {
+export const createURl = (url: string, hash?: string) => {
+  console.log(url);
   if (!url) return '/';
   const cleanedUrl = url.startsWith('/') ? url : `/${url}`;
-  return `${homeLink}${encodeURI(cleanedUrl)}`;
+  return `${homeLink}${encodeURI(cleanedUrl)}${hash ? hash : ''}`;
 };
 
 export const getCurrentManualUrl = () => {
@@ -28,16 +28,13 @@ export const getSectionFromUrl = (url: string = getCurrentManualUrl()): string[]
   return sections;
 };
 
-
 export const getPageDataByUrl = (data: TManualData[] = [], url?: string) => {
   const sections = getSectionFromUrl(url);
   if (sections.length === 0) return homepageData;
 
   if (sections.length === 2) {
     const [sectionName, resourceLabel] = sections.map(decodeURIComponent);
-    const pageData = data
-      ?.find((e) => e.sectionName === sectionName)
-      ?.resource?.find((e) => e.resourceLabel === resourceLabel)?.sections;
+    const pageData = data?.find((e) => e.sectionName === sectionName)?.resource?.find((e) => e.resourceLabel === resourceLabel)?.sections;
     return pageData;
   }
   return null;
