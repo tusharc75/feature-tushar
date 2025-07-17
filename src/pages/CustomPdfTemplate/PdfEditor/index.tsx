@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
 import { getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
-import { Autocomplete, TextField } from '@mui/material';
 
 interface PdfEditorProps {
   template?: any;
@@ -15,10 +14,9 @@ interface PdfEditorProps {
 const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const [dropdownPos, setDropdownPos] = useState<{ x: number; y: number } | null>(null);
-  const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
-  const savedRangeRef = useRef<Range | null>(null);
+  const [savedRange, setSavedRange] = useState<Range | null>(null);
 
   const plugins = useMemo(() => getPlugins(variables), [variables]);
 
@@ -53,12 +51,11 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         const target = e.target as HTMLElement;
         const rect = target.getBoundingClientRect?.();
         if (rect) {
-          setDropdownPos({ x: rect.left - 80, y: rect.bottom - 200 });
-          setActiveElement(target);
-        }
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-          savedRangeRef.current = selection.getRangeAt(0).cloneRange();
+          setDropdownPos({ x: rect.left - 75, y: rect.bottom - 250 });
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            setSavedRange(selection.getRangeAt(0).cloneRange());
+          }
         }
       }
     };
@@ -73,27 +70,18 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         designerInstanceRef.current = null;
       }
     };
-  }, [noOfPages]);
+  }, [noOfPages, plugins]);
 
   const handleSelect = (value: string) => {
-    const variableTag = `{${value}}`;
-    const range = savedRangeRef.current;
-    if (range) {
-      range.deleteContents();
-      range.insertNode(document.createTextNode(variableTag));
-      range.collapse(false);
+    if (savedRange) {
       const selection = window.getSelection();
       selection?.removeAllRanges();
-      selection?.addRange(range);
-
-      const activeEl = activeElement;
-      if (activeEl) {
-        const event = new Event('input', { bubbles: true });
-        activeEl.dispatchEvent(event);
-      }
-      setDropdownPos(null);
-      savedRangeRef.current = null;
+      selection?.addRange(savedRange);
+      savedRange.deleteContents();
+      savedRange.insertNode(document.createTextNode(`{${value}}`));
+      savedRange.collapse(false);
     }
+    setDropdownPos(null);
   };
 
   useEffect(() => {
@@ -102,7 +90,6 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         setDropdownPos(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [dropdownPos]);
@@ -115,7 +102,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
           height: '100%',
           width: '100%',
           position: 'relative',
-          overflow: 'hidden',
+          overflow: 'hidden'
         }}
       />
 
@@ -131,17 +118,56 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
             boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
             zIndex: 10000,
             padding: '4px 0',
-            borderRadius: '4px',
+            borderRadius: '4px'
           }}
         >
-          <Autocomplete
-            disablePortal
-            options={variables}
-            getOptionLabel={(option: { label: string; value: string }) => option.label}
-            onChange={(_, value) => { handleSelect(value.value) }}
-            renderInput={(params) => <TextField {...params} label="Select a movie" variant="outlined" />}
-            style={{ width: 300 }}
-          />
+          <div
+            style={{
+              background: 'white',
+              border: '1px solid #ccc',
+              borderRadius: 4,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              width: 200,
+              maxHeight: 200,
+              overflowY: 'auto'
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%',
+                padding: '6px 10px',
+                boxSizing: 'border-box',
+                border: 'none',
+                borderBottom: '1px solid #eee',
+                outline: 'none',
+                fontSize: '0.9rem'
+              }}
+            />
+            {variables
+              .filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map((opt) => (
+                <div
+                  key={opt.value}
+                  data-variable-option
+                  onClick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
+                  onMouseDown={(e) => e.preventDefault()}
+                  style={{
+                    padding: '4px 12px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem'
+                  }}
+                >
+                  {opt.label}
+                </div>
+              ))}
+          </div>
         </div>
       )}
 
@@ -162,7 +188,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
             fontSize: '1.2rem',
             fontWeight: 'bold',
             pointerEvents: 'all',
-            cursor: 'not-allowed',
+            cursor: 'not-allowed'
           }}
         />
       )}
