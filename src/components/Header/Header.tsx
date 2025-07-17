@@ -9,14 +9,15 @@ import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory } from 'react-router-dom';
-import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore, ONLINE_USERS } from 'src/StateProvider/fastContext';
+import { ONLINE_USERS, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import NewSearchbar from 'src/components/Header/SearchBar';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, EQUIPT_BE_CONNECTED_WINDOW, handleClearLocalStore } from 'src/constants/helpers';
+import { cn, handleClearLocalStore } from 'src/constants/helpers';
 import { deleteDatabase } from 'src/constants/indexdbhelper';
 import { useScrollDirection } from 'src/hooks/useScroll';
+import { useSocket } from 'src/hooks/useSocket';
 import { userManual } from 'src/pages/Home';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -24,7 +25,6 @@ import { CustomOfflineContext } from '../../StateProvider/OfflineContext/Offline
 import { useData } from '../../StateProvider/Provider';
 import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
-import { backendApi } from '../../config';
 import HtmlTooltip from '../CustomTooltipTitle';
 import DashboardModal, { ModalHead } from '../DashboardModal';
 import routes from '../Helpers/Routes';
@@ -32,7 +32,7 @@ import UserProfile from './../UserProfile';
 import ChatNotification from './ChatNotifications';
 import styles from './Header.module.scss';
 import Notification from './Notification';
-import { useSocket } from 'src/hooks/useSocket';
+import DMSRedirect from 'src/components/Header/DMSRedirect';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -516,18 +516,18 @@ const Header = () => {
             <div className={`${styles.flexAlignCenter}`}>
               <div>
                 {isOffline && (
-                  <IconButton>
-                    <HtmlTooltip title="You are working offline right now">
+                  <HtmlTooltip title="You are working offline right now">
+                    <IconButton>
                       <Brightness1 color="error" className="blink" />
-                    </HtmlTooltip>
-                  </IconButton>
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
                 {isSynch && (
-                  <IconButton color="inherit">
-                    <HtmlTooltip title="Synchronizing offline data">
+                  <HtmlTooltip title="Synchronizing offline data">
+                    <IconButton color="inherit">
                       <SyncIcon className="rotate" />
-                    </HtmlTooltip>
-                  </IconButton>
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
                 <HtmlTooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
                   <IconButton
@@ -569,6 +569,7 @@ const Header = () => {
               </IconButton>
             </HtmlTooltip>
           )}
+          <DMSRedirect />
           <Box className={styles.profile}>
             <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
           </Box>
