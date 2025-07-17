@@ -73,6 +73,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
   }, [noOfPages, plugins]);
 
   const handleSelect = (value: string) => {
+    console.log('Selected variable:', savedRange);
     if (savedRange) {
       const selection = window.getSelection();
       selection?.removeAllRanges();
@@ -134,7 +135,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
           >
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search variables..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onMouseDown={(e) => e.stopPropagation()}
