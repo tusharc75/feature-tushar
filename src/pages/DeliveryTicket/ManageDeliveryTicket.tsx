@@ -291,9 +291,6 @@ const ManageDeliveryTicket = ({
   }, [deliveryTicketId, referenceData]);
 
   const fetchFields = async () => {
-
-    // made common 
-
     try {
       let fieldsDataAll;
       let fieldsDataForCreate;
@@ -358,7 +355,7 @@ const ManageDeliveryTicket = ({
             if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
             }
             else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
-              if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant) {
+              if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant && products?.length) {
                 fieldsDataForCreate?.forEach((element) => {
                   if (element?.fieldName === 'pickupFromStorageLocation') {
                     element.required = user?.user?.brandPolicy?.rentalInventoryDebit || user?.user?.brandPolicy?.rentalInventorySofthold || false;
@@ -368,7 +365,7 @@ const ManageDeliveryTicket = ({
               else {
                 fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['pickupFromStorageLocation']?.includes(e.fieldName));
               }
-              if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant) {
+              if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant && products?.length) {
                 fieldsDataForCreate?.forEach((element) => {
                   if (element?.fieldName === 'deliveryToStorageLocation') {
                     element.required = user?.user?.brandPolicy?.rentalInventoryDebit || user?.user?.brandPolicy?.rentalInventorySofthold || false;
