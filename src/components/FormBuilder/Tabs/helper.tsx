@@ -64,6 +64,12 @@ export const resourcePolicy = [
         type: 'checkBox',
         defaultValue: false
       },
+      {
+        fieldName: 'disableServiceAndConsumablesBreakdownInCost',
+        fieldLabel: 'Disable Service & Consumables Breakdown In Cost',
+        type: 'checkBox',
+        defaultValue: false
+      },
     ]
   },
   {
