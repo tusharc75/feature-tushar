@@ -472,7 +472,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             element?.products?.forEach((ele) => {
               loadingTicketProducts.push({
                 ...ele,
-                warehouse: element?.pickupFrom?.optionValue
+                warehouse: element?.pickupFrom?.optionValue,
+                storageLocation: element?.pickupFromStorageLocation?.optionValue
               });
             });
           }
@@ -1087,9 +1088,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     nonSerializedInventory?.forEach((_inventory) => {
       if (_inventory?.product?.optionValue === materialId && _inventory?._id === uniqueId) {
         const plant = _inventory?.warehouse?.optionValue;
+        const storageLocation = _inventory?.storageLocation?.optionValue;
         const ticketQtySum =
           allLoadingTicketProducts
-            ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === plant)
+            ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === plant && (user?.user?.brandPolicy?.storageLocation ? ticket?.storageLocation === storageLocation : true))
             ?.reduce((sum, ticket) => (sum += ticket?.qty), 0) || 0;
         if (_inventory?.qty > ticketQtySum) {
           cnt += _inventory?.qty - ticketQtySum;
@@ -1099,10 +1101,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     return cnt;
   };
 
-  const getPlantWiseValidQty = (uniqueId, materialId, warehouse, inventoryCnt) => {
+  const getPlantWiseValidQty = (uniqueId, materialId, warehouse, storageLocation, inventoryCnt) => {
     const ticketQtySum =
       allLoadingTicketProducts
-        ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === warehouse)
+        ?.filter((ticket) => ticket?.uniqueId === uniqueId && ticket?.product === materialId && ticket?.warehouse === warehouse && (user?.user?.brandPolicy?.storageLocation && storageLocation ? ticket?.storageLocation === storageLocation : true))
         ?.reduce((sum, ticket) => (sum += ticket?.qty), 0) || 0;
     if (inventoryCnt > ticketQtySum) return inventoryCnt - ticketQtySum;
     return 0;
@@ -1413,7 +1415,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               : nonSerializedInventory?.map((m) => {
                 return {
                   ...m,
-                  qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.qty)
+                  qty: getPlantWiseValidQty(m?._id, m?.product?.optionValue, m?.warehouse?.optionValue, m?.storageLocation?.optionValue, m?.qty)
                 };
               })
           }
