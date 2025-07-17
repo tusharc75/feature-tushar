@@ -38,7 +38,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
     if (type === 'add') {
       fetchProductInventory();
     } else {
-      setProductInventoryData(nonSerializedInventory?.filter(s => s?.qty)?.map(s => ({
+      setProductInventoryData(nonSerializedInventory?.filter(s => s?.product?.optionValue === selectedProduct?.materialId && s?._id === selectedProduct?._id && s?.qty)?.map(s => ({
         _id: selectedProduct?._id,
         materialId: selectedProduct?.materialId,
         warehouse: s?.warehouse?.optionLabel,
