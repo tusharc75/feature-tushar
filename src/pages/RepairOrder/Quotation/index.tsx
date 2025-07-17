@@ -243,6 +243,7 @@ const Quotation = ({
                 {row.original?.detail}
               </p>
             )}
+            {row.original?.subRows?.length ? <span>{`(${row.original?.subRows?.length})`}</span> : null}
             {row.original.type !== MATERIAL_TYPE.manualEntry &&
               <IconButton
                 size="small"
