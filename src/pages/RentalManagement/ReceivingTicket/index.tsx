@@ -3924,7 +3924,7 @@ const ActionButtonMenuItems = ({
         )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) &&
-        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && (
+        assetPolicyData?.policy?.inUseSubStatus?.length > 0 && getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length > 0 && (
           <MenuItem
             onClick={() => {
               if (validateAction(rentalManagementActions.changeSubStatus)) {
@@ -3936,7 +3936,11 @@ const ActionButtonMenuItems = ({
               }
             }}
             id={'change-sub-status-menu-item'}
-            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0}
+            disabled={getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.length === 0 ||
+              !rentalPolicyData?.subStatusDateWiseCapture &&
+              assetPolicyData?.policy?.inUseSubStatus?.length === 1 &&
+              getFilterSelectedRecords(MATERIAL_TYPE.serializedAsset)?.every(s => s?.subStatus === assetPolicyData?.policy?.inUseSubStatus[0]) ? true : false
+            }
           >
             {`Change Sub Status${!rentalPolicyData?.subStatusDateWiseCapture && assetPolicyData?.policy?.inUseSubStatus?.length === 1 ? ` - ${assetPolicyData?.policy?.inUseSubStatus[0]}` : ''}`}
           </MenuItem>
