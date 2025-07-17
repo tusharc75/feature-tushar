@@ -139,7 +139,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
             options={variables}
             getOptionLabel={(option: { label: string; value: string }) => option.label}
             onChange={(_, value) => { handleSelect(value.value) }}
-            renderInput={(params) => <TextField {...params} label="Select a movie" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label="Select a variable" variant="outlined" />}
             style={{ width: 300 }}
           />
         </div>
