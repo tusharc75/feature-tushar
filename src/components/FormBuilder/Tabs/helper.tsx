@@ -65,8 +65,8 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
-        fieldName: 'addConsumablesUnderServiceInCost',
-        fieldLabel: 'Add Consumables Under Service In Cost',
+        fieldName: 'disableServiceAndConsumablesBreakdownInCost',
+        fieldLabel: 'Disable Service & Consumables Breakdown In Cost',
         type: 'checkBox',
         defaultValue: false
       },
