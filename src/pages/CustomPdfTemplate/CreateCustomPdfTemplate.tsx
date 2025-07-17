@@ -10,7 +10,7 @@ import routes from '../../components/Helpers/Routes';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, Box, IconButton } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST } from '../../constants/helpers';
+import { sidebarResource, checkIsAllowedToEdit, customPdfTemplate, PDF_RESOURCE_LIST, serviceMaster } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { isEqual, template } from 'lodash';
@@ -59,6 +59,9 @@ export default function CreateCustomPdfTemplate() {
   const [serviceOptions, setServiceOptions] = useState([]);
   const [resourceFields, setResourceFields] = useState(null);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [selectedServices, setSelectedServices] = useState([]);
+  const baseResourceFields = useRef([]);
+
   useEffect(() => {
     const options = [];
     PDF_RESOURCE_LIST?.forEach((item) => {
@@ -68,6 +71,24 @@ export default function CreateCustomPdfTemplate() {
     });
     setpdfResourceOption(options);
   }, []);
+
+  useEffect(() => {
+    if (selectedServices?.length > 0 && formValues?.type === sidebarResource.workOrder) {
+      axiosInstance()
+        .get(`${serviceMaster.api}/fields?serviceIds=${selectedServices}`)
+        .then(({ data: { data } }) => {
+          const serviceFields = data?.map((field) => ({
+            label: field.fieldLabel,
+            value: field.fieldName,
+          })) || [];
+          setResourceFields(prev => [...baseResourceFields.current, ...serviceFields]);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
+    }
+  }, [selectedServices]);
+
 
   useEffect(() => {
     if (formValues?.template) {
@@ -84,6 +105,7 @@ export default function CreateCustomPdfTemplate() {
           data?.forEach((e) => {
             variables.push({ label: e.fieldData.fieldLabel, value: e.fieldData.fieldName })
           })
+          baseResourceFields.current = variables;
           setResourceFields(variables);
         }).catch((err) => {
           toastConfig.setToastConfig(err);
@@ -587,6 +609,7 @@ export default function CreateCustomPdfTemplate() {
                           onChange={(e, val) => {
                             const selectedIds = val?.map((d) => d.optionValue) || [];
                             setFieldValue('services', selectedIds);
+                            setSelectedServices(selectedIds);
                           }}
                           renderInput={(params) => (
                             <TextField
