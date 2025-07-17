@@ -14,18 +14,13 @@ const DMSRedirect = () => {
     if (token) {
       redirectUrl = `${envLink}/oauth?token=${encodeURIComponent(token)}`;
     }
-    
+
     window.open(redirectUrl, '_blank');
   };
 
   return (
     <HtmlTooltip
-      title={
-        <>
-          <p>Open DMS App</p>
-          <span className="text-[12px]">(External APP)</span>
-        </>
-      }
+      title={`Open DMS`}
       className="inline-block"
     >
       <span className="relative mx-2 inline-block rounded-full border border-blue-400 bg-blue-500/10">
