@@ -2,7 +2,9 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@mui/material';
 import {
+  ColumnFiltersState,
   ExpandedState,
+  OnChangeFn,
   Row,
   SortingState,
   getCoreRowModel,
@@ -39,6 +41,7 @@ import {
   getUniqueRows,
   useSkipper
 } from './utils';
+import { useStoreClientFilter } from 'src/components/CustomReactTable/hooks/useStoreClientFilter';
 
 const handleApplySavedSize = (columns, columnSavedSizes) => {
   if (columnSavedSizes && Object.keys(columnSavedSizes).length) {
@@ -91,7 +94,8 @@ const CustomReactTable = ({
   customContent = null,
   isFullScreen = false,
   showTableHead = true,
-  arrangeRowField = null
+  arrangeRowField = null,
+  rememberClientFilters = false
 }) => {
   const {
     dataRows: data,
@@ -111,6 +115,7 @@ const CustomReactTable = ({
   const debouncedSearch = useDebounce(search, 500);
   const isMobileView = useMediaQuery('(max-width:768px)');
   const [newColumns, setNewColumns] = useState([]);
+  const [columnFilters, setUseStoreClientFilter] = useStoreClientFilter((store) => store.columnFilters);
 
   const hookColumns = useCreateColumns({
     columns,
@@ -138,6 +143,19 @@ const CustomReactTable = ({
   const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
   const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  const setColumnFilters: OnChangeFn<ColumnFiltersState> = useCallback(
+    (updaterOrValue: ((prevValue: ColumnFiltersState) => ColumnFiltersState) | ColumnFiltersState) => {
+      if (!renderedFrom) return;
+      let newValue = updaterOrValue;
+      if (typeof updaterOrValue === 'function') {
+        newValue = updaterOrValue(columnFilters[renderedFrom] || []);
+      }
+      const newColumnFilters = { ...columnFilters, [renderedFrom]: newValue as ColumnFiltersState };
+      setUseStoreClientFilter({ columnFilters: newColumnFilters });
+    },
+    [columnFilters, renderedFrom, setUseStoreClientFilter]
+  );
 
   // initialize
   useEffect(() => {
@@ -219,10 +237,12 @@ const CustomReactTable = ({
       sorting: getsorting,
       globalFilter: isClientSideGrid ? debouncedSearch.trim() : '',
       columnVisibility: visibleColumns,
-      rowSelection
+      rowSelection,
+      ...(rememberClientFilters && isClientSideGrid && renderedFrom ? { columnFilters: columnFilters[renderedFrom] } : {})
     },
 
     // flags
+    ...(rememberClientFilters && isClientSideGrid && renderedFrom ? { onColumnFiltersChange: setColumnFilters } : {}),
     autoResetAll: false,
     enableExpanding: expander,
     enableRowSelection: (row: Row<any>) => !hideSelection && row.original.hideSelection !== true,

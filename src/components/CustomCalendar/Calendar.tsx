@@ -11,6 +11,7 @@ import { CustomCalednerProps } from 'src/components/CustomCalendar';
 import { renderEventContent } from 'src/components/CustomCalendar/Components';
 import { useInforSidebar } from 'src/components/InfoSidebar';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { DEFAULT_TIME_ZONE } from 'src/constants/helpers';
 
 export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
   (
@@ -71,7 +72,7 @@ export const Calendar = React.forwardRef<FullCalendar, CustomCalednerProps>(
           }}
           height={height}
           expandRows={true}
-          timeZone={user?.user?.timezone || 'America/New_York'}
+          timeZone={user?.user?.timezone || DEFAULT_TIME_ZONE}
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView={initialView}
           weekends={true}
