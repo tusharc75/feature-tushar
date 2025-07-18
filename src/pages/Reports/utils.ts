@@ -1,5 +1,7 @@
+import dayjs from 'dayjs';
 import { kebabCase } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
+import { dateFormat } from 'src/constants/helpers';
 import { CustomReport, SelectedReport, Report, isCustomReport, isReport, FavouriteReport } from 'src/pages/Reports/types';
 
 export const handleGetRoute = async ({ route, title }: { route: string; title: string }): Promise<SelectedReport> => {
@@ -27,7 +29,7 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
     data.resource = kebabCase(customData?.resource);
     customData?.filters.forEach(ele => {
       if (ele?.type === 'date' && ele?.value?.to === '') {
-        ele.value.to = new Date()
+        ele.value.to = dayjs().tz().format(dateFormat)
       }
     });
     data.customReportData = { ...customData };
