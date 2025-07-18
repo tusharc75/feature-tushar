@@ -1,6 +1,8 @@
 import { text, image, table, line } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import { productTableName, serviceTableName, tableNameOption } from './optionhelper';
+import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
+import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -8,6 +10,8 @@ type DesignerPluginSchema = Schema & {
     position: { x: number; y: number };
     type: string;
     name: string;
+    bold?: boolean;
+    fontName?: string;
 };
 
 type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
@@ -20,7 +24,6 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
             ...table.propPanel,
             schema: (props) => {
                 const baseSchema = typeof table.propPanel.schema === 'function'
-
                     ? table.propPanel.schema(props)
                     : { ...table.propPanel.schema };
 
@@ -94,14 +97,45 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
                     type: 'string',
                     widget: 'select',
                     props: { options: variables },
-                }
-                return base
+                };
+                return base;
             },
         },
-    }
+    };
+
+    const customTextPlugin = {
+        ...text,
+        propPanel: {
+            ...text.propPanel,
+            defaultSchema: {
+                ...text.propPanel.defaultSchema,
+                fontName: 'Roboto',
+                bold: false,
+            } as DesignerPluginSchema,
+            schema: (props) => {
+                const baseSchema = typeof text.propPanel.schema === 'function'
+                    ? text.propPanel.schema(props)
+                    : { ...text.propPanel.schema };
+
+                const activeTextSchema = props.activeSchema as DesignerPluginSchema;
+
+                baseSchema.bold = {
+                    title: 'Bold',
+                    type: 'boolean',
+                    default: false,
+                };
+
+                const isBold = activeTextSchema.bold;
+                activeTextSchema.fontName = isBold ? 'Roboto-Bold' : 'Roboto';
+
+                return baseSchema;
+            },
+        },
+    };
+
 
     const plugins: Record<string, DesignerExpectedPlugin> = {
-        Text: text as DesignerExpectedPlugin,
+        Text: customTextPlugin as DesignerExpectedPlugin,
         Table: customTablePlugin as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
@@ -109,4 +143,21 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
     };
 
     return plugins;
+};
+
+export const getFonts = async () => {
+    try {
+        const [robotoRegularData, robotoBoldData] = await Promise.all([
+            fetch(RobotoRegular).then(res => res.arrayBuffer()),
+            fetch(RobotoBold).then(res => res.arrayBuffer())
+        ]);
+
+        return {
+            Roboto: { data: robotoRegularData, fallback: true },
+            'Roboto-Bold': { data: robotoBoldData },
+        };
+    } catch (error) {
+        console.error('Error loading fonts:', error);
+        return {};
+    }
 };
