@@ -1,10 +1,10 @@
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, map, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, INVOICE_STATUS, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Add, ExpandMore } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -21,6 +21,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import MaterialDialog from './MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { RiExchange2Line } from 'react-icons/ri';
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_credit_memo`;
@@ -38,6 +39,8 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [invoiceColumns, setInvoiceColumns] = useState(null);
+  const [statusOptions, setStatusOptions] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const {
     state: { user, permissions, resources }
@@ -47,7 +50,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     fetchFields();
     fetchInvoiceFields();
     fetchData();
-  }, []);
+  }, [invoiceData]);
 
   const fetchInvoiceFields = async () => {
     try {
@@ -111,8 +114,14 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${sidebarResource.creditMemo}`);
+
       data?.forEach((e) => {
-        e.isColumnEditable = false;
+        if (!allowedToEdit) {
+          e.fieldData.isColumnEditable = false;
+        }
+        if (e?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...e.fieldData.option?.filter((e) => ![INVOICE_STATUS.cancelled]?.includes(e.optionValue))]); return true;
+        }
       });
       const columns = generateColumns(
         renderedFrom,
@@ -284,6 +293,37 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     ]
   };
 
+  const openActions = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeActions = () => {
+    setAnchorEl(null);
+  };
+
+  const validateStatus = (status) => {
+    const statusCheck = uniq(map(selectedRecords, 'status'))[0]
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === statusCheck);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
+  };
+
+  const handleChangeStatus = (status) => {
+    const creditMemos = selectedRecords?.map((e) => { return { _id: e._id, prevStatus: e.status } })
+    axiosInstance().put(`${routes.creditMemo.path}/update-status`, { creditMemos: creditMemos, status: status })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
@@ -299,6 +339,44 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
         )}
         <div className="flex items-center gap-2">
           {invoiceColumns && dataRows?.length > 0 && <PreviewDownload {...previewDownloadProps} />}
+          {(permissions?.creditMemo?.isUpdate && allowedToEdit && statusOptions?.length > 0 && dataRows?.length > 0) &&
+            <ThemeButton
+              onClick={openActions}
+              endIcon={<ExpandMore />}
+              mobileTooltip="Change Status"
+              disabled={selectedRecords.length && uniq(map(selectedRecords, 'status'))?.length === 1 ? false : true}
+              iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
+            >
+              {'Change Status'}
+            </ThemeButton>
+          }
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left'
+            }}
+            id="action-menu"
+            open={Boolean(anchorEl)}
+            onClose={closeActions}
+          >
+            {statusOptions?.map((o) => {
+              return (
+                <MenuItem
+                  key={o?.optionValue}
+                  disabled={validateStatus(o?.optionValue)}
+                  onClick={() => {
+                    closeActions();
+                    handleChangeStatus(o?.optionValue);
+                  }}
+                  value={o}
+                >
+                  {o?.optionLabel}
+                </MenuItem>
+              );
+            })}
+          </Menu>
           {allowedToEdit && (
             <ThemeButton
               disabled={selectedRecords.length === 0}
