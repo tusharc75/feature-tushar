@@ -202,7 +202,18 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     <InputField
                       errors={errors}
                       values={values}
-                      setFieldValue={setFieldValue}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                        if (name === 'wellNumber') {
+                          if (initialData?.fields.find((e) => e?.fieldName === 'numberOfWells')) {
+                            if (value) {
+                              setFieldValue('numberOfWells', value?.length);
+                            } else {
+                              setFieldValue('numberOfWells', 0);
+                            }
+                          }
+                        }
+                      }}
                       touched={touched}
                       fieldsData={initialData.fields}
                       size="small"
