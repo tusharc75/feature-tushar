@@ -30,6 +30,7 @@ import './styles/vis-network/vis-network.min.css';
 import './components/CustomCalendar/index.scss';
 import './styles/ai.scss';
 import { InfoSidebarProvider } from 'src/components/InfoSidebar/store';
+import { StoreClientFilterProvider } from 'src/components/CustomReactTable/hooks/useStoreClientFilter';
 
 // @ts-ignore
 if (VITE_APP_ENV !== 'local' && navigator.onLine) {
@@ -51,23 +52,25 @@ ReactDOM.render(
     <Router>
       <FastProvider>
         <Provider>
-          <CustomToastProvider>
-            <CustomNotificationCountProvider>
-              <CustomChatNotificationCountProvider>
-                <MsalProvider instance={AzureInstance}>
-                  <CustomOfflineProvider>
-                    <NewAddressOptionListProvider>
-                      <InfoSidebarProvider>
-                        <TimezoneLocalizationProvider>
-                          <App />
-                        </TimezoneLocalizationProvider>
-                      </InfoSidebarProvider>
-                    </NewAddressOptionListProvider>
-                  </CustomOfflineProvider>
-                </MsalProvider>
-              </CustomChatNotificationCountProvider>
-            </CustomNotificationCountProvider>
-          </CustomToastProvider>
+          <StoreClientFilterProvider>
+            <CustomToastProvider>
+              <CustomNotificationCountProvider>
+                <CustomChatNotificationCountProvider>
+                  <MsalProvider instance={AzureInstance}>
+                    <CustomOfflineProvider>
+                      <NewAddressOptionListProvider>
+                        <InfoSidebarProvider>
+                          <TimezoneLocalizationProvider>
+                            <App />
+                          </TimezoneLocalizationProvider>
+                        </InfoSidebarProvider>
+                      </NewAddressOptionListProvider>
+                    </CustomOfflineProvider>
+                  </MsalProvider>
+                </CustomChatNotificationCountProvider>
+              </CustomNotificationCountProvider>
+            </CustomToastProvider>
+          </StoreClientFilterProvider>
         </Provider>
       </FastProvider>
     </Router>

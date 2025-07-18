@@ -239,6 +239,7 @@ const FormBuilder = () => {
             refreshGrid={fetchGetBrandResource}
             isClientSideGrid={true}
             hideSelection={true}
+            rememberClientFilters={true}
           />
         ) : (
           <Box p={2} height={500}>
