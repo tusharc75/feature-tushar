@@ -139,7 +139,7 @@ const Invoice = () => {
             <Link className="link text-truncate" title={row?.original?.invoiceNumber} to={`${routes.invoiceDetail.path}/${row?.original?._id}`}>
               {row?.original?.invoiceNumber}
             </Link>
-            {row?.original?.toOpenInvoice && row?.original?.sendToOpenInvoiceError && (
+            {row?.original?.sendToOpenInvoiceError && (
               <Box ml={1}>
                 <HtmlTooltip title="Error in post to open invoice">
                   <IconButton
