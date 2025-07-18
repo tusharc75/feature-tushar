@@ -240,6 +240,11 @@ const CreditMemo = () => {
     dispatch({ type: 'pageChange', page: 0 });
   };
 
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
+  };
+
   const ActionMenuItems = () => {
     return (
       <>
@@ -256,37 +261,30 @@ const CreditMemo = () => {
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>
-        {permissions?.creditMemo?.isUpdate && selectedRecords?.length && !selectedRecords?.some((s) => s.status === 'Closed') && (
-          <>
-            {statusOptions?.map((status) => {
-              return (
-                <MenuItem
-                  onClick={() => {
-                    handleStatusUpdate(status?.optionValue);
-                  }}
-                  disabled={false}
-                >
-                  {`Status Change - ${status?.optionLabel}`}
-                </MenuItem>
-              );
-            })}
-          </>
-        )}
+        {permissions?.creditMemo?.isUpdate && selectedRecords?.length &&
+          !selectedRecords?.some((s) => s.status === INVOICE_STATUS.closed)
+          && selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
+            <>
+              {statusOptions?.map((status) => {
+                return (
+                  <MenuItem
+                    onClick={() => {
+                      handleChangeStatus(status?.optionValue);
+                    }}
+                    disabled={validateStatus(status?.optionValue)}
+                  >
+                    {`Status Change - ${status?.optionLabel}`}
+                  </MenuItem>
+                );
+              })}
+            </>
+          )}
       </>
     );
   };
 
-  const handleStatusUpdate = (status) => {
-    const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
-    if (!isSameStatus) {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'error',
-        message: 'Please select Credit Memo with same status'
-      });
-      return;
-    }
-    const creditMemos = sortBy(selectedRecords, '_id').map((s) => ({ _id: s._id, prevStatus: s.status }));
+  const handleChangeStatus = (status) => {
+    const creditMemos = selectedRecords?.map((e) => { return { _id: e._id, prevStatus: e.status } })
     setIsSubmitting(true);
     axiosInstance()
       .put(`${routes.creditMemo.path}/update-status`, { creditMemos: creditMemos, status: status })
