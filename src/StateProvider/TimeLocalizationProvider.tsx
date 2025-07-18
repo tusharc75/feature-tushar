@@ -14,6 +14,7 @@ import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import isBetween from 'dayjs/plugin/isBetween';
 import duration from 'dayjs/plugin/duration';
 import { useEffect } from 'react';
+import { DEFAULT_TIME_ZONE } from 'src/constants/helpers';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,7 +34,7 @@ const TimezoneLocalizationProvider = ({ children }) => {
   }: any = useData();
 
   useEffect(() => {
-    dayjs.tz.setDefault(user?.user?.timezone || 'America/New_York');
+    dayjs.tz.setDefault(user?.user?.timezone || DEFAULT_TIME_ZONE);
   }, [user]);
 
   return <LocalizationProvider dateAdapter={AdapterDayjs}>{children}</LocalizationProvider>;

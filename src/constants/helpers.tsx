@@ -1528,6 +1528,8 @@ export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/Y
 export const cardDateFormat = 'MMM DD, YYYY';
 export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
+export const DEFAULT_TIME_ZONE = 'America/Chicago'
+
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/DD/YYYY';
 
 export const dayNamesShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import moment from 'moment-timezone';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { DEFAULT_TIME_ZONE } from 'src/constants/helpers';
 import useLocalStorage from 'src/hooks/useLocalStore';
 import Map from 'src/pages/TechnicianScheduler/Vis/Map';
 import ShowDragMessage from 'src/pages/TechnicianScheduler/Vis/ShowDragMessage';
@@ -65,7 +66,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
         axis: 'top'
       },
       moment: function (date: Date) {
-        return moment(date).tz(user?.user?.timezone || 'America/New_York');
+        return moment(date).tz(user?.user?.timezone || DEFAULT_TIME_ZONE);
       },
       template: (item, element, data) => {
         if (!item?.id || !data?.id) return null;
