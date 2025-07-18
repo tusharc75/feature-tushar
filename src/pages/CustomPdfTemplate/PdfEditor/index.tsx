@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Designer } from '@pdfme/ui';
-import { getPlugins } from './plugin';
+import { getFonts, getPlugins } from './plugin';
 import { Template } from '@pdfme/common';
 
 interface PdfEditorProps {
@@ -17,11 +17,23 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
   const [searchTerm, setSearchTerm] = useState('');
   const [dropdownPos, setDropdownPos] = useState<{ x: number; y: number } | null>(null);
   const [savedRange, setSavedRange] = useState<Range | null>(null);
+  const [fontsReady, setFontsReady] = useState(false);
+  const [fontObjects, setFontObjects] = useState({});
 
   const plugins = useMemo(() => getPlugins(variables), [variables]);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const loadFonts = async () => {
+      const loadedFonts = await getFonts();
+      setFontObjects(loadedFonts);
+      setFontsReady(true);
+    };
+
+    loadFonts();
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current || !fontsReady) return;
 
     if (!designerInstanceRef.current) {
       designerInstanceRef.current = new Designer({
@@ -29,7 +41,8 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         template: template,
         options: {
           zoomLevel: 1,
-          sidebarOpen: true
+          sidebarOpen: true,
+          font: fontObjects
         },
         plugins: plugins
       });
@@ -70,7 +83,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
         designerInstanceRef.current = null;
       }
     };
-  }, [noOfPages, plugins]);
+  }, [noOfPages, plugins, fontsReady]);
 
   const handleSelect = (value: string) => {
     if (savedRange) {
@@ -134,8 +147,9 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
           >
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search variables..."
               value={searchTerm}
+              onFocus={(e) => e.stopPropagation()}
               onChange={(e) => setSearchTerm(e.target.value)}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
