@@ -238,7 +238,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && d?.term?.from instanceof Date && dayjs(d?.term?.to).isValid() && d?.term?.to instanceof Date) {
+        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date)) {
           filters.push({
             term: d?.field,
             value: d?.term,

@@ -25,6 +25,11 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
 
     data.type = 'custom-report';
     data.resource = kebabCase(customData?.resource);
+    customData?.filters.forEach(ele => {
+      if (ele?.type === 'date' && ele?.value?.to === '') {
+        ele.value.to = new Date()
+      }
+    });
     data.customReportData = { ...customData };
     return data;
   }
