@@ -117,8 +117,6 @@ const CustomReactTable = ({
   const [newColumns, setNewColumns] = useState([]);
   const [columnFilters, setUseStoreClientFilter] = useStoreClientFilter((store) => store.columnFilters);
 
-  console.log(columnFilters);
-
   const hookColumns = useCreateColumns({
     columns,
     expander,
