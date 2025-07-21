@@ -26,6 +26,7 @@ import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import CustomTimePicker from 'src/components/CustomTimePicker';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
@@ -319,17 +320,18 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           margin="dense"
                         />
 
-                        <CustomDateTimePicker
+                        <CustomTimePicker
                           size="small"
                           label="Start Time"
                           name="startTime"
-                          placeholder="08:00"
-                          inputFormat="HH:mm"
+                          placeholder="08:00 AM"
                           value={values.startTime}
-                          onChange={(date: any) => {
-                            setFieldValue('startTime', date || null);
-                            if (date && new Date(date._d).getHours() < 23) {
-                              setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
+                          onChange={(date: dayjs.Dayjs) => {
+                            if (date) {
+                              setFieldValue('startTime', date?.toDate());
+                              setFieldValue('endTime', date.clone().add(30, 'minutes').toDate());
+                            } else {
+                              setFieldValue('startTime', null);
                             }
                           }}
                           error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
@@ -357,23 +359,15 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                           helperText={Boolean(touched['endDate']) && errors['endDate']}
                           margin="dense"
                         />
-                        <CustomDateTimePicker
+                        <CustomTimePicker
                           size="small"
                           label="End Time"
                           name="endTime"
-                          placeholder="08:00"
-                          inputFormat="HH:mm"
+                          placeholder="08:30 AM"
                           value={values.endTime}
                           onChange={(date: any) => {
-                            const nDate = new Date(values.startTime).toISOString().split('T')[0];
-                            let nTime = '';
                             if (date) {
-                              if ((date._d + '').includes('Invalid Date')) {
-                                setFieldValue('endTime', `${date._i}`);
-                              } else {
-                                nTime = new Date(date._d).toISOString().split('T')[1];
-                                setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
-                              }
+                              setFieldValue('endTime', date.toDate());
                             }
                           }}
                           error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
