@@ -90,6 +90,28 @@ const RenderTextInput = ({
     setIsValid(isValidValue);
   };
 
+  // Prevent pasting invalid characters
+  const handlePaste = (e) => {
+    if (type !== 'number' || columnDef.isAllowedMinus) return;
+    const paste = e.clipboardData.getData('text');
+    if (/[-+eE]/.test(paste)) {
+      e.preventDefault();
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      target.blur();
+    }
+    if (type !== 'number' || columnDef.isAllowedMinus) return;
+    // Block minus, plus, and exponent characters
+    if (['-', '+', 'e', 'E'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div
       className={cn(
@@ -117,20 +139,19 @@ const RenderTextInput = ({
           'hide-number-input-arrow min-w-0 flex-shrink flex-grow border-none bg-transparent px-[2px] py-[1px] text-inherit outline-none',
           type === 'color' ? 'cursor-pointer' : ''
         )}
+        onPaste={handlePaste}
         onBlur={() => handleBlur()}
         value={cellValue}
-        onKeyDown={(e) => {
-          const target = e.target as HTMLInputElement;
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            target.blur();
-          }
-        }}
+        onKeyDown={handleKeyDown}
         onChange={(e) => {
           let value: string | number = e.target.value;
+          if (value !== '' && !/^\d+$/.test(value) && type === 'number' && !columnDef.isAllowedMinus) {
+            return;
+          }
           if (type === 'number' && value) {
             value = Number(value);
           }
+
           handleInput(value || '');
         }}
         {...rest}
