@@ -842,7 +842,7 @@ const LeftSideContents = ({
         value={resource}
         onChange={(event, newValue) => {
           setResource(newValue);
-          if (newValue) {
+          if (newValue?.optionLabel) {
             setFilter([{ isAll: true, label: newValue.optionLabel, name: 'All', type: newValue.optionValue }]);
           } else {
             setFilter([]);

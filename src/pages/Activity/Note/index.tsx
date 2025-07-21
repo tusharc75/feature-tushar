@@ -446,7 +446,7 @@ const LeftSideContents = ({
         fullWidth
         onChange={(event, newValue) => {
           setResource(newValue);
-          if (newValue) {
+          if (newValue?.optionLabel) {
             setFilter([{ isAll: true, label: newValue.optionLabel, name: 'All', type: newValue.optionValue }]);
             //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
           } else {
