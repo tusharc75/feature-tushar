@@ -364,8 +364,11 @@ const Note = () => {
       {isConfirmDialogVisible ? (
         <ConfirmationDialog
           open={isConfirmDialogVisible}
-          message={`Are you sure you want to delete ${deleteRecord ? `${resources?.note?.titleSingular?.toLowerCase()} : ${deleteRecord.name || 'Notes'}`
-            : `selected ${resources?.note?.titlePlural?.toLowerCase()}`} ?`}
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.note?.titleSingular?.toLowerCase()} : ${deleteRecord.name || 'Notes'}`
+              : `selected ${resources?.note?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             if (deleteRecord.id) setDeleteRecord({ id: null, name: null });
             setIsConformDialogVisible(false);
@@ -412,7 +415,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-          // noteData={noteData}
+            // noteData={noteData}
           />
         </Dialog>
       )}
@@ -443,7 +446,8 @@ const LeftSideContents = ({
         fullWidth
         onChange={(event, newValue) => {
           setResource(newValue);
-          if (newValue) {
+          if (newValue?.optionLabel) {
+            setFilter([{ isAll: true, label: newValue.optionLabel, name: 'All', type: newValue.optionValue }]);
             //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
           } else {
             setFilter([]);
@@ -473,7 +477,7 @@ const LeftSideContents = ({
           onChange={(event, newValue) => {
             setSelectedResourceData(newValue);
             if (newValue?.optionValue) {
-              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+              setFilter(() => [{ _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
             } else {
               setFilter([]);
             }

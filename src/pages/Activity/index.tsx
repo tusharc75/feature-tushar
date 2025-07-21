@@ -33,20 +33,20 @@ const Activity = ({ type }) => {
         .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setFilter([]);
     }
   }, [type, referenceId]);
 
   const tabs = ['Board', 'Roadmap'];
+
   const handleChangeFilter = (value) => {
     setFilter(value);
     history.replace({
       search: ''
     });
   };
-
 
   return (
     <section className="main-container-v1">
@@ -62,7 +62,7 @@ const Activity = ({ type }) => {
               isActionButtonVisible={false}
               isAddButtonVisible={false}
             />
-            {viewType === 0 && <Board type={type} filter={filter} />}
+            {viewType === 0 && <Board type={type} filter={filter} setFilter={setFilter} />}
             {viewType === 1 && <Roadmap type={type} filter={filter} />}
           </Fragment>
         )}
