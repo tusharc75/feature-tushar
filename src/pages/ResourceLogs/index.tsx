@@ -112,7 +112,6 @@ const ResourceLogs = () => {
           }}
           additionalParams={getQueryString()}
           resource={sidebarResource?.resourceLogs}
-          subResource={'inventory-history'}
           asyncExport={true}
         />
       </div>
