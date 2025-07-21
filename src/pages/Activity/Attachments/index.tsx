@@ -67,7 +67,7 @@ export default function Attachment() {
 
   useEffect(() => {
     if (attachmentId) {
-      setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null, _id: attachmentId })
+      setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null, _id: attachmentId });
       history.push(routes.attachment.path);
     }
   }, [attachmentId]);
@@ -110,7 +110,6 @@ export default function Attachment() {
         Header: 'Name',
         width: 300,
         canDrag: false,
-        disableFilters: true,
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p className={permissions?.attachment?.isUpdate ? 'link cursor-pointer' : ''} onClick={() => handleActivityOpen(row.original)}>
@@ -254,7 +253,7 @@ export default function Attachment() {
                 <AttachmentDeleteButton
                   attachments={[row.original]}
                   onSuccess={() => {
-                    setIsRefresh(!isRefresh)
+                    setIsRefresh(!isRefresh);
                   }}
                 />
               ) : (
@@ -267,7 +266,7 @@ export default function Attachment() {
               <DeleteRequest
                 file={row.original}
                 handleSucess={() => {
-                  setIsRefresh(!isRefresh)
+                  setIsRefresh(!isRefresh);
                 }}
               />
             </div>
@@ -302,11 +301,14 @@ export default function Attachment() {
 
   useEffect(() => {
     if (referenceType) {
-      axiosInstance().get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`).then(({ data: { data } }) => {
-        setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
-      }).catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
+          setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
+        })
+        .catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     } else {
       setFilter([]);
     }
@@ -346,18 +348,20 @@ export default function Attachment() {
   const downloadFile = (data1) => {
     const file = data1?.file;
     if (file?.length === 1) {
-      axiosInstance().get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
-        responseType: 'blob'
-      }).then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        var fileExt = file[0].url?.split('.').pop();
-        link.setAttribute('download', file[0].name + '.' + fileExt);
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => 2000);
-      })
+      axiosInstance()
+        .get(`user/download?fileName=${encodeURIComponent(file[0].url)}`, {
+          responseType: 'blob'
+        })
+        .then(({ data }) => {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          var fileExt = file[0].url?.split('.').pop();
+          link.setAttribute('download', file[0].name + '.' + fileExt);
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => 2000);
+        })
         .catch((err) => {
           toastConfig.setToastConfig(err);
         });
@@ -469,8 +473,7 @@ export default function Attachment() {
                 open: true,
                 type: 'success'
               });
-              setTimeout(() => {
-              }, 2000);
+              setTimeout(() => {}, 2000);
             }
           }
         })
@@ -508,27 +511,29 @@ export default function Attachment() {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
     let api = `/attachment?graphLookup=0&relatedTo=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(
-      ({
-        data: {
-          data: { data, count }
+    axiosInstance()
+      .get(api, { cancelToken: cancelTokenSource?.token })
+      .then(
+        ({
+          data: {
+            data: { data, count }
+          }
+        }) => {
+          let rows = data?.filter((e) => !e?.parentFolder);
+          const parentRows = rows.map((parent, idx) => {
+            parent.subRows = generateNestedData(data, parent);
+            return {
+              ...parent,
+              id: parent._id,
+              fileUrl: parent.fileUrl,
+              canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+              canExpand: parent.type === 'folder',
+              isChecked: false
+            };
+          });
+          dispatch({ type: 'initialize', data: parentRows, count: count });
         }
-      }) => {
-        let rows = data?.filter((e) => !e?.parentFolder);
-        const parentRows = rows.map((parent, idx) => {
-          parent.subRows = generateNestedData(data, parent);
-          return {
-            ...parent,
-            id: parent._id,
-            fileUrl: parent.fileUrl,
-            canEdit: parent.type === 'folder' ? true : parent?.canEdit,
-            canExpand: parent.type === 'folder',
-            isChecked: false
-          };
-        });
-        dispatch({ type: 'initialize', data: parentRows, count: count });
-      }
-    )
+      )
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
@@ -591,12 +596,15 @@ export default function Attachment() {
           }}
           element={MenuItem}
         >
-          {checkSuperAdminAccess(user, sidebarResource.attachment) ? `Delete` : selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id) ? `Delete Request` : `Delete`}
+          {checkSuperAdminAccess(user, sidebarResource.attachment)
+            ? `Delete`
+            : selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id)
+              ? `Delete Request`
+              : `Delete`}
         </AttachmentDeleteButton>
       </>
     );
   };
-
 
   return (
     <section className="main-container-v1">
@@ -606,7 +614,7 @@ export default function Attachment() {
           permissions={permissions?.attachment}
           module={resources?.attachment?.titlePlural}
           api={`/attachment`}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           total={rowCount}
           onlyExport={true}
           asyncExport={true}
@@ -636,11 +644,15 @@ export default function Attachment() {
             isActionButtonVisible={true}
             actionButtonProps={{
               disabled:
-                (selectedRecords?.length === 0
-                  || selectedRecords?.find((e) => !isEmpty(e?.deleteRequest)
-                    || (!selectedRecords?.every((e) => e?.createdBy?.user?._id === user?.user?._id)
-                      && !selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))))
-                  ? true : !permissions?.attachment?.isDelete
+                selectedRecords?.length === 0 ||
+                selectedRecords?.find(
+                  (e) =>
+                    !isEmpty(e?.deleteRequest) ||
+                    (!selectedRecords?.every((e) => e?.createdBy?.user?._id === user?.user?._id) &&
+                      !selectedRecords?.every((e) => e?.createdBy?.user?._id !== user?.user?._id))
+                )
+                  ? true
+                  : !permissions?.attachment?.isDelete
             }}
             actionMenuItems={<ActionMenuItems />}
             addButtonOnclick={() => setOpen({ open: true, type: 'file', parentFolder: null, parentResource: null, _id: null })}
