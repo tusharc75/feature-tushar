@@ -11,7 +11,6 @@ function getLastPart(url: string): string | null {
 }
 
 export const createURl = (url: string, hash?: string) => {
-  console.log(url);
   if (!url) return '/';
   const cleanedUrl = url.startsWith('/') ? url : `/${url}`;
   return `${homeLink}${encodeURI(cleanedUrl)}${hash ? hash : ''}`;
