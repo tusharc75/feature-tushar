@@ -20,7 +20,7 @@ import { Column } from './type';
 
 let timeOut: NodeJS.Timeout;
 
-const Board = ({ type, filter }) => {
+const Board = ({ type, filter, setFilter }) => {
   const [loading, setLoading] = useState(true);
   const {
     state: {
@@ -236,7 +236,7 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box className="grid max-w-[1008px] grid-cols-1 gap-2 pb-[18px] md:grid-cols-2">
+      <Box className="mt-2 grid max-w-[1008px] grid-cols-1 gap-2 pb-[18px] md:grid-cols-2">
         <Autocomplete
           fullWidth
           options={resourceOptions}
@@ -244,6 +244,11 @@ const Board = ({ type, filter }) => {
           value={resource}
           onChange={(event, newValue) => {
             setResource(newValue);
+            if (newValue?.optionLabel) {
+              setFilter([{ isAll: true, label: newValue.optionLabel, name: 'All', type: newValue.optionValue }]);
+            } else {
+              setFilter([]);
+            }
           }}
           size="small"
           renderInput={(params) => <TextField {...params} fullWidth label="Select Resource" variant="outlined" />}
@@ -258,6 +263,11 @@ const Board = ({ type, filter }) => {
             value={selectedResourceData}
             onChange={(event, newValue) => {
               setSelectedResourceData(newValue);
+              if (newValue?.optionValue) {
+                setFilter(() => [{ _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+              } else {
+                setFilter([]);
+              }
             }}
             size="small"
             renderInput={(params) => <TextField {...params} fullWidth label={`Select ${resource.optionLabel}`} variant="outlined" />}
