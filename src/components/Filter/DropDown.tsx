@@ -60,7 +60,7 @@ const DropDown = ({
         let data = response?.data?.data;
 
         setOptions((prev) =>
-          page === 0 ? uniqBy([...(filterFromFilterById?.term || []), ...data], 'optionValue') : uniqBy([...prev, ...data], 'optionValue')
+          page === 0 ? uniqBy([...(multiple ? filterFromFilterById?.term || [] : filterFromFilterById?.term ? [filterFromFilterById?.term] : []), ...data], 'optionValue') : uniqBy([...prev, ...data], 'optionValue')
         );
         if (data?.length === 0) setHasMore(false);
         setLoading(false);
