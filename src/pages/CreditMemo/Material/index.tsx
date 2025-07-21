@@ -700,6 +700,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
             hideAction={!allowedToEdit}
+            height={'calc(100vh - 350px)'}
           />
           <FinalPriceBox
             allFields={creditMemoFields}
