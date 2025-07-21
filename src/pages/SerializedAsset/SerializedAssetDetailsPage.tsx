@@ -84,7 +84,7 @@ const SerializedAssetDetailsPage = () => {
   const [statusOptions, setStatusOptions] = useState(null);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [customField, setCustomField] = useState(null);
+  const [customField, setCustomField] = useState([]);
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [manageSendOutBoundMessageDialog, setManageSendOutBoundMessageDialog] = useState(false);
   const parsed = queryString.parse(history.location.search);
@@ -218,23 +218,23 @@ const SerializedAssetDetailsPage = () => {
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       setDeviceTemplate(data?.product?.deviceTemplate);
       if (data.status === ASSET_STATUS.scrap) {
-        setCustomField({
+        setCustomField([{
           fieldData: {
             fieldLabel: 'Scraping Reason',
             fieldName: 'scrapingReason',
             type: 'singleLine',
             sectionName: 'Other Information'
           }
-        });
+        }]);
       } else if (data.status === ASSET_STATUS.lost) {
-        setCustomField({
+        setCustomField([{
           fieldData: {
             fieldLabel: 'Lost Reason',
             fieldName: 'lostReason',
             type: 'singleLine',
             sectionName: 'Other Information'
           }
-        });
+        }]);
       }
       setLoading(false);
       setRefreshAssetHistory(!refreshAssetHistory);
@@ -649,7 +649,7 @@ const SerializedAssetDetailsPage = () => {
                   data={assetDetails}
                   fields={
                     assetDetails?.status && (assetDetails?.status === ASSET_STATUS.scrap || assetDetails?.status === ASSET_STATUS.lost)
-                      ? [...fields, customField, ...extraFields]
+                      ? [...fields, ...customField?.filter((ele) => !fields?.map((e) => e?.fieldData?.fieldName)?.includes(ele?.fieldData?.fieldName)), ...extraFields]
                       : [...fields, ...extraFields]
                   }
                   resource={sidebarResource?.serializedAsset}
