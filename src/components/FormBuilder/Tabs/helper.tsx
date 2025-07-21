@@ -531,7 +531,18 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.creditMemo,
+    policy: [
+      {
+        fieldName: 'showNegativeSignInPdf',
+        fieldLabel: 'Show Negative Sign in PDF',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
 ];
 
 export const DATE_VALUE = {
