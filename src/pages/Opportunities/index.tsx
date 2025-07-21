@@ -33,6 +33,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import CanbanView from 'src/components/CanbanVIew';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
@@ -88,12 +89,12 @@ const Opportunities = () => {
     const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
-        (o.disabled = true),
+        ((o.disabled = true),
           (o.accessor = 'opportunityName'),
           (o.header = 'Opportunity Name'),
           (o.pivotIndex = 0),
           (o.show = true),
-          (o.primaryField = true);
+          (o.primaryField = true));
       }
     });
     let staticFields = getStaticFields(true);
@@ -221,7 +222,7 @@ const Opportunities = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
@@ -320,24 +321,26 @@ const Opportunities = () => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${opportunityApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${opportunityApi}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -345,6 +348,77 @@ const Opportunities = () => {
       });
     }
   };
+
+  // const fetchData = async (query:string)=>{
+  //    const getQueryString = () => {
+  //   let deepFilter = `?`;
+  //   const filterByIds = []
+  //   const deepFilters = [];
+
+  //   if (selectedType === 1) {
+  //     deepFilter = deepFilter + `&myRecords=1`;
+  //   }
+
+  //   if (selectedEntity) {
+  //     deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+  //   }
+
+  //   if (accountDetails.accountId) {
+  //     if (accountDetails.resource === customerAccount.accountResource) {
+  //       filterByIds.push({ field: 'customerAccount', term: accountDetails.accountId });
+  //     } else if (accountDetails.resource === supplierAccount.accountResource) {
+  //       filterByIds.push({ field: 'supplierAccount', term: { $in: [accountDetails.accountId] } });
+  //     }
+  //   }
+
+  //     deepFilter = `${deepFilter}&pendingOutcome=1`;
+
+  //   if (filterByIds?.length) {
+  //     deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+  //   }
+  //   if (deepFilters?.length) {
+  //     deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+  //   }
+
+  //   if (filterByIds?.length || deepFilters?.length) {
+  //     deepFilter = `${deepFilter}&filterType=and`;
+  //   }
+
+  //   if (sorting.length > 0) {
+  //     deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+  //   }
+
+  //   return deepFilter;
+  // };
+  //   const queryString = getQueryString();
+  //   dispatch({ type: 'loading', loading: true });
+  //   axiosInstance()
+  //     .get(`${opportunityApi}${queryString}`)
+  //     .then(({ data: { data, count } }) => {
+  //       let rows = data.map((u) => {
+  //         let finalObject: any = prepareDataForGrid(u);
+  //         finalObject['originalData'] = u;
+  //         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+  //         finalObject['canDelete'] =
+  //           permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
+  //         finalObject['canEdit'] = permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, u);
+  //         let res = {
+  //           ...finalObject,
+  //           stage: u.stage,
+  //           closeDate: u?.closeDate
+  //         };
+  //         return res;
+  //       });
+  //       dispatch({ type: 'initialize', data: rows, count: count });
+  //       setTimeout(() => {
+  //         dispatch({ type: 'loading', loading: false });
+  //       }, gridLoadingTimeout);
+  //     })
+  //     .catch((error) => {
+  //       dispatch({ type: 'loading', loading: false });
+  //       toastConfig.setToastConfig(error);
+  //     });
+  // }
 
   return (
     <section className="main-container-v1">
@@ -385,6 +459,14 @@ const Opportunities = () => {
         />
 
         {columns ? (
+          <CanbanView columns={columns} pivotColumn={columns.find((d) => d.accessor === 'process')} />
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
+
+        {/* {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
@@ -401,7 +483,7 @@ const Opportunities = () => {
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
-        )}
+        )} */}
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
