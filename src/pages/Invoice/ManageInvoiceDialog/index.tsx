@@ -130,6 +130,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             type: 'success',
             message: message
           });
+          setShowConfirmCloneDetailsDialog(false)
           history.push(`${routes.invoiceDetail.path}/${data?._id}`);
           setLoading(false);
         })
