@@ -46,6 +46,7 @@ export default function ImportExportLinks({
   asyncExport = false,
   asyncImport = false,
   resource = null,
+  subResource = null,
   hideDownloadTemplate = false
 }) {
   const classes = useStyles();
@@ -429,7 +430,7 @@ export default function ImportExportLinks({
           }}
           type={openAsyncImpExpDialog.type}
           resource={resource}
-          subResource={null}
+          subResource={subResource}
           referenceId={null}
           handleExport={() => {
             exportToExcel(openAsyncImpExpDialog.api);
