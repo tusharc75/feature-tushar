@@ -476,7 +476,7 @@ const RenderCurrencyAutoComplete = ({
 //   );
 // };
 
-const schemas: Partial<Record<ValidInputType, YupSchema>> = {
+const schemas: Partial<Record<ValidInputType, YupSchema | ((attributes: any) => YupSchema)>> = {
   name: yup.string(),
   colorPicker: yup.string().min(7),
   email: yup.string().email(),
@@ -484,11 +484,21 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   singleLine: yup.string().min(1),
   multiLine: yup.string().min(1),
   url: yup.string().url(),
-  number: yup.number().min(1)
-};
+  number: (allowedMinus: boolean = false) => (allowedMinus ? yup.number() : yup.number().min(1))
+} as const;
 
-const decimalPlaceValidator = (decimalPlaces: number = 0) =>
-  yup
+const decimalPlaceValidator = (decimalPlaces: number = 0, allowedMinus: boolean = false) => {
+  if (allowedMinus) {
+    return yup
+      .number()
+      .typeError('Value must be a number')
+      .test('decimal-places', `Must have no more than ${decimalPlaces} decimal place${decimalPlaces === 1 ? '' : 's'}`, (value) => {
+        if (value === undefined || value === null) return true;
+        const decimalPart = value.toString().split('.')[1];
+        return !decimalPart || decimalPart.length <= decimalPlaces;
+      });
+  }
+  return yup
     .number()
     .min(1)
     .typeError('Value must be a number')
@@ -497,6 +507,7 @@ const decimalPlaceValidator = (decimalPlaces: number = 0) =>
       const decimalPart = value.toString().split('.')[1];
       return !decimalPart || decimalPart.length <= decimalPlaces;
     });
+};
 
 export const RenderInputField = memo((props: InputProps) => {
   const validationSchema = schemas[props.columnDef.type] || { isValid: () => new Promise((resove) => resove(true)) };
@@ -520,13 +531,19 @@ export const RenderInputField = memo((props: InputProps) => {
       return <CurrencyNumber {...props} validationSchema={validationSchema} />;
     }
     case 'number': {
-      return <RenderTextInput {...props} validationSchema={validationSchema} type={'number'} />;
+      return <RenderTextInput {...props} validationSchema={validationSchema(props.columnDef.isAllowedMinus)} type={'number'} />;
     }
     case 'percent': {
       return <RenderTextInput {...props} validationSchema={validationSchema} suffixIcon={'%'} />;
     }
     case 'decimal': {
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} />;
+      return (
+        <RenderTextInput
+          {...props}
+          validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces, props.columnDef.isAllowedMinus)}
+          type={'number'}
+        />
+      );
     }
     case 'currencyAmount': {
       return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(2)} type={'number'} />;
