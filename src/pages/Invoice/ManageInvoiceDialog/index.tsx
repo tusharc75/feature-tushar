@@ -27,6 +27,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, onSuccess }) => {
   const history = useHistory();
@@ -41,6 +42,8 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
+  const [isMaterialAvailable, setIsMaterialAvailable] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -60,6 +63,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             rest.status = INVOICE_STATUS.new;
             rest.invoiceNumber = GenerateResourceLineNumber(fieldsDataForCreate);
             setCloneHeading(invoiceNumber);
+            setIsMaterialAvailable(!data?.canDelete)
             setInitialData({
               fields: fieldsDataForCreate,
               values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
@@ -174,7 +178,14 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             validationSchema={yupSchema(initialData.fields)}
             validateOnMount
             validate={validate}
-            onSubmit={handleSubmit}
+            onSubmit={(values) => {
+              if (invoiceId && isClone && isMaterialAvailable && !showConfirmCloneDetailsDialog) {
+                setShowConfirmCloneDetailsDialog(true);
+              }
+              else {
+                handleSubmit(values)
+              }
+            }}
           >
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
@@ -264,6 +275,20 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
                     }}
                   />
                 ) : null}
+                {showConfirmCloneDetailsDialog && (
+                  <ConfirmationDialog
+                    open={true}
+                    message="Please confirm if you'd like to proceed with cloning, including all the line items. If not, click on cancel."
+                    onOk={() => {
+                      setFieldValue('invoiceId', invoiceId);
+                      submitForm();
+                    }}
+                    onClose={() => {
+                      submitForm();
+                    }}
+                    okBtnLoading={loading}
+                  />
+                )}
               </Fragment>
             )}
           </Formik>
