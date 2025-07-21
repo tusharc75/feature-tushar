@@ -483,12 +483,14 @@ const schemas: Partial<Record<ValidInputType, YupSchema>> = {
   mobileNumber: yup.string().min(5),
   singleLine: yup.string().min(1),
   multiLine: yup.string().min(1),
-  url: yup.string().url()
+  url: yup.string().url(),
+  number: yup.number().min(1)
 };
 
 const decimalPlaceValidator = (decimalPlaces: number = 0) =>
   yup
     .number()
+    .min(1)
     .typeError('Value must be a number')
     .test('decimal-places', `Must have no more than ${decimalPlaces} decimal place${decimalPlaces === 1 ? '' : 's'}`, (value) => {
       if (value === undefined || value === null) return true;
