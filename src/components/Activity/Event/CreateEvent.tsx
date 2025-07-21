@@ -1,14 +1,17 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
-import Grid from '@mui/material/Grid2';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { ArrowRightAlt } from '@mui/icons-material';
+import { Box, TextField, Typography, useMediaQuery } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 import axios, { CancelTokenSource } from 'axios';
+import dayjs from 'dayjs';
 import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
+import CustomDatePicker from 'src/components/CustomDatePicker';
+import CustomTimePicker from 'src/components/CustomTimePicker';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import { object, string } from 'yup';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -22,11 +25,6 @@ import Loader from '../../Loader';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import { UserDropdown } from '../Helpers/userDropdown';
 import { get_activity_resource } from '../Helpers/utils';
-import CustomDateTimePicker from 'src/components/CustomDateTimePicker';
-import CustomDatePicker from 'src/components/CustomDatePicker';
-import dayjs from 'dayjs';
-import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
-import CustomTimePicker from 'src/components/CustomTimePicker';
 
 const CreateNewEvent = async (inputData) => {
   const { data } = await axiosInstance().post('/event', inputData);
