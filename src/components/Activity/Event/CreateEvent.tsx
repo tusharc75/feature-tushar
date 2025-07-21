@@ -79,7 +79,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
         .then(({ data: { data } }) => {
           setInitialValues(data);
         })
-        .catch((err) => { });
+        .catch((err) => {});
     } else {
       setInitialValues({
         name: '',
@@ -302,97 +302,86 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                         )}
                       </Box>
                     )}
-                    <Box pt={1} display="flex" flexDirection={isMobile ? 'column' : 'row'}>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 7 }}>
-                          <CustomDatePicker
-                            size="small"
-                            disablePast={true}
-                            value={values.startDate}
-                            name="startDate"
-                            label="Start Date"
-                            onChange={(date: any) => {
-                              setFieldValue('startDate', date ? date : null);
-                              setFieldValue('startTime', date ? getTime(date._d) : null);
-                            }}
-                            error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
-                            helperText={Boolean(touched['startDate']) && errors['startDate']}
-                            margin="dense"
-                          />
-                        </Grid>
+                    <div className="grid grid-cols-1 items-center gap-2 pt-2 md:grid-cols-2 lg:grid-cols-[1fr_24px_1fr]">
+                      <div className="grid gap-2 lg:grid-cols-2">
+                        <CustomDatePicker
+                          size="small"
+                          disablePast={true}
+                          value={values.startDate}
+                          name="startDate"
+                          label="Start Date"
+                          onChange={(date: any) => {
+                            setFieldValue('startDate', date ? date : null);
+                            setFieldValue('startTime', date ? getTime(date._d) : null);
+                          }}
+                          error={Boolean(touched['startDate']) && Boolean(errors['startDate'])}
+                          helperText={Boolean(touched['startDate']) && errors['startDate']}
+                          margin="dense"
+                        />
 
-                        <Grid size={{ xs: 5 }}>
-                          <CustomDateTimePicker
-                            size="small"
-                            label="Start Time"
-                            name="startTime"
-                            placeholder="08:00"
-                            inputFormat="HH:mm"
-                            value={values.startTime}
-                            onChange={(date: any) => {
-                              setFieldValue('startTime', date || null);
-                              if (date && new Date(date._d).getHours() < 23) {
-                                setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
+                        <CustomDateTimePicker
+                          size="small"
+                          label="Start Time"
+                          name="startTime"
+                          placeholder="08:00"
+                          inputFormat="HH:mm"
+                          value={values.startTime}
+                          onChange={(date: any) => {
+                            setFieldValue('startTime', date || null);
+                            if (date && new Date(date._d).getHours() < 23) {
+                              setFieldValue('endTime', new Date(new Date(date._d).getTime() + 30 * 60000));
+                            }
+                          }}
+                          error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
+                          helperText={Boolean(touched['startTime']) && errors['startTime']}
+                          margin="dense"
+                        />
+                      </div>
+
+                      <div className="hidden lg:block">
+                        <ArrowRightAlt color="disabled" />
+                      </div>
+                      <div className="grid gap-2 lg:grid-cols-2">
+                        <CustomDatePicker
+                          size="small"
+                          disablePast={true}
+                          minDateTime={values.startDate}
+                          value={values.endDate}
+                          name="endDate"
+                          label="End Date"
+                          onChange={(date: any) => {
+                            setFieldValue('endDate', date);
+                            setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
+                          }}
+                          error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
+                          helperText={Boolean(touched['endDate']) && errors['endDate']}
+                          margin="dense"
+                        />
+                        <CustomDateTimePicker
+                          size="small"
+                          label="End Time"
+                          name="endTime"
+                          placeholder="08:00"
+                          inputFormat="HH:mm"
+                          value={values.endTime}
+                          onChange={(date: any) => {
+                            const nDate = new Date(values.startTime).toISOString().split('T')[0];
+                            let nTime = '';
+                            if (date) {
+                              if ((date._d + '').includes('Invalid Date')) {
+                                setFieldValue('endTime', `${date._i}`);
+                              } else {
+                                nTime = new Date(date._d).toISOString().split('T')[1];
+                                setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
                               }
-                            }}
-                            error={Boolean(touched['startTime']) && Boolean(errors['startTime'])}
-                            helperText={Boolean(touched['startTime']) && errors['startTime']}
-                            margin="dense"
-                          />
-                        </Grid>
-                      </Grid>
-
-                      {!isMobile && (
-                        <Box mt={2} px={1}>
-                          <ArrowRightAlt color="disabled" />
-                        </Box>
-                      )}
-
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 7 }}>
-                          <CustomDatePicker
-                            size="small"
-                            disablePast={true}
-                            minDateTime={values.startDate}
-                            value={values.endDate}
-                            name="endDate"
-                            label="End Date"
-                            onChange={(date: any) => {
-                              setFieldValue('endDate', date);
-                              setFieldValue('endTime', new Date(getTime(date ? date._d : new Date()).getTime() + 30 * 60000));
-                            }}
-                            error={Boolean(touched['endDate']) && Boolean(errors['endDate'])}
-                            helperText={Boolean(touched['endDate']) && errors['endDate']}
-                            margin="dense"
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 5 }}>
-                          <CustomDateTimePicker
-                            size="small"
-                            label="End Time"
-                            name="endTime"
-                            placeholder="08:00"
-                            inputFormat="HH:mm"
-                            value={values.endTime}
-                            onChange={(date: any) => {
-                              const nDate = new Date(values.startTime).toISOString().split('T')[0];
-                              let nTime = '';
-                              if (date) {
-                                if ((date._d + '').includes('Invalid Date')) {
-                                  setFieldValue('endTime', `${date._i}`);
-                                } else {
-                                  nTime = new Date(date._d).toISOString().split('T')[1];
-                                  setFieldValue('endTime', new Date(`${nDate}T${nTime}`));
-                                }
-                              }
-                            }}
-                            error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
-                            helperText={Boolean(touched['endTime']) && errors['endTime']}
-                            margin="dense"
-                          />
-                        </Grid>
-                      </Grid>
-                    </Box>
+                            }
+                          }}
+                          error={Boolean(touched['endTime']) && Boolean(errors['endTime'])}
+                          helperText={Boolean(touched['endTime']) && errors['endTime']}
+                          margin="dense"
+                        />
+                      </div>
+                    </div>
                     <TextField
                       fullWidth
                       margin="dense"
@@ -404,11 +393,7 @@ export const CreateEvent = ({ relatedTo, eventId, handleClose, email, isMinimize
                       variant="outlined"
                       onChange={(e) => setFieldValue('location', e.target.value.trimStart())}
                     />
-                     <MultiLine
-                      label="Description"
-                      onChange={(value) => setFieldValue('description', value)}
-                      value={values['description']}
-                    />
+                    <MultiLine label="Description" onChange={(value) => setFieldValue('description', value)} value={values['description']} />
                     {eventId && (
                       <Fragment>
                         {initialValues.createdBy && initialValues.createdBy.date && (
