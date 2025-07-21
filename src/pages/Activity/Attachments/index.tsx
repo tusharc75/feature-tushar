@@ -843,7 +843,7 @@ const LeftSideContents = ({
         onChange={(event, newValue) => {
           setResource(newValue);
           if (newValue) {
-            //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
+            setFilter([{ isAll: true, label: newValue.optionLabel, name: 'All', type: newValue.optionValue }]);
           } else {
             setFilter([]);
           }
@@ -873,7 +873,7 @@ const LeftSideContents = ({
           onChange={(event, newValue) => {
             setSelectedResourceData(newValue);
             if (newValue?.optionValue) {
-              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+              setFilter(() => [{ _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
             } else {
               setFilter([]);
             }
