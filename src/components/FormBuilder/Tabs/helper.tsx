@@ -246,6 +246,12 @@ export const resourcePolicy = [
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'enableServicesOnConsumables',
+        fieldLabel: 'Enable Services On Consumables',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
