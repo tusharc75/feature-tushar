@@ -29,6 +29,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import InvoiceMaterialDialog from 'src/pages/CreditMemo/Material/InvoiceMaterialDialog';
 
 const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
@@ -51,6 +52,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [addCostDialog, setAddCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
   const [costFields, setCostFields] = useState(null);
+  const [openInvoiceMaterialDialog, setOpenInvoiceMaterialDialog] = useState(false)
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -544,20 +546,24 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
     }
   };
 
-  const handleAddInvoiceLineItems = () => {
+  const handleAddInvoiceLineItems = (invoiceMaterialIds) => {
+    setIsAdding(true)
     axiosInstance()
-      .put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id })
+      .put(`${routes.creditMemo?.path}/clone-invoice-line-items`, { creditMemo: creditMemoData?._id, invoiceMaterialIds: invoiceMaterialIds })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data?.message
         });
+        setIsAdding(false)
+        setOpenInvoiceMaterialDialog(false)
         fetchData();
         fetchCreditMemoData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsAdding(false)
       });
   };
 
@@ -593,7 +599,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           <MenuItem
             color="primary"
             onClick={() => {
-              handleAddInvoiceLineItems();
+              setOpenInvoiceMaterialDialog(true)
             }}
           >
             {`Add Invoice Line Items`}
@@ -857,6 +863,18 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
           loadingEdit={isUpdating}
           showSaveAndNext={addCostDialog.showSaveAndNext}
           invoiceData={creditMemoData}
+        />
+      )}
+      {openInvoiceMaterialDialog && (
+        <InvoiceMaterialDialog
+          creditMemoData={creditMemoData}
+          onClose={() => {
+            setOpenInvoiceMaterialDialog(false)
+          }}
+          onSuccess={(_ids) => {
+            handleAddInvoiceLineItems(_ids)
+          }}
+          loading={isAdding}
         />
       )}
     </Fragment>
