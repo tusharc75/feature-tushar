@@ -16,7 +16,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import { useData } from "src/StateProvider/Provider";
 import { ListingPageHeader } from '../../../components/PageHeaders';
 
-const InvoiceMaterialDialog = ({ creditMemoData, onClose, onSuccess, loading }) => {
+const InvoiceMaterialDialog = ({ creditMemoData, onClose, onSuccess, ignoreIds, loading }) => {
 
   const renderedFrom = `${camelCase(sidebarResource.invoice)}_Material_Credit_Memo`;
 
@@ -127,6 +127,7 @@ const InvoiceMaterialDialog = ({ creditMemoData, onClose, onSuccess, loading }) 
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
     data = response?.data?.data;
+    data.material = data.material?.filter(d => !ignoreIds?.includes(d?._id))
     let rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;

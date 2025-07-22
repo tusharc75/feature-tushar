@@ -30,6 +30,7 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import { getPricingConditions, getPricingValue, getTaxList } from 'src/components/PricingCondition';
 import FinalPriceBox from 'src/components/FinalPriceBox';
 import InvoiceMaterialDialog from 'src/pages/CreditMemo/Material/InvoiceMaterialDialog';
+import InfoIcon from '@mui/icons-material/Info';
 
 const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
 
@@ -80,7 +81,18 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <p className="text-truncate">{row.original.index}</p>
+            {row?.original?.invoiceMaterialId && (
+              <HtmlTooltip
+                title={`${resources?.invoice?.titleSingular} Line Item`}
+              >
+                <InfoIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            )}
+          </div>
+        ),
         Footer: () => {
           return <>Total</>;
         }
@@ -876,6 +888,7 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
             handleAddInvoiceLineItems(_ids)
           }}
           loading={isAdding}
+          ignoreIds={dataRows?.filter(d => d?.invoiceMaterialId)?.map(d => d?.invoiceMaterialId)}
         />
       )}
     </Fragment>
