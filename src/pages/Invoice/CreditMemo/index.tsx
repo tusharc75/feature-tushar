@@ -137,7 +137,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               <div className="flex items-center gap-2">
                 <p
                   onClick={() => {
-                    setCreditMemoMaterialDialog({ open: true, data: row.original });
+                    setCreditMemoMaterialDialog({ open: true, data: row?.original?.orignalData });
                   }}
                   className="link text-truncate"
                   title={row.original['creditMemoNumber']}
@@ -227,10 +227,10 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       .then(({ data: { data } }) => {
         let rows = data?.data?.map((u, i) => {
           let finalObject = prepareDataForGrid(u, user);
+          finalObject['orignalData'] = u;
           finalObject['index'] = i + 1;
           return finalObject;
         });
-
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
