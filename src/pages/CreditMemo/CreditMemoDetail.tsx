@@ -249,6 +249,11 @@ const CreditMemoDetail = () => {
           </Box>
         </Box>
       </Box>
+      {creditMemoData?.amountGreaterThenInvoiceAmount &&
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded-md shadow-sm mt-2 text-sm">
+          <p><span className="font-semibold">Warning:</span> Credit memo amount exceeds the original invoice amount.</p>
+        </div>
+      }
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Header'} />
