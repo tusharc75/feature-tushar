@@ -1,15 +1,17 @@
-import { ArrowBackIos, ArrowForwardIos, FormatQuote, Message, MoreHoriz, People } from '@mui/icons-material';
+import { ArrowBackIos, ArrowForwardIos, FormatQuote, KeyboardArrowDown, KeyboardArrowUp, Message, MoreHoriz, People } from '@mui/icons-material';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import { Chip, IconButton } from '@mui/material';
-import React, { useState } from 'react';
+import { Chip, Collapse, IconButton } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MdKeyboardDoubleArrowUp } from 'react-icons/md';
 import { PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton, ThemeButtonProps } from 'src/components/Helpers/Buttons';
-import { cn, getChipColor } from 'src/constants/helpers';
+import { cn, getChipColor, sidebarResource } from 'src/constants/helpers';
 import { RenderStatusIcon } from '../index';
 import RenderTotalTime from './RenderTotalTime';
 import useTab from './useTab';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useData } from 'src/StateProvider/Provider';
 
 export type ServicesButtons = { visible: boolean; id: string | number } & ThemeButtonProps;
 
@@ -53,6 +55,24 @@ const RenderService = ({
   completed
 }: RenderServiceProps) => {
   const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
+  const [policy, setPolicy] = useState(null);
+
+  useEffect(() => {
+    const fetchPolicy = async () => {
+      try {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.workOrder}`);
+
+        if (data && user?.brand === data.brand) {
+          setPolicy(data.policy);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchPolicy();
+  }, [user?.brand]);
 
   const getFieldsWithOtherDetails = (step: any, stepSubmitedData) => {
     const steps = stepSubmitedData?.filter((item: any) => item?.uniqueId === step?.uniqueId);
@@ -86,6 +106,17 @@ const RenderService = ({
 
   const isAnyButtonVisible = servicesButtons.some((d) => d.visible);
 
+  const group = useMemo(() => {
+    if (policy && policy.enableServicesOnConsumables) {
+      return [
+        { _id: '1', product: 'Porduct A', serviceSteps: serviceSteps },
+        { _id: '2', product: 'Porduct B', serviceSteps: serviceSteps },
+        { _id: '3', product: 'Porduct C', serviceSteps: serviceSteps }
+      ];
+    }
+    return null;
+  }, [policy, serviceSteps]);
+
   return (
     <>
       <div className={`${isMobile ? 'p-3' : 'min-h-full border p-[20px]'} relative isolate`}>
@@ -101,8 +132,9 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                        }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
+                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                      }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -119,7 +151,7 @@ const RenderService = ({
                 <ArrowBackIos />
               </IconButton>
               <div className={`flex gap-[8px] overflow-x-auto overflow-y-hidden`} ref={containerRef}>
-                <RenderServices
+                <RenderServicesList
                   {...{
                     serviceSteps,
                     isColapsed,
@@ -160,8 +192,35 @@ const RenderService = ({
                 <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
+            {group && (
+              <div className="mb-4 grid gap-4">
+                {group.map((d) => (
+                  <RenderSingleGroup
+                    key={d._id}
+                    servicesButtons={servicesButtons}
+                    group={d}
+                    {...{
+                      isColapsed,
+                      stylesForEveryTab,
+                      selectedService,
+                      stepSubmitedData,
+                      setSelectedService,
+                      user,
+                      handleOpenMenu,
+                      resource,
+                      quotationData,
+                      allowedToEdit,
+                      setShowConfirmBox,
+                      getFieldsWithOtherDetails,
+                      isMobile,
+                      completed
+                    }}
+                  />
+                ))}
+              </div>
+            )}
             <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
-              <RenderServices
+              <RenderServicesList
                 {...{
                   serviceSteps,
                   isColapsed,
@@ -190,7 +249,77 @@ const RenderService = ({
 
 export default RenderService;
 
-const RenderServices = ({
+const RenderSingleGroup = ({
+  group,
+  isColapsed,
+  servicesButtons,
+  stylesForEveryTab,
+  selectedService,
+  stepSubmitedData,
+  setSelectedService,
+  user,
+  handleOpenMenu,
+  resource,
+  quotationData,
+  allowedToEdit,
+  setShowConfirmBox,
+  getFieldsWithOtherDetails,
+  isMobile,
+  completed
+}) => {
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <div className="relative isolate">
+      <div
+        className=" flex cursor-pointer items-center justify-between gap-2 rounded-[8px] bg-[#F3F4F6] p-4 dark:bg-[--dark-secondary]"
+        onClick={() => setExpanded((prev) => !prev)}
+      >
+        <div className="flex flex-grow items-center justify-between">
+          <h6 className="text-base font-medium leading-[24px]">{group.product}</h6>
+          <span className="text-xs text-gray-500">{group?.serviceSteps?.length} Services</span>
+        </div>
+        {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+      </div>
+      {expanded && <div className="absolute -left-[10px] top-[25px] z-[-1] h-[calc(100%-68px)] w-full rounded-md border border-r-0 border-dashed" />}
+      <Collapse in={expanded}>
+        <div className="bg-[var(--dark-primary,white)]">
+          <div className="mb-2 mt-2 flex items-center justify-end gap-2">
+            {servicesButtons.map(({ id, children, visible, ...rest }) => {
+              if (!visible) return null;
+              return (
+                <ThemeButton key={id} {...rest} className={isColapsed ? 'hidden' : ''}>
+                  {children}
+                </ThemeButton>
+              );
+            })}
+          </div>
+          <RenderServicesList
+            {...{
+              serviceSteps: group.serviceSteps,
+              isColapsed,
+              stylesForEveryTab,
+              selectedService,
+              stepSubmitedData,
+              setSelectedService,
+              user,
+              handleOpenMenu,
+              resource,
+              quotationData,
+              allowedToEdit,
+              setShowConfirmBox,
+              getFieldsWithOtherDetails,
+              isMobile,
+              completed
+            }}
+          />
+        </div>
+      </Collapse>
+    </div>
+  );
+};
+
+const RenderServicesList = ({
   serviceSteps,
   isColapsed,
   stylesForEveryTab,
@@ -229,8 +358,9 @@ const RenderServices = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-              } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={`transition-all duration-300 ${
+              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
             style={{
               ...style
             }}

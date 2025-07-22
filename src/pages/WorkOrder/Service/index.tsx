@@ -81,6 +81,7 @@ const Service = ({
       permissions
     }
   } = useData();
+
   const [serviceSteps, setServiceSteps] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
@@ -819,8 +820,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                    isAllowedToServiceEdit &&
-                    selectedService?.clickable
+                  isAllowedToServiceEdit &&
+                  selectedService?.clickable
                     ? false
                     : true
                 }
@@ -840,9 +841,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                  !completed
                     ? false
                     : true
                 }
@@ -862,8 +863,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    !completed &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -882,7 +883,7 @@ const Service = ({
                 id={'AssignWorkStations'}
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -922,8 +923,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -941,8 +942,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  selectedService?.clickable
+                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                selectedService?.clickable
                   ? false
                   : true
               }
@@ -1025,9 +1026,9 @@ const Service = ({
                 id={'delete'}
                 disabled={
                   allowedToEdit &&
-                    selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
-                    !completed &&
-                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                  !completed &&
+                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
