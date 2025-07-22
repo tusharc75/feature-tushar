@@ -53,7 +53,7 @@ const CreditMemoDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.creditMemo}`)
+      .get(`/field?resource=${sidebarResource?.creditMemo}&view=true`)
       .then(({ data }) => {
         data?.data.forEach((o: any) => {
           if (o?.fieldData?.fieldName === 'status') {
