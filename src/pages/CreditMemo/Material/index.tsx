@@ -32,7 +32,7 @@ import FinalPriceBox from 'src/components/FinalPriceBox';
 import InvoiceMaterialDialog from 'src/pages/CreditMemo/Material/InvoiceMaterialDialog';
 import InfoIcon from '@mui/icons-material/Info';
 
-const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData }) => {
+const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCreditMemoData, fromInvoice = false }) => {
 
   const renderedFrom = `${camelCase(sidebarResource.creditMemo)}_Material`;
 
@@ -79,15 +79,13 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
       {
         accessor: 'index',
         Header: 'Index',
-        width: 70,
+        width: 100,
         sticky: 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <p className="text-truncate">{row.original.index}</p>
             {row?.original?.invoiceMaterialId && (
-              <HtmlTooltip
-                title={`${resources?.invoice?.titleSingular} Line Item`}
-              >
+              <HtmlTooltip title={`${resources?.invoice?.titleSingular} Line Item`}   >
                 <InfoIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
@@ -693,6 +691,11 @@ const Material = ({ creditMemoData, creditMemoFields, allowedToEdit, fetchCredit
 
   return (
     <Fragment>
+      {(creditMemoData?.amountGreaterThenInvoiceAmount && fromInvoice) &&
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 rounded-md shadow-sm mt-2 mb-2 text-sm">
+          <p><span className="font-semibold">Warning:</span> Credit memo amount exceeds the original invoice amount.</p>
+        </div>
+      }
       <DetailsPageHeader
         isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}

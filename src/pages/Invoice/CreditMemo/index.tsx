@@ -29,7 +29,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 
   const [columns, setColumns] = useState(null);
   const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
-  const [creditMemoMaterialDialog, setCreditMemoMaterialDialog] = useState({ open: false, data: null });
+  const [creditMemoMaterialDialog, setCreditMemoMaterialDialog] = useState({ open: false, _id: null });
   const [anchorActionEl, setAnchorActionEl] = useState(null);
 
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
@@ -137,7 +137,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               <div className="flex items-center gap-2">
                 <p
                   onClick={() => {
-                    setCreditMemoMaterialDialog({ open: true, data: row?.original?.orignalData });
+                    setCreditMemoMaterialDialog({ open: true, _id: row?.original?._id });
                   }}
                   className="link text-truncate"
                   title={row.original['creditMemoNumber']}
@@ -452,8 +452,8 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
       )}
       {creditMemoMaterialDialog.open && (
         <MaterialDialog
-          creditMemoDetail={creditMemoMaterialDialog.data}
-          handleClose={() => setCreditMemoMaterialDialog({ open: false, data: null })}
+          id={creditMemoMaterialDialog._id}
+          handleClose={() => setCreditMemoMaterialDialog({ open: false, _id: null })}
           allowedToEdit={allowedToEdit}
         />
       )}
