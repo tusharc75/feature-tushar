@@ -29,7 +29,7 @@ const InvoiceMaterialDialog = ({ creditMemoData, onClose, onSuccess, loading }) 
   const [invoiceData, setInvoiceData] = useState(null)
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -200,7 +200,7 @@ const InvoiceMaterialDialog = ({ creditMemoData, onClose, onSuccess, loading }) 
       aria-labelledby="invoice-material-dialog"
     >
       <CustomDialogHeader
-        title={`${resources?.invoice?.titleSingular} Line Items`}
+        title={`${resources?.invoice?.titleSingular} - ${creditMemoData?.invoice?.optionLabel}`}
         showManimizeMaximize={false}
         showRequiredLabel={false}
         onClose={onClose}
