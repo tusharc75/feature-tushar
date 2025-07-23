@@ -535,6 +535,12 @@ export const resourcePolicy = [
         fieldLabel: 'Auto Convert In Same Rental Job',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'autoCreateFolderInDMS',
+        fieldLabel: 'Auto Create Folder In DMS',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
