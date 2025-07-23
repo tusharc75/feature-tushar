@@ -179,7 +179,7 @@ const RenderService = ({
           </>
         ) : (
           <>
-            <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-end'} mb-3 items-center`}>
+            <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-end'} items-center`}>
               {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
               <IconButton size={'small'} onClick={handleColapse}>
                 <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
