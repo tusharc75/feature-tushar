@@ -662,6 +662,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               {[
                 'inUsedSerializedAsset',
                 'lostAssets',
+                'scrappedAssets',
                 'assetUtilization',
                 'invoiceDetails',
                 'inventoryHistory',
