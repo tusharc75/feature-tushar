@@ -27,7 +27,7 @@ const RenderServiceGroup = ({
   const [expanded, setExpanded] = useState(true);
 
   return (
-    <div className="relative isolate min-w-0 max-w-full">
+    <div className="relative isolate min-w-0 max-w-full ">
       <div
         className={cn(
           'flex cursor-pointer items-center gap-2 rounded-[8px] border bg-[white] dark:bg-[--dark-primary]',

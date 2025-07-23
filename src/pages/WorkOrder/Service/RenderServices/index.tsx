@@ -120,7 +120,7 @@ const RenderService = ({
 
   return (
     <>
-      <div className={`${isMobile ? 'p-3' : 'min-h-full border p-[20px]'} relative isolate`}>
+      <div className={`${isMobile ? 'p-3' : 'min-h-full border'} relative isolate`}>
         {isMobile ? (
           <>
             {isAnyButtonVisible && (
@@ -179,15 +179,15 @@ const RenderService = ({
           </>
         ) : (
           <>
-            <div className={`mb-1 flex flex-wrap gap-2 ${isColapsed ? 'justify-around' : 'justify-end'} mb-3 items-center`}>
+            <div className={`mb-1 flex flex-wrap gap-2 p-[20px_20px_0px] ${isColapsed ? 'justify-around' : 'justify-end'} mb-3 items-center`}>
               {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
               <IconButton size={'small'} onClick={handleColapse}>
                 <ArrowForwardIos fontSize="small" className={cn('transition-all', isColapsed ? '' : '[transform:rotate(180deg)]')} />
               </IconButton>
             </div>
-            <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden`}>
+            <div className={`max-h-[calc(100vh-300px)] overflow-y-auto overflow-x-hidden p-[20px]`}>
               {group && (
-                <div className="mb-4 grid gap-4">
+                <div className="mb-4 grid gap-4 ">
                   {group.map((d) => (
                     <RenderSingleGroup
                       key={d._id}
