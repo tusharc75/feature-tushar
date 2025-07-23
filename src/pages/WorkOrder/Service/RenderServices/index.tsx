@@ -18,6 +18,8 @@ export type ServicesButtons = { visible: boolean; id: string | number } & ThemeB
 type RenderServiceProps = {
   isColapsed: boolean;
   serviceSteps: any;
+  allServices: any,
+  products: any,
   stylesForEveryTab: (selectedService: any, data: any, index: number) => React.CSSProperties;
   selectedService: any;
   handleColapse: () => void;
@@ -38,6 +40,8 @@ type RenderServiceProps = {
 const RenderService = ({
   isColapsed,
   serviceSteps,
+  allServices,
+  products,
   stylesForEveryTab,
   selectedService,
   handleColapse,
@@ -107,15 +111,11 @@ const RenderService = ({
   const isAnyButtonVisible = servicesButtons.some((d) => d.visible);
 
   const group = useMemo(() => {
-    if (policy && policy.enableServicesOnConsumables) {
-      return [
-        { _id: '1', product: 'Porduct A', serviceSteps: serviceSteps },
-        { _id: '2', product: 'Porduct B', serviceSteps: serviceSteps },
-        { _id: '3', product: 'Porduct C', serviceSteps: serviceSteps }
-      ];
+    if (policy && policy.enableServicesOnConsumables && products?.length > 0) {
+      return products?.map(p => ({ _id: p?._id, product: p?.product?.optionLabel, serviceSteps: allServices?.filter(s => s?.parentId === p?._id) }))
     }
     return null;
-  }, [policy, serviceSteps]);
+  }, [policy, allServices, products]);
 
   return (
     <>
@@ -132,9 +132,8 @@ const RenderService = ({
                   if (!visible) return null;
                   return (
                     <span
-                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${
-                        isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
-                      }`}
+                      className={`absolute -right-[5.5px] rounded-full bg-[var(--dark-secondary,_white)] ${isMobileSlideOpen ? 'opacity-100' : 'sr-only opacity-0'
+                        }`}
                       style={{ top: isMobileSlideOpen ? `-${(index + 1) * 32 + (index + 1) * 8}px` : '-24px', transition: `top 0.${index + 2}s` }}
                     >
                       <ThemeButton key={id} {...rest} className={`${isColapsed ? 'hidden' : ''} round`}>
@@ -285,10 +284,17 @@ const RenderSingleGroup = ({
       <Collapse in={expanded}>
         <div className="bg-[var(--dark-primary,white)]">
           <div className="mb-2 mt-2 flex items-center justify-end gap-2">
-            {servicesButtons.map(({ id, children, visible, ...rest }) => {
+            {servicesButtons.map(({ id, children, onClick, visible, ...rest }) => {
               if (!visible) return null;
               return (
-                <ThemeButton key={id} {...rest} className={isColapsed ? 'hidden' : ''}>
+                <ThemeButton
+                  key={id}
+                  onClick={(e) => {
+                    onClick(e, group?._id ? group?._id : null)
+                  }}
+                  {...rest}
+                  className={isColapsed ? 'hidden' : ''}
+                >
                   {children}
                 </ThemeButton>
               );
@@ -358,9 +364,8 @@ const RenderServicesList = ({
         return (
           <div
             key={data.uniqueId}
-            className={`transition-all duration-300 ${
-              isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
-            } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
+            className={`transition-all duration-300 ${isMobile ? 'rounded-md p-2' : 'px-3 py-[14px] first-of-type:[border-radius:5px_5px_0_0] last-of-type:[border-radius:0_0_5px_5px]'
+              } min-w-[var(--tab-size)] max-w-[var(--tab-size)]`}
             style={{
               ...style
             }}
