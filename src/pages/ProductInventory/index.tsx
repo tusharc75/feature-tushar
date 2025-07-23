@@ -316,8 +316,6 @@ const InventoryProduct = () => {
     )
   };
 
-  console.log(columns);
-
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     if (plantId) {
