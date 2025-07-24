@@ -67,7 +67,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
     const textDefault = text.propPanel.defaultSchema
 
     const variableDefaultSchema: DesignerPluginSchema = {
-        width: 100,
+        width: 80,
         height: 10,
         position: { x: 0, y: 0 },
         type: 'Variable',
@@ -137,7 +137,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
-        Variable: customVariablePlugin as unknown as any,
+        Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
         Table: customTablePlugin as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
