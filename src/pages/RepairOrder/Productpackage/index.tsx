@@ -703,6 +703,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, se
           handleClose={() =>
             setAddExistingProductDialog({ open: false, type: '', parentId: null, existing: false, productId: null, productCategory: null })
           }
+          packageType={'product'}
           onSuccess={(rows) => {
             handleAdd(rows);
           }}
