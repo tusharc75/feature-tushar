@@ -3,7 +3,6 @@ import type { Plugin, Schema } from '@pdfme/common';
 import { productTableName, serviceTableName, tableNameOption } from './optionhelper';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
-import { Icon } from '@mui/material';
 
 type DesignerPluginSchema = Schema & {
     width: number;
