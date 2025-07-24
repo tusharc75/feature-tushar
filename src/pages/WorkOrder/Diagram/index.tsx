@@ -66,8 +66,6 @@ const Diagram = ({
   const [isEmailAttachmentLoading, setIsEmailAttachmentLoading] = useState(true);
   const [selectedFiles, setSelectedFiles] = useState([]);
 
-  console.log(selectedAttachment, 'selectedAttachment');
-
   useEffect(() => {
     if (resource === ACTIVITY_RESOURCE.workOrder) {
       fetchServices();
