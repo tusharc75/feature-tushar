@@ -500,6 +500,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
                             setValues({ ...values, ...result });
+                            if (newVal?.value === sidebarResource?.serializedAsset) {
+                              setFieldValue('fileType', 'csv')
+                            }
                             if (newVal) {
                               fetchGridColumns(newVal);
                             } else {
@@ -596,7 +599,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv', 'pdf', 'emailBody']}
+                          options={values?.resource?.value === sidebarResource?.serializedAsset ? ['csv'] : ['xslx', 'csv', 'pdf', 'emailBody']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => startCase(option)?.toUpperCase()}
