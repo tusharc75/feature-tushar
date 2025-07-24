@@ -21,6 +21,49 @@ export const ManualContentNew = ({ state }) => {
 
   const content = rawContent.replace(/<[^>]*>/g, '');
 
+  const components = {
+    img: ({ node, ...props }) => {
+      const isIcon = props.src.includes('icon') || props.alt?.toLowerCase().includes('icon');
+      return (
+        <img 
+          {...props} 
+          className={isIcon ? "w-6 h-6 inline-block align-middle" : "max-w-full h-auto mx-auto block"} 
+          alt={props.alt || ''}
+        />
+      );
+    },
+    h1: ({ node, ...props }) => (
+      <h1 className="text-2xl font-bold mt-10 mb-6" {...props} />
+    ),
+    h2: ({ node, ...props }) => (
+      <h2 className="ml-4 mt-8 text-xl font-semibold" {...props} />
+    ),
+    h3: ({ node, ...props }) => (
+      <h3 className="ml-8 mt-6 text-lg font-medium" {...props} />
+    ),
+    h4: ({ node, ...props }) => (
+      <h4 className="ml-12 mt-4 text-base font-medium" {...props} />
+    ),
+    h5: ({ node, ...props }) => (
+    <h5 className="ml-16 text-base font-medium mt-4 mb-2" {...props} />
+    ),
+    h6: ({ node, ...props }) => (
+      <h6 className="ml-20 text-sm font-medium mt-3 mb-2" {...props} />
+    ),
+    ul: ({ node, ...props }) => (
+      <ul className="ml-8 list-disc" {...props} />
+    ),
+    ol: ({ node, ...props }) => (
+      <ol className="ml-8 list-decimal" {...props} />
+    ),
+    li: ({ node, ...props }) => (
+      <li className="mb-2" {...props} />
+    ),
+    p: ({ node, ...props }) => (
+      <p className="mb-4" {...props} />
+    ),
+  };
+
   return (
     <div
       className={cn(
@@ -34,6 +77,7 @@ export const ManualContentNew = ({ state }) => {
             remarkPlugins={[remarkGfm]}
             rehypePlugins={[rehypeSlug]}
             className="prose dark:prose-invert max-w-none"
+            components={components}
           >
             {content}
           </Markdown>
