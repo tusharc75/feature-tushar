@@ -1,7 +1,7 @@
 import { Box, IconButton, Paper, TextField, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Dialog from '@mui/material/Dialog';
-import { CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
+import { checkImageUrl, CustomDialogTransition, imageUploadMaxSize } from 'src/constants/helpers';
 import ImageAttachments from '../Activity/Email/ImageAttachments';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
@@ -76,12 +76,6 @@ const AskSupplierPriceDialog = (props) => {
   };
   const handleDeleteFileImageAttachment = (url) => {
     setFileImageAttachments(fileImageAttachments.filter((currentUrl) => currentUrl !== url));
-  };
-
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
   };
 
   const onUploadFile = (file) => {
