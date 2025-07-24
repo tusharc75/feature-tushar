@@ -541,6 +541,12 @@ export const resourcePolicy = [
         fieldLabel: 'Auto Create Folder In DMS',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'restrictCreationOfParentWorkOrder',
+        fieldLabel: 'Restrict Creation of Parent Work Order',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
