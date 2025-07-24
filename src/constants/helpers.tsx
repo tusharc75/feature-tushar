@@ -2631,6 +2631,13 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
+    title: 'Scrapped Assets',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'ScrappedAssets',
+    section: REPORT_SECTIONS.asset
+  },
+  {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'standardReport',
