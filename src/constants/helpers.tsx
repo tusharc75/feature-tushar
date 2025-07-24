@@ -3660,7 +3660,7 @@ export const DEAL_STAGE = {
 
 export const cloneResourceData = (fromFields, toFields, data, currency) => {
   const overlappingFields = fromFields.filter(
-    (e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
+    (e) => toFields?.filter((e) => !['lookUpDisplay']?.includes(e?.type))?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
   );
   const result: any = {};
   overlappingFields?.forEach((e) => {
