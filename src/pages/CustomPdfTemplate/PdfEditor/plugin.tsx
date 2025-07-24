@@ -1,8 +1,9 @@
-import { text, image, table, line } from '@pdfme/schemas';
+import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
 import { productTableName, serviceTableName, tableNameOption } from './optionhelper';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
+import { Icon } from '@mui/material';
 
 type DesignerPluginSchema = Schema & {
     width: number;
@@ -83,6 +84,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
     const customVariablePlugin: any = {
         ...text,
+        icon: '{𝐕𝐚𝐫}',
         type: 'Variable',
         propPanel: {
             ...text.propPanel,
@@ -136,10 +138,11 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
+        Variable: customVariablePlugin as unknown as any,
         Table: customTablePlugin as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
-        Variable: customVariablePlugin as unknown as any,
+        Rectangle: rectangle as DesignerExpectedPlugin,
     };
 
     return plugins;
