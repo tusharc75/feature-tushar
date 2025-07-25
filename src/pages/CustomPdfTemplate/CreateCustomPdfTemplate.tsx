@@ -57,7 +57,10 @@ export default function CreateCustomPdfTemplate() {
   const noOfPagesInputRef = useRef<HTMLInputElement>(null);
   const [showConfirmNoOfPages, setShowConfirmNoOfpages] = useState<boolean>(false);
   const [serviceOptions, setServiceOptions] = useState([]);
+
   const [resourceFields, setResourceFields] = useState(null);
+  const [resourceTables, setResourceTables] = useState(null);
+
   const [btnLoading, setBtnLoading] = useState(false);
   const [selectedServices, setSelectedServices] = useState([]);
   const baseResourceFields = useRef([]);
@@ -114,6 +117,18 @@ export default function CreateCustomPdfTemplate() {
     }
     if (formValues && formValues.type === sidebarResource.workOrder) {
       fetchServiceOptions();
+    }
+  }, [formValues?.type]);
+
+
+  useEffect(() => {
+    if (formValues && formValues.type) {
+      axiosInstance().get(`${customPdfTemplate.api}/table/${formValues.type}`)
+        .then(({ data: { data } }) => {
+          setResourceTables(data)
+        }).catch((err) => {
+          toastConfig.setToastConfig(err);
+        });
     }
   }, [formValues?.type]);
 
@@ -294,7 +309,7 @@ export default function CreateCustomPdfTemplate() {
       const pdf = await generate({
         template: formValues?.template,
         inputs: finalInputs,
-        plugins: getPlugins(resourceFields)
+        plugins: getPlugins(resourceFields, resourceTables)
       });
       const pdfBytes = new Uint8Array(pdf.buffer);
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -634,6 +649,7 @@ export default function CreateCustomPdfTemplate() {
                       disabled={!isEdit || !allowedToEdit}
                       noOfPages={noOfPages}
                       variables={resourceFields}
+                      resourceTables={resourceTables}
                     />
                   </div> : <Box p={2} height={500}>
                     <CommonSkeleton lenArray={[...Array(10).keys()]} />

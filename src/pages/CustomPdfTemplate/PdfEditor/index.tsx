@@ -9,9 +9,10 @@ interface PdfEditorProps {
   disabled: boolean;
   noOfPages: number;
   variables: any;
+  resourceTables: any;
 }
 
-const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables }: PdfEditorProps) => {
+const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables, resourceTables }: PdfEditorProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const designerInstanceRef = useRef<Designer | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +21,7 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables 
   const [fontsReady, setFontsReady] = useState(false);
   const [fontObjects, setFontObjects] = useState({});
 
-  const plugins = useMemo(() => getPlugins(variables), [variables]);
+  const plugins = useMemo(() => getPlugins(variables, resourceTables), [variables, resourceTables]);
 
   useEffect(() => {
     const loadFonts = async () => {
