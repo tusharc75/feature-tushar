@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import PreviewDownloadMultiple from 'src/components/DeliveryTicket/PreviewDownloadMultiple';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -37,6 +38,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+  const [uniqueLoadingTicket, setUniqueLoadingTicket] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -235,6 +237,8 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
         }
       }
     });
+
+    setUniqueLoadingTicket(deliveryTicketList?.filter((e) => e?.serializedPackages?.length)?.map((e) => e._id));
 
     setHideDeliveryTicketDelivered(defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
     const rows = data?.filter((e) => e.parentId === null);
@@ -444,6 +448,12 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     );
   };
 
+  const rightSideContents = () => {
+    return (
+      <PreviewDownloadMultiple referenceIds={uniqueLoadingTicket} />
+    );
+  };
+
   return (
     <>
       {allowedToEdit && (
@@ -453,6 +463,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+            rightSideContents={rightSideContents()}
             hasXpadding
           />
         </>
