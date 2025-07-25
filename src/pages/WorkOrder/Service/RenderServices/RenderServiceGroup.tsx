@@ -4,6 +4,7 @@ import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
+import RenderServiceCountBadge from 'src/pages/WorkOrder/Service/RenderServices/RenderServiceCountBadge';
 import RenderServicesList from 'src/pages/WorkOrder/Service/RenderServices/RenderServicesList';
 
 const RenderServiceGroup = ({
@@ -37,6 +38,7 @@ const RenderServiceGroup = ({
           if (!isColapsed) setExpanded((prev) => !prev);
         }}
       >
+        <RenderServiceCountBadge serviceSteps={serviceSteps} />
         {isColapsed ? (
           <HtmlTooltip title={'Services'}>
             <Info />
@@ -44,6 +46,7 @@ const RenderServiceGroup = ({
         ) : (
           <>
             <h6 className={'text-base font-medium leading-[24px]'}>Services</h6>
+
             {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </>
         )}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn } from 'src/constants/helpers';
+import RenderServiceCountBadge from 'src/pages/WorkOrder/Service/RenderServices/RenderServiceCountBadge';
 import RenderServicesList from 'src/pages/WorkOrder/Service/RenderServices/RenderServicesList';
 
 const RenderSingleGroup = ({
@@ -45,7 +46,7 @@ const RenderSingleGroup = ({
           <>
             <div className="flex flex-grow items-center justify-between">
               <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
-              {!isColapsed && <span className="text-xs text-gray-500">{group?.serviceSteps?.length} Services</span>}
+              <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
             </div>
             {expanded ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </>
