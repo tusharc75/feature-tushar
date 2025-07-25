@@ -54,6 +54,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiFolderReceivedLine } from 'react-icons/ri';
 import { TbTruckDelivery } from 'react-icons/tb';
 import Step from 'src/pages/DynamicForm/Step';
+import DeliveryTcketSerializedPackages from 'src/pages/DeliveryTicket/DeliveryTcketSerializedPackages';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(sidebarResource.deliveryTicket)}_grid-1`;
@@ -273,6 +274,7 @@ export default function DeliveryTicketDetail(props) {
       }
       const newAssetColumns = generateColumns(renderedFrom, assetData, routes.serializedAssetDetail.path, true);
       const newProductColumns = generateColumns(renderedFrom, productData, routes.productDetail.path);
+
       setSerializedAssetColumns([...newAssetColumns, ...getStaticFields()]);
       setProductColumns([...defaultColumns, ...newProductColumns]);
     } catch (error) {
@@ -548,10 +550,11 @@ export default function DeliveryTicketDetail(props) {
             <CustomTab value={0}>Header</CustomTab>
             {permissions?.serializedAsset?.isRead && <CustomTab value={1}>{resources?.serializedAsset?.titlePlural}</CustomTab>}
             <CustomTab value={2}>Additional Products</CustomTab>
-            {deliveryTicketData?.additionalCost?.length > 0 && <CustomTab value={3}>Add-On</CustomTab>}
+            {permissions?.serializedPackages?.isRead && <CustomTab value={3}>{resources?.serializedPackages?.titlePlural}</CustomTab>}
+            {deliveryTicketData?.additionalCost?.length > 0 && <CustomTab value={4}>Add-On</CustomTab>}
             {resourceData &&
               resourceData?.tabs?.length > 0 &&
-              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             {deliveryTicketData && deliveryTicketFields.length > 0 && !loading ? (
@@ -662,10 +665,16 @@ export default function DeliveryTicketDetail(props) {
               columns={productColumns}
             />
           </TabPanel>
+          <TabPanel value={tabValue} index={3}>
+            <DeliveryTcketSerializedPackages
+              renderedFrom={`${camelCase(sidebarResource.deliveryTicket)}_grid-3`}
+              deliveryTicketId={id}
+            />
+          </TabPanel>
           {deliveryTicketData?.additionalCost?.length > 0 && (
-            <TabPanel value={tabValue} index={3}>
+            <TabPanel value={tabValue} index={4}>
               <DeliveryTicketAdditionalCost
-                renderedFrom={`${camelCase(sidebarResource.deliveryTicket)}_grid-3`}
+                renderedFrom={`${camelCase(sidebarResource.deliveryTicket)}_grid-4`}
                 additionalCost={deliveryTicketData?.additionalCost}
               />
             </TabPanel>
@@ -674,7 +683,7 @@ export default function DeliveryTicketDetail(props) {
             resourceData?.tabs?.length > 0 &&
             resourceData?.tabs?.map((tab, i) => {
               return (
-                <TabPanel value={tabValue} index={i + 4}>
+                <TabPanel value={tabValue} index={i + 5}>
                   <Step
                     tab={tab}
                     resourcePolicyId={resourceData?._id}
