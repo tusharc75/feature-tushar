@@ -43,6 +43,7 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import PreviewDownload from 'src/components/PreviewDownload';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ProductQtyDialog from 'src/pages/AssemblyOrder/WorkOrder/ProductQtyDialog';
+import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -757,7 +758,14 @@ const WorkOrder = ({
 
   const rightSideContents = () => {
     return (
-      <>
+      <> {assemblyOrderData?.customPdfTemplate ?
+        <PreviewDownloadNew
+          fileName={`${resources?.assemblyOrder?.titleSingular}-${assemblyOrderData?.assemblyOrderNumber}`}
+          resource={sidebarResource.assemblyOrder}
+          referenceId={assemblyOrderData?._id}
+          hideDetailButton={true}
+        //isAsyncDownload={true}
+        /> :
         <PreviewDownload
           fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
           resource={sidebarResource.assemblyOrder}
@@ -766,7 +774,7 @@ const WorkOrder = ({
           columns={columns}
           isAsyncDownload={true}
           defaultColumns={['index', `detail`, `description`, `qty`]}
-        />
+        />}
       </>
     );
   };
