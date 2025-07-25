@@ -185,3 +185,15 @@ export const repairOrderMessage = {
   addProductAndAssetsInPackage: 'Add Product and Assign Asset in Package to Proceed',
 };
 
+export const assemblyOrderActions = {
+  createLoadingTicket: 'Create Loading Ticket',
+  deliveredToCustomer: 'Delivered to Customer',
+};
+
+export const assemblyOrderMessage = {
+  loadingAlreadyCreated: 'Loading Ticket is already created',
+  loadingNotCreated: 'Loading Ticket is not created',
+  loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+  repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
+  loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
+};
