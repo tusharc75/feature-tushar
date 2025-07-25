@@ -764,7 +764,7 @@ const WorkOrder = ({
           resource={sidebarResource.assemblyOrder}
           referenceId={assemblyOrderData?._id}
           hideDetailButton={true}
-          isAsyncDownload={true}
+        //isAsyncDownload={true}
         /> :
         <PreviewDownload
           fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
