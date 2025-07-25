@@ -95,7 +95,7 @@ export default function CreateCustomPdfTemplate() {
 
   useEffect(() => {
     if (formValues?.template) {
-      localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(formValues?.template));
+      //localStorage.setItem(PDF_ME_TEMPLATE_STORAGE_KEY, JSON.stringify(formValues?.template));
     }
   }, [formValues?.template]);
 
@@ -179,15 +179,15 @@ export default function CreateCustomPdfTemplate() {
       noOfPages: 1,
       template: null,
     };
-    const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
-        initialValuesData.template = parsed;
-      } else {
-        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
-      }
-    }
+    // const stored = localStorage.getItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    // if (stored) {
+    //   const parsed = JSON.parse(stored);
+    //   if (parsed && typeof parsed === 'object' && Array.isArray(parsed.schemas) && parsed.basePdf) {
+    //     initialValuesData.template = parsed;
+    //   } else {
+    //     localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    //   }
+    // }
     if (id && id !== '0') {
       try {
         const res = await axiosInstance().get(`${customPdfTemplate.api}/${id}`);
@@ -221,6 +221,7 @@ export default function CreateCustomPdfTemplate() {
             })
           })
         );
+        setSelectedServices(data?.services || [])
         if (isClone) {
           setAllowedToEdit(true);
           setIsEdit(true);
@@ -228,7 +229,7 @@ export default function CreateCustomPdfTemplate() {
       } catch (e) {
         toastConfig.setToastConfig(e);
         setNoOfPages(0);
-        localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+        //localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       }
     } else {
       if (!initialValuesData.template) {
@@ -280,7 +281,7 @@ export default function CreateCustomPdfTemplate() {
         type: 'success',
         message: response.data.message
       });
-      localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+      //localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
       setIsUpdating(false);
       if (isBreakCrumbPath && !isClone) {
         history.push({ pathname: isBreakCrumbPath });
@@ -331,7 +332,7 @@ export default function CreateCustomPdfTemplate() {
 
   const handleClose = () => {
     history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.customPdfTemplate.path });
-    localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
+    //localStorage.removeItem(PDF_ME_TEMPLATE_STORAGE_KEY);
   };
 
   return initialValues && (
