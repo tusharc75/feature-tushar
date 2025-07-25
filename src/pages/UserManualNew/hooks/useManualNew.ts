@@ -12,7 +12,8 @@ const initialState: UseManualState = {
   isSidebarOpen: false,
   currentRoute: '',
   pageData: [],
-  loading: false
+  loading: false,
+  searchData: []
 };
 
 const reducer = (state: UseManualState, action: ManualActions) => {
