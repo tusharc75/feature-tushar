@@ -2231,7 +2231,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  subcontractAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2262,6 +2263,12 @@ export const PURCHASE_ORDER_STATUS = {
 } as const;
 
 export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account'
+} as const;
+
+export const SERIALIZED_PACKAGE_OWNER_TYPE = {
   brand: 'Brand',
   supplierAccount: 'Supplier Account',
   customerAccount: 'Customer Account'
