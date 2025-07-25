@@ -37,7 +37,12 @@ const MarkdownTOC = ({ markdown }) => {
     
     const element = document.getElementById(slug);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
     }
   };
 
