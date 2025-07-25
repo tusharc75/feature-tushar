@@ -169,6 +169,12 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             <NoDataCell />
           )
       },
+      {
+        accessor: 'loadingTicketStatus',
+        Header: 'Loading Ticket Status',
+        cell: ({ row }) =>
+          (row?.original?.loadingTicketStatus ? <h5 className="text-truncate">{row?.original?.loadingTicketStatus}</h5> : <NoDataCell />)
+      },
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -323,29 +329,30 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   };
 
   const handleDeliveryTicketDialog = () => {
-    if (selectedRecords.length) {
+    const records = selectedRecords?.filter(r => !r?.parentId && r?.serializedPackageId)
+    if (records.length) {
       const data = {};
       data['ticketName'] = assemblyOrderData?.assemblyOrderNumber;
       data['referenceId'] = assemblyOrderData._id;
 
-      if (selectedRecords[0]?.serializedPackageDetail?.warehouse) {
+      if (records[0]?.serializedPackageDetail?.warehouse) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-        data['pickupFrom'] = selectedRecords[0]?.serializedPackageDetail?.warehouse;
-        if (selectedRecords?.find((e) => e?.serializedPackageDetail?.storageLocation)) {
-          data['pickupFromStorageLocation'] = selectedRecords?.find((e) => e?.serializedPackageDetail?.storageLocation)?.serializedPackageDetail?.storageLocation;
+        data['pickupFrom'] = records[0]?.serializedPackageDetail?.warehouse;
+        if (records?.find((e) => e?.serializedPackageDetail?.storageLocation)) {
+          data['pickupFromStorageLocation'] = records?.find((e) => e?.serializedPackageDetail?.storageLocation)?.serializedPackageDetail?.storageLocation;
           data['isPickupFromStorageLocationDisable'] = true;
           data['pickupFromStorageLocationDisableMessage'] = `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
         }
-      } else if (selectedRecords[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.customerAccount) {
+      } else if (records[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.customerAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
-        data['pickupFrom'] = selectedRecords[0]?.serializedPackageDetail?.currentOwner;
-      } else if (selectedRecords[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.supplierAccount) {
+        data['pickupFrom'] = records[0]?.serializedPackageDetail?.currentOwner;
+      } else if (records[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.supplierAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.supplier;
-        data['pickupFrom'] = selectedRecords[0]?.serializedPackageDetail?.currentOwner;
+        data['pickupFrom'] = records[0]?.serializedPackageDetail?.currentOwner;
       }
 
-      if (selectedRecords[0]?.serializedPackageDetail?.currentLocation) {
-        data['pickupFromAddress'] = selectedRecords[0]?.serializedPackageDetail?.currentLocation;
+      if (records[0]?.serializedPackageDetail?.currentLocation) {
+        data['pickupFromAddress'] = records[0]?.serializedPackageDetail?.currentLocation;
       }
 
       data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
