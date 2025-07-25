@@ -123,14 +123,17 @@ export default function CreateCustomPdfTemplate() {
 
   useEffect(() => {
     if (formValues && formValues.type) {
-      axiosInstance().get(`${customPdfTemplate.api}/table/${formValues.type}`)
-        .then(({ data: { data } }) => {
-          setResourceTables(data)
-        }).catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
+      let api = `${customPdfTemplate.api}/table/${formValues.type}`
+      if (selectedServices) {
+        api += `?serviceIds=${selectedServices}`
+      }
+      axiosInstance().get(api).then(({ data: { data } }) => {
+        setResourceTables(data)
+      }).catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
     }
-  }, [formValues?.type]);
+  }, [formValues?.type, selectedServices]);
 
   useEffect(() => {
     fetchData();
