@@ -1,13 +1,16 @@
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import { ExpandMore } from "@mui/icons-material";
+import { Accordion, AccordionDetails, AccordionSummary, IconButton } from "@mui/material";
+import { Close, ExpandMore } from "@mui/icons-material";
 import Markdown from 'react-markdown';
 import rehypeSlug from 'rehype-slug';
 import { cn } from "src/constants/helpers";
 import MarkdownTOC from "src/pages/UserManualNew/hooks/MarkdownTOC";
 import remarkGfm from "remark-gfm";
+import { useState } from "react";
+import ImageZoomPan from "src/components/ImageZoomPan";
 
 export const ManualContentNew = ({ state }) => {
   const { pageData, loading, isMobile } = state;
+  const [zoomedImage, setZoomedImage] = useState(null);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -27,8 +30,16 @@ export const ManualContentNew = ({ state }) => {
       return (
         <img 
           {...props} 
-          className={isIcon ? "w-6 h-6 inline-block align-middle" : "max-w-full h-auto mx-auto block"} 
+          className={isIcon ? "w-6 h-6 inline-block align-middle" : "max-w-full h-auto mx-auto block cursor-pointer hover:opacity-90 transition-opacity"} 
           alt={props.alt || ''}
+          onClick={() => {
+            if (!isIcon) {
+              setZoomedImage({
+                src: props.src,
+                alt: props.alt || ''
+              });
+            }
+          }}
         />
       );
     },
@@ -97,6 +108,21 @@ export const ManualContentNew = ({ state }) => {
           )}
         </div>
       </div>
+      {zoomedImage && (
+        <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="flex min-h-[50px] w-full items-center justify-between gap-2 border-b bg-[--dark-primary,var(--primary)] px-4 py-3 text-white">
+            <h2>Preview</h2>
+            <IconButton onClick={() => setZoomedImage(null)} size="small" className="text-white">
+              <Close color="inherit" />
+            </IconButton>
+          </div>
+          <div className="flex w-full flex-grow flex-col items-center justify-center bg-[--dark-secondary,white] p-4">
+            <div className="mx-auto flex w-full flex-grow items-center justify-center">
+              <ImageZoomPan src={zoomedImage?.src} alt={zoomedImage?.alt} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
