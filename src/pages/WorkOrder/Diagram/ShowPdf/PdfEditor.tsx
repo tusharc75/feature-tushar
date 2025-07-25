@@ -1,10 +1,12 @@
 import { Close } from '@mui/icons-material';
 import { Box, IconButton, Typography } from '@mui/material';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, convertBlobToBase64 } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
+import { backendApi } from 'src/config';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null }) => {
   const editorRef = useRef<EditorRef>(null);
@@ -13,6 +15,10 @@ const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null 
   const [pageImages, setPageImages] = useState([]);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [editedPages, setEditedPages] = useState({});
+  const [allPagesLoaded, setAllPagesLoaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState({ current: 0, total: 0 });
+
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
     loadPdfPages();
@@ -20,24 +26,85 @@ const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null 
 
   const loadPdfPages = async () => {
     try {
-      const response = await axiosInstance().get(`/user/pdf`, {
-        params: {
-          fileName: data?.url,
-          attachmentId: data?.attachmentId
+      setLoading(true);
+      setAllPagesLoaded(false);
+      setPageImages([]);
+      setLoadingProgress({ current: 0, total: 0 });
+
+      const headers = {
+        Authorization: `Bearer ${localStorage.token}`
+      };
+
+      const response = await fetch(`${backendApi}/user/pdf?fileName=${encodeURIComponent(data?.url)}&attachmentId=${data?.attachmentId}`, {
+        method: 'GET',
+        headers
+      });
+
+      const reader = response?.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      const images = [];
+      let totalPages = 0;
+      let completedPages = 0;
+
+      while (true) {
+        const { done, value } = await reader?.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (line.trim()) {
+            try {
+              const streamData = JSON.parse(line);
+
+              switch (streamData?.type) {
+                case 'metadata':
+                  totalPages = streamData.totalPages;
+                  images.length = totalPages;
+                  setLoadingProgress({ current: 0, total: totalPages });
+                  break;
+
+                case 'page':
+                  if (streamData?.success) {
+                    const buffer = new Uint8Array(streamData?.imageBuffer?.data);
+                    const blob = new Blob([buffer], { type: 'image/png' });
+                    images[streamData?.pageIndex] = URL.createObjectURL(blob);
+                    completedPages++;
+
+                    setLoadingProgress({ current: completedPages, total: totalPages });
+                    setPageImages([...images]);
+                  } else {
+                    toastConfig.setToastConfig({
+                      open: true,
+                      message: `Error loading page ${streamData?.pageIndex}: ${streamData?.error}`,
+                      type: 'error'
+                    });
+                  }
+                  break;
+
+                case 'complete':
+                  setLoading(false);
+                  setAllPagesLoaded(true);
+                  break;
+
+                case 'error':
+                  toastConfig.setToastConfig(streamData?.error);
+              }
+            } catch (error) {
+              toastConfig.setToastConfig(error);
+            }
+          }
         }
-      });
-
-      const images = response.data.map((bufferData) => {
-        const buffer = new Uint8Array(bufferData.data);
-        const blob = new Blob([buffer], { type: 'image/png' });
-        return URL.createObjectURL(blob);
-      });
-
-      setPageImages(images);
-      setLoading(false);
+      }
     } catch (err) {
-      console.error(err);
+      toastConfig.setToastConfig(err);
       setLoading(false);
+      setAllPagesLoaded(false);
     }
   };
 
@@ -48,15 +115,15 @@ const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null 
       format: 'image/png',
       quality: 1.0
     });
-    return new Promise(resolve => {
-      setEditedPages(prev => {
+    return new Promise((resolve) => {
+      setEditedPages((prev) => {
         const updated = { ...prev, [currentPageIndex]: editedDataUrl };
         resolve(updated);
         return updated;
       });
     });
   };
-  
+
   const handleSave = async () => {
     if (!editorRef.current) return;
     setSubmitting(true);
@@ -123,37 +190,25 @@ const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null 
     <Box>
       <head className="flex items-center justify-between gap-2 border-b px-4 py-3">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {data.name && <h6 className="line-clamp-1 text-base font-semibold">{data.name}</h6>}
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Page {currentPageIndex + 1} of {pageImages.length}
-            </Typography>
+          {data.name && <h6 className="line-clamp-1 text-base font-semibold">{data.name}</h6>}
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Page {currentPageIndex + 1} of {loadingProgress?.total || pageImages?.length}
+            {!allPagesLoaded && loadingProgress?.total > 0 && (
+              <span style={{ color: '#666', marginLeft: '8px' }}>({loadingProgress?.current} loaded)</span>
+            )}
+          </Typography>
         </Box>
         <div className="flex items-center gap-2">
-          <ThemeButton 
-            disabled={currentPageIndex === 0 || loading} 
-            onClick={handlePreviousPage}
-          >
+          <ThemeButton disabled={currentPageIndex === 0 || loading} onClick={handlePreviousPage}>
             Prev
           </ThemeButton>
-          <ThemeButton 
-            disabled={currentPageIndex === pageImages.length - 1 || loading} 
-            onClick={handleNextPage}
-          >
+          <ThemeButton disabled={currentPageIndex === pageImages.length - 1 || loading || !pageImages[currentPageIndex + 1]} onClick={handleNextPage}>
             Next
           </ThemeButton>
-          <ThemeButton 
-            disabled={isSubmitting || loading} 
-            isLoading={isSubmitting} 
-            buttonType="theme" 
-            onClick={handleSave}
-          >
+          <ThemeButton disabled={isSubmitting || loading || !allPagesLoaded} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
-          <ThemeButton 
-            disabled={loading} 
-            onClick={handleDownload} 
-            buttonType="theme"
-          >
+          <ThemeButton disabled={loading || !allPagesLoaded} onClick={handleDownload} buttonType="theme">
             Download
           </ThemeButton>
           {typeof handleClose === 'function' && (
@@ -164,27 +219,29 @@ const PdfEditor = ({ data, fetchData, setSelectedAttachment, handleClose = null 
         </div>
       </head>
       <main className={cn('-mt-[1px] h-[calc(100vh-59px)] w-full overflow-auto')}>
-        {loading ? (
+        {loading && pageImages?.length === 0 ? (
           <Box
             className="loading"
             sx={{
               height: '100%',
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              gap: 2
             }}
           >
-            <Typography variant="h6">PDF Loading...</Typography>
+            <Typography variant="h6">Loading PDF...</Typography>
           </Box>
         ) : (
           pageImages[currentPageIndex] && (
-              <Editor 
-                ref={editorRef} 
-                imageName={data?.name} 
-                imageUrl={editedPages[currentPageIndex] || pageImages[currentPageIndex]} 
-                maxHeight={window.innerHeight - 72} 
-                maxWidth={window.innerWidth - 38} 
-              />
+            <Editor
+              ref={editorRef}
+              imageName={data?.name}
+              imageUrl={editedPages[currentPageIndex] || pageImages[currentPageIndex]}
+              maxHeight={window.innerHeight - 72}
+              maxWidth={window.innerWidth - 38}
+            />
           )
         )}
       </main>
