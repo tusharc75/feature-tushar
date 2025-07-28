@@ -198,6 +198,7 @@ export const SearchFilter = ({
           const { size, className, ...rest } = chip;
           return (
             <Box component="li" {...optionProps} display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+              {option.isAll || option.type === 'my' ? '' : `${option.name} `}
               <Chip
                 size={size || 'small'}
                 {...rest}
@@ -220,7 +221,7 @@ export const SearchFilter = ({
         <ActivityModelHandler
           setActivityData={setSelectedActivityId}
           activityType={selectedActivityType}
-          fetchBoard={() => {}}
+          fetchBoard={() => { }}
           activityId={selectedActivityId}
         />
       )}

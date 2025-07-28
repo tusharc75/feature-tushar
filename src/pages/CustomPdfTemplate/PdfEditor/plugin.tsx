@@ -1,6 +1,5 @@
-import { text, image, table, line } from '@pdfme/schemas';
+import { text, image, table, line, rectangle } from '@pdfme/schemas';
 import type { Plugin, Schema } from '@pdfme/common';
-import { productTableName, serviceTableName, tableNameOption } from './optionhelper';
 import RobotoRegular from '../../../assets/font/Roboto-Regular.ttf';
 import RobotoBold from '../../../assets/font/Roboto-Bold.ttf';
 
@@ -16,7 +15,7 @@ type DesignerPluginSchema = Schema & {
 
 type DesignerExpectedPlugin = Plugin<DesignerPluginSchema>;
 
-export const getPlugins = (variables: string[]): Record<string, DesignerExpectedPlugin> => {
+export const getPlugins = (variables: string[], resourceTables: any): Record<string, DesignerExpectedPlugin> => {
 
     const customTablePlugin = {
         ...table,
@@ -28,16 +27,16 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
                     : { ...table.propPanel.schema };
 
                 const selectedTableName = props.activeSchema.name;
-                const headerOptions =
-                    selectedTableName === 'productTable' ? productTableName : serviceTableName;
+
+                const headerOptions = resourceTables?.find((e) => e.value === selectedTableName)?.fields || [];
 
                 baseSchema.name = {
                     title: 'Name',
                     type: 'string',
                     widget: 'select',
-                    default: tableNameOption[0].label,
+                    default: resourceTables?.lenght ? resourceTables[0].label : '',
                     props: {
-                        options: tableNameOption,
+                        options: resourceTables,
                     },
                 };
 
@@ -67,7 +66,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
     const textDefault = text.propPanel.defaultSchema
 
     const variableDefaultSchema: DesignerPluginSchema = {
-        width: 100,
+        width: 80,
         height: 10,
         position: { x: 0, y: 0 },
         type: 'Variable',
@@ -83,6 +82,7 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
     const customVariablePlugin: any = {
         ...text,
+        icon: '{𝐕𝐚𝐫}',
         type: 'Variable',
         propPanel: {
             ...text.propPanel,
@@ -136,10 +136,11 @@ export const getPlugins = (variables: string[]): Record<string, DesignerExpected
 
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
+        Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
         Table: customTablePlugin as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
-        Variable: customVariablePlugin as unknown as any,
+        Rectangle: rectangle as DesignerExpectedPlugin,
     };
 
     return plugins;

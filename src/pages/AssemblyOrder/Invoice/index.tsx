@@ -10,6 +10,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import PreviewDownload from 'src/components/PreviewDownload';
+import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
 import { CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -207,16 +208,23 @@ const Invoice = ({ assemblyOrderData, renderedFrom, stepFullScreen }) => {
 
   const rightSideContents = () => {
     return (
-      <>
+      <>   {assemblyOrderData?.customPdfTemplate ?
+        <PreviewDownloadNew
+          fileName={`${resources?.assemblyOrder?.titleSingular}-${assemblyOrderData?.assemblyOrderNumber}`}
+          resource={sidebarResource.assemblyOrder}
+          referenceId={assemblyOrderData?._id}
+          hideDetailButton={true}
+          isAsyncDownload={true}
+        /> :
         <PreviewDownload
           fileName={`${resources?.assemblyOrder?.titlePlural}-${assemblyOrderData?.assemblyOrderNumber}`}
           resource={sidebarResource.assemblyOrder}
           referenceId={assemblyOrderData._id}
           referenceLabel={assemblyOrderData?.assemblyOrderNumber}
           columns={columns}
-          isSendEmail={true}
           isAsyncDownload={true}
-        />
+          isSendEmail={true}
+        />}
       </>
     );
   };

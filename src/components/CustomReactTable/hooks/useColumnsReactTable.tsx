@@ -35,6 +35,7 @@ import DataListCell from '../Cells/DataListCell';
 import { headerName } from 'src/components/CustomReactTable/hooks/hookUtils';
 import RichTextEditorCell from 'src/components/CustomReactTable/Cells/RichTextEditorCell';
 import { NOT_ALLOW_INLINE_EDIT_FIELD_TYPE } from 'src/components/FormBuilder/helper';
+import ImageUploadCell from 'src/components/CustomReactTable/Cells/ImageUploadCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -108,7 +109,13 @@ export function useColumns() {
         }
 
         commonFieldData['editable'] = false;
-        if (field?.isColumnEditable && !field?.isUneditable && !field?.disableOnEdit && !field?.isSystemGenerate && !NOT_ALLOW_INLINE_EDIT_FIELD_TYPE?.includes(field?.type)) {
+        if (
+          field?.isColumnEditable &&
+          !field?.isUneditable &&
+          !field?.disableOnEdit &&
+          !field?.isSystemGenerate &&
+          !NOT_ALLOW_INLINE_EDIT_FIELD_TYPE?.includes(field?.type)
+        ) {
           commonFieldData['editable'] = field?.isColumnEditable;
           if (['dropDown', 'multiSelect']?.includes(field.type)) {
             commonFieldData['option'] = field?.option;
@@ -131,7 +138,7 @@ export function useColumns() {
                 Header: fieldLabel,
                 cell: ({ row }) => {
                   return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
-                },
+                }
               });
             });
           } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -283,13 +290,7 @@ export function useColumns() {
             width: 100,
             disableFilters: true,
             disableSortBy: true,
-            cell: ({ row }) => (
-              <div>
-                <Avatar className="grid-avatar min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
-                  <Image style={{ fontSize: 18 }} />
-                </Avatar>
-              </div>
-            )
+            cell: ({ row }) => <ImageUploadCell field={field} original={row.original} />
           });
         } else if (field?.type === 'multiFileUpload') {
           column.push({

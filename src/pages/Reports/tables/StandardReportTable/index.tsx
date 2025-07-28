@@ -1,7 +1,7 @@
 import { Dialog, IconButton } from '@mui/material';
 import { History, Visibility } from '@mui/icons-material';
 import axios from 'axios';
-import { camelCase, isArray, isNumber, startCase } from 'lodash';
+import { camelCase, isArray, isEmpty, isNumber, startCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { isTablet } from 'react-device-detect';
 import { MdFilterList } from 'react-icons/md';
@@ -318,13 +318,18 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
     if (filterByIdsP?.length > 0) {
       const filterById = filterByIdsP
-        ?.filter((f) => f?.term?.length > 0)
+        ?.filter((f) => {
+          if (reportConfig?.notMultiSelectFields?.includes(f?.field)) {
+            return !isEmpty(f?.term) && typeof f?.term === 'object'
+          }
+          return f?.term?.length > 0;
+        })
         ?.map((f) => {
           const term = filterTerm[f?.field] === '$nin' ? '$nin' : '$in';
           return {
             field: f?.field,
             term: {
-              [term]: f?.term?.map?.((d: any) => d.optionValue)
+              [term]: isArray(f?.term) ? f?.term?.map?.((d: any) => d.optionValue) : [f?.term?.optionValue]
             }
           };
         });
@@ -657,6 +662,7 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
               {[
                 'inUsedSerializedAsset',
                 'lostAssets',
+                'scrappedAssets',
                 'assetUtilization',
                 'invoiceDetails',
                 'inventoryHistory',

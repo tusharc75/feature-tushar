@@ -246,6 +246,12 @@ export const resourcePolicy = [
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'enableServicesOnConsumables',
+        fieldLabel: 'Enable Services On Consumables',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
@@ -529,9 +535,32 @@ export const resourcePolicy = [
         fieldLabel: 'Auto Convert In Same Rental Job',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'autoCreateFolderInDMS',
+        fieldLabel: 'Auto Create Folder In DMS',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'restrictCreationOfParentWorkOrder',
+        fieldLabel: 'Restrict Creation of Parent Work Order',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.creditMemo,
+    policy: [
+      {
+        fieldName: 'showNegativeSignInPdf',
+        fieldLabel: 'Show Negative Sign in PDF',
+        type: 'checkBox',
+        defaultValue: false
+      }
+    ]
+  },
 ];
 
 export const DATE_VALUE = {

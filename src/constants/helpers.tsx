@@ -2231,7 +2231,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  subcontractAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2262,6 +2263,12 @@ export const PURCHASE_ORDER_STATUS = {
 } as const;
 
 export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account'
+} as const;
+
+export const SERIALIZED_PACKAGE_OWNER_TYPE = {
   brand: 'Brand',
   supplierAccount: 'Supplier Account',
   customerAccount: 'Customer Account'
@@ -2628,6 +2635,13 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'standardReport',
     type: 'lostAssets',
+    section: REPORT_SECTIONS.asset
+  },
+  {
+    title: 'Scrapped Assets',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'ScrappedAssets',
     section: REPORT_SECTIONS.asset
   },
   {
@@ -3660,7 +3674,7 @@ export const DEAL_STAGE = {
 
 export const cloneResourceData = (fromFields, toFields, data, currency) => {
   const overlappingFields = fromFields.filter(
-    (e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
+    (e) => toFields?.filter((e) => !['lookUpDisplay']?.includes(e?.type))?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
   );
   const result: any = {};
   overlappingFields?.forEach((e) => {
@@ -4325,4 +4339,10 @@ export const getDeviceFingerprint = async () => {
   } catch (error) {
     return null;
   }
+};
+
+export const checkImageUrl = (url) => {
+  let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
+  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+  return imageExtensions.indexOf(extension) >= 0;
 };

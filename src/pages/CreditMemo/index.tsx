@@ -87,7 +87,7 @@ const CreditMemo = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}&view=true`);
     data = response?.data?.data;
     setAllFields(JSON.parse(JSON.stringify(data)));
     data?.forEach((d) => {

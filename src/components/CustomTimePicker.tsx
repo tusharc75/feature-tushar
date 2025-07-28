@@ -1,8 +1,7 @@
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { dateFormatForInputControl } from 'src/constants/helpers';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
 
-const CustomDateTimePicker = (props) => {
+const CustomTimePicker = (props) => {
   const {
     value,
     name,
@@ -10,8 +9,8 @@ const CustomDateTimePicker = (props) => {
     onChange,
     required,
     fieldData,
-    maxDateTime,
-    minDateTime,
+    maxTime,
+    minTime,
     onError,
     error,
     helperText,
@@ -25,16 +24,16 @@ const CustomDateTimePicker = (props) => {
   } = props;
 
   return (
-    <DateTimePicker
+    <TimePicker
       {...rest}
       disablePast={disablePast}
       required={required}
-      ampm={false}
+      ampm={true}
       value={value ? dayjs.tz(new Date(value)) : dayjs.tz(new Date(''))}
       name={name}
       label={label}
-      {...(maxDateTime ? { maxDateTime: dayjs.tz(new Date(maxDateTime)) } : {})}
-      {...(minDateTime ? { minDateTime: dayjs.tz(new Date(minDateTime)) } : {})}
+      {...(maxTime ? { maxTime: dayjs.tz(new Date(maxTime)) } : {})}
+      {...(minTime ? { minTime: dayjs.tz(new Date(minTime)) } : {})}
       onChange={(date) => onChange(date)}
       onError={onError ? onError : console.error}
       slotProps={{
@@ -50,9 +49,9 @@ const CustomDateTimePicker = (props) => {
           ...(onInput ? { onInput: onInput } : {})
         }
       }}
-      format={dateFormatForInputControl + ' HH:mm'}
+      format={'hh:mm A'}
     />
   );
 };
 
-export default CustomDateTimePicker;
+export default CustomTimePicker;
