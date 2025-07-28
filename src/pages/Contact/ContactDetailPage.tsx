@@ -45,6 +45,8 @@ import {
 } from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
+import { fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
+import Step from 'src/pages/DynamicForm/Step';
 
 const ContactDetailsPage = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -99,6 +101,7 @@ const ContactDetailsPage = (props) => {
   let { id } = useParams();
 
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     const hasContactPermission = permissions[contactResource];
@@ -116,6 +119,7 @@ const ContactDetailsPage = (props) => {
       fetchRelatedData();
       fetchLoggedInUserRole();
       fetchLoggedInUserEntities();
+      fetchPolicy()
     }
   }, [id]);
 
@@ -143,6 +147,11 @@ const ContactDetailsPage = (props) => {
       }
     }
   }, [tour]);
+
+  const fetchPolicy = async () => {
+    const data = await fetchResourcePolicy(sidebarResource[contactResource], permissions)
+    setResourceData(data);
+  };
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
@@ -568,6 +577,7 @@ const ContactDetailsPage = (props) => {
                 {contactResource === 'customerContact' && permissions?.productInventory && (
                   <CustomTab value={2} label={resources?.warehouse?.titlePlural} />
                 )}
+                {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3} label={tab?.tabName} />)}
               </CustomTabs>
               <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (
@@ -592,6 +602,22 @@ const ContactDetailsPage = (props) => {
                   <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
                 </Box>
               )}
+              {resourceData &&
+                resourceData?.tabs?.length > 0 &&
+                resourceData?.tabs?.map((tab, i) => {
+                  return (
+                    <TabPanel value={currentTabIndex} index={i + 3}>
+                      <Step
+                        tab={tab}
+                        resourcePolicyId={resourceData?._id}
+                        resourceId={id}
+                        resource={sidebarResource[contactResource]}
+                        data={contactData}
+                        allowedToEdit={permissions[contactResource]?.isUpdate}
+                      />
+                    </TabPanel>
+                  );
+                })}
             </>
           )}
         </Box>
