@@ -185,7 +185,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 200px)'}
+          height={'calc(100vh - 300px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
