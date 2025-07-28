@@ -49,6 +49,7 @@ import ManageAccountDialog from './ManageAccount/index';
 import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -139,7 +140,7 @@ export default function AccountDetailPage(props) {
     colorPalette: null
   });
   const [formValues, setFormValues] = useState({});
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   let filteredAccountFields = accountFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   let { id } = useParams();
@@ -304,16 +305,8 @@ export default function AccountDetailPage(props) {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource[accountResource]}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource[accountResource])
+    setResourcePolicyData(data)
   };
 
   const getAccountFields = async (accountData = {}) => {
@@ -657,7 +650,7 @@ export default function AccountDetailPage(props) {
               {accountResource === 'customerAccount' && permissions?.productInventory && (
                 <CustomTab value={4} label={resources?.warehouse?.titleSingular} />
               )}
-              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5} label={tab?.tabName} />)}
+              {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 5} label={tab?.tabName} />)}
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -873,14 +866,14 @@ export default function AccountDetailPage(props) {
             <TabPanel value={tabValue} index={4}>
               <Warehouse reference={accountResource} api={accountApi} id={id} />
             </TabPanel>
-            {resourceData &&
-              resourceData?.tabs?.length > 0 &&
-              resourceData?.tabs?.map((tab, i) => {
+            {resourcePolicyData &&
+              resourcePolicyData?.tabs?.length > 0 &&
+              resourcePolicyData?.tabs?.map((tab, i) => {
                 return (
                   <TabPanel value={tabValue} index={i + 5}>
                     <Step
                       tab={tab}
-                      resourcePolicyId={resourceData?._id}
+                      resourcePolicyId={resourcePolicyData?._id}
                       resourceId={id}
                       resource={sidebarResource[accountResource]}
                       data={accountData}

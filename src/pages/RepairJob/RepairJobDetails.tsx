@@ -33,7 +33,7 @@ import ManageRepairJob from './ManageRepairJob';
 import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -49,7 +49,7 @@ const RepairJobDetails = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [repairJobData, setRepairJobData] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -106,16 +106,8 @@ const RepairJobDetails = () => {
   }, []);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairJob}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.repairJob)
+    setResourcePolicyData(data)
   };
 
   const getResourceFields = () => {
@@ -142,7 +134,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -190,7 +182,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -238,7 +230,7 @@ const RepairJobDetails = () => {
           <CustomTab value={1}>Details</CustomTab>
           <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={3}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -304,14 +296,14 @@ const RepairJobDetails = () => {
             <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 4}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.repairJob}
                   data={repairJobData}

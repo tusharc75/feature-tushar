@@ -18,6 +18,7 @@ import Step from '../DynamicForm/Step';
 import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
 import Products from 'src/pages/ProductTypes/Products';
 import Services from 'src/pages/ProductTypes/Services';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ProductTypesDetail = () => {
 
@@ -28,7 +29,7 @@ const ProductTypesDetail = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [productTypeData, setproductTypeData] = useState(null);
@@ -37,7 +38,7 @@ const ProductTypesDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fields, setFields] = useState(null);
   const WORK_ORDER_RESOURCE_TABS = [sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder, sidebarResource.disassemblyOrder];
 
@@ -75,16 +76,8 @@ const ProductTypesDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productTypes}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.productTypes)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -128,7 +121,7 @@ const ProductTypesDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Products</CustomTab>
           <CustomTab value={2}>Services</CustomTab>
-          {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {productTypeData && fields ? (
@@ -143,9 +136,9 @@ const ProductTypesDetail = () => {
         <TabPanel value={tabValue} index={2}>
           <Services resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
         </TabPanel>
-        {resourceData?.tabs?.map((tab, i) => (
+        {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab} resourcePolicyId={resourceData?._id} resourceId={id} resource={sidebarResource.productTypes} data={productTypeData} allowedToEdit={permissions?.productTypes?.isUpdate} />
+            <Step tab={tab} resourcePolicyId={resourcePolicyData?._id} resourceId={id} resource={sidebarResource.productTypes} data={productTypeData} allowedToEdit={permissions?.productTypes?.isUpdate} />
           </TabPanel>
         ))}
       </Box>

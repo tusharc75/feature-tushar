@@ -16,6 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { packageCategory, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const PackageCategoryDetail = () => {
 
@@ -26,7 +27,7 @@ const PackageCategoryDetail = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [packageCategoryData, setPackageCategoryData] = useState(null);
@@ -35,7 +36,7 @@ const PackageCategoryDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fields, setFields] = useState(null);
 
   useEffect(() => {
@@ -71,16 +72,8 @@ const PackageCategoryDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.packageCategory}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.packageCategory)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -122,7 +115,7 @@ const PackageCategoryDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={(e, newValue) => setTabValue(Number(newValue))}>
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {packageCategoryData && fields ? (
@@ -131,10 +124,10 @@ const PackageCategoryDetail = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           )}
         </TabPanel>
-        {resourceData?.tabs?.map((tab, i) => (
+        {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => (
           <TabPanel value={tabValue} index={i + 1} key={i}>
             <Step tab={tab}
-              resourcePolicyId={resourceData?._id}
+              resourcePolicyId={resourcePolicyData?._id}
               resourceId={id}
               resource={sidebarResource.packageCategory}
               data={packageCategoryData}

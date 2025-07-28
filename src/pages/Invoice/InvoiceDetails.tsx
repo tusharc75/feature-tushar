@@ -37,7 +37,7 @@ import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { RiExchange2Line } from 'react-icons/ri';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
@@ -55,7 +55,7 @@ const InvoiceDetails = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
   const [invoiceData, setInvoiceData] = useState(null);
@@ -96,16 +96,8 @@ const InvoiceDetails = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.invoice)
+    setResourcePolicyData(data)
   };
 
   const fetchFields = async () => {
@@ -399,7 +391,7 @@ const InvoiceDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {permissions?.creditMemo?.isRead && <CustomTab value={2}>{resources?.creditMemo?.titlePlural}</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -492,14 +484,14 @@ const InvoiceDetails = () => {
             />
           }
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.invoice}
                   data={invoiceData}

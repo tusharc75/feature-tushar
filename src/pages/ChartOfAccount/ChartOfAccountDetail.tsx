@@ -17,6 +17,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageChartOfAccount from './ManageChartOfAccount';
 import { useTableReducer } from 'src/components/CustomReactTable';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ChartOfAccountDetail = () => {
   const { id } = useParams();
@@ -30,9 +31,9 @@ const ChartOfAccountDetail = () => {
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   useEffect(() => {
@@ -105,16 +106,8 @@ const ChartOfAccountDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.chartOfAccount}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.chartOfAccount)
+    setResourcePolicyData(data)
   };
 
   return (
@@ -139,7 +132,7 @@ const ChartOfAccountDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel index={tabValue} value={0}>
           <Box>
@@ -152,14 +145,14 @@ const ChartOfAccountDetail = () => {
             )}
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.chartOfAccount}
                   data={chartOfAccountData}

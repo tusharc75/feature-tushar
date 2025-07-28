@@ -21,6 +21,7 @@ import History from './History';
 import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -36,7 +37,7 @@ const EmployeeMasterDetail = () => {
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [unavailabilityFields, setUnavailabilityFields] = useState(null);
 
   const {
@@ -85,16 +86,8 @@ const EmployeeMasterDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.employeeMaster}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.employeeMaster)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -207,9 +200,9 @@ const EmployeeMasterDetail = () => {
           <CustomTab value={0} label={'Details'} />
           {unavailabilityFields?.length > 0 && <CustomTab value={1} label={'Unavailability'} />}
           <CustomTab value={2} label={'History'} />
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + (unavailabilityFields?.length > 0 ? 3 : 2)}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -226,14 +219,14 @@ const EmployeeMasterDetail = () => {
         <TabPanel value={tabValue} index={2}>
           <History id={id} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.employeeMaster}
                   data={employeeMasterData}
