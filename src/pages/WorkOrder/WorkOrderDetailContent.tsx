@@ -118,7 +118,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [workOrderPolicyData, setWorkOrderPolicyData] = useState(null);
   const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false);
 
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null);
@@ -210,7 +210,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.workOrder}`);
       if (data) {
-        setResourceData(data);
+        setWorkOrderPolicyData(data);
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -660,13 +660,13 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
                 <CustomTab value={2}>Products/Consumables</CustomTab>
               )}
               {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
-                resourceData?.policy?.showBom &&
+                workOrderPolicyData?.policy?.showBom &&
                 workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>BOM</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
               {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
                 <CustomTab value={5}>Views</CustomTab>
               )}
-              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+              {workOrderPolicyData && workOrderPolicyData?.tabs?.length && workOrderPolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
           </Grid>
         </Grid>
@@ -724,7 +724,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
         <TabPanel value={tabValue} index={1}>
           {workOrderData && (
             <Service
-              resourceData={resourceData}
+              workOrderPolicyData={workOrderPolicyData}
               workOrderData={workOrderData}
               workOrderId={id}
               allowedToEdit={allowedToEdit}
@@ -766,7 +766,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               materialSubType={MATERIAL_SUB_TYPE.consumable}
               workOrderData={workOrderData}
               defaultServiceUniqueId={defaultSelectedService}
-              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+              serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
@@ -800,7 +800,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               defaultServiceUniqueId={defaultSelectedService}
               materialSubType={MATERIAL_SUB_TYPE.bom}
               workOrderData={workOrderData}
-              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+              serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
@@ -822,15 +822,15 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {workOrderPolicyData &&
+          workOrderPolicyData?.tabs?.length > 0 &&
+          workOrderPolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 6}>
                 <Box>
                   <Step
                     tab={tab}
-                    resourcePolicyId={resourceData?._id}
+                    resourcePolicyId={workOrderPolicyData?._id}
                     resourceId={id}
                     resource={sidebarResource.workOrder}
                     data={workOrderData}
