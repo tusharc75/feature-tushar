@@ -157,9 +157,9 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldServiceOrder)
     if (data) {
+      setResourcePolicyData(data)
       if (data?.policy?.addTechnicians || data?.policy?.addConsumables) {
         if (!data?.policy?.addServices) {
           setSteps(serviceOrderSteps2?.filter((e) => e.name !== 'Add'));
