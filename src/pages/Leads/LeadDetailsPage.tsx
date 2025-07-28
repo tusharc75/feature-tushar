@@ -32,6 +32,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Steps from 'src/components/Steps';
 import { StepIconType } from 'src/components/Steps/icons';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,7 +66,7 @@ const LeadDetailsPage = () => {
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
   const [tabValue, setTabValue] = useState<any>(0);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -94,10 +95,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-              allowedToEdit &&
-              leadData[processFieldName] &&
-              currentStepToShow + 1 >= steps.length
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+            currentStepToShow + 1 >= steps.length
           );
         } else {
           setShowAtLast(false);
@@ -188,16 +189,8 @@ const LeadDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.lead}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.lead)
+    setResourcePolicyData(data)
   };
 
   const handleDeleteLead = () => {
@@ -391,7 +384,7 @@ const LeadDetailsPage = () => {
           }}
         >
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
           <TabPanel value={tabValue} index={0}>
@@ -432,14 +425,14 @@ const LeadDetailsPage = () => {
             </>
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 1}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.lead}
                   data={leadData}

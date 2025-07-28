@@ -43,7 +43,7 @@ import View from './View';
 import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
 import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { generateAddExistingSerializedAsset } from 'src/pages/RepairOrder/walkmeSteps';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
@@ -86,7 +86,7 @@ const RepairOrderDetails = () => {
 
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [isQuotationStep, setIsQuotationStep] = useState(false)
@@ -154,16 +154,8 @@ const RepairOrderDetails = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.repairOrder)
+    setResourcePolicyData(data)
   };
 
   const fetchRepairOrderData = () => {
@@ -316,7 +308,7 @@ const RepairOrderDetails = () => {
                   !repairOrderData?.deleted &&
                   permissions?.repairOrder?.isUpdate &&
                   permissions?.transferAsset?.isCreate &&
-                  resourceData?.policy?.showTransferAssets &&
+                  resourcePolicyData?.policy?.showTransferAssets &&
                   repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
                   repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) &&
                   (isQuotationStep ? QUOTATION_STATUS.acceptByCustomer === quotationVersionData?.status : true) && (
@@ -403,7 +395,7 @@ const RepairOrderDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           {!repairOrderData?.deleted && <CustomTab value={1}>Details</CustomTab>}
           {!(isMobile && !isTablet) && !repairOrderData?.deleted && <CustomTab value={2}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -488,7 +480,7 @@ const RepairOrderDetails = () => {
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}
                 createNewVersionQuote={createNewVersionQuote}
-                resourcePolicy={resourceData?.policy}
+                resourcePolicy={resourcePolicyData?.policy}
               />
             )}
             {stepNames[currentStep] === 'Quotation' && repairOrderData && (
@@ -540,14 +532,14 @@ const RepairOrderDetails = () => {
             <View repairOrderNumber={repairOrderData?.repairOrderNumber || ''} repairOrderId={id} repairOrderStatus={repairOrderData?.status} />
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.repairOrder}
                   data={repairOrderData}

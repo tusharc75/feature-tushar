@@ -28,3 +28,23 @@ export const getResourcePolicy = async (user: any, permissions: any, resource: s
   }
   return resourceData;
 }
+
+export const getMultipleResourcePolicy = async (user: any, permissions: any, resources: string) => {
+  let resourceData: any = []
+  const { data: { data } } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${resources}`);
+  if (data && data?.length > 0) {
+    data?.forEach(ele => {
+      ele.tabs = ele?.tabs?.filter(t => {
+        if (!t?.steps?.length) {
+          return false
+        }
+        if (t?.steps?.every(s => s?.linkResourceName && !permissions[camelCase(s?.linkResourceName)]?.isRead)) {
+          return false
+        }
+        return true
+      })
+      resourceData.push(ele)
+    });
+  }
+  return resourceData;
+}

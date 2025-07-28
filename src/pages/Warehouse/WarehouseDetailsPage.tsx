@@ -20,6 +20,7 @@ import Step from '../DynamicForm/Step';
 import ManageWarehouse from './ManageWarehouse';
 import StorageLocation from './StorageLocation';
 import Users from './Users';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const WarehouseDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,7 +37,7 @@ const WarehouseDetailsPage = () => {
   const [warehouseFields, setWarehouseFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -71,16 +72,8 @@ const WarehouseDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.warehouse}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.warehouse)
+    setResourcePolicyData(data)
   };
 
   const handleDeleteWarehouse = () => {
@@ -151,7 +144,7 @@ const WarehouseDetailsPage = () => {
             <CustomTab label={resources?.storageLocation?.titlePlural} value={1} />
           )}
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
-          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !warehouseFields.length ? (
@@ -168,14 +161,14 @@ const WarehouseDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <Users warehouse={id} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.warehouse}
                   data={warehouseData}

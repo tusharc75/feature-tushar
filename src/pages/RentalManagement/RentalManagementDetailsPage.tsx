@@ -12,7 +12,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -97,7 +97,7 @@ const RentalManagementDetailsPage = () => {
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [assets, setAssets] = useState(null);
   const [assetStatusOptions, setAssetStatusOptions] = useState([]);
@@ -261,20 +261,12 @@ const RentalManagementDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(
-        `/dynamic-form/multiple-resource-policy?resources=${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`
-      );
-      if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
-        setResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
-      }
-      if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
-        setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.rentalManagement},${sidebarResource.serializedAsset}`)
+    if (data?.find((e) => e.resource === sidebarResource.rentalManagement)) {
+      setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
+    }
+    if (data?.find((e) => e.resource === sidebarResource.serializedAsset)) {
+      setAssetPolicyData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
     }
   };
 
@@ -515,19 +507,19 @@ const RentalManagementDetailsPage = () => {
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>Header</CustomTab>
             <CustomTab value={1}>Details</CustomTab>
-            {resourceData &&
-              resourceData?.tabs?.length > 0 &&
-              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+            {resourcePolicyData &&
+              resourcePolicyData?.tabs?.length > 0 &&
+              resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
             {user?.user?.brandPolicy?.rentalProgressiveBilling && permissions?.invoice?.isRead && (
-              <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>
+              <CustomTab value={tabIndexValue(resourcePolicyData, 2)}>Progressive Billing</CustomTab>
             )}
-            {resourceData?.policy?.showFieldJobs && permissions?.fieldServiceOrder?.isRead && (
-              <CustomTab value={tabIndexValue(resourceData, 3)}>{resources?.fieldServiceOrder?.titlePlural}</CustomTab>
+            {resourcePolicyData?.policy?.showFieldJobs && permissions?.fieldServiceOrder?.isRead && (
+              <CustomTab value={tabIndexValue(resourcePolicyData, 3)}>{resources?.fieldServiceOrder?.titlePlural}</CustomTab>
             )}
-            {resourceData?.policy?.showFieldTickets && permissions?.fieldTicket?.isRead && (
-              <CustomTab value={tabIndexValue(resourceData, 4)}>{resources?.fieldTicket?.titlePlural}</CustomTab>
+            {resourcePolicyData?.policy?.showFieldTickets && permissions?.fieldTicket?.isRead && (
+              <CustomTab value={tabIndexValue(resourcePolicyData, 4)}>{resources?.fieldTicket?.titlePlural}</CustomTab>
             )}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 5)}>Views</CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourcePolicyData, 5)}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
@@ -594,7 +586,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
-                  rentalPolicyData={resourceData?.policy}
+                  rentalPolicyData={resourcePolicyData?.policy}
                   assetPolicyData={assetPolicyData?.policy}
                 />
               )}
@@ -622,7 +614,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
-                  rentalPolicyData={resourceData?.policy}
+                  rentalPolicyData={resourcePolicyData?.policy}
                   assetPolicyData={assetPolicyData?.policy}
                 />
               )}
@@ -646,7 +638,7 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  rentalPolicyData={resourceData?.policy}
+                  rentalPolicyData={resourcePolicyData?.policy}
                   assetPolicyData={assetPolicyData}
                 />
               )}
@@ -661,7 +653,7 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   allowUpdateStatus={allowUpdateStatus}
                   stepFullScreen={stepFullScreen}
-                  rentalPolicyData={resourceData?.policy}
+                  rentalPolicyData={resourcePolicyData?.policy}
                   assetStatusOptions={assetStatusOptions?.filter((o) => [ASSET_STATUS.scrap, ASSET_STATUS.lost]?.includes(o?.optionValue))}
                   assetPolicyData={assetPolicyData}
                 />
@@ -678,7 +670,7 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
-                  rentalPolicyData={resourceData?.policy}
+                  rentalPolicyData={resourcePolicyData?.policy}
                   assetStatusOptions={assetStatusOptions}
                   setAssetStatusOptions={setAssetStatusOptions}
                   assetPolicyData={assetPolicyData}
@@ -696,14 +688,14 @@ const RentalManagementDetailsPage = () => {
               )}
             </TabPanel>
           </ContentFullScreen>
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => {
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => {
               return (
                 <TabPanel value={tabValue} index={i + 2}>
                   <Step
                     tab={tab}
-                    resourcePolicyId={resourceData?._id}
+                    resourcePolicyId={resourcePolicyData?._id}
                     resourceId={id}
                     resource={sidebarResource.rentalManagement}
                     data={rentalManagementData}
@@ -713,7 +705,7 @@ const RentalManagementDetailsPage = () => {
                 </TabPanel>
               );
             })}
-          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 2)}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 2)}>
             <ProgressiveBilling
               rentalId={id}
               allowCreateInvoice={
@@ -721,7 +713,7 @@ const RentalManagementDetailsPage = () => {
               }
             />
           </TabPanel>
-          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 3)}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 3)}>
             <ResourceField
               step={{ linkResourceField: 'rentalJob', linkResourceName: sidebarResource?.fieldServiceOrder, readOnly: true }}
               renderedFrom={`${renderedFrom}_${camelCase(resources?.fieldServiceOrder?.titlePlural)}`}
@@ -729,7 +721,7 @@ const RentalManagementDetailsPage = () => {
               referenceData={null}
             />
           </TabPanel>
-          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 4)}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 4)}>
             <ResourceField
               step={{ linkResourceField: 'rentalJob', linkResourceName: sidebarResource?.fieldTicket, readOnly: true }}
               renderedFrom={`${renderedFrom}_${camelCase(resources?.fieldTicket?.titlePlural)}`}
@@ -737,7 +729,7 @@ const RentalManagementDetailsPage = () => {
               referenceData={null}
             />
           </TabPanel>
-          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 5)}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 5)}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>

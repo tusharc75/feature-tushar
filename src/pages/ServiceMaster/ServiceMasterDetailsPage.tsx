@@ -25,6 +25,7 @@ import Grid from '@mui/material/Grid2';
 import { isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { mobileNotSupported } from 'src/constants/messageHelpers';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -34,7 +35,7 @@ const ServiceMasterDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const [serviceMasterDetailData, setServiceMasterDetailData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -51,16 +52,8 @@ const ServiceMasterDetailsPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serviceMaster}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.serviceMaster)
+    setResourcePolicyData(data)
   };
 
   const fetchFields = () => {
@@ -160,7 +153,7 @@ const ServiceMasterDetailsPage = () => {
           <CustomTab value={0} label={<>Details</>} />
           <CustomTab value={1} label={<>Steps</>} />
           <CustomTab value={2} label={<>Consumables/Tools</>} />
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box className="form-v1">
@@ -195,14 +188,14 @@ const ServiceMasterDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <Product id={id} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.serviceMaster}
                   data={serviceMasterDetailData}

@@ -34,7 +34,7 @@ import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { useTableReducer } from 'src/components/CustomReactTable';
 
@@ -64,7 +64,7 @@ const ProductionOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const productionOrderProcessStepsNames = React.useMemo(() => {
     return productionOrderProcessSteps.map((item) => item.name);
   }, [productionOrderProcessSteps]);
@@ -90,16 +90,8 @@ const ProductionOrderDetails = () => {
   }, [locationKeys]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.productionOrder)
+    setResourcePolicyData(data)
   };
 
   useEffect(() => {
@@ -142,8 +134,8 @@ const ProductionOrderDetails = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
         setAllowedToDelete(
           permissions?.productionOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
-            data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) &&
+          data?.canDelete
         );
         setProductionOrderData({ ...data });
       })
@@ -239,7 +231,7 @@ const ProductionOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -272,23 +264,23 @@ const ProductionOrderDetails = () => {
               handleNext={
                 productionOrderProcessStepsNames[currentStep] === 'Add'
                   ? () => {
-                      setNextStep(false);
-                      axiosInstance()
-                        .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                        .then(({ data: { data } }) => {
-                          if (data) {
-                            let newStep;
-                            setCurrentStep((prevStep) => {
-                              newStep = prevStep + 1;
-                              return newStep;
-                            });
-                            dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
-                          }
-                        })
-                        .catch((err) => {
-                          toastConfig.setToastConfig(err);
-                        });
-                    }
+                    setNextStep(false);
+                    axiosInstance()
+                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                      .then(({ data: { data } }) => {
+                        if (data) {
+                          let newStep;
+                          setCurrentStep((prevStep) => {
+                            newStep = prevStep + 1;
+                            return newStep;
+                          });
+                          dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[newStep], id);
+                        }
+                      })
+                      .catch((err) => {
+                        toastConfig.setToastConfig(err);
+                      });
+                  }
                   : null
               }
               updateStatus={(step: number) => {
@@ -330,14 +322,14 @@ const ProductionOrderDetails = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.productionOrder}
                   data={productionOrderData}
