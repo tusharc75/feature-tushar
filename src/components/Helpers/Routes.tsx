@@ -519,6 +519,9 @@ const routes = {
   fieldServiceTechnician: {
     path: '/field-service-technician'
   },
+  rentalJobTechnicianView: {
+    path: '/rental-job-technician-view'
+  },
   fleetDispatch: {
     path: '/fleet-dispatch'
   },
