@@ -19,13 +19,14 @@ import ManageTrailerMaster from './ManageTrailerMaster';
 import Step from '../DynamicForm/Step';
 import { ExpandMore } from '@mui/icons-material';
 import { RiExchange2Line } from 'react-icons/ri';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const TrailerMasterDetail = () => {
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [trailerMasterData, setTrailerMasterData] = useState(null);
@@ -36,7 +37,7 @@ const TrailerMasterDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [statusOptions, setStatusOptions] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -79,16 +80,8 @@ const TrailerMasterDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.trailerMaster}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.trailerMaster)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -219,7 +212,7 @@ const TrailerMasterDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Details</CustomTab>
           <CustomTab value={1}>History</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -233,14 +226,14 @@ const TrailerMasterDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <History id={id} status={trailerMasterData?.status} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.trailerMaster}
                   data={trailerMasterData}

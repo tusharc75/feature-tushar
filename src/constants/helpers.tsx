@@ -4128,9 +4128,9 @@ export async function handleHardReload(url = window.location.href) {
   window.location.reload();
 }
 
-export const tabIndexValue = (resourceData, index) => {
-  if (resourceData && resourceData?.tabs?.length > 0) {
-    index = resourceData?.tabs?.length + index;
+export const tabIndexValue = (resourcePolicyData, index) => {
+  if (resourcePolicyData && resourcePolicyData?.tabs?.length > 0) {
+    index = resourcePolicyData?.tabs?.length + index;
   }
   return index;
 };

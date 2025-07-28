@@ -55,6 +55,7 @@ import { RiFolderReceivedLine } from 'react-icons/ri';
 import { TbTruckDelivery } from 'react-icons/tb';
 import Step from 'src/pages/DynamicForm/Step';
 import DeliveryTcketSerializedPackages from 'src/pages/DeliveryTicket/DeliveryTcketSerializedPackages';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(sidebarResource.deliveryTicket)}_grid-1`;
@@ -94,7 +95,7 @@ export default function DeliveryTicketDetail(props) {
   const [locationKeys, setLocationKeys] = useState([]);
   const { isOffline } = useContext(CustomOfflineContext);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -231,16 +232,8 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.deliveryTicket}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.deliveryTicket)
+    setResourcePolicyData(data)
   };
 
   useEffect(() => {
@@ -552,9 +545,9 @@ export default function DeliveryTicketDetail(props) {
             <CustomTab value={2}>Additional Products</CustomTab>
             {permissions?.serializedPackages?.isRead && <CustomTab value={3}>{resources?.serializedPackages?.titlePlural}</CustomTab>}
             {deliveryTicketData?.additionalCost?.length > 0 && <CustomTab value={4}>Add-On</CustomTab>}
-            {resourceData &&
-              resourceData?.tabs?.length > 0 &&
-              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
+            {resourcePolicyData &&
+              resourcePolicyData?.tabs?.length > 0 &&
+              resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 5}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             {deliveryTicketData && deliveryTicketFields.length > 0 && !loading ? (
@@ -679,14 +672,14 @@ export default function DeliveryTicketDetail(props) {
               />
             </TabPanel>
           )}
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => {
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => {
               return (
                 <TabPanel value={tabValue} index={i + 5}>
                   <Step
                     tab={tab}
-                    resourcePolicyId={resourceData?._id}
+                    resourcePolicyId={resourcePolicyData?._id}
                     resourceId={id}
                     resource={sidebarResource.deliveryTicket}
                     data={deliveryTicketData}

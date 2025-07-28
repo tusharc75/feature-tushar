@@ -30,6 +30,7 @@ import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Step from '../DynamicForm/Step';
 import Material from './Material';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -37,7 +38,7 @@ const DemandOrderDetails = () => {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const {
     state: { user, permissions, resources }
   }: any = useData();
@@ -83,9 +84,9 @@ const DemandOrderDetails = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data) && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.demandOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) &&
-          data?.canDelete &&
-          ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) &&
+        data?.canDelete &&
+        ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status)
       );
       setDemandOrderData(data);
       setLoading(false);
@@ -96,16 +97,8 @@ const DemandOrderDetails = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.demandOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.demandOrder)
+    setResourcePolicyData(data)
   };
 
   const handleOpenUpdateDialog = () => {
@@ -233,7 +226,7 @@ const DemandOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -251,14 +244,14 @@ const DemandOrderDetails = () => {
         <TabPanel value={tabValue} index={1}>
           {demandOrderData && <Material demandOrderData={demandOrderData} fetchDemadOrderData={fetchData} allowedToEdit={allowedToEdit} />}
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.demandOrder}
                   data={demandOrderData}

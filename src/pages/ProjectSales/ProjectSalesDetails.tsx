@@ -24,6 +24,7 @@ import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
 import TeamUsers from './TeamUsers';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -53,7 +54,7 @@ const ProjectSalesDetails = () => {
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([{ ...routes.projectSales, title: resources?.projectSales?.titlePlural }]);
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [graphData, setGraphData] = useState({
     edges: [],
     nodes: [],
@@ -137,16 +138,8 @@ const ProjectSalesDetails = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.projectSales}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.projectSales)
+    setResourcePolicyData(data)
   };
 
   const getProjectFields = () => {
@@ -308,7 +301,7 @@ const ProjectSalesDetails = () => {
               <CustomTab value={1}>OM-Neurons</CustomTab>
               <CustomTab value={2}>Project Team</CustomTab>
               <CustomTab value={3}>{resources?.customerAccount?.titlePlural}</CustomTab>
-              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+              {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -397,14 +390,14 @@ const ProjectSalesDetails = () => {
                 />
               </Box>
             </TabPanel>
-            {resourceData &&
-              resourceData?.tabs?.length > 0 &&
-              resourceData?.tabs?.map((tab, i) => {
+            {resourcePolicyData &&
+              resourcePolicyData?.tabs?.length > 0 &&
+              resourcePolicyData?.tabs?.map((tab, i) => {
                 return (
                   <TabPanel value={currentTabIndex} index={i + 4}>
                     <Step
                       tab={tab}
-                      resourcePolicyId={resourceData?._id}
+                      resourcePolicyId={resourcePolicyData?._id}
                       resourceId={id}
                       resource={sidebarResource.projectSales}
                       data={projectSalesData}

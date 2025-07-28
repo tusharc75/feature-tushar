@@ -47,6 +47,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { MdDelete } from 'react-icons/md';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const DOASteps = [
   {
@@ -143,7 +144,7 @@ export default function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
@@ -257,16 +258,8 @@ export default function QuoteDetail() {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quoteBuilder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.quoteBuilder)
+    setResourcePolicyData(data)
   };
 
   const fetchQuoteData = (version: any) => {
@@ -719,7 +712,7 @@ export default function QuoteDetail() {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Details</CustomTab>
           <CustomTab value={1}>Quote Versions</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <>
@@ -775,14 +768,14 @@ export default function QuoteDetail() {
             />
           )}
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.quoteBuilder}
                   data={quoteData}
