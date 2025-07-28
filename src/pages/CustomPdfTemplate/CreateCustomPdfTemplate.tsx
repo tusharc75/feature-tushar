@@ -252,6 +252,12 @@ export default function CreateCustomPdfTemplate() {
       let response;
       if (id === '0' || isClone === true) {
         response = await axiosInstance().post(`${customPdfTemplate.api}`, submitData);
+        const newId = response.data.data._id;
+        history.replace({
+          pathname: routes.customPdfTemplate.path + '/detail/' + newId,
+          state: history.location.state
+        });
+        window.history.replaceState(null, null, routes.customPdfTemplate.path + '/detail/' + newId);
       } else {
         response = await axiosInstance().put(`${customPdfTemplate.api}`, {
           _id: id,
@@ -264,12 +270,6 @@ export default function CreateCustomPdfTemplate() {
         message: response.data.message
       });
       setIsUpdating(false);
-      if (isBreakCrumbPath && !isClone) {
-        history.push({ pathname: isBreakCrumbPath });
-      } else {
-        history.push(routes.customPdfTemplate.path);
-      }
-      setIsEdit(false);
     } catch (error) {
       setIsUpdating(false);
       toastConfig.setToastConfig(error);
@@ -312,6 +312,7 @@ export default function CreateCustomPdfTemplate() {
   };
 
   const handleClose = () => {
+    setIsEdit(false);
     history.push({ pathname: isBreakCrumbPath ? isBreakCrumbPath : routes.customPdfTemplate.path });
   };
 
@@ -340,6 +341,7 @@ export default function CreateCustomPdfTemplate() {
                       if (allowedToEdit) {
                         if (!isEqual(values, initialValues)) {
                           setShowConfirmDialog(true);
+                          handleClose();
                         } else {
                           handleClose();
                         }
@@ -643,9 +645,10 @@ export default function CreateCustomPdfTemplate() {
               {showConfirmDialog ? (
                 <ConfirmCancelDialog
                   open={showConfirmDialog}
-                  onSave={() => {
+                  onSave={async () => {
                     setShowConfirmDialog(false);
-                    submitForm();
+                    await submitForm();
+                    handleClose();
                   }}
                   onClose={() => {
                     handleClose();
