@@ -304,9 +304,12 @@ export default function AccountDetailPage(props) {
     initializeGraphData();
   };
 
-  const fetchPolicy = async () => {
-    const data = await fetchResourcePolicy(sidebarResource[accountResource], permissions)
-    setResourceData(data)
+  const fetchPolicy = () => {
+    fetchResourcePolicy(sidebarResource[accountResource], permissions).then((data) => {
+      setResourceData(data)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error)
+    })
   };
 
   const getAccountFields = async (accountData = {}) => {

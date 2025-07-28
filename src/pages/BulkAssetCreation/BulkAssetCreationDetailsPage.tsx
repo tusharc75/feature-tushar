@@ -20,7 +20,7 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
@@ -69,17 +69,12 @@ const BulkAssetCreationDetailsPage = () => {
     }
   }, [id, tabValue]);
 
-  const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.bulkAssetCreation}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+  const fetchPolicy = () => {
+    fetchResourcePolicy(sidebarResource.bulkAssetCreation, permissions).then((data) => {
+      setResourceData(data)
+    }).catch((error) => {
+      toastConfig.setToastConfig(error)
+    })
   };
 
   const fetchData = async () => {
