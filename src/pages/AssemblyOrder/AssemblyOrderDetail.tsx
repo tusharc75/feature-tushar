@@ -28,7 +28,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import Step from 'src/pages/DynamicForm/Step';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
-import { dynamicFormUpdateProcessStatus, fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
@@ -64,7 +64,7 @@ const AssemblyOrderDetail = () => {
   const [locationKeys, setLocationKeys] = useState([]);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [openRentalDialog, setOpenRentalDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -91,8 +91,8 @@ const AssemblyOrderDetail = () => {
   }, [locationKeys]);
 
   const fetchPolicy = async () => {
-    const data = await fetchResourcePolicy(sidebarResource.assemblyOrder, permissions)
-    setResourceData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.assemblyOrder)
+    setResourcePolicyData(data)
   };
 
   useEffect(() => {
@@ -103,7 +103,7 @@ const AssemblyOrderDetail = () => {
     if (id) {
       fetchData();
     }
-  }, [id, resourceData]);
+  }, [id, resourcePolicyData]);
 
   useEffect(() => {
     fetchFields();
@@ -124,7 +124,7 @@ const AssemblyOrderDetail = () => {
     axiosInstance().get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         var steps = assemblyOrderSteps;
-        if (!resourceData?.policy?.loadingTicket) {
+        if (!resourcePolicyData?.policy?.loadingTicket) {
           steps = steps?.filter((e) => !['Loading'].includes(e.name));
         }
         setAssemblySteps(steps);
@@ -192,7 +192,7 @@ const AssemblyOrderDetail = () => {
     }
     let show = false
     if (assemblyOrderData?.rentalJob?.length > 0) {
-      if (!resourceData?.policy?.autoConvertInSameRentalJob && (permissions?.rentalManagement?.isUpdate || permissions?.rentalManagement?.isCreate)) {
+      if (!resourcePolicyData?.policy?.autoConvertInSameRentalJob && (permissions?.rentalManagement?.isUpdate || permissions?.rentalManagement?.isCreate)) {
         show = true
       }
     } else {
@@ -305,7 +305,7 @@ const AssemblyOrderDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -380,14 +380,14 @@ const AssemblyOrderDetail = () => {
         <TabPanel value={tabValue} index={2}>
           <Box>{assemblyOrderData && <RoadmapViews assemblyOrderNumber={assemblyOrderData?.assemblyOrderNumber} id={id} />}</Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.assemblyOrder}
                   data={assemblyOrderData}
