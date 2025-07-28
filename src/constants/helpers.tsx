@@ -958,7 +958,6 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
     else if (ele?.type === 'formula') {
       if (ele?.inputFields?.length) {
         const calValues = autoCalculateSpecificFields({ [ele?.inputFields[0]]: obj[ele?.inputFields[0]] }, obj, fields);
-        console.log(calValues)
         Object.assign(obj, calValues);
       }
     }
