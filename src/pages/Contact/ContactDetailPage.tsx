@@ -45,7 +45,7 @@ import {
 } from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
-import { fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
 
 const ContactDetailsPage = (props) => {
@@ -101,7 +101,7 @@ const ContactDetailsPage = (props) => {
   let { id } = useParams();
 
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([]);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     const hasContactPermission = permissions[contactResource];
@@ -149,8 +149,8 @@ const ContactDetailsPage = (props) => {
   }, [tour]);
 
   const fetchPolicy = async () => {
-    const data = await fetchResourcePolicy(sidebarResource[contactResource], permissions)
-    setResourceData(data);
+    const data = await getResourcePolicy(user, permissions, sidebarResource[contactResource],)
+    setResourcePolicyData(data);
   };
 
   const fetchLoggedInUserRole = async () => {
@@ -577,7 +577,7 @@ const ContactDetailsPage = (props) => {
                 {contactResource === 'customerContact' && permissions?.productInventory && (
                   <CustomTab value={2} label={resources?.warehouse?.titlePlural} />
                 )}
-                {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3} label={tab?.tabName} />)}
+                {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3} label={tab?.tabName} />)}
               </CustomTabs>
               <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (
@@ -599,17 +599,21 @@ const ContactDetailsPage = (props) => {
               </TabPanel>
               {contactResource === 'customerContact' && permissions?.productInventory && (
                 <Box hidden={currentTabIndex !== 2}>
-                  <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
+                  <Warehouse
+                    reference={contactResource}
+                    api={contactApi}
+                    id={id}
+                    accountId={contactData?.accountName?.optionValue} />
                 </Box>
               )}
-              {resourceData &&
-                resourceData?.tabs?.length > 0 &&
-                resourceData?.tabs?.map((tab, i) => {
+              {resourcePolicyData &&
+                resourcePolicyData?.tabs?.length > 0 &&
+                resourcePolicyData?.tabs?.map((tab, i) => {
                   return (
                     <TabPanel value={currentTabIndex} index={i + 3}>
                       <Step
                         tab={tab}
-                        resourcePolicyId={resourceData?._id}
+                        resourcePolicyId={resourcePolicyData?._id}
                         resourceId={id}
                         resource={sidebarResource[contactResource]}
                         data={contactData}
@@ -621,146 +625,147 @@ const ContactDetailsPage = (props) => {
             </>
           )}
         </Box>
-        <div className={`pt-3 `}>
-          {permissions?.opportunity?.isRead && (
-            <Box mb={2} id={`opportunityAccordion `}>
-              <OpportunityInAccordian
-                opportunityPermissions={permissions.opportunity}
-                opportunities={opportunities}
-                onNewOpportunityAdd={() => {
-                  fetchRelatedData();
-                }}
-                accountId={contactData?.accountName?.optionValue}
-                accountName={contactData?.accountName?.optionLabel}
-                recordsPerLine={3}
-                resource={accountResource}
-                isRedirect={false}
-                contactId={id}
-                contactResource={contactResource}
-                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
-              />
-            </Box>
-          )}
-          {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
-            <Box mb={2} id="projectsAccordion">
-              <ProjectInAccordion
-                recordsPerLine={3}
-                projectSales={projectSales}
-                type={typeCreateProjectSalesDialog}
-                fetchData={fetchRelatedData}
-                permissions={permissions}
-                isAddProjectSale={true}
-                isAllowedToEdit={contactPermissions.isUpdate && allowedToEdit}
-                accountId={contactData?.accountName?.optionValue}
-                accountName={contactData?.accountName?.optionLabel}
-                resource={accountResource}
-                resources={resources}
-              />
-            </Box>
-          )}
-          {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
-            <Box mb={2} id="quotesAccordion">
-              <QuotesInAccordion
-                recordsPerLine={3}
-                quotes={quotes}
-                fetchData={fetchRelatedData}
-                quoteBuilderPermission={permissions.quoteBuilder}
-                accountId={contactData?.accountName?.optionValue}
-                contactId={id}
-                contactName={[`${contactData?.firstName}`, `${contactData?.middleName}`, `${contactData?.lastName}`].filter((d) => d).join(' ')}
-                contactResource={contactResource}
-                accountResource={accountResource}
-                isRenderedInCustomerContact={true}
-                isRenderedFromCustomerAccount={true}
-                allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
-              />
-            </Box>
-          )}
-        </div>
-
-        <Grid size={{ xs: 12 }}>
-          <QuickLinks quickLinks={quickLinks} />
-        </Grid>
-
-        {contactData?.staticData?.lead && permissions && permissions?.lead && permissions?.lead?.isRead && (
-          <Box mt={2}>
-            <div className={`single-form-v1`}>
-              <div className={`form-head-v1`}>
-                <Typography color="primary" component="h3" style={{ margin: '0 10px' }}>
-                  Related Lead
-                </Typography>
-              </div>
-              <Box className={`formdata-v1 `}>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-                    <Paper className="detailListing card-v1">
-                      <List>
-                        <ListItem>
-                          <ListItemAvatar>
-                            <div
-                              data-initials={[
-                                contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
-                                contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
-                              ]
-                                .filter((f) => f)
-                                .join('')}
-                            ></div>
-                          </ListItemAvatar>
-                          <ListItemText
-                            className="ml-2"
-                            primary={
-                              contactData?.staticData?.lead?.entity === selectedEntity ? (
-                                <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
-                                  {contactData?.staticData?.lead?.concatedName}
-                                </Link>
-                              ) : hasAccessToEntity(contactData?.staticData?.lead?.entity) ? (
-                                <Link
-                                  className="link f_size p-l2"
-                                  onClick={() => {
-                                    handleEntityChange(contactData?.staticData?.lead?.entity);
-                                    history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`);
-                                  }}
-                                >
-                                  {contactData?.staticData?.lead?.concatedName}
-                                </Link>
-                              ) : (
-                                <span>{contactData?.staticData?.lead?.concatedName}</span>
-                              )
-                            }
-                            secondary={
-                              <React.Fragment>
-                                <Typography component="p" variant="body2" className="cardDetail">
-                                  {contactData?.staticData?.lead?.title && (
-                                    <span className="d-flex align-items-center gap-2">
-                                      <FiStar size="15" />
-                                      {contactData?.staticData?.lead?.title}
-                                    </span>
-                                  )}
-                                  {contactData?.staticData?.lead?.email && (
-                                    <span className="d-flex align-items-center gap-2">
-                                      <AiOutlineMail size="15" />
-                                      {contactData?.staticData?.lead?.email}
-                                    </span>
-                                  )}
-                                  {contactData?.staticData?.lead?.phone && (
-                                    <span className="d-flex align-items-center gap-2">
-                                      <BiPhone size="15" />
-                                      {contactData?.staticData?.lead?.phone}
-                                    </span>
-                                  )}
-                                </Typography>
-                              </React.Fragment>
-                            }
-                          />
-                        </ListItem>
-                      </List>
-                    </Paper>
-                  </Grid>
-                </Grid>
-              </Box>
+        {(currentTabIndex === 1 || currentTabIndex === 0) &&
+          <>
+            <div className={`pt-3`}>
+              {permissions?.opportunity?.isRead && (
+                <Box mb={2} id={`opportunityAccordion `}>
+                  <OpportunityInAccordian
+                    opportunityPermissions={permissions.opportunity}
+                    opportunities={opportunities}
+                    onNewOpportunityAdd={() => {
+                      fetchRelatedData();
+                    }}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    recordsPerLine={3}
+                    resource={accountResource}
+                    isRedirect={false}
+                    contactId={id}
+                    contactResource={contactResource}
+                    allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
+                  />
+                </Box>
+              )}
+              {permissions?.projectSales?.isRead && accountResource === customerAccount.accountResource && (
+                <Box mb={2} id="projectsAccordion">
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={contactPermissions.isUpdate && allowedToEdit}
+                    accountId={contactData?.accountName?.optionValue}
+                    accountName={contactData?.accountName?.optionLabel}
+                    resource={accountResource}
+                    resources={resources}
+                  />
+                </Box>
+              )}
+              {accountResource === customerAccount.accountResource && permissions?.quoteBuilder?.isRead && (
+                <Box mb={2} id="quotesAccordion">
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    accountId={contactData?.accountName?.optionValue}
+                    contactId={id}
+                    contactName={[`${contactData?.firstName}`, `${contactData?.middleName}`, `${contactData?.lastName}`].filter((d) => d).join(' ')}
+                    contactResource={contactResource}
+                    accountResource={accountResource}
+                    isRenderedInCustomerContact={true}
+                    isRenderedFromCustomerAccount={true}
+                    allowedToEdit={contactPermissions.isUpdate && allowedToEdit}
+                  />
+                </Box>
+              )}
             </div>
-          </Box>
-        )}
+            <Grid size={{ xs: 12 }}>
+              <QuickLinks quickLinks={quickLinks} />
+            </Grid>
+            {contactData?.staticData?.lead && permissions && permissions?.lead && permissions?.lead?.isRead && (
+              <Box mt={2}>
+                <div className={`single-form-v1`}>
+                  <div className={`form-head-v1`}>
+                    <Typography color="primary" component="h3" style={{ margin: '0 10px' }}>
+                      Related Lead
+                    </Typography>
+                  </div>
+                  <Box className={`formdata-v1 `}>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                        <Paper className="detailListing card-v1">
+                          <List>
+                            <ListItem>
+                              <ListItemAvatar>
+                                <div
+                                  data-initials={[
+                                    contactData?.staticData?.lead?.firstName?.charAt(0).toUpperCase(),
+                                    contactData?.staticData?.lead?.lastName?.charAt(0).toUpperCase()
+                                  ]
+                                    .filter((f) => f)
+                                    .join('')}
+                                ></div>
+                              </ListItemAvatar>
+                              <ListItemText
+                                className="ml-2"
+                                primary={
+                                  contactData?.staticData?.lead?.entity === selectedEntity ? (
+                                    <Link className="link f_size p-l2" to={`/lead/detail/${contactData?.staticData?.lead?._id}`}>
+                                      {contactData?.staticData?.lead?.concatedName}
+                                    </Link>
+                                  ) : hasAccessToEntity(contactData?.staticData?.lead?.entity) ? (
+                                    <Link
+                                      className="link f_size p-l2"
+                                      onClick={() => {
+                                        handleEntityChange(contactData?.staticData?.lead?.entity);
+                                        history.push(`/lead/detail/${contactData?.staticData?.lead?._id}`);
+                                      }}
+                                    >
+                                      {contactData?.staticData?.lead?.concatedName}
+                                    </Link>
+                                  ) : (
+                                    <span>{contactData?.staticData?.lead?.concatedName}</span>
+                                  )
+                                }
+                                secondary={
+                                  <React.Fragment>
+                                    <Typography component="p" variant="body2" className="cardDetail">
+                                      {contactData?.staticData?.lead?.title && (
+                                        <span className="d-flex align-items-center gap-2">
+                                          <FiStar size="15" />
+                                          {contactData?.staticData?.lead?.title}
+                                        </span>
+                                      )}
+                                      {contactData?.staticData?.lead?.email && (
+                                        <span className="d-flex align-items-center gap-2">
+                                          <AiOutlineMail size="15" />
+                                          {contactData?.staticData?.lead?.email}
+                                        </span>
+                                      )}
+                                      {contactData?.staticData?.lead?.phone && (
+                                        <span className="d-flex align-items-center gap-2">
+                                          <BiPhone size="15" />
+                                          {contactData?.staticData?.lead?.phone}
+                                        </span>
+                                      )}
+                                    </Typography>
+                                  </React.Fragment>
+                                }
+                              />
+                            </ListItem>
+                          </List>
+                        </Paper>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </div>
+              </Box>
+            )}
+          </>}
       </Box>
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
@@ -770,7 +775,6 @@ const ContactDetailsPage = (props) => {
           onOk={handleDeleteContact}
         />
       ) : null}
-
       {orgChartInFullScreenDialog && (
         <FullScreenDialog
           heading="Org Chart"
