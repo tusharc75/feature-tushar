@@ -20,7 +20,7 @@ export const fetchResourcePolicy = async (resource: string, permissions: any) =>
       if (!t?.steps?.length) {
         return false
       }
-      if (t?.steps?.every(s => s?.linkResourceName && permissions[camelCase(s?.linkResourceName)]?.isRead)) {
+      if (t?.steps?.every(s => s?.linkResourceName && !permissions[camelCase(s?.linkResourceName)]?.isRead)) {
         return false
       }
       return true

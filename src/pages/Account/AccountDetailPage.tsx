@@ -49,6 +49,7 @@ import ManageAccountDialog from './ManageAccount/index';
 import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
+import { fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -304,16 +305,8 @@ export default function AccountDetailPage(props) {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource[accountResource]}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await fetchResourcePolicy(sidebarResource[accountResource], permissions)
+    setResourceData(data)
   };
 
   const getAccountFields = async (accountData = {}) => {
@@ -952,7 +945,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 
