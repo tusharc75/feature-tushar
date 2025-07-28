@@ -952,7 +952,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 
