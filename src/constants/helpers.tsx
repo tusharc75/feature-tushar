@@ -955,6 +955,12 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       const calValues = autoCalculateSpecificFields({ [ele?.fieldName]: obj[ele?.fieldName] }, obj, fields);
       Object.assign(obj, calValues);
     }
+    else if (ele?.type === 'formula') {
+      if (ele?.inputFields?.length) {
+        const calValues = autoCalculateSpecificFields({ [ele?.inputFields[0]]: obj[ele?.inputFields[0]] }, obj, fields);
+        Object.assign(obj, calValues);
+      }
+    }
   });
 
   return obj;
@@ -1045,7 +1051,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
             obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
           });
       }
-    } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
+    } else if (key.type === 'decimal' || key.type === 'percent') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
       if (isClone) {
@@ -1072,6 +1078,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
           : dataObj[key.fieldName]
         : {};
       obj[key.fieldName] = values;
+    } else if (key.type === 'formula') {
+      if (key?.returnType === 'number') {
+        obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : 0;
+      }
+      else {
+        obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      }
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1373,7 +1386,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       } else {
         schema[input.fieldName] = input.required ? array().min(1, message) : array();
       }
-    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
       if (uniqueDependentFields.length > 0) {
         schema[input.fieldName] = number().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
@@ -1452,7 +1465,19 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'gpsLocation') {
       schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
-    } else {
+    } else if (input.type === 'formula') {
+      if (input?.returnType === 'string') {
+        schema[input.fieldName] = input.required ? string().required(message) : string();
+      }
+      else if (input?.returnType === 'boolean') {
+        schema[input.fieldName] = input.required ? boolean().required(message) : boolean();
+      }
+      else {
+        schema[input.fieldName] = input.required ? number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+          : number().nullable();
+      }
+    }
+    else {
       if (uniqueDependentFields.length > 0) {
         schema[input.fieldName] = string().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
