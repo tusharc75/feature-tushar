@@ -28,7 +28,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import Step from 'src/pages/DynamicForm/Step';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Material from 'src/pages/AssemblyOrder/Material';
@@ -91,16 +91,8 @@ const AssemblyOrderDetail = () => {
   }, [locationKeys]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.assemblyOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await fetchResourcePolicy(sidebarResource.assemblyOrder, permissions)
+    setResourceData(data)
   };
 
   useEffect(() => {
