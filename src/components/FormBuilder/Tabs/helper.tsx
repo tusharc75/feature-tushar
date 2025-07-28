@@ -252,6 +252,18 @@ export const resourcePolicy = [
         fieldLabel: 'Enable Services On Consumables',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'hideStepsProductsConsumables',
+        fieldLabel: 'Hide Steps Products/Consumables',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'hideStepsDrawings',
+        fieldLabel: 'Hide Steps Drawings',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },

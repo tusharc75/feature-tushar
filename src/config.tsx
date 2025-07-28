@@ -15,6 +15,8 @@ export const AI_AGENT = ['local', 'master', 'development']?.includes(import.meta
 
 export const VITE_APP_ENV = import.meta.env?.VITE_APP_ENV;
 
+export const VITE_APP_DMS_URL = import.meta.env.VITE_APP_DMS_URL;
+
 export const FIREBASE_CONFIG = {
   apiKey: import.meta.env?.VITE_APP_FIREBASE_API_KEY,
   authDomain: import.meta.env?.VITE_APP_FIREBASE_AUTH_DOMAIN,

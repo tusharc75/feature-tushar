@@ -38,6 +38,7 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 import { ExpandMore } from '@mui/icons-material';
+import { VITE_APP_DMS_URL } from 'src/config';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -222,6 +223,15 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
+                {assemblyOrderData?.dmsFolder &&
+                  <ThemeButton
+                    onClick={() => {
+                      window.open(`${VITE_APP_DMS_URL}/document/${assemblyOrderData?.dmsFolder?._id}`, '_blank');
+
+                    }}
+                  >
+                    {`Upload Documents`}
+                  </ThemeButton>}
                 {showConvertInRentalJob() ? (
                   <ThemeButton
                     onClick={(event) => {

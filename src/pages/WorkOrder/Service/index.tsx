@@ -72,7 +72,7 @@ const Service = ({
   defaultSelectedService,
   setDefaultSelectedService,
   minHeightClass = null,
-  resourceData = null
+  workOrderPolicyData = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -633,7 +633,7 @@ const Service = ({
                               allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                               fetchService={fetchServiceData}
                               resource={resource}
-                              resourceData={resourceData}
+                              workOrderPolicyData={workOrderPolicyData}
                               stepSubmitedData={stepSubmitedData}
                               minHeightClass={' '}
                               isMobile={mobScreen}
@@ -654,7 +654,7 @@ const Service = ({
                       )}
                     </div>
                   </CustomCollapsible>
-                  {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+                  {(!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables) && (
                     <CustomCollapsible
                       head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
                       headProps={{ className: 'sticky top-0 z-[1]' }}
@@ -690,31 +690,33 @@ const Service = ({
                           serviceName={selectedService?.serviceName}
                           materialSubType={MATERIAL_SUB_TYPE.consumable}
                           workOrderData={workOrderData}
-                          serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+                          serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
                         />
                       </div>
                     </CustomCollapsible>
                   )}
-                  <CustomCollapsible
-                    head={<h6 className="text-base font-semibold">Drawings</h6>}
-                    headProps={{ className: 'sticky top-0 z-[1]' }}
-                    element="li"
-                  >
-                    <div className="p-4">
-                      <Diagram
-                        fullHeight={false}
-                        showContainer={false}
-                        resource={ACTIVITY_RESOURCE.workOrder}
-                        referenceId={workOrderId}
-                        currentVersion={workOrderData?.versions?.length + 1 || 1}
-                        resourceData={workOrderData}
-                        attachmentType={ATTACHMENT_TYPE.drawing}
-                        showMaterialFilter={false}
-                        uniqueId={selectedService.uniqueId}
-                        stepId={null}
-                      />
-                    </div>
-                  </CustomCollapsible>
+                  {!workOrderPolicyData?.policy?.hideStepsDrawings &&
+                    <CustomCollapsible
+                      head={<h6 className="text-base font-semibold">Drawings</h6>}
+                      headProps={{ className: 'sticky top-0 z-[1]' }}
+                      element="li"
+                    >
+                      <div className="p-4">
+                        <Diagram
+                          fullHeight={false}
+                          showContainer={false}
+                          resource={ACTIVITY_RESOURCE.workOrder}
+                          referenceId={workOrderId}
+                          currentVersion={workOrderData?.versions?.length + 1 || 1}
+                          resourceData={workOrderData}
+                          attachmentType={ATTACHMENT_TYPE.drawing}
+                          showMaterialFilter={false}
+                          uniqueId={selectedService.uniqueId}
+                          stepId={null}
+                        />
+                      </div>
+                    </CustomCollapsible>
+                  }
                 </ul>
               </div>
             )}

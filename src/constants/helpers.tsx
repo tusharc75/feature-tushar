@@ -2999,6 +2999,18 @@ export const COLOUR_MASTER = {
   postWork: {
     background: 'rgba(222, 249, 255, 1)',
     borderColor: 'green'
+  },
+  pending: {
+    background: '#FFE7A2',
+    borderColor: '#FFB84D'
+  },
+  inProgress: {
+    background: '#A9D0F5',
+    borderColor: '#3399FF'
+  },
+  completed: {
+    background: '#B6D7A8',
+    borderColor: '#5CB85C'
   }
 };
 
