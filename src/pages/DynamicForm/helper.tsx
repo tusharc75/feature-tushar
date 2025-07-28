@@ -12,7 +12,9 @@ export const dynamicFormUpdateProcessStatus = async (resource: string, processSt
 
 export const fetchResourcePolicy = async (resource: string, permissions: any) => {
   let resourceData: any = null
+
   const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+
   if (data) {
     let { tabs, ...rest } = data;
 
@@ -28,5 +30,6 @@ export const fetchResourcePolicy = async (resource: string, permissions: any) =>
 
     resourceData = { ...rest, tabs: tabs }
   }
+
   return resourceData;
 }

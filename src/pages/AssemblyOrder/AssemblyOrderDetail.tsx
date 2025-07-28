@@ -90,12 +90,9 @@ const AssemblyOrderDetail = () => {
     });
   }, [locationKeys]);
 
-  const fetchPolicy = () => {
-    fetchResourcePolicy(sidebarResource.assemblyOrder, permissions).then((data) => {
-      setResourceData(data)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error)
-    })
+  const fetchPolicy = async () => {
+    const data = await fetchResourcePolicy(sidebarResource.assemblyOrder, permissions)
+    setResourceData(data)
   };
 
   useEffect(() => {

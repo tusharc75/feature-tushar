@@ -49,7 +49,6 @@ import ManageAccountDialog from './ManageAccount/index';
 import RelatedContacts from './RelatedContacts';
 import SupplierItems from './SupplierItems';
 import Warehouse from './Warehouse';
-import { fetchResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 function DisplayData({ label, value, icon, highlightsHead = false }) {
   return (
@@ -304,12 +303,17 @@ export default function AccountDetailPage(props) {
     initializeGraphData();
   };
 
-  const fetchPolicy = () => {
-    fetchResourcePolicy(sidebarResource[accountResource], permissions).then((data) => {
-      setResourceData(data)
-    }).catch((error) => {
-      toastConfig.setToastConfig(error)
-    })
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource[accountResource]}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const getAccountFields = async (accountData = {}) => {
