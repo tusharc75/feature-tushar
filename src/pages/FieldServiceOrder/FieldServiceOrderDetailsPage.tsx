@@ -36,7 +36,7 @@ import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Technicians from './Technicians';
 import Services from './Services';
 import FieldServiceOrderView from './RoadMapViews';
@@ -72,7 +72,7 @@ const ServiceOrderDetailsPage = () => {
 
   const [steps, setSteps] = useState([]);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -157,24 +157,18 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
-      if (data) {
-        setResourceData(data);
-        if (data?.policy?.addTechnicians || data?.policy?.addConsumables) {
-          if (!data?.policy?.addServices) {
-            setSteps(serviceOrderSteps2?.filter((e) => e.name !== 'Add'));
-          } else {
-            setSteps(serviceOrderSteps2);
-          }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket)
+    setResourcePolicyData(data)
+    if (data) {
+      if (data?.policy?.addTechnicians || data?.policy?.addConsumables) {
+        if (!data?.policy?.addServices) {
+          setSteps(serviceOrderSteps2?.filter((e) => e.name !== 'Add'));
         } else {
-          setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
+          setSteps(serviceOrderSteps2);
         }
+      } else {
+        setSteps(permissions?.invoice?.isRead ? serviceOrderSteps : serviceOrderSteps?.filter((e) => e.name !== 'Field Ticket Invoice'));
       }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
     }
   };
 
@@ -276,16 +270,16 @@ const ServiceOrderDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {(resourceData?.policy?.addServices || resourceData?.policy?.addTechnicians || resourceData?.policy?.addConsumables) && !isOffline && (
+          {(resourcePolicyData?.policy?.addServices || resourcePolicyData?.policy?.addTechnicians || resourcePolicyData?.policy?.addConsumables) && !isOffline && (
             <CustomTab value={1}>Details</CustomTab>
           )}
-          {!resourceData?.policy?.addServices && !resourceData?.policy?.addTechnicians && !resourceData?.policy?.addConsumables && (
+          {!resourcePolicyData?.policy?.addServices && !resourcePolicyData?.policy?.addTechnicians && !resourcePolicyData?.policy?.addConsumables && (
             <CustomTab value={2}>{resources?.fieldTicket?.titlePlural}</CustomTab>
           )}
           {!isOffline && permissions?.invoice?.isRead && <CustomTab value={3}>{resources?.invoice?.titlePlural}</CustomTab>}
           {serviceOrderData?.rentalJob && <CustomTab value={4}>On Field</CustomTab>}
           {!(isMobile && !isTablet) && !isOffline && <CustomTab value={5}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -322,7 +316,7 @@ const ServiceOrderDetailsPage = () => {
             />
             {steps[currentStep]?.name === steps[0]?.name &&
               serviceOrderData &&
-              (resourceData?.policy?.addServices ? (
+              (resourcePolicyData?.policy?.addServices ? (
                 <Services
                   serviceOrderData={serviceOrderData}
                   serviceOrderFields={serviceOrderFields}
@@ -339,21 +333,21 @@ const ServiceOrderDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}
-                  resourcePolicy={resourceData?.policy}
+                  resourcePolicy={resourcePolicyData?.policy}
                   stepFullScreen={stepFullScreen}
                   fetchData={fetchServiceOrderData}
                 />
               ))}
             {steps[currentStep]?.name === steps[1]?.name &&
               serviceOrderData &&
-              (resourceData?.policy?.addServices ? (
+              (resourcePolicyData?.policy?.addServices ? (
                 <Technicians
                   serviceOrderData={serviceOrderData}
                   serviceOrderFields={serviceOrderFields}
                   allowedToEdit={allowedToEdit}
                   setNextStep={setNextStep}
                   handleChangeStatus={handleChangeStatus}
-                  resourcePolicy={resourceData?.policy}
+                  resourcePolicy={resourcePolicyData?.policy}
                   stepFullScreen={stepFullScreen}
                   fetchData={fetchServiceOrderData}
                 />
@@ -368,7 +362,7 @@ const ServiceOrderDetailsPage = () => {
                   noQuotationCheck={true}
                 />
               ))}
-            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && resourceData?.policy?.addServices && (
+            {steps[currentStep]?.name === steps[2]?.name && serviceOrderData && resourcePolicyData?.policy?.addServices && (
               <FieldTicket
                 serviceOrderData={serviceOrderData}
                 serviceOrderFields={serviceOrderFields}
@@ -416,14 +410,14 @@ const ServiceOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={5}>
           <Box>{serviceOrderData && <FieldServiceOrderView fieldServiceOrderData={serviceOrderData} />}</Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 6}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.fieldServiceOrder}
                   data={serviceOrderData}
