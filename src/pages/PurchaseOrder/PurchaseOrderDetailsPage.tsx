@@ -114,7 +114,7 @@ const PurchaseOrderDetailsPage = () => {
 
   const getPurchaseOrderFields = () => {
     axiosInstance()
-      .get('/field?resource=Purchase Order')
+      .get('/field?resource=Purchase Order&view=true')
       .then(({ data }) => {
         setPurchaseOrderFields(data.data);
       })
