@@ -15,6 +15,8 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -145,15 +147,9 @@ const AddressDetailPage = () => {
     }
   };
 
-  const getAddressFields = () => {
-    axiosInstance()
-      .get('/field?resource=Address')
-      .then(({ data }) => {
-        setAddressFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getAddressFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.address, permissions?.address?.isUpdate);
+    setAddressFields(fieldsDataForRead);
   };
 
   const handleDeleteAddress = () => {
@@ -216,9 +212,7 @@ const AddressDetailPage = () => {
                     {'Edit'}
                   </ThemeButton>
                 )}
-                {permissions?.address?.isDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />
-                )}
+                {permissions?.address?.isDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
               </>
             </Box>
           </Box>

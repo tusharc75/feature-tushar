@@ -23,6 +23,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -70,8 +71,8 @@ const BulkAssetCreationDetailsPage = () => {
   }, [id, tabValue]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.bulkAssetCreation)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.bulkAssetCreation);
+    setResourcePolicyData(data);
   };
 
   const fetchData = async () => {
@@ -94,15 +95,9 @@ const BulkAssetCreationDetailsPage = () => {
     }
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get('/field?resource=Bulk Asset Creation')
-      .then(({ data }) => {
-        setBulkAssetCreationFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isUpdate);
+    setBulkAssetCreationFields(fieldsDataForRead);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -155,7 +150,9 @@ const BulkAssetCreationDetailsPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
