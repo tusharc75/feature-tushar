@@ -7,7 +7,6 @@ import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { FaRegQuestionCircle } from 'react-icons/fa';
 import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -19,7 +18,6 @@ import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AiButton from 'src/components/Helpers/Buttons/AiButton';
 import routes from 'src/components/Helpers/Routes';
-import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, sidebarResource } from 'src/constants/helpers';
 import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
@@ -519,15 +517,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
                       suffixComponent: (
-                        <InfoSidebarButton
-                          actionId={planningViewActions.planned}
-                          resource={sidebarResource.planningView}
-                          props={{
-                            className: '!bg-transparent cursor-pointer !p-0'
-                          }}
-                        >
-                          <FaRegQuestionCircle fontSize={14} />
-                        </InfoSidebarButton>
+                        <span id='planning-planned'></span>
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
@@ -545,15 +535,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
                       suffixComponent: (
-                        <InfoSidebarButton
-                          actionId={planningViewActions.incoming}
-                          resource={sidebarResource.planningView}
-                          props={{
-                            className: '!bg-transparent cursor-pointer !p-0'
-                          }}
-                        >
-                          <FaRegQuestionCircle fontSize={14} />
-                        </InfoSidebarButton>
+                        <span id='planning-incoming'></span>
                       ),
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
@@ -981,6 +963,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
                         <IconButton
                           size={'small'}
+                          id='some-scheduled-jobs-remain-unfulfilled'
                           onClick={() => {
                             setShowPlannedIncoming(true);
                           }}
@@ -989,7 +972,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         </IconButton>
                       </HtmlTooltip>
                     </span>
-                    <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                   </Box>
                 )}
             </div>
