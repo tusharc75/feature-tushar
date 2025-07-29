@@ -18,11 +18,11 @@ import routes from 'src/components/Helpers/Routes';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let employeeUnavailabilityTimeout;
 
 const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
-
   const renderedFrom = id ? `${camelCase(sidebarResource.employeeMaster)}_Unavailability` : `${camelCase(sidebarResource.technicianUnavailability)}`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -64,11 +64,10 @@ const TechnicianUnavailability = ({ id }: { id?: string | null }) => {
   };
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.technicianUnavailability}`);
-    data = response?.data?.data;
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.technicianUnavailability, permissions?.technicianUnavailability?.isUpdate);
+    let data = fieldsDataForRead;
     if (id) {
-      data = data?.filter((d) => d?.fieldData?.fieldName !== 'technician');
+      data = fieldsDataForRead?.filter((d) => d?.fieldData?.fieldName !== 'technician');
     }
     let newColumns = generateColumns(renderedFrom, data, routes.technicianUnavailabilityDetail.path, id ? false : true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);

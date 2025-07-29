@@ -13,7 +13,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToEdit,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  serviceMaster,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
@@ -22,6 +29,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 import { editDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.serviceMaster);
 
@@ -55,12 +63,13 @@ const ServiceMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.serviceMaster}`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
-    setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, data, false, false)]);
-    let newColumns = generateColumns(renderedFrom, data, routes?.serviceMasterDetail?.path, true);
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource?.serviceMaster,
+      permissions?.serviceMaster?.isUpdate
+    );
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    setWalkmeData([createResourceFlow(sidebarResource?.serviceMaster, fieldsDataForRead, false, false)]);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceMasterDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -104,7 +113,7 @@ const ServiceMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -147,7 +156,7 @@ const ServiceMaster = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.serviceMaster?.isUpdate;
           finalObject['canDelete'] = permissions?.serviceMaster?.isDelete;
@@ -197,28 +206,30 @@ const ServiceMaster = () => {
       });
   };
 
-    const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.allowedToEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${routes?.serviceMaster?.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${routes?.serviceMaster?.path}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -282,8 +293,9 @@ const ServiceMaster = () => {
             },
             {
               title: 'Step Export',
-              api: `${serviceMaster.api}/steps/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-                }`,
+              api: `${serviceMaster.api}/steps/unknown/template?export=true${
+                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -298,8 +310,9 @@ const ServiceMaster = () => {
             },
             {
               title: 'Consumable Export',
-              api: `${serviceMaster.api}/product/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-                }`,
+              api: `${serviceMaster.api}/product/unknown/template?export=true${
+                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+              }`,
               type: 'export'
             },
             {
@@ -344,11 +357,12 @@ const ServiceMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.serviceMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.serviceName || ''}`
-            : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.serviceMaster?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

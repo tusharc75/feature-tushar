@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SalesOrder = () => {
   const renderedFrom = camelCase(sidebarResource.salesOrder);
@@ -65,10 +66,8 @@ const SalesOrder = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Sales Order`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.salesOrder, permissions?.salesOrder?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.salesOrderDetail.path, true);
     let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));

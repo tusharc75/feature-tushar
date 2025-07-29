@@ -37,6 +37,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -72,16 +73,17 @@ const SubcontractAssemblyDetail = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.subcontractAssembly)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.subcontractAssembly);
+    setResourcePolicyData(data);
   };
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.subcontractAssembly}`);
-      data = response?.data?.data;
-      setFields(data?.filter((field) => field.isRead));
+      const { fieldsDataForRead } = await fetch_resource_view_fields(
+        sidebarResource?.subcontractAssembly,
+        permissions?.subcontractAssembly?.isUpdate
+      );
+      setFields(fieldsDataForRead);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -97,8 +99,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-        data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+          data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -223,7 +225,9 @@ const SubcontractAssemblyDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
