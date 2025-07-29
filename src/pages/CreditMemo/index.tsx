@@ -27,6 +27,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { Delete } from '@mui/icons-material';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const CreditMemo = () => {
   const {
@@ -86,17 +87,15 @@ const CreditMemo = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.creditMemo}&view=true`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
-    data?.forEach((d) => {
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.creditMemo, permissions?.creditMemo?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    fieldsDataForRead?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
         const statusOps = d?.fieldData?.option?.filter((e) => ![INVOICE_STATUS.cancelled, INVOICE_STATUS.new].includes(e.optionValue));
         setStatusOptions(statusOps);
       }
     });
-    let newColumns = generateColumns(renderedFrom, data, routes.creditMemoDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.creditMemoDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

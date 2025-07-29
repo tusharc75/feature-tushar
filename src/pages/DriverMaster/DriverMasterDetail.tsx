@@ -17,6 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageDriverMaster from './ManageDriverMaster';
 import { ExpandMore } from '@mui/icons-material';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const DriverMasterDetail = () => {
   const { id } = useParams();
@@ -43,22 +44,16 @@ const DriverMasterDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.driverMaster}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.driverMaster, permissions?.driverMaster?.isUpdate);
+    setFields(fieldsDataForRead);
+    if (fieldsDataForRead && fieldsDataForRead.length) {
+      fieldsDataForRead.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...o.fieldData.option]);
+          return true;
         }
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
       });
+    }
   };
 
   const fetchData = async () => {

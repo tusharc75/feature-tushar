@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIotDataPoints from './ManageIotDataPoints';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.iotDataPoints);
 
@@ -36,13 +37,10 @@ const IotDataPoints = () => {
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.iotDataPoints}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.iotDataPointsDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.iotDataPoints, permissions?.iotDataPoints?.isUpdate);
+      const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.iotDataPointsDetail.path, true);
+      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {

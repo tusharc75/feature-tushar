@@ -19,6 +19,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageDeviceTemplates from './ManageDeviceTemplates';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 export default function DeviceTemplates() {
   const renderedFrom = camelCase(sidebarResource.deviceTemplates);
@@ -41,13 +42,10 @@ export default function DeviceTemplates() {
     fetchGridColumns();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Device Templates')
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.deviceTemplatesDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplates, permissions?.deviceTemplates?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.deviceTemplatesDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

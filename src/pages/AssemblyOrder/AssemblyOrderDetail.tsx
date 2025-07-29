@@ -39,6 +39,7 @@ import RoadmapViews from './RoadMapViews';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 import { ExpandMore } from '@mui/icons-material';
 import { VITE_APP_DMS_URL } from 'src/config';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -91,8 +92,8 @@ const AssemblyOrderDetail = () => {
   }, [locationKeys]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.assemblyOrder)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.assemblyOrder);
+    setResourcePolicyData(data);
   };
 
   useEffect(() => {
@@ -109,19 +110,14 @@ const AssemblyOrderDetail = () => {
     fetchFields();
   }, []);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.assemblyOrder}`)
-      .then(({ data: { data } }) => {
-        setAllFields(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async() => {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
+      setAllFields(fieldsDataForRead);
   };
 
   const fetchData = () => {
-    axiosInstance().get(`${routes.assemblyOrder.path}/${id}`)
+    axiosInstance()
+      .get(`${routes.assemblyOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         var steps = assemblyOrderSteps;
         if (!resourcePolicyData?.policy?.loadingTicket) {
@@ -136,9 +132,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-          data?.canDelete &&
-          ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
+            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+            data?.canDelete &&
+            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -188,20 +184,23 @@ const AssemblyOrderDetail = () => {
 
   const showConvertInRentalJob = () => {
     if (!assemblyOrderData?.canConvert) {
-      return false
+      return false;
     }
-    let show = false
+    let show = false;
     if (assemblyOrderData?.rentalJob?.length > 0) {
-      if (!resourcePolicyData?.policy?.autoConvertInSameRentalJob && (permissions?.rentalManagement?.isUpdate || permissions?.rentalManagement?.isCreate)) {
-        show = true
+      if (
+        !resourcePolicyData?.policy?.autoConvertInSameRentalJob &&
+        (permissions?.rentalManagement?.isUpdate || permissions?.rentalManagement?.isCreate)
+      ) {
+        show = true;
       }
     } else {
       if (permissions?.rentalManagement?.isCreate) {
-        show = true
+        show = true;
       }
     }
-    return show
-  }
+    return show;
+  };
 
   return (
     <Box className="main-container-v1">
@@ -215,22 +214,22 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
-                {assemblyOrderData?.dmsFolder &&
+                {assemblyOrderData?.dmsFolder && (
                   <ThemeButton
                     onClick={() => {
                       window.open(`${VITE_APP_DMS_URL}/document/${assemblyOrderData?.dmsFolder?._id}`, '_blank');
-
                     }}
                   >
                     {`Upload Documents`}
-                  </ThemeButton>}
+                  </ThemeButton>
+                )}
                 {showConvertInRentalJob() ? (
                   <ThemeButton
                     onClick={(event) => {
                       if (assemblyOrderData?.rentalJob?.length > 0) {
                         setAnchorEl(event.currentTarget);
                       } else {
-                        setOpenRentalDialog(true)
+                        setOpenRentalDialog(true);
                       }
                     }}
                     aria-controls="convert-to-rental-job-menu"
@@ -256,25 +255,26 @@ const AssemblyOrderDetail = () => {
                 >
                   {permissions?.rentalManagement?.isUpdate && (
                     <>
-                      {Array.isArray(assemblyOrderData?.rentalJob) && assemblyOrderData?.rentalJob?.map(r => {
-                        return (
-                          <MenuItem
-                            onClick={() => {
-                              setAnchorEl(null);
-                              convertToRental({ _id: r?.optionValue })
-                            }}
-                          >
-                            {`Add to ${r?.optionLabel}`}
-                          </MenuItem>
-                        )
-                      })}
+                      {Array.isArray(assemblyOrderData?.rentalJob) &&
+                        assemblyOrderData?.rentalJob?.map((r) => {
+                          return (
+                            <MenuItem
+                              onClick={() => {
+                                setAnchorEl(null);
+                                convertToRental({ _id: r?.optionValue });
+                              }}
+                            >
+                              {`Add to ${r?.optionLabel}`}
+                            </MenuItem>
+                          );
+                        })}
                     </>
                   )}
                   {permissions?.rentalManagement?.isCreate && (
                     <MenuItem
                       onClick={() => {
                         setAnchorEl(null);
-                        setOpenRentalDialog(true)
+                        setOpenRentalDialog(true);
                       }}
                     >
                       {`Add to New ${resources?.rentalManagement?.titleSingular}`}
@@ -305,7 +305,9 @@ const AssemblyOrderDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -370,10 +372,7 @@ const AssemblyOrderDetail = () => {
               />
             )}
             {assemblySteps[currentStep]?.name === 'Final Slip' && assemblyOrderData && (
-              <Invoice
-                renderedFrom={`${renderedFrom}_grid-4`}
-                assemblyOrderData={assemblyOrderData}
-                stepFullScreen={stepFullScreen} />
+              <Invoice renderedFrom={`${renderedFrom}_grid-4`} assemblyOrderData={assemblyOrderData} stepFullScreen={stepFullScreen} />
             )}
           </TabPanel>
         </ContentFullScreen>

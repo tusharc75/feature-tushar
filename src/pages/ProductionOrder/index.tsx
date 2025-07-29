@@ -28,6 +28,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductionOrder = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
@@ -86,10 +87,8 @@ const ProductionOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Production Order`);
-    data = response?.data?.data;
-    let columns = generateColumns(renderedFrom, data, routes?.productionOrderDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productionOrder, permissions?.productionOrder?.isUpdate);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes?.productionOrderDetail?.path, true);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };

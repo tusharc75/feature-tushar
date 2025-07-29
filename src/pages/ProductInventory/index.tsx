@@ -28,6 +28,7 @@ import SettingsDialog from './SettingsDialog';
 import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
 import WarningIcon from '@mui/icons-material/Warning';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -101,17 +102,17 @@ const InventoryProduct = () => {
   const fetchGridColumns = async () => {
     setColumns(null);
 
-    const productFields = await axiosInstance().get('/field?resource=Product&view=true');
-    const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
+    const productFields = await fetch_resource_view_fields(sidebarResource.product, permissions?.productCategory?.isUpdate);
+    const productInventoryFields = await fetch_resource_view_fields(sidebarResource.productInventory, permissions?.productInventory?.isUpdate);
 
     let columns = [];
-    productFields?.data?.data?.forEach((o) => {
+    productFields?.fieldsDataForRead?.forEach((o) => {
       if (o.fieldData.fieldName === 'expenseItem') {
         setShowExpenseItem(true);
       }
     });
 
-    let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
+    let newColumns = generateColumns(renderedFrom, productFields?.fieldsDataForRead, routes.productDetail.path);
     columns = [...columns, ...newColumns];
     columns?.forEach((col) => {
       if (col?.primaryField) {
@@ -138,12 +139,12 @@ const InventoryProduct = () => {
       }
     });
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
-      let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
+      let newColumns = generateColumns(renderedFrom, productInventoryFields?.fieldsDataForRead, routes.productInventory.path);
       newColumns?.forEach((o) => {
         if (!['plant', 'product'].includes(o?.accessor)) {
           if (
             ['minInventory', 'maxInventory'].includes(o.accessor) &&
-            productInventoryFields?.data?.data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'number'
+            productInventoryFields?.fieldsDataForRead?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'number'
           ) {
             columns.push({
               ...o,

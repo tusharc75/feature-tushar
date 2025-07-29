@@ -31,6 +31,7 @@ import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Step from '../DynamicForm/Step';
 import Material from './Material';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,8 +69,8 @@ const DemandOrderDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
-      setFields(response?.data?.data);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.demandOrder, permissions?.demandOrder?.isUpdate);
+      setFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -84,9 +85,9 @@ const DemandOrderDetails = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data) && ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.demandOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) &&
-        data?.canDelete &&
-        ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          ![DEMAND_ORDER_STATUS.converted]?.includes(data?.status)
       );
       setDemandOrderData(data);
       setLoading(false);
@@ -97,8 +98,8 @@ const DemandOrderDetails = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.demandOrder)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.demandOrder);
+    setResourcePolicyData(data);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -226,7 +227,9 @@ const DemandOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

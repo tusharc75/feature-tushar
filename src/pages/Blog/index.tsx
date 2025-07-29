@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageBlog from './ManageBlog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Blog = () => {
   const renderedFrom = camelCase(sidebarResource?.blog);
@@ -50,10 +51,8 @@ const Blog = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.blog}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.blogDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.blog, permissions?.blog?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.blogDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

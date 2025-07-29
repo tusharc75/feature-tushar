@@ -15,6 +15,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, sidebarResource } from '../../constants/helpers';
 import ManageBudgetDialog from './ManageBudgetDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const BudgetDetail = () => {
   const { id } = useParams();
@@ -40,14 +41,8 @@ const BudgetDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.budget}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.budget, permissions?.budget?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

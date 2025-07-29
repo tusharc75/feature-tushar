@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageBudgetDialog from './ManageBudgetDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Budget = () => {
   const renderedFrom = camelCase(sidebarResource?.budget);
@@ -50,10 +51,8 @@ const Budget = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Budget&view=true`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.budgetDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.budget, permissions?.budget?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.budgetDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

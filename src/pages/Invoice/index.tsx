@@ -36,6 +36,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import OpenInvoiceErrorDialog from 'src/pages/Invoice/OpenInvoiceErrorDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let invoiceTimeout;
 
@@ -90,32 +91,36 @@ const Invoice = () => {
   }, []);
 
   useEffect(() => {
-    fetchChildColumn()
+    fetchChildColumn();
   }, []);
 
   const fetchChildColumn = async () => {
     const invoiceFieldData = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, null, false);
     const newPdfColumns = generateColumns(renderedFrom, invoiceFieldData, null, false, null);
-    setPdfColumns([{
-      accessor: 'index',
-      Header: 'Index',
-    }, {
-      accessor: 'type',
-      Header: 'Type',
-    }, {
-      accessor: 'detail',
-      Header: 'Detail',
-    }, {
-      accessor: 'description',
-      Header: 'Description',
-    }, ...newPdfColumns]);
-  }
+    setPdfColumns([
+      {
+        accessor: 'index',
+        Header: 'Index'
+      },
+      {
+        accessor: 'type',
+        Header: 'Type'
+      },
+      {
+        accessor: 'detail',
+        Header: 'Detail'
+      },
+      {
+        accessor: 'description',
+        Header: 'Description'
+      },
+      ...newPdfColumns
+    ]);
+  };
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Invoice`);
-    data = response?.data?.data;
-    data?.forEach((d) => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.invoice, permissions?.invoice?.isUpdate);
+    fieldsDataForRead?.forEach((d) => {
       if (d?.fieldData?.fieldName === 'status') {
         const statusOps = d?.fieldData?.option?.filter(
           (e) =>
@@ -131,7 +136,7 @@ const Invoice = () => {
         setStatusOptions(statusOps);
       }
     });
-    const newColumns = generateColumns(renderedFrom, data, routes.invoiceDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.invoiceDetail.path, true);
     newColumns?.forEach((o) => {
       if (o?.accessor === 'invoiceNumber') {
         o.cell = ({ row }) => (
@@ -502,11 +507,12 @@ const Invoice = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.invoice?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.invoiceNumber}`
-              : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.invoice?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

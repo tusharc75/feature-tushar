@@ -14,6 +14,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageInventoryCycle from './ManageInventoryCycle';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const InventoryCycleDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -38,15 +40,9 @@ const InventoryCycleDetailPage = () => {
     }
   }, [id]);
 
-  const getInventoryCycleFields = () => {
-    axiosInstance()
-      .get('/field?resource=Inventory Cycle')
-      .then(({ data }) => {
-        setFormsData(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getInventoryCycleFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.inventoryCycle, permissions?.inventoryCycle?.isUpdate);
+    setFormsData(fieldsDataForRead);
   };
 
   const fetchInventoryCycleData = async () => {
