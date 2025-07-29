@@ -61,7 +61,7 @@ const EmployeeMasterDetail = () => {
   };
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isUpdate);
     setFields(fieldsDataForRead);
   };
 

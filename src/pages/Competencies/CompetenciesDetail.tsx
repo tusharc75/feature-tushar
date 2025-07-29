@@ -38,7 +38,7 @@ const CompetenciesDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencies, permissions?.competencies?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencies, permissions?.competencies?.isUpdate);
     setFields(fieldsDataForRead);
   };
 

@@ -69,7 +69,7 @@ const DemandOrderDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.demandOrder, permissions?.demandOrder?.isRead);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.demandOrder, permissions?.demandOrder?.isUpdate);
       setFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);

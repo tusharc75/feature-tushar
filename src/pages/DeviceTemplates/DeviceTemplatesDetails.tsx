@@ -59,7 +59,7 @@ export default function DeviceTemplatesDetails() {
   };
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplates, permissions?.deviceTemplates?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplates, permissions?.deviceTemplates?.isUpdate);
     setFields(fieldsDataForRead);
   };
 

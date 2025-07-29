@@ -44,7 +44,7 @@ const DriverMasterDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.driverMaster, permissions?.driverMaster?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.driverMaster, permissions?.driverMaster?.isUpdate);
     setFields(fieldsDataForRead);
     if (fieldsDataForRead && fieldsDataForRead.length) {
       fieldsDataForRead.some((o) => {

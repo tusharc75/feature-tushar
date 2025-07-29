@@ -41,7 +41,7 @@ const BudgetDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.budget, permissions?.budget?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.budget, permissions?.budget?.isUpdate);
     setFields(fieldsDataForRead);
   };
 

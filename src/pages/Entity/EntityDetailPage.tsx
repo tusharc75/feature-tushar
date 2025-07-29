@@ -110,7 +110,7 @@ const EntityDetailsPage = () => {
   };
 
   const getEntityFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.entity, permissions?.entity?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.entity, permissions?.entity?.isUpdate);
     setEntityFIelds(fieldsDataForRead);
   };
 

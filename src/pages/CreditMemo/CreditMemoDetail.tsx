@@ -54,7 +54,7 @@ const CreditMemoDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.creditMemo, permissions?.creditMemo?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.creditMemo, permissions?.creditMemo?.isUpdate);
     fieldsDataForRead.forEach((o: any) => {
       if (o?.fieldData?.fieldName === 'status') {
         setStatusOptions([...o.fieldData.option]);

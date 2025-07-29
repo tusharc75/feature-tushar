@@ -96,7 +96,7 @@ const BulkAssetCreationDetailsPage = () => {
   };
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isRead);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isUpdate);
     setBulkAssetCreationFields(fieldsDataForRead);
   };
 
