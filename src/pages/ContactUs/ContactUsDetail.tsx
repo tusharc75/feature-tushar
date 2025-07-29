@@ -39,7 +39,7 @@ const BlogDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.contactUs, permissions?.contactUs?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.contactUs, permissions?.contactUs?.isRead);
     setFields(fieldsDataForRead);
   };
 

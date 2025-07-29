@@ -40,7 +40,7 @@ const DeviceTemplateAlertDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplateAlert, permissions?.deviceTemplateAlert?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplateAlert, permissions?.deviceTemplateAlert?.isRead);
     setFields(fieldsDataForRead);
   };
 

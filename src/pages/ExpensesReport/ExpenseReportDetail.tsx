@@ -73,7 +73,7 @@ const ExpenseReportDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isUpdate);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isRead);
       setFields(fieldsDataForRead);
   };
 

@@ -148,7 +148,7 @@ const AddressDetailPage = () => {
   };
 
   const getAddressFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.address, permissions?.address?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.address, permissions?.address?.isRead);
     setAddressFields(fieldsDataForRead);
   };
 

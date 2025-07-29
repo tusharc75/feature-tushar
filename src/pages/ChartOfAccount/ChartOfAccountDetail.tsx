@@ -46,7 +46,7 @@ const ChartOfAccountDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.chartOfAccount, permissions?.chartOfAccount?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.chartOfAccount, permissions?.chartOfAccount?.isRead);
     setFields(fieldsDataForRead);
   };
 

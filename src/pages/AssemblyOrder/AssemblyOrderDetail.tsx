@@ -111,7 +111,7 @@ const AssemblyOrderDetail = () => {
   }, []);
 
   const fetchFields = async() => {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isRead);
       setAllFields(fieldsDataForRead);
   };
 
