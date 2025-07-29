@@ -84,7 +84,7 @@ const Opportunities = () => {
 
   const fetchGridColumns = async () => {
     const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.opportunity, permissions?.opportunity?.isUpdate);
-    setAllFields(fieldsDataAll);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     const newColumns = generateColumns(sidebarResource.opportunity, fieldsDataForRead, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {

@@ -19,9 +19,9 @@ import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
 import Products from 'src/pages/ProductTypes/Products';
 import Services from 'src/pages/ProductTypes/Services';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductTypesDetail = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -40,7 +40,12 @@ const ProductTypesDetail = () => {
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fields, setFields] = useState(null);
-  const WORK_ORDER_RESOURCE_TABS = [sidebarResource.repairOrder, sidebarResource.productionOrder, sidebarResource.assemblyOrder, sidebarResource.disassemblyOrder];
+  const WORK_ORDER_RESOURCE_TABS = [
+    sidebarResource.repairOrder,
+    sidebarResource.productionOrder,
+    sidebarResource.assemblyOrder,
+    sidebarResource.disassemblyOrder
+  ];
 
   useEffect(() => {
     fetchFields();
@@ -54,30 +59,26 @@ const ProductTypesDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productTypes, permissions?.productTypes?.isUpdate);
+    setFields(fieldsDataForRead);
+  };
+
+  const fetchData = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.productTypes}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+      .get(`${productTypes.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setAllowedToEdit(permissions?.productTypes?.isUpdate);
+        setAllowedToDelete(permissions?.productTypes?.isDelete);
+        setproductTypeData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-
-  const fetchData = async () => {
-    axiosInstance().get(`${productTypes.api}/${id}`).then(({ data: { data } }) => {
-      setAllowedToEdit(permissions?.productTypes?.isUpdate);
-      setAllowedToDelete(permissions?.productTypes?.isDelete);
-      setproductTypeData(data);
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  };
-
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.productTypes)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.productTypes);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -92,7 +93,6 @@ const ProductTypesDetail = () => {
         setShowConfirmBox(false);
       });
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -121,33 +121,55 @@ const ProductTypesDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Products</CustomTab>
           <CustomTab value={2}>Services</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 1} key={i}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {productTypeData && fields ? (
-            <DetailsPage data={productTypeData} fields={fields} />
-          ) : (
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          )}
+          {productTypeData && fields ? <DetailsPage data={productTypeData} fields={fields} /> : <CommonSkeleton lenArray={[...Array(10).keys()]} />}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Products resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
+          <Products
+            resource={sidebarResource.productTypes}
+            referenceId={productTypeData?._id}
+            workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS}
+            allowedToEdit={allowedToEdit}
+          />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
-          <Services resource={sidebarResource.productTypes} referenceId={productTypeData?._id} workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS} allowedToEdit={allowedToEdit} />
+          <Services
+            resource={sidebarResource.productTypes}
+            referenceId={productTypeData?._id}
+            workOrderResourceTabs={WORK_ORDER_RESOURCE_TABS}
+            allowedToEdit={allowedToEdit}
+          />
         </TabPanel>
-        {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => (
-          <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab} resourcePolicyId={resourcePolicyData?._id} resourceId={id} resource={sidebarResource.productTypes} data={productTypeData} allowedToEdit={permissions?.productTypes?.isUpdate} />
-          </TabPanel>
-        ))}
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => (
+            <TabPanel value={tabValue} index={i + 1} key={i}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourcePolicyData?._id}
+                resourceId={id}
+                resource={sidebarResource.productTypes}
+                data={productTypeData}
+                allowedToEdit={permissions?.productTypes?.isUpdate}
+              />
+            </TabPanel>
+          ))}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${resources?.productTypes?.titleSingular?.toLowerCase()} : ${productTypeData?.productType} ?`}
           onClose={() => setShowConfirmBox(false)}
-          onOk={handleDelete} />
+          onOk={handleDelete}
+        />
       )}
       {openUpdateDialog && (
         <ManageProductTypes
@@ -155,9 +177,10 @@ const ProductTypesDetail = () => {
           productTypesId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
-            setOpenUpdateDialog(false)
-            fetchData()
-          }} />
+            setOpenUpdateDialog(false);
+            fetchData();
+          }}
+        />
       )}
     </Box>
   );

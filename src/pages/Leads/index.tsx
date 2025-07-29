@@ -91,18 +91,9 @@ const Leads = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.lead, permissions?.lead?.isUpdate);
-    setAllFields(JSON.parse(JSON.stringify(fieldsDataForRead)));
-  };
-
-  useEffect(() => {
-    if (allFields?.length) {
-      createColumns(allFields);
-    }
-  }, [allFields]);
-
-  const createColumns = (data) => {
-    let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.lead, permissions?.lead?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    let newColumns = generateColumns(lead.leadResource, fieldsDataForRead, routes.leadDetail.path, true);
     newColumns = [
       ...newColumns,
       {
