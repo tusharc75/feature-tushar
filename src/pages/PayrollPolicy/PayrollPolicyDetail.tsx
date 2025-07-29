@@ -18,6 +18,7 @@ import Holidays from './Holidays';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import PaidTimeOff from './PaidTimeOff';
 import PayTypes from './PayTypes';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PayrollPolicyDetail = () => {
   const { id } = useParams();
@@ -42,14 +43,8 @@ const PayrollPolicyDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.payrollPolicy}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.payrollPolicy, permissions?.payrollPolicy?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

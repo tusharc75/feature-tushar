@@ -20,6 +20,7 @@ import Step from '../DynamicForm/Step';
 import ManagePlanning from './ManagePlanning';
 import Material from './Material';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PlanningDetail = () => {
   const renderedFrom = camelCase(sidebarResource.planning);
@@ -51,14 +52,8 @@ const PlanningDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get('/field?resource=Planning')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.planning, permissions?.planning?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -83,8 +78,8 @@ const PlanningDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.planning)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.planning);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -177,7 +172,9 @@ const PlanningDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange} textColor="primary">
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

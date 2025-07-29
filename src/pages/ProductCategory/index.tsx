@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CreateProductCategory from './CreateProductCategory';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductCategory = () => {
   const renderedFrom = camelCase(sidebarResource.productCategory);
@@ -48,10 +49,8 @@ const ProductCategory = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.productCategory}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.productCategoryDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productCategory, permissions?.productCategory?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productCategoryDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -258,11 +257,12 @@ const ProductCategory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
+          message={`Are you sure you want to delete ${
+            deleteRecord
               ? `${resources?.productCategory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name || ''}`
               : `selected ${resources?.productCategory?.titlePlural?.toLowerCase()}`
-            } ?`}
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -40,6 +40,7 @@ import NonSerializedAssetProductInventory from './inventory';
 import LeadTime from 'src/components/LeadTime';
 import Step from 'src/pages/DynamicForm/Step';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const minHeight = '250px';
 
@@ -82,8 +83,8 @@ const ProductDetailsPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.product)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.product);
+    setResourcePolicyData(data);
   };
 
   useEffect(() => {
@@ -113,59 +114,51 @@ const ProductDetailsPage = () => {
     setTabValue(newValue);
   };
 
-  const getProductFieldsAndData = () => {
+  const getProductFieldsAndData = async () => {
     setLoading(true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const _productField: any = [];
+    const filteredData = fieldsDataForRead.filter((obj) => obj.isRead);
+    filteredData.forEach((_f) => {
+      if (!ignoreField.includes(_f.fieldData.fieldName)) {
+        _productField.push(_f.fieldData);
+      }
+    });
+    const _fields = [];
+    _productField.map((_f) => _fields.push({ fieldData: _f }));
+    var newField = _fields;
     axiosInstance()
-      .get('/field?resource=Product')
+      .get(`/product/` + id)
       .then(({ data: { data } }) => {
-        const _productField: any = [];
-        const filteredData = data.filter((obj) => obj.isRead);
-        filteredData.forEach((_f) => {
-          if (!ignoreField.includes(_f.fieldData.fieldName)) {
-            _productField.push(_f.fieldData);
-          }
+        data.fields?.map((_f) => newField.push({ fieldData: _f }));
+        data.productData.fields?.map((_f) => newField.push({ fieldData: _f }));
+        var fields = [];
+        newField.forEach((_f) => {
+          fields.push(_f.fieldData);
         });
-        const _fields = [];
-        _productField.map((_f) => _fields.push({ fieldData: _f }));
-        var newField = _fields;
-        axiosInstance()
-          .get(`/product/` + id)
-          .then(({ data: { data } }) => {
-            data.fields?.map((_f) => newField.push({ fieldData: _f }));
-            data.productData.fields?.map((_f) => newField.push({ fieldData: _f }));
-            var fields = [];
-            newField.forEach((_f) => {
-              fields.push(_f.fieldData);
+        fields = extractFieldsForDisplay(fields);
+        newField = [];
+        fields.forEach((_f) => {
+          newField.push({ fieldData: _f });
+        });
+        setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
+        setHeadingLabel(
+          data.productData?.productNumber ? `${data.productData?.productName} - ${data.productData?.productNumber}` : data.productData?.productName
+        );
+        setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
+        if (data?.productData?.entity && data?.productData?.entity !== undefined) {
+          data.productData.entity = user.entity
+            ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
+            ?.map((d) => {
+              return { optionValue: d._id, optionLabel: d.entityName };
             });
-            fields = extractFieldsForDisplay(fields);
-            newField = [];
-            fields.forEach((_f) => {
-              newField.push({ fieldData: _f });
-            });
-            setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
-            setHeadingLabel(
-              data.productData?.productNumber
-                ? `${data.productData?.productName} - ${data.productData?.productNumber}`
-                : data.productData?.productName
-            );
-            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
-            if (data?.productData?.entity && data?.productData?.entity !== undefined) {
-              data.productData.entity = user.entity
-                ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
-                ?.map((d) => {
-                  return { optionValue: d._id, optionLabel: d.entityName };
-                });
-            }
-            setProductData(data.productData);
-            setLoading(false);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setLoading(false);
-          });
+        }
+        setProductData(data.productData);
+        setLoading(false);
       })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
       });
   };
 
@@ -330,7 +323,7 @@ const ProductDetailsPage = () => {
                                             <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
                                           )}
                                           <Typography className="table-data-v1 bt-0 br-0">{inventory}</Typography>
-                                          <Typography className="table-data-v1 bt-0">{(inventory - (softHold || 0))}</Typography>
+                                          <Typography className="table-data-v1 bt-0">{inventory - (softHold || 0)}</Typography>
                                         </Box>
                                       ))}
                                   </>

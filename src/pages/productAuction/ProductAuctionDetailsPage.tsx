@@ -16,6 +16,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, productAuction, sidebarResource } from '../../constants/helpers';
 import BidsPage from './Bids';
 import ManageProductAuction from './ManageProductAuction';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductAuctionDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -40,15 +41,9 @@ const ProductAuctionDetailsPage = () => {
     fetchData();
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${productAuction.resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productAuction, permissions?.productAuction?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -119,7 +114,12 @@ const ProductAuctionDetailsPage = () => {
               <CustomTab value={1}>Bids</CustomTab>
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
-              <DetailsPage data={productAuctionData} fields={fields} resource={sidebarResource?.productAuction} referenceId={productAuctionData?._id} />
+              <DetailsPage
+                data={productAuctionData}
+                fields={fields}
+                resource={sidebarResource?.productAuction}
+                referenceId={productAuctionData?._id}
+              />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               <BidsPage bids={bids} />

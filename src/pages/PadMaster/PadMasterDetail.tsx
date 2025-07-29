@@ -17,6 +17,7 @@ import Step from '../DynamicForm/Step';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Grid from '@mui/material/Grid2';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PadMasterDetail = () => {
   const { id } = useParams();
@@ -44,14 +45,8 @@ const PadMasterDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.padMaster}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.padMaster, permissions?.padMaster?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -98,8 +93,8 @@ const PadMasterDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.padMaster)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.padMaster);
+    setResourcePolicyData(data);
   };
 
   return (
@@ -127,7 +122,9 @@ const PadMasterDetail = () => {
           }}
         >
           <CustomTab value={0}>Header</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={currentTabIndex} index={0}>
           {loading || !fields?.length ? (

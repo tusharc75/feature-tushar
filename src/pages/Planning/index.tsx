@@ -29,6 +29,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Planning = () => {
   const renderedFrom = camelCase(sidebarResource.planning);
@@ -82,10 +83,8 @@ const Planning = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.planning}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.planningDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.planning, permissions?.planning?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.planningDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

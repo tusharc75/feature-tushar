@@ -17,9 +17,9 @@ import { packageCategory, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PackageCategoryDetail = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -51,29 +51,26 @@ const PackageCategoryDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packageCategory, permissions?.packageCategory?.isUpdate);
+    setFields(fieldsDataForRead);
+  };
+
+  const fetchData = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.packageCategory}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+      .get(`${packageCategory.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setAllowedToEdit(permissions?.packageCategory?.isUpdate);
+        setAllowedToDelete(permissions?.packageCategory?.isDelete);
+        setPackageCategoryData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const fetchData = async () => {
-    axiosInstance().get(`${packageCategory.api}/${id}`).then(({ data: { data } }) => {
-      setAllowedToEdit(permissions?.packageCategory?.isUpdate);
-      setAllowedToDelete(permissions?.packageCategory?.isDelete);
-      setPackageCategoryData(data);
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  };
-
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.packageCategory)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.packageCategory);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -88,7 +85,6 @@ const PackageCategoryDetail = () => {
         setShowConfirmBox(false);
       });
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -115,7 +111,13 @@ const PackageCategoryDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={(e, newValue) => setTabValue(Number(newValue))}>
           <CustomTab value={0}>Header</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 1} key={i}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {packageCategoryData && fields ? (
@@ -124,23 +126,28 @@ const PackageCategoryDetail = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           )}
         </TabPanel>
-        {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => (
-          <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab}
-              resourcePolicyId={resourcePolicyData?._id}
-              resourceId={id}
-              resource={sidebarResource.packageCategory}
-              data={packageCategoryData}
-              allowedToEdit={permissions?.packageCategory?.isUpdate} />
-          </TabPanel>
-        ))}
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => (
+            <TabPanel value={tabValue} index={i + 1} key={i}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourcePolicyData?._id}
+                resourceId={id}
+                resource={sidebarResource.packageCategory}
+                data={packageCategoryData}
+                allowedToEdit={permissions?.packageCategory?.isUpdate}
+              />
+            </TabPanel>
+          ))}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${resources?.packageCategory?.titleSingular?.toLowerCase()} : ${packageCategoryData?.name} ?`}
           onClose={() => setShowConfirmBox(false)}
-          onOk={handleDelete} />
+          onOk={handleDelete}
+        />
       )}
       {openUpdateDialog && (
         <ManagePackageCategory
@@ -148,9 +155,10 @@ const PackageCategoryDetail = () => {
           packageCategoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
-            setOpenUpdateDialog(false)
-            fetchData()
-          }} />
+            setOpenUpdateDialog(false);
+            fetchData();
+          }}
+        />
       )}
     </Box>
   );
