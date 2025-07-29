@@ -102,7 +102,7 @@ const PurchaseOrder = () => {
 
   const fetchGridColumns = () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource.purchaseOrder}`)
+      .get(`/field?resource=${sidebarResource.purchaseOrder}&view=true`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, routes.purchaseOrderDetail.path, true);
         let extraColumn = [
