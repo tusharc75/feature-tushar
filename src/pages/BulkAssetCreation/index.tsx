@@ -29,6 +29,7 @@ import {
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const BulkAssetCreation = () => {
   let renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -79,13 +80,10 @@ const BulkAssetCreation = () => {
     return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.bulkAssetCreation}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.bulkAssetCreationDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.bulkAssetCreationDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

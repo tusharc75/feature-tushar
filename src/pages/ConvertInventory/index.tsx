@@ -16,6 +16,7 @@ import { convertInventory, gridLoadingTimeout, prepareDataForGrid, sidebarResour
 import InventoryToAsset from './InventoryToAsset';
 import axios, { CancelTokenSource } from 'axios';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ConvertInventory = () => {
   const renderedFrom = camelCase(sidebarResource?.inventoryToAsset);
@@ -69,11 +70,9 @@ const ConvertInventory = () => {
   }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Product&view=true`);
-    data = response?.data?.data;
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.inventoryToAsset?.isUpdate);
     let columns = [];
-    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path);
     columns = [...columns, ...newColumns];
     columns.push({
       accessor: 'availableInventory',

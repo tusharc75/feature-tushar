@@ -22,6 +22,7 @@ import ManageEmployeeMaster from './ManageEmployeeMaster';
 import Step from '../DynamicForm/Step';
 import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const EmployeeMasterDetail = () => {
   const { id } = useParams();
@@ -55,21 +56,13 @@ const EmployeeMasterDetail = () => {
   }, [id]);
 
   const fetchUnavailabilityFields = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.technicianUnavailability}&view=true`);
-    data = response?.data?.data;
-    setUnavailabilityFields(data);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.technicianUnavailability, permissions?.technicianUnavailability?.isUpdate);
+    setUnavailabilityFields(fieldsDataForRead);
   };
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.employeeMaster}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -86,8 +79,8 @@ const EmployeeMasterDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.employeeMaster)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.employeeMaster);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {

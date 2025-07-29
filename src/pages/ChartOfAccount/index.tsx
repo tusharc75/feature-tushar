@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageChartOfAccount from './ManageChartOfAccount';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ChartOfAccount = () => {
   const renderedFrom = camelCase(sidebarResource.chartOfAccount);
@@ -48,10 +49,8 @@ const ChartOfAccount = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.chartOfAccount}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.chartOfAccountDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.chartOfAccount, permissions?.chartOfAccount?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.chartOfAccountDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

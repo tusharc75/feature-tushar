@@ -20,6 +20,7 @@ import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports'
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ExpenseReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,15 +72,9 @@ const ExpenseReportDetail = () => {
     }
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.expenseReport}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isUpdate);
+      setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -89,7 +84,7 @@ const ExpenseReportDetail = () => {
         setAllowedToDelete(permissions?.expenseReport?.isDelete && data?.canDelete);
         setAllowedToEdit(
           permissions?.expenseReport?.isUpdate &&
-          ![EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved, EXPENSE_STATUS.reimbursed]?.includes(data?.status)
+            ![EXPENSE_STATUS.awaitingApproval, EXPENSE_STATUS.approved, EXPENSE_STATUS.reimbursed]?.includes(data?.status)
         );
         setExpenseReportData(data);
       })
@@ -99,8 +94,8 @@ const ExpenseReportDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.expenses)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.expenses);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -189,7 +184,9 @@ const ExpenseReportDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Expenses</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

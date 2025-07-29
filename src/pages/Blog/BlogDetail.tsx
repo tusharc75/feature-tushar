@@ -14,6 +14,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageBlog from './ManageBlog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const BlogDetail = () => {
   const { id } = useParams();
@@ -39,14 +41,8 @@ const BlogDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get('/field?resource=Blog')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.blog, permissions?.blog?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

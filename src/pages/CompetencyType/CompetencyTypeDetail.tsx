@@ -19,6 +19,7 @@ import Competencies from './Competencies';
 import ManageCompetencyType from './ManageCompetencyType';
 import Step from '../DynamicForm/Step';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const CompetencyMasterDetail = () => {
   const { id } = useParams();
@@ -45,14 +46,8 @@ const CompetencyMasterDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get('/field?resource=Competency Type')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencyType, permissions?.competencyType?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -94,8 +89,8 @@ const CompetencyMasterDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.competencyType)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.competencyType);
+    setResourcePolicyData(data);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -136,7 +131,9 @@ const CompetencyMasterDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Details'} />
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
           {permissions?.competencies?.isRead && <CustomTab value={1} label={resources?.competencies?.titlePlural} />}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>

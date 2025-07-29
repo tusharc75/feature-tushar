@@ -22,6 +22,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';
 import axios, { CancelTokenSource } from 'axios';
 import { isMobile, isTablet } from 'react-device-detect';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Entity: FC = () => {
   const renderedFrom = camelCase(sidebarResource.entity);
@@ -92,13 +93,10 @@ const Entity: FC = () => {
     fetchGridColumns();
   }, []);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Entity')
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.entityDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.entity, permissions[entityResource]?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.entityDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

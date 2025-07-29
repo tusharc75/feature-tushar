@@ -20,6 +20,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { useHistory } from 'react-router-dom';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const AssemblyOrder = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -67,10 +68,8 @@ const AssemblyOrder = () => {
   }, []);
 
   const fetchColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.assemblyOrder}`);
-    data = response?.data?.data;
-    let columns = generateColumns(renderedFrom, data, routes.assemblyOrderDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
+    let columns = generateColumns(renderedFrom, fieldsDataForRead, routes.assemblyOrderDetail.path, true);
     columns = [...columns, ...getStaticFields(true), ActionsRenderer];
     setColumns(columns);
   };
