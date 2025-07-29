@@ -119,7 +119,12 @@ export default function ResourceWiseNotificationPreference() {
   };
 
   const handleExpand = (resource) => {
+    const container = document.querySelector('.notification-table-container');
+    const scrollTop = container?.scrollTop || 0;
     setExpanded((prev) => ({ ...prev, [resource]: !prev[resource] }));
+    setTimeout(() => {
+      if (container) container.scrollTop = scrollTop;
+    }, 0);
   };
 
   return (
@@ -136,8 +141,8 @@ export default function ResourceWiseNotificationPreference() {
         )}
       </Box>
       <TableContainer
-        component={(props) => <div {...props} className={cn('min-h-[300px] rounded-md border', props.className)} />}
-        style={{ maxHeight: 'calc(100vh - 300px)' }}
+        className={cn('notification-table-container min-h-[300px] rounded-md border')}
+        style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}
       >
         <Table
           sx={{
