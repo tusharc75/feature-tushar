@@ -17,6 +17,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateProductCategory from './CreateProductCategory';
 import { useTableReducer } from 'src/components/CustomReactTable';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductCategoryDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,15 +71,9 @@ const ProductCategoryDetailPage = () => {
     setMainPoints(tempMp);
   };
 
-  const getProductCategoryFields = () => {
-    axiosInstance()
-      .get('/field?resource=Product Category')
-      .then(({ data }) => {
-        setCategoryFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getProductCategoryFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productCategory, permissions?.productCategory?.isUpdate);
+    setCategoryFields(fieldsDataForRead);
   };
 
   const handleDeleteProductCategory = () => {

@@ -16,6 +16,7 @@ import { useData } from 'src/StateProvider/Provider';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ShowAvailableInventory from 'src/pages/PackageInventory/ShowAvailableInventory';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PackageInventory = () => {
   const renderedFrom = camelCase(sidebarResource?.packageInventory);
@@ -27,7 +28,7 @@ const PackageInventory = () => {
   const { generateColumns } = useColumns();
 
   const {
-    state: { user, selectedEntity, resources }
+    state: { user, selectedEntity, resources, permissions }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -57,9 +58,9 @@ const PackageInventory = () => {
   const fetchColumns = async () => {
     setColumns(null);
 
-    const packagesFields = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&view=true`);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packageInventory?.isUpdate);
 
-    const newColumns = generateColumns(renderedFrom, packagesFields?.data?.data, routes.packagesDetail.path);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
 
     const defaultColumns = [
       {
@@ -136,9 +137,9 @@ const PackageInventory = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -187,12 +188,12 @@ const PackageInventory = () => {
           module={resources?.packageInventory?.titlePlural}
           onlyExport={true}
           api={routes.packageInventory.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => { }}
+          onExportToExcelSuccess={() => {}}
         />
       </div>
       <CustomContainer>

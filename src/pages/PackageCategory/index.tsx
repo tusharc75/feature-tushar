@@ -19,6 +19,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ManagePackageCategory } from 'src/pages/PackageCategory/ManagePackageCategory';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PackageCategory = () => {
   const renderedFrom = camelCase(sidebarResource?.packageCategory);
@@ -48,10 +49,8 @@ const PackageCategory = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.packageCategory}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.packageCategoryDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packageCategory, permissions?.packageCategory?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.packageCategoryDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

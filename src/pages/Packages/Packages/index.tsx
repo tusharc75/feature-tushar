@@ -19,6 +19,7 @@ import { GrDrag } from 'react-icons/gr';
 import ArrangeView from 'src/components/Helpers/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_packages'}`;
@@ -70,10 +71,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   };
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Packages`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packages?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
     setColumns([
       {
         accessor: 'index',

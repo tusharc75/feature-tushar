@@ -43,6 +43,7 @@ import { RiExchange2Line } from 'react-icons/ri';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import Doa from 'src/pages/Invoice/Doa';
 import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -102,15 +103,15 @@ const InvoiceDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Invoice');
-      response?.data?.data.some((o) => {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.invoice, permissions?.invoice?.isUpdate);
+      fieldsDataForRead?.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option?.filter((e) =>
             ![INVOICE_STATUS.cancelled, INVOICE_STATUS.sentForDoa, INVOICE_STATUS.acceptedbyDOA, INVOICE_STATUS.rejectedbyDOA]?.includes(e.optionValue))]);
           return true;
         }
       });
-      setInvoiceFields(response?.data?.data);
+      setInvoiceFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

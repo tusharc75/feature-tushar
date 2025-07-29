@@ -18,6 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.frequentlyAskedQuestion);
 
@@ -38,10 +39,8 @@ const FrequentlyAskedQuestion = () => {
   const [freqentlyAskedQuestionId, setFrequentlyAskedQuestionId] = useState(null);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get('/field?resource=Frequently Asked Question');
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.frequentlyAskedQuestionDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.frequentlyAskedQuestion, permissions?.frequentlyAskedQuestion?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.frequentlyAskedQuestionDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -115,7 +114,7 @@ const FrequentlyAskedQuestion = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}

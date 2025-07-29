@@ -31,6 +31,7 @@ import {
 } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -146,10 +147,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   ];
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.packages?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns]);
   };
 

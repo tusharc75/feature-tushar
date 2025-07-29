@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.inventoryCycle);
 
@@ -51,10 +52,8 @@ const InventoryCycle = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.inventoryCycle}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.inventoryCycleDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.inventoryCycle, permissions?.inventoryCycle?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.inventoryCycleDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

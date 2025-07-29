@@ -19,6 +19,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Approver from './Approver';
 import ManageIrtTicket from './ManageIrtTicket';
 import IrtTicketView from './View';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const IrtTicketDetail = () => {
   const { id } = useParams();
@@ -46,14 +47,8 @@ const IrtTicketDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.irtTicket}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.irtTicket, permissions?.irtTicket?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

@@ -14,6 +14,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageIotDataPoints from './ManageIotDataPoints';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const IotDataPointsDetail = () => {
   const { id } = useParams();
@@ -37,14 +38,8 @@ const IotDataPointsDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.iotDataPoints}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.iotDataPoints, permissions?.iotDataPoints?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

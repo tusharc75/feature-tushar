@@ -21,6 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -80,9 +81,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const fetchColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
-    data = response?.data?.data;
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.packages?.isUpdate);
     let coloum: any = [
       {
         accessor: 'index',
@@ -126,7 +125,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
         )
       }
     ];
-    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path, false);
     setColumns([...coloum, ...newColumns]);
   };
 
