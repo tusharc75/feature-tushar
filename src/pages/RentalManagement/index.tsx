@@ -484,42 +484,44 @@ const RentalManagement = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ ...routes?.rentalManagement, title: resources?.rentalManagement?.titlePlural }]} />
-        <ImportExportLinks
-          permissions={permissions?.rentalManagement}
-          module={resources?.rentalManagement?.titlePlural}
-          api={rentalManagement.api}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-          asyncExport={true}
-          asyncImport={true}
-          resource={sidebarResource.rentalManagement}
-          extraImportExportLinks={[
-            {
-              title: 'With Material Template',
-              api: `${rentalManagement.api}/template?materialType=true`,
-              type: 'download'
-            },
-            {
-              title: 'With Material Export',
-              api: `${rentalManagement.api}/template?export=true&materialType=true`,
-              type: 'export'
-            },
-            {
-              title: 'With Material Import',
-              api: `${rentalManagement.api}/import?materialType=true`,
-              type: 'import'
-            }
-          ]}
-        />
+        {!isOffline &&
+          <ImportExportLinks
+            permissions={permissions?.rentalManagement}
+            module={resources?.rentalManagement?.titlePlural}
+            api={rentalManagement.api}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+            asyncExport={true}
+            asyncImport={true}
+            resource={sidebarResource.rentalManagement}
+            extraImportExportLinks={[
+              {
+                title: 'With Material Template',
+                api: `${rentalManagement.api}/template?materialType=true`,
+                type: 'download'
+              },
+              {
+                title: 'With Material Export',
+                api: `${rentalManagement.api}/template?export=true&materialType=true`,
+                type: 'export'
+              },
+              {
+                title: 'With Material Import',
+                api: `${rentalManagement.api}/import?materialType=true`,
+                type: 'import'
+              }
+            ]}
+          />
+        }
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -532,12 +534,11 @@ const RentalManagement = () => {
           onSearch={handleSearch}
           isActionButtonVisible={true}
           actionMenuItems={<ActionMenuItems />}
-          isAddButtonVisible={permissions?.rentalManagement?.isCreate && permissions?.rentalManagement?.isUpdate}
+          isAddButtonVisible={isOffline ? false : permissions?.rentalManagement?.isCreate}
           addButtonOnclick={() => {
             setShowManageRentalManagementDialog({ open: true, isClone: false, idToClone: null });
           }}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
