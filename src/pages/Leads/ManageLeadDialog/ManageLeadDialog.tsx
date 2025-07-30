@@ -52,24 +52,26 @@ export default function ManageLeadDialog({
     let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource?.lead);
     if (isNew) {
       if (isClone) {
-        axiosInstance()
-          .get(`${routes.lead.path}/${leadId}?entity=${selectedEntity}`)
-          .then(({ data: { data } }) => {
-            const { _id, firstName, lastName, middleName, process, ...rest } = data;
-            setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
-            let tempData = { ...rest };
-            if (fieldsDataForCreate?.find((e) => e?.fieldName === 'process')) {
-              tempData.process = fieldsDataForCreate?.find((e) => e?.fieldName === 'process')?.defaultValue;
-            }
-            setInitialData({
-              fields: fieldsDataForCreate,
-              values: { ...getObjKeysWithValues(tempData, fieldsDataForCreate, true, user) }
-            });
+        axiosInstance().get(`${routes.lead.path}/${leadId}?entity=${selectedEntity}`).then(({ data: { data } }) => {
+          const { _id, firstName, lastName, middleName, process, ...rest } = data;
+          setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
+          let tempData = { ...rest };
+          if (fieldsDataForCreate?.find((e) => e?.fieldName === 'process')) {
+            tempData.process = fieldsDataForCreate?.find((e) => e?.fieldName === 'process')?.defaultValue;
+          }
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: { ...getObjKeysWithValues(tempData, fieldsDataForCreate, true, user) }
           });
+        });
       } else {
+        const initialData = getObjKeys('', fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
-          values: getObjKeys('', fieldsDataForCreate)
+          values: initialData
         });
       }
     } else {
