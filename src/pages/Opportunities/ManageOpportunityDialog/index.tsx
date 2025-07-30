@@ -79,6 +79,9 @@ export default function ManageOpportunityDialog({
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
