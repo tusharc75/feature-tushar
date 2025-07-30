@@ -30,6 +30,8 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
+import ManageAttachmentsNew from 'src/components/Activity/AttachMentsNew/ManageAttachmentsNew';
+import AttachMentsNew from 'src/components/Activity/AttachMentsNew';
 
 const Activity = (props) => {
   const {
@@ -285,8 +287,11 @@ const Activity = (props) => {
                   {type === 'Email' && data === 'Email' ? (
                     <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
                     <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                  ) : null}
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                    <AttachMentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
@@ -403,7 +408,26 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'Attachment' ? (
+          {['Attachment', 'AttachmentFolder']?.includes(type) && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+            <ManageAttachmentsNew
+              onClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
+              onSuccess={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
+              relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+              type={type === 'AttachmentFolder' ? 'folder' : 'file'}
+            />
+          )}
+          {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
@@ -418,7 +442,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'AttachmentFolder' && (
+          {type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT != 'new' && (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
