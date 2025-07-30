@@ -51,36 +51,37 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     try {
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.budget);
       if (budgetId) {
-        axiosInstance()
-          .get(`${api}/${budgetId}`)
-          .then(({ data: { data } }) => {
-            data.year = new Date(`${data.year}-01-01`);
-            let clonedData = { ...data };
-            if (isClone) {
-              let { name, _id, ...rest } = clonedData;
-              clonedData = { ...rest };
-              clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
-              let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user);
-              setInitialData({
-                fields: fieldsDataForCreate,
-                values: tempObjKeysWithValues
-              });
-            } else {
-              setInitialData({
-                fields: fieldsDataForUpdate,
-                values: getObjKeysWithValues(data, fieldsDataAll)
-              });
-            }
-          })
+        axiosInstance().get(`${api}/${budgetId}`).then(({ data: { data } }) => {
+          data.year = new Date(`${data.year}-01-01`);
+          let clonedData = { ...data };
+          if (isClone) {
+            let { name, _id, ...rest } = clonedData;
+            clonedData = { ...rest };
+            clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+            let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user);
+            setInitialData({
+              fields: fieldsDataForCreate,
+              values: tempObjKeysWithValues
+            });
+          } else {
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataAll)
+            });
+          }
+        })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
       } else {
-        let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
-        tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        let initialData = getObjKeys('', fieldsDataForCreate);
+        initialData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+        if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+          initialData['currency'] = user.user?.brandCurrency;
+        }
         setInitialData({
           fields: fieldsDataForCreate,
-          values: tempObjKeysWithValues
+          values: initialData
         });
       }
     }
