@@ -42,7 +42,7 @@ export default function ImportExportLinks({
   module,
   resource = null,
   api,
-  refrenceId,
+  referenceId,
   onSuccessfulImport,
   recordsToExport = 0,
   isExportAllOrSomeFeature = false,
@@ -104,7 +104,7 @@ export default function ImportExportLinks({
       const file = event.target.files[0];
       let formData = new FormData();
       formData.append('file', file);
-      formData.append('refrenceId', refrenceId);
+      formData.append('referenceId', referenceId);
       if (!isEmpty(data)) {
         formData.append('productCategory', data.productCategory);
         formData.append('productTemplate', data.productTemplate);
@@ -192,7 +192,7 @@ export default function ImportExportLinks({
       type: 'info',
       message: `Your file will be downloaded/uploaded in a matter of seconds`
     });
-    let exportApi = `${api}/template?export=true` + '&refrenceId=' + refrenceId;
+    let exportApi = `${api}/template?export=true` + '&referenceId=' + referenceId;
     if (additionalParams) {
       exportApi = `${exportApi}&${additionalParams}`;
     }
@@ -527,7 +527,7 @@ export default function ImportExportLinks({
         <SelectionDialog
           uploadData={(file, _data) => {
             if (module === resources?.product?.titlePlural && resource) {
-              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, refrenceId: refrenceId }, api: null });
+              setOpenAsyncImpExpDialog({ open: true, type: IMPORT_EXPORT_TYPE.import, importData: { ..._data, referenceId: referenceId }, api: null });
             } else {
               uploadData(file, _data);
             }
@@ -535,7 +535,7 @@ export default function ImportExportLinks({
           isUpload={isUpladDialog}
           module={module}
           resource={resource}
-          refrenceId={refrenceId}
+          referenceId={referenceId}
           handleClose={() => {
             setIsSelection(false);
           }}
@@ -551,7 +551,7 @@ export default function ImportExportLinks({
             setCustomImportDialog(false);
             onSuccessCustomImport();
           }}
-          refrenceId={refrenceId}
+          referenceId={referenceId}
           currency={currency}
         />
       )}

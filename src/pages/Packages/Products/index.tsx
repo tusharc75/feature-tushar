@@ -253,7 +253,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
+            additionalParams={`referenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
