@@ -70,16 +70,18 @@ const PricingConditionsDetails = () => {
   };
 
   const handleDelete = () => {
-    axiosInstance()
-      .put(`${pricingCondition.api}/remove`, { ids: [id] })
-      .then(() => {
-        setShowConfirmBox(false);
-        history.push(`${routes.pricingCondition.path}`);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBox(false);
+    axiosInstance().put(`${pricingCondition.api}/remove`, { ids: [id] }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      setShowConfirmBox(false);
+      history.push(`${routes.pricingCondition.path}`);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      setShowConfirmBox(false);
+    });
   };
 
   return (

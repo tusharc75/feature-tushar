@@ -40,6 +40,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import OnField from 'src/pages/FieldServiceOrder/OnField';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -88,10 +89,10 @@ const FieldTicketDetail = () => {
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
-        data = response?.data?.data;
+        const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldTicket, permissions.fieldTicket?.isUpdate);
+        data = fieldsDataForRead;
       }
-      setFields(data?.filter((field) => field.isRead));
+      setFields(data);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -126,8 +127,8 @@ const FieldTicketDetail = () => {
 
   const fetchPolicy = async () => {
     if (isOffline) return;
-    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -234,7 +235,9 @@ const FieldTicketDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {fieldTicketData?.rentalJob && <CustomTab value={2}>On Field</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (

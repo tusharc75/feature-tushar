@@ -38,6 +38,7 @@ import { MdViewWeek } from 'react-icons/md';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
 import FieldTicketDetailView from 'src/pages/FieldServiceTechnician/FieldTicketDetailView';
 import { isMobile } from 'react-device-detect';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 type Views = 'card' | 'table';
 
@@ -164,12 +165,13 @@ const FieldServiceTechnician = () => {
       data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
     } else {
       policy = await fetchPolicy();
-      let api = `/field?resource=${sidebarResource?.fieldServiceOrder}`;
+      let resource;
+      resource = sidebarResource?.fieldServiceOrder;
       if (policy?.showOnlyAssignedTickets) {
-        api = `/field?resource=${sidebarResource?.fieldTicket}`;
+        resource = sidebarResource?.fieldTicket;
       }
-      const response = await axiosInstance().get(api);
-      data = response?.data?.data;
+      const { fieldsDataForRead } = await fetch_resource_view_fields(resource, permissions.fieldServiceTechnician?.isUpdate);
+      data = fieldsDataForRead;
       if (!policy?.showOnlyAssignedTickets) {
         try {
           insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);

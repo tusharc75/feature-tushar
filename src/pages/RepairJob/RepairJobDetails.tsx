@@ -36,6 +36,7 @@ import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.repairJob);
@@ -106,35 +107,25 @@ const RepairJobDetails = () => {
   }, []);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.repairJob)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.repairJob);
+    setResourcePolicyData(data);
   };
 
-  const getResourceFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.repairJob}`)
-      .then(({ data: { data } }) => {
-        setRepairJobFields(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getResourceFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairJob, permissions.repairJob?.isUpdate);
+    setRepairJobFields(fieldsDataForRead);
   };
 
-  const fetchAssetStatusRights = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}&view=true`)
-      .then(({ data }) => {
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setAllowUpdateStatus(o?.isUpdate);
-              return true;
-            }
-          });
+  const fetchAssetStatusRights = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions.serializedAsset?.isUpdate);
+    if (fieldsDataForRead && fieldsDataForRead.length) {
+      fieldsDataForRead.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setAllowUpdateStatus(o?.isUpdate);
+          return true;
         }
-      })
-      .catch((err) => { });
+      });
+    }
   };
 
   const fetchRepairJobData = () => {
@@ -182,7 +173,7 @@ const RepairJobDetails = () => {
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => { })
+      .then(({ data: { data } }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -230,7 +221,9 @@ const RepairJobDetails = () => {
           <CustomTab value={1}>Details</CustomTab>
           <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={3}>Views</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
