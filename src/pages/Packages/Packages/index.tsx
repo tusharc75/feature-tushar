@@ -193,7 +193,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
+            additionalParams={`referenceId=${packageId}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>

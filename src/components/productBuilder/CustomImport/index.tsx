@@ -38,7 +38,7 @@ import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/
 import { AddAllColumnDialog } from 'src/components/productBuilder/CustomImport/AddAllColumnDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
-export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
+export const CustomImport = ({ handleClose, onSuccess, referenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -364,7 +364,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
     let formData = new FormData();
     formData.append('file', file);
-    formData.append('refrenceId', refrenceId);
+    formData.append('referenceId', referenceId);
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
@@ -630,15 +630,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  // error={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  // }
-                                  // helperText={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                  //   'Required field'
-                                  // }
+                                // error={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                // }
+                                // helperText={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                //   'Required field'
+                                // }
                                 />
                               )}
                             />
