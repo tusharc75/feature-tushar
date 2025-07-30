@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWellMaster from './ManageWellMaster';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.wellMaster);
 
@@ -50,10 +51,8 @@ const WellMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Well Master&view=true`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.wellMasterDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellMaster, permissions?.wellMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.wellMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -97,7 +96,7 @@ const WellMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,11 +259,12 @@ const WellMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.wellMaster?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.wellMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.wellName || ''}`
-            : `selected ${resources?.wellMaster?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.wellMaster?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

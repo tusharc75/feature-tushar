@@ -55,6 +55,7 @@ import UserSession from './UserSession';
 
 import { isMobile, isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const useStyles = makeStyles((theme: Theme) => ({
   dataValue: {
@@ -252,15 +253,9 @@ const UserDetailsPage = () => {
     setMainPoints(tempMp);
   };
 
-  const getUserFields = () => {
-    axiosInstance()
-      .get('/field?resource=User')
-      .then(({ data }) => {
-        setUserFIelds(data.data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const getUserFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.user, permissions?.user?.isUpdate);
+    setUserFIelds(fieldsDataForRead);
   };
 
   const handleDeleteUser = (id) => {

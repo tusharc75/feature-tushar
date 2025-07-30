@@ -21,6 +21,7 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageUnit from './ManageUnit';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const getWarningList = (row?: any) => {
   const icon = <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />;
@@ -90,43 +91,37 @@ const Units = () => {
     return warningList;
   }, []);
 
-  const fetchColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.units}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.unitDetail.path, true);
-        newColumns?.forEach((o) => {
-          if (o?.accessor === 'unitNumber') {
-            o.cell = ({ row }) => {
-              const warnings = getWarnings(row);
-              return (
-                <div
-                  style={{
-                    backgroundColor: warnings.length > 0 ? COLOUR_MASTER.lostAssets.background : ''
-                  }}
-                >
-                  <Link className="link text-truncate" title={row?.original?.unitNumber} to={`${routes.unitDetail.path}/${row?.original?._id}`}>
-                    {row?.original?.unitNumber}
-                  </Link>
-                  {warnings?.length > 0
-                    ? warnings.map((w) => (
-                        <Box ml={1} key={w.warningFilter}>
-                          <HtmlTooltip title={w.title} placement="top" arrow>
-                            {w.icon}
-                          </HtmlTooltip>
-                        </Box>
-                      ))
-                    : null}
-                </div>
-              );
-            };
-          }
-        });
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const fetchColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.units, permissions?.units?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.unitDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'unitNumber') {
+        o.cell = ({ row }) => {
+          const warnings = getWarnings(row);
+          return (
+            <div
+              style={{
+                backgroundColor: warnings.length > 0 ? COLOUR_MASTER.lostAssets.background : ''
+              }}
+            >
+              <Link className="link text-truncate" title={row?.original?.unitNumber} to={`${routes.unitDetail.path}/${row?.original?._id}`}>
+                {row?.original?.unitNumber}
+              </Link>
+              {warnings?.length > 0
+                ? warnings.map((w) => (
+                    <Box ml={1} key={w.warningFilter}>
+                      <HtmlTooltip title={w.title} placement="top" arrow>
+                        {w.icon}
+                      </HtmlTooltip>
+                    </Box>
+                  ))
+                : null}
+            </div>
+          );
+        };
+      }
+    });
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

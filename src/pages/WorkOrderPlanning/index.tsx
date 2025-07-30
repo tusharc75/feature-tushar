@@ -25,6 +25,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { Link } from 'react-router-dom';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.workOrderPlanning);
 const WorkOrderPlanning = () => {
@@ -45,10 +46,8 @@ const WorkOrderPlanning = () => {
   const [selectedStatus, setSelectedStatus] = useState('Pending');
 
   const fetchColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrderPlanning}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, null, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrderPlanning, permissions?.workOrderPlanning?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, null, true);
     newColumns?.forEach((o) => {
       if (o?.accessor === 'asset') {
         const getBackgroundColor = (row) => {

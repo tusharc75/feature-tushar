@@ -17,6 +17,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageWellMaster from './ManageWellMaster';
 import WellNumber from './WellNumber';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const WellMasterDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -57,15 +58,9 @@ const WellMasterDetailsPage = () => {
     }
   };
 
-  const getWellMasterFields = () => {
-    axiosInstance()
-      .get('/field?resource=Well Master')
-      .then(({ data }) => {
-        setWellMasterFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getWellMasterFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellMaster, permissions?.wellMaster?.isUpdate);
+    setWellMasterFields(fieldsDataForRead);
   };
 
   const handleDeleteWellMaster = () => {
@@ -124,12 +119,7 @@ const WellMasterDetailsPage = () => {
               <CommonSkeleton lenArray={[...Array(10).keys()]} />
             </div>
           ) : (
-            <DetailsPage
-              data={wellMasterData}
-              fields={wellMasterFields}
-              resource={sidebarResource?.wellMaster}
-              referenceId={wellMasterData?._id}
-            />
+            <DetailsPage data={wellMasterData} fields={wellMasterFields} resource={sidebarResource?.wellMaster} referenceId={wellMasterData?._id} />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>

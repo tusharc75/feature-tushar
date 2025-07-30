@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWellNumber from './ManageWellNumber';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.wellNumber);
 
@@ -51,10 +52,8 @@ const WellNumber = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.wellNumber}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.wellNumberDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellNumber, permissions?.wellNumber?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.wellNumberDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -97,7 +96,7 @@ const WellNumber = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,11 +259,12 @@ const WellNumber = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.wellNumber?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.wellNumber?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.wellNumber || ''}`
-            : `selected ${resources?.wellNumber?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.wellNumber?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
