@@ -33,6 +33,7 @@ import ManageQuotationDialog from './ManageQuotationDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import dayjs from 'dayjs';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Quotation = () => {
   const renderedFrom = camelCase(sidebarResource?.quotation);
@@ -82,12 +83,10 @@ const Quotation = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Quotation`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.quotation, permissions?.quotation?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
     let columns = [];
-    let newColumns = generateColumns(renderedFrom, data, routes.quotationDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.quotationDetail.path, true);
     columns = [...newColumns, ...getStaticFields(true), ActionsRenderer];
     columns?.forEach((column) => {
       if (column?.primaryField) {

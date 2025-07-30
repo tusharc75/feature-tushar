@@ -49,6 +49,7 @@ import Versions from './Versions';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -158,8 +159,8 @@ const QuotationDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Quotation');
-      setQuotationFields(response?.data?.data);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.quotation, permissions?.quotation?.isUpdate);
+      setQuotationFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }

@@ -19,6 +19,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.serializedPackages);
 
@@ -51,10 +52,8 @@ const SerializedPackages = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, permissions?.serializedPackages?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -88,9 +87,7 @@ const SerializedPackages = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        <HtmlTooltip
-          title={row?.original?.canDelete ? 'Delete' : deleteDisable}
-        >
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"

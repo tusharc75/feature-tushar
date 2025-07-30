@@ -25,6 +25,7 @@ import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
 import TeamUsers from './TeamUsers';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProjectSalesDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -138,19 +139,13 @@ const ProjectSalesDetails = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.projectSales)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.projectSales);
+    setResourcePolicyData(data);
   };
 
-  const getProjectFields = () => {
-    axiosInstance()
-      .get('/field?resource=Project Sales')
-      .then(({ data: { data } }) => {
-        setProjectSalesFields(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+  const getProjectFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.projectSales, permissions?.projectSales?.isUpdate);
+    setProjectSalesFields(fieldsDataForRead);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -301,11 +296,18 @@ const ProjectSalesDetails = () => {
               <CustomTab value={1}>OM-Neurons</CustomTab>
               <CustomTab value={2}>Project Team</CustomTab>
               <CustomTab value={3}>{resources?.customerAccount?.titlePlural}</CustomTab>
-              {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+              {resourcePolicyData &&
+                resourcePolicyData?.tabs?.length &&
+                resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
-                <DetailsPage data={copyOfProjectSalesData} fields={fiteredFieldToShow} resource={sidebarResource?.projectSales} referenceId={copyOfProjectSalesData?._id} />
+                <DetailsPage
+                  data={copyOfProjectSalesData}
+                  fields={fiteredFieldToShow}
+                  resource={sidebarResource?.projectSales}
+                  referenceId={copyOfProjectSalesData?._id}
+                />
               </Box>
             </TabPanel>
             <TabPanel value={currentTabIndex} index={1}>

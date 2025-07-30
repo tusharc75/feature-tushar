@@ -39,6 +39,7 @@ import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 import { generateAddExistingProduct } from './walkmeSteps';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.purchaseOrder);
 
@@ -112,20 +113,14 @@ const PurchaseOrderDetailsPage = () => {
     }
   };
 
-  const getPurchaseOrderFields = () => {
-    axiosInstance()
-      .get('/field?resource=Purchase Order&view=true')
-      .then(({ data }) => {
-        setPurchaseOrderFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getPurchaseOrderFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseOrder, permissions?.purchaseOrder?.isUpdate);
+    setPurchaseOrderFields(fieldsDataForRead);
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.purchaseOrder)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.purchaseOrder);
+    setResourcePolicyData(data);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -254,7 +249,9 @@ const PurchaseOrderDetailsPage = () => {
           {purchaseOrderData?.deleted ? null : <CustomTab value={1}>Details</CustomTab>}
           {purchaseOrderData?.deleted ? null : <CustomTab value={2}>Invoice</CustomTab>}
           {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : <CustomTab value={3}>Views</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

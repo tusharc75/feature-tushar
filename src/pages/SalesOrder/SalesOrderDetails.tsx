@@ -37,6 +37,7 @@ import SalesOrderView from './View';
 import LoadingTicket from './LoadingTicket';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -60,7 +61,7 @@ const SalesOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
-  const [showInvoiceConfirmBox, setShowInvoiceConfirmBox] = useState(false)
+  const [showInvoiceConfirmBox, setShowInvoiceConfirmBox] = useState(false);
   const [steps, setSteps] = useState([]);
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
@@ -98,16 +99,16 @@ const SalesOrderDetails = () => {
 
   const getFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Sales Order');
-      setSalesOrderFields(response?.data?.data);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.salesOrder, permissions?.salesOrder?.isUpdate);
+      setSalesOrderFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.salesOrder)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.salesOrder);
+    setResourcePolicyData(data);
   };
 
   const fetchSalesOrderData = async () => {
@@ -180,15 +181,16 @@ const SalesOrderDetails = () => {
                   <ThemeButton
                     iconForMobile={false}
                     onClick={() => {
-                      setShowInvoiceConfirmBox(true)
+                      setShowInvoiceConfirmBox(true);
                     }}
                   >
                     Invoiced
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate &&
-                  (resourcePolicyData?.policy?.restrictAutoDebitInventory ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced] :
-                    [SALES_ORDER_STATUS.invoiced]
+                  (resourcePolicyData?.policy?.restrictAutoDebitInventory
+                    ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced]
+                    : [SALES_ORDER_STATUS.invoiced]
                   ).includes(salesOrderData?.status) && (
                     <ButtonWithPulse
                       onClick={() => {
@@ -237,7 +239,9 @@ const SalesOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
           {!(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourcePolicyData, 2)}>Views</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
@@ -248,7 +252,12 @@ const SalesOrderDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={salesOrderData} fields={salesOrderFields} resource={sidebarResource?.salesOrder} referenceId={salesOrderData?._id} />
+                <DetailsPage
+                  data={salesOrderData}
+                  fields={salesOrderFields}
+                  resource={sidebarResource?.salesOrder}
+                  referenceId={salesOrderData?._id}
+                />
               </>
             )}
           </Box>

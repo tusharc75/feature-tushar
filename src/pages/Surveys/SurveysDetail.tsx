@@ -17,6 +17,7 @@ import ManageSurveys from './ManageSurveys';
 import SurveysData from './SurveysData';
 import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SurveysDetail = () => {
   const { id } = useParams();
@@ -45,14 +46,8 @@ const SurveysDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get('/field?resource=Surveys')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.surveys, permissions?.surveys?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
