@@ -14,6 +14,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { sidebarResource } from '../../constants/helpers';
 import ManageWellNumber from './ManageWellNumber';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const WellNumberDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,15 +33,9 @@ const WellNumberDetail = () => {
     fetchData();
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.wellNumber}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellNumber, permissions?.wellNumber?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

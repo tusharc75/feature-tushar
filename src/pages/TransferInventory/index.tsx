@@ -31,6 +31,7 @@ import ManageTransferInventory from './ManageTransferInventory';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createTransferInventoryFlow } from 'src/pages/TransferInventory/walkmeSteps';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransferInventory = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -81,14 +82,11 @@ const TransferInventory = () => {
     return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.transferInventory}`)
-      .then(({ data: { data } }) => {
-        setWalkmeData([createTransferInventoryFlow(data, resources?.transferInventory?.titleSingular)]);
-        const newColumns = generateColumns(renderedFrom, data, routes.transferInventoryDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferInventory, permissions?.transferInventory?.isUpdate);
+    setWalkmeData([createTransferInventoryFlow(fieldsDataForRead, resources?.transferInventory?.titleSingular)]);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transferInventoryDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -165,11 +163,9 @@ const TransferInventory = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
-    }
-    else if (selectedType === 2) {
+    } else if (selectedType === 2) {
       deepFilter = deepFilter + `&openRecords=1`;
-    }
-    else if (selectedType === 4) {
+    } else if (selectedType === 4) {
       deepFilter = deepFilter + `&closedRecords=1`;
     }
     if (isExport) {
@@ -327,11 +323,12 @@ const TransferInventory = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.transferInventory?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.transferNumber || '' : ''}`
-            : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.transferInventory?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

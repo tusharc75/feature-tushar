@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTransactionLock from './ManageTransactionLock';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransactionLock = () => {
   const renderedFrom = camelCase(sidebarResource.transactionLock);
@@ -51,10 +52,8 @@ const TransactionLock = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.transactionLock}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.transactionLockDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transactionLock, permissions?.transactionLock?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.transactionLockDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -98,7 +97,7 @@ const TransactionLock = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -263,11 +262,12 @@ const TransactionLock = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.transactionLock?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.lockNumber || ''}`
-            : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.transactionLock?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

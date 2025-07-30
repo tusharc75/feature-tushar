@@ -36,6 +36,7 @@ import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(sidebarResource.transferAsset);
@@ -100,53 +101,46 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.transferAsset)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.transferAsset);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = (transferType) => {
-    axiosInstance()
-      .get('/field?resource=Transfer Asset')
-      .then(({ data: { data } }) => {
-        let fields = [];
-        data.forEach((field: any) => {
-          if (transferType === 'Internal') {
-            if (
-              field.fieldData.fieldName !== 'transfertoSupplier' &&
-              field.fieldData.fieldName !== 'transfertoCustomer' &&
-              field.fieldData.fieldName !== 'supplierShipTo' &&
-              field.fieldData.fieldName !== 'customerShipTo'
-            ) {
-              fields.push(field);
-            }
-          } else if (transferType === 'External Supplier') {
-            if (
-              field.fieldData.fieldName !== 'transfertoPlant' &&
-              field.fieldData.fieldName !== 'transfertoCustomer' &&
-              field.fieldData.fieldName !== 'plantShipTo' &&
-              field.fieldData.fieldName !== 'customerShipTo'
-            ) {
-              fields.push(field);
-            }
-          } else if (transferType === 'External Customer') {
-            if (
-              field.fieldData.fieldName !== 'transfertoSupplier' &&
-              field.fieldData.fieldName !== 'transfertoPlant' &&
-              field.fieldData.fieldName !== 'plantShipTo' &&
-              field.fieldData.fieldName !== 'supplierShipTo'
-            ) {
-              fields.push(field);
-            }
-          }
-        });
+  const fetchFields = async (transferType) => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferAsset, permissions?.transferAsset?.isUpdate);
+    let fields = [];
+    fieldsDataForRead.forEach((field: any) => {
+      if (transferType === 'Internal') {
+        if (
+          field.fieldData.fieldName !== 'transfertoSupplier' &&
+          field.fieldData.fieldName !== 'transfertoCustomer' &&
+          field.fieldData.fieldName !== 'supplierShipTo' &&
+          field.fieldData.fieldName !== 'customerShipTo'
+        ) {
+          fields.push(field);
+        }
+      } else if (transferType === 'External Supplier') {
+        if (
+          field.fieldData.fieldName !== 'transfertoPlant' &&
+          field.fieldData.fieldName !== 'transfertoCustomer' &&
+          field.fieldData.fieldName !== 'plantShipTo' &&
+          field.fieldData.fieldName !== 'customerShipTo'
+        ) {
+          fields.push(field);
+        }
+      } else if (transferType === 'External Customer') {
+        if (
+          field.fieldData.fieldName !== 'transfertoSupplier' &&
+          field.fieldData.fieldName !== 'transfertoPlant' &&
+          field.fieldData.fieldName !== 'plantShipTo' &&
+          field.fieldData.fieldName !== 'supplierShipTo'
+        ) {
+          fields.push(field);
+        }
+      }
+    });
 
-        setTransferAssetFields(fields);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+    setTransferAssetFields(fields);
+    setLoading(false);
   };
 
   const fetchTransferAssetData = () => {
@@ -297,7 +291,9 @@ const TransferAssetDetailPage = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

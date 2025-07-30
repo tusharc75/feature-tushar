@@ -50,6 +50,7 @@ import PackageNumberDialog from 'src/pages/AssemblyOrder/WorkOrder/PackageNumber
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import InfoIcon from '@mui/icons-material/Info';
 import PreviewDownloadNew from 'src/components/PreviewDownloadNew';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -174,17 +175,11 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     }
   };
 
-  const getResourceFields = () => {
+  const getResourceFields = async () => {
     if (resource !== sidebarResource.workOrderTechnician) {
-      axiosInstance()
-        .get(`/field?resource=${sidebarResource.workOrder}`)
-        .then(({ data: { data } }) => {
-          const adjustedData = [...data];
-          setWorkOrderFields(adjustedData);
-        })
-        .catch((err) => {
-          toastConfig.setToastConfig(err);
-        });
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
+      const adjustedData = [...fieldsDataForRead];
+      setWorkOrderFields(adjustedData);
     }
   };
 
@@ -400,12 +395,12 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-          workOrderData?.serializedAsset &&
-          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-          allowedToEdit &&
-          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob
+        workOrderData?.serializedAsset &&
+        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${resources?.repairJob?.titleSingular}`,
@@ -428,10 +423,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       type: 'menuItem',
       isVisible: Boolean(
         workOrderData?.serializedAsset &&
-        workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
-        allowedToEdit &&
-        !workOrderData?.currentRepairJob &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
+          workOrderData?.serializedAsset?.status === ASSET_STATUS.inRepair &&
+          allowedToEdit &&
+          !workOrderData?.currentRepairJob &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)
       ),
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
@@ -507,9 +502,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -522,9 +517,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
       },
       isVisible: Boolean(
         allowedToEdit &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob &&
-        workOrderData?.canCreateWorkOrderVersion
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -540,21 +535,22 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
     {
       id: 'preview-download',
       type: 'element',
-      component: (
-        workOrderData?.customPdfTemplate ?
-          <PreviewDownloadNew
-            fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
-            resource={sidebarResource.workOrder}
-            referenceId={id}
-            hideDetailButton={true}
-          /> : <PreviewDownload
-            fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
-            resource={sidebarResource.workOrder}
-            referenceId={id}
-            columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
-            hideDetailButton={true}
-            hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
-          />
+      component: workOrderData?.customPdfTemplate ? (
+        <PreviewDownloadNew
+          fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
+          resource={sidebarResource.workOrder}
+          referenceId={id}
+          hideDetailButton={true}
+        />
+      ) : (
+        <PreviewDownload
+          fileName={`${resources?.workOrder?.titleSingular}-${workOrderData?.workOrderNumber}`}
+          resource={sidebarResource.workOrder}
+          referenceId={id}
+          columns={user?.user?.brandPolicy?.servicePrePost ? columns : columns?.filter((e) => e.accessor !== 'serviceType')}
+          hideDetailButton={true}
+          hideDialog={workOrderData?.type === WORK_ORDER_TYPE.productionOrder ? true : false}
+        />
       )
     },
     {
@@ -666,7 +662,9 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
                 <CustomTab value={5}>Views</CustomTab>
               )}
-              {workOrderPolicyData && workOrderPolicyData?.tabs?.length && workOrderPolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+              {workOrderPolicyData &&
+                workOrderPolicyData?.tabs?.length &&
+                workOrderPolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
             </CustomTabs>
           </Grid>
         </Grid>
