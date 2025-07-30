@@ -18,6 +18,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageTriggerNotificationMaster from './ManageTriggerNotificationMaster';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.triggerNotificationMaster);
 
@@ -43,10 +44,8 @@ const TriggerNotificationMaster = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.triggerNotificationMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.triggerNotificationMasterDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.triggerNotificationMaster, permissions?.triggerNotificationMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.triggerNotificationMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

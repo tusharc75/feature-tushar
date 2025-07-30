@@ -41,6 +41,7 @@ import {
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -121,21 +122,14 @@ const TransferInventoryDetailPage = () => {
   }, [walkmeInstance]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.transferInventory)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.transferInventory);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get('/field?resource=Transfer Inventory')
-      .then(({ data: { data } }) => {
-        setTransferInventoryFields(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferInventory, permissions?.transferInventory?.isUpdate);
+    setTransferInventoryFields(fieldsDataForRead);
+    setLoading(false);
   };
 
   const fetchTransferInventoryData = () => {
@@ -163,8 +157,8 @@ const TransferInventoryDetailPage = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setAllowedToDelete(
           permissions?.transferInventory?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
-          data?.canEdit
+            checkIsAllowedToDelete(user, sidebarResource.transferInventory, data.owner.optionValue) &&
+            data?.canEdit
         );
         setTransferInventoryData(data);
       })
@@ -254,7 +248,9 @@ const TransferInventoryDetailPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
