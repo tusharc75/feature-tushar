@@ -34,6 +34,7 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createFieldServiceOrderFlow } from './walkmeSteps';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let serviceOrderTimeout;
 
@@ -88,8 +89,8 @@ const ServiceOrder = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
-      data = response?.data?.data;
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldServiceOrder, permissions.fieldServiceOrder?.isUpdate);
+      data = fieldsDataForRead;
       setWalkmeData([createFieldServiceOrderFlow(data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);

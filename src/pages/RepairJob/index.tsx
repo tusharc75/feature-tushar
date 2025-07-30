@@ -34,6 +34,7 @@ import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createRepairJobFlow } from './walkmeSteps';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let repairJobTimeout;
 
@@ -97,8 +98,8 @@ const RepairJob = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.repairJob);
     } else {
-      const response = await axiosInstance().get(`/field?resource=Repair Job`);
-      data = response?.data?.data;
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairJob, permissions.repairJob?.isUpdate);
+      data = fieldsDataForRead;
       try {
         insertUpdate(objectStore.resource, sidebarResource.repairJob, data);
       } catch (ex) {

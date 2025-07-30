@@ -11,6 +11,7 @@ import Submit from 'src/pages/FieldTicket/Submit';
 import Material from 'src/pages/FieldTicket/material';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const FieldTicketDetailView = ({ id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -37,9 +38,8 @@ const FieldTicketDetailView = ({ id }) => {
 
   const fetchFields = async () => {
     try {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
-      const data = response?.data?.data;
-      setFields(data?.filter((field) => field.isRead));
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldTicket, permissions.fieldTicket?.isUpdate);
+      setFields(fieldsDataForRead);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
