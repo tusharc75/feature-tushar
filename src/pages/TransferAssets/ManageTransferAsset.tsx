@@ -518,6 +518,9 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     setFieldValue={(name, value) => {
                                       setFieldValue(name, value);
                                       const address = field.option?.find((_d: any) => _d?.optionValue === value)?.address ?? '';
+                                      if (allFields?.find((e) => e.fieldName === 'fromPlantAddress')) {
+                                        setFieldValue('fromPlantAddress', address);
+                                      }
                                       if (address === values?.plantShipTo) {
                                         setFieldValue('plantShipTo', '');
                                         setFieldValue('transfertoPlant', '');
