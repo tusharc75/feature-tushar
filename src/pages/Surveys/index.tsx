@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSurveys from './ManageSurveys';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Survey = () => {
   const renderedFrom = camelCase(sidebarResource?.surveys);
@@ -50,10 +51,8 @@ const Survey = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.surveys}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.surveysDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.surveys, permissions?.surveys?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.surveysDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -97,7 +96,7 @@ const Survey = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -260,11 +259,12 @@ const Survey = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.surveys?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.surveyName || ''}`
-            : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.surveys?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -20,9 +20,18 @@ import EntitySelectionsDialog from '../../components/EntitySelections';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { checkIsAllowedToEdit, customerAccount, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  checkIsAllowedToEdit,
+  customerAccount,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import CreateProjectSales from './CreateProjectSales';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProjectSales: FC = () => {
   const {
@@ -69,15 +78,12 @@ const ProjectSales: FC = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.projectSales}`)
-      .then(({ data: { data } }) => {
-        setAllFields(JSON.parse(JSON.stringify(data)));
-        let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, routes.projectSalesDetail.path, true);
-        columns = [...newColumns, ...getStaticFields(true)];
-        setColumns([...columns, ActionsRenderer]);
-      });
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.projectSales, permissions?.projectSales?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    let columns = [];
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.projectSalesDetail.path, true);
+    columns = [...newColumns, ...getStaticFields(true)];
+    setColumns([...columns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -222,7 +228,7 @@ const ProjectSales: FC = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((project) => {
           let finalObject = prepareDataForGrid(project, user);
-          finalObject['originalData'] = project
+          finalObject['originalData'] = project;
           finalObject['canDelete'] = finalObject['projectManagerId'] === user?.user._id && permissions?.projectSales?.isDelete;
           finalObject['canEdit'] = permissions?.projectSales?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.projectSales, project);
           return {
@@ -368,24 +374,26 @@ const ProjectSales: FC = () => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${routes.projectSales.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${routes.projectSales.path}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -455,11 +463,12 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.projectSales?.titleSingular?.toLowerCase()} :
               ${deleteRecord?.projectName}`
-            : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.projectSales?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

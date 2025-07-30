@@ -26,6 +26,7 @@ import { isTablet } from 'react-device-detect';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { mobileNotSupported } from 'src/constants/messageHelpers';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -52,19 +53,13 @@ const ServiceMasterDetailsPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.serviceMaster)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.serviceMaster);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${serviceMaster.resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serviceMaster.resource, permissions?.serviceMaster?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -153,7 +148,9 @@ const ServiceMasterDetailsPage = () => {
           <CustomTab value={0} label={<>Details</>} />
           <CustomTab value={1} label={<>Steps</>} />
           <CustomTab value={2} label={<>Consumables/Tools</>} />
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box className="form-v1">

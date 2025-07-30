@@ -49,6 +49,7 @@ import {
   nextButtonStep
 } from 'src/pages/Sublease/walkmeSteps';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SubleaseDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -93,7 +94,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   useEffect(() => {
@@ -122,26 +123,20 @@ const SubleaseDetailsPage = () => {
     fetchPolicy();
   }, [id]);
 
-  const getFields = () => {
-    axiosInstance()
-      .get('/field?resource=Sublease')
-      .then(({ data }) => {
-        data?.data?.map((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option?.filter((e) => ![SUBLEASE_STATUS.closed].includes(e.optionLabel))]);
-            return true;
-          }
-        });
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.sublease, permissions?.sublease?.isUpdate);
+    fieldsDataForRead?.map((o) => {
+      if (o?.fieldData?.fieldName === 'status') {
+        setStatusOptions([...o.fieldData.option?.filter((e) => ![SUBLEASE_STATUS.closed].includes(e.optionLabel))]);
+        return true;
+      }
+    });
+    setFields(fieldsDataForRead);
   };
 
   const fetchPolicy = async () => {
-    const data = await getResourcePolicy(user, permissions, sidebarResource.sublease)
-    setResourcePolicyData(data)
+    const data = await getResourcePolicy(user, permissions, sidebarResource.sublease);
+    setResourcePolicyData(data);
   };
 
   const fetchData = async () => {
@@ -217,7 +212,9 @@ const SubleaseDetailsPage = () => {
           <CustomTab value={1}>Details</CustomTab>
           <CustomTab value={2}>{resources?.deliveryTicket?.titlePlural}</CustomTab>
           {user?.user?.brandPolicy?.subleaseProgressiveBilling && permissions?.invoice?.isRead && <CustomTab value={3}>Invoices</CustomTab>}
-          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>

@@ -30,6 +30,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { createSubleaseFlow } from 'src/pages/Sublease/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSublease from './ManageSublease';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Sublease = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -84,11 +85,9 @@ const Sublease = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Sublease`);
-    data = response?.data?.data;
-    setWalkmeData([createSubleaseFlow(data, resources?.sublease?.titlePlural)]);
-    let newColumns = generateColumns(renderedFrom, data, routes.subleaseDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.sublease, permissions?.sublease?.isUpdate);
+    setWalkmeData([createSubleaseFlow(fieldsDataForRead, resources?.sublease?.titlePlural)]);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subleaseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

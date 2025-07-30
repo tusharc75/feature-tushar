@@ -30,6 +30,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import { createRepairOrderFlow } from 'src/pages/RepairOrder/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const RepairOrder = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -86,11 +87,12 @@ const RepairOrder = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Repair Order`);
-    data = response?.data?.data;
-    setWalkmeData([createRepairOrderFlow(data)]);
-    let newColumns = generateColumns(renderedFrom, data, routes?.repairOrderDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource.repairOrder,
+      permissions?.repairOrder?.isUpdate
+    );
+    setWalkmeData([createRepairOrderFlow(fieldsDataForRead)]);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.repairOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true, true), ActionsRenderer]);
   };
 

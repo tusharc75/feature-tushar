@@ -12,8 +12,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { repairType } from '../../constants/helpers';
+import { repairType, sidebarResource } from '../../constants/helpers';
 import ManageRepairType from './ManageRepairType';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const RepairTypeDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,15 +34,9 @@ const RepairTypeDetailsPage = () => {
     fetchData();
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${repairType.resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairType, permissions?.repairType?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
