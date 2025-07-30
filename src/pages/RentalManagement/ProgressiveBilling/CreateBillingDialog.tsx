@@ -111,7 +111,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           setRentalResourceData(data?.find((e) => e.resource === sidebarResource.rentalManagement));
         }
         if (data?.find((e) => e.resource === sidebarResource.invoice)) {
-          setInvoiceResourceData(data?.find((e) => e.resource === sidebarResource.serializedAsset));
+          setInvoiceResourceData(data?.find((e) => e.resource === sidebarResource.invoice));
         }
       })
       .catch((error) => {
