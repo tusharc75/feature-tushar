@@ -56,6 +56,7 @@ import { TbTruckDelivery } from 'react-icons/tb';
 import Step from 'src/pages/DynamicForm/Step';
 import DeliveryTcketSerializedPackages from 'src/pages/DeliveryTicket/DeliveryTcketSerializedPackages';
 import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(sidebarResource.deliveryTicket)}_grid-1`;
@@ -260,10 +261,10 @@ export default function DeliveryTicketDetail(props) {
         assetData = await findOne(objectStore.resource, sidebarResource.serializedAsset);
         productData = await findOne(objectStore.resource, sidebarResource.product);
       } else {
-        const assetResponse = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
-        const productResponse = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
-        assetData = assetResponse?.data?.data;
-        productData = productResponse?.data?.data;
+        const assetResponse = await fetch_resource_view_fields(sidebarResource.serializedAsset, permissions?.serializedAsset?.isUpdate);
+        const productResponse = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+        assetData = assetResponse?.fieldsDataForRead;
+        productData = productResponse?.fieldsDataForRead;
       }
       const newAssetColumns = generateColumns(renderedFrom, assetData, routes.serializedAssetDetail.path, true);
       const newProductColumns = generateColumns(renderedFrom, productData, routes.productDetail.path);

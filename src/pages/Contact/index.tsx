@@ -34,6 +34,7 @@ import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageContactDialog from './ManageContact';
 import { isMobile, isTablet } from 'react-device-detect';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 export default function Contact(props) {
   const toastConfig = useContext(CustomToastContext);
@@ -95,10 +96,8 @@ export default function Contact(props) {
   }, []);
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource[contactResource]}`);
-    let data = response?.data?.data;
-
-    let newColumns = generateColumns(contactResource, data, `/${contactRoute}/detail`, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[contactResource], permissions[contactResource].isUpdate);
+    let newColumns = generateColumns(contactResource, fieldsDataForRead, `/${contactRoute}/detail`, true);
     let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {
       newColumns.push(checkStaticField(sidebarResource.projectSales, field));

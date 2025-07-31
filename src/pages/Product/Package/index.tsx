@@ -3,10 +3,11 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box } from '@mui/material';
 import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Package = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -15,7 +16,7 @@ const Package = ({ renderedFrom, productId }) => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -50,13 +51,10 @@ const Package = ({ renderedFrom, productId }) => {
     }
   };
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Packages&view=true')
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields()]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packages?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   return (
