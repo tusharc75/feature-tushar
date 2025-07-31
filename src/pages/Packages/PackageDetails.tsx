@@ -21,6 +21,7 @@ import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import LeadTime from 'src/components/LeadTime';
 import Diagram from 'src/pages/WorkOrder/Diagram';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PackageDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,18 +55,11 @@ const PackageDetails = () => {
     }
   }, [id]);
 
-  const fetchFields = () => {
+  const fetchFields = async () => {
     setPackagesLoading(true);
-    axiosInstance()
-      .get('/field?resource=Packages')
-      .then(({ data: { data } }) => {
-        setPackageFields(data);
-        setPackagesLoading(false);
-      })
-      .catch((err) => {
-        setPackagesLoading(false);
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, permissions?.expenses?.isUpdate);
+    setPackageFields(fieldsDataForRead);
+    setPackagesLoading(false);
   };
 
   const fetchPackage = () => {

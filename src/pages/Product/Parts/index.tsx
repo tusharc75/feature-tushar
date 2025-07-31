@@ -18,6 +18,7 @@ import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialo
 import routes from '../../../components/Helpers/Routes';
 import { prepareDataForGrid, product, sidebarResource } from '../../../constants/helpers';
 import { FiExternalLink } from 'react-icons/fi';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 function Parts({ id }) {
   const renderedFrom = `${camelCase(sidebarResource.product)}_bom`;
@@ -63,8 +64,8 @@ function Parts({ id }) {
   };
 
   const fetchGridColumns = async () => {
-    const response = await axiosInstance().get('/field?resource=Product&view=true');
-    const fields = response?.data?.data?.map((e) => e?.fieldData);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const fields = fieldsDataForRead?.map((e) => e?.fieldData);
 
     let coloum: any = [
       {
