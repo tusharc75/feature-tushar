@@ -25,6 +25,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import InputField from 'src/components/Helpers/InputField';
 import { fetch_resource_fields } from 'src/components/ResourceFields';
+import SelectionConfirmationDialog from 'src/components/Helpers/SelectionConfirmationDialog';
 
 const ManageAssemblyOrder = ({
   isClone = false,
@@ -46,6 +47,8 @@ const ManageAssemblyOrder = ({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [assemblyOrderData, setAssemblyOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false);
+
 
   useEffect(() => {
     setLoading(true);
@@ -187,7 +190,14 @@ const ManageAssemblyOrder = ({
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
           validate={validate}
-          onSubmit={handleSubmit}
+          onSubmit={(values) => {
+            if (assemblyOrderId && isClone && !assemblyOrderData?.canDelete && !showConfirmCloneDetailsDialog) {
+              setShowConfirmCloneDetailsDialog(true);
+            }
+            else {
+              handleSubmit(values)
+            }
+          }}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
@@ -266,14 +276,32 @@ const ManageAssemblyOrder = ({
                   }}
                 />
               ) : null}
+              {showConfirmCloneDetailsDialog && (
+                <SelectionConfirmationDialog
+                  open={showConfirmCloneDetailsDialog}
+                  message={"Would you like to clone with all line items? Click 'Yes' to include header and line items, or 'No' to clone only the header."}
+                  onOk={(type) => {
+                    if (type === 'Yes') {
+                      setFieldValue('assemblyOrderId', assemblyOrderId);
+                    }
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmCloneDetailsDialog(false)
+                  }}
+                  selection1={'Yes'}
+                  selection2={'No'}
+                />)}
             </>
           )}
+
         </Formik>
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+
     </Dialog>
   );
 };
