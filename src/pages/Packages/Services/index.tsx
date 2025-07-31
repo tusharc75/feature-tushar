@@ -299,11 +299,11 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       {permissions?.assemblyOrder?.isRead && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
-            <ContainedTab value={0} label={`Individual`} />
-            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+            <ContainedTab value={0} label={`Field`} />
+            <ContainedTab value={1} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
+            <ContainedTab value={2} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]}-WO`} />
+            <ContainedTab value={3} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]}-WO`} />
+            <ContainedTab value={4} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]}-WO`} />
           </ContainedTabs>
         </>
       )}

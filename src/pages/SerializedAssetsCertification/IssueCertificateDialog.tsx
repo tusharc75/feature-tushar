@@ -61,9 +61,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
 
   const handleSubmit = (values) => {
     setLoading(true);
-    const attachments = isArray(values?.attachments)
-      ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName }))
-      : [];
+    const attachments = isArray(values?.attachments) ? values?.attachments?.map((file) => ({ name: file?.fileName?.split('_')[3], url: file?.fileName })) : [];
     const body = { ...values, asset: assetId, attachments: attachments };
     axiosInstance()
       .post(`${serializedAssetsCertification.api}/issue-certificate`, body)

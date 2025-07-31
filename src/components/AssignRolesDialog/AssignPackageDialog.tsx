@@ -33,7 +33,7 @@ const AssignPackageDialog = ({
   isSubmitting = false,
   hideQty = false,
   forceSplitQuantity = false,
-  showWarehouseDialog = false,
+  showWarehouseSelectDialog = false,
   warehouse = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
@@ -61,7 +61,6 @@ const AssignPackageDialog = ({
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     if (permissions?.packageCategory?.isRead) {
       axiosInstance()
@@ -73,7 +72,6 @@ const AssignPackageDialog = ({
         .catch((err) => toastConfig.setToastConfig(err));
     }
   }, []);
-
 
   const defaultColumns = [
     {
@@ -295,7 +293,7 @@ const AssignPackageDialog = ({
             textAddShow: true
           }}
           addButtonOnclick={() => {
-            if (showWarehouseDialog) {
+            if (showWarehouseSelectDialog) {
               setOpenWarehouseDialog(true)
             } else {
               handleAdd(forceSplitQuantity)
@@ -395,7 +393,6 @@ const AssignPackageDialog = ({
             </CustomDialogContent>
           </Dialog>
         )}
-
         {openWarehouseDialog && (
           <WarehouseDialog
             resources={resources}
@@ -408,6 +405,7 @@ const AssignPackageDialog = ({
               handleAdd(forceSplitQuantity, warehouse)
               setOpenWarehouseDialog(false)
             }}
+            isSubmitting={isSubmitting}
             forceSplitQuantity={forceSplitQuantity}
           />
         )}
@@ -458,67 +456,67 @@ const LeftSideContent = ({
 
 export default AssignPackageDialog;
 
-const WarehouseDialog = ({ resources, onClose, options, warehouse, handleAdd, forceSplitQuantity }) => {
+const WarehouseDialog = ({ resources, onClose, options, warehouse, handleAdd, forceSplitQuantity, isSubmitting }) => {
 
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse)
 
-  return (
-    <Dialog
-      fullWidth
-      TransitionComponent={CustomDialogTransition}
-      maxWidth="xs"
-      fullScreen={false}
-      open={true}
+  return (<Dialog
+    fullWidth
+    maxWidth="xs"
+    fullScreen={false}
+    open={true}
+    onClose={onClose}
+    aria-labelledby="assign-roles-dialog-warehouse"
+  >
+    <CustomDialogHeader
+      title={`Select ${resources?.warehouse?.titleSingular}`}
+      showManimizeMaximize={false}
+      showRequiredLabel={true}
       onClose={onClose}
-      aria-labelledby="assign-roles-dialog-warehouse"
-    >
-      <CustomDialogHeader
-        title={`${resources?.warehouse?.titleSingular}`}
-        showManimizeMaximize={false}
-        showRequiredLabel={true}
-        onClose={onClose}
-      />
-      <CustomDialogContent>
-        <div className='p-2'>
-          <Autocomplete
-            options={options}
-            getOptionLabel={(option: any) => option?.optionLabel || ''}
-            disableClearable
-            value={options?.find((data) => data?.optionValue === selectedWarehouse) ?? ''}
-            onChange={(e, val) => {
-              setSelectedWarehouse(val ? val?.optionValue : null)
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                margin="dense"
-                size="small"
-                name="plant"
-                label={resources?.warehouse?.titleSingular}
-                variant="outlined"
-                fullWidth
-              />
-            )}
-          />
-        </div>
-      </CustomDialogContent>
-
-      <CustomDialogFooter>
-        <ThemeButton
-          onClick={onClose}
-          buttonType="transparent"
-        >
-          Cancel
-        </ThemeButton>
-        <ThemeButton
-          buttonType="theme"
-          onClick={() => {
-            handleAdd(forceSplitQuantity, selectedWarehouse)
+    />
+    <CustomDialogContent>
+      <div className='p-2'>
+        <Autocomplete
+          options={options}
+          getOptionLabel={(option: any) => option?.optionLabel || ''}
+          disableClearable
+          value={options?.find((data) => data?.optionValue === selectedWarehouse) ?? ''}
+          onChange={(e, val) => {
+            setSelectedWarehouse(val ? val?.optionValue : null)
           }}
-        >
-          Save
-        </ThemeButton>
-      </CustomDialogFooter>
-    </Dialog>
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="plant"
+              label={resources?.warehouse?.titleSingular}
+              variant="outlined"
+              fullWidth
+              required
+            />
+          )}
+        />
+      </div>
+    </CustomDialogContent>
+    <CustomDialogFooter>
+      <ThemeButton
+        onClick={onClose}
+        buttonType="transparent"
+      >
+        Cancel
+      </ThemeButton>
+      <ThemeButton
+        buttonType="theme"
+        loading={isSubmitting}
+        disabled={isSubmitting}
+        onClick={() => {
+          handleAdd(forceSplitQuantity, selectedWarehouse)
+        }}
+      >
+        Add
+      </ThemeButton>
+    </CustomDialogFooter>
+  </Dialog>
   )
 }

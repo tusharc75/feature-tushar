@@ -512,7 +512,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           isSubmitting={isSubmitting}
           packageType={'product'}
           forceSplitQuantity={true}
-          showWarehouseDialog={allFields?.some((f) => f?.fieldName === 'warehouse')}
+          showWarehouseSelectDialog={allFields?.some((f) => f?.fieldName === 'warehouse')}
           warehouse={assemblyOrderData?.warehouse?.optionValue}
         />
       )}
