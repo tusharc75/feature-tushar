@@ -17,6 +17,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.wellNumber);
 
@@ -47,8 +48,8 @@ const WellNumber = ({ wellName }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.wellNumber}`);
-    data = response?.data?.data?.filter((e) => e.fieldData.fieldName !== 'wellName');
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellNumber, permissions?.wellNumber?.isUpdate);
+    data = fieldsDataForRead?.filter((e) => e.fieldData.fieldName !== 'wellName');
     const newColumns = generateColumns(renderedFrom, data, routes.wellNumberDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -87,7 +88,7 @@ const WellNumber = ({ wellName }) => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}

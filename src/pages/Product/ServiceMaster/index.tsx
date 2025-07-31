@@ -30,6 +30,7 @@ import { TabPanel } from 'src/components/CustomTabs';
 import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 interface Props {
   renderedFrom: string;
@@ -70,19 +71,12 @@ const ServiceMaster = (props: Props) => {
   }: any = useData();
 
   useEffect(() => {
-    getServiceMasterColumns();
+    fetchGridColumns();
     fetchData();
   }, [selectedEntity, id]);
 
-  const getServiceMasterColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serviceMaster.resource}`)
-      .then(({ data: { data } }) => {
-        fetchGridColumns(data);
-      });
-  };
-
-  const fetchGridColumns = (serviceColumns: any) => {
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serviceMaster.resource, permissions?.serviceMaster?.isUpdate);
     let columns: any = [
       {
         accessor: 'order',
@@ -155,16 +149,16 @@ const ServiceMaster = (props: Props) => {
         editable: permissions?.product?.isUpdate ? true : false,
         Cell: ({ row }) => (row.original?.qty ? <p>{row.original?.qty}</p> : <NoDataCell />)
       },
-      ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
+      ...(fieldsDataForRead && fieldsDataForRead?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-          {
-            accessor: 'frequency',
-            Header: 'Frequency',
-            width: 150,
-            minWidth: 150,
-            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'frequency',
+              Header: 'Frequency',
+              width: 150,
+              minWidth: 150,
+              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+            }
+          ]
         : []),
       {
         accessor: 'stepName',
@@ -181,7 +175,7 @@ const ServiceMaster = (props: Props) => {
       }
     ];
 
-    if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'preWork')) {
+    if (fieldsDataForRead && fieldsDataForRead?.some((column) => column?.fieldData?.fieldName === 'preWork')) {
       columns.push({
         accessor: 'preWork',
         Header: 'Pre Work',
@@ -189,7 +183,7 @@ const ServiceMaster = (props: Props) => {
         Cell: ({ row }) => (row.original?.preWork ? <p className="text-truncate">{row.original?.preWork}</p> : <NoDataCell />)
       });
     }
-    if (serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'serviceType')) {
+    if (fieldsDataForRead && fieldsDataForRead?.some((column) => column?.fieldData?.fieldName === 'serviceType')) {
       columns.push({
         accessor: 'serviceType',
         Header: 'Service Type',
@@ -216,8 +210,8 @@ const ServiceMaster = (props: Props) => {
         <div style={{ display: 'flex', justifyContent: 'end' }}>
           {permissions?.product?.isUpdate &&
             row?.original?.type === 'Service' &&
-            serviceColumns &&
-            serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
+            fieldsDataForRead &&
+            fieldsDataForRead?.some((column) => column?.fieldData?.fieldName === 'frequency') && (
               <HtmlTooltip title="Edit">
                 <IconButton
                   size="small"

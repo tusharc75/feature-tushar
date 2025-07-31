@@ -6,8 +6,10 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
+import { useData } from 'src/StateProvider/Provider';
 
 const AddServices = ({ schedularState }: SchedularComponentProps) => {
   const { selectedAssets, selectedWarehouse, loading, setSelectedServices, setActiveTab, getTabData, toastConfig } = schedularState;
@@ -18,6 +20,9 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -47,13 +52,10 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
   }, [loading, selectedWarehouse]);
 
   const fetchGridColumns = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serviceMaster}`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes?.serviceMasterDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.serviceMaster?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceMasterDetail?.path, true);
 
-        setColumns([...newColumns, ...getStaticFields()]);
-      });
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {

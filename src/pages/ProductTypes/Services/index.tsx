@@ -17,6 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { MATERIAL_TYPE, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(resource)}_service'}`;
@@ -89,10 +90,8 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
   ];
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.serviceMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns]);
   };
 
@@ -133,7 +132,7 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
     });
     axiosInstance()
       .put(`/work-order-material-master-data/order`, {
-        data: rows || [],
+        data: rows || []
       })
       .then(() => {
         fetchData();
@@ -201,7 +200,7 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
     return (
       allowedToEdit && (
         <>
-           <ImportExportMenu
+          <ImportExportMenu
             permissions={permissions?.[camelCase(resource)]}
             module="services"
             api={`/work-order-material-master-data`}
@@ -209,17 +208,15 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
               fetchData();
             }}
             isExportAllOrSomeFeature={true}
-            ids={selectedRecords?.map((s)=> s._id) || []}
+            ids={selectedRecords?.map((s) => s._id) || []}
             recordsToExport={selectedRecords?.length}
             additionalParams={`resource=${resource}&referenceId=${referenceId}&workOrderType=${workOrderResourceTabs[tabValue]}&materialType=${MATERIAL_TYPE.service}&workOrderResources=${JSON.stringify(workOrderResourceTabs)}`}
           />
           {dataRows?.length > 0 ? (
-            <ThemeButton
-              startIcon={<GrDrag fontSize="small" />}
-              onClick={() => setArrangeView(true)}>
+            <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
               Arrange
             </ThemeButton>
-          ) : null} 
+          ) : null}
         </>
       )
     );
