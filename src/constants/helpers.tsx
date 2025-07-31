@@ -299,6 +299,7 @@ export const sidebarResource = {
   quotePdfTemplate: 'Quote Pdf Template',
   warehouse: 'Warehouse',
   rentalManagement: 'Rental Management',
+  rentalJobTechnicianView: 'Rental Job Technician View',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
@@ -526,6 +527,11 @@ export const customPdfTemplate = {
 
 export const rentalManagement = {
   api: '/rental-management',
+  resource: 'Rental Management'
+};
+
+export const rentalJobTechnicianView = {
+  api: '/rental-job-technician-view',
   resource: 'Rental Management'
 };
 
