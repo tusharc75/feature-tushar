@@ -5,7 +5,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   ASSET_STATUS,
   RENTAL_STEPS,
-  rentalJobTechnicianView,
+  rentalManagement,
   serializedAsset,
   sidebarResource
 } from 'src/constants/helpers';
@@ -83,7 +83,7 @@ const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
     try {
       let data;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${rentalJobTechnicianView.api}/${rentalJob}`);
+        const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalJob}`);
         data = response?.data?.data;
       } else {
         data = await findOne(objectStore.rentalManagement, rentalJob);
