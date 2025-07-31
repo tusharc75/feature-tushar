@@ -65,7 +65,8 @@ export const Provider = ({ children }) => {
             sidebarResource.rentalManagement,
             sidebarResource.fieldServiceOrder,
             sidebarResource.fieldServiceTechnician,
-            sidebarResource.fieldTicket
+            sidebarResource.fieldTicket,
+            sidebarResource.rentalJobTechnicianView
           ]?.includes(e.name)
         );
       });
