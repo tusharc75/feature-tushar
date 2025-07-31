@@ -47,7 +47,7 @@ const StorageLocation = ({ warehouse }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.storageLocation, permissions?.storageLocation?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.storageLocation, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.storageLocationDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

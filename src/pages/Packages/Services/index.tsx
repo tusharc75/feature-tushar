@@ -147,7 +147,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   ];
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.packages?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns]);
   };

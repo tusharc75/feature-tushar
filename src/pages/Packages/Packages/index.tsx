@@ -71,7 +71,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   };
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packages?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
     setColumns([
       {

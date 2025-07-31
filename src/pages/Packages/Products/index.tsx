@@ -81,7 +81,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const fetchColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.packages?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     let coloum: any = [
       {
         accessor: 'index',

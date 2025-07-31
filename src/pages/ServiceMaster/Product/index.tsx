@@ -81,7 +81,7 @@ function Product({ id }) {
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       }
     ];
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     fieldsDataForRead
       ?.filter((e) =>
         ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)

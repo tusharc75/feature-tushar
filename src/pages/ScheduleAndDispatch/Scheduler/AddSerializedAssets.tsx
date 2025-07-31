@@ -71,7 +71,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   }, [selectedProduct, selectedWarehouse, loading]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAsset, permissions?.serializedAsset?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAsset, false);
     let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serializedAssetDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };

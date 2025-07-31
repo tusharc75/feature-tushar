@@ -45,7 +45,7 @@ const ServicePackage = ({ renderedFrom, productId }) => {
 
   const fetchGridColumns = async () => {
     setColumns(null);
-    const { fieldsDataForRead } = await fetch_resource_view_fields(packages.resource, permissions?.packages?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(packages.resource, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

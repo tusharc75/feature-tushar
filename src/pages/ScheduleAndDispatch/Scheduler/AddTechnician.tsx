@@ -48,7 +48,7 @@ const AddTechnicians = ({ schedularState }: SchedularComponentProps) => {
   }, [loading, selectedWarehouse]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, false);
     let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.employeeMasterDetail?.path, true);
 
     setColumns([...newColumns, ...getStaticFields()]);

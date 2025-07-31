@@ -48,7 +48,7 @@ const WellNumber = ({ wellName }) => {
 
   const fetchGridColumns = async () => {
     let data;
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellNumber, permissions?.wellNumber?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.wellNumber, false);
     data = fieldsDataForRead?.filter((e) => e.fieldData.fieldName !== 'wellName');
     const newColumns = generateColumns(renderedFrom, data, routes.wellNumberDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);

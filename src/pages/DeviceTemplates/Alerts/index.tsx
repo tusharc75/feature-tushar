@@ -46,7 +46,7 @@ export default function Alerts({ deviceTemplate }) {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplateAlert, permissions?.deviceTemplateAlert?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplateAlert, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.deviceTemplateAlertDetail.path, true);
     newColumns?.forEach((o) => {
       if (o?.accessor === 'alertNumber') {

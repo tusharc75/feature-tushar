@@ -38,7 +38,7 @@ const Dispatch = ({ search }) => {
   }, []);
 
   const fetchColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.rentalManagement, permissions?.rentalManagement?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.rentalManagement, false);
     const newColumns = [...generateColumns(renderedFrom, fieldsDataForRead, routes.rentalManagementDetail.path), ...getStaticFields()];
     setColumns(newColumns);
   };

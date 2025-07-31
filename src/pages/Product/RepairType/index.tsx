@@ -49,7 +49,7 @@ const ProductRepairType = (props: Props) => {
   }, [id]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairType, permissions?.repairType?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairType, false);
     const newColumns = generateColumns(camelCase(sidebarResource.repairType), fieldsDataForRead, routes.repairTypeDetail.path);
     setColumns([...newColumns, ActionsRenderer]);
   };

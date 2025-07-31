@@ -76,7 +76,7 @@ const ServiceMaster = (props: Props) => {
   }, [selectedEntity, id]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(serviceMaster.resource, permissions?.serviceMaster?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serviceMaster.resource, false);
     let columns: any = [
       {
         accessor: 'order',

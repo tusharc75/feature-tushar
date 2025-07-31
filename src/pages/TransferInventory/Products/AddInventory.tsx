@@ -38,7 +38,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path);
     newColumns.unshift(
       {

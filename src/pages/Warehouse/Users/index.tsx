@@ -46,7 +46,7 @@ const Users = ({ warehouse }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.user, permissions?.user?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.user, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.userDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

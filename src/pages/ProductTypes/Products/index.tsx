@@ -74,7 +74,7 @@ const Products = ({ resource, referenceId, workOrderResourceTabs, allowedToEdit,
   };
 
   const fetchColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     let coloum: any = [
       {
         accessor: 'index',

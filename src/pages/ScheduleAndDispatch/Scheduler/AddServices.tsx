@@ -52,7 +52,7 @@ const AddServices = ({ schedularState }: SchedularComponentProps) => {
   }, [loading, selectedWarehouse]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.serviceMaster?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, false);
     let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceMasterDetail?.path, true);
 
     setColumns([...newColumns, ...getStaticFields()]);

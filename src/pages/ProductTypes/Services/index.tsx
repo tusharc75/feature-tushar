@@ -90,7 +90,7 @@ const ServiceTable = ({ resource, referenceId, workOrderResourceTabs, allowedToE
   ];
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, permissions?.serviceMaster?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns]);
   };
