@@ -273,47 +273,46 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   };
 
   const handleAdd = async (rows, onlyAddChildren = false) => {
-    console.log('rrrrr', rows)
-    // setSubmitting(true);
-    // const material: any = [];
-    // rows.forEach((d) => {
-    //   const element: any = {};
-    //   element.materialId = d._id;
-    //   element.type = d?.type || MATERIAL_TYPE.package;
-    //   element.qty = d.qty ? parseFloat(d.qty) : 1;
-    //   element.parentId = addDialog.parentId;
-    //   if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
-    //     element.warehouse = d?.warehouse || assemblyOrderData?.warehouse?.optionValue;
-    //   }
-    //   if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
-    //     element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
-    //   }
-    //   if (element.type === MATERIAL_TYPE.package && onlyAddChildren) {
-    //     element.onlyAddChildren = true;
-    //   }
-    //   material.push(element);
-    // });
+    setSubmitting(true);
+    const material: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.type = d?.type || MATERIAL_TYPE.package;
+      element.qty = d.qty ? parseFloat(d.qty) : 1;
+      element.parentId = addDialog.parentId;
+      if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
+        element.warehouse = d?.warehouse || assemblyOrderData?.warehouse?.optionValue;
+      }
+      if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
+        element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
+      }
+      if (element.type === MATERIAL_TYPE.package && onlyAddChildren) {
+        element.onlyAddChildren = true;
+      }
+      material.push(element);
+    });
 
-    // axiosInstance()
-    //   .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material })
-    //   .then(({ data }) => {
-    //     dispatch({ type: 'selection', selectedRecords: [] });
-    //     setChildPackageWithoutParentDialog({ open: false, data: null });
-    //     setAddDialog({ open: false, parentId: null });
-    //     toastConfig.setToastConfig({
-    //       open: true,
-    //       type: 'success',
-    //       message: data.message
-    //     });
-    //     fetchAssembleOrderData();
-    //     fetchData();
-    //     setSubmitting(false);
-    //   })
-    //   .catch((error) => {
-    //     setSubmitting(false);
-    //     setChildPackageWithoutParentDialog({ open: false, data: null });
-    //     toastConfig.setToastConfig(error);
-    //   });
+    axiosInstance()
+      .post(`${routes.assemblyOrder.path}/material/${assemblyOrderData._id}`, { material })
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        setChildPackageWithoutParentDialog({ open: false, data: null });
+        setAddDialog({ open: false, parentId: null });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchAssembleOrderData();
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        setChildPackageWithoutParentDialog({ open: false, data: null });
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDelete = (rows) => {
