@@ -6,7 +6,7 @@ import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import { fetch_resource_fields } from "src/components/ResourceFields";
-import { getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from "src/constants/helpers";
+import { getObjKeys, sidebarResource, yupSchema } from "src/constants/helpers";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';

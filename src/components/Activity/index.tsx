@@ -30,8 +30,8 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
-import ManageAttachmentsNew from 'src/components/Activity/AttachMentsNew/ManageAttachmentsNew';
-import AttachMentsNew from 'src/components/Activity/AttachMentsNew';
+import AttachmentsNew from 'src/components/Activity/AttachmentsNew';
+import ManageAttachmentsNew from 'src/components/Activity/AttachmentsNew/ManageAttachmentsNew';
 
 const Activity = (props) => {
   const {
@@ -291,7 +291,7 @@ const Activity = (props) => {
                     <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
-                    <AttachMentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
+                    <AttachmentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />

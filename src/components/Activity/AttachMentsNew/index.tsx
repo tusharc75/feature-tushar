@@ -12,10 +12,10 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import ManageAttachmentsNew from "src/components/Activity/AttachMentsNew/ManageAttachmentsNew";
 import { isMobile, isTablet } from "react-device-detect";
+import ManageAttachmentsNew from "src/components/Activity/AttachmentsNew/ManageAttachmentsNew";
 
-const AttachMentsNew = ({ relatedTo, onSetCount }) => {
+const AttachmentsNew = ({ relatedTo, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [loading, setLoading] = useState(false);
@@ -135,7 +135,7 @@ const AttachMentsNew = ({ relatedTo, onSetCount }) => {
 
 }
 
-export default AttachMentsNew;
+export default AttachmentsNew;
 
 const RenderTree = ({ tree, folderButtons }) => {
   return (
