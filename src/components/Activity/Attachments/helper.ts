@@ -73,6 +73,37 @@ export const unflatten = (items: TFiles[]): TNestedTree[] => {
   return tree;
 };
 
+export const unflattenNew = (items: TFiles[]): TNestedTree[] => {
+  const tree: TNestedTree[] = [],
+    mappedArr = {};
+
+  // Build a hash table and map items to objects
+  items.forEach(function (item) {
+    const id = item._id;
+    if (!mappedArr.hasOwnProperty(id)) {
+      // in case of duplicates
+      mappedArr[id] = item;
+      mappedArr[id].children = [];
+    }
+  });
+
+  // Loop over hash table
+  for (const id in mappedArr) {
+    if (mappedArr.hasOwnProperty(id)) {
+      const mappedElem = mappedArr[id];
+
+      if (mappedElem.parentId) {
+        const parentId = mappedElem.parentId;
+        mappedArr[parentId].children.push(mappedElem);
+      } else {
+        tree.push(mappedElem);
+      }
+    }
+  }
+
+  return tree;
+};
+
 const order = ['file', 'folder'];
 
 export const sortFileStructure = (a, b) => {
