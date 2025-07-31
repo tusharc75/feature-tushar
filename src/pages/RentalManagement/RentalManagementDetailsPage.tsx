@@ -409,7 +409,7 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
-                  {permissions?.iotChart?.isRead && (
+                  {permissions?.iotChart?.isRead && !isOffline && (
                     <ThemeButton
                       id={'rental-management-view-iot-chart-button'}
                       onClick={() => {
@@ -419,19 +419,21 @@ const RentalManagementDetailsPage = () => {
                       {`View ${resources?.iotChart?.titlePlural}`}
                     </ThemeButton>
                   )}
-                  <ThemeButton
-                    id={'rental-management-download-button'}
-                    type="button"
-                    disabled={isDownloading ? true : false}
-                    iconForMobile={<DownloadIcon />}
-                    startIcon={<DownloadIcon />}
-                    onClick={(e) => {
-                      handleDownload();
-                    }}
-                    mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
-                  >
-                    {isDownloading ? 'Please wait...' : 'Download'}
-                  </ThemeButton>
+                  {!isOffline &&
+                    <ThemeButton
+                      id={'rental-management-download-button'}
+                      type="button"
+                      disabled={isDownloading ? true : false}
+                      iconForMobile={<DownloadIcon />}
+                      startIcon={<DownloadIcon />}
+                      onClick={(e) => {
+                        handleDownload();
+                      }}
+                      mobileTooltip={isDownloading ? 'Please wait...' : 'Download'}
+                    >
+                      {isDownloading ? 'Please wait...' : 'Download'}
+                    </ThemeButton>
+                  }
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
                     versionNotClonned &&
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (

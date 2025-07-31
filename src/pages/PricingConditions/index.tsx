@@ -169,14 +169,18 @@ const PricingCondition = () => {
     }
     axiosInstance()
       .put(`${pricingCondition.api}/remove`, { ids: ids })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setIsSubmitting(false);
-      })
-      .catch((error) => {
+      }).catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
