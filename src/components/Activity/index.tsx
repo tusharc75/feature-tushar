@@ -30,6 +30,8 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
+import ManageAttachmentsNew from 'src/components/Activity/AttachmentsNew/ManageAttachmentsNew';
+import AttachmentsNew from 'src/components/Activity/AttachmentsNew';
 
 const Activity = (props) => {
   const {
@@ -288,9 +290,9 @@ const Activity = (props) => {
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
                     <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {/* {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
                     <AttachmentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
-                  ) : null} */}
+                  ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
                   ) : null}
@@ -406,7 +408,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {/* {['Attachment', 'AttachmentFolder']?.includes(type) && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+          {['Attachment', 'AttachmentFolder']?.includes(type) && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
             <ManageAttachmentsNew
               onClose={() => {
                 handleClose();
@@ -424,7 +426,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
               type={type === 'AttachmentFolder' ? 'folder' : 'file'}
             />
-          )} */}
+          )}
           {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
             <ManageAttachment
               attachmentId={null}
