@@ -15,7 +15,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useData } from 'src/StateProvider/Provider';
 
-const OnField = ({ rentalJob, referenceFrom, referenceData }) => {
+const OnField = ({ rentalJob, referenceFrom }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);

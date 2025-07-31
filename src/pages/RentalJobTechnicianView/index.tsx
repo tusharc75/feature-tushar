@@ -171,7 +171,6 @@ const RentalJobTechnicianView = () => {
                   key={selectedData._id}
                   rentalJob={selectedData._id}
                   referenceFrom={renderedFrom}
-                  referenceData={selectedData}
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
