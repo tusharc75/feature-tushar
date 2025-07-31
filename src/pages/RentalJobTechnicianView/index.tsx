@@ -7,14 +7,14 @@ import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from "src/components/CustomReactTable";
 import routes from "src/components/Helpers/Routes";
 import { ListingPageHeader } from "src/components/PageHeaders";
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { gridLoadingTimeout, prepareDataForGrid, rentalJobTechnicianView, rentalManagement, sidebarResource } from "src/constants/helpers";
 import { CustomOfflineContext } from "src/StateProvider/OfflineContext/OfflineContext";
 import { useData } from "src/StateProvider/Provider";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import CustomContainer from "src/components/CustomContainer";
 import { findAll, findOne, objectStore } from "src/constants/indexdbhelper";
-import OnField from "src/pages/FieldServiceOrder/OnField";
+import OnField from "src/pages/RentalJobTechnicianView/OnField";
 
 const RentalJobTechnicianView = () => {
   const renderedFrom = camelCase(sidebarResource.rentalManagement);
@@ -29,7 +29,6 @@ const RentalJobTechnicianView = () => {
   
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.rentalManagement));
   const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
@@ -37,7 +36,7 @@ const RentalJobTechnicianView = () => {
     const cancelToken = axios.CancelToken.source();
     fetchData(cancelToken);
     return () => cancelToken.cancel();
-  }, [page, limit, filters, sorting, search, selectedType]);
+  }, [page, limit, filters, sorting, search]);
 
   const fetchGridColumns = async () => {
     try {
@@ -59,14 +58,7 @@ const RentalJobTechnicianView = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    
-    if (selectedType === 1) {
-      deepFilter += `&openRecords=1`;
-    } else if (selectedType === 2) {
-      deepFilter += `&myRecords=1`;
-    } else if (selectedType === 4) {
-      deepFilter += `&closedRecords=1`;
-    }
+    deepFilter += `&myRecords=1`;
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
@@ -87,7 +79,6 @@ const RentalJobTechnicianView = () => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    
     return deepFilter;
   };
 
@@ -98,7 +89,7 @@ const RentalJobTechnicianView = () => {
     try {
       let data: any = [], count;
       if (!isOffline) {
-        const response = await axiosInstance().get(`${rentalManagement.api}${queryString}`, { 
+        const response = await axiosInstance().get(`${rentalJobTechnicianView.api}${queryString}`, { 
           cancelToken: cancelTokenSource?.token 
         });
         data = response?.data?.data;
@@ -140,7 +131,7 @@ const RentalJobTechnicianView = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resources?.rentalManagement?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ title: resources?.rentalJobTechnicianView?.titlePlural }]} />
         {initialDataLoaded && (
           <ListingPageHeader
             searchValue={search}
