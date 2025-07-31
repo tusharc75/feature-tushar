@@ -10,6 +10,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, serializedAsset } from 'src/constants/helpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,18 +32,15 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     fetchData();
   }, [page, limit, filters, sorting]);
 
-  const fetchColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-        newColumns?.forEach((o) => {
-          if (data?.find((d) => d?.fieldData.fieldName === o.accessor)?.fieldData?.type === 'singleLine' && o.accessor !== 'assetNumber') {
-            o.editable = true;
-          }
-        });
-        setColumns([...newColumns, ...getStaticFields()]);
-      });
+  const fetchColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path);
+    newColumns?.forEach((o) => {
+      if (fieldsDataForRead?.find((d) => d?.fieldData.fieldName === o.accessor)?.fieldData?.type === 'singleLine' && o.accessor !== 'assetNumber') {
+        o.editable = true;
+      }
+    });
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchData = () => {

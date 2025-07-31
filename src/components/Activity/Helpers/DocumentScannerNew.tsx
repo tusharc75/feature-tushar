@@ -1,4 +1,4 @@
-import { useState, useRef, useContext, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -6,17 +6,12 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import { CustomDialogTransition } from '../../../constants/helpers';
 import Dialog from '@mui/material/Dialog';
 import Webcam from 'react-webcam';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import IconButton from '@mui/material/IconButton';
 import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
-  const toastConfig = useContext(CustomToastContext);
+const DocumentScannerNew = ({ open, onClose, values, setFieldValue, name }) => {
   const webcamRef = useRef(null);
-  const [picture, setPicture] = useState('');
-  const [isScanning, setIsScanning] = useState(false);
   const [facingMode, setFacingMode] = useState('environment');
   const [cameraCount, setCameraCount] = useState(0);
   const [cameraPermission, setCameraPermission] = useState('prompt');
@@ -43,40 +38,32 @@ const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
       });
   }, [cameraPermission]);
 
-  const captureImageFromStream = () => {
-    const video = webcamRef.current.video;
-    const canvas = document.createElement('canvas');
-    canvas.width = 1920;
-    canvas.height = 1080;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL('image/png');
+  const handleCapture = () => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    const fileName = `webcam-capture-${Date.now()}.jpg`;
+    const imageFile = base64StringtoFile(imageSrc, fileName);
+
+    const files = Array.isArray(values[name]) ? [...values[name]] : [];
+
+    files.push(imageFile)
+    setFieldValue(name, files);
+    onClose()
   };
 
-  const handleCapture = () => {
-    const imageSrc = captureImageFromStream();
-    setPicture(imageSrc);
-    setIsScanning(true);
-    axiosInstance()
-      .post('/attachment/upload-scan-document', {
-        image: imageSrc
-      })
-      .then(({ data }) => {
-        setIsScanning(false);
-        const file = data.fileName;
-        setFieldValue(name, file, true);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        onClose();
-      })
-      .catch((error) => {
-        setIsScanning(false);
-        toastConfig.setToastConfig(error);
-      });
+  const base64StringtoFile = (base64String, filename) => {
+    const arr = base64String.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new File([u8arr], filename, { type: mime });
   };
+
 
   const switchCamera = () => {
     facingMode === 'user' ? setFacingMode('environment') : setFacingMode('user');
@@ -105,19 +92,16 @@ const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
             </div>
           )}
           {cameraPermission !== 'denied' &&
-            (picture == '' ? (
-              <Webcam
-                audio={false}
-                ref={webcamRef}
-                screenshotFormat="image/jpeg"
-                screenshotQuality={1}
-                width="100%"
-                height="100%"
-                videoConstraints={{ facingMode: facingMode, width: 1920, height: 1080 }}
-              />
-            ) : (
-              <img src={picture} width="100%" height="100%" />
-            ))}
+            <Webcam
+              audio={false}
+              ref={webcamRef}
+              screenshotFormat="image/jpeg"
+              screenshotQuality={1}
+              width="100%"
+              height="100%"
+              videoConstraints={{ facingMode: facingMode, width: 1920, height: 1080 }}
+            />
+          }
         </CustomDialogContent>
         <CustomDialogFooter>
           <ThemeButton buttonType="transparent" onClick={onClose}>
@@ -131,8 +115,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
           <ThemeButton
             buttonType="theme"
             onClick={handleCapture}
-            disabled={isScanning || !webcamRef?.current?.video}
-            isLoading={isScanning}
+            disabled={!webcamRef?.current?.video}
           >
             Capture
           </ThemeButton>
@@ -142,4 +125,4 @@ const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
   );
 };
 
-export default DocumentScanner;
+export default DocumentScannerNew;

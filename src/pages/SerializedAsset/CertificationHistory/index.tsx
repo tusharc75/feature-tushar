@@ -76,36 +76,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
     axiosInstance()
       .get(`/field/child?resource=${CHILD_RESOURCE.serializedAssetsCertification}`)
       .then(({ data: { data } }) => {
-        let newColumns = generateColumns(
-          renderedFrom,
-          data?.filter((o) => o.fieldName !== 'attachments'),
-          routes.serializedAssetDetail.path,
-          true
-        );
-        newColumns.push({
-          accessor: 'supplierAccount',
-          Header: 'Certification Supplier',
-          Cell: ({ row }) => (
-            <div>
-              {row.original?.supplierAccount ? (
-                permissions?.supplierAccount?.isRead ? (
-                  <Link
-                    className="link"
-                    target="_blank"
-                    title={row.original?.supplierAccount}
-                    to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}
-                  >
-                    {row.original?.supplierAccount}
-                  </Link>
-                ) : (
-                  <span>{row.original?.supplierAccount}</span>
-                )
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        });
+        let newColumns = generateColumns(renderedFrom, data?.filter((o) => o.fieldName !== 'attachments'), routes.serializedAssetDetail.path, true);
         newColumns.push({
           accessor: 'createdBy',
           Header: 'Created By',

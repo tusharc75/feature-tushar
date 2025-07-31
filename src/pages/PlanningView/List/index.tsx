@@ -13,11 +13,12 @@ import { FiExternalLink } from 'react-icons/fi';
 import { camelCase } from 'lodash';
 import DateRangePicker, { DateRange } from 'src/components/DateRangePicker';
 import dayjs from 'dayjs';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString, topRightSlot }, ref) {
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, selectedEntity, resources }
+    state: { user, selectedEntity, resources, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
 
@@ -165,12 +166,9 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
         }
       ]);
     } else {
-      axiosInstance()
-        .get(`/field?resource=${selectedResource.resource}`)
-        .then(({ data: { data } }) => {
-          const newColumns = generateColumns(renderedFrom, data, selectedResource.path);
-          setColumns([...newColumns, ...getStaticFields()]);
-        });
+      const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, permissions[selectedResource.resource]?.isUpdate);
+      const newColumns = generateColumns(renderedFrom, fieldsDataForRead, selectedResource.path);
+      setColumns([...newColumns, ...getStaticFields()]);
     }
   };
 

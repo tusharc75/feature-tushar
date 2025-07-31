@@ -14,6 +14,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../.
 import routes from './../../../components/Helpers/Routes';
 import WarhouseList from './WarhouseList';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Warehouse = ({ reference, api, id, accountId = '' }) => {
   const renderedFrom = camelCase(sidebarResource?.warehouse);
@@ -43,10 +44,8 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Warehouse`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions[reference].isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
