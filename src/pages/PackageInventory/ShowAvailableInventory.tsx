@@ -25,7 +25,7 @@ const ShowAvailableInventory = ({ onClose, renderedFrom, plantId, packageId }) =
   }: any = useData();
 
   const fetchColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAsset, permissions?.packageInventory?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedPackages, false);
     let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path);
     setColumns([...newColumns, ...getStaticFields()]);
   };

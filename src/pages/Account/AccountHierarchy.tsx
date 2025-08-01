@@ -86,7 +86,7 @@ export default function AccountHierarchy({
   };
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[accountResource], permissions[accountResource].isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[accountResource], permissions[accountResource]?.isUpdate);
     let newColumns: any = generateColumns(accountResource, fieldsDataForRead, `/${accountRoute}/detail`, true);
 
     newColumns?.forEach((o) => {

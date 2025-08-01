@@ -102,8 +102,8 @@ const InventoryProduct = () => {
   const fetchGridColumns = async () => {
     setColumns(null);
 
-    const productFields = await fetch_resource_view_fields(sidebarResource.product, permissions?.productCategory?.isUpdate);
-    const productInventoryFields = await fetch_resource_view_fields(sidebarResource.productInventory, permissions?.productInventory?.isUpdate);
+    const productFields = await fetch_resource_view_fields(sidebarResource.product, false);
+    const productInventoryFields = await fetch_resource_view_fields(sidebarResource.productInventory, false);
 
     let columns = [];
     productFields?.fieldsDataForRead?.forEach((o) => {

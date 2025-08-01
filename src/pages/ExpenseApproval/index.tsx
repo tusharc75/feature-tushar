@@ -35,7 +35,7 @@ const ExpenseApproval = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseApproval?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expenseReportDetail?.path);
     setColumns([...newColumns, ...getStaticFields()]);
   };

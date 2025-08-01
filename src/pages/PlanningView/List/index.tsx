@@ -166,7 +166,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
         }
       ]);
     } else {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, permissions[selectedResource.resource]?.isUpdate);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, false);
       const newColumns = generateColumns(renderedFrom, fieldsDataForRead, selectedResource.path);
       setColumns([...newColumns, ...getStaticFields()]);
     }

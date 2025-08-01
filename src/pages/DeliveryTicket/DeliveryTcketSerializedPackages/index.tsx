@@ -28,7 +28,7 @@ const DeliveryTcketSerializedPackages = ({ deliveryTicketId, renderedFrom }) => 
   }, []);
 
   const fetchColumns = async () => {
-    const {fieldsDataForRead} = await fetch_resource_view_fields(sidebarResource.serializedAsset, permissions?.serializedAsset?.isUpdate);
+    const {fieldsDataForRead} = await fetch_resource_view_fields(sidebarResource.serializedPackages, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path);
     setColumns([...newColumns, ...getStaticFields()]);
   };
