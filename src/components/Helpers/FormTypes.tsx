@@ -69,7 +69,6 @@ import CustomDatePicker from 'src/components/CustomDatePicker';
 import CurrencyAutocomplete from './CurrencyAutocomplete';
 import MultiLine from 'src/components/Helpers/FormTypes/MultiLine';
 import MultiFileUpload from './FormTypes/MultiFileUpload';
-import MultiFileUploadNew from 'src/components/Helpers/FormTypes/MultiFileUploadNew';
 
 type MultiFileType = {
   fileName: string;
@@ -576,30 +575,6 @@ const FormTypes = (props) => {
         });
     });
   };
-
-  const handleSelectFile = (ev) => {
-    if (ev.target.files && ev.target.files.length) {
-      const selectedFiles = ev.target.files;
-
-      const files = Array.isArray(values[name]) ? [...values[name]] : [];
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        if (file.size > fileUploadMaxSize.size) {
-          setToastConfig({
-            open: true,
-            type: 'error',
-            message: `file must be less than ${fileUploadMaxSize.text} size`
-          });
-          break;
-        }
-        files.push(file)
-      }
-
-      setFieldValue(name, files);
-      ev.target.value = '';
-    }
-  }
 
   // const getFileUrl = (file, isMultiple = false) => {
   //   setFileUploadProgress(0);
@@ -2665,18 +2640,6 @@ const FormTypes = (props) => {
         required={required}
         setFieldValue={setFieldValue}
         doNotShowUploadedFile={false}
-        disabled={false}
-      />
-    ) : type === 'multipleFileUploadNew' ? (
-      <MultiFileUploadNew
-        name={name}
-        label={label}
-        handleSelectFile={handleSelectFile}
-        values={values}
-        errors={errors}
-        touched={touched}
-        required={required}
-        setFieldValue={setFieldValue}
         disabled={false}
       />
     ) : type === 'url' ? (

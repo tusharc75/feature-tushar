@@ -14,6 +14,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, repairType, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 interface Props {
   renderedFrom: string;
@@ -47,13 +48,10 @@ const ProductRepairType = (props: Props) => {
     fetchData();
   }, [id]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${repairType.resource}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(camelCase(sidebarResource.repairType), data, routes.repairTypeDetail.path);
-        setColumns([...newColumns, ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairType, false);
+    const newColumns = generateColumns(camelCase(sidebarResource.repairType), fieldsDataForRead, routes.repairTypeDetail.path);
+    setColumns([...newColumns, ActionsRenderer]);
   };
 
   const fetchData = () => {

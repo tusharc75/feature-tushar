@@ -33,7 +33,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
   }, [page, limit, filters, sorting]);
 
   const fetchColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path);
     newColumns?.forEach((o) => {
       if (fieldsDataForRead?.find((d) => d?.fieldData.fieldName === o.accessor)?.fieldData?.type === 'singleLine' && o.accessor !== 'assetNumber') {

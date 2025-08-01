@@ -16,6 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, PACKAGE_TYPE, packages, prepareDataForGrid, product } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServicePackage = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -42,14 +43,11 @@ const ServicePackage = ({ renderedFrom, productId }) => {
     fetchData();
   }, [productId]);
 
-  const fetchGridColumns = () => {
+  const fetchGridColumns = async () => {
     setColumns(null);
-    axiosInstance()
-      .get(`/field?resource=${packages.resource}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(packages.resource, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = () => {
