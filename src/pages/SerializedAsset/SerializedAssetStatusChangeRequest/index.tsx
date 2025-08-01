@@ -27,6 +27,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { FiExternalLink } from 'react-icons/fi';
 import { useHistory } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.serializedAssetStatusChangeRequest);
 
@@ -57,58 +58,58 @@ const SerializedAssetStatusChangeRequest = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data);
-        const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
-        assetColumn.cell = ({ row }) => (
-          <div className="flex items-center gap-1">
-            <p
-              className="text-truncate link"
-              title={row?.original?.asset}
-              onClick={() => {
-                history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
-              }}
-            >
-              {row?.original?.asset}
-            </p>
-            {row?.original?.assetId && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
-              </IconButton>
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource?.serializedAssetStatusChangeRequest,
+      permissions?.serializedAssetStatusChangeRequest?.isUpdate
+    );
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead);
+    const assetColumn = newColumns?.find((c) => c?.accessor === 'asset');
+    assetColumn.cell = ({ row }) => (
+      <div className="flex items-center gap-1">
+        <p
+          className="text-truncate link"
+          title={row?.original?.asset}
+          onClick={() => {
+            history.push(`${routes.serializedAssetStatusChangeRequestDetail.path}/${row?.original?._id}`);
+          }}
+        >
+          {row?.original?.asset}
+        </p>
+        {row?.original?.assetId && (
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.serializedAssetDetail.path}/${row.original.assetId}`);
+            }}
+          >
+            <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        )}
+      </div>
+    );
+    setColumns([
+      assetColumn,
+      ...newColumns?.filter((c) => c?.accessor != 'asset'),
+      {
+        accessor: 'doaComment',
+        Header: 'DOA Comment',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.doaComment ? (
+              <p className="text-truncate" title={row?.original?.doaComment}>
+                {row?.original?.doaComment}
+              </p>
+            ) : (
+              <NoDataCell />
             )}
-          </div>
-        );
-        setColumns([
-          assetColumn,
-          ...newColumns?.filter((c) => c?.accessor != 'asset'),
-          {
-            accessor: 'doaComment',
-            Header: 'DOA Comment',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.doaComment ? (
-                  <p className="text-truncate" title={row?.original?.doaComment}>
-                    {row?.original?.doaComment}
-                  </p>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          },
-          ActionsRenderer
-        ]);
-      });
+          </>
+        )
+      },
+      ActionsRenderer
+    ]);
   };
 
   const ActionsRenderer = {
@@ -170,7 +171,8 @@ const SerializedAssetStatusChangeRequest = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['originalStatus'] = finalObject['status'];
-          finalObject['canPerform'] = permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
+          finalObject['canPerform'] =
+            permissions?.serializedAssetStatusChangeRequest?.isUpdate && finalObject['status'] === ASSET_APPROVAL_STATUS.pending;
           if (finalObject['doa_status']) {
             finalObject['canPerform'] =
               finalObject['status'] === ASSET_APPROVAL_STATUS.pending &&
@@ -183,9 +185,10 @@ const SerializedAssetStatusChangeRequest = () => {
               }
             }
             if (u?.doaUsers?.length) {
-              const doaComment = finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
-                ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
-                : '';
+              const doaComment =
+                finalObject['canPerform'] || finalObject['requestedById'] === user?.user?._id
+                  ? [...u?.doaUsers].reverse().find((item) => [DOA_STATUS.approved, DOA_STATUS.rejected]?.includes(item.status))?.doaComment || ''
+                  : '';
               finalObject['doaComment'] = doaComment;
             }
           }
@@ -280,7 +283,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }
@@ -293,7 +296,7 @@ const SerializedAssetStatusChangeRequest = () => {
                 }}
                 disabled={
                   selectedRecords?.filter((o) => o.status === ASSET_APPROVAL_STATUS.pending)?.length === selectedRecords?.length &&
-                    permissions?.serializedAssetStatusChangeRequest?.isUpdate
+                  permissions?.serializedAssetStatusChangeRequest?.isUpdate
                     ? false
                     : true
                 }

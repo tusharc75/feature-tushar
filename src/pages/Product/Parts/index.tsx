@@ -64,7 +64,7 @@ function Parts({ id }) {
   };
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     const fields = fieldsDataForRead?.map((e) => e?.fieldData);
 
     let coloum: any = [

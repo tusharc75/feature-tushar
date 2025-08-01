@@ -40,7 +40,7 @@ const Competencies = ({ competencyType }) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencies, permissions?.competencies?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencies, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.competenciesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

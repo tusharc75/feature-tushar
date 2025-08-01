@@ -17,6 +17,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.storageLocation);
 
@@ -46,10 +47,8 @@ const StorageLocation = ({ warehouse }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.storageLocation}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.storageLocationDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.storageLocation, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.storageLocationDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

@@ -19,6 +19,7 @@ import axios, { CancelTokenSource } from 'axios';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { deleteDisable, editDisable } from 'src/constants/messageHelpers';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ResourceDataMapping = ({ resourceRendered }) => {
   const renderedFrom = camelCase(sidebarResource[resourceRendered]);
@@ -49,10 +50,8 @@ const ResourceDataMapping = ({ resourceRendered }) => {
   }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource[resourceRendered]}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.salesOrderDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[resourceRendered], permissions?.[resourceRendered]?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.salesOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
