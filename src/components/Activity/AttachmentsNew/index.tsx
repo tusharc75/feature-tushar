@@ -1,6 +1,6 @@
-import { Box, Collapse, Dialog, IconButton, Typography } from "@mui/material";
+import { Box, Collapse, Dialog, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
-import { AiOutlineFile } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineFile } from "react-icons/ai";
 import axiosInstance from "src/axios/axiosInstance";
 import { sortFileStructure, TNestedTree, unflattenNew } from "src/components/Activity/Attachments/helper";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
@@ -13,15 +13,25 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { isMobile, isTablet } from "react-device-detect";
-import ManageAttachmentsNew from "src/components/Activity/AttachmentsNew/ManageAttachmentsNew";
+import ManageFile from "src/components/Activity/AttachmentsNew/ManageFile";
+import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { useData } from "src/StateProvider/Provider";
+import { FiEdit2 } from "react-icons/fi";
 
 const AttachmentsNew = ({ relatedTo, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    state: { permissions }
+  }: any = useData();
+
   const [loading, setLoading] = useState(false);
   const [treeStructure, setTreeStructure] = useState<TNestedTree[] | null>(null);
-  const [open, setOpen] = useState({ open: false, type: '', parentId: null })
+  const [open, setOpen] = useState({ open: false, type: '', data: null, isUpdate: false })
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [anchorElFolder, setAnchorElFolder] = useState({ anchor: null, data: null });
+  const [anchorElFile, setAnchorElFile] = useState({ anchor: null, data: null });
 
   useEffect(() => {
     fetchData();
@@ -31,15 +41,45 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
     setLoading(true);
     let api = `/attachment-new?relatedTo=${JSON.stringify(relatedTo)}`;
     axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
-      if (data && data?.length > 0) {
-        setTreeStructure(unflattenNew(data))
-        setLoading(false);
-        onSetCount('Attachment', count);
-      }
+      setTreeStructure(unflattenNew(data?.length > 0 ? data : []))
+      setLoading(false);
+      onSetCount('Attachment', count || 0);
     }).catch((error) => {
       setLoading(false);
       toastConfig.setToastConfig(error);
     });
+  };
+
+  const handleFolderMenu = (event, attachment) => {
+    setAnchorElFolder({ anchor: event.currentTarget, data: attachment });
+  };
+
+  const handleFolderMenuClose = () => {
+    setAnchorElFolder({ anchor: null, data: null });
+  };
+
+  const handleFileMenu = (event, attachment) => {
+    setAnchorElFile({ anchor: event.currentTarget, data: attachment });
+  };
+
+  const handleFileMenuClose = () => {
+    setAnchorElFile({ anchor: null, data: null });
+  };
+
+  const handleDelete = (ids) => {
+    axiosInstance()
+      .put('/attachment-new/remove', { ids: ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const folderIconButtons = (attachment) => {
@@ -52,7 +92,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
             aria-label="create file"
             onClick={(e) => {
               e.stopPropagation();
-              setOpen({ open: true, type: 'file', parentId: attachment._id });
+              setOpen({ open: true, type: 'file', data: attachment, isUpdate: false });
             }}
           >
             <AddOutlinedIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
@@ -65,13 +105,124 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
             aria-label="Create Folder"
             onClick={(e) => {
               e.stopPropagation();
-              setOpen({ open: true, type: 'folder', parentId: attachment._id });
+              setOpen({ open: true, type: 'folder', data: attachment, isUpdate: false });
             }}
           >
             <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
+        <HtmlTooltip title={'Options'}>
+          <IconButton
+            size="small"
+            color="primary"
+            aria-label="delete"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleFolderMenu(event, attachment);
+            }}
+          >
+            <MoreHorizIcon />
+          </IconButton>
+        </HtmlTooltip>
       </div>
+    );
+  };
+
+  const fileIconButtons = (attachment) => {
+    return permissions['attachment']?.isDelete ? (
+      <div className="flex items-center gap-2">
+        <IconButton
+          size="small"
+          color="primary"
+          aria-label="delete"
+          onClick={(event) => {
+            event.stopPropagation();
+            handleFileMenu(event, attachment);
+          }}
+        >
+          <MoreHorizIcon />
+        </IconButton>
+      </div>
+    ) : null;
+  };
+
+  const RenderFolderMenu = () => {
+    return Boolean(anchorElFolder.anchor) ? (
+      <Menu
+        id="folder-edit-menu"
+        anchorEl={anchorElFolder?.anchor}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={Boolean(anchorElFolder.anchor)}
+        onClose={handleFolderMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button'
+        }}
+      >
+        {permissions['attachment']?.isUpdate && (
+          <MenuItem
+            onClick={() => {
+              setOpen({
+                open: true,
+                type: 'folder',
+                data: anchorElFolder?.data,
+                isUpdate: true
+              });
+              handleFolderMenuClose();
+            }}
+          >
+            <ListItemIcon style={{ minWidth: '30px' }}>
+              <FiEdit2 />
+            </ListItemIcon>
+            <ListItemText>Rename</ListItemText>
+          </MenuItem>
+        )}
+        {permissions['attachment']?.isDelete && (
+          <MenuItem
+            onClick={() => {
+              handleDelete([anchorElFolder?.data?._id])
+              handleFolderMenuClose();
+            }}
+          >
+            <ListItemIcon style={{ minWidth: '30px' }}>
+              <AiOutlineDelete />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
+    ) : (
+      <></>
+    );
+  };
+
+  const RenderFileMenu = () => {
+    return Boolean(anchorElFile.anchor) ? (
+      <Menu
+        id="folder-edit-menu"
+        anchorEl={anchorElFile?.anchor}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={Boolean(anchorElFile.anchor)}
+        onClose={handleFileMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button'
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleDelete([anchorElFile?.data?._id])
+            handleFileMenuClose();
+          }}
+        >
+          <ListItemIcon style={{ minWidth: '30px' }}>
+            <AiOutlineDelete />
+          </ListItemIcon>
+          <ListItemText>Delete</ListItemText>
+        </MenuItem>
+      </Menu>
+    ) : (
+      <></>
     );
   };
 
@@ -87,6 +238,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
                 <RenderTree
                   tree={treeStructure}
                   folderButtons={(data) => folderIconButtons(data)}
+                  fileButtons={(data) => fileIconButtons(data)}
                 />
               </>
             ) : (
@@ -94,13 +246,15 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
                 <Typography variant="subtitle2">No Past Attachment</Typography>
               </Box>
             )}
+            <RenderFolderMenu />
+            <RenderFileMenu />
           </>
         )
       }
       <Dialog
         open={open.open}
         aria-labelledby="customized-dialog-title"
-        maxWidth="md"
+        maxWidth={open?.type === 'file' ? 'md' : 'xs'}
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
 
@@ -110,25 +264,47 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
         fullScreen={fullScreen || isMobile || isTablet}
         TransitionComponent={CustomDialogTransition}
       >
-        <ManageAttachmentsNew
-          onClose={() => {
-            setOpen({ open: false, type: '', parentId: null });
-            setFullScreen(false);
-          }}
-          onSuccess={() => {
-            fetchData()
-            setOpen({ open: false, type: '', parentId: null });
-            setFullScreen(false);
-          }}
-          relatedTo={relatedTo}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
-          showManimizeMaximize={true}
-          parentId={open.parentId}
-          type={open.type}
-        />
+        {open?.type === 'file' && (
+          <ManageFile
+            onClose={() => {
+              setOpen({ open: false, type: '', data: null, isUpdate: false });
+              setFullScreen(false);
+            }}
+            onSuccess={() => {
+              fetchData()
+              setOpen({ open: false, type: '', data: null, isUpdate: false });
+              setFullScreen(false);
+            }}
+            relatedTo={relatedTo}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            parentId={open.data?._id}
+          />
+        )}
+        {open?.type === 'folder' && (
+          <ManageFolder
+            onClose={() => {
+              setOpen({ open: false, type: '', data: null, isUpdate: false });
+              setFullScreen(false);
+            }}
+            onSuccess={() => {
+              fetchData()
+              setOpen({ open: false, type: '', data: null, isUpdate: false });
+              setFullScreen(false);
+            }}
+            relatedTo={relatedTo}
+            isMinimized={!fullScreen}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            folderData={open.data}
+            isRename={open?.isUpdate}
+          />
+        )}
       </Dialog>
     </Box >
   )
@@ -137,7 +313,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
 
 export default AttachmentsNew;
 
-const RenderTree = ({ tree, folderButtons }) => {
+const RenderTree = ({ tree, folderButtons, fileButtons }) => {
   return (
     <>
       {tree.sort(sortFileStructure).map((node) => {
@@ -147,12 +323,12 @@ const RenderTree = ({ tree, folderButtons }) => {
               key={node._id}
               node={node}
               iconButtons={() => folderButtons(node)}
-              childNodes={<RenderTree {...{ tree: node.children, folderButtons }} />}
+              childNodes={<RenderTree {...{ tree: node.children, folderButtons, fileButtons }} />}
             />
           );
         }
         if (node.type === 'file' || !node.type) {
-          return <RenderFiles key={node._id} node={node} />;
+          return <RenderFiles key={node._id} node={node} iconButtons={() => fileButtons(node)} />;
         }
         return null;
       })}
@@ -216,7 +392,7 @@ const RenderFolder = ({ node, iconButtons, childNodes }) => {
   );
 };
 
-const RenderFiles = ({ node }) => {
+const RenderFiles = ({ node, iconButtons }) => {
   return (
     <div
       className={`${className}`}
@@ -230,6 +406,7 @@ const RenderFiles = ({ node }) => {
           <h6 className=" line-clamp-1 flex-grow text-[14px] font-medium leading-[17px] text-[var(--dark-primary-text,#2A3042)]">
             <span>{node?.name ?? ''}</span>
           </h6>
+          {iconButtons(node)}
         </div>
         <div className="ml-[27px]">
           <p
