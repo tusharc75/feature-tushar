@@ -57,7 +57,7 @@ const PackageDetails = () => {
 
   const fetchFields = async () => {
     setPackagesLoading(true);
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, permissions?.expenses?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packages?.isUpdate);
     setPackageFields(fieldsDataForRead);
     setPackagesLoading(false);
   };
