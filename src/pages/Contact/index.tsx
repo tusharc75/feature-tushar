@@ -96,7 +96,7 @@ export default function Contact(props) {
   }, []);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[contactResource], permissions[contactResource].isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[contactResource], permissions[contactResource]?.isUpdate);
     let newColumns = generateColumns(contactResource, fieldsDataForRead, `/${contactRoute}/detail`, true);
     let staticFields = getStaticFields(true);
     staticFields.forEach((field) => {

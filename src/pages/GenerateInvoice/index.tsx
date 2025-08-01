@@ -145,7 +145,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
 
   const fetchGridColumns = async () => {
     setColumns(null);
-    const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, permissions?.invoice?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(selectedResource.resource, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, selectedResource?.path);
     let extraColumns = [];
     if (selectedResource?.resource === sidebarResource.fieldTicket) {

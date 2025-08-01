@@ -44,7 +44,7 @@ const Warehouse = ({ reference, api, id, accountId = '' }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions[reference].isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions[reference]?.isUpdate);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

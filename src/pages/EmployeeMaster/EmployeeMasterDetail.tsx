@@ -56,7 +56,7 @@ const EmployeeMasterDetail = () => {
   }, [id]);
 
   const fetchUnavailabilityFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.technicianUnavailability, permissions?.technicianUnavailability?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.technicianUnavailability, false);
     setUnavailabilityFields(fieldsDataForRead);
   };
 

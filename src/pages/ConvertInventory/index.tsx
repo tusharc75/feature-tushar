@@ -70,7 +70,7 @@ const ConvertInventory = () => {
   }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.inventoryToAsset?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     let columns = [];
     let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path);
     columns = [...columns, ...newColumns];
