@@ -18,6 +18,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { FiExternalLink } from 'react-icons/fi';
 
 const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
   const renderedFrom = camelCase(sidebarResource.invoice);
@@ -43,7 +44,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
       const response: any = await axiosInstance().get(`${rentalManagement.api}/${rentalId}`);
       data = response?.data?.data;
       setRentalManagementData(data);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -72,7 +73,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
     columns?.forEach((column) => {
       if (column?.primaryField) {
         column.cell = ({ row }) => (
-          <div>
+          <div className='flex items-center gap-2'>
             <Link
               className="link text-truncate"
               onClick={() => {
@@ -81,6 +82,15 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
             >
               {row?.original?.invoiceNumber}
             </Link>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.invoiceDetail.path}/${row?.original?._id}`);
+              }}
+              title={row?.original?.invoiceNumber}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         );
       }
@@ -228,7 +238,7 @@ const ProgressiveBilling = ({ rentalId, allowCreateInvoice }) => {
               </Box>
             </Box>
           )}
-          <Grid size={{xs:12, md:12, sm:12}} className="mt-3">
+          <Grid size={{ xs: 12, md: 12, sm: 12 }} className="mt-3">
             {columns ? (
               <CustomReactTable
                 height={'calc(100vh - 250px)'}
