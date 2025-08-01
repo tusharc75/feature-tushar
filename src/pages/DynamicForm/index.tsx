@@ -20,6 +20,7 @@ import { getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataFor
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 import PreviewDownload from 'src/components/PreviewDownload';
+import EditIcon from '@mui/icons-material/Edit';
 
 const DynamicForm = () => {
   const { route } = useParams();
@@ -101,13 +102,26 @@ const DynamicForm = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 110,
+    width: 130,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {permissions[renderedFrom]?.isUpdate && (
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: false, idToClone: row.original._id });
+              }}
+            >
+              <EditIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
         {permissions[renderedFrom]?.isRead && (
           <HtmlTooltip title="View">
             <IconButton
