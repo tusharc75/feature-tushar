@@ -101,3 +101,20 @@ export type Option = {
   id?: number;
   outcome?: string;
 };
+
+export type CanbanViewState = {
+  selectedRrowsMap: Map<string, any>;
+  search: string;
+};
+
+type KanbanStateKeys = keyof CanbanViewState;
+type KanbanTableKeys<K extends KanbanStateKeys> = CanbanViewState[K];
+
+type ActionMap = {
+  [K in KanbanStateKeys as `set${Capitalize<string & K>}`]: {
+    type: `set${Capitalize<string & K>}`;
+    payload: KanbanTableKeys<K>;
+  };
+};
+
+export type Actions = ActionMap[keyof ActionMap];

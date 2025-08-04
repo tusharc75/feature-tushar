@@ -89,12 +89,12 @@ const Opportunities = () => {
     const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
-        ((o.disabled = true),
-          (o.accessor = 'opportunityName'),
-          (o.header = 'Opportunity Name'),
-          (o.pivotIndex = 0),
-          (o.show = true),
-          (o.primaryField = true));
+        o.disabled = true;
+        o.accessor = 'opportunityName';
+        o.header = 'Opportunity Name';
+        o.pivotIndex = 0;
+        o.show = true;
+        o.primaryField = true;
       }
     });
     let staticFields = getStaticFields(true);
