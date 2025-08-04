@@ -5,7 +5,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MailIcon from '@mui/icons-material/Mail';
 import { Box, Dialog, IconButton } from '@mui/material';
-import { isEmpty, isObject } from 'lodash';
+import { isEmpty, isObject, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { HistoryIcon, getCollaborateIconBasedOnName } from 'src/assets/svg/CollaborateSidebar';
@@ -15,7 +15,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import HtmlTooltip from '../CustomTooltipTitle';
 import { useData } from './../../StateProvider/Provider';
 import axiosInstance from './../../axios/axiosInstance';
-import { ACTIVITY_RESOURCE, CustomDialogTransition } from './../../constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from './../../constants/helpers';
 import ManageAttachment from './Attachments/ManageAttachment';
 import Attachments from './Attachments/index';
 import { Case } from './Case';
@@ -127,7 +127,7 @@ const Activity = (props) => {
     axiosInstance()
       .get(`/activity/resource/count?relatedTo=${JSON.stringify(viewRelatedTo)}`)
       .then(({ data: { data } }) => {
-        setTotalCount(data);
+        setTotalCount({ ...data, ...(import.meta.env.VITE_APP_ATTACHMENT === 'new' ? { Attachment: data?.AttachmentNew } : {}) });
         setCountFetched(true);
       })
       .catch((err) => {
@@ -292,7 +292,12 @@ const Activity = (props) => {
                     <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
                   {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
-                    <AttachmentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
+                    <AttachmentsNew
+                      resource={sidebarResource[resource] || startCase(resource)}
+                      referenceId={resourceId}
+                      label={resourceLabel}
+                      onSetCount={handleSetCount}
+                    />
                   ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
@@ -419,7 +424,7 @@ const Activity = (props) => {
                 handleClose()
                 setFullScreen(false);
               }}
-              relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]}
+              relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -437,7 +442,7 @@ const Activity = (props) => {
                 handleClose()
                 setFullScreen(false);
               }}
-              relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]}
+              relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);

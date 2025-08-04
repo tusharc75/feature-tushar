@@ -19,7 +19,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useData } from "src/StateProvider/Provider";
 import { FiEdit2 } from "react-icons/fi";
 
-const AttachmentsNew = ({ relatedTo, onSetCount }) => {
+const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -39,7 +39,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
 
   const fetchData = async () => {
     setLoading(true);
-    let api = `/attachment-new?relatedTo=${JSON.stringify(relatedTo)}`;
+    let api = `/attachment-new?resource=${resource}&referenceId=${referenceId}`
     axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
       setTreeStructure(unflattenNew(data?.length > 0 ? data : []))
       setLoading(false);
@@ -275,7 +275,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={relatedTo}
+            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
@@ -295,7 +295,7 @@ const AttachmentsNew = ({ relatedTo, onSetCount }) => {
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
             }}
-            relatedTo={relatedTo}
+            relatedTo={[{ resource: resource, referenceId: referenceId, label: label }]}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
