@@ -23,7 +23,6 @@ import { cn, sidebarResource } from 'src/constants/helpers';
 import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
