@@ -32,6 +32,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { AddOutlined } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import ButtonMenu from 'src/components/ButtonMenu';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const WorkOrder = () => {
   let renderedFrom = camelCase(sidebarResource?.workOrder);
@@ -109,10 +110,8 @@ const WorkOrder = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate)
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

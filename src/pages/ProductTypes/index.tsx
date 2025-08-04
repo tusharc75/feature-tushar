@@ -19,6 +19,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ManageProductTypes } from 'src/pages/ProductTypes/ManageProductTypes';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductTypes = () => {
   const renderedFrom = camelCase(sidebarResource?.productTypes);
@@ -36,7 +37,6 @@ const ProductTypes = () => {
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
-
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -48,10 +48,8 @@ const ProductTypes = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.productTypes}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.productTypesDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productTypes, permissions?.productTypes?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.productTypesDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -80,7 +78,7 @@ const ProductTypes = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}     >
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <IconButton
             size="small"
             aria-label="Delete"
@@ -247,11 +245,12 @@ const ProductTypes = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.productTypes.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.productTypes.titleSingular?.toLowerCase()} :
                       ${deleteRecord?.productType}`
-              : `selected ${resources?.productTypes?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.productTypes?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -266,7 +265,7 @@ const ProductTypes = () => {
           isClone={showManageProductTypes.isClone}
           productTypesId={showManageProductTypes.idToClone}
           onClose={() => setshowManageProductTypes({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => { }}
+          onSuccess={() => {}}
           isRedirectToDetailPage={true}
         />
       )}

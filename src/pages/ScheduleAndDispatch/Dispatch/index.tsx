@@ -15,12 +15,13 @@ import Assets from 'src/pages/ScheduleAndDispatch/Dispatch/Assets';
 import Services from 'src/pages/ScheduleAndDispatch/Dispatch/Services';
 import Technician from 'src/pages/ScheduleAndDispatch/Dispatch/Technician';
 import React from 'react';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Dispatch = ({ search }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(sidebarResource.rentalManagement);
   const {
-    state: { resources }
+    state: { resources, permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -37,10 +38,8 @@ const Dispatch = ({ search }) => {
   }, []);
 
   const fetchColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.rentalManagement}`);
-    data = response?.data?.data;
-    const newColumns = [...generateColumns(renderedFrom, data, routes.rentalManagementDetail.path), ...getStaticFields()];
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.rentalManagement, false);
+    const newColumns = [...generateColumns(renderedFrom, fieldsDataForRead, routes.rentalManagementDetail.path), ...getStaticFields()];
     setColumns(newColumns);
   };
 

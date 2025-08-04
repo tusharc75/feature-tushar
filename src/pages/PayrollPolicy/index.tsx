@@ -18,6 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePayrollPolicy from './ManagePayrollPolicy';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PayrollPolicy = () => {
   const renderedFrom = camelCase(sidebarResource.payrollPolicy);
@@ -42,10 +43,8 @@ const PayrollPolicy = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.payrollPolicy}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.payrollPolicyDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.payrollPolicy, permissions?.payrollPolicy?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.payrollPolicyDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

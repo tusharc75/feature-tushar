@@ -35,8 +35,9 @@ import SubcontractAssemblyView from './View';
 import queryString from 'query-string';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -48,7 +49,7 @@ const SubcontractAssemblyDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const [subcontractAssemblyData, setSubcontractAssemblyData] = useState(null);
   const [fields, setFields] = useState(null);
@@ -72,24 +73,17 @@ const SubcontractAssemblyDetail = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.subcontractAssembly}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.subcontractAssembly);
+    setResourcePolicyData(data);
   };
 
   const fetchFields = async () => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.subcontractAssembly}`);
-      data = response?.data?.data;
-      setFields(data?.filter((field) => field.isRead));
+      const { fieldsDataForRead } = await fetch_resource_view_fields(
+        sidebarResource?.subcontractAssembly,
+        permissions?.subcontractAssembly?.isUpdate
+      );
+      setFields(fieldsDataForRead);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -231,7 +225,9 @@ const SubcontractAssemblyDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -293,14 +289,14 @@ const SubcontractAssemblyDetail = () => {
         <TabPanel value={tabValue} index={2}>
           {subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.subcontractAssembly}
                   data={subcontractAssemblyData}

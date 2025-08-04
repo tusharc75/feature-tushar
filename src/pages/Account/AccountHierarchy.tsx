@@ -16,6 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import EditIcon from '@mui/icons-material/Edit';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = 'customer-account-hierarchy';
 
@@ -34,7 +35,7 @@ export default function AccountHierarchy({
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
-    state: { user, selectedEntity },
+    state: { user, selectedEntity, permissions },
     dispatch: entityDispatch
   }: any = useData();
   const history = useHistory();
@@ -85,10 +86,8 @@ export default function AccountHierarchy({
   };
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-    data = response?.data?.data;
-    let newColumns: any = generateColumns(accountResource, data, `/${accountRoute}/detail`, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[accountResource], permissions[accountResource]?.isUpdate);
+    let newColumns: any = generateColumns(accountResource, fieldsDataForRead, `/${accountRoute}/detail`, true);
 
     newColumns?.forEach((o) => {
       if (o?.accessor === 'accountName') {

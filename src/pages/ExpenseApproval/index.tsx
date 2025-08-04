@@ -11,6 +11,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ExpenceReport from 'src/pages/ExpenseApproval/ExpenceReport';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let expenseApprovalTimeout;
 
@@ -19,7 +20,7 @@ const ExpenseApproval = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, resources }
+    state: { user, resources, permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, showFilteredRecordsOnly } = state;
@@ -34,10 +35,8 @@ const ExpenseApproval = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expenseReportDetail?.path);
     setColumns([...newColumns, ...getStaticFields()]);
   };
 

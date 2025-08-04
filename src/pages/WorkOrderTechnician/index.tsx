@@ -43,6 +43,7 @@ import CardView from './CardView';
 import GridView, { GridViewRef } from './GridView';
 import { handlePdfPreview } from 'src/pages/WorkOrderSupervisor/helper';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 type Columns = typeof WORKORDER_TECHNICIAN_SERVICE_STATUS;
 
@@ -169,11 +170,8 @@ const WorkOrderTechnician = () => {
 
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`, { cancelToken });
-      data = response?.data?.data;
-
-      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
+      const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
       const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
 
       const extraColumns = [
@@ -222,15 +220,19 @@ const WorkOrderTechnician = () => {
                       </HtmlTooltip>
                     </Box>
                   )}
-                  {row?.original?.priority &&
+                  {row?.original?.priority && (
                     <Box ml={1}>
                       <HtmlTooltip title={`${row?.original?.priority} Priority`}>
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${row?.original?.priority === 'High' ? 'bg-red-600' :
-                          row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'} `}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-white ${
+                            row?.original?.priority === 'High' ? 'bg-red-600' : row?.original?.priority === 'Low' ? 'bg-green-600' : 'bg-yellow-500'
+                          } `}
+                        >
                           {row?.original?.priority}
                         </span>
                       </HtmlTooltip>
-                    </Box>}
+                    </Box>
+                  )}
                 </div>
               ) : (
                 <NoDataCell />
@@ -478,14 +480,13 @@ const WorkOrderTechnician = () => {
       disabled: selectedRecords?.length === 0,
       items: [
         {
-          disabled: selectedRecords?.length &&
-            selectedRecords?.filter((s) =>
-              s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending &&
-              s?.status !== WORK_ORDER_STATUS.onHold
-              && s?.canPerform)?.length ===
-            selectedRecords?.length
-            ? false
-            : true,
+          disabled:
+            selectedRecords?.length &&
+            selectedRecords?.filter(
+              (s) => s?.customServiceStatus === WORKORDER_SERVICE_STATUS.pending && s?.status !== WORK_ORDER_STATUS.onHold && s?.canPerform
+            )?.length === selectedRecords?.length
+              ? false
+              : true,
           label: `Complete Service(s)`,
           onClick: () => setShowServiceCompleteConfirmBox(true)
         }

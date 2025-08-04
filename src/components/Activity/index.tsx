@@ -30,6 +30,9 @@ import { Note } from './Note';
 import { CreateNote } from './Note/CreateNote';
 import { Task } from './Task';
 import { CreateTask } from './Task/CreateTask';
+import ManageFile from 'src/components/Activity/AttachmentsNew/ManageFile';
+import AttachmentsNew from 'src/components/Activity/AttachmentsNew';
+import ManageFolder from 'src/components/Activity/AttachmentsNew/ManageFolder';
 
 const Activity = (props) => {
   const {
@@ -285,8 +288,11 @@ const Activity = (props) => {
                   {type === 'Email' && data === 'Email' ? (
                     <Email relatedTo={viewRelatedTo} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
                   ) : null}
-                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' ? (
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
                     <Attachments relatedTo={viewRelatedTo} resourceLabel={resourceLabel} resource={resource} handleActivityRefresh={handleActivityRefresh} onSetCount={handleSetCount} />
+                  ) : null}
+                  {(type === 'Attachment' || type === 'AttachmentFolder') && data === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                    <AttachmentsNew relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]} onSetCount={handleSetCount} />
                   ) : null}
                   {type === 'Collaborate' && data === 'Collaborate' ? (
                     <Collaborate resource={resource} resourceLabel={resourceLabel} resourceData={resourceData} />
@@ -313,7 +319,7 @@ const Activity = (props) => {
           TransitionComponent={CustomDialogTransition}
           open={open}
           aria-labelledby="customized-dialog-title"
-          maxWidth={'md'}
+          maxWidth={type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT === 'new' ? 'xs' : 'md'}
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
               handleClose();
@@ -403,7 +409,43 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'Attachment' ? (
+          {type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+            <ManageFolder
+              onClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
+              onSuccess={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
+              relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          )}
+          {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT === 'new' && (
+            <ManageFile
+              onClose={() => {
+                handleClose();
+                setFullScreen(false);
+              }}
+              onSuccess={() => {
+                handleClose()
+                setFullScreen(false);
+              }}
+              relatedTo={[{ resource: resource, referenceId: resourceId, label: resourceLabel, access: true }]}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            />
+          )}
+          {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {
@@ -418,7 +460,7 @@ const Activity = (props) => {
               showManimizeMaximize={true}
             />
           ) : null}
-          {type === 'AttachmentFolder' && (
+          {type === 'AttachmentFolder' && import.meta.env.VITE_APP_ATTACHMENT != 'new' && (
             <ManageAttachment
               attachmentId={null}
               handleClose={() => {

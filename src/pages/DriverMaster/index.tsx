@@ -19,6 +19,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDriverMaster from './ManageDriverMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const DriverMaster = () => {
   const renderedFrom = camelCase(sidebarResource.driverMaster);
@@ -38,13 +39,10 @@ const DriverMaster = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.driverMaster}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.driverMasterDetail.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.driverMaster, permissions?.driverMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.driverMasterDetail.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

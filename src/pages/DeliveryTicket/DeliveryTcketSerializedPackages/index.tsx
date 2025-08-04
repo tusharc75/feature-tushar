@@ -1,12 +1,13 @@
-import { Box } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
-import axiosInstance from "src/axios/axiosInstance";
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from "src/components/CustomReactTable";
-import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import routes from "src/components/Helpers/Routes";
-import { deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from "src/constants/helpers";
-import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { useData } from "src/StateProvider/Provider";
+import { Box } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const DeliveryTcketSerializedPackages = ({ deliveryTicketId, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -14,7 +15,7 @@ const DeliveryTcketSerializedPackages = ({ deliveryTicketId, renderedFrom }) => 
   const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -22,19 +23,15 @@ const DeliveryTcketSerializedPackages = ({ deliveryTicketId, renderedFrom }) => 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    fetchColumns()
+    fetchColumns();
     fetchData();
   }, []);
 
   const fetchColumns = async () => {
-    axiosInstance().get(`/field?resource=${sidebarResource.serializedPackages}&view=true`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.serializedPackagesDetail.path);
-        setColumns([...newColumns, ...getStaticFields()]);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      })
-  }
+    const {fieldsDataForRead} = await fetch_resource_view_fields(sidebarResource.serializedPackages, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedPackagesDetail.path);
+    setColumns([...newColumns, ...getStaticFields()]);
+  };
 
   const fetchData = async () => {
     try {
@@ -78,7 +75,7 @@ const DeliveryTcketSerializedPackages = ({ deliveryTicketId, renderedFrom }) => 
         </Box>
       )}
     </Box>
-  )
-}
+  );
+};
 
 export default DeliveryTcketSerializedPackages;

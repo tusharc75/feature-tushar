@@ -33,9 +33,10 @@ import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(sidebarResource.transferAsset);
@@ -47,7 +48,7 @@ const TransferAssetDetailPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [loading, setLoading] = useState(true);
@@ -100,61 +101,46 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferAsset}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.transferAsset);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = (transferType) => {
-    axiosInstance()
-      .get('/field?resource=Transfer Asset')
-      .then(({ data: { data } }) => {
-        let fields = [];
-        data.forEach((field: any) => {
-          if (transferType === 'Internal') {
-            if (
-              field.fieldData.fieldName !== 'transfertoSupplier' &&
-              field.fieldData.fieldName !== 'transfertoCustomer' &&
-              field.fieldData.fieldName !== 'supplierShipTo' &&
-              field.fieldData.fieldName !== 'customerShipTo'
-            ) {
-              fields.push(field);
-            }
-          } else if (transferType === 'External Supplier') {
-            if (
-              field.fieldData.fieldName !== 'transfertoPlant' &&
-              field.fieldData.fieldName !== 'transfertoCustomer' &&
-              field.fieldData.fieldName !== 'plantShipTo' &&
-              field.fieldData.fieldName !== 'customerShipTo'
-            ) {
-              fields.push(field);
-            }
-          } else if (transferType === 'External Customer') {
-            if (
-              field.fieldData.fieldName !== 'transfertoSupplier' &&
-              field.fieldData.fieldName !== 'transfertoPlant' &&
-              field.fieldData.fieldName !== 'plantShipTo' &&
-              field.fieldData.fieldName !== 'supplierShipTo'
-            ) {
-              fields.push(field);
-            }
-          }
-        });
+  const fetchFields = async (transferType) => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferAsset, permissions?.transferAsset?.isUpdate);
+    let fields = [];
+    fieldsDataForRead.forEach((field: any) => {
+      if (transferType === 'Internal') {
+        if (
+          field.fieldData.fieldName !== 'transfertoSupplier' &&
+          field.fieldData.fieldName !== 'transfertoCustomer' &&
+          field.fieldData.fieldName !== 'supplierShipTo' &&
+          field.fieldData.fieldName !== 'customerShipTo'
+        ) {
+          fields.push(field);
+        }
+      } else if (transferType === 'External Supplier') {
+        if (
+          field.fieldData.fieldName !== 'transfertoPlant' &&
+          field.fieldData.fieldName !== 'transfertoCustomer' &&
+          field.fieldData.fieldName !== 'plantShipTo' &&
+          field.fieldData.fieldName !== 'customerShipTo'
+        ) {
+          fields.push(field);
+        }
+      } else if (transferType === 'External Customer') {
+        if (
+          field.fieldData.fieldName !== 'transfertoSupplier' &&
+          field.fieldData.fieldName !== 'transfertoPlant' &&
+          field.fieldData.fieldName !== 'plantShipTo' &&
+          field.fieldData.fieldName !== 'supplierShipTo'
+        ) {
+          fields.push(field);
+        }
+      }
+    });
 
-        setTransferAssetFields(fields);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+    setTransferAssetFields(fields);
+    setLoading(false);
   };
 
   const fetchTransferAssetData = () => {
@@ -305,7 +291,9 @@ const TransferAssetDetailPage = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -391,14 +379,14 @@ const TransferAssetDetailPage = () => {
             <TransferAssetViews tANumber={transferAssetData?.transferAssetNumber} tAId={id} />
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.transferAsset}
                   data={transferAssetData}

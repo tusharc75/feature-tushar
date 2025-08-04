@@ -19,6 +19,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ManageTrainAiModel from './ManageTrainAiModel';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let renderedFrom = camelCase(sidebarResource.trainAiModel);
 
@@ -46,13 +47,10 @@ const TrainAiModel = () => {
     fetchData();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.trainAiModel}`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes.trainAiModel.path, true);
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.trainAiModel, permissions?.trainAiModel?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.trainAiModel.path, true);
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

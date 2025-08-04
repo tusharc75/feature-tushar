@@ -19,6 +19,7 @@ import { cloneDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.irtTicket);
 
@@ -40,10 +41,8 @@ const IrtTicket = () => {
   const [columns, setColumns] = useState(null);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.irtTicket}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.irtTicketDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.irtTicket, permissions?.irtTicket?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.irtTicketDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

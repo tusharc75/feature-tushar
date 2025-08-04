@@ -21,6 +21,13 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
         ...table,
         propPanel: {
             ...table.propPanel,
+            defaultSchema: {
+                ...table.propPanel.defaultSchema,
+                content: '[]',
+                showHead: true,
+                head: ['col1', 'col2', 'col3'],
+                headWidthPercentages: [30, 30, 40],
+            },
             schema: (props) => {
                 const baseSchema = typeof table.propPanel.schema === 'function'
                     ? table.propPanel.schema(props)
@@ -59,7 +66,6 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
 
                 return schemaWithDropdowns;
             },
-            defaultSchema: table.propPanel.defaultSchema,
         },
     };
 
@@ -137,7 +143,7 @@ export const getPlugins = (variables: string[], resourceTables: any): Record<str
     const plugins: Record<string, DesignerExpectedPlugin> = {
         Text: customTextPlugin as DesignerExpectedPlugin,
         Variable: customVariablePlugin as unknown as DesignerExpectedPlugin,
-        Table: customTablePlugin as DesignerExpectedPlugin,
+        Table: customTablePlugin as unknown as DesignerExpectedPlugin,
         Image: image as DesignerExpectedPlugin,
         Line: line as DesignerExpectedPlugin,
         Rectangle: rectangle as DesignerExpectedPlugin,

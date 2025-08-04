@@ -86,9 +86,14 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
       values._id = pricingConditionId;
       axiosInstance()
         .put(`${pricingCondition.api}`, values)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
           setLoading(false);
           onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
         })
         .catch((error) => {
           setLoading(false);
@@ -97,9 +102,14 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
     } else {
       axiosInstance()
         .post(`${pricingCondition.api}`, values)
-        .then(({ data: { data } }) => {
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
           setLoading(false);
-          history.push(`${pricingCondition.api}/detail/${data._id}`);
+          history.push(`${pricingCondition.api}/detail/${data?.data?._id}`);
         })
         .catch((error) => {
           setLoading(false);

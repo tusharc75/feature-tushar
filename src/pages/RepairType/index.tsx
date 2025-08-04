@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairType from './ManageRepairType';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const RepairType = () => {
   const renderedFrom = camelCase(sidebarResource.repairType);
@@ -49,10 +50,8 @@ const RepairType = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.repairType}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.repairTypeDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.repairType, permissions?.repairType?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.repairTypeDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -96,7 +95,7 @@ const RepairType = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}

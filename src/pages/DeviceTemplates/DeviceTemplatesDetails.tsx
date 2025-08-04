@@ -18,6 +18,8 @@ import Alerts from './Alerts';
 import IotDataPoints from './IotDataPoints';
 import ManageDeviceTemplates from './ManageDeviceTemplates';
 import Rules from './Rules';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 export default function DeviceTemplatesDetails() {
   const toastConfig = useContext(CustomToastContext);
@@ -56,15 +58,9 @@ export default function DeviceTemplatesDetails() {
     }
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get('/field?resource=Device Templates')
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplates, permissions?.deviceTemplates?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -110,9 +106,7 @@ export default function DeviceTemplatesDetails() {
                     {'Edit'}
                   </ThemeButton>
                 )}
-                {permissions?.deviceTemplates?.isDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
+                {permissions?.deviceTemplates?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />

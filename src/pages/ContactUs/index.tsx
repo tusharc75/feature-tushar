@@ -18,6 +18,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageContactUs from './ManageContactUs';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ContactUs = () => {
   const renderedFrom = camelCase(sidebarResource?.contactUs);
@@ -49,10 +50,8 @@ const ContactUs = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.contactUs}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.contactUsDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.contactUs, permissions?.contactUs?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.contactUsDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

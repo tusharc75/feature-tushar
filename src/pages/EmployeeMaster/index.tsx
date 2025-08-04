@@ -19,6 +19,7 @@ import ManageEmployeeMaster from './ManageEmployeeMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const EmployeeMaster = () => {
   const renderedFrom = camelCase(sidebarResource?.employeeMaster);
@@ -51,10 +52,8 @@ const EmployeeMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.employeeMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.employeeMasterDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.employeeMaster, permissions?.employeeMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.employeeMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

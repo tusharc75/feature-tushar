@@ -22,9 +22,7 @@ import SearchBox from '../../../components/Helpers/SearchBox';
 import {
   ASSET_STATUS,
   CustomDialogTransition,
-  DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   gridLoadingTimeout,

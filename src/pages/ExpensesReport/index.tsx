@@ -18,6 +18,7 @@ import routes from './../../components/Helpers/Routes';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let expenseReportTimeout;
 
@@ -45,10 +46,8 @@ const ExpenseReport = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenseReport}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expenseReportDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expenseReportDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

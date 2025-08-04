@@ -30,7 +30,7 @@ import ContentFullScreen from '../../components/ContentFullScreen';
 import LoadingTicket from './LoadingTicket';
 import ManageTransferInventory from './ManageTransferInventory';
 import Products from './Products';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import {
@@ -41,6 +41,7 @@ import {
   nextButtonStep
 } from 'src/pages/TransferInventory/walkmeSteps';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransferInventoryDetailPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -55,7 +56,7 @@ const TransferInventoryDetailPage = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [tabValue, setTabValue] = useState(parsedTab);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setDeleting] = useState(false);
@@ -121,29 +122,14 @@ const TransferInventoryDetailPage = () => {
   }, [walkmeInstance]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.transferInventory}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.transferInventory);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get('/field?resource=Transfer Inventory')
-      .then(({ data: { data } }) => {
-        setTransferInventoryFields(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setLoading(false);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transferInventory, permissions?.transferInventory?.isUpdate);
+    setTransferInventoryFields(fieldsDataForRead);
+    setLoading(false);
   };
 
   const fetchTransferInventoryData = () => {
@@ -262,7 +248,9 @@ const TransferInventoryDetailPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -325,14 +313,14 @@ const TransferInventoryDetailPage = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.transferInventory}
                   data={transferInventoryData}

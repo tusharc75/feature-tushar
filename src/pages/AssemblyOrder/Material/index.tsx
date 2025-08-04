@@ -282,7 +282,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
       element.qty = d.qty ? parseFloat(d.qty) : 1;
       element.parentId = addDialog.parentId;
       if (allFields?.some((f) => f?.fieldName === 'warehouse')) {
-        element.warehouse = assemblyOrderData?.warehouse?.optionValue;
+        element.warehouse = d?.warehouse || assemblyOrderData?.warehouse?.optionValue;
       }
       if (allFields?.some((f) => f?.fieldName === 'workOrderType')) {
         element.workOrderType = WORK_ORDER_TYPE.assemblyOrder;
@@ -512,6 +512,8 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
           isSubmitting={isSubmitting}
           packageType={'product'}
           forceSplitQuantity={true}
+          showWarehouseSelectDialog={allFields?.some((f) => f?.fieldName === 'warehouse')}
+          warehouse={assemblyOrderData?.warehouse?.optionValue}
         />
       )}
       {materialEdit.open && (

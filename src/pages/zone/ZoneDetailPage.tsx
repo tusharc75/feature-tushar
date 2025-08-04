@@ -15,6 +15,8 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CreateZone from './CreateZone';
 import Zipcode from './zip';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { sidebarResource } from 'src/constants/helpers';
 
 const ZoneDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -65,15 +67,9 @@ const ZoneDetailPage = () => {
     setMainPoints(tempMp);
   };
 
-  const getZoneFields = () => {
-    axiosInstance()
-      .get('/field?resource=Zone')
-      .then(({ data }) => {
-        setZoneFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getZoneFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.zone, permissions?.zone?.isUpdate);
+    setZoneFields(fieldsDataForRead);
   };
 
   const handleDeleteZone = () => {

@@ -43,6 +43,7 @@ import { useTableReducer } from 'src/components/CustomReactTable';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import Steps from 'src/components/Steps';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -79,7 +80,7 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
 
   const [messageDialog, setMessageDialog] = useState({
@@ -210,21 +211,15 @@ function OpportunityDetailsPage() {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.opportunity}`);
-      if (data) {
-        const policyFields = data?.policy?.outcomeFields;
-        const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-        if (processSteps && processSteps?.isRead && policyFields) {
-          const policyOutcomeFields = opportunityFields?.filter((_field) => [...policyFields]?.includes(_field.fieldData.fieldName));
-          setSectionFields(policyOutcomeFields);
-        }
-        setResourceData(data);
+    const data = await getResourcePolicy(user, permissions, sidebarResource.warehouse)
+    if (data) {
+      const policyFields = data?.policy?.outcomeFields;
+      const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+      if (processSteps && processSteps?.isRead && policyFields) {
+        const policyOutcomeFields = opportunityFields?.filter((_field) => [...policyFields]?.includes(_field.fieldData.fieldName));
+        setSectionFields(policyOutcomeFields);
       }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+      setResourcePolicyData(data)
     }
   };
 
@@ -554,7 +549,7 @@ function OpportunityDetailsPage() {
             }}
           >
             <CustomTab value={0}>Details</CustomTab>
-            {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+            {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <ContentFullScreen fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             <TabPanel value={currentTabIndex} index={0}>
@@ -683,14 +678,14 @@ function OpportunityDetailsPage() {
               </div>
             </TabPanel>
           </ContentFullScreen>
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => {
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => {
               return (
                 <TabPanel value={currentTabIndex} index={i + 1}>
                   <Step
                     tab={tab}
-                    resourcePolicyId={resourceData?._id}
+                    resourcePolicyId={resourcePolicyData?._id}
                     resourceId={id}
                     resource={sidebarResource.opportunity}
                     data={opportunityData}

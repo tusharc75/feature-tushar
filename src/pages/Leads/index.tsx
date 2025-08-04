@@ -34,6 +34,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.lead);
 
@@ -90,20 +91,9 @@ const Leads = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
-  };
-
-  useEffect(() => {
-    if (allFields?.length) {
-      createColumns(allFields);
-    }
-  }, [allFields]);
-
-  const createColumns = (data) => {
-    let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.lead, permissions?.lead?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    let newColumns = generateColumns(lead.leadResource, fieldsDataForRead, routes.leadDetail.path, true);
     newColumns = [
       ...newColumns,
       {
@@ -239,7 +229,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
@@ -489,24 +479,26 @@ const Leads = () => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${lead.leadApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${lead.leadApi}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',

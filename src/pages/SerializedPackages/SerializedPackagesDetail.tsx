@@ -20,6 +20,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import History from 'src/pages/SerializedPackages/History';
 import ManageSerializedPackages from 'src/pages/SerializedPackages/ManageSerializedPackages';
 import SerializedPackagesView from 'src/pages/SerializedPackages/View';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SerializedPackagesDetail = () => {
   const { id } = useParams();
@@ -44,19 +45,13 @@ const SerializedPackagesDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.serializedPackages}`)
-      .then(({ data }) => {
-        data.data.forEach((element) => {
-          if (element?.fieldData?.fieldName === 'currentOwner') {
-            element.fieldData.type = 'singleLine';
-          }
-        });
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.serializedPackages, permissions?.serializedPackages?.isUpdate);
+    fieldsDataForRead.forEach((element) => {
+      if (element?.fieldData?.fieldName === 'currentOwner') {
+        element.fieldData.type = 'singleLine';
+      }
+    });
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

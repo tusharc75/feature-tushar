@@ -23,10 +23,18 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import { checkIsAllowedToEdit, getObjKeysWithValues, gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToEdit,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  product,
+  sidebarResource
+} from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -100,34 +108,31 @@ const Product = () => {
     }
   }, [page, limit, filters, sorting, search, selectedEntity, productCategory, productTemplate, productType, showFilteredRecordsOnly, productColumns]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.product}&view=true`)
-      .then(({ data: { data } }) => {
-        setAllFields(JSON.parse(JSON.stringify(data)));
-        setWalkmeData([createResourceFlow(sidebarResource.product, data)]);
-        if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
-          setIsProductTemplate(false);
-        }
-        const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
-        if (productTypes) {
-          setIsProductType(true);
-          setProductTypeList([...productTypes.fieldData.option]);
-          let defaultOptions = productTypes.fieldData?.option?.filter((item: any) => item.default === true);
-          if (defaultOptions.length) {
-            setProductType(defaultOptions[0].optionValue);
-          }
-        } else {
-          setIsProductType(false);
-        }
-        const newColumns = generateColumns(
-          renderedFrom,
-          data?.filter((d) => !ignoreField.includes(d?.fieldData.fieldName)),
-          routes.productDetail.path,
-          true
-        );
-        setProductColumns([...newColumns]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    setWalkmeData([createResourceFlow(sidebarResource.product, fieldsDataForRead)]);
+    if (fieldsDataForRead.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
+      setIsProductTemplate(false);
+    }
+    const productTypes = fieldsDataForRead.find((e) => e.fieldData.fieldName === 'productType');
+    if (productTypes) {
+      setIsProductType(true);
+      setProductTypeList([...productTypes.fieldData.option]);
+      let defaultOptions = productTypes.fieldData?.option?.filter((item: any) => item.default === true);
+      if (defaultOptions.length) {
+        setProductType(defaultOptions[0].optionValue);
+      }
+    } else {
+      setIsProductType(false);
+    }
+    const newColumns = generateColumns(
+      renderedFrom,
+      fieldsDataForRead?.filter((d) => !ignoreField.includes(d?.fieldData.fieldName)),
+      routes.productDetail.path,
+      true
+    );
+    setProductColumns([...newColumns]);
   };
 
   const ActionsRenderer = {
@@ -169,7 +174,7 @@ const Product = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize='small' color={permissions?.product?.isDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={permissions?.product?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -201,9 +206,9 @@ const Product = () => {
       .then(({ data }) => {
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['canDelete'] = permissions?.product.isDelete;
-          finalObject['canEdit'] = permissions?.product.isUpdate && checkIsAllowedToEdit(user, sidebarResource.product, u);;
+          finalObject['canEdit'] = permissions?.product.isUpdate && checkIsAllowedToEdit(user, sidebarResource.product, u);
           return finalObject;
         });
         let columns = [...productColumns];
@@ -294,28 +299,30 @@ const Product = () => {
       });
   };
 
-    const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${routes.product.path}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${routes.product.path}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -386,7 +393,7 @@ const Product = () => {
             resource={sidebarResource?.product}
             permission={permissions.product}
             api={product.api}
-            refrenceId={null}
+            referenceId={null}
             onSuccessfulImport={(isImportedSuccessfully) => {
               if (isImportedSuccessfully) {
                 fetchData();

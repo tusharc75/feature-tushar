@@ -42,6 +42,7 @@ import WarhouseList from './Warehouse/WarhouseList';
 import axios, { CancelTokenSource } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ExpandMore } from '@mui/icons-material';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -117,10 +118,8 @@ export default function Account(props) {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource[accountResource]}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(accountResource, data, `/${accountRoute}/detail`, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource[accountResource], permissions[accountResource]?.isUpdate);
+    let newColumns = generateColumns(accountResource, fieldsDataForRead, `/${accountRoute}/detail`, true);
 
     newColumns?.forEach((o) => {
       if (o?.accessor === 'accountName') {
@@ -209,7 +208,7 @@ export default function Account(props) {
                 });
               }}
             >
-              {row?.original?.approved ? <HiBadgeCheck size={20} /> : <FcApproval size={20} />}
+              {row?.original?.approved ? <FcApproval size={20} /> : <HiBadgeCheck size={20} />}
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -568,8 +567,8 @@ export default function Account(props) {
           <ConfirmationDialog
             open={showDeleteConfirmBox}
             message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
-              : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
+                ? `${resources?.[accountResource]?.titleSingular?.toLowerCase()} : ${deleteRecord?.accountName}`
+                : `selected ${resources?.[accountResource]?.titlePlural?.toLowerCase()}`
               } ?`}
             onClose={() => {
               setShowDeleteConfirmBox(false);

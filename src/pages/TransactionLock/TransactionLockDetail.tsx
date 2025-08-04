@@ -14,6 +14,7 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { sidebarResource } from '../../constants/helpers';
 import ManageTransactionLock from './ManageTransactionLock';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TransactionLockDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,15 +33,9 @@ const TransactionLockDetail = () => {
     fetchData();
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.transactionLock}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.transactionLock, permissions?.transactionLock?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

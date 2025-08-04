@@ -19,6 +19,7 @@ import routes from './../../components/Helpers/Routes';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PurchaseRequisition = () => {
   const {
@@ -68,10 +69,8 @@ const PurchaseRequisition = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.purchaseRequisition}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.purchaseRequisitionDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseRequisition, permissions?.purchaseRequisition?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseRequisitionDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

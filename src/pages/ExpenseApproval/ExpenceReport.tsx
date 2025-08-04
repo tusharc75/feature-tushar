@@ -8,12 +8,17 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { EXPENSE_STATUS, expenseReport, sidebarResource } from '../../constants/helpers';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 import CommentDialog from 'src/components/CommentDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { useData } from 'src/StateProvider/Provider';
 
 const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
   const toastConfig = useContext(CustomToastContext);
   const [fields, setFields] = useState(null);
   const [expenceReportData, setExpenceReportData] = useState(null);
   const [commentDialog, setCommentDialog] = useState(false);
+    const {
+      state: { permissions }
+    }: any = useData();
 
   useEffect(() => {
     fetchFields();
@@ -38,14 +43,8 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
   };
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.expenseReport}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, false);
+    setFields(fieldsDataForRead);
   };
 
   const handleStatusChange = (status, comment = '') => {

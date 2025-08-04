@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTaxMaster from './ManageTaxMaster';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.taxMaster);
 
@@ -51,10 +52,8 @@ const TaxMaster = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.taxMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.taxMasterDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.taxMaster, permissions?.taxMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.taxMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
   const ActionsRenderer = {
@@ -97,7 +96,7 @@ const TaxMaster = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -262,11 +261,12 @@ const TaxMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
+          message={`Are you sure you want to delete ${
+            deleteRecord
               ? `${resources?.taxMaster?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.taxCode || ''}`
               : `selected ${resources?.taxMaster?.titlePlural?.toLowerCase()}`
-            } ?`}
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

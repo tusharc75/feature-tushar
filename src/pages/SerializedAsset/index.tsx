@@ -41,6 +41,7 @@ import axios, { CancelTokenSource } from 'axios';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import StatusChangeFieldDialog from 'src/pages/SerializedAsset/StatusChangeFieldDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource?.serializedAsset);
 
@@ -187,12 +188,12 @@ const SerializedAsset = () => {
     }
   }, [selectedEntity]);
 
-  const fetchFieldSerializedAssetStatusChangeRequest = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
-      .then(({ data: { data } }) => {
-        setSerializedAssetStatusChangeRequestFields([...data]);
-      });
+  const fetchFieldSerializedAssetStatusChangeRequest = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource.serializedAssetStatusChangeRequest,
+      permissions?.serializedAsset?.isUpdate
+    );
+    setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };
 
   useEffect(() => {
@@ -220,7 +221,7 @@ const SerializedAsset = () => {
   const fetchGridColumns = async () => {
     const resourceDataResponce = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
     const resourceData = resourceDataResponce?.data?.data;
-    setResourceData(resourceData)
+    setResourceData(resourceData);
 
     const statusColors = {};
     if (resourceData?.policy?.statusColor) {
@@ -235,135 +236,128 @@ const SerializedAsset = () => {
       }
     }
 
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        setFields(JSON.parse(JSON.stringify(data)));
-        data?.some((o) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setAllStatusOptions(o.fieldData.option)
-            setOtherStatusOptions([...o.fieldData.option?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))]);
-            setAllowUpdateStatus(o?.isUpdate);
-            return true;
-          }
-        });
-        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-        newColumns?.forEach((o) => {
-          if (o?.accessor === 'assetNumber') {
-            o.cell = ({ row }) => (
-              <div
-                style={{
-                  backgroundColor: (() => {
-                    return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
-                      ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
-                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                        ? COLOUR_MASTER.lostAssets.background
-                        : '';
-                  })()
-                }}
-              >
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.assetNumber}
-                  to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
-                >
-                  {row?.original?.assetNumber}
-                </Link>
-                {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
-                  (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
-                    <Box ml={1}>
-                      <HtmlTooltip title="Asset needs to be recert">
-                        <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                      </HtmlTooltip>
-                    </Box>
-                  ))}
-                {row?.original?.currentLocationNotMatchWithGps && (
-                  <Box ml={1}>
-                    <HtmlTooltip title="Asset location needs to be update in Equipt">
-                      <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                    </HtmlTooltip>
-                  </Box>
-                )}
-              </div>
-            );
-          }
-        });
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    setFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    fieldsDataForRead?.some((o) => {
+      if (o?.fieldData?.fieldName === 'status') {
+        setAllStatusOptions(o.fieldData.option);
+        setOtherStatusOptions([...o.fieldData.option?.filter((o) => !Object.values(ASSET_STATUS)?.includes(o?.optionValue))]);
+        setAllowUpdateStatus(o?.isUpdate);
+        return true;
+      }
+    });
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'assetNumber') {
+        o.cell = ({ row }) => (
+          <div
+            style={{
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  ? statusColors[row?.original?.status] || statusColors[row?.original?.subStatus]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
+            }}
+          >
+            <Link className="link text-truncate" title={row?.original?.assetNumber} to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}>
+              {row?.original?.assetNumber}
+            </Link>
+            {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
+              (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Asset needs to be recert">
+                    <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              ))}
+            {row?.original?.currentLocationNotMatchWithGps && (
+              <Box ml={1}>
+                <HtmlTooltip title="Asset location needs to be update in Equipt">
+                  <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                </HtmlTooltip>
+              </Box>
+            )}
+          </div>
+        );
+      }
+    });
 
-        newColumns.push({
-          accessor: 'ownerType',
-          Header: 'Actual Owner Type',
-          width: 200,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.ownerType ? (
-                <h5 className="text-truncate" title={row?.original?.ownerType}>
-                  {row?.original?.ownerType}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        });
+    newColumns.push({
+      accessor: 'ownerType',
+      Header: 'Actual Owner Type',
+      width: 200,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.ownerType ? (
+            <h5 className="text-truncate" title={row?.original?.ownerType}>
+              {row?.original?.ownerType}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    });
 
-        newColumns.push({
-          accessor: 'owner',
-          Header: 'Actual Owner',
-          width: 200,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.owner ? (
-                <h5 className="text-truncate" title={row?.original?.owner}>
-                  {row?.original?.owner}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        });
-        if (permissions?.rentalManagement?.isRead) {
-          newColumns.push({
-            accessor: 'rentalJob',
-            Header: resources?.rentalManagement?.titleSingular,
-            width: 200,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'rentalJob',
-                  lookupResource: sidebarResource.rentalManagement
-                }}
-                original={row?.original}
-              />
-            )
-          });
-        }
-        if (permissions?.repairOrder?.isRead) {
-          newColumns.push({
-            accessor: 'repairOrder',
-            Header: resources?.repairOrder?.titleSingular,
-            width: 200,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'repairOrder',
-                  lookupResource: sidebarResource.repairOrder
-                }}
-                original={row?.original}
-              />
-            )
-          });
-        }
-        setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
+    newColumns.push({
+      accessor: 'owner',
+      Header: 'Actual Owner',
+      width: 200,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.owner ? (
+            <h5 className="text-truncate" title={row?.original?.owner}>
+              {row?.original?.owner}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    });
+    if (permissions?.rentalManagement?.isRead) {
+      newColumns.push({
+        accessor: 'rentalJob',
+        Header: resources?.rentalManagement?.titleSingular,
+        width: 200,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'rentalJob',
+              lookupResource: sidebarResource.rentalManagement
+            }}
+            original={row?.original}
+          />
+        )
       });
+    }
+    if (permissions?.repairOrder?.isRead) {
+      newColumns.push({
+        accessor: 'repairOrder',
+        Header: resources?.repairOrder?.titleSingular,
+        width: 200,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'repairOrder',
+              lookupResource: sidebarResource.repairOrder
+            }}
+            original={row?.original}
+          />
+        )
+      });
+    }
+    setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = useMemo(
@@ -431,7 +425,9 @@ const SerializedAsset = () => {
             ASSET_STATUS.customerPossession,
             ASSET_STATUS.onPO,
             ASSET_STATUS.scrap
-          ]?.includes(u?.status) ? permissions?.serializedAsset?.isDelete : false;
+          ]?.includes(u?.status)
+            ? permissions?.serializedAsset?.isDelete
+            : false;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -521,8 +517,8 @@ const SerializedAsset = () => {
     const statusPolicyData = policy?.statusChangeFields?.find((ele) => ele.status === status);
     if (statusPolicyData) {
       if (statusPolicyData?.products?.length > 0) {
-        if (selectedRecords?.every(r => statusPolicyData?.products?.includes(r?.productId))) {
-          statusPolicy = statusPolicyData
+        if (selectedRecords?.every((r) => statusPolicyData?.products?.includes(r?.productId))) {
+          statusPolicy = statusPolicyData;
         } else {
           toastConfig.setToastConfig({
             open: true,
@@ -532,7 +528,7 @@ const SerializedAsset = () => {
           return;
         }
       } else {
-        statusPolicy = statusPolicyData
+        statusPolicy = statusPolicyData;
       }
     }
 
@@ -864,11 +860,12 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.serializedAsset?.titleSingular?.toLowerCase()} :
             ${deleteRecord?._id ? deleteRecord?.assetNumber : ''}`
-            : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.serializedAsset?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -971,7 +968,7 @@ const LeftSideContent = ({
             <span>{`Calendar`}</span>
           </Button>
         )}
-        {permissions?.productCategory?.isRead && columns?.find(c => c?.accessor === 'productCategory') && (
+        {permissions?.productCategory?.isRead && columns?.find((c) => c?.accessor === 'productCategory') && (
           <Autocomplete
             className={`w-full lg:w-[230px]`}
             options={productCategoryList}
@@ -1041,7 +1038,7 @@ const LeftSideContent = ({
             label={`Subleased ${resources?.serializedAsset?.titlePlural}`}
           />
         )}
-        {allStatusOptions?.find((e => e.optionLabel === ASSET_STATUS.scrap)) &&
+        {allStatusOptions?.find((e) => e.optionLabel === ASSET_STATUS.scrap) && (
           <FormControlLabel
             control={
               <Checkbox
@@ -1056,7 +1053,7 @@ const LeftSideContent = ({
             style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
             label={`Scrapped ${resources?.serializedAsset?.titlePlural}`}
           />
-        }
+        )}
       </Fragment>
     </>
   );

@@ -30,8 +30,9 @@ import ShowDoa from '../DoaSetupNew/ShowDoa';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PurchaseRequisitionDetail = () => {
   const { id } = useParams();
@@ -57,7 +58,7 @@ const PurchaseRequisitionDetail = () => {
   const {
     state: { permissions, user, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -68,27 +69,13 @@ const PurchaseRequisitionDetail = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseRequisition}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.purchaseRequisition);
+    setResourcePolicyData(data);
   };
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.purchaseRequisition}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseRequisition, permissions?.purchaseRequisition?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const updateDOASetup = (doaSetup) => {
@@ -115,8 +102,8 @@ const PurchaseRequisitionDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(
         data?.canDelete &&
-        permissions?.purchaseRequisition?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
+          permissions?.purchaseRequisition?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue)
       );
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([
@@ -170,7 +157,7 @@ const PurchaseRequisitionDetail = () => {
 
   const handleConvertSuccess = (data: any) => {
     setOrderDialog({ open: false });
-    const purchaseOrderId = data?._id
+    const purchaseOrderId = data?._id;
     axiosInstance()
       .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
         _id: id,
@@ -179,7 +166,7 @@ const PurchaseRequisitionDetail = () => {
       })
       .then(({ data }) => {
         fetchData();
-        window.open(`${routes.purchaseOrderDetail.path}/${purchaseOrderId}`)
+        window.open(`${routes.purchaseOrderDetail.path}/${purchaseOrderId}`);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -200,7 +187,8 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {purchaseRequisitionData?.material?.length > 0 && stepList[currentStep]?.name === 'End' &&
+              {purchaseRequisitionData?.material?.length > 0 &&
+                stepList[currentStep]?.name === 'End' &&
                 (purchaseRequisitionData?.doaSetup && DOAData?.status !== DOA_STATUS.approved ? null : (
                   <ThemeButton
                     onClick={() => {
@@ -211,11 +199,13 @@ const PurchaseRequisitionDetail = () => {
                     {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                   </ThemeButton>
                 ))}
-              {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && ![PURCHASE_REQUISITION_STATUS.converted]?.includes(purchaseRequisitionData?.status) && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
-                  {'Edit'}
-                </ThemeButton>
-              )}
+              {permissions?.purchaseRequisition?.isUpdate &&
+                allowedToEdit &&
+                ![PURCHASE_REQUISITION_STATUS.converted]?.includes(purchaseRequisitionData?.status) && (
+                  <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                    {'Edit'}
+                  </ThemeButton>
+                )}
               {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton
                 referenceId={purchaseRequisitionData?._id}
@@ -231,7 +221,9 @@ const PurchaseRequisitionDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -326,14 +318,14 @@ const PurchaseRequisitionDetail = () => {
             </Grid>
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.purchaseRequisition}
                   data={purchaseRequisitionData}

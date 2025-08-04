@@ -23,6 +23,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomDatePicker from 'src/components/CustomDatePicker';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const OPERATOR = [
   {
@@ -79,10 +80,8 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
     fetchData();
   }, [id]);
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.serviceMaster.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMaster.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

@@ -10,13 +10,14 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { serializedAsset, sidebarResource } from 'src/constants/helpers';
 import ShowDoa from 'src/pages/DoaSetupNew/ShowDoa';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SerializedAssetStatusChangeRequestDetail = () => {
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
 
   const {
-    state: { user, resources }
+    state: { user, resources, permissions }
   }: any = useData();
 
   const [fields, setFields] = useState(null);
@@ -27,12 +28,12 @@ const SerializedAssetStatusChangeRequestDetail = () => {
     fetchData();
   }, [id]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
-      .then(({ data: { data } }) => {
-        setFields([...data]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource?.serializedAssetStatusChangeRequest,
+      permissions?.serializedAssetStatusChangeRequest?.isUpdate
+    );
+    setFields([...fieldsDataForRead]);
   };
 
   const fetchData = async () => {

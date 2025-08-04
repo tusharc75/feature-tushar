@@ -13,6 +13,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageTechnicianUnavailability from './Manage';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TechnicianUnavailability = () => {
   const { id } = useParams();
@@ -28,7 +29,6 @@ const TechnicianUnavailability = () => {
     state: { permissions, resources }
   }: any = useData();
 
-
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -37,14 +37,11 @@ const TechnicianUnavailability = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.technicianUnavailability}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource?.technicianUnavailability,
+      permissions?.technicianUnavailability?.isUpdate
+    );
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -85,7 +82,9 @@ const TechnicianUnavailability = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }, { title: data?.title }]} />
+          <CustomBreadCrumbs
+            routes={[{ ...routes.technicianUnavailability, title: resources?.technicianUnavailability?.titlePlural }, { title: data?.title }]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">

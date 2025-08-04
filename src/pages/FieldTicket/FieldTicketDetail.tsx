@@ -38,8 +38,9 @@ import Submit from './Submit';
 import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import OnField from 'src/pages/FieldServiceOrder/OnField';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -67,7 +68,7 @@ const FieldTicketDetail = () => {
   const [versionDialog, setVersionDialog] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -88,10 +89,10 @@ const FieldTicketDetail = () => {
       if (isOffline) {
         data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
       } else {
-        const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
-        data = response?.data?.data;
+        const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldTicket, permissions.fieldTicket?.isUpdate);
+        data = fieldsDataForRead;
       }
-      setFields(data?.filter((field) => field.isRead));
+      setFields(data);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -126,16 +127,8 @@ const FieldTicketDetail = () => {
 
   const fetchPolicy = async () => {
     if (isOffline) return;
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldTicket}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.fieldTicket);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -242,7 +235,9 @@ const FieldTicketDetail = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {fieldTicketData?.rentalJob && <CustomTab value={2}>On Field</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -278,7 +273,7 @@ const FieldTicketDetail = () => {
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
-                resourcePolicy={resourceData?.policy}
+                resourcePolicy={resourcePolicyData?.policy}
                 stepFullScreen={stepFullScreen}
                 fetchData={fetchData}
               />
@@ -290,7 +285,7 @@ const FieldTicketDetail = () => {
                 fieldTicketFields={fields}
                 allowedToEdit={allowedToEdit}
                 fetchData={fetchData}
-                resourcePolicy={resourceData?.policy}
+                resourcePolicy={resourcePolicyData?.policy}
               />
             )}
           </TabPanel>
@@ -298,14 +293,14 @@ const FieldTicketDetail = () => {
         <TabPanel value={tabValue} index={2}>
           <OnField referenceData={fieldTicketData} rentalJob={fieldTicketData?.rentalJob?.optionValue} referenceFrom={sidebarResource?.fieldTicket} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.fieldTicket}
                   data={fieldTicketData}

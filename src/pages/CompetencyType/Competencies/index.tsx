@@ -14,6 +14,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ManageCompetencies from 'src/pages/Competencies/ManageCompetencies';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Competencies = ({ competencyType }) => {
   let renderedFrom = camelCase(sidebarResource.competencies);
@@ -39,10 +40,8 @@ const Competencies = ({ competencyType }) => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.competencies}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.competenciesDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.competencies, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.competenciesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

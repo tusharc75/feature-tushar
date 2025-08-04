@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageStorageLocation from './ManageStorageLocation';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.storageLocation);
 
@@ -51,10 +52,8 @@ const StorageLocation = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.storageLocation}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes?.storageLocationDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.storageLocation, permissions?.storageLocation?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.storageLocationDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -98,7 +97,7 @@ const StorageLocation = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -261,11 +260,12 @@ const StorageLocation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.storageLocation?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.storageLocation?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.storageLocationName || ''}`
-            : `selected ${resources?.storageLocation?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.storageLocation?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

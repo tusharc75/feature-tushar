@@ -17,6 +17,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
 import Step from './Step';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -38,7 +39,7 @@ const DynamicFormDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
@@ -96,16 +97,8 @@ const DynamicFormDetail = () => {
   }, [resource]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, resource)
+    setResourcePolicyData(data)
   };
 
   const handleDelete = () => {
@@ -172,11 +165,11 @@ const DynamicFormDetail = () => {
               </ThemeButton>
             )}
             {permissions[renderedFrom]?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-            {resourceData?.collaborateTools && detailData && (
+            {resourcePolicyData?.collaborateTools && detailData && (
               <ActivityButton
                 referenceId={detailData?._id}
                 resource={camelCase(resource)}
-                resourceLabel={detailData[resourceData?.collaborateToolsField]}
+                resourceLabel={detailData[resourcePolicyData?.collaborateToolsField]}
                 resourceData={detailData}
               />
             )}
@@ -187,7 +180,7 @@ const DynamicFormDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length > 0 && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -198,19 +191,19 @@ const DynamicFormDetail = () => {
             <DetailsPage
               data={detailData}
               fields={fields}
-              resource={resourceData?.collaborateTools ? resource : null}
-              referenceId={resourceData?.collaborateTools ? id : null}
+              resource={resourcePolicyData?.collaborateTools ? resource : null}
+              referenceId={resourcePolicyData?.collaborateTools ? id : null}
             />
           )}
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 1}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={resource}
                   data={detailData}
@@ -241,7 +234,7 @@ const DynamicFormDetail = () => {
             closeUpdateDialog();
             fetchData();
           }}
-          collaborateTools={resourceData?.collaborateTools}
+          collaborateTools={resourcePolicyData?.collaborateTools}
         />
       )}
     </Box>

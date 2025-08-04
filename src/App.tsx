@@ -293,6 +293,7 @@ import CreateCustomPdfTemplate from './pages/CustomPdfTemplate/CreateCustomPdfTe
 import UserManualNew from './pages/UserManualNew';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
+import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
 var notificationInterval: any = null;
 
 function App() {
@@ -1028,6 +1029,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldServiceTechnician.path}`}>
               <FieldServiceTechnician />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.rentalJobTechnicianView.path}`}>
+              <RentalJobTechnicianView />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fleetDispatch.path}`}>
               <FleetDispatch />

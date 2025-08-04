@@ -13,6 +13,8 @@ import { ASSET_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource }
 import { SchedularComponentProps } from 'src/pages/ScheduleAndDispatch/Scheduler/types';
 import AssetQtyDialog from './AssetQtyDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { useData } from 'src/StateProvider/Provider';
 
 const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const {
@@ -38,6 +40,9 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   const [columns, setColumns] = useState(null);
   const [isVirtualizedTableView, setIsVirtualizedTableView] = useState(false);
   const [openAssetQtyDialog, setOpenAssetQtyDialog] = useState(false);
+  const {
+    state: { permissions }
+  }: any = useData();
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -66,12 +71,9 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
   }, [selectedProduct, selectedWarehouse, loading]);
 
   const fetchGridColumns = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAsset}`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes?.serializedAssetDetail?.path, true);
-        setColumns([...newColumns, ...getStaticFields()]);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serializedAsset, false);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serializedAssetDetail?.path, true);
+    setColumns([...newColumns, ...getStaticFields()]);
   };
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
@@ -216,11 +218,7 @@ const AddSerializedAssets = ({ schedularState }: SchedularComponentProps) => {
       )}
 
       <div className="flex justify-end">
-        <ThemeButton
-          disabled={!selectedAssets?.length && !selectedRecords?.length}
-          buttonType="theme"
-          onClick={() => handleAdd()}
-        >
+        <ThemeButton disabled={!selectedAssets?.length && !selectedRecords?.length} buttonType="theme" onClick={() => handleAdd()}>
           Save & Next
         </ThemeButton>
       </div>

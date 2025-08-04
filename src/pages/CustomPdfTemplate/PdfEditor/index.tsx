@@ -109,44 +109,17 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
   }, [dropdownPos]);
 
   return (
-    <div style={{ position: 'relative', height: '100vh', width: '100%' }}>
-      <div
-        ref={containerRef}
-        style={{
-          height: '100%',
-          width: '100%',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      />
-
+    <div className="relative h-screen w-full">
+      <div ref={containerRef} className="h-full w-full relative overflow-hidden" />
       {dropdownPos && (
         <div
+          className="absolute z-[10000] bg-white border border-gray-300 shadow-lg rounded-md"
           data-variable-dropdown
-          style={{
-            position: 'absolute',
-            top: dropdownPos.y,
-            left: dropdownPos.x,
-            backgroundColor: 'white',
-            border: '1px solid gray',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-            zIndex: 10000,
-            padding: '4px 0',
-            borderRadius: '4px'
-          }}
+          style={{ top: dropdownPos.y, left: dropdownPos.x }}
         >
-          <div
-            style={{
-              background: 'white',
-              border: '1px solid #ccc',
-              borderRadius: 4,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              width: 200,
-              maxHeight: 200,
-              overflowY: 'auto'
-            }}
-          >
+          <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-82 ">
             <input
+              className="sticky top-0 w-full p-2 rounded-md outline-none text-sm bg-white border border-gray-300"
               type="text"
               placeholder="Search variables..."
               value={searchTerm}
@@ -154,58 +127,29 @@ const PdfEditor = ({ template, onTemplateChange, disabled, noOfPages, variables,
               onChange={(e) => setSearchTerm(e.target.value)}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
-              style={{
-                width: '100%',
-                padding: '6px 10px',
-                boxSizing: 'border-box',
-                border: 'none',
-                borderBottom: '1px solid #eee',
-                outline: 'none',
-                fontSize: '0.9rem'
-              }}
             />
-            {variables
-              .filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map((opt) => (
-                <div
-                  key={opt.value}
-                  data-variable-option
-                  onClick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
-                  onMouseDown={(e) => e.preventDefault()}
-                  style={{
-                    padding: '4px 12px',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  {opt.label}
-                </div>
-              ))}
+            <div className="bg-white border border-gray-200 rounded-md shadow-md w-52 max-h-52 overflow-y-auto">
+              {variables
+                .filter((opt) => opt.label.toLowerCase().includes(searchTerm.toLowerCase()))
+                .map((opt) => (
+                  <div
+                    className="p-2 text-sm hover:bg-gray-100 cursor-pointer whitespace-nowrap"
+                    key={opt.value}
+                    title={opt.label}
+                    data-variable-option
+                    onClick={(e) => { e.preventDefault(); handleSelect(opt.value); }}
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    {opt.label}
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       )}
 
       {disabled && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(128, 128, 128, 0.3)',
-            zIndex: 9999,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#fff',
-            fontSize: '1.2rem',
-            fontWeight: 'bold',
-            pointerEvents: 'all',
-            cursor: 'not-allowed'
-          }}
-        />
+        <div className="absolute inset-0 bg-gray-500 bg-opacity-30 z-[9999] flex justify-center items-center text-white text-lg font-bold pointer-events-auto cursor-not-allowed" />
       )}
     </div>
   );

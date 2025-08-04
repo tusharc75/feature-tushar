@@ -34,6 +34,7 @@ import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import CanbanView from 'src/components/CanbanVIew';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 

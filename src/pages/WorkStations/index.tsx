@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkStations from './ManageWorkStations';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.workStations);
 
@@ -47,10 +48,8 @@ const WorkStations = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.workStations}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.workStationsDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workStations, permissions?.workStations?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.workStationsDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

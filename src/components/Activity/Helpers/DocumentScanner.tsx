@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import SwitchCameraIcon from '@mui/icons-material/SwitchCamera';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const DocumentScanner = ({ open, onClose, setFieldValue ,name}) => {
+const DocumentScanner = ({ open, onClose, setFieldValue, name }) => {
   const toastConfig = useContext(CustomToastContext);
   const webcamRef = useRef(null);
   const [picture, setPicture] = useState('');
@@ -64,7 +64,7 @@ const DocumentScanner = ({ open, onClose, setFieldValue ,name}) => {
       .then(({ data }) => {
         setIsScanning(false);
         const file = data.fileName;
-        setFieldValue(name,file,true);
+        setFieldValue(name, file, true);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',

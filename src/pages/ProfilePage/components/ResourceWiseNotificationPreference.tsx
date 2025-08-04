@@ -136,8 +136,8 @@ export default function ResourceWiseNotificationPreference() {
         )}
       </Box>
       <TableContainer
-        component={(props) => <div {...props} className={cn('min-h-[300px] rounded-md border', props.className)} />}
-        style={{ maxHeight: 'calc(100vh - 300px)' }}
+        className={cn('min-h-[300px] rounded-md border')}
+        style={{ maxHeight: 'calc(100vh - 300px)', overflowY: 'auto' }}
       >
         <Table
           sx={{
