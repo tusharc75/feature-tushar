@@ -117,7 +117,7 @@ const RepairJobDetails = () => {
   };
 
   const fetchAssetStatusRights = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions.serializedAsset?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, false);
     if (fieldsDataForRead && fieldsDataForRead.length) {
       fieldsDataForRead.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {

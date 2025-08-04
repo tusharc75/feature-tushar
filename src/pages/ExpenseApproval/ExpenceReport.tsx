@@ -43,7 +43,7 @@ const Requests = ({ expenceReportId, fetchExpenceReportData }) => {
   };
 
   const fetchFields = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseApproval?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, false);
     setFields(fieldsDataForRead);
   };
 

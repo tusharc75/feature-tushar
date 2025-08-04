@@ -38,7 +38,7 @@ function AddExistingExpenses({ onClose, ids, isSubmitting, onSuccess, expenseRep
   }, [page, limit, filters, search, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, permissions?.expenses?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, false);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expensesDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };

@@ -58,7 +58,7 @@ const PackageInventory = () => {
   const fetchColumns = async () => {
     setColumns(null);
 
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, permissions?.packageInventory?.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.packages, false);
 
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.packagesDetail.path);
 

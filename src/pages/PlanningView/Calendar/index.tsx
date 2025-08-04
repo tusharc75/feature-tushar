@@ -17,12 +17,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AiButton from 'src/components/Helpers/Buttons/AiButton';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import routes from 'src/components/Helpers/Routes';
 import { cn, sidebarResource } from 'src/constants/helpers';
 import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
@@ -55,7 +55,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       {
         label: resources?.serializedAsset?.titlePlural,
         value: 'Serialized Asset',
-        key: 'assetIds'
+        key: 'assetIds',
       }
     ],
     [resources?.serializedAsset?.titlePlural]
@@ -66,7 +66,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       {
         label: resources?.product?.titlePlural,
         value: 'Product',
-        key: 'product'
+        key: 'product',
       },
       {
         label: resources?.warehouse?.titlePlural,
@@ -95,7 +95,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const toastConfig = useContext(CustomToastContext);
   const [events, setEvents] = useState([]);
-  const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [staticEvents, setStaticEvents] = useState([]);
@@ -116,7 +115,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [anchor, setAnchor] = useState(null);
 
-  const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [showPlannedIncoming, setShowPlannedIncoming] = useState(false);
@@ -274,23 +272,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, []);
 
   useEffect(() => {
-    const lookupResource = [...new Set([...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS]?.map((e) => e.value))]?.toString();
-    if (lookupResource) {
-      setLookupLoading(true);
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setLookUpResource(data);
-          setLookupLoading(false);
-        })
-        .catch((error) => {
-          setLookupLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  }, []);
-
-  useEffect(() => {
     setSelectedFilters([]);
     if (selectedResource?.resource === sidebarResource.serializedAsset) {
       setSelectedFilters(ASSET_FILTERS);
@@ -311,12 +292,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
       if (selectedLookUpResourceData) {
         Object.keys(selectedLookUpResourceData).forEach((d) => {
-          let data = [];
-          if (d === 'technician') {
-            data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-          } else {
-            data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
-          }
+          const data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
           query = `${query}&${d}=${data}`;
         });
       }
@@ -942,13 +918,30 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
                 selectedFilters?.map((filtered) => {
                   return (
-                    <RenderFilter
-                      filtered={filtered}
-                      lookupResource={lookupResource}
-                      selectedLookUpResourceData={selectedLookUpResourceData}
-                      setSelectedLookUpResourceData={setSelectedLookUpResourceData}
-                      lookupLoading={lookupLoading}
-                    />
+                    <div style={{ width: '300px' }}>
+                      <AsyncDropDown
+                        resource={filtered?.value}
+                        multiple={true}
+                        errors={false}
+                        touched={false}
+                        value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+                        fieldLabel={`Select ${filtered?.label}`}
+                        onChange={(e, val) => {
+                          if (val?.length > 0) {
+                            setSelectedLookUpResourceData((preVal) => ({
+                              ...preVal,
+                              [filtered.key]: val
+                            }));
+                          } else {
+                            const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+                            setSelectedLookUpResourceData(remainObj);
+                          }
+                        }}
+                        fieldName={''}
+                        required={false}
+                        disableCloseOnSelect={true}
+                      />
+                    </div>
                   );
                 })}
               {selectedResource?.resource === sidebarResource.product &&

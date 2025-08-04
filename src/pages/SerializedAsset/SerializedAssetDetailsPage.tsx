@@ -276,7 +276,7 @@ const SerializedAssetDetailsPage = () => {
   const fetchFieldSerializedAssetStatusChangeRequest = async () => {
     const { fieldsDataForRead } = await fetch_resource_view_fields(
       sidebarResource.serializedAssetStatusChangeRequest,
-      permissions?.serializedAsset?.isUpdate
+      false
     );
     setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };

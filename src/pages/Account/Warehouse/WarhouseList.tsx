@@ -85,7 +85,7 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   };
 
   const fetchGridColumns = async () => {
-    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions.warehouse.isUpdate);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions?.warehouse?.isUpdate);
     const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };
