@@ -25,11 +25,19 @@ const RenderCanbanCellImpl = <D,>({
   const rowObject = {
     row: {
       original: data
+    },
+    column: {
+      id: column.id || column.accessor,
+      columnDef: column
     }
   };
   const cell = {
     column: {
+      id: column.id || column.accessor,
       columnDef: column
+    },
+    row: {
+      original: data
     }
   };
   let renderedCell = <></>;
@@ -37,6 +45,8 @@ const RenderCanbanCellImpl = <D,>({
 
   const header = column.Header || column.header;
   const cellRenderer = column.cell || column.Cell;
+
+  const isEditable = !!column?.id && !!data['_id'] && column.editable && column?.id !== 'selection';
 
   if (typeof cellRenderer === 'function') {
     renderedCell = cellRenderer(rowObject as any);
@@ -53,17 +63,21 @@ const RenderCanbanCellImpl = <D,>({
   const handleStopEditing = () => {
     setIsEditing(false);
   };
+
   const props = useMemo(
     () => ({
       id: column?.id,
       key: column?.id,
-      className: `text-[12px_!important] [&>*]:[font-size:12px_!important] [&>div]:[flex-wrap:wrap_!important] [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+      className: cn(
+        `!text-[12px] [&>*]:[font-size:12px_!important]  [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+        hideHeader ? 'flex-shrink-0 flex-nowrap flex' : ' line-clamp-1 [&>div]:[flex-wrap:wrap_!important]'
+      ),
       onClick: () => {
-        if (!column?.id || !data['_id'] || column.editable || column?.id === 'selection') return;
+        if (!isEditable) return;
         setIsEditing(true);
       }
     }),
-    [column.editable, column?.id, data]
+    [column?.id, hideHeader, isEditable]
   );
 
   const combinedHeaderClass = cn(defaultHeaderClass, headerClassName);
@@ -80,14 +94,14 @@ const RenderCanbanCellImpl = <D,>({
           </span>
         </h6>
       );
-    case column?.editable:
+    case isEditable:
       return (
         <h6 className=" grid max-w-full text-[12px]">
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>
             <div className="w-fit">
               <div className=" ml-auto max-w-[max-content] cursor-pointer justify-end gap-[20px] [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important]">
-                <p>{renderedCell}</p>
+                <p className="line-clamp-1">{renderedCell}</p>
                 <span>
                   <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
                 </span>

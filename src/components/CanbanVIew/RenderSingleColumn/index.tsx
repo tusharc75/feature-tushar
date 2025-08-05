@@ -5,6 +5,7 @@ import axios, { CancelToken } from 'axios';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getRandomNumber } from 'src/components/AiChatbox/utils';
 import RenderSingleCard from 'src/components/CanbanView/RenderSingleColumn/RenderSIngleCard';
+import useColumns from 'src/components/CanbanView/RenderSingleColumn/useColumns';
 import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/CanbanView/types';
 import { cn } from 'src/constants/helpers';
 
@@ -18,9 +19,7 @@ type RenderSingleColumnProps<D> = {
   hideSelection?: boolean;
 };
 
-const DEFAUTL_VISIBLE_COLUMNS = 5;
 const LIMIT = 7;
-const actionColumnNames = ['actions', 'action'];
 
 const RenderSingleColumn = <D,>({
   fetchData,
@@ -31,6 +30,7 @@ const RenderSingleColumn = <D,>({
   state,
   hideSelection
 }: RenderSingleColumnProps<D>) => {
+  const { actionColumn, displayedColumns, hiddenColumns, indexColumn, primaryColumn } = useColumns({ columns });
   const parentRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(true);
   const [newDataLoading, setNewDataLoading] = useState(false);
@@ -46,36 +46,6 @@ const RenderSingleColumn = <D,>({
   }, [state.selectedRrowsMap, rows]);
 
   const hasNextPage = rows.length < count;
-
-  const visibleColumns = useMemo(() => {
-    if (!columns) return [];
-    return columns.filter((c, index) => {
-      if (['index', ...actionColumnNames].includes(c.id || c.accessor)) return false;
-      return true;
-    });
-  }, [columns]);
-
-  const { actionColumn, indexColumn } = useMemo(() => {
-    let actionColumn: Column<D> | undefined = undefined,
-      indexColumn: Column<D> | undefined = undefined;
-    for (const column of columns) {
-      if (actionColumnNames.includes(column.id || column.accessor)) {
-        actionColumn = column;
-        continue;
-      }
-      if (['index'].includes(column.id || column.accessor)) {
-        indexColumn = column;
-        continue;
-      }
-    }
-    return { actionColumn, indexColumn };
-  }, [columns]);
-
-  const { displayedColumns, hiddenColumns } = useMemo(() => {
-    const displayedColumns = [...(visibleColumns || [])].slice(0, DEFAUTL_VISIBLE_COLUMNS);
-    const hiddenColumns = [...(visibleColumns || [])].slice(DEFAUTL_VISIBLE_COLUMNS, visibleColumns?.length || 0);
-    return { displayedColumns: displayedColumns, hiddenColumns } as const;
-  }, [visibleColumns]);
 
   const virtualizer = useVirtualizer({
     count: rows.length + (hasNextPage ? 1 : 0),
@@ -168,6 +138,7 @@ const RenderSingleColumn = <D,>({
                 return (
                   <div key={`${key}`} data-index={index} ref={virtualizer.measureElement} className={cn('')}>
                     <RenderSingleCard
+                      primaryColumn={primaryColumn}
                       hideSelection={hideSelection}
                       actionColumn={actionColumn}
                       data={data}

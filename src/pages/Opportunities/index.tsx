@@ -33,7 +33,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import CanbanView, { FetchCanbanDataPayload } from 'src/components/CanbanView';
+import CanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs } from 'src/components/CanbanView';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import { useCanbanStore } from 'src/components/CanbanView/useCanbanStore';
 import { PiTableDuotone, PiTextColumns } from 'react-icons/pi';
@@ -76,6 +76,8 @@ const Opportunities = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
+  const [pivotColumn, setPivotColumn] = useState<any>(null);
+
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const canbanState = useCanbanStore();
@@ -382,10 +384,6 @@ const Opportunities = () => {
     }
   };
 
-  const pivotColumn = useMemo(() => {
-    return columns?.find((d) => d.accessor === 'process');
-  }, [columns]);
-
   const getQueryStringForCanban = (column: string, page: number, limit: number) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
@@ -494,28 +492,12 @@ const Opportunities = () => {
           addButtonOnclick={() => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
-          rightSideContents={
-            <div className="flex gap-1 rounded-md border bg-gray-100 p-[3px] dark:bg-neutral-800">
-              <HtmlTooltip title="Table View">
-                <IconButton
-                  size="small"
-                  onClick={() => setViewType('table')}
-                  sx={{ borderRadius: '6px', background: viewType === 'table' ? 'var(--dark-primary, white)' : 'transparent' }}
-                >
-                  <PiTableDuotone />
-                </IconButton>
-              </HtmlTooltip>
-              <HtmlTooltip title="Canban View">
-                <IconButton
-                  size="small"
-                  onClick={() => setViewType('canban')}
-                  sx={{ borderRadius: '6px', background: viewType === 'canban' ? 'var(--dark-primary, white)' : 'transparent' }}
-                >
-                  <PiTextColumns />
-                </IconButton>
-              </HtmlTooltip>
-            </div>
+          leftSideContents={
+            viewType === 'canban' ? (
+              <PivotColumnSelector defaultPivotColumnId="process" columns={columns} pivotColumn={pivotColumn} setPivotColumn={setPivotColumn} />
+            ) : null
           }
+          rightSideContents={<RenderViewTabs setViewType={setViewType} viewType={viewType} />}
           isAddButtonVisible={permissions?.opportunity?.isCreate}
         />
 

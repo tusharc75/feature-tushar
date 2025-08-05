@@ -13,7 +13,7 @@ type CanbanViewProps<D> = {
 
 const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArray = [], state, hideSelection }: CanbanViewProps<D>) => {
   const options = useMemo(() => {
-    return [...(pivotColumn.option || [])].sort((a, b) => a.order - b.order);
+    return [...(pivotColumn?.option || [])].sort((a, b) => a.order - b.order);
   }, [pivotColumn]);
 
   if (!pivotColumn) {

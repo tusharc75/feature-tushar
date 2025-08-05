@@ -1,6 +1,6 @@
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Collapse, IconButton } from '@mui/material';
-import { memo, useMemo, useState } from 'react';
+import { memo, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import RenderCanbanCell from 'src/components/CanbanView/RenderSingleColumn/RenderCanbanCell';
 import { Column, UseCanbanStore } from 'src/components/CanbanView/types';
@@ -10,6 +10,7 @@ type RenderSingleCardProps<D> = {
   state: UseCanbanStore<D>;
   actionColumn: Column<D> | undefined;
   indexColumn: Column<D> | undefined;
+  primaryColumn: Column<D> | undefined;
   displayedColumns: Column<D>[];
   hiddenColumns: Column<D>[];
   onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
@@ -18,6 +19,7 @@ type RenderSingleCardProps<D> = {
 
 const RenderSingleCardImpl = <D,>({
   data,
+  primaryColumn,
   actionColumn,
   displayedColumns,
   hiddenColumns,
@@ -47,7 +49,7 @@ const RenderSingleCardImpl = <D,>({
             </span>
           )}
           {indexColumn && <RenderCanbanCell column={indexColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
-          <RenderCanbanCell column={displayedColumns[0]} data={data} onSaveEdit={onSaveEdit} />
+          <RenderCanbanCell column={primaryColumn} data={data} onSaveEdit={onSaveEdit} />
         </div>
         <div className="flex items-center">
           {actionColumn && <RenderCanbanCell column={actionColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
@@ -66,7 +68,6 @@ const RenderSingleCardImpl = <D,>({
       </div>
       <div className="px-4 pb-4 pt-0">
         {displayedColumns?.map((d, i) => {
-          if (i === 0) return null;
           return <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />;
         })}
         {hiddenColumns.length > 0 && (
