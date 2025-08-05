@@ -25,7 +25,7 @@ const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependenc
   }
 
   return (
-    <div className="grid auto-cols-[min(calc(100%-35px),340px)] grid-flow-col gap-4 overflow-x-auto">
+    <div className="mt-2 grid auto-cols-[min(calc(100%-35px),340px)] grid-flow-col gap-4 overflow-x-auto">
       {options?.map((d) => (
         <RenderSingleColumn
           state={state}
