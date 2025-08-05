@@ -6,6 +6,7 @@ import { memo, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import RenderCanbanCell from 'src/components/KanbanView/RenderSingleColumn/RenderKanbanCell';
 import { Column, UseCanbanStore } from 'src/components/KanbanView/types';
+import { cn } from 'src/constants/helpers';
 
 type RenderSingleCardProps<D> = {
   data: D;
@@ -19,6 +20,7 @@ type RenderSingleCardProps<D> = {
   hideSelection?: boolean;
   setActiveDragItemProps: React.Dispatch<any>;
   columnId: string;
+  dragging?: boolean;
 };
 
 const RenderSingleCardImpl = <D,>({
@@ -31,13 +33,16 @@ const RenderSingleCardImpl = <D,>({
   state,
   onSaveEdit,
   hideSelection,
-  columnId
+  columnId,
+  dragging
 }: RenderSingleCardProps<D>) => {
   const [expanded, setExpanded] = useState(false);
 
+  const canEdit = data?.hasOwnProperty('canEdit') ? data['canEdit'] : true;
+
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: data?.['_id'],
-    disabled: !data,
+    disabled: !data || !canEdit,
     data: {
       columnId,
       props: {
@@ -59,13 +64,18 @@ const RenderSingleCardImpl = <D,>({
   };
 
   if (!data) return null;
+
   return (
     <div
       ref={setNodeRef}
       style={styleDnd}
       {...attributes}
       {...listeners}
-      className="mx-2 mb-2 rounded-md bg-[var(--dark-primary,white)] [&_.show-in-export]:!hidden"
+      className={cn(
+        'mx-2 mb-2 rounded-md bg-[var(--dark-primary,white)] [&_.show-in-export]:!hidden',
+        dragging ? 'cursor-grabbing' : canEdit ? 'cursor-grab' : '',
+        canEdit ? '' : 'bg-red-100 dark:bg-red-900'
+      )}
     >
       <div className="mb-2 flex items-center justify-between gap-2 border-b p-2 pb-0">
         <div className="flex items-center">

@@ -48,7 +48,7 @@ const KanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependenc
           />
         ))}
       </div>
-      <DragOverlay>{activeDragItemProps && <RenderSingleCard {...activeDragItemProps} />}</DragOverlay>
+      <DragOverlay>{activeDragItemProps && <RenderSingleCard {...activeDragItemProps} dragging={true} />}</DragOverlay>
     </DndContext>
   );
 };
