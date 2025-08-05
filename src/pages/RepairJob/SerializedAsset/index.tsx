@@ -28,6 +28,7 @@ import {
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
   REPAIR_JOB_STATUS,
+  SYSTEM_ASSET_STATUS,
   deliveryTicket,
   getEmailsFromContacts,
   repairJob,
@@ -39,6 +40,8 @@ import RepairProcess from '../RepairProcess';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import CustomMessageDialog from 'src/components/MessageDialog';
+import { repairJobActions, repairJobMessage } from 'src/constants/messageHelpers';
 
 const SerializedAsset = ({
   repairJobData,
@@ -64,9 +67,10 @@ const SerializedAsset = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
   const {
-    state: { user, permissions, resources }
+    state: { user, resources }
   }: any = useData();
 
   const handleClick = (event) => {
@@ -422,8 +426,8 @@ const SerializedAsset = ({
               }}
             >
               <MenuItem
-                disabled={
-                  checkUniqcurrentOwnerType() || selectedRecords?.some((r) => [ASSET_STATUS.reserved, ASSET_STATUS.needRepair]?.includes(r?.status))
+                disabled={checkUniqcurrentOwnerType() || selectedRecords?.some((r) =>
+                  [ASSET_STATUS.reserved, ASSET_STATUS.needRepair]?.includes(r?.status) || SYSTEM_ASSET_STATUS?.includes(r?.status))
                 }
                 onClick={() => {
                   setAnchorEl(null);
@@ -434,7 +438,9 @@ const SerializedAsset = ({
               </MenuItem>
               {!user?.user?.brandPolicy?.serializedAssetScrapApproval && (
                 <MenuItem
-                  disabled={checkUniqcurrentOwnerType()}
+                  disabled={checkUniqcurrentOwnerType() || selectedRecords?.some((r) =>
+                    SYSTEM_ASSET_STATUS?.includes(r?.status))
+                  }
                   onClick={() => {
                     setAnchorEl(null);
                     setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.scrap, message: '' });
@@ -444,6 +450,7 @@ const SerializedAsset = ({
                 </MenuItem>
               )}
               <MenuItem
+                disabled={selectedRecords?.some((r) => SYSTEM_ASSET_STATUS?.includes(r?.status))}
                 onClick={() => {
                   setAnchorEl(null);
                   setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.lost, message: '' });
@@ -479,6 +486,27 @@ const SerializedAsset = ({
     );
   };
 
+  const validateAction = (action) => {
+    const errorMessages = [];
+    selectedRecords?.forEach((e) => {
+      if (action === repairJobActions.sendToSupplier) {
+        if (e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
+          errorMessages.push({ index: e.index, message: repairJobMessage.restrictSendOtherSupplier });
+        }
+      }
+      if (action === repairJobActions.receivedToPlant) {
+        if (e?.status === ASSET_STATUS.repair && repairJobData?.restrictReceive) {
+          errorMessages.push({ index: e.index, message: repairJobMessage.restrictReceive });
+        }
+      }
+    });
+    if (errorMessages?.length) {
+      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+      return true;
+    }
+    return false;
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -486,11 +514,13 @@ const SerializedAsset = ({
           <MenuItem
             disabled={checkUniqSupplier() || checkUniqWarehouse()}
             onClick={() => {
-              if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-                if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
-                } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+              if (!validateAction(repairJobActions.receivedToPlant)) {
+                if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                  if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.plant);
+                  } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.plant);
+                  }
                 }
               }
             }}
@@ -501,11 +531,13 @@ const SerializedAsset = ({
         <MenuItem
           disabled={checkUniqSupplier() || checkUniqWarehouse() || selectedRecords.some((s) => [ASSET_STATUS.needRepair].includes(s.status))}
           onClick={() => {
-            if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
-              if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
-                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
-              } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
-                handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
+            if (!validateAction(repairJobActions.sendToSupplier)) {
+              if (uniq(map(selectedRecords, 'currentOwnerType')).length === 1) {
+                if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.brand) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.plant, DELIVERY_FROM_TO_TYPE.supplier);
+                } else if (uniq(map(selectedRecords, 'currentOwnerType'))[0] === INVENTORY_OWNER_TYPE.supplierAccount) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.delivery, DELIVERY_FROM_TO_TYPE.supplier, DELIVERY_FROM_TO_TYPE.supplier);
+                }
               }
             }
           }}
@@ -665,6 +697,15 @@ const SerializedAsset = ({
           onSuccess={() => {
             setRepairProcessDialog({ open: false, assetId: null, assetNumber: null, repaired: false });
             fetchRecords();
+          }}
+        />
+      )}
+      {openMessageDialog.open && (
+        <CustomMessageDialog
+          open={openMessageDialog.open}
+          errorMessages={openMessageDialog.errorMessages}
+          onClose={() => {
+            setOpenMessageDialog({ open: false, errorMessages: [] });
           }}
         />
       )}
