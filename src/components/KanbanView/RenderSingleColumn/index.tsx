@@ -21,6 +21,7 @@ type RenderSingleColumnProps<D> = {
   hideSelection?: boolean;
   setActiveDragItemProps: React.Dispatch<any>;
   pivotColumn: Column<D>;
+  refreshSignal: number;
 };
 
 const LIMIT = 7;
@@ -34,7 +35,8 @@ const RenderSingleColumn = <D,>({
   state,
   hideSelection,
   setActiveDragItemProps,
-  pivotColumn
+  pivotColumn,
+  refreshSignal
 }: RenderSingleColumnProps<D>) => {
   const { actionColumn, displayedColumns, hiddenColumns, indexColumn, primaryColumn } = useColumns({ columns });
   const parentRef = useRef<HTMLDivElement>(null);
@@ -100,7 +102,7 @@ const RenderSingleColumn = <D,>({
       token.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...dependencyArray]);
+  }, [...dependencyArray, refreshSignal]);
 
   useEffect(() => {
     if (!hasNextPage) return;

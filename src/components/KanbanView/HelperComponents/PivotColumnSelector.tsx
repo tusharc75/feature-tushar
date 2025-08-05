@@ -35,6 +35,7 @@ export const PivotColumnSelector = <D,>({ columns, defaultPivotColumnId, pivotCo
     if (pivotableColumns.length === 0 || !localDefaultColumnId) return;
     const defaultPivotColumn = pivotableColumns.find((d) => (d.id || d.accessor) === localDefaultColumnId);
     setPivotColumn(defaultPivotColumn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localDefaultColumnId, pivotableColumns]);
 
   if (pivotableColumns.length === 0) return null;
@@ -54,7 +55,7 @@ export const PivotColumnSelector = <D,>({ columns, defaultPivotColumnId, pivotCo
             setPivotColumn(newValue);
           }
         }}
-        renderInput={(params) => <TextField size="small" margin="none" {...params} label="Select Pivot Column" />}
+        renderInput={(params) => <TextField size="small" margin="none" {...params} label="Group By" />}
       />
     </>
   );

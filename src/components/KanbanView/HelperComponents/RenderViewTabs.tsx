@@ -15,6 +15,7 @@ export const RenderViewTabs = ({ setViewType, viewType, renderedFrom }: RenderVi
 
   useEffect(() => {
     setViewType(localViewType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localViewType]);
 
   return (
