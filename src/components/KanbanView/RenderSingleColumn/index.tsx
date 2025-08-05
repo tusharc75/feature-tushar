@@ -119,7 +119,7 @@ const RenderSingleColumn = <D,>({
   const { setNodeRef, active, over } = useDragAndDrop({ handleSaveEditWrapper, option, setActiveDragItemProps, pivotColumn, handleFetchData });
 
   return (
-    <div className={cn('rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>
+    <div className={cn('relative rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>
       <div className="flex items-center p-2">
         <Checkbox
           icon={<RadioButtonUnchecked />}
@@ -138,13 +138,13 @@ const RenderSingleColumn = <D,>({
         />
         <h6 className="line-clamp-1 text-sm font-semibold">{option.optionLabel}</h6>
       </div>
+      {active && over && over.id === option.optionValue && over.id !== active.data.current?.columnId && (
+        <div className="absolute bottom-0 left-0 right-0 top-[45px] z-10 flex items-center justify-center bg-black/30 [backdrop-filter:blur(4px)] dark:bg-white/30">
+          <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
+        </div>
+      )}
       {!loading ? (
         <div ref={parentRef} style={{ contain: 'strict' }} className="relative h-[calc(100vh-250px)] overflow-y-auto overflow-x-hidden">
-          {active && over && over.id === option.optionValue && over.id !== active.data.current?.columnId && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 [backdrop-filter:blur(4px)] dark:bg-white/30">
-              <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
-            </div>
-          )}
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             <div
               style={{
