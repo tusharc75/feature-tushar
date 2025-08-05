@@ -4,7 +4,7 @@ import { FetchCanbanData, InitialState, UseCanbanStore } from 'src/components/Ca
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type CanbanViewProps<D> = {
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: D) => void;
+  onSaveEdit?: (inputField: Record<string, string>, updatedData: D, shouldFetchData?: boolean) => Promise<void>;
   fetchData: FetchCanbanData<D>;
   dependencyArray?: any[];
   state: UseCanbanStore<D>;

@@ -90,7 +90,7 @@ const RenderCanbanCellImpl = <D,>({
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>
             <div className="w-full">
-              <RenderInputs cell={cell} columnDef={column} handleStopEditing={handleStopEditing} row={data} submitInput={onSaveEdit} />
+              <RenderInputs cell={cell} columnDef={column} handleStopEditing={handleStopEditing} row={rowObject.row} submitInput={onSaveEdit} />
             </div>
           </span>
         </h6>

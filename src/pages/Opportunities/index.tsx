@@ -352,7 +352,7 @@ const Opportunities = () => {
     );
   };
 
-  const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow, shouldFetchData = true) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
@@ -362,19 +362,17 @@ const Opportunities = () => {
           values[key] = inputField[key];
         }
       });
-      axiosInstance()
-        .put(`${opportunityApi}`, { ...values, _id: updatedRow._id })
-        .then(({ data }) => {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          fetchData();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
+      try {
+        const { data } = await axiosInstance().put(`${opportunityApi}`, { ...values, _id: updatedRow._id });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        if (shouldFetchData) fetchData();
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
     } else {
       toastConfig.setToastConfig({
         open: true,
