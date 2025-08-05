@@ -77,8 +77,14 @@ const Opportunities = () => {
 
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
-  const canbanState = useCanbanStore();
-  const { selectedRows: canbanSelectedRows, search: canbanSearch, setState } = canbanState;
+  const kanbanState = useCanbanStore();
+  const {
+    selectedRows: kanbanSelectedRows,
+    search: kanbanSearch,
+    deepFilters: kanbanDeepFilters,
+    filterByIds: kanbanFilterByIds,
+    setState
+  } = kanbanState;
   const {
     rowCount,
     page,
@@ -95,17 +101,17 @@ const Opportunities = () => {
     if (viewType === 'table') {
       return tableSelectedRows;
     } else {
-      return canbanSelectedRows;
+      return kanbanSelectedRows;
     }
-  }, [tableSelectedRows, canbanSelectedRows, viewType]);
+  }, [tableSelectedRows, kanbanSelectedRows, viewType]);
 
   const search = useMemo(() => {
     if (viewType === 'table') {
       return tableSearch;
     } else {
-      return canbanSearch;
+      return kanbanSearch;
     }
-  }, [tableSearch, canbanSearch, viewType]);
+  }, [tableSearch, kanbanSearch, viewType]);
 
   const [allFields, setAllFields] = useState(null);
 
@@ -117,6 +123,7 @@ const Opportunities = () => {
   const fetchGridColumns = async () => {
     const response = await axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}&view=true`);
     let data = response?.data?.data;
+    setState('setResourceColumns', data);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
@@ -393,6 +400,14 @@ const Opportunities = () => {
     const filterByIds = [];
     const deepFilters = [];
 
+    if (kanbanDeepFilters.length > 0) {
+      deepFilters.push(...kanbanDeepFilters);
+    }
+
+    if (kanbanFilterByIds.length > 0) {
+      filterByIds.push(...kanbanFilterByIds);
+    }
+
     deepFilters.push({ field: pivotColumn.accessor, term: column });
 
     if (selectedType === 3) {
@@ -519,12 +534,14 @@ const Opportunities = () => {
               />
             ) : (
               <KanbanView
-                state={canbanState}
+                state={kanbanState}
                 onSaveEdit={handleSaveEdit}
                 fetchData={fetchCanbanData}
                 dependencyArray={[selectedType, selectedEntity, pivotColumn]}
                 columns={columns}
                 pivotColumn={pivotColumn}
+                renderedFrom={renderedFrom}
+                resource={sidebarResource.opportunity}
               />
             )}
           </>
