@@ -1,16 +1,17 @@
-import { CancelToken } from 'axios';
-import React, { useEffect, useMemo } from 'react';
-import RenderSingleColumn from 'src/components/CanbanVIew/RenderSingleColumn';
-import { InitialState } from 'src/components/CanbanVIew/types';
+import { useMemo } from 'react';
+import RenderSingleColumn from 'src/components/CanbanView/RenderSingleColumn';
+import { FetchCanbanData, InitialState, UseCanbanStore } from 'src/components/CanbanView/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type CanbanViewProps<D> = {
-  onSaveEdit?: (data: { inputField: Record<string, string>; updatedData: any }) => void;
-  fetchData: (payload: { column: string; page: number; cancelToken: CancelToken }) => Promise<D[]>;
+  onSaveEdit?: (inputField: Record<string, string>, updatedData: D) => void;
+  fetchData: FetchCanbanData<D>;
   dependencyArray?: any[];
-} & InitialState;
+  state: UseCanbanStore<D>;
+  hideSelection?: boolean;
+} & InitialState<D>;
 
-const CanbanView = ({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArray = [] }: CanbanViewProps<D>) => {
+const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArray = [], state, hideSelection }: CanbanViewProps<D>) => {
   const options = useMemo(() => {
     return [...(pivotColumn.option || [])].sort((a, b) => a.order - b.order);
   }, [pivotColumn]);
@@ -24,9 +25,18 @@ const CanbanView = ({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArr
   }
 
   return (
-    <div className="grid auto-cols-[300px] grid-flow-col overflow-x-auto">
+    <div className="grid auto-cols-[min(calc(100%-35px),340px)] grid-flow-col gap-4 overflow-x-auto">
       {options?.map((d) => (
-        <RenderSingleColumn option={d} onSaveEdit={onSaveEdit} key={d.id} />
+        <RenderSingleColumn
+          state={state}
+          option={d}
+          onSaveEdit={onSaveEdit}
+          columns={columns}
+          key={d.id}
+          hideSelection={hideSelection}
+          dependencyArray={dependencyArray}
+          fetchData={fetchData}
+        />
       ))}
     </div>
   );

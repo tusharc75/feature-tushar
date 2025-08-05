@@ -1,4 +1,5 @@
 import { ColumnDef } from '@tanstack/react-table';
+import { CancelToken } from 'axios';
 
 export type InitialState<D> = {
   columns: Column<D>[];
@@ -6,8 +7,9 @@ export type InitialState<D> = {
 };
 
 export type Column<D> = {
-  _id?: string;
   id?: string;
+  Header?: string | (() => string);
+  Cell?: (d: any) => any;
   lockPosition?: boolean;
   fieldName?: string;
   fieldLabel?: string;
@@ -102,19 +104,89 @@ export type Option = {
   outcome?: string;
 };
 
-export type CanbanViewState = {
-  selectedRrowsMap: Map<string, any>;
+export type CanbanViewState<D> = {
+  selectedRrowsMap: Map<string, D>;
   search: string;
 };
 
-type KanbanStateKeys = keyof CanbanViewState;
-type KanbanTableKeys<K extends KanbanStateKeys> = CanbanViewState[K];
+export type FetchCanbanDataPayload = { column: string; page: number; limit: number; cancelToken?: CancelToken };
+export type FetchCanbanData<D> = (payload: FetchCanbanDataPayload) => Promise<{ data: D[]; count: number }>;
 
-type ActionMap = {
-  [K in KanbanStateKeys as `set${Capitalize<string & K>}`]: {
+type KanbanStateKeys<D> = keyof CanbanViewState<D>;
+type KanbanTableKeys<D, K extends KanbanStateKeys<D>> = CanbanViewState<D>[K];
+
+type ActionMap<D> = {
+  [K in KanbanStateKeys<D> as `set${Capitalize<string & K>}`]: {
     type: `set${Capitalize<string & K>}`;
-    payload: KanbanTableKeys<K>;
+    payload: KanbanTableKeys<D, K>;
   };
 };
 
-export type Actions = ActionMap[keyof ActionMap];
+export type Actions<D> = ActionMap<D>[keyof ActionMap<D>];
+export type ActionPayloadMap<D> = {
+  [A in Actions<D> as A['type']]: A['payload'];
+};
+
+export type UseCanbanStore<D> = {
+  selectedRows: D[];
+  dispatch: React.Dispatch<Actions<D>>;
+  handleSelect: (data: D) => void;
+  handleOnDelete: (data: D) => void;
+  handleClearSelection: () => void;
+  handleSelectMultiple: (data: D[]) => void;
+  handleUnSelectMultiple: (data: D[]) => void;
+  setState: <K extends keyof ActionPayloadMap<D>>(type: K, payload: ActionPayloadMap<D>[K]) => void;
+} & CanbanViewState<D>;
+
+// {
+//     "inputField": {
+//         "qty": 5
+//     },
+//     "updatedData": {
+//         "materialId": "68679129d37c74f4b5d728c7",
+//         "type": "product",
+//         "unit": "Piece",
+//         "qty": 5,
+//         "parentId": null,
+//         "_id": "6883165b1812857234422eb8",
+//         "productDetail": {
+//             "_id": "68679129d37c74f4b5d728c7",
+//             "brand": "630dbe1e9ec418610523529c",
+//             "productImage": "",
+//             "productName": "Car EV",
+//             "expenseItem": false,
+//             "productDescription": "",
+//             "serializedProduct": true,
+//             "assetCertification": false,
+//             "productNumber": "",
+//             "productCategory": "686790fed37c74f4b5d728c3",
+//             "entity": [],
+//             "unit": [
+//                 "Piece"
+//             ],
+//             "pricingMethod": [
+//                 "Per Day"
+//             ],
+//             "barcode": "",
+//             "productShortDetail": "",
+//             "productLongDetail": "",
+//             "metatag": [],
+//             "costPrice": 0,
+//             "listPrice": 0,
+//             "digitalProduct": false,
+//             "procurementMethod": "",
+//             "rentalNotification": "",
+//             "rentalNotificationUsers": [],
+//             "fields": [],
+//             "fieldChanges": [],
+//             "createdBy": {
+//                 "user": "67ebac0d5d104a18d4fb3192",
+//                 "date": "2025-07-04T08:30:33.219Z"
+//             }
+//         },
+//         "index": 1,
+//         "detail": "Car EV",
+//         "description": "",
+
+//     }
+// }

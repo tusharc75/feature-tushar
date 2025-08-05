@@ -159,7 +159,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       canDrag: false,
       Cell: ({ row, table }) => (
         <>
-          <HtmlTooltip title='Edit'>
+          <HtmlTooltip title="Edit">
             <IconButton
               size="small"
               aria-label="Details"
@@ -171,7 +171,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
               <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </HtmlTooltip>
-          <HtmlTooltip title='Delete'>
+          <HtmlTooltip title="Delete">
             <IconButton
               size="small"
               aria-label="Details"
@@ -183,7 +183,6 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
               <DeleteIcon fontSize="small" color="error" />
             </IconButton>
           </HtmlTooltip>
-
         </>
       )
     });
@@ -254,7 +253,8 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
       element.parentId = addDialog.parentId;
       material.push(element);
     });
-    axiosInstance().post(`${routes?.demandOrder?.path}/material/${demandOrderData._id}`, { material })
+    axiosInstance()
+      .post(`${routes?.demandOrder?.path}/material/${demandOrderData._id}`, { material })
       .then(({ data }) => {
         setAddDialog({ open: false, type: '', parentId: null });
         toastConfig.setToastConfig({
@@ -350,7 +350,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
         >
           Add Existing Products
         </MenuItem>
-        {permissions?.packages?.isRead &&
+        {permissions?.packages?.isRead && (
           <MenuItem
             onClick={() => {
               setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
@@ -358,7 +358,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
           >
             {`Add Existing ${resources?.packages?.titlePlural}`}
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -382,13 +382,15 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            const dataToDelete = selectedRecords?.filter((e) => !e.hideSelection).map((rec: any) => {
-              const obj: any = {};
-              obj.id = rec._id;
-              obj.type = rec?.type;
-              obj.materialId = rec?.materialId;
-              return obj;
-            });
+            const dataToDelete = selectedRecords
+              ?.filter((e) => !e.hideSelection)
+              .map((rec: any) => {
+                const obj: any = {};
+                obj.id = rec._id;
+                obj.type = rec?.type;
+                obj.materialId = rec?.materialId;
+                return obj;
+              });
             setDeleteData(dataToDelete);
           }}
         >
