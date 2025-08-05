@@ -20,7 +20,7 @@ const DMSRedirect = () => {
   };
 
   return (
-    <HtmlTooltip title={`Open DMS`} className="inline-block">
+    <HtmlTooltip title={`Open EDrive`} className="inline-block">
       <span className="relative mx-2 inline-block rounded-full border border-blue-400 bg-blue-500/10 dark:border-blue-800">
         <IconButton sx={{ padding: '5px', width: '30px', height: '30px' }} onClick={handleRedirect}>
           <FiExternalLink className="absolute -right-[5px] -top-[5px] text-[#0000FF] dark:text-blue-600" size={14} />
