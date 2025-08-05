@@ -66,7 +66,7 @@ const Opportunities = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
-  const [viewType, setViewType] = useState<'table' | 'canban'>('table');
+  const [viewType, setViewType] = useState<'table' | 'kanban'>('table');
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
@@ -488,7 +488,7 @@ const Opportunities = () => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
           leftSideContents={
-            viewType === 'canban' ? (
+            viewType === 'kanban' ? (
               <PivotColumnSelector
                 renderedFrom={renderedFrom}
                 defaultPivotColumnId="process"
