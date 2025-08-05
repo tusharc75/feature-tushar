@@ -4,9 +4,9 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import axios, { CancelToken } from 'axios';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { getRandomNumber } from 'src/components/AiChatbox/utils';
-import RenderSingleCard from 'src/components/CanbanView/RenderSingleColumn/RenderSIngleCard';
-import useColumns from 'src/components/CanbanView/RenderSingleColumn/useColumns';
-import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/CanbanView/types';
+import RenderSingleCard from 'src/components/KanbanView/RenderSingleColumn/RenderSIngleCard';
+import useColumns from 'src/components/KanbanView/RenderSingleColumn/useColumns';
+import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/KanbanView/types';
 import { cn } from 'src/constants/helpers';
 
 type RenderSingleColumnProps<D> = {

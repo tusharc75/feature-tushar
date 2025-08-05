@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Column } from 'src/components/CanbanView/types';
+import { Column } from 'src/components/KanbanView/types';
 
 const actionColumnNames = ['actions', 'action'];
 const DEFAUTL_VISIBLE_COLUMNS = 3;

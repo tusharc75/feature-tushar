@@ -1,6 +1,6 @@
 import { Edit } from '@mui/icons-material';
 import { memo, useMemo, useState } from 'react';
-import { Column } from 'src/components/CanbanView/types';
+import { Column } from 'src/components/KanbanView/types';
 import { RenderInputs } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { cn } from 'src/constants/helpers';
 

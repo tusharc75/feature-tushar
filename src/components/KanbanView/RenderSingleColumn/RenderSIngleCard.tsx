@@ -2,8 +2,8 @@ import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Collapse, IconButton } from '@mui/material';
 import { memo, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
-import RenderCanbanCell from 'src/components/CanbanView/RenderSingleColumn/RenderCanbanCell';
-import { Column, UseCanbanStore } from 'src/components/CanbanView/types';
+import RenderCanbanCell from 'src/components/KanbanView/RenderSingleColumn/RenderKanbanCell';
+import { Column, UseCanbanStore } from 'src/components/KanbanView/types';
 
 type RenderSingleCardProps<D> = {
   data: D;

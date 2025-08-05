@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import RenderSingleColumn from 'src/components/CanbanView/RenderSingleColumn';
-import { FetchCanbanData, InitialState, UseCanbanStore } from 'src/components/CanbanView/types';
+import RenderSingleColumn from 'src/components/KanbanView/RenderSingleColumn';
+import { FetchCanbanData, InitialState, UseCanbanStore } from 'src/components/KanbanView/types';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-type CanbanViewProps<D> = {
+type KanbanViewProps<D> = {
   onSaveEdit?: (inputField: Record<string, string>, updatedData: D, shouldFetchData?: boolean) => Promise<void>;
   fetchData: FetchCanbanData<D>;
   dependencyArray?: any[];
@@ -11,7 +11,7 @@ type CanbanViewProps<D> = {
   hideSelection?: boolean;
 } & InitialState<D>;
 
-const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArray = [], state, hideSelection }: CanbanViewProps<D>) => {
+const KanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependencyArray = [], state, hideSelection }: KanbanViewProps<D>) => {
   const options = useMemo(() => {
     return [...(pivotColumn?.option || [])].sort((a, b) => a.order - b.order);
   }, [pivotColumn]);
@@ -42,4 +42,4 @@ const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependenc
   );
 };
 
-export default CanbanView;
+export default KanbanView;
