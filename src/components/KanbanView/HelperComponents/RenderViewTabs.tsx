@@ -5,13 +5,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import useLocalStorage from 'src/hooks/useLocalStore';
 
 type RenderViewTabsProps = {
-  viewType: 'table' | 'canban';
-  setViewType: React.Dispatch<React.SetStateAction<'table' | 'canban'>>;
+  viewType: 'table' | 'kanban';
+  setViewType: React.Dispatch<React.SetStateAction<'table' | 'kanban'>>;
   renderedFrom: string;
 };
 
 export const RenderViewTabs = ({ setViewType, viewType, renderedFrom }: RenderViewTabsProps) => {
-  const [localViewType, setLocalViewType] = useLocalStorage<'table' | 'canban'>(`kanban-view-type-${renderedFrom}`, 'table');
+  const [localViewType, setLocalViewType] = useLocalStorage<'table' | 'kanban'>(`kanban-view-type-${renderedFrom}`, 'table');
 
   useEffect(() => {
     setViewType(localViewType);
@@ -28,11 +28,11 @@ export const RenderViewTabs = ({ setViewType, viewType, renderedFrom }: RenderVi
           <PiTableDuotone />
         </IconButton>
       </HtmlTooltip>
-      <HtmlTooltip title="Canban View">
+      <HtmlTooltip title="Kanban View">
         <IconButton
           size="small"
-          onClick={() => setLocalViewType('canban')}
-          sx={{ borderRadius: '6px', background: viewType === 'canban' ? 'var(--dark-primary, white)' : 'transparent' }}
+          onClick={() => setLocalViewType('kanban')}
+          sx={{ borderRadius: '6px', background: viewType === 'kanban' ? 'var(--dark-primary, white)' : 'transparent' }}
         >
           <PiTextColumns />
         </IconButton>

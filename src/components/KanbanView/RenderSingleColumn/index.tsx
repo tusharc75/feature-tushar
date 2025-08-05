@@ -1,3 +1,4 @@
+import { useDndMonitor, useDroppable } from '@dnd-kit/core';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Skeleton } from '@mui/material';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -6,6 +7,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getRandomNumber } from 'src/components/AiChatbox/utils';
 import RenderSingleCard from 'src/components/KanbanView/RenderSingleColumn/RenderSIngleCard';
 import useColumns from 'src/components/KanbanView/RenderSingleColumn/useColumns';
+import useDragAndDrop from 'src/components/KanbanView/RenderSingleColumn/useDragAndDrop';
 import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/KanbanView/types';
 import { cn } from 'src/constants/helpers';
 
@@ -17,6 +19,8 @@ type RenderSingleColumnProps<D> = {
   state: UseCanbanStore<D>;
   columns: Column<D>[];
   hideSelection?: boolean;
+  setActiveDragItemProps: React.Dispatch<any>;
+  pivotColumn: Column<D>;
 };
 
 const LIMIT = 7;
@@ -28,7 +32,9 @@ const RenderSingleColumn = <D,>({
   dependencyArray = [],
   columns,
   state,
-  hideSelection
+  hideSelection,
+  setActiveDragItemProps,
+  pivotColumn
 }: RenderSingleColumnProps<D>) => {
   const { actionColumn, displayedColumns, hiddenColumns, indexColumn, primaryColumn } = useColumns({ columns });
   const parentRef = useRef<HTMLDivElement>(null);
@@ -76,7 +82,7 @@ const RenderSingleColumn = <D,>({
     }
   };
 
-  const handleSaveEditWrapper = async ({ inputField, updatedData }) => {
+  const handleSaveEditWrapper = async ({ inputField, updatedData }: { inputField: Record<string, string>; updatedData: any }) => {
     try {
       await onSaveEdit(inputField, updatedData, false);
       handleFetchData({ page: 0 });
@@ -110,8 +116,10 @@ const RenderSingleColumn = <D,>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasNextPage, rows.length, items, newDataLoading, page, loading]);
 
+  const { setNodeRef, active, over } = useDragAndDrop({ handleSaveEditWrapper, option, setActiveDragItemProps, pivotColumn, handleFetchData });
+
   return (
-    <div className="rounded-md bg-gray-100 dark:bg-[--dark-secondary]">
+    <div className={cn('rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>
       <div className="flex items-center p-2">
         <Checkbox
           icon={<RadioButtonUnchecked />}
@@ -131,7 +139,12 @@ const RenderSingleColumn = <D,>({
         <h6 className="line-clamp-1 text-sm font-semibold">{option.optionLabel}</h6>
       </div>
       {!loading ? (
-        <div ref={parentRef} style={{ contain: 'strict' }} className="h-[calc(100vh-250px)] overflow-y-auto overflow-x-hidden">
+        <div ref={parentRef} style={{ contain: 'strict' }} className="relative h-[calc(100vh-250px)] overflow-y-auto overflow-x-hidden">
+          {active && over && over.id === option.optionValue && over.id !== active.data.current?.columnId && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 [backdrop-filter:blur(4px)] dark:bg-white/30">
+              <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
+            </div>
+          )}
           <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
             <div
               style={{
@@ -147,6 +160,7 @@ const RenderSingleColumn = <D,>({
                 return (
                   <div key={`${key}`} data-index={index} ref={virtualizer.measureElement} className={cn('')}>
                     <RenderSingleCard
+                      columnId={option.optionValue}
                       primaryColumn={primaryColumn}
                       hideSelection={hideSelection}
                       actionColumn={actionColumn}
@@ -156,6 +170,7 @@ const RenderSingleColumn = <D,>({
                       indexColumn={indexColumn}
                       state={state}
                       onSaveEdit={handleSaveEditWrapper}
+                      setActiveDragItemProps={setActiveDragItemProps}
                     />
                   </div>
                 );

@@ -1,3 +1,5 @@
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Collapse, IconButton } from '@mui/material';
 import { memo, useState } from 'react';
@@ -15,6 +17,8 @@ type RenderSingleCardProps<D> = {
   hiddenColumns: Column<D>[];
   onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   hideSelection?: boolean;
+  setActiveDragItemProps: React.Dispatch<any>;
+  columnId: string;
 };
 
 const RenderSingleCardImpl = <D,>({
@@ -26,12 +30,43 @@ const RenderSingleCardImpl = <D,>({
   indexColumn,
   state,
   onSaveEdit,
-  hideSelection
+  hideSelection,
+  columnId
 }: RenderSingleCardProps<D>) => {
   const [expanded, setExpanded] = useState(false);
+
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: data?.['_id'],
+    disabled: !data,
+    data: {
+      columnId,
+      props: {
+        data,
+        primaryColumn,
+        actionColumn,
+        displayedColumns,
+        hiddenColumns,
+        indexColumn,
+        state,
+        onSaveEdit,
+        hideSelection
+      }
+    }
+  });
+
+  const styleDnd = {
+    transform: CSS.Translate.toString(transform)
+  };
+
   if (!data) return null;
   return (
-    <div className="mx-2 mb-2 rounded-md bg-[var(--dark-primary,white)] [&_.show-in-export]:!hidden">
+    <div
+      ref={setNodeRef}
+      style={styleDnd}
+      {...attributes}
+      {...listeners}
+      className="mx-2 mb-2 rounded-md bg-[var(--dark-primary,white)] [&_.show-in-export]:!hidden"
+    >
       <div className="mb-2 flex items-center justify-between gap-2 border-b p-2 pb-0">
         <div className="flex items-center">
           {!hideSelection && (
