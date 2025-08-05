@@ -155,7 +155,8 @@ const WorkOrder = ({
         Header: 'Type',
         width: 100,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}`}</h5> : <NoDataCell />),
+        Cell: ({ row }) => (row.original['type'] ? <h5>{`${getMaterialLabel(row.original?.type)}
+          ${row.original['type'] === MATERIAL_TYPE.product ? row.original?.productDetail?.serializedProduct ? ' (Serialized)' : ' (Non-Serialized)' : ''}`}</h5> : <NoDataCell />),
         accessorFn: (original) => {
           return getMaterialLabel(original?.type);
         }
@@ -169,23 +170,21 @@ const WorkOrder = ({
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.service) {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </Box>
-          </div>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.package) {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div >
         )
       },
       {
