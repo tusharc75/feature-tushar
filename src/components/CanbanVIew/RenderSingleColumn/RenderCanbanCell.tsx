@@ -69,7 +69,8 @@ const RenderCanbanCellImpl = <D,>({
       id: column?.id,
       key: column?.id,
       className: cn(
-        `!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-medium [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-medium',
+        `[&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
         hideHeader ? 'flex-shrink-0 flex-nowrap flex' : ' line-clamp-1 [&>div]:[flex-wrap:wrap_!important]'
       ),
       onClick: () => {
