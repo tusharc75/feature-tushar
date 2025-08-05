@@ -52,8 +52,6 @@ const reducer = <D>(state: CanbanViewState<D>, action: Actions<D>): CanbanViewSt
 export const useCanbanStore = <D>(): UseCanbanStore<D> => {
   const [state, dispatch] = useReducer<Reducer<CanbanViewState<D>, Actions<D>>, void>(reducer, undefined, () => getInitialState<D>());
 
-  console.log(state);
-
   const selectedRows = useMemo(() => {
     return Array.from(state.selectedRrowsMap.values());
   }, [state.selectedRrowsMap]);
