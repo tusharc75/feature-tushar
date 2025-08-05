@@ -10,7 +10,7 @@ import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/
 import { cn } from 'src/constants/helpers';
 
 type RenderSingleColumnProps<D> = {
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
+  onSaveEdit?: (inputField: Record<string, string>, updatedData: any, shouldFetchData?: boolean) => Promise<void>;
   fetchData: FetchCanbanData<D>;
   option: Option;
   dependencyArray?: any[];
@@ -71,6 +71,15 @@ const RenderSingleColumn = <D,>({
       setLoading(false);
       setNewDataLoading(false);
       setPage(page);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSaveEditWrapper = async ({ inputField, updatedData }) => {
+    try {
+      await onSaveEdit(inputField, updatedData, false);
+      handleFetchData({ page: 0 });
     } catch (error) {
       console.error(error);
     }
@@ -146,7 +155,7 @@ const RenderSingleColumn = <D,>({
                       hiddenColumns={hiddenColumns}
                       indexColumn={indexColumn}
                       state={state}
-                      onSaveEdit={onSaveEdit}
+                      onSaveEdit={handleSaveEditWrapper}
                     />
                   </div>
                 );

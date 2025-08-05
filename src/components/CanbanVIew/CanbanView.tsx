@@ -4,7 +4,7 @@ import { FetchCanbanData, InitialState, UseCanbanStore } from 'src/components/Ca
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 type CanbanViewProps<D> = {
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: D) => void;
+  onSaveEdit?: (inputField: Record<string, string>, updatedData: D, shouldFetchData?: boolean) => Promise<void>;
   fetchData: FetchCanbanData<D>;
   dependencyArray?: any[];
   state: UseCanbanStore<D>;
@@ -25,7 +25,7 @@ const CanbanView = <D,>({ columns, pivotColumn, onSaveEdit, fetchData, dependenc
   }
 
   return (
-    <div className="grid auto-cols-[min(calc(100%-35px),340px)] grid-flow-col gap-4 overflow-x-auto">
+    <div className="mt-2 grid auto-cols-[min(calc(100%-35px),340px)] grid-flow-col gap-4 overflow-x-auto">
       {options?.map((d) => (
         <RenderSingleColumn
           state={state}

@@ -16,7 +16,7 @@ const RenderCanbanCellImpl = <D,>({
 }: {
   column: Column<D>;
   data: D;
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
+  onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   hideHeader?: boolean;
   headerClassName?: string;
   cellClassname?: string;
@@ -69,7 +69,8 @@ const RenderCanbanCellImpl = <D,>({
       id: column?.id,
       key: column?.id,
       className: cn(
-        `!text-[12px] [&>*]:[font-size:12px_!important]  [&_*]:!font-semibold [&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-medium',
+        `[&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
         hideHeader ? 'flex-shrink-0 flex-nowrap flex' : ' line-clamp-1 [&>div]:[flex-wrap:wrap_!important]'
       ),
       onClick: () => {
@@ -89,14 +90,14 @@ const RenderCanbanCellImpl = <D,>({
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>
             <div className="w-full">
-              <RenderInputs cell={cell} columnDef={column} handleStopEditing={handleStopEditing} row={data} submitInput={onSaveEdit} />
+              <RenderInputs cell={cell} columnDef={column} handleStopEditing={handleStopEditing} row={rowObject.row} submitInput={onSaveEdit} />
             </div>
           </span>
         </h6>
       );
     case isEditable:
       return (
-        <h6 className=" grid max-w-full text-[12px]">
+        <h6 className=" grid max-w-full !text-[12px]">
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>
             <div className="w-fit">
@@ -112,7 +113,7 @@ const RenderCanbanCellImpl = <D,>({
       );
     default:
       return (
-        <h6 className=" grid max-w-full text-[12px]">
+        <h6 className=" grid max-w-full !text-[12px]">
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>{renderedCell}</span>
         </h6>

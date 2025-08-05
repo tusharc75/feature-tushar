@@ -13,7 +13,7 @@ type RenderSingleCardProps<D> = {
   primaryColumn: Column<D> | undefined;
   displayedColumns: Column<D>[];
   hiddenColumns: Column<D>[];
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
+  onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   hideSelection?: boolean;
 };
 
@@ -67,15 +67,27 @@ const RenderSingleCardImpl = <D,>({
         </div>
       </div>
       <div className="px-4 pb-4 pt-0">
-        {displayedColumns?.map((d, i) => {
-          return <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />;
-        })}
+        <ul className=" list-none space-y-2">
+          {displayedColumns?.map((d, i) => {
+            return (
+              <li key={d.accessor} className="list-none">
+                <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />
+              </li>
+            );
+          })}
+        </ul>
         {hiddenColumns.length > 0 && (
           <Collapse unmountOnExit in={expanded}>
-            {hiddenColumns?.map((d, i) => {
-              if (i === 0) return null;
-              return <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />;
-            })}
+            <div className=" space-y-2">
+              {hiddenColumns?.map((d, i) => {
+                if (i === 0) return null;
+                return (
+                  <li key={d.accessor} className="list-none">
+                    <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />
+                  </li>
+                );
+              })}
+            </div>
           </Collapse>
         )}
       </div>
