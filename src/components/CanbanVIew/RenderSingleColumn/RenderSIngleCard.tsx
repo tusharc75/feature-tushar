@@ -13,7 +13,7 @@ type RenderSingleCardProps<D> = {
   primaryColumn: Column<D> | undefined;
   displayedColumns: Column<D>[];
   hiddenColumns: Column<D>[];
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
+  onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   hideSelection?: boolean;
 };
 

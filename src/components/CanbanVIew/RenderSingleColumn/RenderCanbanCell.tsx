@@ -16,7 +16,7 @@ const RenderCanbanCellImpl = <D,>({
 }: {
   column: Column<D>;
   data: D;
-  onSaveEdit?: (inputField: Record<string, string>, updatedData: any) => void;
+  onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   hideHeader?: boolean;
   headerClassName?: string;
   cellClassname?: string;
