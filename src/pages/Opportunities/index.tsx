@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -33,7 +33,10 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import CanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs } from 'src/components/CanbanView';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import { useCanbanStore } from 'src/components/CanbanView/useCanbanStore';
+import { PiTableDuotone, PiTextColumns } from 'react-icons/pi';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
@@ -66,15 +69,47 @@ const Opportunities = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
+  const [viewType, setViewType] = useState<'table' | 'canban'>('table');
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [accountDetails, setAccountDetails] = useState({
     accountId: history.location?.state?.accountId,
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
+  const [pivotColumn, setPivotColumn] = useState<any>(null);
+
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const canbanState = useCanbanStore();
+  const { selectedRows: canbanSelectedRows, search: canbanSearch, setState } = canbanState;
+  const {
+    rowCount,
+    page,
+    limit,
+    search: tableSearch,
+    filters,
+    sorting,
+    selectedRecords: tableSelectedRows,
+    showFilteredRecordsOnly,
+    dataRows
+  } = state;
+
+  const selectedRecords = useMemo(() => {
+    if (viewType === 'table') {
+      return tableSelectedRows;
+    } else {
+      return canbanSelectedRows;
+    }
+  }, [tableSelectedRows, canbanSelectedRows, viewType]);
+
+  const search = useMemo(() => {
+    if (viewType === 'table') {
+      return tableSearch;
+    } else {
+      return canbanSearch;
+    }
+  }, [tableSearch, canbanSearch, viewType]);
+
   const [allFields, setAllFields] = useState(null);
 
   //  Grid Variables - End
@@ -89,12 +124,12 @@ const Opportunities = () => {
     const newColumns = generateColumns(sidebarResource.opportunity, data, routes.opportunityDetail.path, true);
     newColumns?.forEach((o) => {
       if (o.accessor === 'firstName') {
-        (o.disabled = true),
-          (o.accessor = 'opportunityName'),
-          (o.header = 'Opportunity Name'),
-          (o.pivotIndex = 0),
-          (o.show = true),
-          (o.primaryField = true);
+        o.disabled = true;
+        o.accessor = 'opportunityName';
+        o.header = 'Opportunity Name';
+        o.pivotIndex = 0;
+        o.show = true;
+        o.primaryField = true;
       }
     });
     let staticFields = getStaticFields(true);
@@ -222,7 +257,7 @@ const Opportunities = () => {
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
@@ -321,29 +356,104 @@ const Opportunities = () => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${opportunityApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`${opportunityApi}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          fetchData();
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
         message: editDisable
       });
+    }
+  };
+
+  const getQueryStringForCanban = (column: string, page: number, limit: number) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    const filterByIds = [];
+    const deepFilters = [];
+
+    deepFilters.push({ field: pivotColumn.accessor, term: column });
+
+    if (selectedType === 3) {
+      deepFilters.push({
+        field: 'outcome',
+        term: ['Won', 'Lost']
+      });
+    } else {
+      deepFilter = `${deepFilter}&pendingOutcome=1`;
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchCanbanData = async ({ column, page, cancelToken, limit }: FetchCanbanDataPayload) => {
+    const queryString = getQueryStringForCanban(column, page, limit);
+    try {
+      const {
+        data: { data, count }
+      } = await axiosInstance().get(`${opportunityApi}${queryString}`, { cancelToken });
+      let rows = data.map((u) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject['originalData'] = u;
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['canDelete'] =
+          permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
+        finalObject['canEdit'] = permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, u);
+        let res = {
+          ...finalObject,
+          stage: u.stage,
+          closeDate: u?.closeDate
+        };
+        return res;
+      });
+      return { data: rows, count };
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -382,27 +492,47 @@ const Opportunities = () => {
           addButtonOnclick={() => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
+          leftSideContents={
+            viewType === 'canban' ? (
+              <PivotColumnSelector defaultPivotColumnId="process" columns={columns} pivotColumn={pivotColumn} setPivotColumn={setPivotColumn} />
+            ) : null
+          }
+          rightSideContents={<RenderViewTabs setViewType={setViewType} viewType={viewType} />}
           isAddButtonVisible={permissions?.opportunity?.isCreate}
         />
 
         {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-            resource={sidebarResource.opportunity}
-            onSaveEdit={handleSaveEdit}
-          />
+          <>
+            {viewType === 'table' ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.opportunity}
+                onSaveEdit={handleSaveEdit}
+              />
+            ) : (
+              <CanbanView
+                state={canbanState}
+                onSaveEdit={handleSaveEdit}
+                fetchData={fetchCanbanData}
+                dependencyArray={[selectedType, selectedEntity, pivotColumn]}
+                columns={columns}
+                pivotColumn={pivotColumn}
+              />
+            )}
+          </>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
+
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
