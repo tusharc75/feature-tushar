@@ -1,5 +1,5 @@
 import { Reducer, useCallback, useMemo, useReducer } from 'react';
-import { ActionPayloadMap, Actions, CanbanViewState, UseCanbanStore } from 'src/components/CanbanView/types';
+import { ActionPayloadMap, Actions, CanbanViewState, UseCanbanStore } from 'src/components/KanbanView/types';
 
 const getInitialState = <D>() => {
   return {

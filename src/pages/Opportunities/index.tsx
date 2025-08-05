@@ -33,10 +33,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import CanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs } from 'src/components/CanbanView';
-import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import { useCanbanStore } from 'src/components/CanbanView/useCanbanStore';
-import { PiTableDuotone, PiTextColumns } from 'react-icons/pi';
+import KanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
@@ -492,10 +489,16 @@ const Opportunities = () => {
           }}
           leftSideContents={
             viewType === 'canban' ? (
-              <PivotColumnSelector defaultPivotColumnId="process" columns={columns} pivotColumn={pivotColumn} setPivotColumn={setPivotColumn} />
+              <PivotColumnSelector
+                renderedFrom={renderedFrom}
+                defaultPivotColumnId="process"
+                columns={columns}
+                pivotColumn={pivotColumn}
+                setPivotColumn={setPivotColumn}
+              />
             ) : null
           }
-          rightSideContents={<RenderViewTabs setViewType={setViewType} viewType={viewType} />}
+          rightSideContents={<RenderViewTabs renderedFrom={renderedFrom} setViewType={setViewType} viewType={viewType} />}
           isAddButtonVisible={permissions?.opportunity?.isCreate}
         />
 
@@ -515,7 +518,7 @@ const Opportunities = () => {
                 onSaveEdit={handleSaveEdit}
               />
             ) : (
-              <CanbanView
+              <KanbanView
                 state={canbanState}
                 onSaveEdit={handleSaveEdit}
                 fetchData={fetchCanbanData}
