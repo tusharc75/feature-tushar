@@ -172,13 +172,17 @@ export default function NewCreateQuotePdfTemplate() {
             const vars = data.map((field) => field.fieldData.fieldName);
             setVariables(['entity', 'currentDate', ...vars]);
             setAllFields(data);
-            setChildResourceFields((prev) => {
-              const headerFields =
-                data?.filter(
-                  (f) => f?.fieldData?.type === 'percent' && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems)
-                )?.map((e) => e.fieldData) || [];
-              return [...(prev || []), ...headerFields];
-            });
+            const headerFields = data?.filter((f) => f?.fieldData?.type === 'percent'
+              && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems))?.map((e) => e.fieldData) || [];
+            if (headerFields?.length) {
+              headerFields.push({
+                fieldName: 'finalAmount',
+                fieldLabel: 'Final Total'
+              })
+              setChildResourceFields((prev) => {
+                return [...(prev || []), ...headerFields];
+              });
+            }
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -188,6 +192,14 @@ export default function NewCreateQuotePdfTemplate() {
             .get(`/field?resource=${resourceChildResourceMap[resource]}`)
             .then(({ data: { data } }) => {
               const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
+              filteredData?.forEach((e) => {
+                if (e?.fieldName === 'totalPrice') {
+                  e.fieldLabel = `${e?.fieldLabel} (Sub Total)`
+                }
+                if (e?.fieldName === 'finalPrice') {
+                  e.fieldLabel = `${e?.fieldLabel} (Total)`
+                }
+              })
               setChildResourceFields((prev) => {
                 return [...(prev || []), ...filteredData];
               });
@@ -1026,13 +1038,8 @@ export default function NewCreateQuotePdfTemplate() {
                                         multiple
                                         value={belowTableFields}
                                         onChange={(e, val) => {
-                                          if (
-                                            val.find((e) => e.fieldName === 'Select All') &&
-                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
-                                            val
-                                              ?.map((e) => e?.fieldName)
-                                              .sort()
-                                              .toString()
+                                          if (val.find((e) => e.fieldName === 'Select All') && ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
+                                            val?.map((e) => e?.fieldName).sort().toString()
                                           ) {
                                             setBelowTableFields(childResourceFields);
                                           } else if (
