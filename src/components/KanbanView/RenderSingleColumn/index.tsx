@@ -203,7 +203,7 @@ const RenderSingleColumn = <D,>({
             </div>
           </div>
         ) : (
-          <div className="h-[calc(100vh-250px)] space-y-2 overflow-y-auto">
+          <div className="h-[calc(100vh-300px)] min-h-[500px] space-y-2 overflow-y-auto">
             {[...Array(getRandomNumber(2, 8)).keys()].map((d) => (
               <div key={d} className="mx-2 rounded-md border bg-[var(--dark-primary,white)] p-4">
                 <Skeleton />
