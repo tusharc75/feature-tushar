@@ -38,6 +38,11 @@ const resourceChildResourceMap: any = {
   [sidebarResource.purchaseOrder]: CHILD_RESOURCE.purchaseOrderProduct,
   [sidebarResource.fieldTicket]: CHILD_RESOURCE.fieldTicketMateial,
   [sidebarResource.creditMemo]: CHILD_RESOURCE.invoiceProduct,
+  [sidebarResource.invoice]: CHILD_RESOURCE.invoiceProduct,
+  [sidebarResource.repairOrder]: CHILD_RESOURCE.quotationProduct,
+  [sidebarResource.salesOrder]: CHILD_RESOURCE.salesOrderProduct,
+  [sidebarResource.repairJob]: CHILD_RESOURCE.repairJobAsset,
+  [sidebarResource.quotation]: CHILD_RESOURCE.quotationProduct,
 };
 
 const PdfTemplateSchema = object().shape({
