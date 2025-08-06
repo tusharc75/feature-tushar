@@ -40,6 +40,7 @@ import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRenta
 import { ExpandMore } from '@mui/icons-material';
 import { VITE_APP_DMS_URL } from 'src/config';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -110,9 +111,9 @@ const AssemblyOrderDetail = () => {
     fetchFields();
   }, []);
 
-  const fetchFields = async() => {
-      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
-      setAllFields(fieldsDataForRead);
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.assemblyOrder, permissions?.assemblyOrder?.isUpdate);
+    setAllFields(fieldsDataForRead);
   };
 
   const fetchData = () => {
@@ -132,9 +133,9 @@ const AssemblyOrderDetail = () => {
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.assemblyOrder, data) && data?.status != ASSEMBLY_ORDER_STATUS.converted);
         setAllowedToDelete(
           permissions?.assemblyOrder?.isDelete &&
-            checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
-            data?.canDelete &&
-            ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.assemblyOrder, data.owner.optionValue) &&
+          data?.canDelete &&
+          ![ASSEMBLY_ORDER_STATUS.converted, ASSEMBLY_ORDER_STATUS.partiallyConverted]?.includes(data?.status)
         );
         setAssemblyOrderData({ ...data });
       })
@@ -214,14 +215,26 @@ const AssemblyOrderDetail = () => {
           <Box className="control-buttons-v1">
             {assemblyOrderData ? (
               <>
-                {assemblyOrderData?.dmsFolder && (
-                  <ThemeButton
-                    onClick={() => {
-                      window.open(`${VITE_APP_DMS_URL}/document/${assemblyOrderData?.dmsFolder?._id}`, '_blank');
-                    }}
-                  >
-                    {`Upload Documents`}
-                  </ThemeButton>
+                {(assemblyOrderData?.dmsFolder && permissions?.assemblyOrder?.isUpdate && allowedToEdit) && (
+                  <>
+                    <ImportExportMenu
+                      permissions={{ isRead: false, isCreate: true }}
+                      module="merge"
+                      api={`${routes?.assemblyOrder?.path}/material/${assemblyOrderData?._id}`}
+                      afterImportCompleted={() => {
+                        fetchData()
+                      }}
+                      isExportAllOrSomeFeature={true}
+                      ids={[]}
+                    />
+                    <ThemeButton
+                      onClick={() => {
+                        window.open(`${VITE_APP_DMS_URL}/document/${assemblyOrderData?.dmsFolder?._id}`, '_blank');
+                      }}
+                    >
+                      {`Upload Documents`}
+                    </ThemeButton>
+                  </>
                 )}
                 {showConvertInRentalJob() ? (
                   <ThemeButton

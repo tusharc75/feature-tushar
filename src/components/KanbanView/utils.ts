@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { isEmpty } from 'lodash';
-import { DateRange, DeepFilter, FilterByID, FilterTerm } from 'src/components/KanbanView/types';
+import { DateRange, DeepFilter, FilterByID, FilterTerm, Option } from 'src/components/KanbanView/types';
 
 export const prepareDeepFilters = (deepFiltersOriginal: DeepFilter[], filterTerm: FilterTerm) => {
   if (deepFiltersOriginal.length === 0) return [];
@@ -72,3 +72,21 @@ export const prepareFilterByIds = (filterByIdsOriginal: FilterByID[], filterTerm
 
   return filterByIds;
 };
+
+export function getSortedVisibleColumns<D>(order: string[], visible: Record<string, boolean>, columns: D[], nameAccessor: (col: D) => string): D[] {
+  const visibleColumns = columns.filter((col) => visible[nameAccessor(col)]);
+  const columnMap = new Map(visibleColumns.map((col) => [nameAccessor(col), col]));
+  const sorted = order.map((name) => columnMap.get(name)).filter((col): col is D => !!col);
+  const remaining = visibleColumns.filter((col) => !order.includes(nameAccessor(col)));
+  return [...sorted, ...remaining];
+}
+
+export function createCleanLoadingState(options: Option[]) {
+  return options.reduce(
+    (acc, curr) => {
+      acc[curr.optionValue] = false;
+      return acc;
+    },
+    {} as Record<string, boolean>
+  );
+}

@@ -10,16 +10,19 @@ const useDragAndDrop = <D>({
   option,
   handleSaveEditWrapper,
   pivotColumn,
-  handleFetchData
+  handleFetchData,
+  disabled = false
 }: {
   setActiveDragItemProps: React.Dispatch<any>;
   option: Option;
   handleSaveEditWrapper: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
   pivotColumn: Column<D>;
   handleFetchData: (props: { page: number; cancelToken?: CancelToken }) => Promise<void>;
+  disabled?: boolean;
 }) => {
   const droppableProps = useDroppable({
     id: option.optionValue,
+    disabled,
     data: {
       type: 'Column',
       column: option.optionValue
