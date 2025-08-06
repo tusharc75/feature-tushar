@@ -131,7 +131,7 @@ export const AddField = (props) => {
       });
       data.option = values.option;
     }
-    if (values.type === 'decimal' || values.type === 'converter' || values.type === 'currencyAmount') {
+    if (values.type === 'decimal' || values.type === 'converter' || values.type === 'currencyAmount' || values.type === 'currencyNumber') {
       data.decimalPlaces = values.decimalPlaces;
     }
     if (values.lookup) {

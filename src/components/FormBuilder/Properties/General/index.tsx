@@ -148,6 +148,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'formula' ||
         values['type'] === 'converter' ||
         values['type'] === 'percent' ||
+        values['type'] === 'currencyNumber' ||
         values['type'] === 'currencyAmount') && (
           <Grid spacing={3} container>
             {values['type'] === 'formula' && (
@@ -176,6 +177,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
               values['type'] === 'converter' ||
               values['type'] === 'percent' ||
               values['type'] === 'currencyAmount' ||
+              values['type'] === 'currencyNumber' ||
               values['returnType'] === 'decimal') && (
                 <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                   <DecimalPlaces
@@ -326,6 +328,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
           />
         )}
       {(values['type'] === 'currencyAmount' ||
+        values['type'] === 'currencyNumber' ||
         values['type'] === 'decimal' ||
         values['type'] === 'percent' ||
         values['type'] === 'date' ||

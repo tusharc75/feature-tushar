@@ -113,6 +113,8 @@ export type CanbanViewState<D> = {
   deepFilters: any[];
   filterByIds: any[];
   resourceColumns: any[];
+  order: string[];
+  visible: Record<string, boolean>;
 };
 
 export type FetchCanbanDataPayload = { column: string; page: number; limit: number; cancelToken?: CancelToken };
@@ -169,3 +171,7 @@ export type TermElement = {
 };
 
 export type FilterTerm = Record<string, '$nin' | '$in'>;
+
+export type KanbanViewRef = {
+  fetchData: () => void;
+};

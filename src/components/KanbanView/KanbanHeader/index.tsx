@@ -1,10 +1,10 @@
 import { Refresh } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
-import axios from 'axios';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import axiosInstance from 'src/axios/axiosInstance';
 import { createFilterSetData } from 'src/components/CustomReactTable';
+import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -19,9 +19,12 @@ type KanbanHeaderProps<D> = {
   renderedFrom: string;
   resource: string;
   pivotColumn: Column<D>;
+  columns: Column<D>[];
+  loadingComplete: Record<string, boolean>;
 };
 
-const KanbanHeader = <D,>({ sendRefreshSignal, state, resource, renderedFrom, pivotColumn }: KanbanHeaderProps<D>) => {
+const KanbanHeader = <D,>({ sendRefreshSignal, state, resource, renderedFrom, pivotColumn, columns, loadingComplete }: KanbanHeaderProps<D>) => {
+  const loading = !Object.values(loadingComplete).every((d) => d);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { resources }
@@ -86,26 +89,31 @@ const KanbanHeader = <D,>({ sendRefreshSignal, state, resource, renderedFrom, pi
 
   useEffect(() => {
     fetchUserFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <>
       <div className="mb-2 flex items-center justify-between gap-2">
-        <DisplayFilterChip
-          filterTerm={filterTerm}
-          resourceColumns={filteredResourceFilter}
-          deepFilters={filterByIdsOriginal as any}
-          filterByIds={deepFiltersOriginal as any}
-          fetchResourceData={(deepFilter, filterById) => {
-            sendRefreshSignal();
-          }}
-          setDeepFilters={setDeepFilters}
-          setFilterByIds={setFilterByIds}
-        />
+        <div className="flex items-center gap-2">
+          {<p className="font-semibold text-gray-500">Selected: {state.selectedRows.length}</p>}
+          <DisplayFilterChip
+            filterTerm={filterTerm}
+            resourceColumns={filteredResourceFilter}
+            deepFilters={filterByIdsOriginal as any}
+            filterByIds={deepFiltersOriginal as any}
+            fetchResourceData={(deepFilter, filterById) => {
+              sendRefreshSignal();
+            }}
+            setDeepFilters={setDeepFilters}
+            setFilterByIds={setFilterByIds}
+          />
+        </div>
         <div className="flex items-center gap-2">
           {filteredResourceFilter.length > 0 && (
             <ThemeButton
               onClick={() => setIsFilterOpen(true)}
+              disabled={loading}
               startIcon={<BiFilterAlt />}
               mobileTooltip="Apply Filters"
               iconForMobile={<BiFilterAlt />}
@@ -113,10 +121,24 @@ const KanbanHeader = <D,>({ sendRefreshSignal, state, resource, renderedFrom, pi
               Filters
             </ThemeButton>
           )}
+          {columns && (
+            <ArrangeView
+              columns={columns}
+              expander={false}
+              hideSelection={true}
+              renderedFrom={renderedFrom}
+              setOrderAndVisibility={({ order, visible }) => {
+                if (!order || !visible) return;
+                setState('setOrder', order);
+                setState('setVisible', { ...visible, action: true, actions: true });
+              }}
+            />
+          )}
           <HtmlTooltip title="Refresh" placement="top" arrow>
             <IconButton
               className={`refresh-arrange-button`}
               color="primary"
+              disabled={loading}
               size="small"
               onClick={() => {
                 sendRefreshSignal();
@@ -127,6 +149,7 @@ const KanbanHeader = <D,>({ sendRefreshSignal, state, resource, renderedFrom, pi
           </HtmlTooltip>
         </div>
       </div>
+
       {isFilterOpen && (
         <>
           <Filter

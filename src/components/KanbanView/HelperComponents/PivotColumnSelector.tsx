@@ -28,12 +28,12 @@ export const PivotColumnSelector = <D,>({ columns, defaultPivotColumnId, pivotCo
   const [localDefaultColumnId, setLocalDefaultColumnId] = useLocalStorage(`kanban-pivot-column-${renderedFrom}`, defaultPivotColumnId);
 
   const pivotableColumns = useMemo(() => {
-    return columns?.filter((c) => c.option?.length > 0 && !c.lookup && PIVOTABLE_COLUMN_TYPES.includes(c.type)) || [];
+    return columns?.filter((c) => c.option?.length > 0 && c.option.length < 11 && !c.lookup && PIVOTABLE_COLUMN_TYPES.includes(c.type)) || [];
   }, [columns]);
 
   useEffect(() => {
     if (pivotableColumns.length === 0 || !localDefaultColumnId) return;
-    const defaultPivotColumn = pivotableColumns.find((d) => (d.id || d.accessor) === localDefaultColumnId);
+    const defaultPivotColumn = pivotableColumns.find((d) => (d.id || d.accessor) === localDefaultColumnId) || pivotableColumns[0];
     setPivotColumn(defaultPivotColumn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localDefaultColumnId, pivotableColumns]);
