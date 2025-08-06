@@ -36,7 +36,7 @@ const RenderSingleCardImpl = <D,>({
   columnId,
   dragging
 }: RenderSingleCardProps<D>) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(dragging);
 
   const canEdit = data?.hasOwnProperty('canEdit') ? data['canEdit'] : true;
 
@@ -72,7 +72,7 @@ const RenderSingleCardImpl = <D,>({
       {...attributes}
       {...listeners}
       className={cn(
-        'mx-2 mb-2 rounded-md bg-[var(--dark-primary,white)] [&_.show-in-export]:!hidden',
+        'mx-2 mb-2 rounded-lg border bg-[var(--dark-primary,white)] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] [&_.show-in-export]:!hidden',
         dragging ? 'cursor-grabbing' : canEdit ? 'cursor-grab' : '',
         canEdit ? '' : 'bg-red-100 dark:bg-red-900'
       )}
@@ -94,7 +94,7 @@ const RenderSingleCardImpl = <D,>({
             </span>
           )}
           {indexColumn && <RenderCanbanCell column={indexColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
-          <RenderCanbanCell column={primaryColumn} data={data} onSaveEdit={onSaveEdit} />
+          <RenderCanbanCell column={primaryColumn} data={data} onSaveEdit={onSaveEdit} headerClassName="font-semibold" />
         </div>
         <div className="flex items-center">
           {actionColumn && <RenderCanbanCell column={actionColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
