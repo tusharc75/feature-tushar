@@ -211,6 +211,7 @@ export default function NewCreateQuotePdfTemplate() {
   const fetchData = async () => {
     const initialValues = {
       landscape: false,
+      tableTotalAtBottom: false,
       tableFontSize: '',
       belowTableTotalFontSize: '',
       pdfFontSize: '',
@@ -273,6 +274,7 @@ export default function NewCreateQuotePdfTemplate() {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
         setBelowTableFields(tempPdfTemplate?.belowTableFields || []);
         initialValues.landscape = tempPdfTemplate?.landscape;
+        initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
         initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
         initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
@@ -308,6 +310,7 @@ export default function NewCreateQuotePdfTemplate() {
           setIsLandscapChecked(data?.landscape);
           setBelowTableFields(data?.belowTableFields || []);
           initialValues.landscape = data?.landscape;
+          initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
           initialValues.tableFontSize = data?.tableFontSize;
           initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
           initialValues.pdfFontSize = data?.pdfFontSize;
@@ -420,6 +423,7 @@ export default function NewCreateQuotePdfTemplate() {
             const importedData = JSON.parse(fileContent);
             const newInitialValues = {
               landscape: importedData?.landscape,
+              tableTotalAtBottom: importedData?.tableTotalAtBottom,
               tableFontSize: importedData?.tableFontSize,
               belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
               pdfFontSize: importedData?.pdfFontSize,
@@ -522,6 +526,7 @@ export default function NewCreateQuotePdfTemplate() {
           services: values?.services,
           landscape: values?.landscape,
           belowTableFields: belowTableFields,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -571,6 +576,7 @@ export default function NewCreateQuotePdfTemplate() {
           services: values?.services,
           landscape: values?.landscape,
           belowTableFields: belowTableFields,
+          tableTotalAtBottom: values?.tableTotalAtBottom,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -992,82 +998,95 @@ export default function NewCreateQuotePdfTemplate() {
                             <Grid container spacing={2}>
                               <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
                                 <div className="flex flex-col">
-                                  {childResourceFields?.length > 0 && (
-                                    <Box className="mb-2 mt-3 flex items-center justify-between">
-                                      <Box width="94%">
-                                        <Autocomplete
-                                          id="demo-mutiple-chip"
-                                          disabled={!allowedToEdit || !isEdit}
-                                          fullWidth
-                                          size="small"
-                                          multiple
-                                          value={belowTableFields}
-                                          onChange={(e, val) => {
-                                            if (
-                                              val.find((e) => e.fieldName === 'Select All') &&
-                                              ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
-                                                val
-                                                  ?.map((e) => e?.fieldName)
-                                                  .sort()
-                                                  .toString()
-                                            ) {
-                                              setBelowTableFields(childResourceFields);
-                                            } else if (
-                                              ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                  <Box className="mb-2 mt-3 flex items-center justify-between">
+                                    <Box width="94%">
+                                      <Autocomplete
+                                        id="demo-mutiple-chip"
+                                        disabled={!allowedToEdit || !isEdit || !childResourceFields?.length}
+                                        fullWidth
+                                        size="small"
+                                        multiple
+                                        value={belowTableFields}
+                                        onChange={(e, val) => {
+                                          if (
+                                            val.find((e) => e.fieldName === 'Select All') &&
+                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
                                               val
                                                 ?.map((e) => e?.fieldName)
                                                 .sort()
                                                 .toString()
-                                            ) {
-                                              setBelowTableFields([]);
-                                            } else {
-                                              setBelowTableFields(val);
-                                            }
-                                          }}
-                                          options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...childResourceFields]}
-                                          getOptionLabel={(option) => option?.fieldLabel}
-                                          isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
-                                          disableCloseOnSelect
-                                          renderOption={(props, option, state, ownerState) => {
-                                            const { key, ...optionProps } = props;
-                                            return (
-                                              <Box
-                                                key={key}
-                                                component="li"
-                                                {...optionProps}
-                                                display={'flex'}
-                                                alignItems={'center'}
-                                                justifyContent={'space-between'}
-                                              >
-                                                <Checkbox
-                                                  icon={icon}
-                                                  checkedIcon={checkedIcon}
-                                                  style={{ marginRight: 8 }}
-                                                  checked={
-                                                    ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
-                                                    ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
-                                                      ? true
-                                                      : state.selected
-                                                  }
-                                                />
-                                                {ownerState.getOptionLabel(option)}
-                                              </Box>
-                                            );
-                                          }}
-                                          renderInput={(params) => (
-                                            <TextField {...params} variant="outlined" label={`Select Below Table Fields`} placeholder="Select" />
-                                          )}
-                                        />
-                                      </Box>
-                                      <Box width="5%">
-                                        <ArrangeChildResourceFieldView
-                                          columns={belowTableFields}
-                                          setColumns={setBelowTableFields}
-                                          disabled={!allowedToEdit || !isEdit}
-                                        />
-                                      </Box>
+                                          ) {
+                                            setBelowTableFields(childResourceFields);
+                                          } else if (
+                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                            val
+                                              ?.map((e) => e?.fieldName)
+                                              .sort()
+                                              .toString()
+                                          ) {
+                                            setBelowTableFields([]);
+                                          } else {
+                                            setBelowTableFields(val);
+                                          }
+                                        }}
+                                        options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...(childResourceFields || [])]}
+                                        getOptionLabel={(option) => option?.fieldLabel}
+                                        isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
+                                        disableCloseOnSelect
+                                        renderOption={(props, option, state, ownerState) => {
+                                          const { key, ...optionProps } = props;
+                                          return (
+                                            <Box
+                                              key={key}
+                                              component="li"
+                                              {...optionProps}
+                                              display={'flex'}
+                                              alignItems={'center'}
+                                              justifyContent={'space-between'}
+                                            >
+                                              <Checkbox
+                                                icon={icon}
+                                                checkedIcon={checkedIcon}
+                                                style={{ marginRight: 8 }}
+                                                checked={
+                                                  ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                                  ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
+                                                    ? true
+                                                    : state.selected
+                                                }
+                                              />
+                                              {ownerState.getOptionLabel(option)}
+                                            </Box>
+                                          );
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField {...params} variant="outlined" label={`Select Below Table Fields`} placeholder="Select" />
+                                        )}
+                                      />
                                     </Box>
-                                  )}
+                                    <Box width="5%">
+                                      <ArrangeChildResourceFieldView
+                                        columns={belowTableFields}
+                                        setColumns={setBelowTableFields}
+                                        disabled={!allowedToEdit || !isEdit || !childResourceFields?.length}
+                                      />
+                                    </Box>
+                                  </Box>
+                                  <FormControlLabel
+                                    disabled={!allowedToEdit || !isEdit}
+                                    value={values['tableTotalAtBottom']}
+                                    control={
+                                      <Checkbox
+                                        name="tableTotalAtBottom"
+                                        checked={values['tableTotalAtBottom']}
+                                        onChange={(e) => {
+                                          setFieldValue('tableTotalAtBottom', e.target.checked);
+                                        }}
+                                        color="primary"
+                                      />
+                                    }
+                                    label="Show Table Total At Bottom"
+                                  />
                                   <FormTypes
                                     disabled={!allowedToEdit || !isEdit}
                                     values={values}
