@@ -4,7 +4,7 @@ import { Column } from 'src/components/KanbanView/types';
 import { RenderInputs } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { cn } from 'src/constants/helpers';
 
-const defaultHeaderClass = 'text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]';
+const defaultHeaderClass = 'text-[12px] font-normal text-[var(--dark-secondary-text,#6B7280)]';
 
 const RenderCanbanCellImpl = <D,>({
   column,
@@ -69,8 +69,9 @@ const RenderCanbanCellImpl = <D,>({
       id: column?.id,
       key: column?.id,
       className: cn(
-        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-medium',
+        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-semibold',
         `[&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
+        cellClassname,
         hideHeader ? 'flex-shrink-0 flex-nowrap flex' : ' line-clamp-1 [&>div]:[flex-wrap:wrap_!important]'
       ),
       onClick: () => {
@@ -78,7 +79,7 @@ const RenderCanbanCellImpl = <D,>({
         setIsEditing(true);
       }
     }),
-    [column?.id, hideHeader, isEditable]
+    [column?.id, hideHeader, isEditable, cellClassname]
   );
 
   const combinedHeaderClass = cn(defaultHeaderClass, headerClassName);
@@ -101,10 +102,10 @@ const RenderCanbanCellImpl = <D,>({
           {!hideHeader && <span className={combinedHeaderClass}>{renderedHead}: </span>}
           <span {...props}>
             <div className="w-fit">
-              <div className=" ml-auto max-w-[max-content] cursor-pointer justify-end gap-[20px] [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important]">
-                <p className="line-clamp-1">{renderedCell}</p>
+              <div className="ml-auto max-w-[max-content] cursor-pointer items-center justify-end gap-1 [display:flex_!important]">
+                <p className="line-clamp-1 border-dashed [border-bottom:1px_dashed_#8a8a8a]">{renderedCell}</p>
                 <span>
-                  <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
+                  <Edit className="!size-[14px] text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" />
                 </span>
               </div>
             </div>

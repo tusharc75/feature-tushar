@@ -171,3 +171,7 @@ export type TermElement = {
 };
 
 export type FilterTerm = Record<string, '$nin' | '$in'>;
+
+export type KanbanViewRef = {
+  fetchData: () => void;
+};
