@@ -430,10 +430,6 @@ const Opportunities = () => {
       deepFilter = `${deepFilter}&filterType=and`;
     }
 
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
