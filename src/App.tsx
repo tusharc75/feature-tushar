@@ -294,6 +294,9 @@ import UserManualNew from './pages/UserManualNew';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
 import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
+import CustomIntroNew from './components/CustomIntroNew';
+import { useSetWalkmeData } from './components/CustomIntroNew/useSetWalkmeSteps';
+import { useStore, WALK_ME_STEPS } from './StateProvider/fastContext';
 var notificationInterval: any = null;
 
 function App() {
@@ -302,6 +305,26 @@ function App() {
       registerSW();
     }
   }, []);
+
+  const { setWalkmeData } = useSetWalkmeData();
+  const [walkMeStepsData] = useStore((store) => store[WALK_ME_STEPS]);
+
+  useEffect(() => {
+    if (walkMeStepsData.length === 0) {
+      const fetchWalkmeData = async () => {
+        try {
+          const { data } = await axiosInstance().get('/resource-walkme');
+          if (data?.data) {
+            setWalkmeData(data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch Walkme data:', error);
+        }
+      };
+      fetchWalkmeData();
+    }
+  }, []);
+
 
   useEffect(() => {
     if (import.meta.env.DEV) return;
@@ -1323,6 +1346,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
+          {/* <CustomIntroNew />  // the new component*/}
           {user && <DesktopDM />}
           <RenderAllInfoButtons />
           <RenderInfoInspector />
