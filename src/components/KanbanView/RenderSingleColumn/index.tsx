@@ -1,4 +1,3 @@
-import { useDndMonitor, useDroppable } from '@dnd-kit/core';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Skeleton } from '@mui/material';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -11,6 +10,8 @@ import useDragAndDrop from 'src/components/KanbanView/RenderSingleColumn/useDrag
 import { Column, FetchCanbanData, Option, UseCanbanStore } from 'src/components/KanbanView/types';
 import { cn } from 'src/constants/helpers';
 
+const LIMIT = 10;
+
 type RenderSingleColumnProps<D> = {
   onSaveEdit?: (inputField: Record<string, string>, updatedData: any, shouldFetchData?: boolean) => Promise<void>;
   fetchData: FetchCanbanData<D>;
@@ -22,9 +23,8 @@ type RenderSingleColumnProps<D> = {
   setActiveDragItemProps: React.Dispatch<any>;
   pivotColumn: Column<D>;
   refreshSignal: number;
+  setLoadingComplte: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 };
-
-const LIMIT = 7;
 
 const RenderSingleColumn = <D,>({
   fetchData,
@@ -36,7 +36,8 @@ const RenderSingleColumn = <D,>({
   hideSelection,
   setActiveDragItemProps,
   pivotColumn,
-  refreshSignal
+  refreshSignal,
+  setLoadingComplte
 }: RenderSingleColumnProps<D>) => {
   const { actionColumn, displayedColumns, hiddenColumns, indexColumn, primaryColumn } = useColumns({ columns });
   const parentRef = useRef<HTMLDivElement>(null);
@@ -79,6 +80,7 @@ const RenderSingleColumn = <D,>({
       setLoading(false);
       setNewDataLoading(false);
       setPage(page);
+      setLoadingComplte((prev) => ({ ...prev, [option.optionValue]: true }));
     } catch (error) {
       console.error(error);
     }
@@ -118,7 +120,14 @@ const RenderSingleColumn = <D,>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasNextPage, rows.length, items, newDataLoading, page, loading]);
 
-  const { setNodeRef, active, over } = useDragAndDrop({ handleSaveEditWrapper, option, setActiveDragItemProps, pivotColumn, handleFetchData });
+  const { setNodeRef, active, over } = useDragAndDrop({
+    handleSaveEditWrapper,
+    option,
+    setActiveDragItemProps,
+    pivotColumn,
+    handleFetchData,
+    disabled: loading
+  });
 
   return (
     <div className={cn('relative rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>

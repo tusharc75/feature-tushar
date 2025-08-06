@@ -11,7 +11,9 @@ const getInitialState = <D>() => {
     filterByIds: [],
     filterByIdsOriginal: [],
     filterTerm: {},
-    resourceColumns: []
+    resourceColumns: [],
+    order: [],
+    visible: {}
   } as CanbanViewState<D>;
 };
 
@@ -43,6 +45,12 @@ const reducer = <D>(state: CanbanViewState<D>, action: Actions<D>): CanbanViewSt
     }
     case 'setResourceColumns': {
       return { ...state, resourceColumns: action.payload };
+    }
+    case 'setOrder': {
+      return { ...state, order: action.payload };
+    }
+    case 'setVisible': {
+      return { ...state, visible: action.payload };
     }
     default:
       return state;
