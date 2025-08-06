@@ -606,7 +606,7 @@ const Leads = () => {
           values[key] = inputField[key];
         }
       });
-      axiosInstance()
+      return axiosInstance()
         .put(`${lead.leadApi}`, { ...values, _id: updatedRow._id })
         .then(({ data }) => {
           toastConfig.setToastConfig({
