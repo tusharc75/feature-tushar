@@ -27,7 +27,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CheckBoxOutlineBlank, CheckBox } from '@mui/icons-material';
-import ArrangeChildResourceFieldView from 'src/pages/QuotePdfTemplate/ArrangeChildResourceFieldView';
+import ArrangeChildResourceFieldView from 'src/pages/QuotePdfTemplate/ArrangeBelowTableFieldView';
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
@@ -202,8 +202,6 @@ export default function NewCreateQuotePdfTemplate() {
       }
     }
   }, [formValues?.type]);
-
-  console.log(childResourceFields, 'childResourceFields');
 
   useEffect(() => {
     fetchData();
