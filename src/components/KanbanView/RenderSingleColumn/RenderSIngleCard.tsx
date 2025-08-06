@@ -112,7 +112,7 @@ const RenderSingleCardImpl = <D,>({
         </div>
       </div>
       <div className="px-4 pb-4 pt-0">
-        <ul className=" list-none space-y-2">
+        <ul className=" mb-2 list-none space-y-2">
           {displayedColumns?.map((d, i) => {
             return (
               <li key={d.accessor} className="list-none">
@@ -123,16 +123,15 @@ const RenderSingleCardImpl = <D,>({
         </ul>
         {hiddenColumns.length > 0 && (
           <Collapse unmountOnExit in={expanded}>
-            <div className=" space-y-2">
+            <ul className=" space-y-2">
               {hiddenColumns?.map((d, i) => {
-                if (i === 0) return null;
                 return (
                   <li key={d.accessor} className="list-none">
                     <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />
                   </li>
                 );
               })}
-            </div>
+            </ul>
           </Collapse>
         )}
       </div>
