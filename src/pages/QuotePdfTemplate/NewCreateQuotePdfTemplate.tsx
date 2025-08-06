@@ -42,7 +42,7 @@ const resourceChildResourceMap: any = {
   [sidebarResource.repairOrder]: CHILD_RESOURCE.quotationProduct,
   [sidebarResource.salesOrder]: CHILD_RESOURCE.salesOrderProduct,
   [sidebarResource.repairJob]: CHILD_RESOURCE.repairJobAsset,
-  [sidebarResource.quotation]: CHILD_RESOURCE.quotationProduct,
+  [sidebarResource.quotation]: CHILD_RESOURCE.quotationProduct
 };
 
 const PdfTemplateSchema = object().shape({
@@ -94,9 +94,10 @@ export default function NewCreateQuotePdfTemplate() {
 
   const [variables, setVariables] = useState([]);
   const [allFields, setAllFields] = useState(null);
-  const [childResourceFields, setChildResourceFields] = useState(null);
+  const [childResourceFields, setChildResourceFields] = useState([]);
   const [belowTableFields, setBelowTableFields] = useState([]);
   const [formValues, setFormValues] = useState(null);
+  const [rawBelowTableFields, setRawBelowTableFields] = useState([]);
 
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
   const [variableDialog, setVariableDialog] = useState(false);
@@ -161,63 +162,73 @@ export default function NewCreateQuotePdfTemplate() {
     }
   }, [selectedServices]);
 
-  useEffect(() => {
-    if (formValues && formValues.type) {
-      let resource: string = formValues.type;
-      if (resource) {
-        setChildResourceFields(null);
-        axiosInstance()
-          .get(`/field?resource=${resource}`)
-          .then(({ data: { data } }) => {
-            const vars = data.map((field) => field.fieldData.fieldName);
-            setVariables(['entity', 'currentDate', ...vars]);
-            setAllFields(data);
-            const headerFields = data?.filter((f) => f?.fieldData?.type === 'percent'
-              && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems))?.map((e) => e.fieldData) || [];
-            if (headerFields?.length) {
-              headerFields.push({
-                fieldName: 'finalAmount',
-                fieldLabel: 'Final Total'
-              })
-              setChildResourceFields((prev) => {
-                return [...(prev || []), ...headerFields];
-              });
-            }
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          });
-        if (resourceChildResourceMap[resource]) {
-          axiosInstance().get(`/field?resource=${resourceChildResourceMap[resource]}`).then(({ data: { data } }) => {
-            const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
-            setChildResourceFields((prev) => {
-              return [...(prev || []), ...filteredData];
-            });
-          }).catch((err) => {
-            toastConfig.setToastConfig(err);
+  const fetchResourceFields = async (resource) => {
+    try {
+      setLoading(true);
+
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/field?resource=${resource}`);
+      const vars = data.map((field) => field.fieldData.fieldName);
+      setVariables(['entity', 'currentDate', ...vars]);
+      setAllFields(data);
+      const headerFields =
+        data
+          ?.filter((f) => f?.fieldData?.type === 'percent' && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems))
+          ?.map((e) => e.fieldData) || [];
+      if (headerFields?.length) {
+        headerFields.push({
+          fieldName: 'finalAmount',
+          fieldLabel: 'Final Total'
+        });
+      }
+
+      let filteredData = [];
+
+      if (resourceChildResourceMap[resource]) {
+        const {
+          data: { data: childResourceFields }
+        } = await axiosInstance().get(`/field?resource=${resourceChildResourceMap[resource]}`);
+        filteredData = childResourceFields?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
+
+        const hasTaxField = filteredData.some((field) => field.fieldName === 'tax');
+        const hasPreTaxAmountField = filteredData.some((field) => field.fieldName === 'preTaxAmount');
+
+        if (hasTaxField && !hasPreTaxAmountField) {
+          filteredData.push({
+            fieldName: 'preTaxAmount',
+            fieldLabel: 'Pre Tax Total'
           });
         }
       }
+
+      setChildResourceFields([...headerFields, ...filteredData]);
+
       if (resource === sidebarResource.workOrder) {
-        setLoading(true);
-        axiosInstance()
-          .get(`${serviceMaster.api}`)
-          .then(({ data: { data } }) => {
-            const services =
-              data?.map((service) => {
-                return {
-                  optionValue: service._id,
-                  optionLabel: service.serviceName
-                };
-              }) || [];
-            setServices(services);
-          })
-          .catch((err) => {
-            toastConfig.setToastConfig(err);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        let {
+          data: { data: services }
+        } = await axiosInstance().get(`${serviceMaster.api}`);
+
+        services =
+          services?.map((service) => {
+            return {
+              optionValue: service._id,
+              optionLabel: service.serviceName
+            };
+          }) || [];
+        setServices(services);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (formValues && formValues?.type) {
+      if (formValues?.type) {
+        fetchResourceFields(formValues?.type);
       }
     }
   }, [formValues?.type]);
@@ -226,6 +237,15 @@ export default function NewCreateQuotePdfTemplate() {
     fetchData();
     fetchUser();
   }, [id]);
+
+  useEffect(() => {
+    if (childResourceFields?.length > 0 && rawBelowTableFields?.length > 0) {
+      const validBelowTableFields = rawBelowTableFields.filter((field) => childResourceFields.some((crf) => crf.fieldName === field.fieldName));
+      setBelowTableFields(validBelowTableFields);
+    } else if (childResourceFields?.length > 0 && rawBelowTableFields?.length === 0) {
+      setBelowTableFields([]);
+    }
+  }, [childResourceFields, rawBelowTableFields]);
 
   const fetchData = async () => {
     const initialValues = {
@@ -291,7 +311,7 @@ export default function NewCreateQuotePdfTemplate() {
 
       if (tempPdfTemplate) {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
-        setBelowTableFields(tempPdfTemplate?.belowTableFields || []);
+        setRawBelowTableFields(tempPdfTemplate?.belowTableFields || []);
         initialValues.landscape = tempPdfTemplate?.landscape;
         initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
@@ -327,7 +347,7 @@ export default function NewCreateQuotePdfTemplate() {
             data: { data }
           } = res;
           setIsLandscapChecked(data?.landscape);
-          setBelowTableFields(data?.belowTableFields || []);
+          setRawBelowTableFields(data?.belowTableFields || []);
           initialValues.landscape = data?.landscape;
           initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
           initialValues.tableFontSize = data?.tableFontSize;
@@ -465,7 +485,7 @@ export default function NewCreateQuotePdfTemplate() {
             setInitialValues(newInitialValues);
             setSelectedServices(newInitialValues?.services);
             setIsLandscapChecked(importedData?.landscape);
-            setBelowTableFields(importedData?.belowTableFields || []);
+            setRawBelowTableFields(importedData?.belowTableFields || []);
             setDetails({
               header: importedData?.header,
               footer: importedData?.footer,
@@ -807,10 +827,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -844,10 +864,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -883,10 +903,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                      ownerCollaboratorDataConst.filter((data) =>
-                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        ownerCollaboratorDataConst.filter((data) =>
+                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
+                                        )
                                       )
-                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -1025,12 +1045,25 @@ export default function NewCreateQuotePdfTemplate() {
                                         fullWidth
                                         size="small"
                                         multiple
-                                        value={belowTableFields}
+                                        value={belowTableFields.map((field) => {
+                                          const matchingOption = childResourceFields?.find((opt) => opt.fieldName === field.fieldName);
+                                          return matchingOption || { fieldName: field.fieldName, fieldLabel: field.fieldName };
+                                        })}
                                         onChange={(e, val) => {
-                                          if (val.find((e) => e.fieldName === 'Select All') && ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
-                                            val?.map((e) => e?.fieldName).sort().toString()
+                                          if (
+                                            val.find((e) => e.fieldName === 'Select All') &&
+                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
+                                              val
+                                                ?.map((e) => e?.fieldName)
+                                                .sort()
+                                                .toString()
                                           ) {
-                                            setBelowTableFields(childResourceFields);
+                                            const allFields = childResourceFields.map((field) => ({
+                                              fieldName: field.fieldName,
+                                              customLabel: field.fieldName === 'totalPrice' ? 'Sub Total' : '',
+                                              hideOnZeroValue: false
+                                            }));
+                                            setBelowTableFields(allFields);
                                           } else if (
                                             ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
                                             val
@@ -1040,7 +1073,22 @@ export default function NewCreateQuotePdfTemplate() {
                                           ) {
                                             setBelowTableFields([]);
                                           } else {
-                                            setBelowTableFields(val);
+                                            const currentFieldNames = belowTableFields.map((f) => f.fieldName);
+                                            const newFieldNames = val.filter((f) => f.fieldName !== 'Select All').map((f) => f.fieldName);
+
+                                            const addedFields = newFieldNames.filter((name) => !currentFieldNames.includes(name));
+
+                                            const newFields = belowTableFields.filter((f) => newFieldNames.includes(f.fieldName));
+
+                                            addedFields.forEach((fieldName) => {
+                                              newFields.push({
+                                                fieldName: fieldName,
+                                                customLabel: fieldName === 'totalPrice' ? 'Sub Total' : '',
+                                                hideOnZeroValue: false
+                                              });
+                                            });
+
+                                            setBelowTableFields(newFields);
                                           }
                                         }}
                                         options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...(childResourceFields || [])]}
@@ -1064,7 +1112,7 @@ export default function NewCreateQuotePdfTemplate() {
                                                 style={{ marginRight: 8 }}
                                                 checked={
                                                   ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
-                                                    ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
+                                                  ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
                                                     ? true
                                                     : state.selected
                                                 }
@@ -1084,7 +1132,7 @@ export default function NewCreateQuotePdfTemplate() {
                                                 ...params.InputProps,
                                                 endAdornment: (
                                                   <>
-                                                    {!Array.isArray(childResourceFields) && !isEmpty(resourceChildResourceMap[values?.type]) ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
                                                     {params.InputProps.endAdornment}
                                                   </>
                                                 )
@@ -1098,7 +1146,8 @@ export default function NewCreateQuotePdfTemplate() {
                                       <ArrangeBelowTableFieldView
                                         columns={belowTableFields}
                                         setColumns={setBelowTableFields}
-                                        disabled={!allowedToEdit || !isEdit || !childResourceFields?.length}
+                                        disabled={!allowedToEdit || !isEdit || loading}
+                                        childResourceFields={childResourceFields}
                                       />
                                     </Box>
                                   </Box>
