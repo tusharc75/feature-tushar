@@ -28,7 +28,7 @@ export const PivotColumnSelector = <D,>({ columns, defaultPivotColumnId, pivotCo
   const [localDefaultColumnId, setLocalDefaultColumnId] = useLocalStorage(`kanban-pivot-column-${renderedFrom}`, defaultPivotColumnId);
 
   const pivotableColumns = useMemo(() => {
-    return columns?.filter((c) => c.option?.length > 0 && !c.lookup && PIVOTABLE_COLUMN_TYPES.includes(c.type)) || [];
+    return columns?.filter((c) => c.option?.length > 0 && c.option.length < 11 && !c.lookup && PIVOTABLE_COLUMN_TYPES.includes(c.type)) || [];
   }, [columns]);
 
   useEffect(() => {
