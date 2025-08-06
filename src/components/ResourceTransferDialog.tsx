@@ -141,7 +141,7 @@ export default function ResourceTransferDialog({ resource = '', open, onClose, a
       {showConfirmDialog ? (
         <ConfirmationDialog
           open={showConfirmDialog}
-          message={`All Resources related to this is transferred to ${toResource?.optionLabel}. Are you want to continue to delete ?`}
+          message={`All related resources are now transferred to ${toResource?.optionLabel}. Do you want to proceed with deletion?`}
           onClose={() => setShowConfirmDialog(false)}
           okBtnLoading={deleteLoading}
           onOk={handleDeleteResource}
