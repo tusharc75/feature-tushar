@@ -27,14 +27,17 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { CheckBoxOutlineBlank, CheckBox } from '@mui/icons-material';
-import ArrangeChildResourceFieldView from 'src/pages/QuotePdfTemplate/ArrangeBelowTableFieldView';
+import ArrangeBelowTableFieldView from 'src/pages/QuotePdfTemplate/ArrangeBelowTableFieldView';
+import { OPERATION_ON_LINE_ITEMS } from 'src/components/FormBuilder/helper';
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 
 const resourceChildResourceMap: any = {
   [sidebarResource.rentalManagement]: CHILD_RESOURCE.rentalManagementProduct,
-  [sidebarResource.purchaseOrder]: CHILD_RESOURCE.purchaseOrderProduct
+  [sidebarResource.purchaseOrder]: CHILD_RESOURCE.purchaseOrderProduct,
+  [sidebarResource.fieldTicket]: CHILD_RESOURCE.fieldTicketMateial,
+  [sidebarResource.creditMemo]: CHILD_RESOURCE.invoiceProduct,
 };
 
 const PdfTemplateSchema = object().shape({
@@ -157,12 +160,20 @@ export default function NewCreateQuotePdfTemplate() {
     if (formValues && formValues.type) {
       let resource: string = formValues.type;
       if (resource) {
+        setChildResourceFields(null);
         axiosInstance()
           .get(`/field?resource=${resource}`)
           .then(({ data: { data } }) => {
             const vars = data.map((field) => field.fieldData.fieldName);
             setVariables(['entity', 'currentDate', ...vars]);
             setAllFields(data);
+            setChildResourceFields((prev) => {
+              const headerFields =
+                data?.filter(
+                  (f) => f?.fieldData?.type === 'percent' && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems)
+                )?.map((e) => e.fieldData) || [];
+              return [...(prev || []), ...headerFields];
+            });
           })
           .catch((err) => {
             toastConfig.setToastConfig(err);
@@ -172,7 +183,9 @@ export default function NewCreateQuotePdfTemplate() {
             .get(`/field?resource=${resourceChildResourceMap[resource]}`)
             .then(({ data: { data } }) => {
               const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
-              setChildResourceFields(filteredData);
+              setChildResourceFields((prev) => {
+                return [...(prev || []), ...filteredData];
+              });
             })
             .catch((err) => {
               toastConfig.setToastConfig(err);
@@ -788,10 +801,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -825,10 +838,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -864,10 +877,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -1011,10 +1024,10 @@ export default function NewCreateQuotePdfTemplate() {
                                           if (
                                             val.find((e) => e.fieldName === 'Select All') &&
                                             ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
-                                              val
-                                                ?.map((e) => e?.fieldName)
-                                                .sort()
-                                                .toString()
+                                            val
+                                              ?.map((e) => e?.fieldName)
+                                              .sort()
+                                              .toString()
                                           ) {
                                             setBelowTableFields(childResourceFields);
                                           } else if (
@@ -1050,7 +1063,7 @@ export default function NewCreateQuotePdfTemplate() {
                                                 style={{ marginRight: 8 }}
                                                 checked={
                                                   ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
-                                                  ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
+                                                    ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
                                                     ? true
                                                     : state.selected
                                                 }
@@ -1060,12 +1073,28 @@ export default function NewCreateQuotePdfTemplate() {
                                           );
                                         }}
                                         renderInput={(params) => (
-                                          <TextField {...params} variant="outlined" label={`Select Below Table Fields`} placeholder="Select" />
+                                          <TextField
+                                            {...params}
+                                            variant="outlined"
+                                            label={`Select Below Table Fields`}
+                                            placeholder="Select"
+                                            slotProps={{
+                                              input: {
+                                                ...params.InputProps,
+                                                endAdornment: (
+                                                  <>
+                                                    {!Array.isArray(childResourceFields) ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {params.InputProps.endAdornment}
+                                                  </>
+                                                )
+                                              }
+                                            }}
+                                          />
                                         )}
                                       />
                                     </Box>
                                     <Box width="5%">
-                                      <ArrangeChildResourceFieldView
+                                      <ArrangeBelowTableFieldView
                                         columns={belowTableFields}
                                         setColumns={setBelowTableFields}
                                         disabled={!allowedToEdit || !isEdit || !childResourceFields?.length}
