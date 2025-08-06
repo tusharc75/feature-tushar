@@ -596,7 +596,7 @@ const Leads = () => {
     );
   }, [permissions, selectedRecords, user?.user?._id]);
 
-  const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow, shouldFetchData = true) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
@@ -606,7 +606,7 @@ const Leads = () => {
           values[key] = inputField[key];
         }
       });
-      axiosInstance()
+      return axiosInstance()
         .put(`${lead.leadApi}`, { ...values, _id: updatedRow._id })
         .then(({ data }) => {
           toastConfig.setToastConfig({
@@ -614,7 +614,9 @@ const Leads = () => {
             type: 'success',
             message: data.message
           });
-          fetchData();
+          if (shouldFetchData) {
+            fetchData();
+          }
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
