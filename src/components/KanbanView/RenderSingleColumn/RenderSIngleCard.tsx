@@ -2,7 +2,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
 import { Checkbox, Collapse, IconButton } from '@mui/material';
-import { memo, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
 import RenderCanbanCell from 'src/components/KanbanView/RenderSingleColumn/RenderKanbanCell';
 import { Column, UseCanbanStore } from 'src/components/KanbanView/types';
@@ -36,11 +36,14 @@ const RenderSingleCardImpl = <D,>({
   columnId,
   dragging
 }: RenderSingleCardProps<D>) => {
-  const [expanded, setExpanded] = useState(dragging);
+  const [expanded, setExpanded] = useState(false);
+  const rectRef = useRef<DOMRect>(null);
+  const dummyDiv = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
 
   const canEdit = data?.hasOwnProperty('canEdit') ? data['canEdit'] : true;
 
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: data?.['_id'],
     disabled: !data || !canEdit,
     data: {
@@ -63,12 +66,32 @@ const RenderSingleCardImpl = <D,>({
     transform: CSS.Translate.toString(transform)
   };
 
+  useEffect(() => {
+    if (isDragging) {
+      timeoutRef.current = setTimeout(() => {
+        dummyDiv.current.style.height = '0px';
+      }, 100);
+    }
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, [isDragging]);
+
   if (!data) return null;
+
+  if (isDragging) {
+    return <div ref={dummyDiv} style={{ height: rectRef.current?.height + 2 }} className="w-full transition-[height] duration-500"></div>;
+  }
 
   return (
     <div
-      ref={setNodeRef}
-      style={styleDnd}
+      ref={(node) => {
+        setNodeRef(node);
+        if (node) {
+          rectRef.current = node.getBoundingClientRect();
+        }
+      }}
+      style={{ ...styleDnd, ...(dragging ? { minWidth: rectRef.current?.width } : {}) }}
       {...attributes}
       {...listeners}
       className={cn(
