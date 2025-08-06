@@ -154,61 +154,67 @@ const RenderSingleColumn = <D,>({
           <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
         </div>
       )}
-      {!loading ? (
-        <div ref={parentRef} style={{ contain: 'strict' }} className="relative h-[calc(100vh-250px)] overflow-y-auto overflow-x-hidden">
-          <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                transform: `translateY(${items[0]?.start ?? 0}px)`
-              }}
-            >
-              {items.map(({ key, index }) => {
-                const data = rows[index];
-                return (
-                  <div key={`${key}`} data-index={index} ref={virtualizer.measureElement} className={cn('')}>
-                    <RenderSingleCard
-                      columnId={option.optionValue}
-                      primaryColumn={primaryColumn}
-                      hideSelection={hideSelection}
-                      actionColumn={actionColumn}
-                      data={data}
-                      displayedColumns={displayedColumns}
-                      hiddenColumns={hiddenColumns}
-                      indexColumn={indexColumn}
-                      state={state}
-                      onSaveEdit={handleSaveEditWrapper}
-                      setActiveDragItemProps={setActiveDragItemProps}
-                    />
+      <div className="pb-2">
+        {!loading ? (
+          <div
+            ref={parentRef}
+            style={{ contain: 'strict' }}
+            className="relative h-[calc(100vh-300px)] min-h-[500px] overflow-y-auto overflow-x-hidden"
+          >
+            <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${items[0]?.start ?? 0}px)`
+                }}
+              >
+                {items.map(({ key, index }) => {
+                  const data = rows[index];
+                  return (
+                    <div key={`${key}`} data-index={index} ref={virtualizer.measureElement} className={cn('')}>
+                      <RenderSingleCard
+                        columnId={option.optionValue}
+                        primaryColumn={primaryColumn}
+                        hideSelection={hideSelection}
+                        actionColumn={actionColumn}
+                        data={data}
+                        displayedColumns={displayedColumns}
+                        hiddenColumns={hiddenColumns}
+                        indexColumn={indexColumn}
+                        state={state}
+                        onSaveEdit={handleSaveEditWrapper}
+                        setActiveDragItemProps={setActiveDragItemProps}
+                      />
+                    </div>
+                  );
+                })}
+                {newDataLoading && (
+                  <div className="mx-2 rounded-md border bg-[var(--dark-primary,white)] p-4">
+                    <Skeleton />
+                    <Skeleton />
+                    <Skeleton />
+                    <Skeleton />
                   </div>
-                );
-              })}
-              {newDataLoading && (
-                <div className="mx-2 rounded-md border bg-[var(--dark-primary,white)] p-4">
-                  <Skeleton />
-                  <Skeleton />
-                  <Skeleton />
-                  <Skeleton />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="h-[calc(100vh-250px)] space-y-2 overflow-y-auto">
-          {[...Array(getRandomNumber(2, 8)).keys()].map((d) => (
-            <div key={d} className="mx-2 rounded-md border bg-[var(--dark-primary,white)] p-4">
-              <Skeleton />
-              <Skeleton />
-              <Skeleton />
-              <Skeleton />
-            </div>
-          ))}
-        </div>
-      )}
+        ) : (
+          <div className="h-[calc(100vh-250px)] space-y-2 overflow-y-auto">
+            {[...Array(getRandomNumber(2, 8)).keys()].map((d) => (
+              <div key={d} className="mx-2 rounded-md border bg-[var(--dark-primary,white)] p-4">
+                <Skeleton />
+                <Skeleton />
+                <Skeleton />
+                <Skeleton />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
