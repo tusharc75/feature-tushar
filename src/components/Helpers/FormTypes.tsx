@@ -2737,7 +2737,7 @@ const FormTypes = (props) => {
         <Box display="flex" alignItems="center">
           <Typography color="textSecondary">{label}</Typography>
           <Box ml={2} display="flex" alignContent="center">
-            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} />
+            <input type="color" name={name} value={values[name]} onChange={(e) => setFieldValue(name, e.target.value)} disabled={rest?.disabled} />
           </Box>
         </Box>
         {touched[name] && Boolean(errors[name]) && (

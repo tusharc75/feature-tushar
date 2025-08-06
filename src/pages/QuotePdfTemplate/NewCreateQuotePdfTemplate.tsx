@@ -16,7 +16,7 @@ import TinyMce from './../../components/TinyMCE/index';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { Autocomplete, CircularProgress, Theme } from '@mui/material';
 import { useData } from '../../StateProvider/Provider';
-import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit, serviceMaster } from '../../constants/helpers';
+import { quoteBuilder, PDF_RESOURCE_LIST, sidebarResource, checkIsAllowedToEdit, serviceMaster, CHILD_RESOURCE } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
@@ -26,6 +26,16 @@ import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { CheckBoxOutlineBlank, CheckBox } from '@mui/icons-material';
+import ArrangeChildResourceFieldView from 'src/pages/QuotePdfTemplate/ArrangeChildResourceFieldView';
+
+const icon = <CheckBoxOutlineBlank fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
+
+const resourceChildResourceMap: any = {
+  [sidebarResource.rentalManagement]: CHILD_RESOURCE.rentalManagementProduct,
+  [sidebarResource.purchaseOrder]: CHILD_RESOURCE.purchaseOrderProduct
+};
 
 const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name  is required'),
@@ -76,6 +86,8 @@ export default function NewCreateQuotePdfTemplate() {
 
   const [variables, setVariables] = useState([]);
   const [allFields, setAllFields] = useState(null);
+  const [childResourceFields, setChildResourceFields] = useState(null);
+  const [belowTableFields, setBelowTableFields] = useState([]);
   const [formValues, setFormValues] = useState(null);
 
   const [pdfResourceOption, setpdfResourceOption] = useState(null);
@@ -141,7 +153,6 @@ export default function NewCreateQuotePdfTemplate() {
     }
   }, [selectedServices]);
 
-
   useEffect(() => {
     if (formValues && formValues.type) {
       let resource: string = formValues.type;
@@ -156,6 +167,17 @@ export default function NewCreateQuotePdfTemplate() {
           .catch((err) => {
             toastConfig.setToastConfig(err);
           });
+        if (resourceChildResourceMap[resource]) {
+          axiosInstance()
+            .get(`/field?resource=${resourceChildResourceMap[resource]}`)
+            .then(({ data: { data } }) => {
+              const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
+              setChildResourceFields(filteredData);
+            })
+            .catch((err) => {
+              toastConfig.setToastConfig(err);
+            });
+        }
       }
       if (resource === sidebarResource.workOrder) {
         setLoading(true);
@@ -181,6 +203,8 @@ export default function NewCreateQuotePdfTemplate() {
     }
   }, [formValues?.type]);
 
+  console.log(childResourceFields, 'childResourceFields');
+
   useEffect(() => {
     fetchData();
     fetchUser();
@@ -189,9 +213,6 @@ export default function NewCreateQuotePdfTemplate() {
   const fetchData = async () => {
     const initialValues = {
       landscape: false,
-      hideAmountTotalSection: false,
-      hideTaxSection: false,
-      tableTotalAtBottom: false,
       tableFontSize: '',
       belowTableTotalFontSize: '',
       pdfFontSize: '',
@@ -252,10 +273,8 @@ export default function NewCreateQuotePdfTemplate() {
 
       if (tempPdfTemplate) {
         setIsLandscapChecked(tempPdfTemplate?.landscape);
+        setBelowTableFields(tempPdfTemplate?.belowTableFields || []);
         initialValues.landscape = tempPdfTemplate?.landscape;
-        initialValues.hideAmountTotalSection = tempPdfTemplate?.hideAmountTotalSection;
-        initialValues.hideTaxSection = tempPdfTemplate?.hideTaxSection;
-        initialValues.tableTotalAtBottom = tempPdfTemplate?.tableTotalAtBottom;
         initialValues.tableFontSize = tempPdfTemplate?.tableFontSize;
         initialValues.belowTableTotalFontSize = tempPdfTemplate?.belowTableTotalFontSize;
         initialValues.pdfFontSize = tempPdfTemplate?.pdfFontSize;
@@ -289,10 +308,8 @@ export default function NewCreateQuotePdfTemplate() {
             data: { data }
           } = res;
           setIsLandscapChecked(data?.landscape);
+          setBelowTableFields(data?.belowTableFields || []);
           initialValues.landscape = data?.landscape;
-          initialValues.hideAmountTotalSection = data?.hideAmountTotalSection;
-          initialValues.hideTaxSection = data?.hideTaxSection;
-          initialValues.tableTotalAtBottom = data?.tableTotalAtBottom;
           initialValues.tableFontSize = data?.tableFontSize;
           initialValues.belowTableTotalFontSize = data?.belowTableTotalFontSize;
           initialValues.pdfFontSize = data?.pdfFontSize;
@@ -405,9 +422,6 @@ export default function NewCreateQuotePdfTemplate() {
             const importedData = JSON.parse(fileContent);
             const newInitialValues = {
               landscape: importedData?.landscape,
-              hideAmountTotalSection: importedData?.hideAmountTotalSection,
-              hideTaxSection: importedData?.hideTaxSection,
-              tableTotalAtBottom: importedData?.tableTotalAtBottom,
               tableFontSize: importedData?.tableFontSize,
               belowTableTotalFontSize: importedData?.belowTableTotalFontSize,
               pdfFontSize: importedData?.pdfFontSize,
@@ -430,6 +444,7 @@ export default function NewCreateQuotePdfTemplate() {
             setInitialValues(newInitialValues);
             setSelectedServices(newInitialValues?.services);
             setIsLandscapChecked(importedData?.landscape);
+            setBelowTableFields(importedData?.belowTableFields || []);
             setDetails({
               header: importedData?.header,
               footer: importedData?.footer,
@@ -508,9 +523,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           services: values?.services,
           landscape: values?.landscape,
-          hideTaxSection: values?.hideTaxSection,
-          hideAmountTotalSection: values?.hideAmountTotalSection,
-          tableTotalAtBottom: values?.tableTotalAtBottom,
+          belowTableFields: belowTableFields,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -559,9 +572,7 @@ export default function NewCreateQuotePdfTemplate() {
           collaborator: values?.collaborator,
           services: values?.services,
           landscape: values?.landscape,
-          hideTaxSection: values?.hideTaxSection,
-          hideAmountTotalSection: values?.hideAmountTotalSection,
-          tableTotalAtBottom: values?.tableTotalAtBottom,
+          belowTableFields: belowTableFields,
           tableFontSize: parseInt(values?.tableFontSize),
           belowTableTotalFontSize: parseInt(values?.belowTableTotalFontSize),
           pdfFontSize: parseInt(values?.pdfFontSize),
@@ -983,51 +994,82 @@ export default function NewCreateQuotePdfTemplate() {
                             <Grid container spacing={2}>
                               <Grid size={{ xs: 12, sm: 12, md: 6, lg: 6 }}>
                                 <div className="flex flex-col">
-                                  <FormControlLabel
-                                    disabled={!allowedToEdit || !isEdit}
-                                    value={values['hideAmountTotalSection']}
-                                    control={
-                                      <Checkbox
-                                        name="hideAmountTotalSection"
-                                        checked={values['hideAmountTotalSection']}
-                                        onChange={(e) => {
-                                          setFieldValue('hideAmountTotalSection', e.target.checked);
-                                        }}
-                                        color="primary"
-                                      />
-                                    }
-                                    label="Hide Amount Total Section"
-                                  />
-                                  <FormControlLabel
-                                    disabled={!allowedToEdit || !isEdit}
-                                    value={values['hideTaxSection']}
-                                    control={
-                                      <Checkbox
-                                        name="hideTaxSection"
-                                        checked={values['hideTaxSection']}
-                                        onChange={(e) => {
-                                          setFieldValue('hideTaxSection', e.target.checked);
-                                        }}
-                                        color="primary"
-                                      />
-                                    }
-                                    label="Hide Tax Section"
-                                  />
-                                  <FormControlLabel
-                                    disabled={!allowedToEdit || !isEdit}
-                                    value={values['tableTotalAtBottom']}
-                                    control={
-                                      <Checkbox
-                                        name="tableTotalAtBottom"
-                                        checked={values['tableTotalAtBottom']}
-                                        onChange={(e) => {
-                                          setFieldValue('tableTotalAtBottom', e.target.checked);
-                                        }}
-                                        color="primary"
-                                      />
-                                    }
-                                    label="Show Table Total At Bottom"
-                                  />
+                                  {childResourceFields?.length > 0 && (
+                                    <Box className="mb-2 mt-3 flex items-center justify-between">
+                                      <Box width="94%">
+                                        <Autocomplete
+                                          id="demo-mutiple-chip"
+                                          disabled={!allowedToEdit || !isEdit}
+                                          fullWidth
+                                          size="small"
+                                          multiple
+                                          value={belowTableFields}
+                                          onChange={(e, val) => {
+                                            if (
+                                              val.find((e) => e.fieldName === 'Select All') &&
+                                              ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
+                                                val
+                                                  ?.map((e) => e?.fieldName)
+                                                  .sort()
+                                                  .toString()
+                                            ) {
+                                              setBelowTableFields(childResourceFields);
+                                            } else if (
+                                              ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                              val
+                                                ?.map((e) => e?.fieldName)
+                                                .sort()
+                                                .toString()
+                                            ) {
+                                              setBelowTableFields([]);
+                                            } else {
+                                              setBelowTableFields(val);
+                                            }
+                                          }}
+                                          options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...childResourceFields]}
+                                          getOptionLabel={(option) => option?.fieldLabel}
+                                          isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
+                                          disableCloseOnSelect
+                                          renderOption={(props, option, state, ownerState) => {
+                                            const { key, ...optionProps } = props;
+                                            return (
+                                              <Box
+                                                key={key}
+                                                component="li"
+                                                {...optionProps}
+                                                display={'flex'}
+                                                alignItems={'center'}
+                                                justifyContent={'space-between'}
+                                              >
+                                                <Checkbox
+                                                  icon={icon}
+                                                  checkedIcon={checkedIcon}
+                                                  style={{ marginRight: 8 }}
+                                                  checked={
+                                                    ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                                    ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
+                                                      ? true
+                                                      : state.selected
+                                                  }
+                                                />
+                                                {ownerState.getOptionLabel(option)}
+                                              </Box>
+                                            );
+                                          }}
+                                          renderInput={(params) => (
+                                            <TextField {...params} variant="outlined" label={`Select Below Table Fields`} placeholder="Select" />
+                                          )}
+                                        />
+                                      </Box>
+                                      <Box width="5%">
+                                        <ArrangeChildResourceFieldView
+                                          columns={belowTableFields}
+                                          setColumns={setBelowTableFields}
+                                          disabled={!allowedToEdit || !isEdit}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  )}
                                   <FormTypes
                                     disabled={!allowedToEdit || !isEdit}
                                     values={values}
