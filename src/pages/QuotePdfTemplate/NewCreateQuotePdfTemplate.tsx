@@ -188,25 +188,14 @@ export default function NewCreateQuotePdfTemplate() {
             toastConfig.setToastConfig(err);
           });
         if (resourceChildResourceMap[resource]) {
-          axiosInstance()
-            .get(`/field?resource=${resourceChildResourceMap[resource]}`)
-            .then(({ data: { data } }) => {
-              const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
-              filteredData?.forEach((e) => {
-                if (e?.fieldName === 'totalPrice') {
-                  e.fieldLabel = `${e?.fieldLabel} (Sub Total)`
-                }
-                if (e?.fieldName === 'finalPrice') {
-                  e.fieldLabel = `${e?.fieldLabel} (Total)`
-                }
-              })
-              setChildResourceFields((prev) => {
-                return [...(prev || []), ...filteredData];
-              });
-            })
-            .catch((err) => {
-              toastConfig.setToastConfig(err);
+          axiosInstance().get(`/field?resource=${resourceChildResourceMap[resource]}`).then(({ data: { data } }) => {
+            const filteredData = data?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
+            setChildResourceFields((prev) => {
+              return [...(prev || []), ...filteredData];
             });
+          }).catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
         }
       }
       if (resource === sidebarResource.workOrder) {
