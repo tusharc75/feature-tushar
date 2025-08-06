@@ -4,7 +4,7 @@ import { Column } from 'src/components/KanbanView/types';
 import { RenderInputs } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
 import { cn } from 'src/constants/helpers';
 
-const defaultHeaderClass = 'text-[8px] font-medium text-[var(--dark-secondary-text,#8b8b8b)]';
+const defaultHeaderClass = 'text-[12px] font-normal text-[var(--dark-secondary-text,#6B7280)]';
 
 const RenderCanbanCellImpl = <D,>({
   column,
@@ -69,7 +69,7 @@ const RenderCanbanCellImpl = <D,>({
       id: column?.id,
       key: column?.id,
       className: cn(
-        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-medium',
+        '!text-[12px] [&>*]:!text-[12px] [&_span]:!text-[12px] [&_p]:!text-[12px] [&_*]:!font-semibold',
         `[&_*]:[white-space:unset_!important] [&_h5]:[font-size:12px_!important]`,
         hideHeader ? 'flex-shrink-0 flex-nowrap flex' : ' line-clamp-1 [&>div]:[flex-wrap:wrap_!important]'
       ),
