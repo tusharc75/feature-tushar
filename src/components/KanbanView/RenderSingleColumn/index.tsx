@@ -130,7 +130,7 @@ const RenderSingleColumn = <D,>({
   });
 
   return (
-    <div className={cn('relative rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>
+    <div className={cn('relative isolate rounded-md bg-gray-100 dark:bg-[--dark-secondary]')} ref={setNodeRef}>
       <div className="flex items-center p-2">
         <Checkbox
           icon={<RadioButtonUnchecked />}
@@ -149,11 +149,16 @@ const RenderSingleColumn = <D,>({
         />
         <h6 className="line-clamp-1 text-sm font-semibold">{option.optionLabel}</h6>
       </div>
-      {active && over && over.id === option.optionValue && over.id !== active.data.current?.columnId && (
-        <div className="absolute bottom-0 left-0 right-0 top-[45px] z-10 flex items-center justify-center bg-black/30 [backdrop-filter:blur(4px)] dark:bg-white/30">
-          <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
-        </div>
-      )}
+
+      <div
+        className={cn(
+          'pointer-events-none absolute bottom-0 left-0 right-0 top-[45px] flex items-center justify-center bg-black/30 transition-opacity [backdrop-filter:blur(4px)] dark:bg-white/30',
+          active && over && over.id === option.optionValue && over.id !== active.data.current?.columnId ? 'z-10 opacity-100' : 'z-[-1] opacity-0'
+        )}
+      >
+        <p className="text-[20px] font-semibold text-[white]">Drop Here</p>
+      </div>
+
       <div className="pb-2">
         {!loading ? (
           <div
