@@ -107,6 +107,12 @@ export type Option = {
 export type CanbanViewState<D> = {
   selectedRrowsMap: Map<string, D>;
   search: string;
+  deepFiltersOriginal: DeepFilter[];
+  filterByIdsOriginal: FilterByID[];
+  filterTerm: FilterTerm;
+  deepFilters: any[];
+  filterByIds: any[];
+  resourceColumns: any[];
 };
 
 export type FetchCanbanDataPayload = { column: string; page: number; limit: number; cancelToken?: CancelToken };
@@ -137,3 +143,29 @@ export type UseCanbanStore<D> = {
   handleUnSelectMultiple: (data: D[]) => void;
   setState: <K extends keyof ActionPayloadMap<D>>(type: K, payload: ActionPayloadMap<D>[K]) => void;
 } & CanbanViewState<D>;
+
+export type DeepFilter = {
+  field?: string;
+  term?: string[] | DateRange | 'Yes' | 'No';
+  duration?: string;
+  type?: string;
+};
+
+export type DateRange = {
+  from?: Date;
+  to?: Date;
+};
+
+export type FilterByID = {
+  field?: string;
+  term?: TermElement[];
+};
+
+export type TermElement = {
+  optionValue?: string;
+  optionLabel?: string;
+  order?: number;
+  default?: boolean;
+};
+
+export type FilterTerm = Record<string, '$nin' | '$in'>;
