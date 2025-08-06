@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { camelCase, isEqual, startCase } from 'lodash';
+import { camelCase, isEmpty, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -1083,7 +1083,7 @@ export default function NewCreateQuotePdfTemplate() {
                                                 ...params.InputProps,
                                                 endAdornment: (
                                                   <>
-                                                    {!Array.isArray(childResourceFields) ? <CircularProgress color="inherit" size={20} /> : null}
+                                                    {!Array.isArray(childResourceFields) && !isEmpty(resourceChildResourceMap[values?.type]) ? <CircularProgress color="inherit" size={20} /> : null}
                                                     {params.InputProps.endAdornment}
                                                   </>
                                                 )
