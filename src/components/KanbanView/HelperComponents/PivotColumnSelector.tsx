@@ -33,7 +33,7 @@ export const PivotColumnSelector = <D,>({ columns, defaultPivotColumnId, pivotCo
 
   useEffect(() => {
     if (pivotableColumns.length === 0 || !localDefaultColumnId) return;
-    const defaultPivotColumn = pivotableColumns.find((d) => (d.id || d.accessor) === localDefaultColumnId);
+    const defaultPivotColumn = pivotableColumns.find((d) => (d.id || d.accessor) === localDefaultColumnId) || pivotableColumns[0];
     setPivotColumn(defaultPivotColumn);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [localDefaultColumnId, pivotableColumns]);
