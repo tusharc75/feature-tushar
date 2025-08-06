@@ -36,7 +36,7 @@ const RenderSingleCardImpl = <D,>({
   columnId,
   dragging
 }: RenderSingleCardProps<D>) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(dragging);
 
   const canEdit = data?.hasOwnProperty('canEdit') ? data['canEdit'] : true;
 
