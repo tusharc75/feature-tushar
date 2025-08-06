@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -33,7 +33,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
-import KanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
+import KanbanView, { FetchCanbanDataPayload, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
 
 const renderedFrom = camelCase(sidebarResource.opportunity);
 
@@ -74,7 +74,7 @@ const Opportunities = () => {
     resource: history.location?.state?.resource
   });
   const [pivotColumn, setPivotColumn] = useState<any>(null);
-
+  const kanbanViewRef = useRef<KanbanViewRef>(null);
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const kanbanState = useCanbanStore();
@@ -315,7 +315,11 @@ const Opportunities = () => {
         setIsConformDialogVisible(false);
         setDeleteLoading(false);
         setDeleteRecord(null);
-        fetchData();
+        if (viewType === 'table') {
+          fetchData();
+        } else {
+          kanbanViewRef.current?.fetchData();
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -472,14 +476,22 @@ const Opportunities = () => {
           module="opportunities"
           api={opportunityApi}
           afterImportCompleted={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           additionalParams={getQueryString(true)}
         />
@@ -530,6 +542,7 @@ const Opportunities = () => {
               />
             ) : (
               <KanbanView
+                ref={kanbanViewRef}
                 state={kanbanState}
                 onSaveEdit={handleSaveEdit}
                 fetchData={fetchCanbanData}
@@ -566,7 +579,11 @@ const Opportunities = () => {
           open={showCreateOpportunityDialog?.open}
           onSuccess={() => {
             setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           onClose={() => {
             setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
@@ -584,7 +601,11 @@ const Opportunities = () => {
           TransferEntityDialogOpen={showTransferEntityDialog}
           onSuccess={() => {
             setShowCreateOpportunityDialog({ open: false, isClone: false, idToClone: null });
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
             setShowTransferEntityDialog(false);
           }}
           handleCloseDialog={() => {

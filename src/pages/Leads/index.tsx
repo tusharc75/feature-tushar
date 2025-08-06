@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SiConvertio } from 'react-icons/si';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -35,7 +35,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import KanbanView, { FetchCanbanDataPayload, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
+import KanbanView, { FetchCanbanDataPayload, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
 
 const renderedFrom = camelCase(sidebarResource.lead);
 
@@ -102,6 +102,8 @@ const Leads = () => {
     filterByIds: kanbanFilterByIds,
     setState
   } = kanbanState;
+
+  const kanbanViewRef = useRef<KanbanViewRef>(null);
 
   const selectedRecords = useMemo(() => {
     if (viewType === 'table') {
@@ -388,7 +390,11 @@ const Leads = () => {
 
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
-    fetchData();
+    if (viewType === 'table') {
+      fetchData();
+    } else {
+      kanbanViewRef.current?.fetchData();
+    }
   };
 
   const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, canEdit }) => {
@@ -484,7 +490,11 @@ const Leads = () => {
           message: data.message
         });
         dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
+        if (viewType === 'table') {
+          fetchData();
+        } else {
+          kanbanViewRef.current?.fetchData();
+        }
         setIsConformDialogVisible(false);
         setOkButtonLoading(false);
         if (deleteRecord.id) {
@@ -517,7 +527,11 @@ const Leads = () => {
         if (convertLeadToOpportunityConfirmationDialog.id) {
           history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
         } else {
-          fetchData();
+          if (viewType === 'table') {
+            fetchData();
+          } else {
+            kanbanViewRef.current?.fetchData();
+          }
         }
       })
       .catch((error) => {
@@ -639,14 +653,22 @@ const Leads = () => {
           module="lead(s)"
           api={lead.leadApi}
           afterImportCompleted={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           additionalParams={getQueryString(true)}
         />
@@ -696,6 +718,7 @@ const Leads = () => {
               />
             ) : (
               <KanbanView
+                ref={kanbanViewRef}
                 state={kanbanState}
                 onSaveEdit={handleSaveEdit}
                 fetchData={fetchCanbanData}
@@ -763,7 +786,11 @@ const Leads = () => {
           <TransferEntityDialog
             TransferEntityDialogOpen={showTransferEntityDialog}
             onSuccess={() => {
-              fetchData();
+              if (viewType === 'table') {
+                fetchData();
+              } else {
+                kanbanViewRef.current?.fetchData();
+              }
               setShowTransferEntityDialog(false);
             }}
             handleCloseDialog={() => {
