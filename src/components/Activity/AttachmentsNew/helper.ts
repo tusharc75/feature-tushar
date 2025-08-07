@@ -82,9 +82,9 @@ export const sortFileStructure = (a, b) => {
 
 export const allAttachmentsAreFromUser = (attachments: any[], user: any) => {
   return attachments?.every((attachment) => {
-    // if (checkSuperAdminAccess(user, sidebarResource.attachment)) {
-    //   return true;
-    // }
+    if (checkSuperAdminAccess(user, sidebarResource.attachment)) {
+      return true;
+    }
     return attachment?.createdBy?.user?._id === user?.user?._id;
   })
 }

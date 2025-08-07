@@ -631,13 +631,14 @@ const RenderFolder = ({ node, setAttachemntDialog, disableEdit, setOpenDelete, s
   };
 
   return (
-    <div key={node?._id} className='relative cursor-pointer px-[18px] py-[8px] mt-[15px] rounded-md  border border-solid'>
-      <div className="absolute inset-0"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((prev) => !prev);
-        }}>
-      </div>
+    <div
+      key={node?._id}
+      className='cursor-pointer px-[18px] py-[8px] mt-[15px] rounded-md  border border-solid'
+      onClick={(e) => {
+        e.stopPropagation();
+        setOpen((prev) => !prev);
+      }}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-[20px]">
