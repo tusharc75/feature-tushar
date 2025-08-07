@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 import queryString from 'query-string';
 import { quotation } from '../../constants/helpers';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
-import { camelCase, isEmpty, isEqual, startCase } from 'lodash';
+import { camelCase, isEqual, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import VariablesDialog from './Variables';
 import FormTypes from 'src/components/Helpers/FormTypes';
@@ -42,7 +42,15 @@ const resourceChildResourceMap: any = {
   [sidebarResource.repairOrder]: CHILD_RESOURCE.quotationProduct,
   [sidebarResource.salesOrder]: CHILD_RESOURCE.salesOrderProduct,
   [sidebarResource.repairJob]: CHILD_RESOURCE.repairJobAsset,
-  [sidebarResource.quotation]: CHILD_RESOURCE.quotationProduct
+  [sidebarResource.quotation]: CHILD_RESOURCE.quotationProduct,
+  [sidebarResource.fieldServiceOrder]: CHILD_RESOURCE.fieldServiceOrderDetails,
+  [sidebarResource.sublease]: CHILD_RESOURCE.subleaseProduct,
+  [sidebarResource.subcontractAssembly]: CHILD_RESOURCE.subcontractAssemblyMaterial,
+  [sidebarResource.demandOrder]: CHILD_RESOURCE.demandOrderDetail,
+  [sidebarResource.purchaseRequisition]: CHILD_RESOURCE.purchaseRequisitionDetail,
+  [sidebarResource.assemblyOrder]: CHILD_RESOURCE.assemblyOrderMaterial,
+  [sidebarResource.planning]: CHILD_RESOURCE.planningMaterial,
+  [sidebarResource.productionOrder]: CHILD_RESOURCE.productionOrderDetail,
 };
 
 const PdfTemplateSchema = object().shape({
@@ -1044,7 +1052,7 @@ export default function NewCreateQuotePdfTemplate() {
                                     <Box width="94%">
                                       <Autocomplete
                                         id="demo-mutiple-chip"
-                                        disabled={!allowedToEdit || !isEdit || !childResourceFields?.length}
+                                        disabled={!allowedToEdit || !isEdit || loading}
                                         fullWidth
                                         size="small"
                                         multiple
@@ -1083,7 +1091,11 @@ export default function NewCreateQuotePdfTemplate() {
                                             setBelowTableFields(newFields);
                                           }
                                         }}
-                                        options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...(childResourceFields || [])]}
+                                        options={
+                                          childResourceFields?.length > 0
+                                            ? [{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...childResourceFields]
+                                            : []
+                                        }
                                         getOptionLabel={(option) => option?.fieldLabel}
                                         isOptionEqualToValue={(option: any, value: any) => option.fieldName === value.fieldName}
                                         disableCloseOnSelect
@@ -1138,7 +1150,7 @@ export default function NewCreateQuotePdfTemplate() {
                                       <ArrangeBelowTableFieldView
                                         columns={belowTableFields}
                                         setColumns={setBelowTableFields}
-                                        disabled={!allowedToEdit || !isEdit || loading}
+                                        disabled={!allowedToEdit || !isEdit || loading || !belowTableFields?.length}
                                         childResourceFields={childResourceFields}
                                       />
                                     </Box>
