@@ -1,8 +1,8 @@
-import { Box, Collapse, Dialog, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, Collapse, Dialog, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Popover, Typography } from "@mui/material";
 import { useContext, useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineFile } from "react-icons/ai";
 import axiosInstance from "src/axios/axiosInstance";
-import { sortFileStructure, TNestedTree, unflattenNew } from "src/components/Activity/Attachments/helper";
+import { allAttachmentsAreFromUser, getTitle, sortFileStructure, TNestedTree, unflatten } from "src/components/Activity/AttachmentsNew/helper";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import ActivityLoader from "src/components/Helpers/ActivityLoader";
 import { CustomDialogTransition, displayDateTime } from "src/constants/helpers";
@@ -18,12 +18,15 @@ import ManageFolder from "src/components/Activity/AttachmentsNew/ManageFolder";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useData } from "src/StateProvider/Provider";
 import { FiEdit2 } from "react-icons/fi";
+import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
+import { isEmpty } from "lodash";
+import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
 
 const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   const [loading, setLoading] = useState(false);
@@ -32,6 +35,8 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [anchorElFolder, setAnchorElFolder] = useState({ anchor: null, data: null });
   const [anchorElFile, setAnchorElFile] = useState({ anchor: null, data: null });
+  const [openDelete, setOpenDelete] = useState({ open: false, request: false, attachment: null })
+  const [openDeleteRequest, setOpenDeleteRequest] = useState({ ancherEl: null, attachment: null })
 
   useEffect(() => {
     fetchData();
@@ -41,7 +46,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
     setLoading(true);
     let api = `/attachment-new?resource=${resource}&referenceId=${referenceId}`
     axiosInstance().get(api).then(({ data: { data: { data, count } } }) => {
-      setTreeStructure(unflattenNew(data?.length > 0 ? data : []))
+      setTreeStructure(unflatten(data?.length > 0 ? data : []))
       setLoading(false);
       onSetCount('Attachment', count || 0);
     }).catch((error) => {
@@ -64,22 +69,6 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
 
   const handleFileMenuClose = () => {
     setAnchorElFile({ anchor: null, data: null });
-  };
-
-  const handleDelete = (ids) => {
-    axiosInstance()
-      .put('/attachment-new/remove', { ids: ids })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const folderIconButtons = (attachment) => {
@@ -111,6 +100,15 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             <CreateNewFolderIcon style={{ maxWidth: '18px', color: 'var(--dark-primary-text,#2A3042)' }} />
           </IconButton>
         </HtmlTooltip>
+        {!isEmpty(attachment?.deleteRequest) && attachment?.createdBy?.user?._id === user?.user?._id && (
+          <DeleteRequestIcon
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setOpenDeleteRequest({ ancherEl: e?.currentTarget, attachment: attachment })
+            }}
+          />
+        )}
         <HtmlTooltip title={'Options'}>
           <IconButton
             size="small"
@@ -131,6 +129,15 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const fileIconButtons = (attachment) => {
     return permissions['attachment']?.isDelete ? (
       <div className="flex items-center gap-2">
+        {!isEmpty(attachment?.deleteRequest) && attachment?.createdBy?.user?._id === user?.user?._id && (
+          <DeleteRequestIcon
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setOpenDeleteRequest({ ancherEl: e?.currentTarget, attachment: attachment })
+            }}
+          />
+        )}
         <IconButton
           size="small"
           color="primary"
@@ -178,17 +185,28 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           </MenuItem>
         )}
         {permissions['attachment']?.isDelete && (
-          <MenuItem
-            onClick={() => {
-              handleDelete([anchorElFolder?.data?._id])
-              handleFolderMenuClose();
-            }}
-          >
-            <ListItemIcon style={{ minWidth: '30px' }}>
-              <AiOutlineDelete />
-            </ListItemIcon>
-            <ListItemText>Delete</ListItemText>
-          </MenuItem>
+          <HtmlTooltip
+            title={getTitle([anchorElFolder?.data], user)}
+            placement="top"
+            arrow>
+            <MenuItem
+              disabled={allAttachmentsAreFromUser([anchorElFolder?.data], user) ? false : !isEmpty(anchorElFolder?.data?.deleteRequest) ? true : false}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (allAttachmentsAreFromUser([anchorElFolder?.data], user)) {
+                  setOpenDelete({ open: true, request: false, attachment: anchorElFolder?.data })
+                } else {
+                  setOpenDelete({ open: true, request: true, attachment: anchorElFolder?.data })
+                }
+                handleFolderMenuClose()
+              }}
+            >
+              <ListItemIcon style={{ minWidth: '30px' }}>
+                <AiOutlineDelete />
+              </ListItemIcon>
+              <ListItemText>Delete</ListItemText>
+            </MenuItem>
+          </HtmlTooltip>
         )}
       </Menu>
     ) : (
@@ -199,7 +217,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const RenderFileMenu = () => {
     return Boolean(anchorElFile.anchor) ? (
       <Menu
-        id="folder-edit-menu"
+        id="file-edit-menu"
         anchorEl={anchorElFile?.anchor}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -209,17 +227,28 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           'aria-labelledby': 'basic-button'
         }}
       >
-        <MenuItem
-          onClick={() => {
-            handleDelete([anchorElFile?.data?._id])
-            handleFileMenuClose();
-          }}
-        >
-          <ListItemIcon style={{ minWidth: '30px' }}>
-            <AiOutlineDelete />
-          </ListItemIcon>
-          <ListItemText>Delete</ListItemText>
-        </MenuItem>
+        <HtmlTooltip
+          title={getTitle([anchorElFile?.data], user)}
+          placement="top"
+          arrow>
+          <MenuItem
+            disabled={allAttachmentsAreFromUser([anchorElFile?.data], user) ? false : !isEmpty(anchorElFile?.data?.deleteRequest) ? true : false}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (allAttachmentsAreFromUser([anchorElFile?.data], user)) {
+                setOpenDelete({ open: true, request: false, attachment: anchorElFile?.data })
+              } else {
+                setOpenDelete({ open: true, request: true, attachment: anchorElFile?.data })
+              }
+              handleFileMenuClose()
+            }}
+          >
+            <ListItemIcon style={{ minWidth: '30px' }}>
+              <AiOutlineDelete />
+            </ListItemIcon>
+            <ListItemText>Delete</ListItemText>
+          </MenuItem>
+        </HtmlTooltip>
       </Menu>
     ) : (
       <></>
@@ -306,6 +335,42 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           />
         )}
       </Dialog>
+      {openDelete.open && (
+        <AttachmentDelete
+          deleteRequest={openDelete.request}
+          attachments={[openDelete?.attachment]}
+          onClose={() => {
+            setOpenDelete({ open: false, request: false, attachment: null })
+          }}
+          onSuccess={() => {
+            setOpenDelete({ open: false, request: false, attachment: null })
+            fetchData()
+          }}
+        />
+      )}
+      <Popover
+        open={Boolean(openDeleteRequest.ancherEl)}
+        onClose={() => setOpenDeleteRequest({ ancherEl: null, attachment: null })}
+        anchorEl={openDeleteRequest.ancherEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        <div className="w-[290px] p-3">
+          <DeleteRequest
+            attachment={openDeleteRequest.attachment}
+            onSuccess={() => {
+              setOpenDeleteRequest({ ancherEl: null, attachment: null })
+              fetchData()
+            }}
+          />
+        </div>
+      </Popover>
     </Box >
   )
 

@@ -22,7 +22,8 @@ const ManageFile = ({
   showManimizeMaximize,
   onClose,
   onSuccess,
-  parentId = null
+  parentId = null,
+  attachmentType = null
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -41,6 +42,9 @@ const ManageFile = ({
       setLoading(true)
       let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);
       const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+      if (attachmentType) {
+        tempInitialData.attachmentType = attachmentType
+      }
       tempInitialData.files = []
       setInitialData({
         fields: fieldsDataForCreate,
