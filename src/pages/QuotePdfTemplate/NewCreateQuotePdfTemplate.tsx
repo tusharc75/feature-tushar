@@ -180,29 +180,22 @@ export default function NewCreateQuotePdfTemplate() {
       const vars = data.map((field) => field.fieldData.fieldName);
       setVariables(['entity', 'currentDate', ...vars]);
       setAllFields(data);
-      const headerFields =
-        data
-          ?.filter((f) => f?.fieldData?.type === 'percent' && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems))
-          ?.map((e) => e.fieldData) || [];
+      const headerFields = data?.filter((f) => f?.fieldData?.type === 'percent'
+        && Object.values(OPERATION_ON_LINE_ITEMS)?.includes(f?.fieldData?.operationOnLineItems))?.map((e) => e.fieldData) || [];
       if (headerFields?.length) {
         headerFields.push({
           fieldName: 'finalAmount',
           fieldLabel: 'Final Total'
         });
       }
-
       let filteredData = [];
-
       if (resourceChildResourceMap[resource]) {
         const {
           data: { data: childResourceFields }
         } = await axiosInstance().get(`/field?resource=${resourceChildResourceMap[resource]}`);
         filteredData = childResourceFields?.filter((e) => e?.fieldData?.type === 'currencyAmount')?.map((e) => e.fieldData) || [];
 
-        const hasTaxField = filteredData.some((field) => field.fieldName === 'tax');
-        const hasPreTaxAmountField = filteredData.some((field) => field.fieldName === 'preTaxAmount');
-
-        if (hasTaxField && !hasPreTaxAmountField) {
+        if (filteredData.some((field) => field.fieldName === 'tax') && !filteredData.some((field) => field.fieldName === 'preTaxAmount')) {
           filteredData.push({
             fieldName: 'preTaxAmount',
             fieldLabel: 'Pre Tax Total'
@@ -210,7 +203,7 @@ export default function NewCreateQuotePdfTemplate() {
         }
       }
 
-      setChildResourceFields([...headerFields, ...filteredData]);
+      setChildResourceFields([...filteredData, ...headerFields]);
 
       if (resource === sidebarResource.workOrder) {
         let {
@@ -677,6 +670,16 @@ export default function NewCreateQuotePdfTemplate() {
     }
   };
 
+  const getDefaultLabel = (fieldName) => {
+    if (fieldName === 'totalPrice') {
+      return 'Sub Total'
+    }
+    if (fieldName === 'finalPrice') {
+      return 'Total'
+    }
+    return ''
+  }
+
   return initialValues && pdfResourceOption ? (
     <>
       <DeviceMessage backPath={queryParams.quotation ? `${routes.quotationDetail.path}/${quoteData._id}` : routes.quotePdfTemplate.path} />
@@ -835,10 +838,10 @@ export default function NewCreateQuotePdfTemplate() {
                                   setFieldValue('collaborator', []);
                                   val && val.length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        val?.some((d) => data.entities?.some((e) => e?.entity?._id === d._id))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                                 }}
                                 renderInput={(params) => (
@@ -872,10 +875,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -911,10 +914,10 @@ export default function NewCreateQuotePdfTemplate() {
                                 onOpen={() =>
                                   values['entity'] && values['entity'].length !== 0
                                     ? setOwnerCollaboratorData(
-                                        ownerCollaboratorDataConst.filter((data) =>
-                                          values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
-                                        )
+                                      ownerCollaboratorDataConst.filter((data) =>
+                                        values['entity']?.some((d) => data.entities?.some((e) => e?.entity?._id === d))
                                       )
+                                    )
                                     : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                                 }
                                 renderInput={(params) => (
@@ -1058,27 +1061,16 @@ export default function NewCreateQuotePdfTemplate() {
                                           return matchingOption || { fieldName: field.fieldName, fieldLabel: field.fieldName };
                                         })}
                                         onChange={(e, val) => {
-                                          if (
-                                            val.find((e) => e.fieldName === 'Select All') &&
-                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
-                                              val
-                                                ?.map((e) => e?.fieldName)
-                                                .sort()
-                                                .toString()
-                                          ) {
+                                          if (val.find((e) => e.fieldName === 'Select All') && ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() !==
+                                            val?.map((e) => e?.fieldName).sort().toString()) {
                                             const allFields = childResourceFields.map((field) => ({
                                               fieldName: field.fieldName,
-                                              customLabel: field.fieldName === 'totalPrice' ? 'Sub Total' : '',
+                                              customLabel: getDefaultLabel(field.fieldName),
                                               hideOnZeroValue: false
                                             }));
                                             setBelowTableFields(allFields);
-                                          } else if (
-                                            ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
-                                            val
-                                              ?.map((e) => e?.fieldName)
-                                              .sort()
-                                              .toString()
-                                          ) {
+                                          } else if (['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
+                                            val?.map((e) => e?.fieldName).sort().toString()) {
                                             setBelowTableFields([]);
                                           } else {
                                             const currentFieldNames = belowTableFields.map((f) => f.fieldName);
@@ -1091,7 +1083,7 @@ export default function NewCreateQuotePdfTemplate() {
                                             addedFields.forEach((fieldName) => {
                                               newFields.push({
                                                 fieldName: fieldName,
-                                                customLabel: fieldName === 'totalPrice' ? 'Sub Total' : '',
+                                                customLabel: getDefaultLabel(fieldName),
                                                 hideOnZeroValue: false
                                               });
                                             });
@@ -1124,7 +1116,7 @@ export default function NewCreateQuotePdfTemplate() {
                                                 style={{ marginRight: 8 }}
                                                 checked={
                                                   ['Select All', ...childResourceFields?.map((e) => e?.fieldName)].sort().toString() ===
-                                                  ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
+                                                    ['Select All', ...belowTableFields?.map((e) => e?.fieldName)].sort().toString()
                                                     ? true
                                                     : state.selected
                                                 }

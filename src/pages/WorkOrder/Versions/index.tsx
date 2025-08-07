@@ -24,6 +24,7 @@ import {
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
 
 let renderedFrom = `${camelCase(sidebarResource?.workOrder)}_version`;
 
@@ -343,14 +344,26 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
               <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <Diagram
-                resource={ACTIVITY_RESOURCE.workOrder}
-                referenceId={workOrderId}
-                currentVersion={selectedVersionNumber}
-                disableEdit={true}
-                resourceData={workOrderData}
-                attachmentType={ATTACHMENT_TYPE.drawing}
-              />
+              {import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+                <DiagramNew
+                  resource={sidebarResource.workOrder}
+                  referenceId={workOrderId}
+                  resourceLabel={workOrderData?.workOrderNumber}
+                  currentVersion={selectedVersionNumber}
+                  disableEdit={true}
+                  resourceData={workOrderData}
+                  attachmentType={ATTACHMENT_TYPE.drawing}
+                />
+              ) : (
+                <Diagram
+                  resource={ACTIVITY_RESOURCE.workOrder}
+                  referenceId={workOrderId}
+                  currentVersion={selectedVersionNumber}
+                  disableEdit={true}
+                  resourceData={workOrderData}
+                  attachmentType={ATTACHMENT_TYPE.drawing}
+                />
+              )}
             </TabPanel>
           </Box>
         </CustomDialogContent>

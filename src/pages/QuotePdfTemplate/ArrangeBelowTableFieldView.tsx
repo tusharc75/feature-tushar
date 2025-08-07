@@ -17,8 +17,9 @@ import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
 
 export default function ArrangeChildResourceFieldView({ columns, setColumns, disabled, childResourceFields }) {
+
   const [open, setOpen] = useState(false);
-  const [fullScreen, setFullScreen] = useState(true);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setSubmitting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
 
@@ -89,12 +90,12 @@ export default function ArrangeChildResourceFieldView({ columns, setColumns, dis
 
   return (
     <>
-      <HtmlTooltip title="Arrange Columns" placement="top" arrow>
+      <HtmlTooltip title="Arrange" placement="top" arrow>
         <IconButton
           disabled={disabled}
           aria-describedby="columnSelection"
           size="small"
-          className="arrange-view-v1  px-2"
+          className="arrange-view-v1 px-2"
           color="primary"
           onClick={(event) => {
             setOpen(true);
@@ -113,7 +114,7 @@ export default function ArrangeChildResourceFieldView({ columns, setColumns, dis
           fullScreen={fullScreen || isMobile || isTablet}
         >
           <CustomDialogHeader
-            title="Arrange Columns"
+            title="Arrange"
             onClose={onClose}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
@@ -200,9 +201,8 @@ const RenderListItem = memo(
       <li
         style={style}
         ref={setNodeRef}
-        className={`${
-          isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+        className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+          } list-none transition-colors`}
       >
         <div key={id} className={cn(`rounded-md border p-[8px_0px]`, index === 0 ? 'mt-0' : 'mt-2')}>
           <div className="flex items-center gap-1">
