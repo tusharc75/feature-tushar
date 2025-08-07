@@ -1,6 +1,6 @@
 import { Dialog } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { ACTIVITY_RESOURCE, CustomDialogTransition, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Diagram from '.';
@@ -8,6 +8,8 @@ import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import DiagramNew from 'src/pages/WorkOrder/Diagram/DiagramNew';
+import { startCase } from 'lodash';
 
 const DiagramDialog = ({
   handleClose,
@@ -16,6 +18,7 @@ const DiagramDialog = ({
   uniqueId = null,
   stepId = null,
   resource,
+  resourceLabel = '',
   attachmentType = null,
   showMaterialFilter = false
 }) => {
@@ -60,19 +63,35 @@ const DiagramDialog = ({
       ></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
         {!loading ? (
-          <Diagram
-            height={'calc(100vh - 150px)'}
-            resource={resource}
-            referenceId={referenceId}
-            uniqueId={uniqueId}
-            stepId={stepId}
-            currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
-            resourceData={resourceData}
-            attachmentType={attachmentType}
-            referenceLabel={referenceLabel}
-            showMaterialFilter={showMaterialFilter}
-            showContainer={false}
-          />
+          import.meta.env.VITE_APP_ATTACHMENT === 'new' ? (
+            <DiagramNew
+              height={'calc(100vh - 150px)'}
+              resource={sidebarResource[resource] || startCase(resource)}
+              referenceId={referenceId}
+              resourceLabel={resourceLabel}
+              referenceLabel={referenceLabel}
+              uniqueId={uniqueId}
+              stepId={stepId}
+              currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+              attachmentType={attachmentType}
+              showMaterialFilter={showMaterialFilter}
+              showContainer={false}
+            />
+          ) : (
+            <Diagram
+              height={'calc(100vh - 150px)'}
+              resource={resource}
+              referenceId={referenceId}
+              uniqueId={uniqueId}
+              stepId={stepId}
+              currentVersion={resource === ACTIVITY_RESOURCE.workOrder ? resourceData?.currentVersion : null}
+              resourceData={resourceData}
+              attachmentType={attachmentType}
+              referenceLabel={referenceLabel}
+              showMaterialFilter={showMaterialFilter}
+              showContainer={false}
+            />
+          )
         ) : (
           <Grid container spacing={2}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
