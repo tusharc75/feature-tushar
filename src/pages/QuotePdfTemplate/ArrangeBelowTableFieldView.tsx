@@ -16,7 +16,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
 
-export default function ArrangeChildResourceFieldView({ columns, setColumns, disabled }) {
+export default function ArrangeChildResourceFieldView({ columns, setColumns, disabled, childResourceFields }) {
   const [open, setOpen] = useState(false);
   const [fullScreen, setFullScreen] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
@@ -72,7 +72,6 @@ export default function ArrangeChildResourceFieldView({ columns, setColumns, dis
       column?.map((e) => {
         return {
           fieldName: e?.fieldName,
-          fieldLabel: e?.fieldLabel,
           customLabel: e?.customLabel,
           hideOnZeroValue: e?.hideOnZeroValue
         };
@@ -138,7 +137,7 @@ export default function ArrangeChildResourceFieldView({ columns, setColumns, dis
                       key={col?.id}
                       index={index}
                       id={col?.id}
-                      fieldLabel={col?.fieldLabel}
+                      fieldLabel={childResourceFields?.find((e) => e?.fieldName === col?.fieldName)?.fieldLabel || col?.fieldName}
                       isFullScreen={fullScreen || isMobile || isTablet}
                       customLabel={col?.customLabel}
                       setCustomLabel={(l) => {
@@ -183,16 +182,7 @@ interface ItemProps {
 }
 
 const RenderListItem = memo(
-  ({
-    index,
-    id,
-    fieldLabel,
-    customLabel,
-    setCustomLabel,
-    hideOnZeroValue = false,
-    setHideOnZeroValue,
-    isFullScreen
-  }: ItemProps) => {
+  ({ index, id, fieldLabel, customLabel, setCustomLabel, hideOnZeroValue = false, setHideOnZeroValue, isFullScreen }: ItemProps) => {
     const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
       id,
       data: {
