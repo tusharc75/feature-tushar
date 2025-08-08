@@ -813,7 +813,6 @@ const ContactDetailsPage = (props) => {
             assignedEntity={[]}
             ids={[id]}
             isRenderedFromContact={true}
-            regionalRole={false}
             type="entity"
             entityAccessIds={entityAccess}
             roleAccessIds={roleAccessOfLoggedInUser}

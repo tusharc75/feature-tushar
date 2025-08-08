@@ -486,7 +486,6 @@ export default function Contact(props) {
                 assignedEntity={[]}
                 ids={selectedRecords?.map((record) => record._id || record.id)}
                 isRenderedFromContact={true}
-                regionalRole={false}
                 type="entity"
                 entityAccessIds={entityAccess}
                 roleAccessIds={roleAccessOfLoggedInUser}
