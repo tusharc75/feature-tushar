@@ -2,12 +2,13 @@ import { Box, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Rad
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { makeStyles } from '@mui/styles';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, sortBy, startCase } from 'lodash';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { generateId } from 'src/constants/helpers';
 import { CHART_TYPES, GRAPH_TYPES, IFormDataType, KPIListType, defaultFormConfigs, statuses } from './builderHelpers';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { useData } from 'src/StateProvider/Provider';
 
 const useClasses = makeStyles(() => ({
   column: {
@@ -30,6 +31,11 @@ const Builder = (props: Props) => {
 
   const classes = useClasses();
 
+
+  const {
+    state: { resources }
+  }: any = useData();
+
   React.useEffect(() => {
     if (selectedData) {
       setFormValues(selectedData);
@@ -39,12 +45,13 @@ const Builder = (props: Props) => {
   }, [selectedData]);
 
   const fetchKpis = () => {
-    axiosInstance()
-      .get(`dashboard-master/kpi-list`)
+    axiosInstance().get(`dashboard-master/kpi-list`)
       .then(({ data: { data } }) => {
-        setKpiLists(data);
-      })
-      .catch((err) => { });
+        data?.forEach((e) => {
+          e.resourceLabel = resources[camelCase(e?.resource[0])]?.titlePlural || e?.resource[0]
+        })
+        setKpiLists(sortBy(data, 'resourceLabel'));
+      }).catch((err) => { });
   };
 
   React.useEffect(fetchKpis, []);
@@ -99,7 +106,7 @@ const Builder = (props: Props) => {
             size="small"
             options={kpiLists}
             value={formValues.kpi}
-            groupBy={(option) => option.resource[0]}
+            groupBy={(option) => option.resourceLabel}
             onChange={(_, val: KPIListType) => {
               handleChange('kpi', val);
               setFormValues((prevState) => ({
