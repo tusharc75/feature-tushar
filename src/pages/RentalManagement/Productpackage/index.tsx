@@ -1265,6 +1265,7 @@ const Productpackage = ({
           uniqueId={showAttachmentDialog?._id}
           referenceLabel={showAttachmentDialog.label}
           resource={ACTIVITY_RESOURCE.rentalManagement}
+          resourceLabel={rentalManagementData?.rentalJobName}
           handleClose={() => {
             setShowAttachmentDialog({ open: false, _id: null, label: '' });
           }}

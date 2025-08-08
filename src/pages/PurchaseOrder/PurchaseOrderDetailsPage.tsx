@@ -34,11 +34,12 @@ import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 import { generateAddExistingProduct } from './walkmeSteps';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.purchaseOrder);
 
@@ -63,7 +64,7 @@ const PurchaseOrderDetailsPage = () => {
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const purchaseOrderStepNames = React.useMemo(() => {
     return purchaseOrderSteps.map((item) => item.name);
@@ -112,28 +113,14 @@ const PurchaseOrderDetailsPage = () => {
     }
   };
 
-  const getPurchaseOrderFields = () => {
-    axiosInstance()
-      .get('/field?resource=Purchase Order&view=true')
-      .then(({ data }) => {
-        setPurchaseOrderFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getPurchaseOrderFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseOrder, permissions?.purchaseOrder?.isUpdate);
+    setPurchaseOrderFields(fieldsDataForRead);
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.purchaseOrder);
+    setResourcePolicyData(data);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -262,7 +249,9 @@ const PurchaseOrderDetailsPage = () => {
           {purchaseOrderData?.deleted ? null : <CustomTab value={1}>Details</CustomTab>}
           {purchaseOrderData?.deleted ? null : <CustomTab value={2}>Invoice</CustomTab>}
           {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : <CustomTab value={3}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -335,14 +324,14 @@ const PurchaseOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Box>{purchaseOrderData && <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 4}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.purchaseOrder}
                   data={purchaseOrderData}

@@ -19,6 +19,8 @@ import Step from '../DynamicForm/Step';
 import ManageExpenseReports from 'src/pages/ExpensesReport/ManageExpenseReports';
 import Expenses from 'src/pages/ExpensesReport/Expenses';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ExpenseReportDetail = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +29,7 @@ const ExpenseReportDetail = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
   const [expenseReportData, setExpenseReportData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -36,7 +38,7 @@ const ExpenseReportDetail = () => {
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fields, setFields] = useState(null);
 
   useEffect(() => {
@@ -70,15 +72,9 @@ const ExpenseReportDetail = () => {
     }
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.expenseReport}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenseReport, permissions?.expenseReport?.isUpdate);
+      setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -98,16 +94,8 @@ const ExpenseReportDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.expenses}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.expenses);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -196,7 +184,9 @@ const ExpenseReportDetail = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Expenses</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -228,14 +218,14 @@ const ExpenseReportDetail = () => {
             )}
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.expenseReport}
                   data={expenseReportData}

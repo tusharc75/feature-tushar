@@ -26,7 +26,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import TinyMce from '../../../components/TinyMCE';
-import { displayDateTime, imageUploadMaxSize, sidebarResource, validations } from '../../../constants/helpers';
+import { checkImageUrl, displayDateTime, imageUploadMaxSize, sidebarResource, validations } from '../../../constants/helpers';
 import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import ImageAttachments from './ImageAttachments';
@@ -163,12 +163,6 @@ export const CreateEmail = ({
       walkmeInstance.instance.insertAtCurrentIndex(data);
       walkmeInstance.handleNext();
     }
-  };
-
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
   };
 
   const fetchUsersEmails = async () => {

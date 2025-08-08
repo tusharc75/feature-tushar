@@ -12,8 +12,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { storageLocation } from '../../constants/helpers';
+import { sidebarResource, storageLocation } from '../../constants/helpers';
 import ManageStorageLocation from './ManageStorageLocation';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const StorageLocationDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,15 +34,9 @@ const StorageLocationDetailsPage = () => {
     fetchData();
   }, [id]);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${storageLocation.resource}`)
-      .then(({ data }) => {
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.storageLocation, permissions?.storageLocation?.isUpdate);
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

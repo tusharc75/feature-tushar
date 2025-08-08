@@ -53,7 +53,8 @@ const ManageDeliveryTicket = ({
   referenceType = null,
   referenceData = null,
   assets = null,
-  products = null
+  products = null,
+  serializedPackages = null
 }) => {
   const {
     state: { user }
@@ -350,7 +351,7 @@ const ManageDeliveryTicket = ({
         var pickupFromStorageLocationDisableMessage = '';
         var deliveryToStorageLocationDisableMessage = '';
 
-        if ((assets || products) && referenceType && referenceData) {
+        if ((assets || products || serializedPackages) && referenceType && referenceData) {
           if (user?.user?.brandPolicy?.storageLocation) {
             if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
             }
@@ -412,6 +413,14 @@ const ManageDeliveryTicket = ({
             }
             tempInitialData['products'].push(obj);
           });
+          tempInitialData['serializedPackages'] = []
+          serializedPackages?.forEach(ele => {
+            const obj: any = {};
+            obj.serializedPackage = ele.serializedPackage;
+            obj.qty = ele.qty;
+            obj.uniqueId = ele._id;
+            tempInitialData['serializedPackages'].push(obj);
+          });
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'padName') && referenceData?.padName) {
             tempInitialData['padName'] = referenceData?.padName;
           }
@@ -459,6 +468,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['productionOrder'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly) {
             tempInitialData['subcontractAssembly'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.assemblyOrder) {
+            tempInitialData['assemblyOrder'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;

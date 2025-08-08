@@ -21,6 +21,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useHistory } from 'react-router-dom';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SubcontractAssembly = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -74,13 +75,11 @@ const SubcontractAssembly = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = async () => {
-    let data;
-
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.subcontractAssembly}`);
-    data = response?.data?.data;
-
-    const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
-    setWalkmeData([createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, data)]);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.subcontractAssembly, permissions?.subcontractAssembly?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.subcontractAssemblyDetail.path, true);
+    setWalkmeData([
+      createAddItemStepdata({ title: resources?.subcontractAssembly?.titleSingular, path: routes.subcontractAssembly.path }, fieldsDataForRead)
+    ]);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

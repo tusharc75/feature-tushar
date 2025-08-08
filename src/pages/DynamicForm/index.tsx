@@ -19,6 +19,8 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
+import PreviewDownload from 'src/components/PreviewDownload';
+import EditIcon from '@mui/icons-material/Edit';
 
 const DynamicForm = () => {
   const { route } = useParams();
@@ -59,6 +61,8 @@ const DynamicForm = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
+  const [isPdfTemplateFieldExist, setIsPdfTemplateFieldExist] = useState(false);
+
 
   const [columns, setColumns] = useState(null);
 
@@ -88,6 +92,9 @@ const DynamicForm = () => {
     if (primaryField) {
       setPrimaryFieldName(primaryField?.fieldData?.fieldName);
     }
+    if (data?.find((ele) => ele?.fieldData?.fieldName === 'pdfTemplate')) {
+      setIsPdfTemplateFieldExist(true);
+    }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -95,13 +102,26 @@ const DynamicForm = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 110,
+    width: 130,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
+        {permissions[renderedFrom]?.isUpdate && (
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setShowManageDialog({ open: true, isClone: false, idToClone: row.original._id });
+              }}
+            >
+              <EditIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
         {permissions[renderedFrom]?.isRead && (
           <HtmlTooltip title="View">
             <IconButton
@@ -278,19 +298,34 @@ const DynamicForm = () => {
 
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
-        onClick={() => {
-          if (selectedRecords.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
+      <>
+        {selectedRecords?.length > 0 && isPdfTemplateFieldExist && (
+          <PreviewDownload
+            resource={resource}
+            fileName={`${resourceLabel?.titlePlural}`}
+            referenceId={null}
+            defaultColumns={[]}
+            columns={[]}
+            isMenuItem={true}
+            ids={selectedRecords.map((s) => s._id)}
+            hideDetailButton={true}
+            hideDialog={true}
+          />
+        )}
+        <MenuItem
+          disabled={selectedRecords?.every((e) => !e.canDelete) ? true : false}
+          onClick={() => {
+            if (selectedRecords.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+      </>
     );
   };
 
@@ -356,11 +391,10 @@ const DynamicForm = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${
-            deleteRecord
-              ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
-              : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
-          } ?`}
+          message={`Are you sure you want to delete ${deleteRecord
+            ? `${resourceLabel?.titleSingular?.toLowerCase()} ${primaryFieldName ? `: ${deleteRecord?.[primaryFieldName]}` : ''}`
+            : `selected ${resourceLabel?.titlePlural?.toLowerCase()}`
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

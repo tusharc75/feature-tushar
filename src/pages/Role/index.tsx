@@ -68,13 +68,15 @@ const Roles: FC = () => {
       disabled: true,
       Cell: ({ row }) => (
         <>
-          {row?.original?.name ? (
-            <Link title={row?.original?.name} className="text-truncate link" to={`${routes.roleDetail.path}/${row?.original?.id}`}>
-              {row?.original?.name}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )}
+          <div>
+            {row?.original?.name ? (
+              <Link title={row?.original?.name} className="text-truncate link" to={`${routes.roleDetail.path}/${row?.original?.id}`}>
+                {row?.original?.name}
+              </Link>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
         </>
       )
     },
@@ -84,29 +86,61 @@ const Roles: FC = () => {
       width: 300,
       Cell: ({ row }) => (
         <>
-          {row?.original?.description ? (
-            <h5 className="text-truncate" title={row?.original?.description}>
-              {row?.original?.description}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )}
+          <div>
+            {row?.original?.description ? (
+              <h5 className="text-truncate" title={row?.original?.description}>
+                {row?.original?.description}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
         </>
       )
     },
     {
       accessor: 'tier',
       Header: 'Tier',
-      width: 300,
+      width: 200,
       Cell: ({ row }) => (
         <>
-          {row?.original?.tier ? (
-            <h5 className="text-truncate" title={row?.original?.tier}>
-              {row?.original?.tier}
+          <div>
+            {row?.original?.tier ? (
+              <h5 className="text-truncate" title={row?.original?.tier}>
+                {row?.original?.tier}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
+        </>
+      )
+    },
+    {
+      accessor: 'canAssignByAnyuser',
+      Header: 'Can Assign By Any User',
+      width: 200,
+      Cell: ({ row }) => (
+        <>
+          <div>
+            <h5 className="text-truncate" >
+              {row?.original?.canAssignByAnyuser ? 'Yes' : 'No'}
             </h5>
-          ) : (
-            <NoDataCell />
-          )}
+          </div>
+        </>
+      )
+    },
+    {
+      accessor: 'superAdminAccess',
+      Header: 'Super Admin Access',
+      width: 200,
+      Cell: ({ row }) => (
+        <>
+          <div>
+            <h5 className="text-truncate" >
+              {row?.original?.superAdminAccess ? 'Yes' : 'No'}
+            </h5>
+          </div>
         </>
       )
     },
@@ -309,8 +343,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+              permissions?.role?.isDelete &&
+              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }
@@ -323,8 +357,8 @@ const Roles: FC = () => {
         <MenuItem
           disabled={
             permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+              permissions?.role?.isDelete &&
+              selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
               ? true
               : false
           }

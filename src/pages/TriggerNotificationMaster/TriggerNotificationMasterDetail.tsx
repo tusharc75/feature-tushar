@@ -15,6 +15,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageTriggerNotificationMaster from './ManageTriggerNotificationMaster';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const TriggerNotificationMasterDetail = () => {
   const { id } = useParams();
@@ -39,14 +40,11 @@ const TriggerNotificationMasterDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.triggerNotificationMaster}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource?.triggerNotificationMaster,
+      permissions?.triggerNotificationMaster?.isUpdate
+    );
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {

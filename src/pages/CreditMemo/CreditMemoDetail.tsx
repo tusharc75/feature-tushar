@@ -19,6 +19,8 @@ import { ExpandMore } from '@mui/icons-material';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { Skeleton } from '@mui/material';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const CreditMemoDetail = () => {
   const { id } = useParams();
@@ -31,7 +33,7 @@ const CreditMemoDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
@@ -52,19 +54,13 @@ const CreditMemoDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.creditMemo}&view=true`)
-      .then(({ data }) => {
-        data?.data.forEach((o: any) => {
-          if (o?.fieldData?.fieldName === 'status') {
-            setStatusOptions([...o.fieldData.option]);
-          }
-        });
-        setFields(data.data?.filter((field) => field.isRead));
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.creditMemo, permissions?.creditMemo?.isUpdate);
+    fieldsDataForRead.forEach((o: any) => {
+      if (o?.fieldData?.fieldName === 'status') {
+        setStatusOptions([...o.fieldData.option]);
+      }
+    });
+    setFields(fieldsDataForRead);
   };
 
   const fetchData = async () => {
@@ -121,16 +117,8 @@ const CreditMemoDetail = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.creditMemo}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.creditMemo);
+    setResourcePolicyData(data);
   };
 
   const handleChangeStatus = (status) => {
@@ -249,11 +237,20 @@ const CreditMemoDetail = () => {
           </Box>
         </Box>
       </Box>
+      {creditMemoData?.amountGreaterThenInvoiceAmount && (
+        <div className="mt-2 rounded-md border-l-4 border-yellow-500 bg-yellow-100 p-2 text-sm text-yellow-700 shadow-sm">
+          <p>
+            <span className="font-semibold">Warning:</span> Credit memo amount exceeds the original invoice amount.
+          </p>
+        </div>
+      )}
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0} label={'Header'} />
           <CustomTab value={1} label={'Details'} />
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -276,14 +273,14 @@ const CreditMemoDetail = () => {
             />
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.creditMemo}
                   data={creditMemoData}

@@ -35,8 +35,9 @@ import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
 import LoadingTicket from './LoadingTicket';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from 'src/pages/DynamicForm/Step';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -60,9 +61,9 @@ const SalesOrderDetails = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
-  const [showInvoiceConfirmBox, setShowInvoiceConfirmBox] = useState(false)
+  const [showInvoiceConfirmBox, setShowInvoiceConfirmBox] = useState(false);
   const [steps, setSteps] = useState([]);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -98,24 +99,16 @@ const SalesOrderDetails = () => {
 
   const getFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Sales Order');
-      setSalesOrderFields(response?.data?.data);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.salesOrder, permissions?.salesOrder?.isUpdate);
+      setSalesOrderFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.salesOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.salesOrder);
+    setResourcePolicyData(data);
   };
 
   const fetchSalesOrderData = async () => {
@@ -188,15 +181,16 @@ const SalesOrderDetails = () => {
                   <ThemeButton
                     iconForMobile={false}
                     onClick={() => {
-                      setShowInvoiceConfirmBox(true)
+                      setShowInvoiceConfirmBox(true);
                     }}
                   >
                     Invoiced
                   </ThemeButton>
                 )}
                 {permissions?.salesOrder?.isUpdate &&
-                  (resourceData?.policy?.restrictAutoDebitInventory ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced] :
-                    [SALES_ORDER_STATUS.invoiced]
+                  (resourcePolicyData?.policy?.restrictAutoDebitInventory
+                    ? [SALES_ORDER_STATUS.readyToInvoice, SALES_ORDER_STATUS.invoiced]
+                    : [SALES_ORDER_STATUS.invoiced]
                   ).includes(salesOrderData?.status) && (
                     <ButtonWithPulse
                       onClick={() => {
@@ -245,8 +239,10 @@ const SalesOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
-          {!(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 2)}>Views</CustomTab>}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {!(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourcePolicyData, 2)}>Views</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -256,7 +252,12 @@ const SalesOrderDetails = () => {
               </div>
             ) : (
               <>
-                <DetailsPage data={salesOrderData} fields={salesOrderFields} resource={sidebarResource?.salesOrder} referenceId={salesOrderData?._id} />
+                <DetailsPage
+                  data={salesOrderData}
+                  fields={salesOrderFields}
+                  resource={sidebarResource?.salesOrder}
+                  referenceId={salesOrderData?._id}
+                />
               </>
             )}
           </Box>
@@ -298,14 +299,14 @@ const SalesOrderDetails = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.salesOrder}
                   data={salesOrderData}
@@ -314,7 +315,7 @@ const SalesOrderDetails = () => {
               </TabPanel>
             );
           })}
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 2)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 2)}>
           {salesOrderData && <SalesOrderView salesOrderData={salesOrderData} />}
         </TabPanel>
       </Box>

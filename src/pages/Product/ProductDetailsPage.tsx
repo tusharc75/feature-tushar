@@ -39,6 +39,8 @@ import ServicePackage from './ServicePackage';
 import NonSerializedAssetProductInventory from './inventory';
 import LeadTime from 'src/components/LeadTime';
 import Step from 'src/pages/DynamicForm/Step';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const minHeight = '250px';
 
@@ -71,7 +73,7 @@ const ProductDetailsPage = () => {
 
   const [productInventoryData, setProductInventoryData] = useState([]);
   const [productInventoryLoading, setProductInventoryLoading] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   useEffect(() => {
     if (id) {
@@ -81,16 +83,8 @@ const ProductDetailsPage = () => {
   }, [id]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.product}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.product);
+    setResourcePolicyData(data);
   };
 
   useEffect(() => {
@@ -120,59 +114,51 @@ const ProductDetailsPage = () => {
     setTabValue(newValue);
   };
 
-  const getProductFieldsAndData = () => {
+  const getProductFieldsAndData = async () => {
     setLoading(true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, permissions?.product?.isUpdate);
+    const _productField: any = [];
+    const filteredData = fieldsDataForRead.filter((obj) => obj.isRead);
+    filteredData.forEach((_f) => {
+      if (!ignoreField.includes(_f.fieldData.fieldName)) {
+        _productField.push(_f.fieldData);
+      }
+    });
+    const _fields = [];
+    _productField.map((_f) => _fields.push({ fieldData: _f }));
+    var newField = _fields;
     axiosInstance()
-      .get('/field?resource=Product')
+      .get(`/product/` + id)
       .then(({ data: { data } }) => {
-        const _productField: any = [];
-        const filteredData = data.filter((obj) => obj.isRead);
-        filteredData.forEach((_f) => {
-          if (!ignoreField.includes(_f.fieldData.fieldName)) {
-            _productField.push(_f.fieldData);
-          }
+        data.fields?.map((_f) => newField.push({ fieldData: _f }));
+        data.productData.fields?.map((_f) => newField.push({ fieldData: _f }));
+        var fields = [];
+        newField.forEach((_f) => {
+          fields.push(_f.fieldData);
         });
-        const _fields = [];
-        _productField.map((_f) => _fields.push({ fieldData: _f }));
-        var newField = _fields;
-        axiosInstance()
-          .get(`/product/` + id)
-          .then(({ data: { data } }) => {
-            data.fields?.map((_f) => newField.push({ fieldData: _f }));
-            data.productData.fields?.map((_f) => newField.push({ fieldData: _f }));
-            var fields = [];
-            newField.forEach((_f) => {
-              fields.push(_f.fieldData);
+        fields = extractFieldsForDisplay(fields);
+        newField = [];
+        fields.forEach((_f) => {
+          newField.push({ fieldData: _f });
+        });
+        setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
+        setHeadingLabel(
+          data.productData?.productNumber ? `${data.productData?.productName} - ${data.productData?.productNumber}` : data.productData?.productName
+        );
+        setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
+        if (data?.productData?.entity && data?.productData?.entity !== undefined) {
+          data.productData.entity = user.entity
+            ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
+            ?.map((d) => {
+              return { optionValue: d._id, optionLabel: d.entityName };
             });
-            fields = extractFieldsForDisplay(fields);
-            newField = [];
-            fields.forEach((_f) => {
-              newField.push({ fieldData: _f });
-            });
-            setProductFields(newField.filter((d) => !ignoreField.includes(d?.fieldData?.fieldName)));
-            setHeadingLabel(
-              data.productData?.productNumber
-                ? `${data.productData?.productName} - ${data.productData?.productNumber}`
-                : data.productData?.productName
-            );
-            setCustomizedRoutes([{ ...routes.product, title: resources?.product?.titlePlural }, { title: `${data.productData.productName}` }]);
-            if (data?.productData?.entity && data?.productData?.entity !== undefined) {
-              data.productData.entity = user.entity
-                ?.filter((d) => data?.productData?.entity?.some((e) => d._id === e))
-                ?.map((d) => {
-                  return { optionValue: d._id, optionLabel: d.entityName };
-                });
-            }
-            setProductData(data.productData);
-            setLoading(false);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-            setLoading(false);
-          });
+        }
+        setProductData(data.productData);
+        setLoading(false);
       })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setLoading(false);
       });
   };
 
@@ -270,9 +256,9 @@ const ProductDetailsPage = () => {
           {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
           {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
           {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
-          {resourceData &&
-            resourceData?.tabs?.length > 0 &&
-            resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 10}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 10}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -337,7 +323,7 @@ const ProductDetailsPage = () => {
                                             <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
                                           )}
                                           <Typography className="table-data-v1 bt-0 br-0">{inventory}</Typography>
-                                          <Typography className="table-data-v1 bt-0">{(inventory - (softHold || 0))}</Typography>
+                                          <Typography className="table-data-v1 bt-0">{inventory - (softHold || 0)}</Typography>
                                         </Box>
                                       ))}
                                   </>
@@ -582,14 +568,14 @@ const ProductDetailsPage = () => {
         <TabPanel value={tabValue} index={9}>
           <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 10}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.product}
                   data={productData}

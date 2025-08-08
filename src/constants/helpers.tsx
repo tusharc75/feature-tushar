@@ -299,6 +299,7 @@ export const sidebarResource = {
   quotePdfTemplate: 'Quote Pdf Template',
   warehouse: 'Warehouse',
   rentalManagement: 'Rental Management',
+  rentalJobTechnicianView: 'Rental Job Technician View',
   deliveryTicket: 'Delivery Ticket',
   pricingCondition: 'Pricing Condition',
   repairJob: 'Repair Job',
@@ -526,6 +527,11 @@ export const customPdfTemplate = {
 
 export const rentalManagement = {
   api: '/rental-management',
+  resource: 'Rental Management'
+};
+
+export const rentalJobTechnicianView = {
+  api: '/rental-job-technician-view',
   resource: 'Rental Management'
 };
 
@@ -955,6 +961,12 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       const calValues = autoCalculateSpecificFields({ [ele?.fieldName]: obj[ele?.fieldName] }, obj, fields);
       Object.assign(obj, calValues);
     }
+    else if (ele?.type === 'formula') {
+      if (ele?.inputFields?.length) {
+        const calValues = autoCalculateSpecificFields({ [ele?.inputFields[0]]: obj[ele?.inputFields[0]] }, obj, fields);
+        Object.assign(obj, calValues);
+      }
+    }
   });
 
   return obj;
@@ -1045,7 +1057,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
             obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
           });
       }
-    } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
+    } else if (key.type === 'decimal' || key.type === 'percent') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
     } else if (key.type === 'dateTime') {
       if (isClone) {
@@ -1072,6 +1084,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
           : dataObj[key.fieldName]
         : {};
       obj[key.fieldName] = values;
+    } else if (key.type === 'formula') {
+      if (key?.returnType === 'number') {
+        obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : 0;
+      }
+      else {
+        obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      }
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1373,7 +1392,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       } else {
         schema[input.fieldName] = input.required ? array().min(1, message) : array();
       }
-    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
       if (uniqueDependentFields.length > 0) {
         schema[input.fieldName] = number().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
@@ -1452,7 +1471,19 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'gpsLocation') {
       schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
-    } else {
+    } else if (input.type === 'formula') {
+      if (input?.returnType === 'string') {
+        schema[input.fieldName] = input.required ? string().required(message) : string();
+      }
+      else if (input?.returnType === 'boolean') {
+        schema[input.fieldName] = input.required ? boolean().required(message) : boolean();
+      }
+      else {
+        schema[input.fieldName] = input.required ? number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+          : number().nullable();
+      }
+    }
+    else {
       if (uniqueDependentFields.length > 0) {
         schema[input.fieldName] = string().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
@@ -2231,7 +2262,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  subcontractAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly',
+  assemblyOrder: 'Assembly Order'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2262,6 +2294,12 @@ export const PURCHASE_ORDER_STATUS = {
 } as const;
 
 export const INVENTORY_OWNER_TYPE = {
+  brand: 'Brand',
+  supplierAccount: 'Supplier Account',
+  customerAccount: 'Customer Account'
+} as const;
+
+export const SERIALIZED_PACKAGE_OWNER_TYPE = {
   brand: 'Brand',
   supplierAccount: 'Supplier Account',
   customerAccount: 'Customer Account'
@@ -2631,6 +2669,13 @@ export const REPORT_LIST = [
     section: REPORT_SECTIONS.asset
   },
   {
+    title: 'Scrapped Assets',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'ScrappedAssets',
+    section: REPORT_SECTIONS.asset
+  },
+  {
     title: 'Number Of Assets by Status',
     permission: 'serializedAsset',
     key: 'standardReport',
@@ -2985,6 +3030,18 @@ export const COLOUR_MASTER = {
   postWork: {
     background: 'rgba(222, 249, 255, 1)',
     borderColor: 'green'
+  },
+  pending: {
+    background: '#FFE7A2',
+    borderColor: '#FFB84D'
+  },
+  inProgress: {
+    background: '#A9D0F5',
+    borderColor: '#3399FF'
+  },
+  completed: {
+    background: '#B6D7A8',
+    borderColor: '#5CB85C'
   }
 };
 
@@ -4077,9 +4134,9 @@ export async function handleHardReload(url = window.location.href) {
   window.location.reload();
 }
 
-export const tabIndexValue = (resourceData, index) => {
-  if (resourceData && resourceData?.tabs?.length > 0) {
-    index = resourceData?.tabs?.length + index;
+export const tabIndexValue = (resourcePolicyData, index) => {
+  if (resourcePolicyData && resourcePolicyData?.tabs?.length > 0) {
+    index = resourcePolicyData?.tabs?.length + index;
   }
   return index;
 };
@@ -4325,4 +4382,10 @@ export const getDeviceFingerprint = async () => {
   } catch (error) {
     return null;
   }
+};
+
+export const checkImageUrl = (url) => {
+  let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
+  let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
+  return imageExtensions.indexOf(extension) >= 0;
 };

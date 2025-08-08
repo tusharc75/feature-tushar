@@ -34,6 +34,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createPurchaseOrderFlow } from './walkmeSteps';
 import CustomContent from 'src/pages/PurchaseOrder/CustomContent';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PurchaseOrder = () => {
   let renderedFrom = camelCase(sidebarResource.purchaseOrder);
@@ -100,33 +101,30 @@ const PurchaseOrder = () => {
       });
   };
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.purchaseOrder}&view=true`)
-      .then(({ data: { data } }) => {
-        let newColumns = generateColumns(renderedFrom, data, routes.purchaseOrderDetail.path, true);
-        let extraColumn = [
-          {
-            accessor: 'totalPrice',
-            Header: 'Total Price',
-            width: 150,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => (
-              <>
-                {row?.original?.totalPrice ? (
-                  <h5 className="text-truncate" title={row?.original?.totalPrice}>
-                    {row?.original?.totalPrice}
-                  </h5>
-                ) : (
-                  <NoDataCell />
-                )}
-              </>
-            )
-          }
-        ];
-        setColumns([...newColumns, ...extraColumn, ...getStaticFields(true), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.purchaseOrder, permissions?.purchaseOrder?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.purchaseOrderDetail.path, true);
+    let extraColumn = [
+      {
+        accessor: 'totalPrice',
+        Header: 'Total Price',
+        width: 150,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <>
+            {row?.original?.totalPrice ? (
+              <h5 className="text-truncate" title={row?.original?.totalPrice}>
+                {row?.original?.totalPrice}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </>
+        )
+      }
+    ];
+    setColumns([...newColumns, ...extraColumn, ...getStaticFields(true), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

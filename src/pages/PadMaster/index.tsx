@@ -18,6 +18,7 @@ import { useData } from '../../StateProvider/Provider';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManagePadMaster from './ManagePadMaster';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PadMaster = () => {
   const renderedFrom = camelCase(sidebarResource.padMaster);
@@ -36,10 +37,8 @@ const PadMaster = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.padMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.padMasterDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.padMaster, permissions?.padMaster?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.padMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

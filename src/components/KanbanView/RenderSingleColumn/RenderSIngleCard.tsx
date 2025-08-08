@@ -1,0 +1,167 @@
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { CheckCircle, RadioButtonUnchecked } from '@mui/icons-material';
+import { Checkbox, Collapse, IconButton } from '@mui/material';
+import { memo, useEffect, useRef, useState } from 'react';
+import { BsChevronContract, BsChevronExpand } from 'react-icons/bs';
+import RenderCanbanCell from 'src/components/KanbanView/RenderSingleColumn/RenderKanbanCell';
+import { Column, UseCanbanStore } from 'src/components/KanbanView/types';
+import { cn } from 'src/constants/helpers';
+
+type RenderSingleCardProps<D> = {
+  data: D;
+  state: UseCanbanStore<D>;
+  actionColumn: Column<D> | undefined;
+  indexColumn: Column<D> | undefined;
+  primaryColumn: Column<D> | undefined;
+  displayedColumns: Column<D>[];
+  hiddenColumns: Column<D>[];
+  onSaveEdit?: (props: { inputField: Record<string, string>; updatedData: any }) => Promise<void>;
+  hideSelection?: boolean;
+  setActiveDragItemProps: React.Dispatch<any>;
+  columnId: string;
+  dragging?: boolean;
+};
+
+const RenderSingleCardImpl = <D,>({
+  data,
+  primaryColumn,
+  actionColumn,
+  displayedColumns,
+  hiddenColumns,
+  indexColumn,
+  state,
+  onSaveEdit,
+  hideSelection,
+  columnId,
+  dragging
+}: RenderSingleCardProps<D>) => {
+  const [expanded, setExpanded] = useState(false);
+  const rectRef = useRef<DOMRect>(null);
+  const dummyDiv = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout>(null);
+
+  const canEdit = data?.hasOwnProperty('canEdit') ? data['canEdit'] : true;
+
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: data?.['_id'],
+    disabled: !data || !canEdit,
+    data: {
+      columnId,
+      props: {
+        data,
+        primaryColumn,
+        actionColumn,
+        displayedColumns,
+        hiddenColumns,
+        indexColumn,
+        state,
+        onSaveEdit,
+        hideSelection
+      }
+    }
+  });
+
+  const styleDnd = {
+    transform: CSS.Translate.toString(transform)
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      timeoutRef.current = setTimeout(() => {
+        dummyDiv.current.style.height = '0px';
+      }, 100);
+    }
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, [isDragging]);
+
+  if (!data) return null;
+
+  if (isDragging) {
+    return <div ref={dummyDiv} style={{ height: rectRef.current?.height + 2 }} className="w-full transition-[height] duration-500"></div>;
+  }
+
+  return (
+    <div
+      ref={(node) => {
+        setNodeRef(node);
+        if (node) {
+          rectRef.current = node.getBoundingClientRect();
+        }
+      }}
+      style={{ ...styleDnd, ...(dragging ? { minWidth: rectRef.current?.width } : {}) }}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        'mx-2 mb-2 rounded-lg border bg-[var(--dark-primary,white)] shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] [&_.show-in-export]:!hidden',
+        dragging ? 'cursor-grabbing' : canEdit ? 'cursor-grab' : '',
+        canEdit ? '' : 'bg-red-100 dark:bg-red-900'
+      )}
+    >
+      <div className="mb-2 flex items-center justify-between gap-2 border-b p-2 pb-0">
+        <div className="flex items-center">
+          {!hideSelection && (
+            <span className="block">
+              <Checkbox
+                icon={<RadioButtonUnchecked />}
+                sx={{ p: '5px' }}
+                size="small"
+                checkedIcon={<CheckCircle />}
+                onChange={(event) => {
+                  state.handleSelect(data);
+                }}
+                checked={state.selectedRrowsMap.has(data['_id'])}
+              />
+            </span>
+          )}
+          {indexColumn && <RenderCanbanCell column={indexColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
+          <RenderCanbanCell column={primaryColumn} data={data} onSaveEdit={onSaveEdit} headerClassName="font-semibold" />
+        </div>
+        <div className="flex items-center">
+          {actionColumn && <RenderCanbanCell column={actionColumn} data={data} onSaveEdit={onSaveEdit} hideHeader />}
+          {hiddenColumns.length > 0 && (
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded((prev) => !prev);
+              }}
+            >
+              {expanded ? <BsChevronExpand /> : <BsChevronContract />}
+            </IconButton>
+          )}
+        </div>
+      </div>
+      <div className="px-4 pb-4 pt-0">
+        <ul className=" mb-2 list-none space-y-2">
+          {displayedColumns?.map((d, i) => {
+            return (
+              <li key={d.accessor} className="list-none">
+                <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />
+              </li>
+            );
+          })}
+        </ul>
+        {hiddenColumns.length > 0 && (
+          <Collapse unmountOnExit in={expanded}>
+            <ul className=" space-y-2">
+              {hiddenColumns?.map((d, i) => {
+                return (
+                  <li key={d.accessor} className="list-none">
+                    <RenderCanbanCell column={d} data={data} key={d.accessor} onSaveEdit={onSaveEdit} />
+                  </li>
+                );
+              })}
+            </ul>
+          </Collapse>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const RenderSingleCard = memo(RenderSingleCardImpl) as typeof RenderSingleCardImpl;
+
+export default RenderSingleCard;

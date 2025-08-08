@@ -31,6 +31,7 @@ import {
 } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_service'}`;
@@ -146,10 +147,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   ];
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.serviceMaster, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serviceMasterDetail.path);
     setColumns([...defaultColumns, ...newColumns]);
   };
 
@@ -254,7 +253,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
+            additionalParams={`referenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
@@ -300,11 +299,11 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       {permissions?.assemblyOrder?.isRead && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
-            <ContainedTab value={0} label={`Individual`} />
-            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+            <ContainedTab value={0} label={`Field`} />
+            <ContainedTab value={1} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
+            <ContainedTab value={2} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]}-WO`} />
+            <ContainedTab value={3} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]}-WO`} />
+            <ContainedTab value={4} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]}-WO`} />
           </ContainedTabs>
         </>
       )}

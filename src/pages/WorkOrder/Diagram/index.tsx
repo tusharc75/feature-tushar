@@ -19,6 +19,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ActionButtonWithMenu from 'src/components/PageHeaders/ActionButtonWithMenu';
 import {
   ACTIVITY_RESOURCE,
+  checkImageUrl,
   checkSuperAdminAccess,
   cn,
   CustomDialogTransition,
@@ -131,13 +132,6 @@ const Diagram = ({
         setSelectedService(serviceData?.find((e) => e.uniqueId === defaultSelectedUniqueId));
       }
     }
-  };
-
-  const checkImageType = (memeType) => {
-    if (['jpg', 'png', 'jpeg'].includes(memeType)) {
-      return true;
-    }
-    return false;
   };
 
   const checkpdfType = (memeType) => {
@@ -548,7 +542,7 @@ const Diagram = ({
           fullWidth
           disableEnforceFocus={true}
         >
-          {!checkImageType(selectedAttachment?.url?.split('.')[1]) && !checkpdfType(selectedAttachment?.url?.split('.')[1]) && (
+          {!checkImageUrl(selectedAttachment?.url) && !checkpdfType(selectedAttachment?.url?.split('.')[1]) && (
             <CustomDialogHeader
               title={selectedAttachment?.name}
               showManimizeMaximize={false}
@@ -560,10 +554,10 @@ const Diagram = ({
           )}
           <CustomDialogContent
             isFooterPresent={false}
-            shouldApplyHeight={!checkImageType(selectedAttachment?.url?.split('.')[1])}
+            shouldApplyHeight={!checkImageUrl(selectedAttachment?.url)}
             className={cn(!disableEdit ? 'px-0 py-0' : 'px-4 py-3')}
           >
-            {checkImageType(selectedAttachment?.url?.split('.')[1]) ? (
+            {checkImageUrl(selectedAttachment?.url) ? (
               <ImageEditor
                 data={selectedAttachment}
                 fetchData={fetchData}

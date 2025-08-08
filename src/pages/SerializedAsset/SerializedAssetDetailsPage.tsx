@@ -57,6 +57,8 @@ import dayjs from 'dayjs';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
 import ServiceHistory from 'src/pages/SerializedAsset/ServiceHistory';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -90,7 +92,7 @@ const SerializedAssetDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
@@ -101,37 +103,37 @@ const SerializedAssetDetailsPage = () => {
   const extraFields = [
     ...(permissions?.rentalManagement?.isRead
       ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869032395b3',
-            fieldName: 'rentalJob',
-            fieldLabel: resources?.rentalManagement?.titleSingular,
-            lookup: true,
-            lookupResource: sidebarResource.rentalManagement,
-            resource: sidebarResource.serializedAsset,
-            type: 'dropDown',
-            sectionName: 'Other Information'
-          },
-          isRead: true
-        }
-      ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b3',
+              fieldName: 'rentalJob',
+              fieldLabel: resources?.rentalManagement?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.rentalManagement,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
       : []),
     ...(permissions?.repairOrder?.isRead
       ? [
-        {
-          fieldData: {
-            _id: '630dc2429ec41869032395b5',
-            fieldName: 'repairOrder',
-            fieldLabel: resources?.repairOrder?.titleSingular,
-            lookup: true,
-            lookupResource: sidebarResource.repairOrder,
-            resource: sidebarResource.serializedAsset,
-            type: 'dropDown',
-            sectionName: 'Other Information'
-          },
-          isRead: true
-        }
-      ]
+          {
+            fieldData: {
+              _id: '630dc2429ec41869032395b5',
+              fieldName: 'repairOrder',
+              fieldLabel: resources?.repairOrder?.titleSingular,
+              lookup: true,
+              lookupResource: sidebarResource.repairOrder,
+              resource: sidebarResource.serializedAsset,
+              type: 'dropDown',
+              sectionName: 'Other Information'
+            },
+            isRead: true
+          }
+        ]
       : [])
   ];
 
@@ -218,23 +220,27 @@ const SerializedAssetDetailsPage = () => {
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
       setDeviceTemplate(data?.product?.deviceTemplate);
       if (data.status === ASSET_STATUS.scrap) {
-        setCustomField([{
-          fieldData: {
-            fieldLabel: 'Scraping Reason',
-            fieldName: 'scrapingReason',
-            type: 'singleLine',
-            sectionName: 'Other Information'
+        setCustomField([
+          {
+            fieldData: {
+              fieldLabel: 'Scraping Reason',
+              fieldName: 'scrapingReason',
+              type: 'singleLine',
+              sectionName: 'Other Information'
+            }
           }
-        }]);
+        ]);
       } else if (data.status === ASSET_STATUS.lost) {
-        setCustomField([{
-          fieldData: {
-            fieldLabel: 'Lost Reason',
-            fieldName: 'lostReason',
-            type: 'singleLine',
-            sectionName: 'Other Information'
+        setCustomField([
+          {
+            fieldData: {
+              fieldLabel: 'Lost Reason',
+              fieldName: 'lostReason',
+              type: 'singleLine',
+              sectionName: 'Other Information'
+            }
           }
-        }]);
+        ]);
       }
       setLoading(false);
       setRefreshAssetHistory(!refreshAssetHistory);
@@ -244,49 +250,35 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.serializedAsset);
+    setResourcePolicyData(data);
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data }) => {
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              setAllowUpdateStatus(o?.isUpdate);
-              return true;
-            }
-          });
-          data.data.forEach((element) => {
-            if (element?.fieldData?.fieldName === 'currentOwner') {
-              element.fieldData.type = 'singleLine';
-            }
-          });
+  const fetchFields = async () => {
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    if (fieldsDataForRead && fieldsDataForRead.length) {
+      fieldsDataForRead.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...o.fieldData.option]);
+          setAllowUpdateStatus(o?.isUpdate);
+          return true;
         }
-        setFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
       });
+      fieldsDataForRead.forEach((element) => {
+        if (element?.fieldData?.fieldName === 'currentOwner') {
+          element.fieldData.type = 'singleLine';
+        }
+      });
+    }
+    setFields(fieldsDataAll);
   };
 
-  const fetchFieldSerializedAssetStatusChangeRequest = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}&view=true`)
-      .then(({ data: { data } }) => {
-        setSerializedAssetStatusChangeRequestFields([...data]);
-      });
+  const fetchFieldSerializedAssetStatusChangeRequest = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource.serializedAssetStatusChangeRequest,
+      false
+    );
+    setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -315,9 +307,11 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    const { policy } = resourceData;
-    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === o.optionValue
-      && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue)));
+    const { policy } = resourcePolicyData;
+    const statusPolicy = policy?.statusChangeFields?.find(
+      (ele) =>
+        ele.status === o.optionValue && (!ele?.products || ele?.products?.length === 0 || ele?.products?.includes(assetDetails?.product?.optionValue))
+    );
     setStatus(o.optionValue);
     if (
       (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
@@ -341,24 +335,25 @@ const SerializedAssetDetailsPage = () => {
   const handleAddAssetToRepairJob = (repairJobId) => {
     axiosInstance()
       .post(`${repairJob.api}/${repairJobId}/assets`, { assets: [{ _id: id, currentStatus: assetDetails.status }] })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
   const handleAddAssetsToRepairOrder = async (repairOrderId: any) => {
-    const rows = [{
-      materialId: assetDetails._id,
-      type: MATERIAL_TYPE.serializedAsset,
-      qty: 1,
-      parentId: null
-    }]
+    const rows = [
+      {
+        materialId: assetDetails._id,
+        type: MATERIAL_TYPE.serializedAsset,
+        qty: 1,
+        parentId: null
+      }
+    ];
 
     axiosInstance()
       .post(`${repairOrder.api}/${repairOrderId}/product-package`, { material: rows, autoCreateWorkOrder: true })
-      .then(() => {
-      })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -459,7 +454,7 @@ const SerializedAssetDetailsPage = () => {
   const openDataChange = () => {
     return (
       [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview].includes(assetDetails.status) &&
-      resourceData?.policy?.dataChangeAssetLogFields?.length
+      resourcePolicyData?.policy?.dataChangeAssetLogFields?.length
     );
   };
 
@@ -493,7 +488,8 @@ const SerializedAssetDetailsPage = () => {
                 </ThemeButton> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
-                    {permissions?.repairOrder?.isCreate && assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
+                    {permissions?.repairOrder?.isCreate &&
+                      assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
                         assetDetails?.status
                       ) && (
@@ -518,12 +514,16 @@ const SerializedAssetDetailsPage = () => {
                           {`Create ${resources?.repairJob?.titleSingular}`}
                         </ThemeButton>
                       )}
-                    {openDataChange() && !resourceData?.policy?.dataChangeStatus ? (
+                    {openDataChange() && !resourcePolicyData?.policy?.dataChangeStatus ? (
                       <HtmlTooltip title={'If you update data from this button it will add log in history'}>
                         <ThemeButton
                           iconForMobile={<EditIcon />}
                           onClick={() =>
-                            setOpenUpdateDialog({ open: true, assetLogFields: resourceData.policy.dataChangeAssetLogFields, updateStatus: null })
+                            setOpenUpdateDialog({
+                              open: true,
+                              assetLogFields: resourcePolicyData?.policy?.dataChangeAssetLogFields,
+                              updateStatus: null
+                            })
                           }
                         >
                           Edit Data
@@ -581,7 +581,7 @@ const SerializedAssetDetailsPage = () => {
                               ) {
                                 setStatusChangeRequestDialog(true);
                               } else {
-                                const { policy } = resourceData;
+                                const { policy } = resourcePolicyData;
                                 if (policy?.dataChangeStatus === o.optionValue && openDataChange()) {
                                   setOpenUpdateDialog({ open: true, assetLogFields: policy.dataChangeAssetLogFields, updateStatus: o });
                                 } else {
@@ -622,13 +622,17 @@ const SerializedAssetDetailsPage = () => {
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={3}>Alarms</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Volume Data</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={5}>Status</CustomTab>}
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
-          <CustomTab value={tabIndexValue(resourceData, 6)}>Status History</CustomTab>
-          <CustomTab value={tabIndexValue(resourceData, 7)}>Service History</CustomTab>
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 6}>{tab?.tabName}</CustomTab>)}
+          <CustomTab value={tabIndexValue(resourcePolicyData, 6)}>Status History</CustomTab>
+          <CustomTab value={tabIndexValue(resourcePolicyData, 7)}>Service History</CustomTab>
           {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <CustomTab value={tabIndexValue(resourceData, 8)}>Certification History</CustomTab>
+            <CustomTab value={tabIndexValue(resourcePolicyData, 8)}>Certification History</CustomTab>
           )}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={tabIndexValue(resourceData, 9)}>Depreciation History</CustomTab>}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && (
+            <CustomTab value={tabIndexValue(resourcePolicyData, 9)}>Depreciation History</CustomTab>
+          )}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails?.currentLocationNotMatchWithGps && (
@@ -649,7 +653,11 @@ const SerializedAssetDetailsPage = () => {
                   data={assetDetails}
                   fields={
                     assetDetails?.status && (assetDetails?.status === ASSET_STATUS.scrap || assetDetails?.status === ASSET_STATUS.lost)
-                      ? [...fields, ...customField?.filter((ele) => !fields?.map((e) => e?.fieldData?.fieldName)?.includes(ele?.fieldData?.fieldName)), ...extraFields]
+                      ? [
+                          ...fields,
+                          ...customField?.filter((ele) => !fields?.map((e) => e?.fieldData?.fieldName)?.includes(ele?.fieldData?.fieldName)),
+                          ...extraFields
+                        ]
                       : [...fields, ...extraFields]
                   }
                   resource={sidebarResource?.serializedAsset}
@@ -674,14 +682,14 @@ const SerializedAssetDetailsPage = () => {
         <TabPanel value={tabValue} index={5}>
           <Status assetId={id} dataPoints={dataPoints} />
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 6}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.serializedAsset}
                   data={assetDetails}
@@ -690,13 +698,13 @@ const SerializedAssetDetailsPage = () => {
               </TabPanel>
             );
           })}
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 6)}>
-          <AssetHistory id={id} refresh={refreshAssetHistory} resourceData={resourceData} fields={fields} />
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 6)}>
+          <AssetHistory id={id} refresh={refreshAssetHistory} resourceData={resourcePolicyData} fields={fields} />
         </TabPanel>
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 7)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 7)}>
           <ServiceHistory id={id} refresh={refreshAssetHistory} />
         </TabPanel>
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 8)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 8)}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -705,7 +713,7 @@ const SerializedAssetDetailsPage = () => {
             fetchAssetData={fetchData}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 9)}>
+        <TabPanel value={tabValue} index={tabIndexValue(resourcePolicyData, 9)}>
           <DepreciationHistory id={id} />
         </TabPanel>
       </Box>

@@ -4,6 +4,7 @@ import { DownloadIcon, ExportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from '../Helpers/Buttons';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { AsyncDownloadDialog } from 'src/components/PreviewDownloadNew/AsyncDownloadDialog';
 
 function PreviewDownloadNew({
   resource,
@@ -31,14 +32,12 @@ function PreviewDownloadNew({
 
   const [loadingType, setLoadingType] = useState(null);
   const [btnLoading, setBtnLoading] = useState(null);
+  const [openAsynDialog, setOpenAsynDialog] = useState(false);
 
 
   const handleView = (type, operation, subType) => {
     setLoadingType(subType);
     setBtnLoading(operation);
-
-
-
     let api = '';
     if (Array.isArray(ids) && ids.length > 0) {
       if (subType === 'Detail') {
@@ -54,9 +53,9 @@ function PreviewDownloadNew({
       else {
         if (isAsyncDownload) {
           if (subType === 'Detail') {
-            api = `/pdf/async-download/${referenceId}/detail?resource=${resource}&referenceLabel=${referenceLabel}`;
+            api = `/pdf-new/async-download/${referenceId}/detail?resource=${resource}&referenceLabel=${referenceLabel}`;
           } else {
-            api = `/pdf/async-download/${referenceId}?resource=${resource}&referenceLabel=${referenceLabel}`;
+            api = `/pdf-new/async-download/${referenceId}?resource=${resource}&referenceLabel=${referenceLabel}`;
           }
         } else {
           if (subType === 'Detail') {
@@ -148,7 +147,12 @@ function PreviewDownloadNew({
         startIcon={<VisibilityIcon />}
         disabled={btnLoading === 'Preview'}
         onClick={(e) => {
-          handleView('PDF', 'Preview', 'Regular');
+          if (isAsyncDownload) {
+            setOpenAsynDialog(true)
+          } else {
+            setLoadingType('Preview')
+            handleView('PDF', 'Preview', 'Regular');
+          }
         }}
       >
         Preview
@@ -160,11 +164,28 @@ function PreviewDownloadNew({
         startIcon={<DownloadIcon />}
         disabled={btnLoading === 'Download'}
         onClick={(e) => {
-          handleView('PDF', 'Download', 'Regular');
+          if (isAsyncDownload) {
+            setOpenAsynDialog(true)
+          } else {
+            setLoadingType('Download')
+            handleView('PDF', 'Download', 'Regular');
+          }
         }}
       >
         Download
       </ThemeButton>
+      {openAsynDialog &&
+        <AsyncDownloadDialog
+          resource={resource}
+          referenceId={referenceId}
+          loadingType={loadingType}
+          btnLoading={btnLoading}
+          handleClose={() => { setOpenAsynDialog(false) }}
+          generatePdf={() => {
+            handleView('PDF', 'Preview', 'Regular');
+          }}
+        />
+      }
     </Fragment >
   );
 }

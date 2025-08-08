@@ -21,6 +21,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let expensesTimeout;
 
@@ -47,10 +48,8 @@ const Expenses = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, permissions?.expenses?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expensesDetail?.path, true);
     const extracolumns: any = [
       ...newColumns,
       {

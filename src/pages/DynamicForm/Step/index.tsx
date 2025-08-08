@@ -11,10 +11,18 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { cn, STEPS_STYLE } from 'src/constants/helpers';
 import View from './View';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from 'src/StateProvider/Provider';
+import { camelCase } from 'lodash';
 
 const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, resource, data, allowedToEdit, referenceData = null }) => {
+
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
   const [steps, setSteps] = useState(null);
   const [stepLoading, setStepLoading] = useState(false);
+  const [isStepsExist, setIsStepsExist] = useState(false)
   const [currentStep, setCurrentStep] = useState(0);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [expended, setExpended] = useState({});
@@ -33,7 +41,14 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
         steps?.forEach((step) => {
           step.fields = CURReplaceByCurrencySingle(step?.fields, data?.currency ? data?.currency : 'USD');
         });
-        setSteps(steps);
+        const _steps = steps?.filter(s => {
+          if (s?.linkResourceName) {
+            return permissions[camelCase(s?.linkResourceName)]?.isRead
+          }
+          return true
+        })
+        setIsStepsExist(steps?.length ? true : false)
+        setSteps(_steps)
         setStepLoading(false);
       })
       .catch((error) => {
@@ -219,6 +234,10 @@ const Step = ({ tab, resourcePolicyId = null, workflowId = null, resourceId, res
       ) : stepLoading ? (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      ) : isStepsExist ? (
+        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          You have not permission to View it!
         </Box>
       ) : (
         <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>

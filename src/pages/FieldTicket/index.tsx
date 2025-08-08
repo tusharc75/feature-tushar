@@ -25,6 +25,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const FieldTicket = () => {
   const {
@@ -85,8 +86,8 @@ const FieldTicket = () => {
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
-      data = response?.data?.data;
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.fieldTicket, permissions.fieldTicket?.isUpdate);
+      data = fieldsDataForRead;
       try {
         insertUpdate(objectStore.resource, sidebarResource?.fieldTicket, data);
       } catch (e) {

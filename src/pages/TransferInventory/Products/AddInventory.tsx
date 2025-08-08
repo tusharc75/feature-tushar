@@ -16,6 +16,7 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, renderedFrom, ignoreIds }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -25,7 +26,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const { generateColumns } = useColumns();
 
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -37,9 +38,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const fetchFields = async () => {
-    const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
-    const data = productResult?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path);
     newColumns.unshift(
       {
         accessor: 'qty',

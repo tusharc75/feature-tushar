@@ -421,9 +421,15 @@ const ChartTypes = ({
                                   }
                                 } else {
                                   let parseValue = context?.parsed?.y;
-                                  if (chart?.kpi?.horizontalBar) {
-                                    parseValue = context?.parsed?.x;
+                                  if(typeof context?.parsed == "object"){
+                                    parseValue = context?.parsed?.y;
+                                    if (chart?.kpi?.horizontalBar) {
+                                      parseValue = context?.parsed?.x;
+                                    }
+                                  }else if (typeof context?.parsed === "number"){
+                                    parseValue = context?.parsed
                                   }
+
                                   if (parseValue !== null) {
                                     label += chart?.currency
                                       ? formatAmountWithCurrency(globalFilters.currency || currency, Number(parseValue) ? parseValue : '00')
@@ -435,10 +441,7 @@ const ChartTypes = ({
                               }
                             }
                           }
-                        }),
-                        legend: {
-                          display: chart?.plugins ? chart?.plugins?.legend : true
-                        }
+                        })
                       },
                       onClick: (event, elements) => {
                         if (elements.length > 0 && chart?.kpi?.redirectField && chart?.kpi?.resource) {
@@ -459,41 +462,43 @@ const ChartTypes = ({
                       },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
-                      scales: {
-                        x: {
-                          grid: {
-                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                          }
-                        },
-                        y: {
-                          grid: {
-                            color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                          },
-                          ticks: {
-                            callback: function (value) {
-                              return chart?.currency
-                                ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
-                                  .fullFormatAmountWithoutSpace
-                                : value;
+                      ...(!["Pie","Doughnut"].includes(chart?.chartType) && {
+                        scales: {
+                          x: {
+                            grid: {
+                              color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             }
-                          }
-                        },
-                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
-                          y1: {
-                            position: 'right',
+                          },
+                          y: {
                             grid: {
                               color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
                             },
-                            max: 100,
-                            min: 0,
                             ticks: {
                               callback: function (value) {
-                                return value + '%';
+                                return chart?.currency
+                                  ? formatAmountWithCurrency(globalFilters.currency || currency, Number(value) ? value : '00')
+                                    .fullFormatAmountWithoutSpace
+                                  : value;
                               }
                             }
-                          }
-                        })
-                      },
+                          },
+                          ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
+                            y1: {
+                              position: 'right',
+                              grid: {
+                                color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
+                              },
+                              max: 100,
+                              min: 0,
+                              ticks: {
+                                callback: function (value) {
+                                  return value + '%';
+                                }
+                              }
+                            }
+                          })
+                        },
+                      }),
                       ...(chart.stack &&
                         !chartData.datasets.some((d) => d.stack === 'stacked') && {
                         scales: {

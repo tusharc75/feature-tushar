@@ -21,6 +21,8 @@ import Products from 'src/pages/Packages/Products';
 import Packages from 'src/pages/Packages/Packages';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import Grid from '@mui/material/Grid2';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const AssignPackageDialog = ({
   onSuccess,
@@ -30,7 +32,9 @@ const AssignPackageDialog = ({
   ids = [],
   isSubmitting = false,
   hideQty = false,
-  forceSplitQuantity = false
+  forceSplitQuantity = false,
+  showWarehouseSelectDialog = false,
+  warehouse = null
 }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}`;
   const toastConfig = useContext(CustomToastContext);
@@ -41,10 +45,11 @@ const AssignPackageDialog = ({
 
   const [open, setOpen] = useState({ open: false, data: null });
   const [tabValue, setTabValue] = useState(0);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
-
+  const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, warehouse: null });
   const [packageCategoryList, setPackageCategoryList] = useState([]);
   const [packageCategory, setPackageCategory] = useState(null);
+  const [openWarehouseDialog, setOpenWarehouseDialog] = useState(false)
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
 
   const {
     state: { selectedEntity, resources, permissions }
@@ -56,18 +61,17 @@ const AssignPackageDialog = ({
     fetchGridColumns();
   }, []);
 
-
   useEffect(() => {
     if (permissions?.packageCategory?.isRead) {
       axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.packageCategory}`)
+        .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.packageCategory},${sidebarResource.warehouse}`)
         .then(({ data: { data: lookupResource } }) => {
           setPackageCategoryList(lookupResource[sidebarResource.packageCategory] || []);
+          setWarehouseOptions(lookupResource[sidebarResource.warehouse] || [])
         })
         .catch((err) => toastConfig.setToastConfig(err));
     }
   }, []);
-
 
   const defaultColumns = [
     {
@@ -241,6 +245,24 @@ const AssignPackageDialog = ({
     setTabValue(newValue);
   };
 
+  const handleAdd = (forceSplitQuantity = false, warehouse = null) => {
+    if (forceSplitQuantity) {
+      const data: any = [];
+      selectedRecords?.forEach((r) => {
+        for (let i = 0; i < r?.qty; i++) {
+          data.push({ ...r, qty: 1, ...(warehouse ? { warehouse: warehouse } : {}) });
+        }
+      });
+      onSuccess(data);
+    } else {
+      if (selectedRecords?.some((r) => r?.qty > 1)) {
+        setShowConfirmationDialog({ open: true, warehouse: warehouse });
+      } else {
+        onSuccess(selectedRecords?.map(r => ({ ...r, ...(warehouse ? { warehouse: warehouse } : {}) })));
+      }
+    }
+  }
+
   return (
     <Dialog
       TransitionComponent={CustomDialogTransition}
@@ -271,21 +293,10 @@ const AssignPackageDialog = ({
             textAddShow: true
           }}
           addButtonOnclick={() => {
-            if (forceSplitQuantity) {
-              const data: any = [];
-              selectedRecords?.forEach((r) => {
-                for (let i = 0; i < r?.qty; i++) {
-                  data.push({ ...r, qty: 1 });
-                }
-              });
-              onSuccess(data);
-            }
-            else {
-              if (selectedRecords?.some((r) => r?.qty > 1)) {
-                setShowConfirmationDialog(true);
-              } else {
-                onSuccess(selectedRecords);
-              }
+            if (showWarehouseSelectDialog) {
+              setOpenWarehouseDialog(true)
+            } else {
+              handleAdd(forceSplitQuantity)
             }
           }}
           isAddButtonVisible={true}
@@ -319,23 +330,17 @@ const AssignPackageDialog = ({
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showConfirmationDialog && (
+        {showConfirmationDialog.open && (
           <ConfirmationDialog
             open={true}
             message="Do you want to split this quantity into multiple line item(s)?"
             onOk={() => {
-              setShowConfirmationDialog(false);
-              const data: any = [];
-              selectedRecords?.forEach((r) => {
-                for (let i = 0; i < r?.qty; i++) {
-                  data.push({ ...r, qty: 1 });
-                }
-              });
-              onSuccess(data);
+              handleAdd(true, showConfirmationDialog?.warehouse)
+              setShowConfirmationDialog({ open: false, warehouse: null });
             }}
             onClose={() => {
-              setShowConfirmationDialog(false);
-              onSuccess(selectedRecords);
+              onSuccess(selectedRecords?.map(r => ({ ...r, ...(showConfirmationDialog?.warehouse ? { warehouse: showConfirmationDialog?.warehouse } : {}) })));
+              setShowConfirmationDialog({ open: false, warehouse: null });
             }}
             forwardText="Yes"
             cancelText="No"
@@ -388,6 +393,22 @@ const AssignPackageDialog = ({
             </CustomDialogContent>
           </Dialog>
         )}
+        {openWarehouseDialog && (
+          <WarehouseDialog
+            resources={resources}
+            onClose={() => {
+              setOpenWarehouseDialog(false)
+            }}
+            options={warehouseOptions}
+            warehouse={warehouse}
+            handleAdd={(forceSplitQuantity, warehouse) => {
+              handleAdd(forceSplitQuantity, warehouse)
+              setOpenWarehouseDialog(false)
+            }}
+            isSubmitting={isSubmitting}
+            forceSplitQuantity={forceSplitQuantity}
+          />
+        )}
       </CustomDialogContent>
     </Dialog>
   );
@@ -434,3 +455,68 @@ const LeftSideContent = ({
 
 
 export default AssignPackageDialog;
+
+const WarehouseDialog = ({ resources, onClose, options, warehouse, handleAdd, forceSplitQuantity, isSubmitting }) => {
+
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse)
+
+  return (<Dialog
+    fullWidth
+    maxWidth="xs"
+    fullScreen={false}
+    open={true}
+    onClose={onClose}
+    aria-labelledby="assign-roles-dialog-warehouse"
+  >
+    <CustomDialogHeader
+      title={`Select ${resources?.warehouse?.titleSingular}`}
+      showManimizeMaximize={false}
+      showRequiredLabel={true}
+      onClose={onClose}
+    />
+    <CustomDialogContent>
+      <div className='p-2'>
+        <Autocomplete
+          options={options}
+          getOptionLabel={(option: any) => option?.optionLabel || ''}
+          disableClearable
+          value={options?.find((data) => data?.optionValue === selectedWarehouse) ?? ''}
+          onChange={(e, val) => {
+            setSelectedWarehouse(val ? val?.optionValue : null)
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              size="small"
+              name="plant"
+              label={resources?.warehouse?.titleSingular}
+              variant="outlined"
+              fullWidth
+              required
+            />
+          )}
+        />
+      </div>
+    </CustomDialogContent>
+    <CustomDialogFooter>
+      <ThemeButton
+        onClick={onClose}
+        buttonType="transparent"
+      >
+        Cancel
+      </ThemeButton>
+      <ThemeButton
+        buttonType="theme"
+        loading={isSubmitting}
+        disabled={isSubmitting}
+        onClick={() => {
+          handleAdd(forceSplitQuantity, selectedWarehouse)
+        }}
+      >
+        Add
+      </ThemeButton>
+    </CustomDialogFooter>
+  </Dialog>
+  )
+}

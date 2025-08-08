@@ -23,6 +23,7 @@ import CardView from './CardView';
 import ManageJobDialog from './ManageJobDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let jobTimeout;
 
@@ -67,10 +68,8 @@ const Job = () => {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=Job`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.jobDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.job, permissions?.job?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.jobDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 

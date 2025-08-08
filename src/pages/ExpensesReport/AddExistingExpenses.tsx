@@ -12,6 +12,7 @@ import axios, { CancelTokenSource } from 'axios';
 import { useData } from '../../StateProvider/Provider';
 import { gridLoadingTimeout, prepareDataForGrid, expenses } from '../../constants/helpers';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 function AddExistingExpenses({ onClose, ids, isSubmitting, onSuccess, expenseReportData = null }) {
 
@@ -37,10 +38,8 @@ function AddExistingExpenses({ onClose, ids, isSubmitting, onSuccess, expenseRep
   }, [page, limit, filters, search, sorting, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expensesDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };
 

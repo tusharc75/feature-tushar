@@ -145,7 +145,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             type="entity"
             ids={[userId, currentEntity?.entity._id]}
             assignedEntity={entities}
-            regionalRole={true}
+            onlyAssignRoles={true}
             onSuccess={() => {
               onSuccess();
             }}
@@ -224,7 +224,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                 <h6 className="text-sm font-semibold leading-[1.05] ">Assigned Roles ({currentEntity?.role?.length || '0'})</h6>
                 {permissions?.user?.isUpdate && (
                   <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
-                    <HtmlTooltip title='Assigned Roles'>
+                    <HtmlTooltip title='Assign Roles'>
                       <IconButton color="primary" size="small" onClick={handleAssignRole}>
                         <ControlPoint />
                       </IconButton>

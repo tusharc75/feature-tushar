@@ -17,6 +17,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.termsAndConditions);
 
@@ -49,10 +50,8 @@ const TermsAndCondition = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.termsAndConditions}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.termsAndConditionsDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.termsAndConditions, permissions?.termsAndConditions?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.termsAndConditionsDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -96,7 +95,7 @@ const TermsAndCondition = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color="error" fontSize='small' />
+              <DeleteIcon color="error" fontSize="small" />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -246,11 +245,12 @@ const TermsAndCondition = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${deleteRecord
-            ? `${resources?.termsAndConditions?.titleSingular?.toLowerCase()} :
+          message={`Are you sure you want to delete ${
+            deleteRecord
+              ? `${resources?.termsAndConditions?.titleSingular?.toLowerCase()} :
             ${deleteRecord?.name || ''}`
-            : `selected ${resources?.termsAndConditions?.titlePlural?.toLowerCase()}`
-            } ?`}
+              : `selected ${resources?.termsAndConditions?.titlePlural?.toLowerCase()}`
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

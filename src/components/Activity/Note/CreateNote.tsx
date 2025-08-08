@@ -20,7 +20,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import TinyMce from '../../../components/TinyMCE';
-import { displayDate } from '../../../constants/helpers';
+import { checkImageUrl, displayDate } from '../../../constants/helpers';
 import emailStyles from '../../../pages/Activity/Email/email.module.scss';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ImageAttachments from '../Email/ImageAttachments';
@@ -78,12 +78,6 @@ export const CreateNote = ({ relatedTo, noteId, handleClose, handleDialogClose, 
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const checkImageUrl = (url) => {
-    let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
-    let imageExtensions = ['.tif', 'tiff', '.bmp', '.jpg', 'jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
-    return imageExtensions.indexOf(extension) >= 0;
-  };
 
   const fetchNoteDetail = async (cancelTokenSource?: CancelTokenSource) => {
     if (noteId) {

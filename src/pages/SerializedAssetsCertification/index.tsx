@@ -28,6 +28,7 @@ import IssueCertificateDialog from './IssueCertificateDialog';
 import axios, { CancelTokenSource } from 'axios';
 import CustomDatePicker from 'src/components/CustomDatePicker';
 import dayjs from 'dayjs';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(CHILD_RESOURCE?.serializedAssetsCertification);
 
@@ -84,10 +85,8 @@ const SerializedAssetsCertification = () => {
   }, [search, page, limit, filters, sorting, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${serializedAsset.resource}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

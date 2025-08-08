@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { FaEye } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
-import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
+import { CustomDialogTransition, DOA_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER, USER_LOADING } from '../../StateProvider/actionTypes';
@@ -25,6 +25,7 @@ import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import DoaSetup from '../DoaSetupNew';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -108,15 +109,9 @@ const EntityDetailsPage = () => {
     setMainPoints(tempMp);
   };
 
-  const getEntityFields = () => {
-    axiosInstance()
-      .get('/field?resource=Entity')
-      .then(({ data }) => {
-        setEntityFIelds(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getEntityFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.entity, permissions?.entity?.isUpdate);
+    setEntityFIelds(fieldsDataForRead);
   };
 
   const handleDeleteEntity = () => {
@@ -474,7 +469,6 @@ const EntityDetailsPage = () => {
             type="user"
             ids={[id]}
             assignedEntity={users}
-            regionalRole={false}
             onSuccess={() => {
               fetchEntityUser();
               userDialogClose();

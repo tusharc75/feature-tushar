@@ -15,9 +15,10 @@ interface Props {
   fieldName: string;
   required: boolean;
   onChange: (_: React.SyntheticEvent, value: any) => void;
+  disableCloseOnSelect?: boolean
 }
 
-const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel, onChange, fieldName, required = false }: Props) => {
+const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel, onChange, fieldName, required = false, disableCloseOnSelect = true }: Props) => {
   const {
     state: { selectedEntity }
   } = useData();
@@ -77,6 +78,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         getOptionLabel={(option: any) => option?.optionLabel}
         isOptionEqualToValue={(option, val) => option?.optionValue === val?.optionValue}
         onChange={onChange}
+        disableCloseOnSelect={disableCloseOnSelect}
         renderInput={(params) => (
           <TextField
             {...params}

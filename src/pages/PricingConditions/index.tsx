@@ -18,6 +18,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import PricingConditionsDialog from './PricingConditionsDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const PricingCondition = () => {
   const renderedFrom = camelCase(sidebarResource?.pricingCondition);
@@ -49,10 +50,8 @@ const PricingCondition = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.pricingCondition}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.pricingConditionDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.pricingCondition, permissions?.pricingCondition?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.pricingConditionDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
@@ -170,14 +169,18 @@ const PricingCondition = () => {
     }
     axiosInstance()
       .put(`${pricingCondition.api}/remove`, { ids: ids })
-      .then(() => {
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
         setIsSubmitting(false);
-      })
-      .catch((error) => {
+      }).catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });

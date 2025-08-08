@@ -643,7 +643,7 @@ const ProductBuilder = (props) => {
               module="builder"
               permission={permissions}
               api={'productbuilder'}
-              refrenceId={productBuilderId}
+              referenceId={productBuilderId}
               onSuccessfulImport={(isImportedSuccessfully) => {
                 if (isImportedSuccessfully) {
                   fetchProduct();

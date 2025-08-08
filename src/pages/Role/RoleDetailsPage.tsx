@@ -709,7 +709,7 @@ const RoleDetailsPage = () => {
                                 disabled={!isEdit}
                               />
                             }
-                            label="Can Assign By Anyuser"
+                            label="Can Assign By Any User"
                           />
                         </Box>
                       )}

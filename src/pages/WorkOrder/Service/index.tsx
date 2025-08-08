@@ -72,7 +72,7 @@ const Service = ({
   defaultSelectedService,
   setDefaultSelectedService,
   minHeightClass = null,
-  resourceData = null
+  workOrderPolicyData = null
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -81,14 +81,17 @@ const Service = ({
       permissions
     }
   } = useData();
+
   const [serviceSteps, setServiceSteps] = useState(null);
+  const [allServices, setAllServices] = useState([])
+  const [products, setProducts] = useState([])
   const [selectedService, setSelectedService] = useState(null);
   const [stepSubmitedData, setStepSubmitedData] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [userAssignDialog, setUserAssignDialog] = useState(false);
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
-  const [serviceDialog, setServiceDialog] = useState({ open: false, type: '', uniqueId: null, preWork: null });
-  const [arrangeView, setArrangeView] = useState(false);
+  const [serviceDialog, setServiceDialog] = useState({ open: false, type: '', uniqueId: null, preWork: null, parentId: null });
+  const [arrangeView, setArrangeView] = useState({ open: false, tabId: null });
   const [consumablesDialog, setConsumablesDialog] = useState({ open: false, uniqueId: null, service: null, stepId: null, serviceName: null });
   const [logsDialog, setLogsDialog] = useState(false);
   const [commentsDialog, setCommentsDialog] = useState(false);
@@ -103,7 +106,7 @@ const Service = ({
   const [quotationData, setQuotationData] = useState(null);
   const [attchmentsDialog, setAttchmentsDialog] = useState({ open: false, uniqueServiceId: null, stepId: null, serviceName: null, stepName: null });
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [addServiceAnchorEl, setAddServiceAnchorEl] = useState(null);
+  const [addServiceAnchorEl, setAddServiceAnchorEl] = useState({ anchor: null, tabId: null });
   const [innerTabs, setInnerTabs] = useState<InnerTabs>('steps');
 
   const prevOrder = useRef(0);
@@ -239,7 +242,8 @@ const Service = ({
           }
         }
       }
-      setServiceSteps(services);
+      setServiceSteps(services?.filter(s => !s?.parentId));
+      setAllServices(services)
       if (![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.deleted, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status)) {
         if (
           (workOrderData?.canComplete &&
@@ -256,6 +260,9 @@ const Service = ({
       }
     } else {
       setServiceSteps([]);
+    }
+    if (workOrderDetail?.products?.length) {
+      setProducts(workOrderDetail?.products)
     }
   };
 
@@ -278,7 +285,7 @@ const Service = ({
       .put(`${workOrder.api}/service/${workOrderId}/order`, { data: rows || [] })
       .then(({ data }) => {
         fetchServiceData();
-        setArrangeView(false);
+        setArrangeView({ open: false, tabId: null });
         toastConfig.setToastConfig({
           open: true,
           message: data.message,
@@ -337,7 +344,7 @@ const Service = ({
     axiosInstance()
       .post(`${workOrder.api}/service/${workOrderId}`, data)
       .then(() => {
-        setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null });
+        setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null, parentId: null });
         if ([QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(quotationData?.status)) {
           setReviseQuotation(true);
         } else {
@@ -510,12 +517,12 @@ const Service = ({
         selectedService?.competencies?.length &&
         selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length));
 
-  const openAddServiceActions = (event) => {
-    setAddServiceAnchorEl(event.currentTarget);
+  const openAddServiceActions = (event, tabId = null) => {
+    setAddServiceAnchorEl({ anchor: event.currentTarget, tabId: tabId });
   };
 
   const closeAddServiceActions = () => {
-    setAddServiceAnchorEl(null);
+    setAddServiceAnchorEl({ anchor: null, tabId: null });
   };
 
   const handleProperties = (data) => {
@@ -554,7 +561,9 @@ const Service = ({
       id: '2',
       disabled: allowedToEdit && !completed ? false : true,
       iconForMobile: <LowPriority />,
-      onClick: () => setArrangeView(true),
+      onClick: (e, tabId = null) => {
+        setArrangeView({ open: true, tabId: tabId })
+      },
       children: (
         <>
           <DragIndicatorIcon fontSize="small" className="-ml-2" /> Arrange
@@ -581,6 +590,8 @@ const Service = ({
                   {...{
                     isColapsed,
                     serviceSteps,
+                    allServices,
+                    products,
                     stylesForEveryTab,
                     selectedService,
                     handleColapse,
@@ -622,7 +633,7 @@ const Service = ({
                               allowedToEdit={isAllowedToServiceEdit && selectedService?.clickable}
                               fetchService={fetchServiceData}
                               resource={resource}
-                              resourceData={resourceData}
+                              workOrderPolicyData={workOrderPolicyData}
                               stepSubmitedData={stepSubmitedData}
                               minHeightClass={' '}
                               isMobile={mobScreen}
@@ -643,7 +654,7 @@ const Service = ({
                       )}
                     </div>
                   </CustomCollapsible>
-                  {!user?.user?.brandPolicy?.workOrderConsumableHide && (
+                  {(!user?.user?.brandPolicy?.workOrderConsumableHide && !workOrderPolicyData?.policy?.hideStepsProductsConsumables) && (
                     <CustomCollapsible
                       head={<h6 className="text-base font-semibold">Products/Consumables</h6>}
                       headProps={{ className: 'sticky top-0 z-[1]' }}
@@ -679,31 +690,33 @@ const Service = ({
                           serviceName={selectedService?.serviceName}
                           materialSubType={MATERIAL_SUB_TYPE.consumable}
                           workOrderData={workOrderData}
-                          serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+                          serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
                         />
                       </div>
                     </CustomCollapsible>
                   )}
-                  <CustomCollapsible
-                    head={<h6 className="text-base font-semibold">Drawings</h6>}
-                    headProps={{ className: 'sticky top-0 z-[1]' }}
-                    element="li"
-                  >
-                    <div className="p-4">
-                      <Diagram
-                        fullHeight={false}
-                        showContainer={false}
-                        resource={ACTIVITY_RESOURCE.workOrder}
-                        referenceId={workOrderId}
-                        currentVersion={workOrderData?.versions?.length + 1 || 1}
-                        resourceData={workOrderData}
-                        attachmentType={ATTACHMENT_TYPE.drawing}
-                        showMaterialFilter={false}
-                        uniqueId={selectedService.uniqueId}
-                        stepId={null}
-                      />
-                    </div>
-                  </CustomCollapsible>
+                  {!workOrderPolicyData?.policy?.hideStepsDrawings &&
+                    <CustomCollapsible
+                      head={<h6 className="text-base font-semibold">Drawings</h6>}
+                      headProps={{ className: 'sticky top-0 z-[1]' }}
+                      element="li"
+                    >
+                      <div className="p-4">
+                        <Diagram
+                          fullHeight={false}
+                          showContainer={false}
+                          resource={ACTIVITY_RESOURCE.workOrder}
+                          referenceId={workOrderId}
+                          currentVersion={workOrderData?.versions?.length + 1 || 1}
+                          resourceData={workOrderData}
+                          attachmentType={ATTACHMENT_TYPE.drawing}
+                          showMaterialFilter={false}
+                          uniqueId={selectedService.uniqueId}
+                          stepId={null}
+                        />
+                      </div>
+                    </CustomCollapsible>
+                  }
                 </ul>
               </div>
             )}
@@ -717,6 +730,8 @@ const Service = ({
                 {...{
                   isColapsed,
                   serviceSteps,
+                  allServices,
+                  products,
                   stylesForEveryTab,
                   selectedService,
                   handleColapse,
@@ -739,19 +754,19 @@ const Service = ({
           {!isColapsed && resource === sidebarResource.workOrder && (
             <>
               <Menu
-                anchorEl={addServiceAnchorEl}
+                anchorEl={addServiceAnchorEl.anchor}
                 keepMounted
                 anchorOrigin={{
                   vertical: 'bottom',
                   horizontal: 'left'
                 }}
                 id="add-menu"
-                open={Boolean(addServiceAnchorEl)}
+                open={Boolean(addServiceAnchorEl.anchor)}
                 onClose={closeAddServiceActions}
               >
                 <MenuItem
                   onClick={() => {
-                    setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null });
+                    setServiceDialog({ open: true, type: 'service', uniqueId: null, preWork: null, parentId: addServiceAnchorEl.tabId });
                     closeAddServiceActions();
                   }}
                 >
@@ -759,7 +774,7 @@ const Service = ({
                 </MenuItem>
                 <MenuItem
                   onClick={() => {
-                    setServiceDialog({ open: true, type: 'newService', uniqueId: null, preWork: null });
+                    setServiceDialog({ open: true, type: 'newService', uniqueId: null, preWork: null, parentId: addServiceAnchorEl.tabId });
                     closeAddServiceActions();
                   }}
                 >
@@ -781,7 +796,7 @@ const Service = ({
                 group="Add/Assign"
                 disabled={!isAllowedToServiceEdit}
                 onClick={() => {
-                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork });
+                  setServiceDialog({ open: true, type: 'service', uniqueId: selectedService.uniqueId, preWork: selectedService.preWork, parentId: null });
                   setAnchorEl(null);
                 }}
                 searchKey="Add Existing Services"
@@ -819,8 +834,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                  isAllowedToServiceEdit &&
-                  selectedService?.clickable
+                    isAllowedToServiceEdit &&
+                    selectedService?.clickable
                     ? false
                     : true
                 }
@@ -840,9 +855,9 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   allowedToEdit &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
-                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer &&
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
+                    !completed
                     ? false
                     : true
                 }
@@ -862,8 +877,8 @@ const Service = ({
                 group="Add/Assign"
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -882,7 +897,7 @@ const Service = ({
                 id={'AssignWorkStations'}
                 disabled={
                   ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.skipped]?.includes(selectedService?.status) &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -922,8 +937,8 @@ const Service = ({
               id={'completeService'}
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -941,8 +956,8 @@ const Service = ({
               id="skipService"
               disabled={
                 isAllowedToServiceEdit &&
-                [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
-                selectedService?.clickable
+                  [WORKORDER_SERVICE_STATUS.pending, WORKORDER_SERVICE_STATUS.inProgress].includes(selectedService?.status) &&
+                  selectedService?.clickable
                   ? false
                   : true
               }
@@ -1025,9 +1040,9 @@ const Service = ({
                 id={'delete'}
                 disabled={
                   allowedToEdit &&
-                  selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
-                  !completed &&
-                  quotationData?.status != QUOTATION_STATUS.sentToCustomer
+                    selectedService?.status === WORKORDER_SERVICE_STATUS.pending &&
+                    !completed &&
+                    quotationData?.status != QUOTATION_STATUS.sentToCustomer
                     ? false
                     : true
                 }
@@ -1090,11 +1105,11 @@ const Service = ({
       )}
       {serviceDialog.open && serviceDialog.type === 'service' && (
         <AssignServiceDialog
-          handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
+          handleClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null, parentId: null })}
           onSuccess={(data) => {
             handleAddService(
               data?.map((e) => {
-                return { _id: e._id, qty: parseInt(e?.qty) || 1 };
+                return { _id: e._id, qty: parseInt(e?.qty) || 1, parentId: serviceDialog.parentId };
               }),
               serviceDialog.uniqueId
             );
@@ -1107,24 +1122,24 @@ const Service = ({
         <ManageServiceMaster
           isClone={false}
           serviceMasterId={null}
-          onClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null })}
+          onClose={() => setServiceDialog({ open: false, type: '', uniqueId: null, preWork: null, parentId: null })}
           onSuccess={(data) => {
-            handleAddService([{ _id: data?.data?._id, qty: 1 }], serviceDialog.uniqueId);
+            handleAddService([{ _id: data?.data?._id, qty: 1, parentId: serviceDialog.parentId }], serviceDialog.uniqueId);
           }}
           isRedirectToDetailPage={false}
         />
       )}
-      {arrangeView && (
+      {arrangeView.open && (
         <ArrangeView
           data={
-            serviceSteps
-              ?.filter((e) => e.type === 'service')
+            allServices
+              ?.filter((e) => e.type === 'service' && arrangeView?.tabId ? e?.parentId === arrangeView?.tabId : !e?.parentId)
               ?.map((d) => {
                 return { _id: d?.uniqueId, name: d?.serviceName, order: d?.order, preWork: d?.preWork };
               }) || []
           }
           title={'Arrange'}
-          handleClose={() => setArrangeView(false)}
+          handleClose={() => setArrangeView({ open: false, tabId: null })}
           handleSubmit={handleArrangeUpdate}
           loading={false}
         />
@@ -1159,7 +1174,7 @@ const Service = ({
       )}
       {viewServiceStepDataDialog.open && (
         <ViewServiceStepDataDialog
-          servicesData={serviceSteps}
+          servicesData={allServices}
           stepsData={stepSubmitedData}
           selectedService={selectedService}
           handleClose={() => {

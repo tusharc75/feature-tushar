@@ -35,6 +35,7 @@ import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = camelCase(sidebarResource.user);
 
@@ -166,13 +167,10 @@ const User: FC = () => {
     fetchLoggedInUserRole();
   }, []);
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get(`/field?resource=User&view=true`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.userDetail.path, true);
-        setColumns([...newColumns, ...extraColumns, ...getStaticFields(true), ActionsRenderer]);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.user, permissions?.user?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.userDetail.path, true);
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
   useEffect(() => {
@@ -306,7 +304,8 @@ const User: FC = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
-    axiosInstance().get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance()
+      .get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { entities } = u;
@@ -664,7 +663,6 @@ const User: FC = () => {
             type="entity"
             ids={selectedRecords.map((d) => d._id)}
             assignedEntity={[]}
-            regionalRole={false}
             onSuccess={() => {
               handleRegionalRolesCloseDialog();
               fetchUsers();

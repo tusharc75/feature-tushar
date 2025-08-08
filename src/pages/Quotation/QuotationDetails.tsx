@@ -48,6 +48,8 @@ import RoadmapViews from './RoadMapViews';
 import Versions from './Versions';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { getMultipleResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -91,7 +93,7 @@ const QuotationDetails = () => {
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
   const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fieldTicketPolicyData, setFieldTicketPolicyData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -157,8 +159,8 @@ const QuotationDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Quotation');
-      setQuotationFields(response?.data?.data);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.quotation, permissions?.quotation?.isUpdate);
+      setQuotationFields(fieldsDataForRead);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -278,18 +280,12 @@ const QuotationDetails = () => {
   };
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/multiple-resource-policy?resources=${sidebarResource.quotation},${sidebarResource.fieldTicket}`);
-      if (data?.find((e) => e.resource === sidebarResource.quotation)) {
-        setResourceData(data?.find((e) => e.resource === sidebarResource.quotation));
-      }
-      if (data?.find((e) => e.resource === sidebarResource.fieldTicket)) {
-        setFieldTicketPolicyData(data?.find((e) => e.resource === sidebarResource.fieldTicket));
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
+    const data = await getMultipleResourcePolicy(user, permissions, `${sidebarResource.quotation},${sidebarResource.fieldTicket}`)
+    if (data?.find((e) => e.resource === sidebarResource.quotation)) {
+      setResourcePolicyData(data?.find((e) => e.resource === sidebarResource.quotation));
+    }
+    if (data?.find((e) => e.resource === sidebarResource.fieldTicket)) {
+      setFieldTicketPolicyData(data?.find((e) => e.resource === sidebarResource.fieldTicket));
     }
   };
 
@@ -551,7 +547,7 @@ const QuotationDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={2}>Views</CustomTab>}
-          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData && resourcePolicyData?.tabs?.length && resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -578,10 +574,10 @@ const QuotationDetails = () => {
             {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
               quotationData?.versions[currentVersion]?.status
             ) && (
-              <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+                <Box className={`ml-auto max-w-max md:static md:-mt-[15px] `}>
+                  <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+                </Box>
+              )}
             <div>
               <Steps
                 isNextStep={false}
@@ -599,10 +595,10 @@ const QuotationDetails = () => {
                 handleNext={
                   stepNames[currentStep] === 'Quote Approval'
                     ? () => {
-                        if (allowedToEdit) {
-                          setCustomerAcceptable(true);
-                        }
+                      if (allowedToEdit) {
+                        setCustomerAcceptable(true);
                       }
+                    }
                     : null
                 }
               />
@@ -693,14 +689,14 @@ const QuotationDetails = () => {
             )}
           </Box>
         </TabPanel>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 3}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.quotation}
                   data={quotationData}

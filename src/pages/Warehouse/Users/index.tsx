@@ -16,6 +16,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 let renderedFrom = `${camelCase(sidebarResource.user)}_warehouse_master`;
 
@@ -45,10 +46,8 @@ const Users = ({ warehouse }) => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.user}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.userDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.user, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.userDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

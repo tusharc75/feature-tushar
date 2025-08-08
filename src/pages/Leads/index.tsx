@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { SiConvertio } from 'react-icons/si';
 import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -34,6 +34,8 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import KanbanView, { FetchCanbanDataPayload, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
 
 const renderedFrom = camelCase(sidebarResource.lead);
 
@@ -68,9 +70,20 @@ const Leads = () => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [messageDialog, setMessageDialog] = useState({ open: false, message: '' });
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, dataRows } = state;
+  const {
+    rowCount,
+    page,
+    limit,
+    search: tableSearch,
+    filters,
+    sorting,
+    selectedRecords: tableSelectedRows,
+    showFilteredRecordsOnly,
+    dataRows
+  } = state;
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
+
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
     open: false,
     id: null,
@@ -78,6 +91,35 @@ const Leads = () => {
     message: null
   });
   const hasPermissionToConvertInOpportunity = user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity ?? false;
+
+  const [viewType, setViewType] = useState<'table' | 'kanban'>('table');
+  const [pivotColumn, setPivotColumn] = useState<any>(null);
+  const kanbanState = useCanbanStore();
+  const {
+    selectedRows: kanbanSelectedRows,
+    search: kanbanSearch,
+    deepFilters: kanbanDeepFilters,
+    filterByIds: kanbanFilterByIds,
+    setState
+  } = kanbanState;
+
+  const kanbanViewRef = useRef<KanbanViewRef>(null);
+
+  const selectedRecords = useMemo(() => {
+    if (viewType === 'table') {
+      return tableSelectedRows;
+    } else {
+      return kanbanSelectedRows;
+    }
+  }, [tableSelectedRows, kanbanSelectedRows, viewType]);
+
+  const search = useMemo(() => {
+    if (viewType === 'table') {
+      return tableSearch;
+    } else {
+      return kanbanSearch;
+    }
+  }, [tableSearch, kanbanSearch, viewType]);
 
   useEffect(() => {
     fetchGridColumns();
@@ -90,20 +132,10 @@ const Leads = () => {
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
-    data = response?.data?.data;
-    setAllFields(JSON.parse(JSON.stringify(data)));
-  };
-
-  useEffect(() => {
-    if (allFields?.length) {
-      createColumns(allFields);
-    }
-  }, [allFields]);
-
-  const createColumns = (data) => {
-    let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
+    const { fieldsDataAll, fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.lead, permissions?.lead?.isUpdate);
+    setAllFields(JSON.parse(JSON.stringify(fieldsDataAll)));
+    setState('setResourceColumns', fieldsDataAll);
+    let newColumns = generateColumns(lead.leadResource, fieldsDataForRead, routes.leadDetail.path, true);
     newColumns = [
       ...newColumns,
       {
@@ -239,7 +271,7 @@ const Leads = () => {
         count = response?.data?.count;
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
-          finalObject['originalData'] = u
+          finalObject['originalData'] = u;
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
@@ -262,6 +294,87 @@ const Leads = () => {
     }
   };
 
+  const getQueryStringForCanban = (column: string, page: number, limit: number) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
+    if (selectedEntity) {
+      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
+    }
+
+    const filterByIds = [];
+    const deepFilters = [];
+
+    if (kanbanDeepFilters.length > 0) {
+      deepFilters.push(...kanbanDeepFilters);
+    }
+
+    if (kanbanFilterByIds.length > 0) {
+      filterByIds.push(...kanbanFilterByIds);
+    }
+
+    deepFilters.push({ field: pivotColumn.accessor, term: column });
+
+    if (selectedType === 3) {
+      deepFilters.push({
+        field: 'staticData.convertedToOpportunity',
+        term: 'Yes'
+      });
+    } else {
+      deepFilters.push({
+        field: 'staticData.convertedToOpportunity',
+        term: 'No'
+      });
+    }
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+
+    return deepFilter;
+  };
+
+  const fetchCanbanData = async ({ column, page, cancelToken, limit }: FetchCanbanDataPayload) => {
+    if (selectedEntity) {
+      const queryString = getQueryStringForCanban(column, page, limit);
+      try {
+        let data, count;
+        const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`, { cancelToken });
+        data = response?.data?.data;
+        count = response?.data?.count;
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['originalData'] = u;
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
+          finalObject['canEdit'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
+          let res = {
+            ...finalObject,
+            convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
+            relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
+            relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id
+          };
+          return res;
+        });
+        return { data: rows, count };
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    }
+  };
+
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
   };
@@ -277,7 +390,11 @@ const Leads = () => {
 
   const handleClose = () => {
     setIsOpen({ open: false, isClone: false, idToClone: null });
-    fetchData();
+    if (viewType === 'table') {
+      fetchData();
+    } else {
+      kanbanViewRef.current?.fetchData();
+    }
   };
 
   const generateLeadToOpportunityButton = ({ _id, concatedName, convertedToOpportunity, [processFieldName]: leadProcess, canEdit }) => {
@@ -373,7 +490,11 @@ const Leads = () => {
           message: data.message
         });
         dispatch({ type: 'selection', selectedRecords: [] });
-        fetchData();
+        if (viewType === 'table') {
+          fetchData();
+        } else {
+          kanbanViewRef.current?.fetchData();
+        }
         setIsConformDialogVisible(false);
         setOkButtonLoading(false);
         if (deleteRecord.id) {
@@ -406,7 +527,11 @@ const Leads = () => {
         if (convertLeadToOpportunityConfirmationDialog.id) {
           history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
         } else {
-          fetchData();
+          if (viewType === 'table') {
+            fetchData();
+          } else {
+            kanbanViewRef.current?.fetchData();
+          }
         }
       })
       .catch((error) => {
@@ -485,28 +610,32 @@ const Leads = () => {
     );
   }, [permissions, selectedRecords, user?.user?._id]);
 
-  const handleSaveEdit = async (inputField, updatedRow) => {
+  const handleSaveEdit = async (inputField, updatedRow, shouldFetchData = true) => {
     const dataToUpdate = dataRows.find((d) => d._id === updatedRow._id);
     if (dataToUpdate?.canEdit) {
       const fieldsDataAll = allFields?.map((d: any) => d.fieldData);
-      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll)
+      const values = getObjKeysWithValues(dataToUpdate.originalData, fieldsDataAll);
       Object.keys(inputField).forEach((key) => {
         if (key in values) {
           values[key] = inputField[key];
         }
       });
-      axiosInstance().put(`${lead.leadApi}`, { ...values, _id: updatedRow._id }).then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      return axiosInstance()
+        .put(`${lead.leadApi}`, { ...values, _id: updatedRow._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          if (shouldFetchData) {
+            fetchData();
+          }
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
         });
-        fetchData();
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
+    } else {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
@@ -524,14 +653,22 @@ const Leads = () => {
           module="lead(s)"
           api={lead.leadApi}
           afterImportCompleted={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}
           ids={selectedRecords?.map((obj) => obj._id)}
           onExportToExcelSuccess={() => {
-            fetchData();
+            if (viewType === 'table') {
+              fetchData();
+            } else {
+              kanbanViewRef.current?.fetchData();
+            }
           }}
           additionalParams={getQueryString(true)}
         />
@@ -551,20 +688,48 @@ const Leads = () => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.lead?.isCreate}
+          leftSideContents={
+            viewType === 'kanban' ? (
+              <PivotColumnSelector
+                renderedFrom={renderedFrom}
+                defaultPivotColumnId="process"
+                columns={columns}
+                pivotColumn={pivotColumn}
+                setPivotColumn={setPivotColumn}
+              />
+            ) : null
+          }
+          rightSideContents={<RenderViewTabs renderedFrom={renderedFrom} setViewType={setViewType} viewType={viewType} />}
         />
         {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
-            resource={sidebarResource.lead}
-            onSaveEdit={handleSaveEdit}
-          />
+          <>
+            {viewType === 'table' ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={true}
+                resource={sidebarResource.lead}
+                onSaveEdit={handleSaveEdit}
+              />
+            ) : (
+              <KanbanView
+                ref={kanbanViewRef}
+                state={kanbanState}
+                onSaveEdit={handleSaveEdit}
+                fetchData={fetchCanbanData}
+                dependencyArray={[selectedType, selectedEntity, pivotColumn]}
+                columns={columns}
+                pivotColumn={pivotColumn}
+                renderedFrom={renderedFrom}
+                resource={sidebarResource.opportunity}
+              />
+            )}
+          </>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -621,7 +786,11 @@ const Leads = () => {
           <TransferEntityDialog
             TransferEntityDialogOpen={showTransferEntityDialog}
             onSuccess={() => {
-              fetchData();
+              if (viewType === 'table') {
+                fetchData();
+              } else {
+                kanbanViewRef.current?.fetchData();
+              }
               setShowTransferEntityDialog(false);
             }}
             handleCloseDialog={() => {

@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2';
 import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ProfileSidebar from './components/ProfileSidebar';
-import { profileMenuItems } from '../../constants/helpers';
+import { profileMenuItems, sidebarResource } from '../../constants/helpers';
 import ManageProfile from './components/ManageProfile';
 import NotificationPreference from './components/NotificationPreference';
 import UiPreference from './components/UiPreference';
@@ -13,6 +13,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const useStyles = makeStyles((theme: Theme) => ({
   paper: {
@@ -40,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 export default function ProfilePage(props) {
   const {
-    state: { user },
+    state: { user, permissions },
     dispatch
   }: any = useData();
   const { profileBreadCrumbs } = props;
@@ -95,22 +96,16 @@ export default function ProfilePage(props) {
       });
   };
 
-  const getUserFields = () => {
+  const getUserFields = async () => {
+    let data;
     setLoading(true);
-    axiosInstance()
-      .get('/field?resource=User')
-      .then(({ data }) => {
-        data.data =
-          data.data && data.data.length
-            ? data.data.filter((field) => ['blocked', 'email', 'employeeNumber'].indexOf(field?.fieldData?.fieldName) < 0)
-            : [];
-        setUserFields(data.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
-      });
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.user, permissions?.user?.isUpdate);
+    data =
+      fieldsDataForRead && fieldsDataForRead.length
+        ? fieldsDataForRead.filter((field) => ['blocked', 'email', 'employeeNumber'].indexOf(field?.fieldData?.fieldName) < 0)
+        : [];
+    setUserFields(data);
+    setLoading(false);
   };
 
   const getLoggedInUserData = async () => {

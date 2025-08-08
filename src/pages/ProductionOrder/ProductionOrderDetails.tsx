@@ -34,9 +34,10 @@ import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { useTableReducer } from 'src/components/CustomReactTable';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(sidebarResource?.productionOrder);
@@ -64,7 +65,7 @@ const ProductionOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const productionOrderProcessStepsNames = React.useMemo(() => {
     return productionOrderProcessSteps.map((item) => item.name);
   }, [productionOrderProcessSteps]);
@@ -90,16 +91,8 @@ const ProductionOrderDetails = () => {
   }, [locationKeys]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.productionOrder);
+    setResourcePolicyData(data);
   };
 
   useEffect(() => {
@@ -113,15 +106,9 @@ const ProductionOrderDetails = () => {
     getResourceFields();
   }, []);
 
-  const getResourceFields = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.productionOrder}`)
-      .then(({ data: { data } }) => {
-        setProductionOrderFields(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const getResourceFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productionOrder, permissions?.productionOrder?.isUpdate);
+    setProductionOrderFields(fieldsDataForRead);
   };
 
   const fetchProductionOrderData = () => {
@@ -239,7 +226,9 @@ const ProductionOrderDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -330,14 +319,14 @@ const ProductionOrderDetails = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.productionOrder}
                   data={productionOrderData}

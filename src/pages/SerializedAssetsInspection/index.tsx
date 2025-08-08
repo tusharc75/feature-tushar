@@ -38,6 +38,7 @@ import { RiExchange2Line } from 'react-icons/ri';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
 import StatusChangeRequestDialog from 'src/pages/SerializedAsset/StatusChangeRequestDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const SerializedAssetInspection = () => {
   const renderedFrom = camelCase(sidebarResource.serializedAssetsInspection);
@@ -101,101 +102,93 @@ const SerializedAssetInspection = () => {
         }
       }
     }
+    const { fieldsDataForRead } = await fetch_resource_view_fields(serializedAsset.resource, permissions?.serializedAsset?.isUpdate);
+    let statusFieldOption = fieldsDataForRead?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
+    statusFieldOption = statusFieldOption?.filter(
+      (e) => !SYSTEM_ASSET_STATUS?.includes(e.optionLabel) || [ASSET_STATUS.inRepair]?.includes(e.optionLabel)
+    );
+    setStatusOptions(statusFieldOption);
 
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        let statusFieldOption = data?.find((e) => e?.fieldData?.fieldName === 'status')?.fieldData?.option || [];
-        statusFieldOption = statusFieldOption?.filter(
-          (e) => !SYSTEM_ASSET_STATUS?.includes(e.optionLabel) || [ASSET_STATUS.inRepair]?.includes(e.optionLabel)
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.serializedAssetDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'assetNumber') {
+        o.cell = ({ row }) => (
+          <div
+            style={{
+              backgroundColor: (() => {
+                return statusColors[row?.original?.status]
+                  ? statusColors[row?.original?.status]
+                  : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                    ? COLOUR_MASTER.lostAssets.background
+                    : '';
+              })()
+            }}
+          >
+            <Link
+              className="link text-truncate"
+              title={row?.original?.assetNumber}
+              to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {row?.original?.assetNumber}
+            </Link>
+            {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
+              (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
+                <Box ml={1}>
+                  <HtmlTooltip title="Asset needs to be recert">
+                    <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
+                  </HtmlTooltip>
+                </Box>
+              ))}
+          </div>
         );
-        setStatusOptions(statusFieldOption);
-
-        let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path, true);
-        newColumns?.forEach((o) => {
-          if (o?.accessor === 'assetNumber') {
-            o.cell = ({ row }) => (
-              <div
-                style={{
-                  backgroundColor: (() => {
-                    return statusColors[row?.original?.status]
-                      ? statusColors[row?.original?.status]
-                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                        ? COLOUR_MASTER.lostAssets.background
-                        : '';
-                  })()
-                }}
-              >
-                <Link
-                  className="link text-truncate"
-                  title={row?.original?.assetNumber}
-                  to={`${routes.serializedAssetDetail.path}/${row?.original?._id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {row?.original?.assetNumber}
-                </Link>
-                {(row?.original?.recertDate && new Date(row?.original?.recertDate)?.getTime() <= new Date()?.getTime()) ||
-                  (row?.original?.certificateExpiryDate && new Date(row?.original?.certificateExpiryDate)?.getTime() <= new Date()?.getTime() && (
-                    <Box ml={1}>
-                      <HtmlTooltip title="Asset needs to be recert">
-                        <WarningIcon style={{ fontSize: '14px' }} fontSize="small" color="error" />
-                      </HtmlTooltip>
-                    </Box>
-                  ))}
-              </div>
-            );
-          }
-        });
-        newColumns.push({
-          accessor: 'ownerType',
-          Header: 'Actual Owner Type',
-          minWidth: 150,
-          width: 150,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.ownerType ? (
-                <h5 className="text-truncate" title={row?.original?.ownerType}>
-                  {row?.original?.ownerType}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        });
-        newColumns.push({
-          accessor: 'owner',
-          Header: 'Actual Owner',
-          minWidth: 150,
-          width: 150,
-          Cell: ({ row }) => (
-            <>
-              {row?.original?.owner ? (
-                <h5 className="text-truncate" title={row?.original?.owner}>
-                  {row?.original?.owner}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </>
-          )
-        });
-        setColumns([...newColumns, ...getStaticFields()]);
-        fetchPolicy();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        fetchPolicy();
-      });
+      }
+    });
+    newColumns.push({
+      accessor: 'ownerType',
+      Header: 'Actual Owner Type',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.ownerType ? (
+            <h5 className="text-truncate" title={row?.original?.ownerType}>
+              {row?.original?.ownerType}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    });
+    newColumns.push({
+      accessor: 'owner',
+      Header: 'Actual Owner',
+      minWidth: 150,
+      width: 150,
+      Cell: ({ row }) => (
+        <>
+          {row?.original?.owner ? (
+            <h5 className="text-truncate" title={row?.original?.owner}>
+              {row?.original?.owner}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )}
+        </>
+      )
+    });
+    setColumns([...newColumns, ...getStaticFields()]);
+    fetchPolicy();
   };
 
-  const fetchFieldSerializedAssetStatusChangeRequest = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.serializedAssetStatusChangeRequest}`)
-      .then(({ data: { data } }) => {
-        setSerializedAssetStatusChangeRequestFields([...data]);
-      });
+  const fetchFieldSerializedAssetStatusChangeRequest = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(
+      sidebarResource.serializedAssetStatusChangeRequest,
+      false
+    );
+    setSerializedAssetStatusChangeRequestFields([...fieldsDataForRead]);
   };
 
   const fetchPolicy = async () => {
@@ -585,16 +578,16 @@ const RightSideContents = ({
           onClick={() => setShowRepairOrderDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [
-                  ASSET_STATUS.new,
-                  ASSET_STATUS.available,
-                  ASSET_STATUS.scrap,
-                  ASSET_STATUS.needRecert,
-                  ASSET_STATUS.needRepair,
-                  ASSET_STATUS.underReview
-                ]?.includes(e.status)
-              )
+            selectedRecords?.every((e) =>
+              [
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.scrap,
+                ASSET_STATUS.needRecert,
+                ASSET_STATUS.needRepair,
+                ASSET_STATUS.underReview
+              ]?.includes(e.status)
+            )
               ? false
               : true
           }
@@ -608,9 +601,9 @@ const RightSideContents = ({
           onClick={() => setShowRepairJobDialog(true)}
           disabled={
             checkUniqWarehouse() &&
-              selectedRecords?.every((e) =>
-                [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
-              )
+            selectedRecords?.every((e) =>
+              [ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ASSET_STATUS.underReview]?.includes(e.status)
+            )
               ? false
               : true
           }

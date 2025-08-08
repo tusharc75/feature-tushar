@@ -18,12 +18,12 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import InputField from 'src/components/Helpers/InputField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { getTaxById } from 'src/components/PricingCondition';
-import { fetch_resource_fields } from 'src/components/ResourceFields';
+import { fetch_resource_fields, fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null, invoiceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
-    state: { user, resources }
+    state: { user, resources, permissions }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -78,8 +78,8 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
 
         let referenceData: any = {};
         if (invoiceData) {
-          const responseFieldResponce: any = await axiosInstance().get(`/field?resource=${sidebarResource?.invoice}`);
-          const invoiceField = responseFieldResponce?.data?.data;
+          const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.invoice, permissions?.invoice?.isUpdate);
+          const invoiceField = fieldsDataForRead;
           referenceData = cloneResourceData(
             invoiceField.map((d: any) => d.fieldData),
             fieldsDataForCreate,

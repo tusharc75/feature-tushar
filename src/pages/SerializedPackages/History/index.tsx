@@ -34,7 +34,9 @@ const History = ({ id }) => {
               ? routes?.serializedPackagesDetail.path
               : row?.original?.type === sidebarResource?.rentalManagement
                 ? routes?.rentalManagementDetail?.path
-                : null;
+                : row?.original?.type === sidebarResource?.deliveryTicket
+                  ? routes?.deliveryTicketDetail?.path
+                  : null;
         return (
           <div>
             {row.original.reference ? (

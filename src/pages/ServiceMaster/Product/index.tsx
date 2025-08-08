@@ -17,6 +17,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = `${camelCase(sidebarResource?.serviceMaster)}_product`;
 
@@ -80,8 +81,8 @@ function Product({ id }) {
         Cell: ({ row }) => <p className="text-truncate">{row?.original?.qty || <NoDataCell />}</p>
       }
     ];
-    const productResult = await axiosInstance().get('/field?resource=Product');
-    productResult?.data?.data
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
+    fieldsDataForRead
       ?.filter((e) =>
         ['productName', 'productNumber', 'productDescription', 'productCategory', 'serializedProduct'].includes(e?.fieldData?.fieldName)
       )

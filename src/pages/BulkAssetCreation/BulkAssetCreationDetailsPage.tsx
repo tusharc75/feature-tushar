@@ -20,9 +20,10 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus, getResourcePolicy } from 'src/pages/DynamicForm/helper';
 import Step from '../DynamicForm/Step';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(sidebarResource.bulkAssetCreation);
@@ -33,7 +34,7 @@ const BulkAssetCreationDetailsPage = () => {
   const {
     state: { user, permissions, resources }
   }: any = useData();
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
 
   const [loadingBulkAssetCreation, setLoadingBulkAssetCreation] = useState(false);
   const [bulkAssetCreationData, setBulkAssetCreationData] = useState(null);
@@ -70,16 +71,8 @@ const BulkAssetCreationDetailsPage = () => {
   }, [id, tabValue]);
 
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.bulkAssetCreation}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.bulkAssetCreation);
+    setResourcePolicyData(data);
   };
 
   const fetchData = async () => {
@@ -102,15 +95,9 @@ const BulkAssetCreationDetailsPage = () => {
     }
   };
 
-  const fetchFields = () => {
-    axiosInstance()
-      .get('/field?resource=Bulk Asset Creation')
-      .then(({ data }) => {
-        setBulkAssetCreationFields(data.data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
+  const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.bulkAssetCreation, permissions?.bulkAssetCreation?.isUpdate);
+    setBulkAssetCreationFields(fieldsDataForRead);
   };
 
   const handleOpenUpdateDialog = () => {
@@ -163,7 +150,9 @@ const BulkAssetCreationDetailsPage = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Details</CustomTab>
-          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -224,14 +213,14 @@ const BulkAssetCreationDetailsPage = () => {
             )}
           </TabPanel>
         </ContentFullScreen>
-        {resourceData &&
-          resourceData?.tabs?.length > 0 &&
-          resourceData?.tabs?.map((tab, i) => {
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => {
             return (
               <TabPanel value={tabValue} index={i + 2}>
                 <Step
                   tab={tab}
-                  resourcePolicyId={resourceData?._id}
+                  resourcePolicyId={resourcePolicyData?._id}
                   resourceId={id}
                   resource={sidebarResource.bulkAssetCreation}
                   data={bulkAssetCreationData}

@@ -21,6 +21,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
@@ -80,9 +81,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const fetchColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
-    data = response?.data?.data;
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.product, false);
     let coloum: any = [
       {
         accessor: 'index',
@@ -126,7 +125,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
         )
       }
     ];
-    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productDetail.path, false);
     setColumns([...coloum, ...newColumns]);
   };
 
@@ -254,7 +253,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`refrenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
+            additionalParams={`referenceId=${packageId}${selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
@@ -286,11 +285,11 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       {permissions?.assemblyOrder?.isRead && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
-            <ContainedTab value={0} label={`Individual`} />
-            <ContainedTab value={1} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]} />
-            <ContainedTab value={2} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]} />
-            <ContainedTab value={3} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]} />
-            <ContainedTab value={4} label={WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]} />
+            <ContainedTab value={0} label={`Field`} />
+            <ContainedTab value={1} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.assemblyOrder]}-WO`} />
+            <ContainedTab value={2} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.preInspectionOrder]}-WO`} />
+            <ContainedTab value={3} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.postInspectionOrder]}-WO`} />
+            <ContainedTab value={4} label={`${WORK_ORDER_TYPE_LABEL[WORK_ORDER_TYPE.disassemblyOrder]}-WO`} />
           </ContainedTabs>
         </>
       )}

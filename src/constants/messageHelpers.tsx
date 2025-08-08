@@ -173,10 +173,16 @@ export const subcontractAssemblyMessage = {
   assemblyProductAlreadyReceived: 'Assembly product already received'
 };
 
-export const repairJobMessage = {
-  repairProcess: 'Please enter the price to proceed'
+export const repairJobActions = {
+  sendToSupplier: 'Send To Supplier',
+  receivedToPlant: 'Received To Plant'
 };
 
+export const repairJobMessage = {
+  repairProcess: 'Please enter the price to proceed',
+  restrictReceive: 'Manual ticket creation is not allowed. A ticket will be automatically created once the supplier repair is completed and the asset is returned.',
+  restrictSendOtherSupplier: 'Assets cannot be sent to another supplier as it is currently under repair.'
+};
 
 export const repairOrderMessage = {
   workOrderComplete: 'Complete work order to proceed',
@@ -185,3 +191,15 @@ export const repairOrderMessage = {
   addProductAndAssetsInPackage: 'Add Product and Assign Asset in Package to Proceed',
 };
 
+export const assemblyOrderActions = {
+  createLoadingTicket: 'Create Loading Ticket',
+  deliveredToCustomer: 'Delivered to Customer',
+};
+
+export const assemblyOrderMessage = {
+  loadingAlreadyCreated: 'Loading Ticket is already created',
+  loadingNotCreated: 'Loading Ticket is not created',
+  loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+  repairSameWarehouse: `Selected records must be at same ${sidebarResource?.warehouse} to perform this action`,
+  loadSameStorageLocation: `Selected records must be at same ${sidebarResource?.storageLocation} to perform this action`,
+};

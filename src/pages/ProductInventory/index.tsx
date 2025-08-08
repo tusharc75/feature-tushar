@@ -28,6 +28,7 @@ import SettingsDialog from './SettingsDialog';
 import SoftHoldDialog from './SoftHold';
 import axios, { CancelTokenSource } from 'axios';
 import WarningIcon from '@mui/icons-material/Warning';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const InventoryProduct = () => {
   const renderedFrom = camelCase(sidebarResource?.productInventory);
@@ -101,17 +102,17 @@ const InventoryProduct = () => {
   const fetchGridColumns = async () => {
     setColumns(null);
 
-    const productFields = await axiosInstance().get('/field?resource=Product&view=true');
-    const productInventoryFields = await axiosInstance().get('/field?resource=Product Inventory&view=true');
+    const productFields = await fetch_resource_view_fields(sidebarResource.product, false);
+    const productInventoryFields = await fetch_resource_view_fields(sidebarResource.productInventory, false);
 
     let columns = [];
-    productFields?.data?.data?.forEach((o) => {
+    productFields?.fieldsDataForRead?.forEach((o) => {
       if (o.fieldData.fieldName === 'expenseItem') {
         setShowExpenseItem(true);
       }
     });
 
-    let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
+    let newColumns = generateColumns(renderedFrom, productFields?.fieldsDataForRead, routes.productDetail.path);
     columns = [...columns, ...newColumns];
     columns?.forEach((col) => {
       if (col?.primaryField) {
@@ -138,12 +139,12 @@ const InventoryProduct = () => {
       }
     });
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
-      let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
+      let newColumns = generateColumns(renderedFrom, productInventoryFields?.fieldsDataForRead, routes.productInventory.path);
       newColumns?.forEach((o) => {
         if (!['plant', 'product'].includes(o?.accessor)) {
           if (
             ['minInventory', 'maxInventory'].includes(o.accessor) &&
-            productInventoryFields?.data?.data?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'number'
+            productInventoryFields?.fieldsDataForRead?.find((d) => d?.fieldData?.fieldName === o?.accessor)?.type === 'number'
           ) {
             columns.push({
               ...o,
@@ -166,38 +167,38 @@ const InventoryProduct = () => {
     const defaultColumns = [
       ...(!user?.user?.brandPolicy?.hideInventoryCount
         ? [
-          {
-            accessor: 'availableInventory',
-            Header: 'Available Inventory',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
-          },
-          {
-            accessor: 'softHold',
-            Header: 'Soft Hold',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row?.original?.softHold ? (
-                <div className="flex items-center gap-2">
-                  <h5 className="text-truncate">{row?.original?.softHold}</h5>
-                  <HtmlTooltip title={`Soft Hold History`}>
-                    <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
-                  </HtmlTooltip>
-                </div>
-              ) : (
-                <h5 className="text-truncate">0</h5>
-              )
-          },
-          {
-            accessor: 'purchaseOrderQty',
-            Header: 'On PO',
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
-          }
-        ]
+            {
+              accessor: 'availableInventory',
+              Header: 'Available Inventory',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
+            },
+            {
+              accessor: 'softHold',
+              Header: 'Soft Hold',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) =>
+                row?.original?.softHold ? (
+                  <div className="flex items-center gap-2">
+                    <h5 className="text-truncate">{row?.original?.softHold}</h5>
+                    <HtmlTooltip title={`Soft Hold History`}>
+                      <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
+                    </HtmlTooltip>
+                  </div>
+                ) : (
+                  <h5 className="text-truncate">0</h5>
+                )
+            },
+            {
+              accessor: 'purchaseOrderQty',
+              Header: 'On PO',
+              disableFilters: true,
+              disableSortBy: true,
+              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
+            }
+          ]
         : [])
     ];
     setColumns([...columns, ...defaultColumns, ActionsRenderer]);
@@ -356,9 +357,9 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
+            .filter((d) => d.optionValue !== 'All')
+            .map((d) => d.optionValue)
+            .toString()
         : plantId;
 
     let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
@@ -436,7 +437,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -590,9 +591,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />
@@ -608,9 +609,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
           storageLocation={storageLocationId}
@@ -626,9 +627,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                .filter((d) => d.optionValue !== 'All')
-                .map((d) => d.optionValue)
-                .toString()
+                  .filter((d) => d.optionValue !== 'All')
+                  .map((d) => d.optionValue)
+                  .toString()
               : plantId
           }
         />

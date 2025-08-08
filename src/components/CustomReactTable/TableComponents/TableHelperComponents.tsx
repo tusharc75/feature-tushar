@@ -489,6 +489,7 @@ export const RenderInputs = ({ columnDef, row, cell, submitInput, handleStopEdit
     const inputField = {
       [cell.column.id]: cellValue
     };
+
     const updatedData = { ...row.original, [cell.column.id]: cellValue };
     submitInput({ inputField, updatedData });
   };

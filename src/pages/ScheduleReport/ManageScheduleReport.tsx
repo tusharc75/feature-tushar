@@ -325,17 +325,18 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
-    } else {
+    }
+    else {
       if (values.frequency === 'Daily' && !values.time) {
         errors['time'] = 'Time is required';
       }
-      if (values.frequency === 'Weekly' && !values.week) {
+      else if (values.frequency === 'Weekly' && !values.week) {
         errors['week'] = 'Day is required';
       }
-      if (values.frequency === 'Monthly' && !values.day) {
+      else if (values.frequency === 'Monthly' && !values.day) {
         errors['day'] = 'Date is required';
       }
-      if (values.frequency === 'Hourly' && !values.hour) {
+      else if (values.frequency === 'Hourly' && !values.hour) {
         errors['hour'] = 'Hour is required';
       }
     }
@@ -500,6 +501,9 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           onChange={(_, newVal) => {
                             const result = { resource: newVal, filters: [], column: [] };
                             setValues({ ...values, ...result });
+                            if (newVal?.value === sidebarResource?.serializedAsset) {
+                              setFieldValue('fileType', 'csv')
+                            }
                             if (newVal) {
                               fetchGridColumns(newVal);
                             } else {
@@ -596,7 +600,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                       </Grid>
                       <Grid size={{ xs: 12, sm: 6 }}>
                         <Autocomplete
-                          options={['xslx', 'csv', 'pdf', 'emailBody']}
+                          options={values?.resource?.value === sidebarResource?.serializedAsset ? ['csv'] : ['xslx', 'csv', 'pdf', 'emailBody']}
                           fullWidth
                           size="small"
                           getOptionLabel={(option) => startCase(option)?.toUpperCase()}
@@ -744,7 +748,6 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                               </ToggleButton>
                             ))}
                           </ToggleButtonGroup>
-
                           {values?.frequency === 'Weekly' && (
                             <Box mt={2}>
                               <Typography color="textPrimary">Days</Typography>

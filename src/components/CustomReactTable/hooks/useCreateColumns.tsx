@@ -279,7 +279,7 @@ const ExpanderCell = ({ row, fetchChildAttachment, isMobile }) => {
   return (
     <div
       style={{
-        marginLeft: isMobile ? 0 : `${row.depth * 15}px`
+        marginLeft: isMobile ? 0 : `${Math.min(row.depth, 2) * 15}px`
       }}
     >
       {row.original.canExpand === true || row.getCanExpand() ? (

@@ -246,6 +246,24 @@ export const resourcePolicy = [
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'enableServicesOnConsumables',
+        fieldLabel: 'Enable Services On Consumables',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'hideStepsProductsConsumables',
+        fieldLabel: 'Hide Steps Products/Consumables',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'hideStepsDrawings',
+        fieldLabel: 'Hide Steps Drawings',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
@@ -527,6 +545,18 @@ export const resourcePolicy = [
       {
         fieldName: 'autoConvertInSameRentalJob',
         fieldLabel: 'Auto Convert In Same Rental Job',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'autoCreateFolderInDMS',
+        fieldLabel: 'Auto Create Folder In DMS',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'restrictCreationOfParentWorkOrder',
+        fieldLabel: 'Restrict Creation of Parent Work Order',
         type: 'checkBox',
         defaultValue: false
       }

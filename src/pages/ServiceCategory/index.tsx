@@ -19,9 +19,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { ManageServiceCategory } from 'src/pages/ServiceCategory/ManageServiceCategory';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceCategory = () => {
-
   const renderedFrom = camelCase(sidebarResource?.serviceCategory);
   const {
     state: { user, permissions, selectedEntity, resources }
@@ -37,7 +37,6 @@ const ServiceCategory = () => {
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();
 
-
   useEffect(() => {
     fetchGridColumns();
   }, []);
@@ -49,10 +48,8 @@ const ServiceCategory = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceCategory}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.serviceCategoryDetail?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.serviceCategory, permissions?.serviceCategory?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.serviceCategoryDetail?.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -81,7 +78,7 @@ const ServiceCategory = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}     >
+        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
           <IconButton
             size="small"
             aria-label="Delete"
@@ -248,11 +245,12 @@ const ServiceCategory = () => {
         {showDeleteConfirmBox ? (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${deleteRecord
-              ? `${resources?.serviceCategory.titleSingular?.toLowerCase()} :
+            message={`Are you sure you want to delete ${
+              deleteRecord
+                ? `${resources?.serviceCategory.titleSingular?.toLowerCase()} :
                       ${deleteRecord?.serviceCategory}`
-              : `selected ${resources?.serviceCategory?.titlePlural?.toLowerCase()}`
-              } ?`}
+                : `selected ${resources?.serviceCategory?.titlePlural?.toLowerCase()}`
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -267,7 +265,7 @@ const ServiceCategory = () => {
           isClone={showManageCategory.isClone}
           serviceCategoryId={showManageCategory.idToClone}
           onClose={() => setshowManageCategory({ open: false, isClone: false, idToClone: null })}
-          onSuccess={() => { }}
+          onSuccess={() => {}}
           isRedirectToDetailPage={true}
         />
       )}

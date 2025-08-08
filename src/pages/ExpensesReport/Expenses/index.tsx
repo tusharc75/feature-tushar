@@ -6,14 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import {
-  expenseReport,
-  expenses,
-  formatAmountWithCurrency,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
+import { expenseReport, expenses, formatAmountWithCurrency, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -24,9 +17,16 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import AddExistingExpenses from 'src/pages/ExpensesReport/AddExistingExpenses';
 import ManageExpenses from 'src/pages/Expenses/ManageExpenses';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expenceReportId = null, setExpences = null, fetchexpenseReportData = null }) => {
-
+const Expenses = ({
+  expenseIds,
+  allowedToEdit,
+  expenseReportData = null,
+  expenceReportId = null,
+  setExpences = null,
+  fetchexpenseReportData = null
+}) => {
   const renderedFrom = camelCase(sidebarResource?.expenses);
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -52,10 +52,8 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
   }, [expenseIds]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.expenses}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.expensesDetail?.path);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.expenses, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.expensesDetail?.path);
     const extracolumns: any = [
       ...newColumns,
       {
@@ -91,16 +89,18 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     try {
-      let rows = []
+      let rows = [];
       if (expenseIds?.length) {
-        const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}&noUserFilter=true`, { cancelToken: cancelTokenSource?.token });
+        const response: any = await axiosInstance().get(`${expenses.api}?getById=${JSON.stringify(expenseIds)}&noUserFilter=true`, {
+          cancelToken: cancelTokenSource?.token
+        });
         rows = response?.data?.data;
       }
       rows = rows?.map((e) => {
         const finalObject = prepareDataForGrid(e, user);
         finalObject['isChecked'] = false;
         finalObject['canDelete'] = permissions?.expenses?.isDelete;
-        return finalObject
+        return finalObject;
       });
       const sum = rows?.reduce((acc, row) => acc + (Number(row.totalAmount) || 0), 0).toFixed(2);
       setSubtotal(sum);
@@ -117,11 +117,12 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
   const handleAdd = async (rows) => {
     if (expenceReportId) {
       setIsSubmitting(true);
-      await axiosInstance().post(`${expenseReport.api}/${expenceReportId}/expenses/add`, { expenseIds: rows?.map((e) => e._id) })
+      await axiosInstance()
+        .post(`${expenseReport.api}/${expenceReportId}/expenses/add`, { expenseIds: rows?.map((e) => e._id) })
         .then(({ data }) => {
-          setShowAddExistingExpenseModal(false)
+          setShowAddExistingExpenseModal(false);
           setIsSubmitting(false);
-          fetchexpenseReportData()
+          fetchexpenseReportData();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -132,18 +133,18 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
           toastConfig.setToastConfig(error);
           setIsSubmitting(false);
         });
-    }
-    else {
-      setExpences([...expenseIds, ...rows?.map((e) => e._id)])
-      setShowAddExistingExpenseModal(false)
+    } else {
+      setExpences([...expenseIds, ...rows?.map((e) => e._id)]);
+      setShowAddExistingExpenseModal(false);
     }
   };
 
   const handleRemove = async () => {
     if (expenceReportId) {
-      await axiosInstance().put(`${expenseReport.api}/${expenceReportId}/expenses/remove`, { expenseIds: deleteData })
+      await axiosInstance()
+        .put(`${expenseReport.api}/${expenceReportId}/expenses/remove`, { expenseIds: deleteData })
         .then(({ data }) => {
-          fetchexpenseReportData()
+          fetchexpenseReportData();
           setDeleteConfirmBox(false);
           setDeleteData(null);
           toastConfig.setToastConfig({
@@ -155,9 +156,8 @@ const Expenses = ({ expenseIds, allowedToEdit, expenseReportData = null, expence
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
-      setExpences(expenseIds?.filter((e) => !deleteData?.includes(e)))
+    } else {
+      setExpences(expenseIds?.filter((e) => !deleteData?.includes(e)));
       setDeleteConfirmBox(false);
       setDeleteData(null);
     }

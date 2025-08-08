@@ -18,6 +18,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/con
 import { cloneDisable, deleteDisable, editDisable } from 'src/constants/messageHelpers';
 import ManageDeviceTemplateAlert from 'src/pages/DeviceTemplatesAlert/ManageDeviceTemplateAlert';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 export default function Alerts({ deviceTemplate }) {
   const renderedFrom = `${camelCase(sidebarResource.deviceTemplateAlert)}_alerts`;
@@ -44,29 +45,26 @@ export default function Alerts({ deviceTemplate }) {
     return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource?.deviceTemplateAlert}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(renderedFrom, data, routes.deviceTemplateAlertDetail.path, true);
-        newColumns?.forEach((o) => {
-          if (o?.accessor === 'alertNumber') {
-            o.cell = ({ row }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <p
-                  className="link text-truncate"
-                  onClick={() => {
-                    setOpen({ open: true, isClone: false, id: row.original?.id });
-                  }}
-                >
-                  {row.original?.alertNumber}
-                </p>
-              </div>
-            );
-          }
-        });
-        setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-      });
+  const fetchGridColumns = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.deviceTemplateAlert, false);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.deviceTemplateAlertDetail.path, true);
+    newColumns?.forEach((o) => {
+      if (o?.accessor === 'alertNumber') {
+        o.cell = ({ row }) => (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              className="link text-truncate"
+              onClick={() => {
+                setOpen({ open: true, isClone: false, id: row.original?.id });
+              }}
+            >
+              {row.original?.alertNumber}
+            </p>
+          </div>
+        );
+      }
+    });
+    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const ActionsRenderer = {

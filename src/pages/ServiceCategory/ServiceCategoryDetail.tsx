@@ -16,9 +16,10 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { serviceCategory, sidebarResource } from '../../constants/helpers';
 import Step from '../DynamicForm/Step';
 import { ManageServiceCategory } from 'src/pages/ServiceCategory/ManageServiceCategory';
+import { getResourcePolicy } from 'src/pages/DynamicForm/helper';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ServiceCategoryDetail = () => {
-
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
   const history = useHistory();
@@ -26,7 +27,7 @@ const ServiceCategoryDetail = () => {
   const { tab }: any = parsed;
 
   const {
-    state: { permissions, resources }
+    state: { user, permissions, resources }
   }: any = useData();
 
   const [categoryData, setCategoryData] = useState(null);
@@ -35,7 +36,7 @@ const ServiceCategoryDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-  const [resourceData, setResourceData] = useState(null);
+  const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [fields, setFields] = useState(null);
 
   useEffect(() => {
@@ -50,37 +51,26 @@ const ServiceCategoryDetail = () => {
   }, [id]);
 
   const fetchFields = async () => {
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource?.serviceCategory, permissions?.serviceCategory?.isUpdate);
+    setFields(fieldsDataForRead);
+  };
+
+  const fetchData = async () => {
     axiosInstance()
-      .get(`/field?resource=${sidebarResource?.serviceCategory}`)
-      .then(({ data }) => {
-        setFields(data.data?.filter((field) => field.isRead));
+      .get(`${serviceCategory.api}/${id}`)
+      .then(({ data: { data } }) => {
+        setAllowedToEdit(permissions?.serviceCategory?.isUpdate);
+        setAllowedToDelete(permissions?.serviceCategory?.isDelete);
+        setCategoryData(data);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
   };
 
-  const fetchData = async () => {
-    axiosInstance().get(`${serviceCategory.api}/${id}`).then(({ data: { data } }) => {
-      setAllowedToEdit(permissions?.serviceCategory?.isUpdate);
-      setAllowedToDelete(permissions?.serviceCategory?.isDelete);
-      setCategoryData(data);
-    }).catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  };
-
   const fetchPolicy = async () => {
-    try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serviceCategory}`);
-      if (data) {
-        setResourceData(data);
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
+    const data = await getResourcePolicy(user, permissions, sidebarResource.serviceCategory);
+    setResourcePolicyData(data);
   };
 
   const handleDelete = () => {
@@ -95,7 +85,6 @@ const ServiceCategoryDetail = () => {
         setShowConfirmBox(false);
       });
   };
-
 
   return (
     <Box className="main-container-v1">
@@ -122,32 +111,39 @@ const ServiceCategoryDetail = () => {
       <Box className="detail-container-v1">
         <CustomTabs value={tabValue} onChange={(e, newValue) => setTabValue(Number(newValue))}>
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1} key={i}>{tab?.tabName}</CustomTab>)}
+          {resourcePolicyData &&
+            resourcePolicyData?.tabs?.length > 0 &&
+            resourcePolicyData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 1} key={i}>
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
-          {categoryData && fields ? (
-            <DetailsPage data={categoryData} fields={fields} />
-          ) : (
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          )}
+          {categoryData && fields ? <DetailsPage data={categoryData} fields={fields} /> : <CommonSkeleton lenArray={[...Array(10).keys()]} />}
         </TabPanel>
-        {resourceData?.tabs?.map((tab, i) => (
-          <TabPanel value={tabValue} index={i + 1} key={i}>
-            <Step tab={tab}
-              resourcePolicyId={resourceData?._id}
-              resourceId={id}
-              resource={sidebarResource.serviceCategory}
-              data={categoryData}
-              allowedToEdit={permissions?.serviceCategory?.isUpdate} />
-          </TabPanel>
-        ))}
+        {resourcePolicyData &&
+          resourcePolicyData?.tabs?.length > 0 &&
+          resourcePolicyData?.tabs?.map((tab, i) => (
+            <TabPanel value={tabValue} index={i + 1} key={i}>
+              <Step
+                tab={tab}
+                resourcePolicyId={resourcePolicyData?._id}
+                resourceId={id}
+                resource={sidebarResource.serviceCategory}
+                data={categoryData}
+                allowedToEdit={permissions?.serviceCategory?.isUpdate}
+              />
+            </TabPanel>
+          ))}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${resources?.serviceCategory?.titleSingular?.toLowerCase()} : ${categoryData?.name} ?`}
           onClose={() => setShowConfirmBox(false)}
-          onOk={handleDelete} />
+          onOk={handleDelete}
+        />
       )}
       {openUpdateDialog && (
         <ManageServiceCategory
@@ -155,9 +151,10 @@ const ServiceCategoryDetail = () => {
           serviceCategoryId={id}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
-            setOpenUpdateDialog(false)
-            fetchData()
-          }} />
+            setOpenUpdateDialog(false);
+            fetchData();
+          }}
+        />
       )}
     </Box>
   );

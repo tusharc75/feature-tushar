@@ -54,6 +54,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import routes from '../../components/Helpers/Routes';
 import AssignTechniciansDialog from '../WorkOrder/Service/AssignTechniciansDialog';
 import AssignWorkStationDialog from '../WorkOrder/Service/AssignWorkStationDialog';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 type ViewType = 'card-view' | 'table-view' | 'calendar-view';
 
@@ -265,11 +266,8 @@ const WorkOrderSupervisor = () => {
 
   const fetchGridColumns = async (cancelToken: CancelToken) => {
     try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`, { cancelToken });
-      data = response?.data?.data;
-
-      const newColumns = generateColumns(renderedFrom, data, routes?.workOrderDetail?.path);
+      const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.workOrder, permissions?.workOrder?.isUpdate);
+      const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.workOrderDetail?.path);
       const columns = newColumns.filter((ele) => ele.accessor !== 'workOrderNumber');
 
       const extraColumns = [

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import ReactFlow, { ControlButton, Controls, ReactFlowProvider } from 'react-flow-renderer';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
-import { COLOUR_MASTER, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
+import { COLOUR_MASTER, WORKORDER_SERVICE_STATUS, WORKORDER_SERVICE_STEP_STATUS, WORK_ORDER_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ContentFullScreen from 'src/components/ContentFullScreen';
@@ -29,20 +29,6 @@ const customNodeStyles = {
   postWorkService: {
     name: 'Post Work Service',
     ...COLOUR_MASTER.postWork
-  },
-  stepPassed: {
-    name: 'Step Passed',
-    ...COLOUR_MASTER.accepted,
-    cursor: 'pointer'
-  },
-  stepFailed: {
-    name: 'Step Failed',
-    ...COLOUR_MASTER.rejected,
-    cursor: 'pointer'
-  },
-  stepSkipped: {
-    name: 'Step Skipped',
-    ...COLOUR_MASTER.skipped
   },
   step: {
     name: 'Step',
@@ -77,13 +63,6 @@ const WorkOrderViews = (props) => {
     try {
       const allDetails: any = await axiosInstance().get(`${routes?.workOrder?.path}/${workOrderId}/detail`);
       const stepData = allDetails?.data?.data?.stepData;
-      const stepDatas = {};
-
-      stepData
-        ?.filter((s) => s?.passFailStatus)
-        ?.map((s) => {
-          stepDatas[s?.stepId] = s?.passFailStatus;
-        });
 
       var xPosition = 0;
       var flow: any[] = [
@@ -136,7 +115,8 @@ const WorkOrderViews = (props) => {
             )
           },
           position: { x: xPosition, y: sIdx * 80 },
-          style: s?.preWork || !user?.user?.brandPolicy?.servicePrePost ? customNodeStyles.preWorkService : customNodeStyles.postWorkService
+          style: s?.status === WORKORDER_SERVICE_STATUS.inProgress ? COLOUR_MASTER.inProgress :
+            s?.status === WORKORDER_SERVICE_STATUS.completed ? COLOUR_MASTER.completed : COLOUR_MASTER.pending
         });
         flowEdge.push({
           id: `workOrder-service-${serviceId}-${workOrderId}`,
@@ -146,6 +126,8 @@ const WorkOrderViews = (props) => {
         });
         s?.steps?.map((step) => {
           const stepId = `${step?._id}_${_.random(1000, 9999)}`;
+          const tempStepData = stepData?.find((e) => e?.uniqueId === s?.uniqueId && e?.stepId === step?._id)
+          const passFailStatus = tempStepData?.passFailStatus || s?.status
           allStepsIds.push(stepId);
           flow.push({
             id: `${stepId}`,
@@ -157,21 +139,18 @@ const WorkOrderViews = (props) => {
               label: (
                 <HtmlTooltip arrow placement="top" title={'Step'}>
                   <div>
-                    <Typography variant="body2">{s?.status || ''}</Typography>
+                    <Typography variant="body2">{passFailStatus || ''}</Typography>
                     <Typography variant="subtitle2">{step?.stepName || ''}</Typography>
                   </div>
                 </HtmlTooltip>
               )
             },
             position: { x: xPosition + 300, y: serviceStepIdx * 80 },
-            style:
-              stepDatas[step?._id] && stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.passed
-                ? customNodeStyles.stepPassed
-                : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.failed
-                  ? customNodeStyles.stepFailed
-                  : stepDatas[step?._id] === WORKORDER_SERVICE_STEP_STATUS.skipped
-                    ? customNodeStyles?.stepSkipped
-                    : customNodeStyles.step
+            style: passFailStatus ?
+              passFailStatus === WORKORDER_SERVICE_STEP_STATUS.start || passFailStatus === WORKORDER_SERVICE_STATUS.inProgress ? COLOUR_MASTER.inProgress :
+                passFailStatus === WORKORDER_SERVICE_STEP_STATUS.completed || passFailStatus === WORKORDER_SERVICE_STEP_STATUS.passed ? COLOUR_MASTER.completed :
+                  passFailStatus === WORKORDER_SERVICE_STEP_STATUS.failed ? COLOUR_MASTER.rejected :
+                    COLOUR_MASTER.pending : COLOUR_MASTER.pending
           });
           flowEdge.push({
             id: `workOrder-service-steps-${s?._id}_${s?.uniqueId}-${stepId}`,

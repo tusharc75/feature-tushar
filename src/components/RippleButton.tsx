@@ -3,15 +3,16 @@ import { cn } from 'src/constants/helpers';
 
 type Component = React.ElementType;
 
-type ExtendType<T> = T extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[T] : Record<string, unknown>;
+type ElementTypeProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T>;
+type PolymorphicRef<T extends React.ElementType> = React.ComponentPropsWithRef<T>['ref'];
 
 type RippleButtonProps<T extends Component> = {
   component?: T;
   className?: string;
   children: React.ReactNode | Element[];
-} & ExtendType<T>;
+} & Omit<ElementTypeProps<T>, 'component' | 'children'>;
 
-const RippleButton = <T extends Component = 'button'>(props: RippleButtonProps<T>, ref: React.Ref<HTMLElement>) => {
+const RippleButton = forwardRef(<T extends Component = 'button'>(props: RippleButtonProps<T>, ref: PolymorphicRef<T>) => {
   const { component = 'button', children, className, onClick = () => {}, ...rest } = props;
   const [ripples, setRipples] = useState<JSX.Element[]>([]);
 
@@ -34,7 +35,7 @@ const RippleButton = <T extends Component = 'button'>(props: RippleButtonProps<T
       onClick: (e: any) => {
         createRipple(e);
         if (typeof onClick === 'function') {
-          onClick(e);
+          (onClick as any)(e);
         }
       },
       ref,
@@ -49,6 +50,6 @@ const RippleButton = <T extends Component = 'button'>(props: RippleButtonProps<T
       <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">{ripples}</div>
     </>
   );
-};
+}) as <T extends React.ElementType = 'button'>(props: RippleButtonProps<T> & { ref?: PolymorphicRef<T> }) => React.ReactElement | null;
 
-export default React.memo(forwardRef(RippleButton)) as typeof RippleButton;
+export default React.memo(RippleButton) as typeof RippleButton;

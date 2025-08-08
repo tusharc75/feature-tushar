@@ -7,7 +7,6 @@ import axios, { CancelToken } from 'axios';
 import dayjs from 'dayjs';
 import { camelCase, groupBy, isEmpty } from 'lodash';
 import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { FaRegQuestionCircle } from 'react-icons/fa';
 import { MdFilterList } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -18,13 +17,12 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Filter from 'src/components/Filter';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AiButton from 'src/components/Helpers/Buttons/AiButton';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import routes from 'src/components/Helpers/Routes';
-import { InfoSidebarButton, planningViewActions } from 'src/components/InfoSidebar';
 import { cn, sidebarResource } from 'src/constants/helpers';
 import AiSuggestionsDialog from 'src/pages/PlanningView/AiDialog/AiSuggestionsDialog';
 import DetailsPopover from 'src/pages/PlanningView/Calendar/DetailsPopover';
 import PlannedIncomingDialog from 'src/pages/PlanningView/Calendar/PlannedIncomingDialog';
-import RenderFilter from 'src/pages/PlanningView/Calendar/RenderFilter';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import { getColorByIndex, SingleColor } from 'src/pages/PlanningView/Calendar/colorMap';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
@@ -97,7 +95,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const toastConfig = useContext(CustomToastContext);
   const [events, setEvents] = useState([]);
-  const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [staticEvents, setStaticEvents] = useState([]);
@@ -118,7 +115,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [anchor, setAnchor] = useState(null);
 
-  const [lookupLoading, setLookupLoading] = useState(false);
   const [isDataFetching, setIsDataFetching] = useState(false);
   const [showDetail, setShowDetail] = useState({ open: false, data: null, anchor: null });
   const [showPlannedIncoming, setShowPlannedIncoming] = useState(false);
@@ -140,107 +136,107 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     () => [
       ...(permissions?.product?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869152396b1',
-              fieldName: 'product',
-              fieldLabel: resources?.product?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.product,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 100,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869152396b1',
+                fieldName: 'product',
+                fieldLabel: resources?.product?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.product,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 100,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serializedAsset?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869252396b1',
-              fieldName: 'asset',
-              fieldLabel: resources?.serializedAsset?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serializedAsset,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 101,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869252396b1',
+                fieldName: 'asset',
+                fieldLabel: resources?.serializedAsset?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serializedAsset,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 101,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.serviceMaster?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869352396b1',
-              fieldName: 'service',
-              fieldLabel: resources?.serviceMaster?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.serviceMaster,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 102,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869352396b1',
+                fieldName: 'service',
+                fieldLabel: resources?.serviceMaster?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.serviceMaster,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 102,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : []),
       ...(permissions?.competencies?.isRead
         ? [
-          {
-            fieldData: {
-              _id: '630dc2429ec41869452396b1',
-              fieldName: 'competencies',
-              fieldLabel: resources?.competencies?.titlePlural,
-              lookup: true,
-              lookupResource: sidebarResource.competencies,
-              resource: selectedResource?.resource,
-              type: 'dropDown',
-              order: 103,
-              required: false,
-              sectionName: 'Material Handeling Filter',
-              isTooltip: false,
-              editAble: false,
-              brand: user?.user?.brand,
-              roleType: 0,
-              sectionProperties: ''
-            },
-            isRead: true,
-            isCreate: true,
-            isUpdate: true
-          }
-        ]
+            {
+              fieldData: {
+                _id: '630dc2429ec41869452396b1',
+                fieldName: 'competencies',
+                fieldLabel: resources?.competencies?.titlePlural,
+                lookup: true,
+                lookupResource: sidebarResource.competencies,
+                resource: selectedResource?.resource,
+                type: 'dropDown',
+                order: 103,
+                required: false,
+                sectionName: 'Material Handeling Filter',
+                isTooltip: false,
+                editAble: false,
+                brand: user?.user?.brand,
+                roleType: 0,
+                sectionProperties: ''
+              },
+              isRead: true,
+              isCreate: true,
+              isUpdate: true
+            }
+          ]
         : [])
     ],
     [
@@ -276,23 +272,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, []);
 
   useEffect(() => {
-    const lookupResource = [...new Set([...ASSET_FILTERS, ...PRODUCT_FILTERS, ...EMPLOYEE_MASTER_FILTERS]?.map((e) => e.value))]?.toString();
-    if (lookupResource) {
-      setLookupLoading(true);
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setLookUpResource(data);
-          setLookupLoading(false);
-        })
-        .catch((error) => {
-          setLookupLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    }
-  }, []);
-
-  useEffect(() => {
     setSelectedFilters([]);
     if (selectedResource?.resource === sidebarResource.serializedAsset) {
       setSelectedFilters(ASSET_FILTERS);
@@ -313,12 +292,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       }
       if (selectedLookUpResourceData) {
         Object.keys(selectedLookUpResourceData).forEach((d) => {
-          let data = [];
-          if (d === 'technician') {
-            data = selectedLookUpResourceData[d]?.map((ele) => ele.technician)?.toString();
-          } else {
-            data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
-          }
+          const data = selectedLookUpResourceData[d]?.map((ele) => ele.optionValue)?.toString();
           query = `${query}&${d}=${data}`;
         });
       }
@@ -518,17 +492,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
                     otherData.push({
                       title: `↓ Planned ${debitQty}`,
-                      suffixComponent: (
-                        <InfoSidebarButton
-                          actionId={planningViewActions.planned}
-                          resource={sidebarResource.planningView}
-                          props={{
-                            className: '!bg-transparent cursor-pointer !p-0'
-                          }}
-                        >
-                          <FaRegQuestionCircle fontSize={14} />
-                        </InfoSidebarButton>
-                      ),
+                      suffixComponent: <span id="planning-planned"></span>,
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       originalDate: d['date'],
@@ -544,17 +508,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                   if (d?.credit?.length) {
                     otherData.push({
                       title: `↑ Incoming ${d?.credit.reduce((sum, row) => Number(row.qty) + sum, 0)}`,
-                      suffixComponent: (
-                        <InfoSidebarButton
-                          actionId={planningViewActions.incoming}
-                          resource={sidebarResource.planningView}
-                          props={{
-                            className: '!bg-transparent cursor-pointer !p-0'
-                          }}
-                        >
-                          <FaRegQuestionCircle fontSize={14} />
-                        </InfoSidebarButton>
-                      ),
+                      suffixComponent: <span id="planning-incoming"></span>,
                       start: dayjs.utc(d['date']).tz().toDate(),
                       end: dayjs.utc(d['date']).tz().endOf('day').toDate(),
                       originalDate: d['date'],
@@ -632,8 +586,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             if (selectedResource.resource === sidebarResource.rentalManagement) {
               if (d?.parentAccount?.optionLabel) {
                 title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
-              }
-              else if (d?.customerAccount?.optionLabel) {
+              } else if (d?.customerAccount?.optionLabel) {
                 title = `${title} (Customer-${d?.customerAccount?.optionLabel})`;
               }
               if (d?.padName?.optionLabel) {
@@ -960,13 +913,30 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               {[sidebarResource.serializedAsset, sidebarResource.product, sidebarResource.employeeMaster].includes(selectedResource?.resource) &&
                 selectedFilters?.map((filtered) => {
                   return (
-                    <RenderFilter
-                      filtered={filtered}
-                      lookupResource={lookupResource}
-                      selectedLookUpResourceData={selectedLookUpResourceData}
-                      setSelectedLookUpResourceData={setSelectedLookUpResourceData}
-                      lookupLoading={lookupLoading}
-                    />
+                    <div style={{ width: '300px' }}>
+                      <AsyncDropDown
+                        resource={filtered?.value}
+                        multiple={true}
+                        errors={false}
+                        touched={false}
+                        value={selectedLookUpResourceData && selectedLookUpResourceData[filtered.key] ? selectedLookUpResourceData[filtered.key] : []}
+                        fieldLabel={`Select ${filtered?.label}`}
+                        onChange={(e, val) => {
+                          if (val?.length > 0) {
+                            setSelectedLookUpResourceData((preVal) => ({
+                              ...preVal,
+                              [filtered.key]: val
+                            }));
+                          } else {
+                            const { [filtered.key]: _, ...remainObj } = selectedLookUpResourceData;
+                            setSelectedLookUpResourceData(remainObj);
+                          }
+                        }}
+                        fieldName={''}
+                        required={false}
+                        disableCloseOnSelect={true}
+                      />
+                    </div>
                   );
                 })}
               {selectedResource?.resource === sidebarResource.product &&
@@ -981,6 +951,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                       <HtmlTooltip title={'Warning: Some scheduled jobs remain unfulfilled.'}>
                         <IconButton
                           size={'small'}
+                          id="some-scheduled-jobs-remain-unfulfilled"
                           onClick={() => {
                             setShowPlannedIncoming(true);
                           }}
@@ -989,20 +960,14 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                         </IconButton>
                       </HtmlTooltip>
                     </span>
-                    <InfoSidebarButton actionId={planningViewActions.warningUnfulfilledPastJobsDetected} resource={sidebarResource.planningView} />
                   </Box>
                 )}
             </div>
             <div className="right-side-content ml-auto flex flex-shrink-0 items-center gap-2">
-              {(selectedResource?.resource === sidebarResource.product &&
+              {selectedResource?.resource === sidebarResource.product &&
                 !isEmpty(selectedLookUpResourceData) &&
                 selectedLookUpResourceData['product'] &&
-                selectedLookUpResourceData['product']?.length > 0) &&
-                <AiButton
-                  onClick={() => setAiSuggestionDialog(true)}>
-                  AI Suggestions
-                </AiButton>
-              }
+                selectedLookUpResourceData['product']?.length > 0 && <AiButton onClick={() => setAiSuggestionDialog(true)}>AI Suggestions</AiButton>}
               {topRightSlot}
             </div>
           </div>

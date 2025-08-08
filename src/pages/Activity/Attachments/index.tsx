@@ -34,6 +34,7 @@ import routes from '../../../components/Helpers/Routes';
 import { checkSuperAdminAccess, CustomDialogTransition, displayDate, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
 import AttachmentDeleteButton from 'src/components/Activity/Attachments/AttachmentDeleteButton';
 import DeleteRequest from 'src/components/Activity/Attachments/DeleteRequest';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const renderedFrom = 'attachment_render';
 
@@ -77,10 +78,8 @@ export default function Attachment() {
   }, []);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.attachment}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes?.attachment?.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.attachment, permissions?.attachment?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes?.attachment?.path, true);
     const extracolumns: any = [
       {
         accessor: 'type',

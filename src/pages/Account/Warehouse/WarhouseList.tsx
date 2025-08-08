@@ -14,12 +14,13 @@ import SearchBox from '../../../components/Helpers/SearchBox';
 import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAddingWarehouse, assignedWarehouse }) => {
   const renderedFrom = camelCase(sidebarResource?.warehouse);
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { selectedEntity, resources }
+    state: { selectedEntity, resources, permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -84,10 +85,8 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   };
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
-    data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.warehouse, permissions?.warehouse?.isUpdate);
+    const newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields()]);
   };
 

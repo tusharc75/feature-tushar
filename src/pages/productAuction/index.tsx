@@ -19,6 +19,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductAuction from './ManageProductAuction';
 import axios, { CancelTokenSource } from 'axios';
+import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
 const ProductAuction = () => {
   const renderedFrom = camelCase(sidebarResource.productAuction);
@@ -51,10 +52,8 @@ const ProductAuction = () => {
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
-    let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.productAuction}`);
-    data = response?.data?.data;
-    let newColumns = generateColumns(renderedFrom, data, routes.productAuctionDetail.path, true);
+    const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.productAuction, permissions?.productAuction?.isUpdate);
+    let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.productAuctionDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(true), ActionsRenderer]);
   };
 
