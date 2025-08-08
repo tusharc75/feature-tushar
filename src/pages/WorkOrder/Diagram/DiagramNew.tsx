@@ -986,7 +986,6 @@ const ImagePreview = ({ name, url, onFileClick }: ImagePreviewProps) => {
   return (
     <div
       onClick={(e) => {
-        console.log('aaaaa')
         e.preventDefault();
         e.stopPropagation();
         onFileClick();

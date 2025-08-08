@@ -663,7 +663,6 @@ const User: FC = () => {
             type="entity"
             ids={selectedRecords.map((d) => d._id)}
             assignedEntity={[]}
-            regionalRole={false}
             onSuccess={() => {
               handleRegionalRolesCloseDialog();
               fetchUsers();

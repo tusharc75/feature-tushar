@@ -268,9 +268,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -469,7 +469,6 @@ const EntityDetailsPage = () => {
             type="user"
             ids={[id]}
             assignedEntity={users}
-            regionalRole={false}
             onSuccess={() => {
               fetchEntityUser();
               userDialogClose();

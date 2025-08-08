@@ -14,7 +14,7 @@ import {
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { Check } from '@mui/icons-material';
 import { startCase } from 'lodash';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -33,7 +33,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginRight: theme.spacing(1)
   },
   actionsContainer: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2)
   },
   resetContainer: {
     padding: theme.spacing(3)
@@ -47,10 +48,10 @@ const AssignEntityDialog = ({
   ids,
   type,
   assignedEntity,
-  regionalRole,
   isRenderedFromContact = false,
   entityAccessIds = [],
   roleAccessIds = [],
+  onlyAssignRoles = false,
   contactResource = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -64,7 +65,7 @@ const AssignEntityDialog = ({
   const [role, setRole] = useState([]);
   const [roleConst, setRoleConst] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
-  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []);
+  const [selectedData, setSelectedData] = useState(onlyAssignRoles ? [ids[1]] : []);
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -128,33 +129,15 @@ const AssignEntityDialog = ({
         toastConfig.setToastConfig(error);
       });
     }
-
-    axiosInstance()
-      .get(`/role?type=${roleTypes.find((d) => d.key === 'Regional')?.value}`)
+    axiosInstance().get(`/role?type=${roleTypes.find((d) => d.key === 'Regional')?.value}`)
       .then(({ data: { data } }) => {
-        if (regionalRole) {
-          setRole(
-            data
-              .filter(
-                (role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id)
-              )
-              .map((obj) => ({ ...obj, isChecked: false }))
-          );
-          setRoleConst(
-            data.filter((role) => !assignedEntity.find((element) => element.entity._id === selectedData[0]).role.some((item) => item?._id === role?._id))
-              .map((obj) => ({ ...obj, isChecked: false }))
-          );
+        if (onlyAssignRoles) {
+          const entityRoleIds: any = assignedEntity.find((element) => element.entity._id === selectedData[0])?.role?.map((e) => e._id)
+          setRole(data.filter((e) => entityRoleIds?.includes(e._id) || e?.canAssignByAnyuser).map((obj) => ({ ...obj, isChecked: false })));
+          setRoleConst(data.filter((e) => entityRoleIds?.includes(e._id) || e?.canAssignByAnyuser).map((obj) => ({ ...obj, isChecked: false })));
         } else {
-          setRole(
-            data
-              .filter((item) => (roleAccessIds && roleAccessIds?.includes(item._id)) || item?.canAssignByAnyuser)
-              .map((obj) => ({ ...obj, isChecked: false }))
-          );
-          setRoleConst(
-            data
-              .filter((item) => (roleAccessIds && roleAccessIds?.includes(item._id)) || item?.canAssignByAnyuser)
-              .map((obj) => ({ ...obj, isChecked: false }))
-          );
+          setRole(data.filter((e) => (roleAccessIds && roleAccessIds?.includes(e._id)) || e?.canAssignByAnyuser).map((obj) => ({ ...obj, isChecked: false })));
+          setRoleConst(data.filter((e) => (roleAccessIds && roleAccessIds?.includes(e._id)) || e?.canAssignByAnyuser).map((obj) => ({ ...obj, isChecked: false })));
         }
         setLoadingData(false);
       })
@@ -208,7 +191,7 @@ const AssignEntityDialog = ({
         .put(type === 'entity' ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
         .then(() => {
           setAssigning(false);
-          if (regionalRole) {
+          if (onlyAssignRoles) {
             toastConfig.setToastConfig({
               message: `Role Assigned Successfully`,
               type: 'success',
@@ -349,7 +332,7 @@ const AssignEntityDialog = ({
               <Checkbox
                 edge="start"
                 onChange={(e) => {
-                  if (activeStep === 0 && !regionalRole) {
+                  if (activeStep === 0 && !onlyAssignRoles) {
                     data.forEach((d) => (d.isChecked = e.target.checked));
                     setSelectedData(data.filter((r) => r.isChecked).map((obj) => obj._id));
                   } else {
@@ -357,7 +340,7 @@ const AssignEntityDialog = ({
                     setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
                   }
                 }}
-                checked={activeStep === 0 && !regionalRole ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
+                checked={activeStep === 0 && !onlyAssignRoles ? data.every((x) => x.isChecked) : role.every((x) => x.isChecked)}
                 inputProps={{
                   'aria-labelledby': `checkbox-list-label-select-all`
                 }}
@@ -375,11 +358,11 @@ const AssignEntityDialog = ({
       <CustomDialogHeader
         onClose={handleCloseDialog}
         showRequiredLabel={false}
-        title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`}
+        title={onlyAssignRoles ? `Assign Roles` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`}
       />
       <CustomDialogContent>
         <div className="p-3 md:p-4">
-          {!regionalRole ? (
+          {!onlyAssignRoles ? (
             loadingData ? (
               <Loader text={`Loading ${startCase(type)}`} />
             ) : dataConst.length ? (
@@ -409,7 +392,7 @@ const AssignEntityDialog = ({
                         ></div>
                       )}
                       <Collapse in={activeStep === index}>
-                        <div className="max-w-full  min-[600px]:ml-[35px]">
+                        <div className="max-w-full min-[600px]:ml-[35px]">
                           <div className="max-w-full">{getStepContent(index)}</div>
                           <div className={classes.actionsContainer}>
                             <div>

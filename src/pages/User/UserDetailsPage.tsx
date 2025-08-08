@@ -367,427 +367,422 @@ const UserDetailsPage = () => {
       });
   };
 
-  return (
-    <>
-      <Box className="main-container-v1">
-        <Box className="headerbox-v1">
-          <Box className="nav-v1">
-            <CustomBreadCrumbs routes={customizedRoutes} />
-          </Box>
-          <Box className="controls-v1">
-            <Box className="control-buttons-v1">
-              {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
-                <span className="max-[768px]:hidden">
-                  <ThemeButton iconForMobile={<RiSettingsFill />} mobileTooltip="Assign Entity/Role" onClick={entityDialogOpen}>
-                    Assign Entity/Role
-                  </ThemeButton>
-                </span>
-              )}
-              {user?.user?.userType === userType.brandAdmin && (
-                <ThemeButton
-                  iconForMobile={<GeneratePasswordIcon size={20} />}
-                  onClick={() => {
-                    setGenerateAutoPassword(true);
-                  }}
-                  mobileTooltip="Generate Password"
-                >
-                  Generate Password
-                </ThemeButton>
-              )}
-              {permissions?.user?.isUpdate && (
-                <ThemeButton mobileTooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
-                  Reset Password
-                </ThemeButton>
-              )}
-              {permissions?.user?.isUpdate ? (
-                <ThemeButton
-                  iconForMobile={<Edit />}
-                  onClick={handleOpenUpdateDialog}
-                  disabled={
-                    userData?.userType === userType.brandAdmin
-                      ? checkSuperAdminAccess(user, sidebarResource.user) || user?.user?._id === id
-                        ? false
-                        : true
-                      : false
-                  }
-                  mobileTooltip={'Edit'}
-                >
-                  Edit
-                </ThemeButton>
-              ) : null}
-              {permissions?.user?.isDelete && user?.user?._id !== id && userData?.userType !== userType.brandAdmin ? (
-                <DeleteButton text={'Delete'} onClick={() => handleDeleteUser(true)} />
-              ) : null}
-              <ActivityButton
-                referenceId={userData?._id}
-                resource={ACTIVITY_RESOURCE.user}
-                resourceLabel={`${userData?.firstName} ${userData?.lastName}`}
-                resourceData={userData}
-              />
-            </Box>
-          </Box>
-        </Box>
-        <Box className={`detail-container-v1`}>
-          <Box>
-            <Box style={{ padding: '8px', minHeight: '450px' }}>
-              {loading || !userFields.length || !userData ? (
-                <div className="p-2">
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </div>
-              ) : (
-                <>
-                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab value={0} label={'Details'} />
-                    <CustomTab value={1} label={'Org Chart'} />
-                    {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
-                    <CustomTab value={3} label={'User Session'} />
-                    <CustomTab value={4} label={`Assigned ${resources?.entity?.titlePlural}`} />
-                  </CustomTabs>
-                  <TabPanel value={tabValue} index={0}>
-                    <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
-                    <DetailsPage data={userData} fields={userFields} resource={sidebarResource?.user} referenceId={userData?._id} />
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={1}>
-                    <OrgChartContainer
-                      data={orgChartData}
-                      onClick={(id) => {
-                        history.push(`${routes.userDetail.path}/${id}`);
-                      }}
-                    />
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={2}>
-                    {userData?.proxyDOA ? (
-                      <TableContainer>
-                        <Table aria-label="DOA Proxy Table" size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>
-                                <h4 title="assignedTo" className={classes.detailLabel}>
-                                  Assigned To
-                                </h4>
-                              </TableCell>
-
-                              <TableCell align="center">
-                                <h4 title="startDate" className={classes.detailLabel}>
-                                  Start Date
-                                </h4>
-                              </TableCell>
-
-                              <TableCell align="center">
-                                <h4 title="endDate" className={classes.detailLabel}>
-                                  End Date
-                                </h4>
-                              </TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            <TableRow key={userData.proxyDOA?.user}>
-                              <TableCell>
-                                <Link
-                                  className="link"
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  to={`${routes.userDetail.path}/${userData.proxyDOA?.user}`}
-                                >
-                                  {userData.proxyDOA?.user}
-                                </Link>
-                              </TableCell>
-                              <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.startDate)}</span>
-                              </TableCell>
-                              <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.endDate)}</span>
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    ) : null}
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={3}>
-                    <UserSession id={id} />
-                  </TabPanel>
-                  <TabPanel value={tabValue} index={4}>
-                    <Grid container spacing={2}>
-                      <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
-                        <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
-                          <h6 className="text-sm font-semibold leading-[1.05] ">
-                            {`Assigned ${resources?.entity?.titlePlural}`} ({entities?.length || 0})
-                          </h6>
-                          {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
-                            <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
-                              <HtmlTooltip title="Assign Entities">
-                                <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
-                                  <ControlPoint />
-                                </IconButton>
-                              </HtmlTooltip>
-                            </span>
-                          )}
-                        </div>
-                        <>
-                          {loading ? (
-                            <Box display="flex">
-                              {[1, 2].map((i) => (
-                                <BoxWithBorder
-                                  key={i}
-                                  style={{
-                                    padding: '8px',
-                                    margin: '8px',
-                                    width: '100%'
-                                  }}
-                                >
-                                  <Box padding={1}>
-                                    <Skeleton variant="text" width="100px" height="20px" />
-                                    <Box marginTop={1} />
-                                    <Skeleton variant="text" width="100%" height="15px" />
-                                  </Box>
-                                </BoxWithBorder>
-                              ))}
-                            </Box>
-                          ) : entities?.length ? (
-                            <AssignedEntities
-                              entities={entities}
-                              permissions={permissions}
-                              userId={id}
-                              loggedInUser={user?.user}
-                              onSuccess={() => {
-                                fetchUserData();
-                              }}
-                              entityAccessIds={entityAccess}
-                              roleAccessIds={roleAccessOfLoggedInUser}
-                            />
-                          ) : (
-                            <Box textAlign="center" padding={2}>
-                              <Typography>No Entities </Typography>
-                            </Box>
-                          )}
-                        </>
-                      </Grid>
-                    </Grid>
-                  </TabPanel>
-                </>
-              )}
-            </Box>
-            <div className="pt-3">
-              <QuickLinks quickLinks={quickLinks} />
-              {permissions?.[opportunity.opportunityResource]?.isRead && (
-                <Box mb={2}>
-                  <OpportunityAccordionInUserDetail
-                    opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[lead.leadResource]?.isRead && (
-                <Box mb={2}>
-                  <LeadAccordionInUserDetailPage
-                    leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[customerAccount.accountResource]?.isRead && (
-                <Box mb={2}>
-                  <AccountAccordionDetail
-                    type="customer"
-                    accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[supplierAccount.accountResource]?.isRead && (
-                <Box mb={2}>
-                  <AccountAccordionDetail
-                    type="supplier"
-                    accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[customerContact.contactResource]?.isRead && (
-                <Box mb={2}>
-                  <ContactAccordionInDetailPage
-                    type="customer"
-                    contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[supplierContact.contactResource]?.isRead && (
-                <Box mb={2}>
-                  <ContactAccordionInDetailPage
-                    type="supplier"
-                    contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
-                    recordsPerLine={3}
-                    expanded={false}
-                    userId={id}
-                    onSuccess={() => {
-                      fetchUserRelatedDetail();
-                    }}
-                    isAllowedToEdit={false}
-                  />
-                </Box>
-              )}
-              {permissions?.[quoteBuilder.qbResource]?.isRead && (
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
-                  expanded={false}
-                  fetchData={() => fetchUserRelatedDetail()}
-                  quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
-                  allowedToEdit={false}
-                />
-              )}
-            </div>
-          </Box>
+  return (<Box className="main-container-v1">
+    <Box className="headerbox-v1">
+      <Box className="nav-v1">
+        <CustomBreadCrumbs routes={customizedRoutes} />
+      </Box>
+      <Box className="controls-v1">
+        <Box className="control-buttons-v1">
+          {permissions?.role?.isUpdate && permissions?.entity?.isUpdate && (
+            <span className="max-[768px]:hidden">
+              <ThemeButton iconForMobile={<RiSettingsFill />} mobileTooltip="Assign Entity/Role" onClick={entityDialogOpen}>
+                Assign Entity/Role
+              </ThemeButton>
+            </span>
+          )}
+          {user?.user?.userType === userType.brandAdmin && (
+            <ThemeButton
+              iconForMobile={<GeneratePasswordIcon size={20} />}
+              onClick={() => {
+                setGenerateAutoPassword(true);
+              }}
+              mobileTooltip="Generate Password"
+            >
+              Generate Password
+            </ThemeButton>
+          )}
+          {permissions?.user?.isUpdate && (
+            <ThemeButton mobileTooltip="Reset Password" iconForMobile={<ResetPasswordIcon />} onClick={handleResetPassword}>
+              Reset Password
+            </ThemeButton>
+          )}
+          {permissions?.user?.isUpdate ? (
+            <ThemeButton
+              iconForMobile={<Edit />}
+              onClick={handleOpenUpdateDialog}
+              disabled={
+                userData?.userType === userType.brandAdmin
+                  ? checkSuperAdminAccess(user, sidebarResource.user) || user?.user?._id === id
+                    ? false
+                    : true
+                  : false
+              }
+              mobileTooltip={'Edit'}
+            >
+              Edit
+            </ThemeButton>
+          ) : null}
+          {permissions?.user?.isDelete && user?.user?._id !== id && userData?.userType !== userType.brandAdmin ? (
+            <DeleteButton text={'Delete'} onClick={() => handleDeleteUser(true)} />
+          ) : null}
+          <ActivityButton
+            referenceId={userData?._id}
+            resource={ACTIVITY_RESOURCE.user}
+            resourceLabel={`${userData?.firstName} ${userData?.lastName}`}
+            resourceData={userData}
+          />
         </Box>
       </Box>
-      {openUpdateDialog && (
-        <ManageUserDialog
-          open={openUpdateDialog}
-          close={closeUpdateDialog}
-          onSuccess={(obj) => {
-            setOpenUpdateDialog(false);
+    </Box>
+    <Box className={`detail-container-v1`}>
+      <Box>
+        <Box>    {loading || !userFields.length || !userData ? (
+          <div className="p-2">
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </div>
+        ) : (
+          <>
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab value={0} label={'Details'} />
+              <CustomTab value={1} label={'Org Chart'} />
+              {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
+              <CustomTab value={3} label={'User Session'} />
+              <CustomTab value={4} label={`Assigned ${resources?.entity?.titlePlural}`} />
+            </CustomTabs>
+            <TabPanel value={tabValue} index={0}>
+              <DetailsPageHeader logo={userData?.avatar ? userData.avatar : undefined} mainPoints={mainPoints} />
+              <DetailsPage data={userData} fields={userFields} resource={sidebarResource?.user} referenceId={userData?._id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <OrgChartContainer
+                data={orgChartData}
+                onClick={(id) => {
+                  history.push(`${routes.userDetail.path}/${id}`);
+                }}
+              />
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
+              {userData?.proxyDOA ? (
+                <TableContainer>
+                  <Table aria-label="DOA Proxy Table" size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>
+                          <h4 title="assignedTo" className={classes.detailLabel}>
+                            Assigned To
+                          </h4>
+                        </TableCell>
+
+                        <TableCell align="center">
+                          <h4 title="startDate" className={classes.detailLabel}>
+                            Start Date
+                          </h4>
+                        </TableCell>
+
+                        <TableCell align="center">
+                          <h4 title="endDate" className={classes.detailLabel}>
+                            End Date
+                          </h4>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <TableRow key={userData.proxyDOA?.user}>
+                        <TableCell>
+                          <Link
+                            className="link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            to={`${routes.userDetail.path}/${userData.proxyDOA?.user}`}
+                          >
+                            {userData.proxyDOA?.user}
+                          </Link>
+                        </TableCell>
+                        <TableCell align="center">
+                          <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.startDate)}</span>
+                        </TableCell>
+                        <TableCell align="center">
+                          <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.endDate)}</span>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : null}
+            </TabPanel>
+            <TabPanel value={tabValue} index={3}>
+              <UserSession id={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={4}>
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 12, md: 12, lg: 12 }}>
+                  <div className="relative flex justify-between rounded-t bg-[var(--dark-secondary,var(--accordion-expanded-summary-bg,#EFFBF9))] px-7 py-4">
+                    <h6 className="text-sm font-semibold leading-[1.05] ">
+                      {`Assigned ${resources?.entity?.titlePlural}`} ({entities?.length || 0})
+                    </h6>
+                    {permissions?.entity?.isUpdate && permissions?.role?.isUpdate && (
+                      <span className="absolute right-7 top-[50%] [transform:translateY(-50%)]">
+                        <HtmlTooltip title="Assign Entities">
+                          <IconButton title="Assign entities" color="primary" size="small" onClick={entityDialogOpen}>
+                            <ControlPoint />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </span>
+                    )}
+                  </div>
+                  <>
+                    {loading ? (
+                      <Box display="flex">
+                        {[1, 2].map((i) => (
+                          <BoxWithBorder
+                            key={i}
+                            style={{
+                              padding: '8px',
+                              margin: '8px',
+                              width: '100%'
+                            }}
+                          >
+                            <Box padding={1}>
+                              <Skeleton variant="text" width="100px" height="20px" />
+                              <Box marginTop={1} />
+                              <Skeleton variant="text" width="100%" height="15px" />
+                            </Box>
+                          </BoxWithBorder>
+                        ))}
+                      </Box>
+                    ) : entities?.length ? (
+                      <AssignedEntities
+                        entities={entities}
+                        permissions={permissions}
+                        userId={id}
+                        loggedInUser={user?.user}
+                        onSuccess={() => {
+                          fetchUserData();
+                        }}
+                        entityAccessIds={entityAccess}
+                        roleAccessIds={roleAccessOfLoggedInUser}
+                      />
+                    ) : (
+                      <Box textAlign="center" padding={2}>
+                        <Typography>No Entities </Typography>
+                      </Box>
+                    )}
+                  </>
+                </Grid>
+              </Grid>
+            </TabPanel>
+          </>
+        )}
+        </Box>
+        <div className="pt-3">
+          <QuickLinks quickLinks={quickLinks} />
+          {permissions?.[opportunity.opportunityResource]?.isRead && (
+            <Box mb={2}>
+              <OpportunityAccordionInUserDetail
+                opportunities={[...(opportunityRelatedData?.Owner ?? []), ...(opportunityRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[lead.leadResource]?.isRead && (
+            <Box mb={2}>
+              <LeadAccordionInUserDetailPage
+                leads={[...(leadsRelatedData?.Owner ?? []), ...(leadsRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[customerAccount.accountResource]?.isRead && (
+            <Box mb={2}>
+              <AccountAccordionDetail
+                type="customer"
+                accounts={[...(customerAccountRelatedData?.Owner ?? []), ...(customerAccountRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[supplierAccount.accountResource]?.isRead && (
+            <Box mb={2}>
+              <AccountAccordionDetail
+                type="supplier"
+                accounts={[...(supplierAccountRelatedData?.Owner ?? []), ...(supplierAccountRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[customerContact.contactResource]?.isRead && (
+            <Box mb={2}>
+              <ContactAccordionInDetailPage
+                type="customer"
+                contacts={[...(customerContactRelatedData?.Owner ?? []), ...(customerContactRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[supplierContact.contactResource]?.isRead && (
+            <Box mb={2}>
+              <ContactAccordionInDetailPage
+                type="supplier"
+                contacts={[...(supplierContactRelatedData?.Owner ?? []), ...(supplierContactRelatedData?.Collaborator ?? [])]}
+                recordsPerLine={3}
+                expanded={false}
+                userId={id}
+                onSuccess={() => {
+                  fetchUserRelatedDetail();
+                }}
+                isAllowedToEdit={false}
+              />
+            </Box>
+          )}
+          {permissions?.[quoteBuilder.qbResource]?.isRead && (
+            <QuotesInAccordion
+              recordsPerLine={3}
+              quotes={[...(quotesRelatedData?.Owner ?? []), ...(quotesRelatedData?.Collaborator ?? [])]}
+              expanded={false}
+              fetchData={() => fetchUserRelatedDetail()}
+              quoteBuilderPermission={permissions?.[quoteBuilder.qbResource]}
+              allowedToEdit={false}
+            />
+          )}
+        </div>
+      </Box>
+    </Box>
+    {openUpdateDialog && (
+      <ManageUserDialog
+        open={openUpdateDialog}
+        close={closeUpdateDialog}
+        onSuccess={(obj) => {
+          setOpenUpdateDialog(false);
+          fetchUserData();
+        }}
+        userId={userData?._id}
+        dataToUpdate={userData}
+        isNew={false}
+      />
+    )}
+    {rolesDialogOpen && (
+      <Dialog
+        TransitionComponent={CustomDialogTransition}
+        fullWidth
+        maxWidth="xs"
+        open={rolesDialogOpen}
+        onClose={handleCloseDialog}
+        aria-labelledby="assign-roles-dialog"
+      >
+        <AssignRolesDialog
+          rolesDialogOpen={rolesDialogOpen}
+          handleCloseDialog={handleCloseDialog}
+          userIds={[id]}
+          assignedRoles={globalRoles}
+          onSuccess={() => {
+            handleCloseDialog();
             fetchUserData();
           }}
-          userId={userData?._id}
-          dataToUpdate={userData}
-          isNew={false}
         />
-      )}
-      {rolesDialogOpen && (
-        <Dialog
-          TransitionComponent={CustomDialogTransition}
-          fullWidth
-          maxWidth="xs"
-          open={rolesDialogOpen}
-          onClose={handleCloseDialog}
-          aria-labelledby="assign-roles-dialog"
-        >
-          <AssignRolesDialog
-            rolesDialogOpen={rolesDialogOpen}
-            handleCloseDialog={handleCloseDialog}
-            userIds={[id]}
-            assignedRoles={globalRoles}
-            onSuccess={() => {
-              handleCloseDialog();
-              fetchUserData();
-            }}
-          />
-        </Dialog>
-      )}
-      {showAssignEntityDialog && (
-        <Dialog
-          fullWidth
-          fullScreen={isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-          maxWidth="xs"
-          open={showAssignEntityDialog}
-          onClose={entityDialogClose}
-          aria-labelledby="assign-roles-dialog"
-        >
-          <AssignEntityDialog
-            entitiesDialogOpen={showAssignEntityDialog}
-            handleCloseDialog={entityDialogClose}
-            type="entity"
-            ids={[id]}
-            assignedEntity={entities}
-            regionalRole={false}
-            onSuccess={() => {
-              fetchUserData();
-              entityDialogClose();
-            }}
-            roleAccessIds={roleAccessOfLoggedInUser}
-          />
-        </Dialog>
-      )}
-      {showConfirmBox ? (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={
-            deleteUserRec
-              ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
-              : roleDeleteRec
-                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-                : ''
-          }
-          onClose={() => {
-            setShowConfirmBox(false);
-            if (roleDeleteRec) setRoleDeleteRec(undefined);
-            if (deleteUserRec) setDeleteUserRec(undefined);
+      </Dialog>
+    )}
+    {showAssignEntityDialog && (
+      <Dialog
+        fullWidth
+        fullScreen={isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        maxWidth="xs"
+        open={showAssignEntityDialog}
+        onClose={entityDialogClose}
+        aria-labelledby="assign-roles-dialog"
+      >
+        <AssignEntityDialog
+          entitiesDialogOpen={showAssignEntityDialog}
+          handleCloseDialog={entityDialogClose}
+          type="entity"
+          ids={[id]}
+          assignedEntity={entities}
+          onSuccess={() => {
+            fetchUserData();
+            entityDialogClose();
           }}
-          onOk={deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null}
+          roleAccessIds={roleAccessOfLoggedInUser}
         />
-      ) : null}
-      {orgChartInFullScreenDialog && (
-        <FullScreenDialog
-          heading="Org Chart"
-          open={orgChartInFullScreenDialog}
-          close={() => {
+      </Dialog>
+    )}
+    {showConfirmBox ? (
+      <ConfirmationDialog
+        open={showConfirmBox}
+        message={
+          deleteUserRec
+            ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
+            : roleDeleteRec
+              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+              : ''
+        }
+        onClose={() => {
+          setShowConfirmBox(false);
+          if (roleDeleteRec) setRoleDeleteRec(undefined);
+          if (deleteUserRec) setDeleteUserRec(undefined);
+        }}
+        onOk={deleteUserRec ? DeleteUser : roleDeleteRec ? unassignUserRole : null}
+      />
+    ) : null}
+    {orgChartInFullScreenDialog && (
+      <FullScreenDialog
+        heading="Org Chart"
+        open={orgChartInFullScreenDialog}
+        close={() => {
+          setOrgChartInFullScreenDialog(false);
+        }}
+      >
+        <OrgChartContainer
+          data={orgChartData}
+          onClick={(id) => {
             setOrgChartInFullScreenDialog(false);
-          }}
-        >
-          <OrgChartContainer
-            data={orgChartData}
-            onClick={(id) => {
-              setOrgChartInFullScreenDialog(false);
-              history.push(`${routes.userDetail.path}/${id}`);
-            }}
-          />
-        </FullScreenDialog>
-      )}
-      {showConfirmBox && deleteUserRec ? (
-        <ResourceTransferDialog
-          open={showConfirmBox}
-          resource="User"
-          fromResource={[userData]}
-          allResourceData={allUsers?.filter((u) => u?.optionValue != userData?._id)}
-          onClose={() => setShowConfirmBox(false)}
-          handleDelete={() => {
-            setShowConfirmBox(false);
-            history.push(routes.user.path);
+            history.push(`${routes.userDetail.path}/${id}`);
           }}
         />
-      ) : null}
-      {generateAutoPassword && (
-        <GenerateAutoPassword
-          onClose={() => {
-            setGenerateAutoPassword(false);
-          }}
-          ids={[userData?._id]}
-        />
-      )}
-    </>
+      </FullScreenDialog>
+    )}
+    {showConfirmBox && deleteUserRec ? (
+      <ResourceTransferDialog
+        open={showConfirmBox}
+        resource="User"
+        fromResource={[userData]}
+        allResourceData={allUsers?.filter((u) => u?.optionValue != userData?._id)}
+        onClose={() => setShowConfirmBox(false)}
+        handleDelete={() => {
+          setShowConfirmBox(false);
+          history.push(routes.user.path);
+        }}
+      />
+    ) : null}
+    {generateAutoPassword && (
+      <GenerateAutoPassword
+        onClose={() => {
+          setGenerateAutoPassword(false);
+        }}
+        ids={[userData?._id]}
+      />
+    )}
+  </Box>
   );
 };
 

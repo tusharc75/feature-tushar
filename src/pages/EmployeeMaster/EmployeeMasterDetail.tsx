@@ -271,7 +271,6 @@ const EmployeeMasterDetail = () => {
             ids={[id]}
             assignedEntity={[]}
             isRenderedFromContact={true}
-            regionalRole={false}
             onSuccess={() => {
               setShowAssignEntityDialog(false);
               fetchData();
