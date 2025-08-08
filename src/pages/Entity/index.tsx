@@ -346,7 +346,6 @@ const Entity: FC = () => {
             type="user"
             ids={selectedEntity ? [selectedEntity] : selectedRecords.map((rec) => rec._id)}
             assignedEntity={users}
-            regionalRole={false}
             onSuccess={() => {
               setSelectedEntity(null);
               handleCloseDialog();
