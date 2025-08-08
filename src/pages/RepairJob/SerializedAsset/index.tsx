@@ -647,6 +647,7 @@ const SerializedAsset = ({
           onClose={() => setShowTicketDialog({ open: false, ticketType: '', data: {} })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
+            fetchRepairJobData();
             fetchRecords();
           }}
         />
