@@ -160,6 +160,7 @@ const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
       {addserialNumber && (
         <AddSerialNumber
           product={product}
+          productName={productName}
           warehouse={selectedWarehouse}
           storageLocation={selectedStorageLocation}
           serialNumberCount={serialNumberCount}
