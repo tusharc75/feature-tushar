@@ -68,8 +68,6 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
         let serialNumbers = tableContent
           .map((item) => item[1]?.toString().trim())
           .filter((sn) => sn && sn.length > 0);
-
-        console.log(serialNumbers);
         setFieldValue('serialNumber', serialNumbers);
       }
     };
