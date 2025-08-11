@@ -11,8 +11,9 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { read, utils, writeFile } from 'xlsx';
 
-const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storageLocation, serialNumberCount }) => {
+const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storageLocation, serialNumberCount, productName }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -30,6 +31,51 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
         toastConfig.setToastConfig(err);
       });
   };
+
+  const handleExport = (qty: number) => {
+    let json_data = [...new Array(Number(qty)).keys()].map((_, i) => ({
+      Name: productName,
+      'Serial Number': ''
+    }));
+    const header = ['Name', 'Serial Number'];
+    const ws = utils.json_to_sheet(json_data);
+    if (header.length) {
+      utils.sheet_add_aoa(ws, [header]);
+    }
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+    writeFile(wb, 'Serial Numbers.xlsx');
+  };
+
+  const handleImport = (setFieldValue: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const f = files[0];
+    let reader = new FileReader();
+
+    reader.onload = function (e) {
+      const data = e.target?.result;
+      let readedData = read(data, { type: 'binary' });
+      const wsname = readedData.SheetNames[0];
+      const ws = readedData.Sheets[wsname];
+      const parsedData = utils.sheet_to_json(ws, { header: 1 });
+
+      if (parsedData.length > 1) {
+        let tableContent = parsedData.slice(1);
+        let serialNumbers = tableContent
+          .map((item) => item[1]?.toString().trim())
+          .filter((sn) => sn && sn.length > 0);
+
+        setFieldValue('serialNumber', serialNumbers);
+      }
+    };
+
+    reader.readAsBinaryString(f);
+    e.target.value = '';
+  };
+
 
   function validate(values) {
     const errors = {};
@@ -74,6 +120,28 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
                 <Typography>{`Inventory without Serial Number - ${serialNumberCount}`}</Typography>
                 <Box pt={2} pb={2}>
                   <Divider />
+                </Box>
+                <Box mb={1} display="flex" justifyContent="flex-end">
+                  <Box mr={2}>
+                    <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(serialNumberCount)}>
+                      Export
+                    </Typography>
+                  </Box>
+                  <Box mr={1}>
+                    <input
+                      accept="json"
+                      style={{ display: 'none' }}
+                      onChange={handleImport(setFieldValue)}
+                      id="import-file"
+                      multiple={false}
+                      type="file"
+                    />
+                    <label htmlFor="import-file">
+                      <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                        Import
+                      </Typography>
+                    </label>
+                  </Box>
                 </Box>
                 <Autocomplete
                   size="small"
