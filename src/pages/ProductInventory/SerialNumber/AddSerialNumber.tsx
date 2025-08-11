@@ -17,7 +17,6 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const [qty, setQty] = useState(0);
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -68,6 +67,7 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
         let serialNumbers = tableContent
           .map((item) => item[1]?.toString().trim())
           .filter((sn) => sn && sn.length > 0);
+
         setFieldValue('serialNumber', serialNumbers);
       }
     };
@@ -123,10 +123,9 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
                 </Box>
                 <Box mb={1} display="flex" justifyContent="flex-end">
                   <Box mr={2}>
-                    {qty > 0 &&
-                      <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(qty)}>
-                        Export
-                      </Typography>}
+                    <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(serialNumberCount)}>
+                      Export
+                    </Typography>
                   </Box>
                   <Box mr={1}>
                     <input
@@ -144,21 +143,6 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, storag
                     </label>
                   </Box>
                 </Box>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  size="small"
-                  type="number"
-                  label="Qty"
-                  name="qty"
-                  required
-                  variant="outlined"
-                  value={qty}
-                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                  onChange={(e) => {
-                    setQty(Number(e.target.value.replace(/\D/g, '')))
-                  }}
-                />
                 <Autocomplete
                   size="small"
                   options={[]}
