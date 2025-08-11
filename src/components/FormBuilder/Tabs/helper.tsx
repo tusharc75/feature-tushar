@@ -513,6 +513,12 @@ export const resourcePolicy = [
         fieldLabel: 'Planned Available Count From Current Date',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'showInUsePlanned',
+        fieldLabel: 'Show In-Use (Planned)',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },

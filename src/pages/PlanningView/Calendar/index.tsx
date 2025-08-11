@@ -534,7 +534,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
                     order: 3
                   });
                 } else if (property === 'inUseByPlanning') {
-                  if (!ledgerDate.isBefore(today, 'day')) {
+                  if (!ledgerDate.isBefore(today, 'day') && resourcePolicy?.showInUsePlanned) {
                     otherData.push({
                       title: `In-Use (Planned) ${d?.inUseByPlanning || 0}`,
                       start: dayjs.utc(d['date']).tz().toDate(),
