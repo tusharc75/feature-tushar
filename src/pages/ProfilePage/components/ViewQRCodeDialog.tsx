@@ -13,7 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 export default function ViewQRCodeDialog({ onClose }) {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({ secret: '', qrCode: '' });
+  const [data, setData] = useState({ userName: '', qrCode: '' });
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -21,7 +21,10 @@ export default function ViewQRCodeDialog({ onClose }) {
     axiosInstance()
       .get(`/user/qr-setup`)
       .then(({ data }) => {
-        setData({ secret: data?.data?.secret || '', qrCode: data?.data?.qrCode || '' });
+        setData({
+          userName: data?.data?.userName || '',
+          qrCode: data?.data?.qrCode || ''
+        });
         setLoading(false);
       })
       .catch((error) => {
@@ -60,7 +63,7 @@ export default function ViewQRCodeDialog({ onClose }) {
               onClick={() => {
                 const link = document.createElement('a');
                 link.href = data.qrCode;
-                link.download = `qr-login-${data.secret}.png`;
+                link.download = `qrLogin-${data.userName}.png`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -69,9 +72,6 @@ export default function ViewQRCodeDialog({ onClose }) {
             >
               Download QR Code
             </ThemeButton>
-            <Typography variant="body2" align="center">
-              QR Login ID: {data.secret}
-            </Typography>
           </Box>
         ) : (
           <Typography align="center">QR code not available.</Typography>
