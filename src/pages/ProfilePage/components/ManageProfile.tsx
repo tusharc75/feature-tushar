@@ -649,6 +649,8 @@ export default function ManageProfile(props) {
             <SetUpQRDialog
               onClose={() => {
                 setSetUpQRCodeDialog(false);
+              }}
+              onSubmit={() => {
                 onFetchUserData();
                 setViewQRCodeDialog(true);
               }}
@@ -658,6 +660,8 @@ export default function ManageProfile(props) {
             <SetUpQRDialog
               onClose={() => {
                 setChangeQRCodeDialog(false);
+              }}
+              onSubmit={() => {
                 onFetchUserData();
               }}
               mode="change"

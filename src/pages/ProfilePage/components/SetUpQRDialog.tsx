@@ -13,7 +13,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import OtpInput from 'src/components/OtpInput';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const SetUpQRDialog = ({ onClose, mode = 'setup', qrLoginId = null }) => {
+const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) => {
   const [loading, setLoading] = useState(false);
   const [pin, setPin] = useState('');
   const toastConfig = useContext(CustomToastContext);
@@ -35,6 +35,7 @@ const SetUpQRDialog = ({ onClose, mode = 'setup', qrLoginId = null }) => {
           message: mode === 'change' ? 'QR PIN changed successfully' : 'QR setup successful'
         });
         setLoading(false);
+        onSubmit();
         onClose();
       })
       .catch((error) => {
