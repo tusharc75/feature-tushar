@@ -7,6 +7,8 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
+import { useHistory } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 
 const useStyles = makeStyles((theme: Theme) => ({
     whiteBg: {
@@ -29,6 +31,7 @@ const CalendarView = ({ topRightSlot }) => {
     const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
     const [events, setEvents] = useState([]);
     const toastConfig = useContext(CustomToastContext);
+    const history = useHistory();
 
     const fetchData = async () => {
         try {
@@ -128,7 +131,13 @@ const CalendarView = ({ topRightSlot }) => {
                         getEventStyle={getEventStyle}
                         onNavigate={() => { }}
                         eventClick={(arg) => {
-                            console.log("cliked");
+                            const ev = arg.event;
+                            const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
+                            if (id) {
+                                history.push(`${routes.contentPostPlanningDetail.path}/${id}`);
+                            } else {
+                                console.warn('Calendar event clicked but id not found', ev);
+                            }
                         }}
                     />
                 </div>

@@ -1,4 +1,3 @@
-// src/pages/Planning/PlanningView.tsx
 import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useState } from 'react';
@@ -24,7 +23,7 @@ const PlanningView = () => {
         dispatch({ type: 'selection', selectedRecords: [] });
         tableDispatch({ type: 'selection', selectedRecords: [] });
     };
-    const [view, setView] = useState<'calendar' | 'list'>('calendar');
+    const [view, setView] = useState<'calendar' | 'list'>('list');
 
     const topRightSlot = (
         <TopRightButtons
