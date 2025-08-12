@@ -461,6 +461,9 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
 
         data = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
+          if (resourceCamelCase === 'dutyLogs') {
+            finalObject['location.name'] = u?.location?.name;
+          }
           return finalObject;
         });
 
