@@ -291,11 +291,12 @@ export default function ManageProfile(props) {
           type: 'success',
           message: "QR login removed successfully."
         });
-        setRemoveQRConfirmBox(false);
-        onFetchUserData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+      }).finally(() => {
+        setRemoveQRConfirmBox(false);
+        onFetchUserData();
       });
   };
 

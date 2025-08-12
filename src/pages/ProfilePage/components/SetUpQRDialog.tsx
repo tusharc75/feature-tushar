@@ -34,13 +34,13 @@ const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) 
           type: 'success',
           message: mode === 'change' ? 'QR PIN changed successfully' : 'QR setup successful'
         });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      }).finally(() => {
         setLoading(false);
         onSubmit();
         onClose();
-      })
-      .catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
       });
   };
 
