@@ -89,17 +89,27 @@ const ManageDynamicForm = ({
         if (primaryField) {
           tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
-        referenceData = { ...(isObject(referenceData) && !isEmpty(referenceData) ? referenceData : {}), ...reverseLookupDependentOn(referenceData, fieldsDataForCreate) }
+
         if (referenceData) {
+          const disabledFields: any = []
           Object.keys(referenceData)?.forEach((_r) => {
             fieldsDataForCreate?.forEach((_f) => {
               if (_f?.fieldName === _r) {
-                _f.disabled = true;
-                _f.isUneditable = true;
+                disabledFields.push(_f?.fieldName)
                 tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
+                if (_f?.lookupDependentOn) {
+                  tempInitialData[_f?.lookupDependentOn] = reverseLookupDependentOn(_f?.lookupDependentOn, _f?.option, referenceData[_f?.fieldName], fieldsDataForCreate)
+                  disabledFields.push(_f?.lookupDependentOn)
+                }
                 return;
               }
             });
+          });
+          fieldsDataForCreate?.forEach((_f) => {
+            if (disabledFields.includes(_f?.fieldName)) {
+              _f.disabled = true;
+              _f.isUneditable = true;
+            }
           });
         }
         setInitialData({
