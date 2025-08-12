@@ -127,9 +127,10 @@ const MenuWithGroupping = ({
               overflow: 'visible',
               background: 'transparent',
               filter: 'drop-shadow(rgba(0, 0, 0, 0.35) 0px 5px 15px) drop-shadow(var(--common-border-color) 0px 0px 1px)',
-              boxShadow: 'unset'
+              boxShadow: 'unset',
+              borderRadius: '10px'
             },
-            className: 'relative isolate',
+            className: 'relative isolate border',
             ref: paperRef
           }
         }}
