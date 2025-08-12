@@ -424,10 +424,10 @@ export default function ManageProfile(props) {
                   View QR Code
                 </ThemeButton>
                 <ThemeButton fullWidth onClick={() => setChangeQRCodeDialog(true)}>
-                  Change Pin
+                  Change QR Pin
                 </ThemeButton>
                 <ThemeButton fullWidth onClick={() => setRemoveQRConfirmBox(true)}>
-                  Remove QR
+                  Remove QR Login
                 </ThemeButton>
               </>
             ) : (<ThemeButton fullWidth onClick={() => setSetUpQRCodeDialog(true)}>
