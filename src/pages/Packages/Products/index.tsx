@@ -18,11 +18,11 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE, MATERIAL_TYPE } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid, WORK_ORDER_TYPE_LABEL, WORK_ORDER_TYPE, PACKAGE_TYPE, MATERIAL_SUB_TYPE } from 'src/constants/helpers';
 import ContainedTabs, { ContainedTab } from 'src/components/CustomTabs/ContainedTab';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 
-const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, childItems = false }) => {
+const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, childItem = false }) => {
   const renderedFrom = `${camelCase(sidebarResource?.packages)}_product`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -57,8 +57,8 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     let api = `${packages.api}/${packageId}/products`;
-    if (childItems) {
-      api += `?type=${MATERIAL_TYPE.childItems}`;
+    if (childItem) {
+      api += `?type=${MATERIAL_SUB_TYPE.childItem}`;
     } else if (selectedResource) {
       api += `?type=${selectedResource}`;
     }
@@ -135,7 +135,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       .put(`${packages.api}/${packageId}/products`, {
         ids: [row._id],
         qty: Number(data.qty),
-        type: childItems ? MATERIAL_TYPE.childItems : selectedResource
+        type: childItem ? MATERIAL_SUB_TYPE.childItem : selectedResource
       })
       .then(({ data }) => {
         setToastConfig({
@@ -152,7 +152,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
     setRemovingProducts(true);
     let ids = deleteRecord?.map((d) => d._id);
     axiosInstance()
-      .put(`${packages.api}/${packageId}/products/remove`, { ids: ids, type: childItems ? MATERIAL_TYPE.childItems : selectedResource })
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: ids, type: childItem ? MATERIAL_SUB_TYPE.childItem : selectedResource })
       .then(({ data }) => {
         setRemovingProducts(false);
         setShowProductConfirmBox(false);
@@ -177,7 +177,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       .post(`${packages.api}/material`, {
         ids: [packageId],
         products: rows.map((d: any) => ({ product: d.id, qty: Number(d.qty) })),
-        type: childItems ? MATERIAL_TYPE.childItems : selectedResource
+        type: childItem ? MATERIAL_SUB_TYPE.childItem : selectedResource
       })
       .then(({ data }) => {
         fetchData();
@@ -213,7 +213,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
       .put(`${packages.api}/material/${packageId}/order`, {
         packageType: PACKAGE_TYPE.product,
         data: rows || [],
-        type: childItems ? MATERIAL_TYPE.childItems : selectedResource
+        type: childItem ? MATERIAL_SUB_TYPE.childItem : selectedResource
       })
       .then(() => {
         fetchData();
@@ -254,7 +254,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`referenceId=${packageId}${childItems ? `&type=${MATERIAL_TYPE.childItems}` : selectedResource ? `&type=${selectedResource}` : ''}`}
+            additionalParams={`referenceId=${packageId}${childItem ? `&type=${MATERIAL_SUB_TYPE.childItem}` : selectedResource ? `&type=${selectedResource}` : ''}`}
           />
           {dataRows?.length > 0 ? (
             <ThemeButton startIcon={<GrDrag fontSize="small" />} onClick={() => setArrangeView(true)}>
@@ -283,7 +283,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false, c
 
   return (
     <>
-      {permissions?.assemblyOrder?.isRead && !childItems && (
+      {permissions?.assemblyOrder?.isRead && !childItem && (
         <>
           <ContainedTabs value={tabValue} onChange={handleMainTabChange} className="mb-2">
             <ContainedTab value={0} label={`Field`} />

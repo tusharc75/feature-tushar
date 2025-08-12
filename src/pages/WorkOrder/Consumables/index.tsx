@@ -416,10 +416,10 @@ const Consumables = ({
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         setSerialNumbers(data?.filter((d) => d?.type === OTHER_MATERIAL_TYPE.serialNumber));
-        if (materialSubType === MATERIAL_SUB_TYPE.childItems) {
+        if (materialSubType === MATERIAL_SUB_TYPE.childItem) {
           data = data?.filter((e) => e?.subType === materialSubType);
         } else {
-          // data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.childItems || e?.product?.serializedProduct);
+          // data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.childItem || e?.product?.serializedProduct);
           data = data?.filter(e => !('subType' in e) || e?.subType === materialSubType)
         }
 
@@ -606,7 +606,7 @@ const Consumables = ({
             setConsumablesDialog(true);
           }}
         >
-          {materialSubType === MATERIAL_SUB_TYPE.childItems ? `Add Existing ${resources?.product?.titlePlural}` : `Add Products/Consumables`}
+          {materialSubType === MATERIAL_SUB_TYPE.childItem ? `Add Existing ${resources?.product?.titlePlural}` : `Add Products/Consumables`}
         </MenuItem>
       </>
     );

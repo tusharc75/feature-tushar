@@ -795,7 +795,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               stepId={null}
               serviceName={null}
               defaultServiceUniqueId={defaultSelectedService}
-              materialSubType={MATERIAL_SUB_TYPE.childItems}
+              materialSubType={MATERIAL_SUB_TYPE.childItem}
               workOrderData={workOrderData}
               serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
             />
