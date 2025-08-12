@@ -19,6 +19,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
 import { Edit } from '@mui/icons-material';
+import routes from 'src/components/Helpers/Routes';
 
 const ListView = ({ topRightSlot }) => {
 
@@ -66,8 +67,7 @@ const ListView = ({ topRightSlot }) => {
         try {
             const { fieldsDataForRead } = await fetch_resource_view_fields(sidebarResource.contentPostPlanning, permissions.contentPostPlanning?.isUpdate);
             const data = fieldsDataForRead;
-            const newColumns = generateColumns(renderedFrom, fieldsDataForRead);
-
+            let newColumns = generateColumns(renderedFrom, fieldsDataForRead, routes.contentPostPlanningDetail.path, true);
             let staticFields = getStaticFields(true);
             staticFields.forEach((field) => {
                 if (field.id !== 'lastActivityBy') {

@@ -37,17 +37,16 @@ const PlanningView = () => {
         <Box className="main-container-v1">
             <Box className="headerbox-v1">
                 <div className="headerbox-v1">
-                    <CustomBreadCrumbs routes={[{ ...routes.ContentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
+                    <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
                 </div>
             </Box>
-            <Box className="detail-container-v1">
-                {view === 'calendar' ? (
-                    <CalenderView
-                        topRightSlot={topRightSlot} />
-                ) : (
-                    <ListView topRightSlot={topRightSlot} />
-                )}
-            </Box>
+            {view === 'calendar' ? (
+                <CalenderView
+                    topRightSlot={topRightSlot} />
+            ) : (
+                <ListView topRightSlot={topRightSlot} />
+            )}
+
         </Box>
     );
 };

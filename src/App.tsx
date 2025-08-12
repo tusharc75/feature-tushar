@@ -298,6 +298,7 @@ import CustomIntroNew from './components/CustomIntroNew';
 import { useSetWalkmeData } from './components/CustomIntroNew/useSetWalkmeSteps';
 import { useStore, WALK_ME_STEPS } from './StateProvider/fastContext';
 import ContentPostPlanning from './pages/ContentPostPlanning';
+import ContentPostPlanningDetail from './pages/ContentPostPlanning/contentPostPlanningDetail';
 var notificationInterval: any = null;
 
 function App() {
@@ -1039,8 +1040,11 @@ function App() {
             <PrivateRoute exact path={`${routes.planning.path}`}>
               <Planning />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.ContentPostPlanning.path}`}>
+            <PrivateRoute exact path={`${routes.contentPostPlanning.path}`}>
               <ContentPostPlanning />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contentPostPlanningDetail.path}`}>
+              <ContentPostPlanningDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
               <PlanningDetail />

@@ -3,10 +3,8 @@ import { makeStyles } from '@mui/styles';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomCalendar from 'src/components/CustomCalendar';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import dayjs from 'dayjs';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
 
