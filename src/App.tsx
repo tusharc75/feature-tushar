@@ -1040,7 +1040,7 @@ function App() {
             <PrivateRoute exact path={`${routes.planning.path}`}>
               <Planning />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.contentPostPlanning.path}`}>
+            <PrivateRoute exact path={`${routes.contentPostPlanning.path}/:id`}>
               <ContentPostPlanning />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.contentPostPlanningDetail.path}`}>
