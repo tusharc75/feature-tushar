@@ -39,6 +39,8 @@ import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import SetUpMfaDialog from './SetUpMfaDialog';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import SetUpQRDialog from 'src/pages/ProfilePage/components/SetUpQRDialog';
+import ViewQRCodeDialog from 'src/pages/ProfilePage/components/ViewQRCodeDialog';
 
 const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
@@ -91,6 +93,12 @@ export default function ManageProfile(props) {
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
   const [addFaceDialog, setAddFaceDialog] = useState(false);
   const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
+
+  const [setUpQRCodeDialog, setSetUpQRCodeDialog] = useState(false);
+  const [viewQRCodeDialog, setViewQRCodeDialog] = useState(false);
+  const [changeQRCodeDialog, setChangeQRCodeDialog] = useState(false);
+  const [removeQRConfirmBox, setRemoveQRConfirmBox] = useState(false);
+
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -273,6 +281,25 @@ export default function ManageProfile(props) {
         toastConfig.setToastConfig(err);
       });
   };
+
+  const handleRemoveQR = () => {
+    axiosInstance()
+      .delete(`/user/qr-setup/${userData?.qrLoginId}`)
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: "QR login removed successfully."
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      }).finally(() => {
+        setRemoveQRConfirmBox(false);
+        onFetchUserData();
+      });
+  };
+
   return (
     <>
       {openUpdateDialog && (
@@ -391,6 +418,30 @@ export default function ManageProfile(props) {
                 Setup MFA
               </ThemeButton>
             )}
+
+            {/* qrLoginId */}
+            {userData?.brandPolicy?.qRCodeLogin && (
+              <>
+                <Divider />
+                {userData?.qrLoginId ? (
+                  <>
+                    <ThemeButton fullWidth onClick={() => setViewQRCodeDialog(true)}>
+                      View QR Code
+                    </ThemeButton>
+                    <ThemeButton fullWidth onClick={() => setChangeQRCodeDialog(true)}>
+                      Change QR Pin
+                    </ThemeButton>
+                    <ThemeButton fullWidth onClick={() => setRemoveQRConfirmBox(true)}>
+                      Remove QR Login
+                    </ThemeButton>
+                  </>
+                ) : (<ThemeButton fullWidth onClick={() => setSetUpQRCodeDialog(true)}>
+                  Setup QR Login
+                </ThemeButton>)}
+              </>
+            )}
+
+
             {permissions?.payrollPolicy && (
               <>
                 <Divider />
@@ -601,6 +652,42 @@ export default function ManageProfile(props) {
                 setSetUpMfaDialog(false);
                 onFetchUserData();
               }}
+            />
+          )}
+          {setUpQRCodeDialog && (
+            <SetUpQRDialog
+              onClose={() => {
+                setSetUpQRCodeDialog(false);
+              }}
+              onSubmit={() => {
+                onFetchUserData();
+                setViewQRCodeDialog(true);
+              }}
+            />
+          )}
+          {changeQRCodeDialog && (
+            <SetUpQRDialog
+              onClose={() => {
+                setChangeQRCodeDialog(false);
+              }}
+              onSubmit={() => {
+                onFetchUserData();
+              }}
+              mode="change"
+              qrLoginId={userData?.qrLoginId}
+            />
+          )}
+          {viewQRCodeDialog && (
+            <ViewQRCodeDialog
+              onClose={() => setViewQRCodeDialog(false)}
+            />
+          )}
+          {removeQRConfirmBox && (
+            <ConfirmationDialog
+              open={removeQRConfirmBox}
+              message={`Are you sure you want to remove QR code ?`}
+              onClose={() => setRemoveQRConfirmBox(false)}
+              onOk={handleRemoveQR}
             />
           )}
           {/* {webCamDialog && (
