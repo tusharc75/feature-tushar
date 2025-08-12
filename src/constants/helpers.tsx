@@ -2559,7 +2559,8 @@ export const REPORT_SECTIONS = {
   integration: 'Integration',
   iot: 'Iot',
   technician: 'Technician',
-  repairOrder: 'Repair Order'
+  repairOrder: 'Repair Order',
+  hos: 'Hours of Service'
 };
 
 export const REPORT_LIST = [
@@ -2886,6 +2887,13 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'assetRepairCost',
     section: REPORT_SECTIONS.repairOrder
+  },
+  {
+    title: 'Duty Logs',
+    permission: 'dutyMaster',
+    key: 'standardReport',
+    type: 'dutyLogs',
+    section: REPORT_SECTIONS.hos
   }
 ];
 
