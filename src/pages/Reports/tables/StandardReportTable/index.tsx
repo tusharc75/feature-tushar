@@ -463,8 +463,6 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
           let finalObject: any = prepareDataForGrid(u);
           if (resourceCamelCase === 'dutyLogs') {
             finalObject['location.name'] = u?.location?.name;
-            finalObject['createdBy.date'] = u?.createdBy?.date;
-            finalObject['createdBy.user'] = u?.createdBy?.user?.concatedName;
           }
           return finalObject;
         });
