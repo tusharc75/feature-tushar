@@ -1,6 +1,6 @@
 import { Box, Dialog } from '@mui/material';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual, isObject } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, GenerateResourceLineNumber, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, rentalManagement, reverseLookupDependentOn } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
@@ -48,7 +48,7 @@ const ManageDynamicForm = ({
 
   const fetchFields = async () => {
     try {
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(resource);    
+      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(resource);
       if (id) {
         axiosInstance()
           .get(`/dynamic-form/${id}`, {
@@ -89,16 +89,27 @@ const ManageDynamicForm = ({
         if (primaryField) {
           tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
         }
+
         if (referenceData) {
+          const disabledFields: any = []
           Object.keys(referenceData)?.forEach((_r) => {
             fieldsDataForCreate?.forEach((_f) => {
               if (_f?.fieldName === _r) {
-                _f.disabled = true;
-                _f.isUneditable = true;
+                disabledFields.push(_f?.fieldName)
                 tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
+                if (_f?.lookupDependentOn) {
+                  tempInitialData[_f?.lookupDependentOn] = reverseLookupDependentOn(_f?.lookupDependentOn, _f?.option, referenceData[_f?.fieldName], fieldsDataForCreate)
+                  disabledFields.push(_f?.lookupDependentOn)
+                }
                 return;
               }
             });
+          });
+          fieldsDataForCreate?.forEach((_f) => {
+            if (disabledFields.includes(_f?.fieldName)) {
+              _f.disabled = true;
+              _f.isUneditable = true;
+            }
           });
         }
         setInitialData({
