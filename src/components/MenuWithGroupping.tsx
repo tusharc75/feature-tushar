@@ -126,6 +126,7 @@ const MenuWithGroupping = ({
               minHeight: '400px',
               overflow: 'visible',
               background: 'transparent',
+              '-webkit-filter': 'drop-shadow(rgba(0, 0, 0, 0.35) 0px 5px 15px) drop-shadow(var(--common-border-color) 0px 0px 1px)',
               filter: 'drop-shadow(rgba(0, 0, 0, 0.35) 0px 5px 15px) drop-shadow(var(--common-border-color) 0px 0px 1px)',
               boxShadow: 'unset',
               borderRadius: '10px'
