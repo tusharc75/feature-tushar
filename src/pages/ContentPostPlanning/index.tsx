@@ -34,11 +34,9 @@ const ContentPostPlanning = () => {
     );
     return (
         <Box className="main-container-v1">
-            <Box className="headerbox-v1">
-                <div className="headerbox-v1">
-                    <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
-                </div>
-            </Box>
+            <div className="headerbox-v1">
+                <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
+            </div>
             {view === 'calendar' ? (
                 <CalenderView
                     topRightSlot={topRightSlot} />
