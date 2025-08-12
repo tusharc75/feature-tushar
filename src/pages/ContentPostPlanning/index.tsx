@@ -1,4 +1,3 @@
-// src/pages/Planning/PlanningView.tsx
 import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useState } from 'react';
@@ -14,7 +13,7 @@ import ListView from './List/listPageView';
 import CalenderView from './Calender/calenderView';
 
 
-const PlanningView = () => {
+const ContentPostPlanning = () => {
     const {
         state: { resources }
     }: any = useData();
@@ -24,7 +23,7 @@ const PlanningView = () => {
         dispatch({ type: 'selection', selectedRecords: [] });
         tableDispatch({ type: 'selection', selectedRecords: [] });
     };
-    const [view, setView] = useState<'calendar' | 'list'>('calendar');
+    const [view, setView] = useState<'calendar' | 'list'>('list');
 
     const topRightSlot = (
         <TopRightButtons
@@ -37,22 +36,21 @@ const PlanningView = () => {
         <Box className="main-container-v1">
             <Box className="headerbox-v1">
                 <div className="headerbox-v1">
-                    <CustomBreadCrumbs routes={[{ ...routes.ContentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
+                    <CustomBreadCrumbs routes={[{ ...routes.contentPostPlanning, title: resources?.contentPostPlanning?.titlePlural }]} />
                 </div>
             </Box>
-            <Box className="detail-container-v1">
-                {view === 'calendar' ? (
-                    <CalenderView
-                        topRightSlot={topRightSlot} />
-                ) : (
-                    <ListView topRightSlot={topRightSlot} />
-                )}
-            </Box>
+            {view === 'calendar' ? (
+                <CalenderView
+                    topRightSlot={topRightSlot} />
+            ) : (
+                <ListView topRightSlot={topRightSlot} />
+            )}
+
         </Box>
     );
 };
 
-export default PlanningView;
+export default ContentPostPlanning;
 
 const TopRightButtons = ({ view, setView, resetSelectedRecords }: any) => {
     return (

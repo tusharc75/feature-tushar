@@ -2393,7 +2393,8 @@ export const ACTIVITY_RESOURCE = {
   assemblyOrder: 'assemblyOrder',
   serializedPackages: 'serializedPackages',
   expenses: 'expenses',
-  expenseReport: 'expenseReport'
+  expenseReport: 'expenseReport',
+  contentPostPlanning: 'contentPostPlanning'
 };
 
 export const LOG_RESOURCE = {

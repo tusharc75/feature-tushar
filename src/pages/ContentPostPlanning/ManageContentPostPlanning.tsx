@@ -61,7 +61,7 @@ const ManageContentPostPlanning = ({
 
             if (isEdit && idToEdit) {
                 const response = await axiosInstance().get(
-                    `${routes.ContentPostPlanning.path}/${idToEdit}`
+                    `${routes.contentPostPlanning.path}/${idToEdit}`
                 );
                 const data = response?.data?.data;
 
@@ -88,7 +88,7 @@ const ManageContentPostPlanning = ({
         if (isEdit && idToEdit) {
             values._id = idToEdit;
             axiosInstance()
-                .put(`${routes.ContentPostPlanning.path}`, values)
+                .put(`${routes.contentPostPlanning.path}`, values)
                 .then(({ data }) => {
                     toastConfig.setToastConfig({
                         open: true,
@@ -101,7 +101,7 @@ const ManageContentPostPlanning = ({
                 .finally(() => setLoading(false));
         } else {
             axiosInstance()
-                .post(`${routes.ContentPostPlanning.path}`, values)
+                .post(`${routes.contentPostPlanning.path}`, values)
                 .then(({ data: { data, message } }) => {
                     toastConfig.setToastConfig({
                         open: true,
