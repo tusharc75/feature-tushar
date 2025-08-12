@@ -418,22 +418,30 @@ export default function ManageProfile(props) {
                 Setup MFA
               </ThemeButton>
             )}
+
             {/* qrLoginId */}
-            {userData?.qrLoginId ? (
+            {userData?.brandPolicy?.qRCodeLogin && (
               <>
-                <ThemeButton fullWidth onClick={() => setViewQRCodeDialog(true)}>
-                  View QR Code
-                </ThemeButton>
-                <ThemeButton fullWidth onClick={() => setChangeQRCodeDialog(true)}>
-                  Change QR Pin
-                </ThemeButton>
-                <ThemeButton fullWidth onClick={() => setRemoveQRConfirmBox(true)}>
-                  Remove QR Login
-                </ThemeButton>
+                <Divider />
+                {userData?.qrLoginId ? (
+                  <>
+                    <ThemeButton fullWidth onClick={() => setViewQRCodeDialog(true)}>
+                      View QR Code
+                    </ThemeButton>
+                    <ThemeButton fullWidth onClick={() => setChangeQRCodeDialog(true)}>
+                      Change QR Pin
+                    </ThemeButton>
+                    <ThemeButton fullWidth onClick={() => setRemoveQRConfirmBox(true)}>
+                      Remove QR Login
+                    </ThemeButton>
+                  </>
+                ) : (<ThemeButton fullWidth onClick={() => setSetUpQRCodeDialog(true)}>
+                  Setup QR Login
+                </ThemeButton>)}
               </>
-            ) : (<ThemeButton fullWidth onClick={() => setSetUpQRCodeDialog(true)}>
-              Setup QR Login
-            </ThemeButton>)}
+            )}
+
+
             {permissions?.payrollPolicy && (
               <>
                 <Divider />
