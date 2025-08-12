@@ -416,10 +416,11 @@ const Consumables = ({
       .get(`${workOrder.api}/${workOrderId}/consumable${query}`)
       .then(({ data: { data } }) => {
         setSerialNumbers(data?.filter((d) => d?.type === OTHER_MATERIAL_TYPE.serialNumber));
-        if (materialSubType === MATERIAL_SUB_TYPE.bom) {
+        if (materialSubType === MATERIAL_SUB_TYPE.childItems) {
           data = data?.filter((e) => e?.subType === materialSubType);
         } else {
-          data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.bom || e?.product?.serializedProduct);
+          // data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.childItems || e?.product?.serializedProduct);
+          data = data?.filter(e => !('subType' in e) || e?.subType === materialSubType)
         }
 
         let rows = orderBy(data, 'product.serializedProduct')
@@ -605,7 +606,7 @@ const Consumables = ({
             setConsumablesDialog(true);
           }}
         >
-          {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}
+          {materialSubType === MATERIAL_SUB_TYPE.childItems ? `Add Existing ${resources?.product?.titlePlural}` : `Add Products/Consumables`}
         </MenuItem>
       </>
     );
@@ -624,7 +625,7 @@ const Consumables = ({
             }}
             isExportAllOrSomeFeature={true}
             ids={[]}
-            additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}`}
+            additionalParams={`workOrderIds=${JSON.stringify([workOrderId])}&subType=${materialSubType}`}
           />
         )}
         {!user?.user?.brandPolicy?.workOrderConsumableConsumeHide && allowedToEdit && (

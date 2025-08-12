@@ -3369,7 +3369,7 @@ export const MATERIAL_TYPE = {
 
 export const MATERIAL_SUB_TYPE = {
   consumable: 'consumable',
-  bom: 'bom'
+  childItems: 'childItems'
 };
 
 export const OTHER_MATERIAL_TYPE = {
