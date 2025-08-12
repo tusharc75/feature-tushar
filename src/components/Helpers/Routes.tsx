@@ -789,6 +789,9 @@ const routes = {
   customPdfTemplateDetail: {
     path: '/custom-pdf-template/detail'
   },
+  ContentPostPlanning: {
+    path: '/content-post-planning'
+  },
 };
 
 export default routes;
