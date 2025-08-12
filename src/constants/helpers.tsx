@@ -3363,13 +3363,12 @@ export const MATERIAL_TYPE = {
   serializedAsset: 'serializedAsset',
   serializedPackage: 'serializedPackage',
   manualEntry: 'manualEntry',
-  childItems: 'childItems',
   other: 'other'
 };
 
 export const MATERIAL_SUB_TYPE = {
   consumable: 'consumable',
-  bom: 'bom'
+  childItem: 'childItem'
 };
 
 export const OTHER_MATERIAL_TYPE = {

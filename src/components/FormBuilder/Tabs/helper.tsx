@@ -236,12 +236,6 @@ export const resourcePolicy = [
     resource: sidebarResource.workOrder,
     policy: [
       {
-        fieldName: 'showBom',
-        fieldLabel: 'Show BOM',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
         fieldName: 'consumablesSerialNumberRequired',
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
