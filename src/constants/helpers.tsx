@@ -4398,3 +4398,14 @@ export const checkImageUrl = (url) => {
   let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
   return imageExtensions.indexOf(extension) >= 0;
 };
+
+export const reverseLookupDependentOn = (lookupDependentOn, options = [], value, fields) => {
+  const field = fields?.find(f => f?.fieldName === lookupDependentOn)
+  const option = options?.find(f => f?.optionValue === value)
+
+  if (option[lookupDependentOn] && field?.type === 'multiSelect' && typeof option[lookupDependentOn] === 'string') {
+    return [option[lookupDependentOn]]
+  }
+  return option[lookupDependentOn]
+
+};
