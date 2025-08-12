@@ -417,12 +417,11 @@ const Consumables = ({
       .then(({ data: { data } }) => {
         setSerialNumbers(data?.filter((d) => d?.type === OTHER_MATERIAL_TYPE.serialNumber));
         if (materialSubType === MATERIAL_SUB_TYPE.childItem) {
-          data = data?.filter((e) => e?.subType === materialSubType);
+          data = data?.filter((e) => e?.subType === materialSubType || e?.type === MATERIAL_TYPE.serializedAsset
+            || e?.type === OTHER_MATERIAL_TYPE.serialNumber);
         } else {
-          // data = data?.filter((e) => e?.subType !== MATERIAL_SUB_TYPE.childItem || e?.product?.serializedProduct);
           data = data?.filter(e => !('subType' in e) || e?.subType === materialSubType)
         }
-
         let rows = orderBy(data, 'product.serializedProduct')
           ?.filter((d) => !([MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(d?.type) && d?.parentId))
           ?.map((u, i) => {
