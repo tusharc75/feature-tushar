@@ -883,7 +883,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (!option && key.required && key.option?.length === 1) {
         option = key.option[0];
       }
-      if (key?.visibilityCondition?.length) {
+      if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
         obj[key.fieldName] = value ? value : option ? option.optionValue : '';
