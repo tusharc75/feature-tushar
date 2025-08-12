@@ -3362,6 +3362,7 @@ export const MATERIAL_TYPE = {
   serializedAsset: 'serializedAsset',
   serializedPackage: 'serializedPackage',
   manualEntry: 'manualEntry',
+  childItems: 'childItems',
   other: 'other'
 };
 

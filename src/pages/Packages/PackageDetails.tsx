@@ -128,9 +128,10 @@ const PackageDetails = () => {
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
-          <CustomTab value={2}>Consumables</CustomTab>
-          <CustomTab value={3}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
-          <CustomTab value={4}>Drawings</CustomTab>
+          <CustomTab value={2}>Child Items</CustomTab>
+          <CustomTab value={3}>Consumables</CustomTab>
+          <CustomTab value={4}>{`Sub ${resources?.packages?.titlePlural}`}</CustomTab>
+          <CustomTab value={5}>Drawings</CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 12, md: 12 }}>
@@ -150,12 +151,15 @@ const PackageDetails = () => {
               {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              {tabValue === 2 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+              <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} childItems={true} />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              {tabValue === 3 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+              {tabValue === 3 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={4}>
+              {tabValue === 4 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
+            </TabPanel>
+            <TabPanel value={tabValue} index={5}>
               <Diagram resource={ACTIVITY_RESOURCE.packages} referenceId={id} attachmentType={ATTACHMENT_TYPE.drawing} />
             </TabPanel>
           </Grid>
