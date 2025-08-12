@@ -4398,3 +4398,42 @@ export const checkImageUrl = (url) => {
   let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
   return imageExtensions.indexOf(extension) >= 0;
 };
+
+export const reverseLookupDependentOn = (referenceData, fields) => {
+  const result: Record<string, any> = {};
+
+  fields?.forEach(field => {
+    const fieldValue = referenceData?.[field?.fieldName];
+    const lookupKey = field?.lookupDependentOn;
+
+    if (!lookupKey || !fieldValue) return;
+
+    const dependentField = fields.find(f => f?.fieldName === lookupKey);
+    if (!dependentField) return;
+
+    const isFieldMulti = field?.type === 'multiSelect';
+    const isDependentMulti = dependentField?.type === 'multiSelect';
+    const options = field?.option ?? [];
+
+    if (isFieldMulti) {
+      const matchedOptions = options.filter(opt =>
+        fieldValue.includes(opt.optionValue)
+      );
+
+      result[lookupKey] = isDependentMulti
+        ? matchedOptions.map(opt => opt[lookupKey])
+        : matchedOptions[0]?.[lookupKey];
+
+    } else {
+      const matchedOption = options.find(opt => opt.optionValue === fieldValue);
+
+      if (!matchedOption) return;
+
+      result[lookupKey] = isDependentMulti
+        ? [matchedOption[lookupKey]]
+        : matchedOption[lookupKey];
+    }
+  });
+
+  return result;
+};
