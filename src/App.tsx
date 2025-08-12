@@ -294,7 +294,6 @@ import UserManualNew from './pages/UserManualNew';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
 import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
-import CustomIntroNew from './components/CustomIntroNew';
 import { useSetWalkmeData } from './components/CustomIntroNew/useSetWalkmeSteps';
 import { useStore, WALK_ME_STEPS } from './StateProvider/fastContext';
 import ContentPostPlanning from './pages/ContentPostPlanning';
@@ -1043,7 +1042,7 @@ function App() {
             <PrivateRoute exact path={`${routes.contentPostPlanning.path}/:id`}>
               <ContentPostPlanning />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.contentPostPlanningDetail.path}`}>
+            <PrivateRoute exact path={`${routes.contentPostPlanningDetail.path}/:id`}>
               <ContentPostPlanningDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>

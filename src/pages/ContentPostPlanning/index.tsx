@@ -13,7 +13,7 @@ import ListView from './List/listPageView';
 import CalenderView from './Calender/calenderView';
 
 
-const PlanningView = () => {
+const ContentPostPlanning = () => {
     const {
         state: { resources }
     }: any = useData();
@@ -50,7 +50,7 @@ const PlanningView = () => {
     );
 };
 
-export default PlanningView;
+export default ContentPostPlanning;
 
 const TopRightButtons = ({ view, setView, resetSelectedRecords }: any) => {
     return (

@@ -96,73 +96,69 @@ const ContentPostPlanningDetail = () => {
     const closeUpdateDialog = () => setOpenUpdateDialog(false);
 
     return (
-        <>
-            <>helele</>
-        </>
-        // <Box className="main-container-v1">
-        //     <Box className="headerbox-v1">
-        //         <Box className="nav-v1">
-        //             <CustomBreadCrumbs routes={customizedRoutes} />
-        //         </Box>
-        //         <Box className="controls-v1">
-        //             <Box className="control-buttons-v1">
-        //                 <>
-        //                     {permissions?.contentPostPlanning?.isUpdate && (
-        //                         <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
-        //                             {'Edit'}
-        //                         </ThemeButton>
-        //                     )}
-        //                     {permissions?.contentPostPlanning?.isDelete && (
-        //                         <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-        //                     )}
-        //                     {console.log(id, ACTIVITY_RESOURCE.contentPostPlanning, postData?.title, postData)}
-        //                     <ActivityButton
-        //                         referenceId={id}
-        //                         resource={ACTIVITY_RESOURCE.contentPostPlanning}
-        //                         resourceLabel={postData?.title}
-        //                         resourceData={postData}
-        //                     />
-        //                 </>
-        //             </Box>
-        //         </Box>
-        //     </Box>
+        <Box className="main-container-v1">
+            <Box className="headerbox-v1">
+                <Box className="nav-v1">
+                    <CustomBreadCrumbs routes={customizedRoutes} />
+                </Box>
+                <Box className="controls-v1">
+                    <Box className="control-buttons-v1">
+                        <>
+                            {permissions?.contentPostPlanning?.isUpdate && (
+                                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                                    {'Edit'}
+                                </ThemeButton>
+                            )}
+                            {permissions?.contentPostPlanning?.isDelete && (
+                                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
+                            )}
+                            <ActivityButton
+                                referenceId={id}
+                                resource={ACTIVITY_RESOURCE.contentPostPlanning}
+                                resourceLabel={postData?.title}
+                                resourceData={postData}
+                            />
+                        </>
+                    </Box>
+                </Box>
+            </Box>
 
-        //     <Box className="detail-container-v1">
-        //         <Box>
-        //             {loading || !fields?.length ? (
-        //                 <div className="p-2">
-        //                     <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        //                 </div>
-        //             ) : (
-        //                 <DetailsPage data={postData} fields={fields} />
-        //             )}
-        //         </Box>
-        //     </Box>
+            <Box className="detail-container-v1">
+                <Box>
+                    {loading || !fields?.length ? (
+                        <div className="p-2">
+                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </div>
+                    ) : (
+                        <DetailsPage data={postData} fields={fields} />
+                    )}
+                </Box>
+            </Box>
 
-        //     {showConfirmBox && (
-        //         <ConfirmationDialog
-        //             open={showConfirmBox}
-        //             message={`Are you sure you want to delete ${resources?.contentPostPlanning?.titleSingular?.toLowerCase()} : ${postData?.title} ?`}
-        //             onClose={() => {
-        //                 setShowConfirmBox(false);
-        //             }}
-        //             onOk={handleDelete}
-        //         />
-        //     )}
+            {showConfirmBox && (
+                <ConfirmationDialog
+                    open={showConfirmBox}
+                    message={`Are you sure you want to delete ${resources?.contentPostPlanning?.titleSingular?.toLowerCase()} : ${postData?.title} ?`}
+                    onClose={() => {
+                        setShowConfirmBox(false);
+                    }}
+                    onOk={handleDelete}
+                />
+            )}
 
-        //     {openUpdateDialog && (
-        //         <ManageContentPostPlanning
-        //             open={openUpdateDialog}
-        //             isEdit={true}
-        //             idToEdit={id}
-        //             onClose={closeUpdateDialog}
-        //             onSuccess={() => {
-        //                 closeUpdateDialog();
-        //                 fetchData();
-        //             }}
-        //         />
-        //     )}
-        // </Box>
+            {openUpdateDialog && (
+                <ManageContentPostPlanning
+                    open={openUpdateDialog}
+                    isEdit={true}
+                    idToEdit={id}
+                    onClose={closeUpdateDialog}
+                    onSuccess={() => {
+                        closeUpdateDialog();
+                        fetchData();
+                    }}
+                />
+            )}
+        </Box>
     );
 };
 
