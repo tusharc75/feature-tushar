@@ -63,7 +63,7 @@ export default function ViewQRCodeDialog({ onClose }) {
               onClick={() => {
                 const link = document.createElement('a');
                 link.href = data.qrCode;
-                link.download = `qr-login-${data.userName}.png`;
+                link.download = `qrLogin-${data.userName}.png`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
