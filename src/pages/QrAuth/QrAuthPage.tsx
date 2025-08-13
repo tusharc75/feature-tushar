@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { SVG } from 'src/assets';
 import OtpInput from 'src/components/OtpInput';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -77,22 +77,22 @@ export default function QrAuthPage() {
   };
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
       {loading ? (
         <CommonSkeleton lenArray={[...Array(6).keys()]} />
       ) : !valid ? (
-        <Box width="100%" maxWidth={500} p={10} bgcolor="background.paper" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
-          <div className="logo-container mx-auto mb-3 max-w-[150px]">
+        <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
+          <div className="logo-container mx-auto my-5 max-w-[150px]">
             <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
           </div>
           <Typography color="error" variant="h6" mb={2}>QR code is invalid or has expired.</Typography>
-          <ThemeButton sx={{ paddingBlock: 1.25, height: 40, marginTop: 2 }} buttonType="theme" fullWidth onClick={() => history.push('/login')}>
+          <ThemeButton sx={{ paddingBlock: 1.25, height: 40, marginY: 2 }} buttonType="theme" fullWidth onClick={() => history.push('/login')}>
             Go to Login
           </ThemeButton>
-        </Box>
+        </div>
       ) : (
-        <Box width="100%" maxWidth={500} p={5} bgcolor="background.paper" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
-          <div className="logo-container mx-auto mb-3 max-w-[150px]">
+        <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
+          <div className="logo-container mx-auto my-3 max-w-[150px]">
             <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
           </div>
           <Typography variant="h5" fontWeight={600} mt={3} mb={3}>Verify Your Identity</Typography>
@@ -130,8 +130,8 @@ export default function QrAuthPage() {
               Submit
             </ThemeButton>
           </form>
-        </Box>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
