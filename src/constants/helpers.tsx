@@ -2875,7 +2875,6 @@ export const CONTENT_PLANNING_STATUS_STATUS ={
   pendingApproval: 'Pending Approval',
   published: 'Published',
   scheduled: 'Scheduled',
-  others: 'Others',
 }
 
 type ChipStatus =

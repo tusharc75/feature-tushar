@@ -139,12 +139,6 @@ const CalendarView = ({ topRightSlot }) => {
         value: CONTENT_PLANNING_STATUS_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
       },
-      {
-        label: CONTENT_PLANNING_STATUS_STATUS.others,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.others,
-        value: CONTENT_PLANNING_STATUS_STATUS.others,
-        startIcon: <Category color="disabled" fontSize="small" />
-      }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);
 
