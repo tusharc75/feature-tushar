@@ -1,10 +1,9 @@
-import { Autocomplete, Box, TextField } from '@mui/material';
+import { Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { camelCase } from 'lodash';
-
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -14,13 +13,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import {
-  sidebarResource,
-  prepareDataForGrid,
-  WORKORDER_SERVICE_STATUS,
-  workOrderIconMap,
-  CONTENT_PLANNING_STATUS_STATUS
-} from 'src/constants/helpers';
+import { sidebarResource, prepareDataForGrid, CONTENT_PLANNING_STATUS_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
