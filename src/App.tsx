@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import QrAuthPage from 'src/pages/QrAuth/QrAuthPage';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -1341,6 +1342,9 @@ function App() {
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
+            </Route>
+            <Route exact path={'/qrauth/:qrLoginId'}>
+              <QrAuthPage />
             </Route>
             <PrivateRoute exact path={`/:route`}>
               <DynamicForm />
