@@ -1,4 +1,4 @@
-import { groupBy, kebabCase, uniqBy } from 'lodash';
+import { camelCase, groupBy, kebabCase, uniqBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { TColType } from 'src/components/CustomReactTable/TableComponents/TableHelperComponents';
@@ -67,7 +67,7 @@ const useReport = () => {
 
   const processedReportList = useMemo(() => {
     return state.reportList
-      .filter((f) => permissions?.[f.permission]?.isRead)
+      .filter((f) => permissions?.[camelCase(f?.resource)]?.isRead)
       .map((d) => ({
         ...d,
         label: d.type === 'dynamic' && resources[d.key]?.titlePlural ? resources[d.key]?.titlePlural : d.title,

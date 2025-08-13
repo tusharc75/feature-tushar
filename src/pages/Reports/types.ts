@@ -59,7 +59,7 @@ export type ReportState = {
   isColumnsLoading: boolean;
   favouriteReports: FavouriteReport[];
   favouritList: string[];
-  reportList: Report[];
+  reportList: any[];
 };
 
 export type UseReportActions =
