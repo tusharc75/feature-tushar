@@ -2871,6 +2871,13 @@ export const PRODUCT_SERIAL_NUMBER_STATUS = {
   unAvailable: 'Unavailable'
 };
 
+export const CONTENT_PLANNING_STATUS_STATUS ={
+  pendingApproval: 'Pending Approval',
+  published: 'Published',
+  scheduled: 'Scheduled',
+  others: 'Others',
+}
+
 type ChipStatus =
   | 'Pending'
   | 'Backlog'
