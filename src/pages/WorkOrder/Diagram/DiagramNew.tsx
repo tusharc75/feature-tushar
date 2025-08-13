@@ -31,6 +31,7 @@ import PdfEditor from './ShowPdfNew/PdfEditor'
 import { FolderIcon } from "src/assets/FolderIcon"
 import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
 import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
+import ShowFileUploader from "src/components/ShowFileUploader";
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
@@ -67,6 +68,7 @@ const DiagramNew = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openDelete, setOpenDelete] = useState({ open: false, request: false, attachment: null })
   const [openDeleteRequest, setOpenDeleteRequest] = useState({ ancherEl: null, attachment: null })
+  const [uploads, setUploads] = useState([])
 
   useEffect(() => {
     if (resource === sidebarResource.workOrder) {
@@ -79,7 +81,7 @@ const DiagramNew = ({
   }, [resource, referenceId, currentVersion, selectedService, uniqueId]);
 
   const fetchData = async () => {
-    let query = `/attachment-new/?resource=${resource}&referenceId=${referenceId}`;
+    let query = `/attachment-new?resource=${resource}&referenceId=${referenceId}`;
     if (attachmentType) {
       query = `${query}&attachmentType=${attachmentType}`;
     }
@@ -394,11 +396,7 @@ const DiagramNew = ({
                 setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
                 setFullScreen(false);
               }}
-              onSuccess={() => {
-                fetchData()
-                setAttachemntDialog({ open: false, type: '', data: null, isUpdate: false });
-                setFullScreen(false);
-              }}
+              fetchData={fetchData}
               relatedTo={getRelatedTo()}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
@@ -407,6 +405,7 @@ const DiagramNew = ({
               showManimizeMaximize={true}
               parentId={attachemntDialog?.data?._id}
               attachmentType={attachmentType}
+              setUploads={setUploads}
             />
           )}
           {attachemntDialog?.type === 'folder' && (
@@ -513,6 +512,8 @@ const DiagramNew = ({
                 fetchData={fetchData}
                 setSelectedFile={setSelectedFile}
                 handleClose={() => setSelectedFile(null)}
+                uploads={uploads}
+                setUploads={setUploads}
               />
             ) : checkpdfType(selectedFile?.fileName?.split('.')[1]) ? (
               <PdfEditor
@@ -563,6 +564,7 @@ const DiagramNew = ({
           />
         </div>
       </Popover>
+      <ShowFileUploader uploads={uploads} setUploads={setUploads} />
     </Box>
   );
 }
