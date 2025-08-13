@@ -99,32 +99,33 @@ const ListView = ({ topRightSlot }) => {
     canDrag: false,
     Cell: ({ row }: any) => (
       <>
-        <HtmlTooltip title={permissions?.contentPostPlanning?.isUpdate ? 'Edit' : editDisable}>
+        <HtmlTooltip title={permissions?.contentPostPlanning?.isUpdate  && row?.original?.status !== 'Published' ? 'Edit' : editDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Edit"
-              disabled={permissions?.contentPostPlanning?.isUpdate ? false : true}
+              disabled={permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== 'Published' ? false : true}
               onClick={() => {
+                console.log(row?.original?.status)
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-              <Edit fontSize="small" color={permissions?.contentPostPlanning?.isUpdate ? 'primary' : 'disabled'} />
+              <Edit fontSize="small" color={permissions?.contentPostPlanning?.isUpdate|| row?.original?.status !== 'Published' ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== 'Published' ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
+              disabled={row?.original?.canDelete && row?.original?.status !== 'Published' ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== 'Published' ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -233,7 +234,7 @@ const ListView = ({ topRightSlot }) => {
   const ActionMenuItems = () => {
     return (
       <MenuItem
-        disabled={selectedRecords.every((e: any) => e?.canDelete) ? false : true}
+        disabled={selectedRecords.every((e: any) => e?.canDelete && e?.status !== 'Published') ? false : true}
         onClick={() => {
           if (selectedRecords?.length === 1) {
             setDeleteRecord(selectedRecords[0]);
