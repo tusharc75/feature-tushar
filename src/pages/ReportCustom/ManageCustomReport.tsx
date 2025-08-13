@@ -3,7 +3,7 @@ import { Dialog, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
-import { cn, CustomDialogTransition, REPORT_LIST, sidebarResource } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -35,6 +35,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
+  const [reportList, setReportList] = useState([]);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
@@ -43,9 +44,11 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const [resourceOption, setResourceOption] = useState(null);
 
-  useEffect(() => {
+  const fetchReportList = async () => {
+    const { data: { data } } = await axiosInstance().get('/report/list');
+    setReportList(data || []);
     const options = [];
-    REPORT_LIST?.forEach((item) => {
+    data?.forEach((item) => {
       if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
         options.push({
           title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
@@ -56,17 +59,21 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       }
     });
     setResourceOption(options);
+  };
+
+  useEffect(() => {
+    fetchReportList();
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (id && reportList?.length > 0) {
       (async () => {
         try {
           let {
             data: { data }
           } = await axiosInstance().get(`/custom-report/${id}`);
 
-          let resource: any = REPORT_LIST?.find((item) => item.title === data.resource);
+          let resource: any = reportList?.find((item) => item.title === data.resource);
           resource = {
             title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
             value: resource.title,
@@ -93,7 +100,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         column: []
       });
     }
-  }, [id]);
+  }, [id, reportList?.length]);
 
   const fetchGridColumns = async (resource: any) => {
     setFilterColumns([]);
