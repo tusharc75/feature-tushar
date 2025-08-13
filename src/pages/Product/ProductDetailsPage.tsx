@@ -610,7 +610,7 @@ const ProductDetailsPage = () => {
         productData?.serializedProduct ? (
           <ManageSerializedAsset
             productId={productData?._id}
-            productCategory={productData?.productCategory}
+            productCategory={productData?.productCategory?.optionValue}
             productInventoryId={null}
             onClose={() => setOpenProductInventoryDialog(false)}
             onSuccess={() => {
