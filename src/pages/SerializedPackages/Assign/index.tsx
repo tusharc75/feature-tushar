@@ -29,14 +29,14 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
 
   const [columns, setColumns] = useState(null);
 
-  const [assignDialog, setAssignDialog] = useState({ open: false, type: '', products: [] });
+  const [assignDialog, setAssignDialog] = useState({ open: false, type: '', replaceAsset: false, products: [] });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
@@ -314,7 +314,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
         fetchSerializedPackagesData()
-        setAssignDialog({ open: false, type: '', products: [] });
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         setIsSubmitting(false);
         fetchData();
       })
@@ -330,7 +330,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/add-serial-numbers`, { serialNumbers: data })
       .then(() => {
         fetchSerializedPackagesData()
-        setAssignDialog({ open: false, type: '', products: [] });
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
         setIsSubmitting(false);
         fetchData();
       })
@@ -339,6 +339,22 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
         setToastConfig(err);
       });
   };
+
+  const handleReplaceAssets = (data) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: [{ oldAssetId: selectedRecords[0]?.asset, newAssetId: data[0]?.asset }] })
+      .then(() => {
+        fetchSerializedPackagesData()
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setIsSubmitting(false);
+        fetchData();
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setToastConfig(err);
+      });
+  }
 
   const disableAssign = () => {
     if (selectedRecords.length === 0) return true;
@@ -377,20 +393,41 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
     return (
       <>
         {permissions?.serializedPackages?.isUpdate && (
-          <MenuItem
-            disabled={disableAssign()}
-            onClick={() => {
-              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, products: getProducts() });
-            }}
-          >
-            {`Assign ${resources?.serializedAsset?.titlePlural}`}
-          </MenuItem>
+          selectedRecords?.length === 1 && selectedRecords[0]?.type === MATERIAL_TYPE.serializedAsset ? (
+            <MenuItem
+              onClick={() => {
+                const product = dataRows?.find(d => d?._id === selectedRecords[0]?._id && d?.materialId === selectedRecords[0]?.product && d?.type === MATERIAL_TYPE.product && d?.serializedProduct)
+                setAssignDialog({
+                  open: true,
+                  type: MATERIAL_TYPE.serializedAsset,
+                  replaceAsset: true,
+                  products: [{
+                    product: product?.materialId,
+                    qty: 1,
+                    productName: product?.detail,
+                    _id: [product?._id]
+                  }]
+                });
+              }}
+            >
+              {`Replace ${resources?.serializedAsset?.titleSingular}`}
+            </MenuItem>
+          ) : (
+            <MenuItem
+              disabled={disableAssign()}
+              onClick={() => {
+                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+              }}
+            >
+              {`Assign ${resources?.serializedAsset?.titlePlural}`}
+            </MenuItem>
+          )
         )}
         {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
             disabled={disableAssign()}
             onClick={() => {
-              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
+              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
             }}
           >
             Assign Serial Numbers
@@ -439,8 +476,14 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
         <AssignSerializedAssetDialog
           reference={'serializedPackages'}
           ids={[]}
-          handleClose={() => setAssignDialog({ open: false, type: '', products: [] })}
-          handleSucess={handleAssignAssets}
+          handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
+          handleSucess={(rows) => {
+            if (assignDialog.replaceAsset) {
+              handleReplaceAssets(rows)
+            } else {
+              handleAssignAssets(rows)
+            }
+          }}
           isAssigning={isSubmitting}
           selectedProducts={assignDialog.products}
           referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
@@ -449,7 +492,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
         <AssignSerialNumbersDialog
           selectedProducts={assignDialog.products}
-          handleClose={() => setAssignDialog({ open: false, type: '', products: [] })}
+          handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
           handleSucess={handleAssignSerialNumbers}
           referenceType={'serializedPackages'}
           isAssigning={isSubmitting}
