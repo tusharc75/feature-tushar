@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { camelCase, kebabCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -49,7 +49,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     setReportList(data || []);
     const options = [];
     data?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
+      if (permissions?.[camelCase(item?.resource)]?.isRead === true) {
         options.push({
           title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
           value: item.title,

@@ -73,7 +73,7 @@ export type UseReportActions =
   | { type: 'setColumns'; payload: TColType[] | null }
   | { type: 'setFavouritList'; payload: string[] }
   | { type: 'setIsColumnsLoading'; payload: boolean }
-  | { type: 'setReportList'; payload: Report[] };
+  | { type: 'setReportList'; payload: any[] };
 
 export type UseReport = ReturnType<typeof useReport>;
 
