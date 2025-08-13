@@ -555,6 +555,12 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
+        fieldName: 'splitQuantity',
+        fieldLabel: 'Split Quantity',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
         fieldName: 'restrictCreationOfParentWorkOrder',
         fieldLabel: 'Restrict Creation of Parent Work Order',
         type: 'checkBox',
