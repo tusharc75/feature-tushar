@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext, useRef, Fragment } from 'react';
-import { Dialog, Box, TextField, Typography, FormControlLabel, Checkbox, Chip } from '@mui/material';
+import { Dialog, Box, TextField, Typography, Chip } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { Form, Formik, FormikProps } from 'formik';
-import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { capitalize, kebabCase, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -50,6 +50,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [filterByIds, setFilterByIds] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [reportList, setReportList] = useState([]);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
@@ -58,19 +59,30 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
   const [resourceOption, setResourceOption] = useState(null);
   const [sharepointOptions, setSharepointOptions] = useState(null);
 
+  const fetchReportList = async () => {
+    try {
+      const { data: { data } } = await axiosInstance().get('/report/list');
+      const options = [];
+      data?.forEach((item) => {
+        if (permissions?.[camelCase(item?.resource)]?.isRead === true) {
+          options.push({
+            title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
+            value: item.title,
+            key: item.key,
+            type: item?.type
+          });
+        }
+      });
+      setResourceOption(options);
+      setReportList(data || []);
+    } catch (error) {
+      setResourceOption([]);
+      setReportList([]);
+    }
+  };
+
   useEffect(() => {
-    const options = [];
-    REPORT_LIST?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
-        options.push({
-          title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
-          value: item.title,
-          key: item.key,
-          type: item?.type
-        });
-      }
-    });
-    setResourceOption(options);
+    fetchReportList();
   }, []);
 
   useEffect(() => {
@@ -85,7 +97,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             data: { data }
           } = await axiosInstance().get(`/schedule-report/${id}`);
 
-          let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
+          let resource: any = reportList.find((item) => item.title === data.resource);
           resource = {
             title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
             value: resource.title,
@@ -161,7 +173,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
       }
 
       if (scheduleData?.column?.length > 0) {
-        scheduleData?.column?.map((c) => {
+        scheduleData?.column?.forEach((c) => {
           const fieldData = resourceColumns?.find((r) => r?.fieldData?.fieldName === c)?.fieldData;
           if (fieldData) {
             column.push(fieldData);
@@ -361,7 +373,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date)) {
+        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || (dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date))) {
           filters.push({
             term: d?.field,
             value: d?.term,
@@ -711,7 +723,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             fullWidth
                             size="small"
                             getOptionLabel={(option) => option.optionLabel}
-                            isOptionEqualToValue={(option, value) => option.optionValue == value}
+                            isOptionEqualToValue={(option, value) => option.optionValue === value}
                             value={sharepointOptions?.find((ops) => ops?.optionValue === values?.sharepointSite) || {}}
                             onChange={(_, newVal) => setFieldValue('sharepointSite', newVal?.optionValue || '')}
                             renderInput={(params) => (

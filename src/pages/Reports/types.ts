@@ -59,6 +59,7 @@ export type ReportState = {
   isColumnsLoading: boolean;
   favouriteReports: FavouriteReport[];
   favouritList: string[];
+  reportList: any[];
 };
 
 export type UseReportActions =
@@ -71,7 +72,8 @@ export type UseReportActions =
   | { type: 'setResourceColumns'; payload: any }
   | { type: 'setColumns'; payload: TColType[] | null }
   | { type: 'setFavouritList'; payload: string[] }
-  | { type: 'setIsColumnsLoading'; payload: boolean };
+  | { type: 'setIsColumnsLoading'; payload: boolean }
+  | { type: 'setReportList'; payload: any[] };
 
 export type UseReport = ReturnType<typeof useReport>;
 
