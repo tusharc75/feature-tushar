@@ -3,6 +3,7 @@ import { ReportType, UseReport } from 'src/pages/Reports/types';
 import analytics from 'src/assets/newSvgs/analytics.svg';
 import ReportsTable from 'src/pages/Reports/tables/ReportsTable';
 import StandardReportsTable from 'src/pages/Reports/tables/StandardReportTable';
+import DynamicFormReportTable from 'src/pages/Reports/tables/DynamicFormReportTable';
 import { startCase } from 'lodash';
 
 type ReportsContentProps = {
@@ -25,6 +26,8 @@ const getTableComponent = (selectedReport, reportList) => {
       return ReportsTable;
     case 'standard-report':
       return StandardReportsTable;
+    case 'dynamicForm':
+      return DynamicFormReportTable;
     case 'custom-report':
       switch (isStanderdCustomReport) {
         case true:
