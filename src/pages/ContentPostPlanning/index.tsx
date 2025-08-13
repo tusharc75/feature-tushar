@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import IconButtonTabs from 'src/components/IconButtonTabs';
 import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
@@ -11,8 +11,12 @@ import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import ListView from './List/listPageView';
 import CalenderView from './Calender/calenderView';
+import { camelCase } from 'lodash';
+import { sidebarResource } from 'src/constants/helpers';
+type ViewType = 'calendar' | 'list';
 
 const ContentPostPlanning = () => {
+  const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
   const {
     state: { resources }
   }: any = useData();
@@ -22,7 +26,14 @@ const ContentPostPlanning = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
-  const [view, setView] = useState<'calendar' | 'list'>('list');
+
+  const [view, setView] = useState<ViewType>(() => {
+    return (localStorage.getItem(`${renderedFrom}_view`) as ViewType) || 'calendar';
+  });
+
+  useEffect(() => {
+    localStorage.setItem(`${renderedFrom}_view`, view);
+  }, [view]);
 
   const topRightSlot = <TopRightButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />;
   return (

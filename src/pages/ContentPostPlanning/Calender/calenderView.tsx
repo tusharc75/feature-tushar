@@ -14,6 +14,8 @@ import { CONTENT_POST_PLANNING_STATUS } from 'src/constants/helpers';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-material';
 import { gridFilterParser } from 'src/components/CustomReactTable';
+import { DatesSetArg } from '@fullcalendar/core';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   whiteBg: {
@@ -38,6 +40,10 @@ const CalendarView = ({ topRightSlot }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [dateRange, setDateRange] = useState({
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
+  });
 
   const getQueryString = () => {
     let deepFilter = `?entity=${selectedEntity}`;
@@ -91,7 +97,7 @@ const CalendarView = ({ topRightSlot }) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedStatus, filters]);
+  }, [selectedEntity, selectedStatus, filters, dateRange]);
 
   const getEventStyle = useCallback((obj) => {
     let bg = 'rgba(237, 231, 246, 1)';
@@ -118,6 +124,30 @@ const CalendarView = ({ topRightSlot }) => {
     };
   }, []);
 
+  const onNavigate = useCallback((dateInfo: DatesSetArg) => {
+    if (dateInfo.view.type === 'dayGridMonth') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridWeek') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridDay') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'agenda') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().add(1, 'month').format('MM/DD/YYYY')
+      });
+    }
+  }, []);
+
   const resolvedTopRight = typeof topRightSlot === 'function' ? (topRightSlot as Function)() : topRightSlot;
   const statusMenuItems = useMemo(() => {
     return [
@@ -128,16 +158,16 @@ const CalendarView = ({ topRightSlot }) => {
         startIcon: <HourglassEmpty color="warning" fontSize="small" />
       },
       {
-        label: CONTENT_POST_PLANNING_STATUS.published,
-        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
-        value: CONTENT_POST_PLANNING_STATUS.published,
-        startIcon: <CheckCircle color="success" fontSize="small" />
-      },
-      {
         label: CONTENT_POST_PLANNING_STATUS.scheduled,
         selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.scheduled,
         value: CONTENT_POST_PLANNING_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
+      },
+      {
+        label: CONTENT_POST_PLANNING_STATUS.published,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
+        value: CONTENT_POST_PLANNING_STATUS.published,
+        startIcon: <CheckCircle color="success" fontSize="small" />
       }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);
@@ -165,24 +195,20 @@ const CalendarView = ({ topRightSlot }) => {
       />
       <div className={classes.whiteBg}>
         <div className="relative">
-          {events.length === 0 ? (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>No events found for the selected status</div>
-          ) : (
-            <CustomCalendar
-              events={events}
-              getEventStyle={getEventStyle}
-              onNavigate={() => {}}
-              eventClick={(arg) => {
-                const ev = arg.event;
-                const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
-                if (id) {
-                  history.push(`${routes.contentPostPlanningDetail.path}/${id}`);
-                } else {
-                  console.warn('Calendar event clicked but id not found', ev);
-                }
-              }}
-            />
-          )}
+          <CustomCalendar
+            events={events}
+            getEventStyle={getEventStyle}
+            onNavigate={onNavigate}
+            eventClick={(arg) => {
+              const ev = arg.event;
+              const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
+              if (id) {
+                history.push(`${routes.contentPostPlanningDetail.path}/${id}`);
+              } else {
+                console.warn('Calendar event clicked but id not found', ev);
+              }
+            }}
+          />
         </div>
       </div>
       {showManageDialog.open && (
