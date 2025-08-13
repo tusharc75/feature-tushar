@@ -22,6 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-material';
+import ContentPostPlanning from 'src/pages/ContentPostPlanning';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -257,16 +258,16 @@ const ListView = ({ topRightSlot }) => {
         startIcon: <HourglassEmpty color="warning" fontSize="small" />
       },
       {
-        label: CONTENT_POST_PLANNING_STATUS.published,
-        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
-        value: CONTENT_POST_PLANNING_STATUS.published,
-        startIcon: <CheckCircle color="success" fontSize="small" />
-      },
-      {
         label: CONTENT_POST_PLANNING_STATUS.scheduled,
         selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.scheduled,
         value: CONTENT_POST_PLANNING_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
+      },
+      {
+        label: CONTENT_POST_PLANNING_STATUS.published,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
+        value: CONTENT_POST_PLANNING_STATUS.published,
+        startIcon: <CheckCircle color="success" fontSize="small" />
       }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);

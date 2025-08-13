@@ -22,7 +22,7 @@ const ContentPostPlanning = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
-  const [view, setView] = useState<'calendar' | 'list'>('list');
+  const [view, setView] = useState<'calendar' | 'list'>('calendar');
 
   const topRightSlot = <TopRightButtons view={view} setView={setView} resetSelectedRecords={resetSelectedRecords} />;
   return (

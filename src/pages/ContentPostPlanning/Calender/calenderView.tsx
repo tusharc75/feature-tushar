@@ -128,16 +128,16 @@ const CalendarView = ({ topRightSlot }) => {
         startIcon: <HourglassEmpty color="warning" fontSize="small" />
       },
       {
-        label: CONTENT_POST_PLANNING_STATUS.published,
-        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
-        value: CONTENT_POST_PLANNING_STATUS.published,
-        startIcon: <CheckCircle color="success" fontSize="small" />
-      },
-      {
         label: CONTENT_POST_PLANNING_STATUS.scheduled,
         selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.scheduled,
         value: CONTENT_POST_PLANNING_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
+      },
+      {
+        label: CONTENT_POST_PLANNING_STATUS.published,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
+        value: CONTENT_POST_PLANNING_STATUS.published,
+        startIcon: <CheckCircle color="success" fontSize="small" />
       }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);
@@ -165,24 +165,20 @@ const CalendarView = ({ topRightSlot }) => {
       />
       <div className={classes.whiteBg}>
         <div className="relative">
-          {events.length === 0 ? (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>No events found for the selected status</div>
-          ) : (
-            <CustomCalendar
-              events={events}
-              getEventStyle={getEventStyle}
-              onNavigate={() => {}}
-              eventClick={(arg) => {
-                const ev = arg.event;
-                const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
-                if (id) {
-                  history.push(`${routes.contentPostPlanningDetail.path}/${id}`);
-                } else {
-                  console.warn('Calendar event clicked but id not found', ev);
-                }
-              }}
-            />
-          )}
+          <CustomCalendar
+            events={events}
+            getEventStyle={getEventStyle}
+            onNavigate={() => {}}
+            eventClick={(arg) => {
+              const ev = arg.event;
+              const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
+              if (id) {
+                history.push(`${routes.contentPostPlanningDetail.path}/${id}`);
+              } else {
+                console.warn('Calendar event clicked but id not found', ev);
+              }
+            }}
+          />
         </div>
       </div>
       {showManageDialog.open && (
