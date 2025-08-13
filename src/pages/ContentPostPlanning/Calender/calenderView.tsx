@@ -14,6 +14,8 @@ import { CONTENT_POST_PLANNING_STATUS } from 'src/constants/helpers';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-material';
 import { gridFilterParser } from 'src/components/CustomReactTable';
+import { DatesSetArg } from '@fullcalendar/core';
+import dayjs from 'dayjs';
 
 const useStyles = makeStyles((theme: Theme) => ({
   whiteBg: {
@@ -38,6 +40,10 @@ const CalendarView = ({ topRightSlot }) => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [dateRange, setDateRange] = useState({
+    estimateStartDate: dayjs().startOf('month').format('MM/DD/YYYY'),
+    estimateEndDate: dayjs().endOf('month').format('MM/DD/YYYY')
+  });
 
   const getQueryString = () => {
     let deepFilter = `?entity=${selectedEntity}`;
@@ -91,7 +97,7 @@ const CalendarView = ({ topRightSlot }) => {
 
   useEffect(() => {
     fetchData();
-  }, [selectedEntity, selectedStatus, filters]);
+  }, [selectedEntity, selectedStatus, filters, dateRange]);
 
   const getEventStyle = useCallback((obj) => {
     let bg = 'rgba(237, 231, 246, 1)';
@@ -116,6 +122,30 @@ const CalendarView = ({ topRightSlot }) => {
       borderColor: 'transparent',
       padding: '8px 16px'
     };
+  }, []);
+
+  const onNavigate = useCallback((dateInfo: DatesSetArg) => {
+    if (dateInfo.view.type === 'dayGridMonth') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridWeek') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'timeGridDay') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().format('MM/DD/YYYY')
+      });
+    } else if (dateInfo.view.type === 'agenda') {
+      setDateRange({
+        estimateStartDate: dayjs(dateInfo.start).tz().format('MM/DD/YYYY'),
+        estimateEndDate: dayjs(dateInfo.end).tz().add(1, 'month').format('MM/DD/YYYY')
+      });
+    }
   }, []);
 
   const resolvedTopRight = typeof topRightSlot === 'function' ? (topRightSlot as Function)() : topRightSlot;
@@ -168,7 +198,7 @@ const CalendarView = ({ topRightSlot }) => {
           <CustomCalendar
             events={events}
             getEventStyle={getEventStyle}
-            onNavigate={() => {}}
+            onNavigate={onNavigate}
             eventClick={(arg) => {
               const ev = arg.event;
               const id = ev.id || ev._def?.publicId || ev.extendedProps?.id;
