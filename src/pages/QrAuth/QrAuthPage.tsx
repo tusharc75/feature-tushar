@@ -61,7 +61,6 @@ export default function QrAuthPage() {
         }
       })
       .catch((error) => {
-        console.log("QR Auth Error:", error);
         setLoading(false);
         setError(error.message || 'Invalid PIN');
       });
