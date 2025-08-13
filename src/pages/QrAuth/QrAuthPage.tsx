@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import OtpInput from 'src/components/OtpInput';
@@ -7,6 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 export default function QrAuthPage() {
   const { qrLoginId } = useParams();
@@ -14,14 +15,14 @@ export default function QrAuthPage() {
   const [loading, setLoading] = useState(true);
   const [valid, setValid] = useState(false);
   const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
+  const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
 
   useEffect(() => {
     if (!qrLoginId) return;
     setLoading(true);
     axiosInstance()
-      .get(`/user/qr-auth/${qrLoginId}`)
+      .post(`/user/qr-auth`, { _id: qrLoginId })
       .then(({ data }) => {
         setValid(data?.data?.valid === true);
         setLoading(false);
@@ -33,7 +34,6 @@ export default function QrAuthPage() {
   }, [qrLoginId]);
 
   const handleSubmit = async () => {
-    setError('');
     setLoading(true);
     axiosInstance()
       .post('/user/qr-auth', { _id: qrLoginId, pin: Number(pin) })
@@ -57,12 +57,16 @@ export default function QrAuthPage() {
           }
           history.push('/');
         } else {
-          setError('Invalid PIN');
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Invalid PIN',
+          });
         }
       })
       .catch((error) => {
+        toastConfig.setToastConfig(error);
         setLoading(false);
-        setError(error.message || 'Invalid PIN');
       });
   };
 
@@ -83,7 +87,6 @@ export default function QrAuthPage() {
             TextFieldsProps={{ size: 'small' }}
             length={4}
           />
-          {error && <Typography color="error" align="center" mb={2}>{error}</Typography>}
           <ThemeButton
             buttonType="theme"
             fullWidth
