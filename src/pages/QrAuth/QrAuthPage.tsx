@@ -77,11 +77,11 @@ export default function QrAuthPage() {
   };
 
   return (
-    <Box display="flex" minHeight="100vh" alignItems="center" justifyContent="center" bgcolor="var(--dark-secondary,white)">
+    <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
       {loading ? (
-        <CommonSkeleton lenArray={[...Array(5).keys()]} />
+        <CommonSkeleton lenArray={[...Array(6).keys()]} />
       ) : !valid ? (
-        <Box width="100%" maxWidth={500} p={10} bgcolor="var(--dark-primary,white)" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
+        <Box width="100%" maxWidth={500} p={10} bgcolor="background.paper" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
           <div className="logo-container mx-auto mb-3 max-w-[150px]">
             <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
           </div>
@@ -91,7 +91,7 @@ export default function QrAuthPage() {
           </ThemeButton>
         </Box>
       ) : (
-        <Box width="100%" maxWidth={500} p={5} bgcolor="var(--dark-primary,white)" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
+        <Box width="100%" maxWidth={500} p={5} bgcolor="background.paper" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
           <div className="logo-container mx-auto mb-3 max-w-[150px]">
             <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
           </div>
@@ -113,7 +113,7 @@ export default function QrAuthPage() {
                     handleSubmit(value);
                   }
                 }}
-                TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
+                TextFieldsProps={{ size: 'small' }}
                 autoFocus
                 length={4}
               />
