@@ -423,7 +423,8 @@ export const sidebarResource = {
   customerAccountsAndServicesDataMapping: 'Customer Accounts And Services Data Mapping',
   customerAccountsAndProductsDataMapping: 'Customer Accounts And Products Data Mapping',
   fieldView: 'Field View',
-  customPdfTemplate: 'Custom Pdf Template'
+  customPdfTemplate: 'Custom Pdf Template',
+  contentPostPlanning: 'Content Post Planning'
 } as const;
 
 export const primaryFields = {
@@ -883,7 +884,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
       if (!option && key.required && key.option?.length === 1) {
         option = key.option[0];
       }
-      if (key?.visibilityCondition?.length) {
+      if (key?.visibilityCondition?.length || key?.lookupDependentOn) {
         obj[key.fieldName] = '';
       } else {
         obj[key.fieldName] = value ? value : option ? option.optionValue : '';
@@ -2392,7 +2393,8 @@ export const ACTIVITY_RESOURCE = {
   assemblyOrder: 'assemblyOrder',
   serializedPackages: 'serializedPackages',
   expenses: 'expenses',
-  expenseReport: 'expenseReport'
+  expenseReport: 'expenseReport',
+  contentPostPlanning: 'contentPostPlanning'
 };
 
 export const LOG_RESOURCE = {
@@ -3010,13 +3012,12 @@ export const MATERIAL_TYPE = {
   serializedAsset: 'serializedAsset',
   serializedPackage: 'serializedPackage',
   manualEntry: 'manualEntry',
-  childItems: 'childItems',
   other: 'other'
 };
 
 export const MATERIAL_SUB_TYPE = {
   consumable: 'consumable',
-  bom: 'bom'
+  childItem: 'childItem'
 };
 
 export const OTHER_MATERIAL_TYPE = {
@@ -4045,4 +4046,15 @@ export const checkImageUrl = (url) => {
   let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
   let imageExtensions = ['.tif', '.tiff', '.bmp', '.jpg', '.jpeg', '.gif', '.png', '.eps', '.raw', '.cr2', '.nef', '.orf', '.sr2'];
   return imageExtensions.indexOf(extension) >= 0;
+};
+
+export const reverseLookupDependentOn = (lookupDependentOn, options = [], value, fields) => {
+  const field = fields?.find(f => f?.fieldName === lookupDependentOn)
+  const option = options?.find(f => f?.optionValue === value)
+
+  if (option[lookupDependentOn] && field?.type === 'multiSelect' && typeof option[lookupDependentOn] === 'string') {
+    return [option[lookupDependentOn]]
+  }
+  return option[lookupDependentOn]
+
 };
