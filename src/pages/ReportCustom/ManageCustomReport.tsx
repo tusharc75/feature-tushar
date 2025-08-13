@@ -3,7 +3,7 @@ import { Dialog, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
-import { cn, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, getResourceLabel, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -39,13 +39,15 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
 
   const [resourceOption, setResourceOption] = useState(null);
 
   const fetchReportList = async () => {
-    const { data: { data } } = await axiosInstance().get('/report/list');
+    const {
+      data: { data }
+    } = await axiosInstance().get('/report/list');
     setReportList(data || []);
     const options = [];
     data?.forEach((item) => {
@@ -74,8 +76,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           } = await axiosInstance().get(`/custom-report/${id}`);
 
           let resource: any = reportList?.find((item) => item.title === data.resource);
+          const title =
+            resource?.type === 'dynamicForm'
+              ? getResourceLabel(resource?.resource, user)?.titleSingular
+              : resource.type === 'dynamic'
+                ? resources?.[resource?.key]?.titleSingular
+                : resource.title;
           resource = {
-            title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
+            title,
             value: resource.title,
             key: resource.key,
             type: resource.type
@@ -245,7 +253,11 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date)) {
+        if (
+          dayjs(d?.term?.from).isValid() &&
+          dayjs(d?.term?.from).toDate() instanceof Date &&
+          (d?.term?.to === '' || (dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date))
+        ) {
           filters.push({
             term: d?.field,
             value: d?.term,
