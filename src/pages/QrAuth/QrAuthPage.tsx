@@ -103,7 +103,7 @@ export default function QrAuthPage() {
               if (pin.length === 4) handleSubmit();
             }}
           >
-            <div className="mb-6 md:px-5">
+            <div className="mb-6 md:px-5 max-w-xs mx-auto">
               <OtpInput
                 validateChar={(character, index) => /^[0-9]$/.test(character)}
                 value={pin}
