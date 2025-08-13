@@ -7,7 +7,7 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { MATERIAL_TYPE, COLOUR_MASTER } from 'src/constants/helpers';
+import { MATERIAL_TYPE, COLOUR_MASTER, OTHER_MATERIAL_TYPE } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase, startCase } from 'lodash';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -53,7 +53,8 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
     setLoading(true);
     try {
       const allAssetsResponse = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`);
-      const assets = allAssetsResponse?.data?.data || [];
+      const assets = allAssetsResponse?.data?.data?.assets || [];
+      const serialNumbers = allAssetsResponse?.data?.data?.serialNumbers || [];
 
       const {
         data: { data: material }
@@ -98,7 +99,7 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
             : parent?.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageName
               : '';
-        parent.subRows = generateNestedData(material, assets, parent);
+        parent.subRows = generateNestedData(material, assets, serialNumbers, parent);
       });
       generateFlowData(rows, xPosition, flow, flowEdge, serializedPackagesData._id, yPrev);
       setFlowData([...flow, ...flowEdge]);
@@ -160,7 +161,7 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
     return yPosition - yPrev;
   };
 
-  const generateNestedData = (material, assets, parent) => {
+  const generateNestedData = (material, assets, serialNumbers, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -170,7 +171,7 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
           : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productName
             : '';
-      _subRow.subRows = generateNestedData(material, assets, _subRow);
+      _subRow.subRows = generateNestedData(material, assets, serialNumbers, _subRow);
     });
     if (assets?.length > 0) {
       const assetsSubRows = assets.filter((e) => e.product === parent.materialId && e?._id === parent?._id);
@@ -180,6 +181,18 @@ const SerializedPackagesView = ({ serializedPackagesData }) => {
         _subRow.type = MATERIAL_TYPE.serializedAsset;
         _subRow._id = _subRow?.asset;
         _subRow.detail = _subRow?.assetDetail?.assetNumber;
+        _subRow.parentId = _subRow?.product;
+        subRows.push(_subRow);
+      });
+    }
+    if (serialNumbers?.length > 0) {
+      const serialNumberSubRows = serialNumbers?.filter((e) => e.product === parent?.materialId && e?._id === parent?._id);
+      const subRowsLength = subRows?.length || 0;
+      serialNumberSubRows.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
+        _subRow.type = OTHER_MATERIAL_TYPE.serialNumber;
+        _subRow._id = _subRow?.serialNumber;
+        _subRow.detail = _subRow?.serialNumberDetail?.serialNumber;
         _subRow.parentId = _subRow?.product;
         subRows.push(_subRow);
       });

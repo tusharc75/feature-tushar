@@ -151,7 +151,7 @@ const PackageDetails = () => {
               {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} childItems={true} />
+              <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} childItem={true} />
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
               {tabValue === 3 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}

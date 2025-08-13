@@ -265,7 +265,16 @@ const AssignSerialNumbersDialog = ({
         while (qty) {
           const result = selectedRecords?.filter((f) => f.product === ele.id && !f.isCounted);
           if (result.length) {
-            data.push({ ...ele, serialNumber: result[0]._id });
+            if (referenceType === 'serializedPackages') {
+              if (qty - ele?._id?.length <= 0) {
+                data.push({ product: ele.id, _id: ele?._id[0], serialNumber: result[0]._id });
+                ele._id.shift();
+              } else {
+                data.push({ product: ele.id, _id: ele?._id[0], serialNumber: result[0]._id });
+              }
+            } else {
+              data.push({ ...ele, serialNumber: result[0]._id });
+            }
             result[0].isCounted = true;
           }
           qty--;

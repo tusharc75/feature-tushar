@@ -63,7 +63,7 @@ const SetUpQRDialog = ({ onClose, onSubmit, mode = 'setup', qrLoginId = null }) 
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
             <Typography variant="h6" align="center">
-              {mode === 'change' ? 'Change 4-digit PIN for QR login' : 'Enter a 4-digit PIN to setup QR login'}
+              {mode === 'change' ? 'Set a new 4-digit PIN' : 'Set up your 4-digit PIN for secure access'}
             </Typography>
             <Box mt={3} />
             <Box m={2}>

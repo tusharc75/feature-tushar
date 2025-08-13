@@ -26,7 +26,6 @@ import {
   gridLoadingTimeout,
   isObjectEmpty,
   prepareDataForGrid,
-  REPORT_LIST,
   sidebarResource,
 } from 'src/constants/helpers';
 import { ReferenceRenderer } from 'src/pages/ProductInventory/History';
@@ -64,14 +63,15 @@ const StandardReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: T
     permissions,
     isColumnsLoading,
     selectedEntity,
-    navigateToMainPage
+    navigateToMainPage,
+    reportList
   } = reportState;
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
-  const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
+  const reportConfig = reportList?.find((e) => e.type === resourceCamelCase);
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
