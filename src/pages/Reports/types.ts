@@ -81,6 +81,7 @@ export type TableCommonProps = {
   state: UseReport;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  dynamicForm?: boolean;
 };
 
 export type ResourceColumn = {
