@@ -10,7 +10,7 @@ import ManageContentPostPlanning from '../ManageContentPostPlanning';
 import { useHistory } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
-import { CONTENT_PLANNING_STATUS_STATUS } from 'src/constants/helpers';
+import { CONTENT_POST_PLANNING_STATUS } from 'src/constants/helpers';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
 import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-material';
 import { gridFilterParser } from 'src/components/CustomReactTable';
@@ -37,7 +37,7 @@ const CalendarView = ({ topRightSlot }) => {
   const [events, setEvents] = useState([]);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const [selectedStatus, setSelectedStatus] = useState(CONTENT_PLANNING_STATUS_STATUS.pendingApproval);
+  const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
 
   const getQueryString = () => {
     let deepFilter = `?entity=${selectedEntity}`;
@@ -122,23 +122,23 @@ const CalendarView = ({ topRightSlot }) => {
   const statusMenuItems = useMemo(() => {
     return [
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
-        value: CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
+        label: CONTENT_POST_PLANNING_STATUS.pendingApproval,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.pendingApproval,
+        value: CONTENT_POST_PLANNING_STATUS.pendingApproval,
         startIcon: <HourglassEmpty color="warning" fontSize="small" />
       },
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.published,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.published,
-        value: CONTENT_PLANNING_STATUS_STATUS.published,
+        label: CONTENT_POST_PLANNING_STATUS.published,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
+        value: CONTENT_POST_PLANNING_STATUS.published,
         startIcon: <CheckCircle color="success" fontSize="small" />
       },
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.scheduled,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.scheduled,
-        value: CONTENT_PLANNING_STATUS_STATUS.scheduled,
+        label: CONTENT_POST_PLANNING_STATUS.scheduled,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.scheduled,
+        value: CONTENT_POST_PLANNING_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
-      },
+      }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);
 

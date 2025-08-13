@@ -2871,7 +2871,7 @@ export const PRODUCT_SERIAL_NUMBER_STATUS = {
   unAvailable: 'Unavailable'
 };
 
-export const CONTENT_PLANNING_STATUS_STATUS ={
+export const CONTENT_POST_PLANNING_STATUS ={
   pendingApproval: 'Pending Approval',
   published: 'Published',
   scheduled: 'Scheduled',

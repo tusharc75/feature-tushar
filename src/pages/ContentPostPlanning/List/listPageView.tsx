@@ -13,7 +13,7 @@ import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomContainer from 'src/components/CustomContainer';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { sidebarResource, prepareDataForGrid, CONTENT_PLANNING_STATUS_STATUS } from 'src/constants/helpers';
+import { sidebarResource, prepareDataForGrid, CONTENT_POST_PLANNING_STATUS } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ManageContentPostPlanning from '../ManageContentPostPlanning';
@@ -42,7 +42,7 @@ const ListView = ({ topRightSlot }) => {
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
-  const [selectedStatus, setSelectedStatus] = useState(CONTENT_PLANNING_STATUS_STATUS.pendingApproval);
+  const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
 
   const types = [
     {
@@ -251,23 +251,23 @@ const ListView = ({ topRightSlot }) => {
   const statusMenuItems = useMemo(() => {
     return [
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
-        value: CONTENT_PLANNING_STATUS_STATUS.pendingApproval,
+        label: CONTENT_POST_PLANNING_STATUS.pendingApproval,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.pendingApproval,
+        value: CONTENT_POST_PLANNING_STATUS.pendingApproval,
         startIcon: <HourglassEmpty color="warning" fontSize="small" />
       },
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.published,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.published,
-        value: CONTENT_PLANNING_STATUS_STATUS.published,
+        label: CONTENT_POST_PLANNING_STATUS.published,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.published,
+        value: CONTENT_POST_PLANNING_STATUS.published,
         startIcon: <CheckCircle color="success" fontSize="small" />
       },
       {
-        label: CONTENT_PLANNING_STATUS_STATUS.scheduled,
-        selected: selectedStatus === CONTENT_PLANNING_STATUS_STATUS.scheduled,
-        value: CONTENT_PLANNING_STATUS_STATUS.scheduled,
+        label: CONTENT_POST_PLANNING_STATUS.scheduled,
+        selected: selectedStatus === CONTENT_POST_PLANNING_STATUS.scheduled,
+        value: CONTENT_POST_PLANNING_STATUS.scheduled,
         startIcon: <Schedule color="info" fontSize="small" />
-      },
+      }
     ] as NewActionButtonProps<string, any>['items'];
   }, [selectedStatus]);
 
