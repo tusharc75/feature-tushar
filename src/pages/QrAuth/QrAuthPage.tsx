@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
+import { SVG } from 'src/assets';
 import OtpInput from 'src/components/OtpInput';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -17,6 +18,7 @@ export default function QrAuthPage() {
   const [pin, setPin] = useState('');
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!qrLoginId) return;
@@ -33,12 +35,12 @@ export default function QrAuthPage() {
       });
   }, [qrLoginId]);
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const handleSubmit = async (qrPin = pin) => {
+    setIsSubmitting(true);
     axiosInstance()
-      .post('/user/qr-auth', { _id: qrLoginId, pin: Number(pin) })
+      .post('/user/qr-auth', { _id: qrLoginId, pin: Number(qrPin) })
       .then(({ data: { data } }) => {
-        setLoading(false);
+        setIsSubmitting(false);
         if (data?.valid) {
           const userData = data.userData;
           localStorage.setItem('token', userData.token);
@@ -60,42 +62,74 @@ export default function QrAuthPage() {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
-            message: 'Invalid PIN',
+            message: 'Please enter a valid PIN',
           });
         }
       })
       .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setLoading(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please enter a valid PIN'
+        });
+        setIsSubmitting(false);
       });
   };
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="100vh">
+    <Box display="flex" minHeight="100vh" alignItems="center" justifyContent="center" bgcolor="var(--dark-secondary,white)">
       {loading ? (
-        <CommonSkeleton lenArray={[...Array(4).keys()]} />
+        <CommonSkeleton lenArray={[...Array(5).keys()]} />
       ) : !valid ? (
-        <Typography color="error" variant="h6">Invalid or expired QR code.</Typography>
-      ) : (
-        <Box maxWidth={320} width="100%" p={3} boxShadow={2} borderRadius={2} bgcolor="background.paper">
-          <Typography variant="h5" align="center" mb={2}>QR Login</Typography>
-          <Typography variant="body2" align="center" mb={2}>Enter your 4-digit PIN</Typography>
-          <OtpInput
-            validateChar={(character, index) => /^[0-9]$/.test(character)}
-            value={pin}
-            onChange={(value) => setPin(value)}
-            TextFieldsProps={{ size: 'small' }}
-            length={4}
-          />
-          <ThemeButton
-            buttonType="theme"
-            fullWidth
-            disabled={pin.length !== 4 || loading}
-            onClick={handleSubmit}
-            className='mt-4'
-          >
-            Login
+        <Box width="100%" maxWidth={500} p={10} bgcolor="var(--dark-primary,white)" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
+          <div className="logo-container mx-auto mb-3 max-w-[150px]">
+            <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
+          </div>
+          <Typography color="error" variant="h6" mb={2}>QR code is invalid or has expired.</Typography>
+          <ThemeButton sx={{ paddingBlock: 1.25, height: 40, marginTop: 2 }} buttonType="theme" fullWidth onClick={() => history.push('/login')}>
+            Go to Login
           </ThemeButton>
+        </Box>
+      ) : (
+        <Box width="100%" maxWidth={500} p={5} bgcolor="var(--dark-primary,white)" borderRadius={4} boxShadow={3} textAlign="center" style={{ border: '1px solid var(--common-border-color)' }}>
+          <div className="logo-container mx-auto mb-3 max-w-[150px]">
+            <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
+          </div>
+          <Typography variant="h5" fontWeight={600} mt={3} mb={3}>Verify Your Identity</Typography>
+          <Typography variant="body2" fontWeight={500} color="textSecondary" mb={2} mt={7}>Enter your 4-digit PIN</Typography>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              if (pin.length === 4) handleSubmit();
+            }}
+          >
+            <div className="mb-6 md:px-5">
+              <OtpInput
+                validateChar={(character, index) => /^[0-9]$/.test(character)}
+                value={pin}
+                onChange={value => {
+                  setPin(value);
+                  if (value.length === 4) {
+                    handleSubmit(value);
+                  }
+                }}
+                TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
+                autoFocus
+                length={4}
+              />
+            </div>
+            <ThemeButton
+              buttonType="theme"
+              type="submit"
+              fullWidth
+              sx={{ paddingBlock: 1.25, height: 40 }}
+              disabled={pin.length < 4 || isSubmitting}
+              isLoading={isSubmitting}
+              className="mt-4"
+            >
+              Submit
+            </ThemeButton>
+          </form>
         </Box>
       )}
     </Box>
