@@ -3,7 +3,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { camelCase } from 'lodash';
+import { camelCase, sortBy } from 'lodash';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -21,8 +21,7 @@ import { Edit } from '@mui/icons-material';
 import routes from 'src/components/Helpers/Routes';
 import ButtonMenu from 'src/components/ButtonMenu';
 import { NewActionButtonProps } from 'src/components/PageHeaders/DetailsPageHeader/NewActionButton';
-import { HourglassEmpty, CheckCircle, Schedule, Category } from '@mui/icons-material';
-import ContentPostPlanning from 'src/pages/ContentPostPlanning';
+import { HourglassEmpty, CheckCircle, Schedule } from '@mui/icons-material';
 
 const ListView = ({ topRightSlot }) => {
   const renderedFrom = camelCase(sidebarResource?.contentPostPlanning);
@@ -37,13 +36,15 @@ const ListView = ({ topRightSlot }) => {
   const [columns, setColumns] = useState<any>(null);
   const pageTitle = camelCase(`${resources?.contentPostPlanning?.titlePlural}`);
   const { generateColumns, checkStaticField } = useColumns();
-  // const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [selectedType, setSelectedType] = useState(1);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isEdit: false, idToEdit: null });
   const [selectedStatus, setSelectedStatus] = useState(CONTENT_POST_PLANNING_STATUS.pendingApproval);
+  const [statusOptions, setStatusOptions] = useState(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState({ open: false, status: null });
+  const [approvetRecord, setApproveRecord] = useState(null);
 
   const types = [
     {
@@ -78,6 +79,12 @@ const ListView = ({ topRightSlot }) => {
           newColumns.push(checkStaticField(pageTitle, field));
         }
       });
+      fieldsDataForRead?.some((o) => {
+        if (o?.fieldData?.fieldName === 'status') {
+          setStatusOptions([...o.fieldData.option?.filter((e) => e.optionValue)]);
+          return true;
+        }
+      });
       setColumns([...newColumns, ActionsRenderer]);
     } catch (ex: any) {
       toastConfig.setToastConfig({ open: true, type: 'error', message: ex.message || 'Error fetching columns' });
@@ -99,33 +106,63 @@ const ListView = ({ topRightSlot }) => {
     canDrag: false,
     Cell: ({ row }: any) => (
       <>
-        <HtmlTooltip title={permissions?.contentPostPlanning?.isUpdate  && row?.original?.status !== 'Published' ? 'Edit' : editDisable}>
+        <HtmlTooltip
+          title={
+            permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Edit' : editDisable
+          }
+        >
           <span>
             <IconButton
               size="small"
               aria-label="Edit"
-              disabled={permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== 'Published' ? false : true}
+              disabled={permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
               onClick={() => {
-                console.log(row?.original?.status)
+                console.log(row?.original?.status);
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-              <Edit fontSize="small" color={permissions?.contentPostPlanning?.isUpdate|| row?.original?.status !== 'Published' ? 'primary' : 'disabled'} />
+              <Edit
+                fontSize="small"
+                color={
+                  permissions?.contentPostPlanning?.isUpdate || row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published
+                    ? 'primary'
+                    : 'disabled'
+                }
+              />
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== 'Published' ? 'Delete' : deleteDisable}>
+        {row?.original?.status === CONTENT_POST_PLANNING_STATUS.pendingApproval && (
+          <HtmlTooltip title="Approve">
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Approve"
+                onClick={() => {
+                  setApproveRecord(row?.original);
+                  setShowConfirmDialog({ open: true, status: CONTENT_POST_PLANNING_STATUS.scheduled });
+                }}
+              >
+                <CheckCircle fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
+        <HtmlTooltip title={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'Delete' : deleteDisable}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={row?.original?.canDelete && row?.original?.status !== 'Published' ? false : true}
+              disabled={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
               onClick={() => {
                 setDeleteRecord(row.original);
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete && row?.original?.status !== 'Published' ? 'error' : 'disabled'} />
+              <DeleteIcon
+                fontSize="small"
+                color={row?.original?.canDelete && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? 'error' : 'disabled'}
+              />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -231,21 +268,81 @@ const ListView = ({ topRightSlot }) => {
     }
   };
 
+  const validateStatus = (status) => {
+    const currIdx = statusOptions.findIndex((status) => status.optionValue === selectedRecords[0].status);
+    return statusOptions[currIdx + 1]?.optionValue !== status;
+  };
+
+  const handleChangeStatus = (status) => {
+    let _ids = [];
+    if (approvetRecord) {
+      _ids.push(approvetRecord?._id);
+    } else {
+      const isSameStatus = selectedRecords?.every((e) => e.status === selectedRecords[0].status);
+      if (!isSameStatus) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Please select invoices with same status'
+        });
+        return;
+      }
+      selectedRecords?.forEach((e) => {
+        _ids.push(e._id);
+      });
+    }
+    axiosInstance()
+      .put('content-post-planning/update-status', { _id: _ids, status: status })
+      .then(({ data: { data } }) => {
+        setShowConfirmDialog({ open: false, status: null });
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const ActionMenuItems = () => {
     return (
-      <MenuItem
-        disabled={selectedRecords.every((e: any) => e?.canDelete && e?.status !== 'Published') ? false : true}
-        onClick={() => {
-          if (selectedRecords?.length === 1) {
-            setDeleteRecord(selectedRecords[0]);
-          } else {
-            setDeleteRecord(null);
-          }
-          setShowDeleteConfirmBox(true);
-        }}
-      >
-        {`Delete (${selectedRecords?.length})`}
-      </MenuItem>
+      <>
+        <MenuItem
+          disabled={selectedRecords.every((e: any) => e?.canDelete && e?.status !== CONTENT_POST_PLANNING_STATUS.published) ? false : true}
+          onClick={() => {
+            if (selectedRecords?.length === 1) {
+              setDeleteRecord(selectedRecords[0]);
+            } else {
+              setDeleteRecord(null);
+            }
+            setShowDeleteConfirmBox(true);
+          }}
+        >
+          {`Delete (${selectedRecords?.length})`}
+        </MenuItem>
+        {permissions?.invoice?.isUpdate &&
+          selectedRecords?.length &&
+          !selectedRecords?.some((s) => s.status === CONTENT_POST_PLANNING_STATUS.published) &&
+          selectedRecords.every((e) => e.status === selectedRecords[0].status) && (
+            <>
+              {statusOptions?.map((status) => {
+                return (
+                  <MenuItem
+                    onClick={() => {
+                      handleChangeStatus(status?.optionValue);
+                    }}
+                    disabled={validateStatus(status?.optionValue)}
+                  >
+                    {`Status Change - ${status?.optionLabel}`}
+                  </MenuItem>
+                );
+              })}
+            </>
+          )}
+      </>
     );
   };
   const resolvedTopRight = typeof topRightSlot === 'function' ? (topRightSlot as Function)() : topRightSlot;
@@ -339,6 +436,19 @@ const ListView = ({ topRightSlot }) => {
           />
         )}
       </CustomContainer>
+
+      {showConfirmDialog.open && (
+        <ConfirmationDialog
+          open={showConfirmDialog.open}
+          message={`Are you sure you want to approve this post ?`}
+          onClose={() => {
+            setShowConfirmDialog({ open: false, status: null });
+          }}
+          onOk={() => {
+            handleChangeStatus(showConfirmDialog.status);
+          }}
+        />
+      )}
 
       {showManageDialog.open && (
         <ManageContentPostPlanning
