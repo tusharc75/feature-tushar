@@ -256,7 +256,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         }
 
         filterColumns = filterFields;
-        setResourceColumns(filterFields);
+        setResourceColumns(columnFields);
       }
       setFilterColumns([...filterColumns]);
     } catch (err) {
