@@ -50,7 +50,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
-  const resourceStartCase = startCase(selectedReport.resource);
+  const resourceStartCase: any = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
@@ -59,13 +59,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
   const [selectedReportView, setSelectedReportView] = useState(null);
-  const [emailAttachments, setEmailAttachments] = useState([]);
-  const [isProcessing, setIsProcessing] = useState(null);
-  const [isSendMail, setIsSendMail] = useState(false);
-  const [htmlContent, setHtmlContent] = useState(null);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  const reportConfig = reportList?.find((e) => e.type === resourceCamelCase);
 
   const fetchGridColumns = useCallback(async () => {
     setIsColumnsLoading(true);
@@ -377,10 +370,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
       let api = dynamicForm ? `/report/dynamic-form${query}` : `/report${routes[resourceCamelCase].path}${query}`;
       if (resourceCamelCase === 'quotes') {
         api = `/report/quote-builder${query}`;
-      } else if (!dynamicForm) {
-        api = `/report${routes[resourceCamelCase].path}${query}`;
       }
-
       const requestConfig: any = { cancelToken: cancelTokenSource?.token };
       if (dynamicForm) {
         requestConfig.headers = {
@@ -415,7 +405,9 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
 
   const getApi = () => {
     let api = null;
-    if (resourceCamelCase === 'quotes') {
+    if (dynamicForm) {
+      api = `/report/dynamic-form`;
+    } else if (resourceCamelCase === 'quotes') {
       api = `/report/quote-builder`;
     } else {
       api = `/report${routes[resourceCamelCase].path}`;
@@ -454,115 +446,10 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
   }, []);
 
   useEffect(() => {
-    if (emailAttachments?.length > 0 || htmlContent) {
-      setIsProcessing(null);
-      setIsSendMail(true);
-    }
-  }, [emailAttachments, htmlContent]);
-
-  useEffect(() => {
     if (showGrid) {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes, showGrid]);
-
-  const generateBase64forFile = (blobData, fileName, extension) => {
-    let reader = new FileReader();
-    reader.readAsDataURL(blobData);
-    reader.onloadend = function () {
-      let base64data: any = reader.result;
-      const attachments = {
-        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-        contentType: base64data.split(';')[0].split(':')[1],
-        extension: `.${extension}`,
-        name: fileName
-      };
-      setEmailAttachments((prevState) => {
-        return [...prevState, attachments];
-      });
-    };
-  };
-
-  const exportData = (exportType = 'excel', processType = 'excel') => {
-    toastConfig.setToastConfig({
-      open: true,
-      message: `Please wait ${processType === 'sendMail' ? '' : 'exporting data'}`,
-      type: 'info'
-    });
-
-    setIsProcessing(processType);
-
-    let { query: filterQuery } = getQueryString(true);
-
-    var api = '';
-    if (exportType === 'pdf') {
-      api = `/report/dynamic-form/pdf`;
-    } else if (exportType === 'html') {
-      api = `/report/dynamic-form/pdf`;
-    } else {
-      api = `/report/dynamic-form/export`;
-    }
-    const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
-    const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-
-    if (processType === 'sendMail' && exportType === 'html') {
-      axiosInstance()
-        .get(`${api}${filterQuery}&html=true`, {
-          headers: {
-            resource: resourceStartCase
-          }
-        })
-        .then((res) => {
-          setHtmlContent(res.data);
-          setIsProcessing(null);
-        })
-        .catch((err) => {
-          setIsProcessing(null);
-          toastConfig.setToastConfig(err);
-        });
-      return;
-    }
-
-    axiosInstance()
-      .get(`${api}${filterQuery}`, {
-        responseType: 'arraybuffer',
-        headers: {
-          resource: resourceStartCase
-        }
-      })
-      .then((res) => {
-        const fileName = res.headers['content-disposition'].split('filename=')[1];
-        if (processType === 'sendMail') {
-          const blobData = new Blob([res.data], { type: contentType });
-          generateBase64forFile(blobData, fileName, extension);
-        } else if (processType === 'pdf') {
-          const url = window.URL.createObjectURL(new Blob([res.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', fileName + '.pdf');
-          document.body.appendChild(link);
-          link.click();
-          toastConfig.setToastConfig({
-            open: true,
-            message: 'Successfully Exported',
-            type: 'success'
-          });
-          setIsProcessing(null);
-        } else {
-          downloadExcel(res.data, fileName);
-          toastConfig.setToastConfig({
-            open: true,
-            message: 'Successfully Exported',
-            type: 'success'
-          });
-          setIsProcessing(null);
-        }
-      })
-      .catch((err) => {
-        setIsProcessing(null);
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   return (
     <>
@@ -583,40 +470,17 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
                 Show Filters
               </ThemeButton>
             )}
-            {dynamicForm ? (
-              <>
-                {reportConfig?.isSendMail && <SendMailMenu exportData={exportData} isProcessing={isProcessing} />}
-                {reportConfig?.isExportPdf && (
-                  <ThemeButton
-                    iconForMobile={false}
-                    disabled={isProcessing === 'pdf'}
-                    onClick={() => exportData('pdf', 'pdf')}
-                    isLoading={isProcessing === 'pdf'}
-                  >
-                    Export To PDF
-                  </ThemeButton>
-                )}
-                <ThemeButton
-                  iconForMobile={false}
-                  disabled={isProcessing === 'excel'}
-                  onClick={() => exportData('excel', 'excel')}
-                  isLoading={isProcessing === 'excel'}
-                >
-                  Export To Excel
-                </ThemeButton>
-              </>
-            ) : (
-              <AsynImportExportMenu
-                resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-                subResource={'report'}
-                permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-                module={''}
-                api={getApi()}
-                afterImportCompleted={() => {}}
-                onlyExport={true}
-                additionalParams={getQueryString(true).query}
-              />
-            )}
+            <AsynImportExportMenu
+              resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+              subResource={'report'}
+              permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+              module={''}
+              api={getApi()}
+              afterImportCompleted={() => { }}
+              onlyExport={true}
+              additionalParams={getQueryString(true).query}
+              additionalHeaders={dynamicForm ? { resource: resourceStartCase } : null}
+            />
           </>
         )}
       </div>
@@ -673,46 +537,6 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
           setFilterTerm={setFilterTerm}
           onCloseWithErrors={navigateToMainPage}
         />
-      )}
-      {isSendMail && (
-        <Dialog
-          open={isSendMail}
-          fullScreen={fullScreen || isMobile || isTablet}
-          TransitionComponent={CustomDialogTransition}
-          aria-labelledby="customized-dialog-title"
-          maxWidth="md"
-          onClose={() => {
-            setEmailAttachments([]);
-            setHtmlContent(null);
-            setFullScreen(false);
-            setIsSendMail(false);
-          }}
-          fullWidth
-          disableEnforceFocus={true}
-        >
-          <CreateEmail
-            isQuoteBuilder={true}
-            relatedTo={null}
-            emailId={null}
-            handleClose={() => {
-              setEmailAttachments([]);
-              setHtmlContent(null);
-              setIsSendMail(false);
-            }}
-            fetchData={() => {
-              setEmailAttachments([]);
-              setHtmlContent(null);
-              setIsSendMail(false);
-            }}
-            qouteBuilderAttachments={emailAttachments}
-            isMinimized={true}
-            onMinimizeMaximize={() => {
-              setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-            content={htmlContent}
-          />
-        </Dialog>
       )}
     </>
   );

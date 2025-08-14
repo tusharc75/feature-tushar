@@ -22,7 +22,8 @@ const AsynImportExportMenu = ({
   total = 0,
   additionalParams = null,
   title = '',
-  onlyExport = false
+  onlyExport = false,
+  additionalHeaders = null
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -58,8 +59,14 @@ const AsynImportExportMenu = ({
     if (exportCount > 0) {
       exportApi = exportApi + `&ids=${JSON.stringify(ids)}`;
     }
+
+    const requestConfig: any = {};
+    if (additionalHeaders) {
+      requestConfig.headers = additionalHeaders;
+    }
+
     axiosInstance()
-      .get(exportApi)
+      .get(exportApi, requestConfig)
       .then((response) => {
         setRefresh(!refresh);
         toastConfig.setToastConfig({
@@ -78,8 +85,14 @@ const AsynImportExportMenu = ({
     if (additionalParams) {
       exportApi = `${exportApi}?${additionalParams}`;
     }
+
+    const requestConfig: any = { responseType: 'arraybuffer' };
+    if (additionalHeaders) {
+      requestConfig.headers = additionalHeaders;
+    }
+
     axiosInstance()
-      .get(exportApi, { responseType: 'arraybuffer' })
+      .get(exportApi, requestConfig)
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
