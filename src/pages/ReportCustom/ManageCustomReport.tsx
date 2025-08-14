@@ -123,12 +123,14 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       filterColumns = filterFields;
       setResourceColumns(columnFields);
     } else {
-      const {
-        data: { data }
-      }: any = await axiosInstance().get(`/field?resource=${resource.value}`);
+      let {
+        data: {
+          data: { columnFields, filterFields }
+        }
+      } = await axiosInstance().get(`/report/columns?resource=${resource.value}`);
 
       if (resource.value === sidebarResource.serializedAsset) {
-        const currentOwner: any = data?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
+        const currentOwner: any = filterFields?.find((e) => e?.fieldData?.fieldName === 'currentOwner');
         if (currentOwner) {
           const {
             data: { data: lookupResource }
@@ -144,36 +146,9 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
             ];
           }
         }
-        if (data?.some((r) => r?.fieldData?.fieldName === 'status')) {
-          const index = data?.findIndex((r) => r?.fieldData?.fieldName === 'status');
-          if (index !== -1) {
-            data?.splice(index + 1, 0, {
-              fieldData: {
-                _id: '630dc2429ec41869056955b1',
-                fieldLabel: 'Status Period',
-                type: 'date',
-                option: [],
-                required: false,
-                isTooltip: false,
-                tooltipMessage: '',
-                editAble: true,
-                deletAble: true,
-                order: 71,
-                fieldName: 'statusPeriod',
-                sectionName: 'Filter Section',
-                resource: 'Serialized Asset',
-                brand: data[0]?.fieldData?.brand,
-                timeFrame: 'custom'
-              },
-              isCreate: true,
-              isRead: true,
-              isUpdate: true
-            });
-          }
-        }
       }
-      filterColumns = data;
-      setResourceColumns(data);
+      filterColumns = filterFields;
+      setResourceColumns(filterFields);
     }
     setFilterColumns([...filterColumns]);
   };
@@ -345,6 +320,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           onSubmit={handleSubmit}
           validate={validate}
           validateOnMount
+          enableReinitialize
         >
           {({ values, errors, submitForm, setFieldValue, setValues, touched }) => (
             <Fragment>

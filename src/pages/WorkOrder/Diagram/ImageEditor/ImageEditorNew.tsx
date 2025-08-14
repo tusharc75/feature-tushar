@@ -3,13 +3,18 @@ import { Box, IconButton, Typography, useMediaQuery } from '@mui/material';
 import { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ShowFileUploader from 'src/components/ShowFileUploader';
 import { b64toBlob, cn } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
+import { SET_UPLOADER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
-const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null, uploads, setUploads }) => {
+const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => {
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    dispatch
+  }: any = useData();
 
   const editorRef = useRef<EditorRef>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +50,8 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
     handleClose()
     if (file) {
       const newUploads = [{ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }]
-      setUploads((prev) => [...prev, ...newUploads]);
+      dispatch({ type: SET_UPLOADER, payload: newUploads[0] })
+
 
       await Promise.allSettled(
         newUploads.map(({ file, _id }) => {
@@ -57,7 +63,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
             let fake = 0;
             const fakeInterval = setInterval(() => {
               fake = Math.min(fake + Math.random() * 15, 90);
-              setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, progress: Math.round(fake) } : u)));
+              dispatch({ type: SET_UPLOADER, payload: { _id, progress: Math.round(fake) } })
             }, 200);
 
             axiosInstance()
@@ -66,7 +72,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
               })
               .then(({ data }) => {
                 clearInterval(fakeInterval);
-                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'completed', progress: 100 } : u)));
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'completed', progress: 100 } })
                 toastConfig.setToastConfig({
                   open: true,
                   type: 'success',
@@ -76,7 +82,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
               })
               .catch((error) => {
                 clearInterval(fakeInterval);
-                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'failed' } : u)));
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'failed' } })
                 toastConfig.setToastConfig(error);
                 reject('failed');
               });
@@ -134,7 +140,6 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
           )
         )}
       </main>
-      <ShowFileUploader uploads={uploads} setUploads={setUploads} />
     </div>
   );
 };

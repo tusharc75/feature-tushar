@@ -298,6 +298,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
+import ShowFileUploader from 'src/components/ShowFileUploader';
 
 var notificationInterval: any = null;
 
@@ -375,7 +376,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1370,6 +1371,7 @@ function App() {
         ) : (
           ''
         ))}
+      <ShowFileUploader />
     </ColorModeProvider>
   );
 }

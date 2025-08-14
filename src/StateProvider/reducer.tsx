@@ -1,5 +1,5 @@
 import { getPermissions } from '../constants/helpers';
-import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH } from './actionTypes';
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH, SET_UPLOADER } from './actionTypes';
 
 export const initialState = {
   user: null,
@@ -16,7 +16,8 @@ export const initialState = {
     start: false,
     stepIndex: 0
   },
-  gridMetaData: {}
+  gridMetaData: {},
+  uploads: []
 };
 
 const reducer = (state = initialState, action) => {
@@ -53,6 +54,26 @@ const reducer = (state = initialState, action) => {
         permissions: nPermissions,
         resources: nResources
       };
+
+    case SET_UPLOADER:
+      let uploads = [...state?.uploads]
+      if (action?.payload && uploads?.some(u => u?._id === action?.payload?._id)) {
+        uploads = uploads?.map(u => {
+          if (u?._id === action?.payload?._id) {
+            const { _id, ...rest } = action?.payload
+            return {
+              ...u,
+              ...rest
+            }
+          }
+          return u
+        })
+      } else if (action?.payload) {
+        uploads = [...uploads, action?.payload]
+      } else {
+        uploads = []
+      }
+      return { ...state, uploads: [...uploads] }
     default:
       return state;
   }
