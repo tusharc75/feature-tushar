@@ -13,6 +13,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { flattenArray } from 'src/constants/columns';
 import { CHILD_RESOURCE, dateFormatToSend, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket, MATERIAL_TYPE, SERIALIZED_PACKAGE_OWNER_TYPE, sidebarResource } from 'src/constants/helpers';
 import { actionDisable, assemblyOrderActions, assemblyOrderMessage } from 'src/constants/messageHelpers';
 import ExistingRentalJob from 'src/pages/AssemblyOrder/Loading/ExistingRentalJob';
@@ -209,6 +210,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
+    dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
 
     const {
@@ -219,19 +221,17 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.assemblyOrder}&referenceId=${assemblyOrderData?._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
     );
 
-    const loadingTicketSerializedPackages = [];
-
+    const loadingTickets = [];
     deliveryTicketList?.forEach((element) => {
       if (element.ticketType === DELIVERY_TICKET_TYPE.loading) {
         if (element?.serializedPackages?.length) {
           element?.serializedPackages?.forEach((ele) => {
-            loadingTicketSerializedPackages.push({
+            loadingTickets.push({
               ...ele,
               loadingTicketId: element._id,
               loadingTicket: element?.ticketName,
               loadingTicketStatus: element?.status,
               warehouse: element?.pickupFrom,
-              storageLocation: element?.pickupFromStorageLocation
             });
           });
         }
@@ -239,10 +239,9 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
     });
 
     setUniqueLoadingTicket(deliveryTicketList?.filter((e) => e?.serializedPackages?.length)?.map((e) => e._id));
-
     setHideDeliveryTicketDelivered(defaultDeliveryTicketStatus === DELIVERY_TICKET_STATUS.delivered ? true : false);
-    const rows = data?.filter((e) => e.parentId === null);
 
+    const rows = data?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent?.detail || parent?.packageDetail?.packageName || '';
@@ -251,23 +250,27 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       parent.serializedPackageId = parent?.serializedPackageDetail?._id;
       parent.serializedPackageNumber = parent?.serializedPackageDetail?.serializedPackageNumber;
       parent.status = parent?.serializedPackageDetail?.status;
-      const loading = loadingTicketSerializedPackages?.find((e) => e?.serializedPackage === parent?.serializedPackageId && e?.uniqueId === parent?._id);
+      const loading = loadingTickets?.find((e) =>
+        e?.serializedPackage === parent?.serializedPackageId
+        && e?.uniqueId === parent?._id);
       if (loading) {
         parent.loadingTicket = loading?.loadingTicket;
         parent.loadingTicketId = loading?.loadingTicketId;
         parent.loadingTicketStatus = loading?.loadingTicketStatus;
       }
-      parent.subRows = generateNestedData(data, parent);
+      parent.subRows = generateNestedData(data, parent, loadingTickets);
     });
 
-    if (rows?.every((r) => r?.isValid && r?.serializedPackageId)) {
+    if (flattenArray(rows)?.filter((r) => r?.serializedPackageId)?.length ===
+      flattenArray(rows)?.filter((r) => r?.serializedPackageId && r?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)?.length) {
       setNextStep(true);
     }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, loadingTickets) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
@@ -290,16 +293,23 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       }
       _subRow.qty = _subRow.qty || 1;
       _subRow.qtyDisplay = _subRow.qty || 1;
-      _subRow.subRows = generateNestedData(material, _subRow);
+      const loading = loadingTickets?.find((e) =>
+        e?.serializedPackage === _subRow?.serializedPackageId
+        && e?.uniqueId === _subRow?._id);
+      if (loading) {
+        _subRow.loadingTicket = loading?.loadingTicket;
+        _subRow.loadingTicketId = loading?.loadingTicketId;
+        _subRow.loadingTicketStatus = loading?.loadingTicketStatus;
+      }
+      _subRow.subRows = generateNestedData(material, _subRow, loadingTickets);
     });
     const subPackages = subRows?.filter((s) => s.type === MATERIAL_TYPE.package);
-    parent.isValid = subPackages?.length > 0 ? subPackages?.every((s) => s?.serializedPackageId) : true;
     return subRows;
   };
 
   const validateAction = (action) => {
     const errorMessages = [];
-    var records = [...selectedRecords?.filter(r => !r?.parentId)];
+    var records = selectedRecords;
     records?.forEach((e) => {
       if (action === assemblyOrderActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
@@ -309,13 +319,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
             index: e.index,
             message: assemblyOrderMessage.repairSameWarehouse?.replace(sidebarResource?.warehouse, resources?.warehouse?.titleSingular)
           });
-        } else if (user?.user?.brandPolicy?.storageLocation && records?.find((e) => e?.serializedPackageDetail?.storageLocation?.optionValue)) {
-          if (uniq(map(records, 'serializedPackageDetail.warehouse.optionValue')).length !== 1) {
-            errorMessages.push({
-              index: e.index,
-              message: assemblyOrderMessage.loadSameStorageLocation?.replace(sidebarResource?.storageLocation, resources?.storageLocation?.titleSingular)
-            });
-          }
         }
       } else if (action === assemblyOrderActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
@@ -333,7 +336,7 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
   };
 
   const handleDeliveryTicketDialog = () => {
-    const records = selectedRecords?.filter(r => !r?.parentId && r?.serializedPackageId)
+    const records = selectedRecords?.filter(r => r?.serializedPackageId)
     if (records.length) {
       const data = {};
       data['ticketName'] = assemblyOrderData?.assemblyOrderNumber;
@@ -342,11 +345,6 @@ const Loading = ({ allowedToEdit, assemblyOrderData, setNextStep, renderedFrom, 
       if (records[0]?.serializedPackageDetail?.warehouse) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['pickupFrom'] = records[0]?.serializedPackageDetail?.warehouse;
-        if (records?.find((e) => e?.serializedPackageDetail?.storageLocation)) {
-          data['pickupFromStorageLocation'] = records?.find((e) => e?.serializedPackageDetail?.storageLocation)?.serializedPackageDetail?.storageLocation;
-          data['isPickupFromStorageLocationDisable'] = true;
-          data['pickupFromStorageLocationDisableMessage'] = `Changes to the ${resources.storageLocation.titleSingular} are not allowed because inventory or asset assignments.`;
-        }
       } else if (records[0]?.serializedPackageDetail?.currentOwnerType === SERIALIZED_PACKAGE_OWNER_TYPE.customerAccount) {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
         data['pickupFrom'] = records[0]?.serializedPackageDetail?.currentOwner;
