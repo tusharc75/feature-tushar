@@ -320,6 +320,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
           onSubmit={handleSubmit}
           validate={validate}
           validateOnMount
+          enableReinitialize
         >
           {({ values, errors, submitForm, setFieldValue, setValues, touched }) => (
             <Fragment>
