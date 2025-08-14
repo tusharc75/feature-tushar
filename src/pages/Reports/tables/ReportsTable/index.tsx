@@ -70,12 +70,6 @@ const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }
             e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
           }
         });
-        data?.columnFields?.forEach((e: any) => {
-          if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.lookup = false;
-            e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
-          }
-        });
       }
     }
 
