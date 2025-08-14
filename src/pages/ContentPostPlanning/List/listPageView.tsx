@@ -124,7 +124,7 @@ const ListView = ({ topRightSlot }) => {
               <Edit
                 fontSize="small"
                 color={
-                  permissions?.contentPostPlanning?.isUpdate || row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published
+                  permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published
                     ? 'primary'
                     : 'disabled'
                 }
