@@ -3,7 +3,7 @@ import { Dialog, Box, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Form, Formik, FormikProps } from 'formik';
-import { cn, CustomDialogTransition, REPORT_LIST, sidebarResource } from 'src/constants/helpers';
+import { cn, CustomDialogTransition, getResourceLabel, sidebarResource } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import { useData } from '../../StateProvider/Provider';
-import { kebabCase } from 'lodash';
+import { camelCase, kebabCase } from 'lodash';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Filters from 'src/components/Filter/Filters';
 import dayjs from 'dayjs';
@@ -35,18 +35,23 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
+  const [reportList, setReportList] = useState([]);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { permissions, resources }
+    state: { permissions, resources, user }
   }: any = useData();
 
   const [resourceOption, setResourceOption] = useState(null);
 
-  useEffect(() => {
+  const fetchReportList = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().get('/report/list');
+    setReportList(data || []);
     const options = [];
-    REPORT_LIST?.forEach((item) => {
-      if (permissions[item.permission] && permissions[item.permission]?.isRead === true) {
+    data?.forEach((item) => {
+      if (permissions?.[camelCase(item?.resource)]?.isRead === true) {
         options.push({
           title: item.type === 'dynamic' ? resources[item.key]?.titleSingular : item.title,
           value: item.title,
@@ -56,19 +61,29 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
       }
     });
     setResourceOption(options);
+  };
+
+  useEffect(() => {
+    fetchReportList();
   }, []);
 
   useEffect(() => {
-    if (id) {
+    if (id && reportList?.length > 0) {
       (async () => {
         try {
           let {
             data: { data }
           } = await axiosInstance().get(`/custom-report/${id}`);
 
-          let resource: any = REPORT_LIST?.find((item) => item.title === data.resource);
+          let resource: any = reportList?.find((item) => item.title === data.resource);
+          const title =
+            resource?.type === 'dynamicForm'
+              ? getResourceLabel(resource?.resource, user)?.titleSingular
+              : resource.type === 'dynamic'
+                ? resources?.[resource?.key]?.titleSingular
+                : resource.title;
           resource = {
-            title: resource.type === 'dynamic' ? resources[resource.key]?.titleSingular : resource.title,
+            title,
             value: resource.title,
             key: resource.key,
             type: resource.type
@@ -93,7 +108,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         column: []
       });
     }
-  }, [id]);
+  }, [id, reportList?.length]);
 
   const fetchGridColumns = async (resource: any) => {
     setFilterColumns([]);
@@ -238,7 +253,11 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
     deepFilters?.forEach((d) => {
       if (d?.type === 'date') {
-        if (dayjs(d?.term?.from).isValid() && dayjs(d?.term?.from).toDate() instanceof Date && (d?.term?.to === '' || dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date)) {
+        if (
+          dayjs(d?.term?.from).isValid() &&
+          dayjs(d?.term?.from).toDate() instanceof Date &&
+          (d?.term?.to === '' || (dayjs(d?.term?.to).isValid() && dayjs(d?.term?.to).toDate() instanceof Date))
+        ) {
           filters.push({
             term: d?.field,
             value: d?.term,

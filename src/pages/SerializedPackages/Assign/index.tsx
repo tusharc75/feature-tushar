@@ -12,10 +12,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_TYPE, OTHER_MATERIAL_TYPE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
 const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
 
@@ -28,13 +29,14 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
 
   const [columns, setColumns] = useState(null);
 
-  const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
-  const [isAssetAdding, setIsAssetAdding] = useState(false);
+  const [assignDialog, setAssignDialog] = useState({ open: false, type: '', replaceAsset: false, products: [] });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [serialNumbers, setSerialNumbers] = useState([]);
   const { state, dispatch } = useTableReducer({ renderedFrom });
-  const { selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
@@ -90,20 +92,22 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
           row?.original?.type ? (
             <div className="flex items-center gap-2">
               <p className="text-truncate">{row.original.detail}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row?.original?.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row?.original?.type === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+              {[MATERIAL_TYPE.product, MATERIAL_TYPE.package, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row?.original?.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row?.original?.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+              )}
             </div>
           ) : (
             <NoDataCell />
@@ -168,7 +172,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) && (
+            {permissions?.serializedPackages?.isUpdate && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(row?.original?.type) && (
               <HtmlTooltip title="Delete">
                 <IconButton
                   size="small"
@@ -194,7 +198,9 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     const allAssetsResponse: any = await axiosInstance().get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`);
-    const assets = allAssetsResponse?.data?.data || [];
+    const assets = allAssetsResponse?.data?.data?.assets || [];
+    const serialNumbers = allAssetsResponse?.data?.data?.serialNumbers || [];
+    setSerialNumbers(JSON.parse(JSON.stringify(serialNumbers)))
 
     axiosInstance()
       .get(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/material`)
@@ -217,8 +223,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
           parent.productNumber = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.productNumber : '';
           parent.serializedProduct = parent?.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
           parent.assetQty =
-            parent?.type === MATERIAL_TYPE.product ? assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length : 0;
-          parent.subRows = generateNestedData(data, assets, parent);
+            parent?.type === MATERIAL_TYPE.product ? (assets.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length + serialNumbers?.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length) : 0;
+          parent.subRows = generateNestedData(data, assets, serialNumbers, parent);
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
@@ -228,7 +234,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       });
   };
 
-  const generateNestedData = (material, assets, parent) => {
+  const generateNestedData = (material, assets, serialNumbers, parent) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -247,8 +253,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       _subRow.productNumber = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productNumber : '';
       _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
-        _subRow.type === MATERIAL_TYPE.product ? assets.filter((e) => e.product === _subRow.materialId && e?._id === _subRow?._id)?.length : 0;
-      _subRow.subRows = generateNestedData(material, assets, _subRow);
+        _subRow.type === MATERIAL_TYPE.product ? (assets.filter((e) => e.product === _subRow.materialId && e?._id === _subRow?._id)?.length + serialNumbers?.filter((e) => e?._id === parent?._id && e.product === parent?.materialId)?.length) : 0;
+      _subRow.subRows = generateNestedData(material, assets, serialNumbers, _subRow);
     });
 
     if (assets?.length > 0) {
@@ -263,16 +269,28 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
         subRows.push(_subRow);
       });
     }
+    if (serialNumbers?.length > 0) {
+      const serialNumbersSubRows = serialNumbers.filter((e) => e.product === parent.materialId && e?._id === parent?._id);
+      const subRowsLength = subRows?.length || 0;
+      serialNumbersSubRows?.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1 + subRowsLength);
+        _subRow.type = OTHER_MATERIAL_TYPE.serialNumber;
+        _subRow.detail = _subRow?.serialNumberDetail?.serialNumber;
+        _subRow.parentId = _subRow?.product;
+        _subRow.canDelete = serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available;
+        subRows.push(_subRow);
+      });
+    }
     return subRows;
   };
 
   const handleDelete = () => {
-    setIsSubmitting(true);
+    setIsDeleting(true);
     let ids = [];
     if (deleteRecord) {
-      ids.push({ _id: deleteRecord._id, asset: deleteRecord.asset });
+      ids.push({ _id: deleteRecord._id, asset: deleteRecord?.type === OTHER_MATERIAL_TYPE.serialNumber ? deleteRecord?.serialNumber : deleteRecord.asset, type: deleteRecord?.type });
     } else {
-      ids = selectedRecords?.filter((r) => r?.canDelete && r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => ({ _id: d?._id, asset: d?.asset }));
+      ids = selectedRecords?.filter((r) => r?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(r?.type))?.map((d) => ({ _id: d?._id, asset: d?.type === OTHER_MATERIAL_TYPE.serialNumber ? d?.serialNumber : d?.asset, type: d?.type }));
     }
     axiosInstance()
       .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { ids: ids })
@@ -282,74 +300,142 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
         fetchData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
-        setIsSubmitting(false);
+        setIsDeleting(false);
       })
       .catch((error) => {
         setToastConfig(error);
-        setIsSubmitting(false);
+        setIsDeleting(false);
       });
   };
 
   const handleAssignAssets = (data) => {
-    setIsAssetAdding(true);
+    setIsSubmitting(true);
     axiosInstance()
       .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
         fetchSerializedPackagesData()
-        setAssignAssetDialog({ open: false, products: [] });
-        setIsAssetAdding(false);
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setIsSubmitting(false);
         fetchData();
       })
       .catch((err) => {
-        setIsAssetAdding(false);
+        setIsSubmitting(false);
         setToastConfig(err);
       });
   };
 
-  const disableAssignSerializedAssets = () => {
+  const handleAssignSerialNumbers = (data) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .post(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/add-serial-numbers`, { serialNumbers: data })
+      .then(() => {
+        fetchSerializedPackagesData()
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setIsSubmitting(false);
+        fetchData();
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setToastConfig(err);
+      });
+  };
+
+  const handleReplaceAssets = (data) => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: [{ oldAssetId: selectedRecords[0]?.asset, newAssetId: data[0]?.asset }] })
+      .then(() => {
+        fetchSerializedPackagesData()
+        setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
+        setIsSubmitting(false);
+        fetchData();
+      })
+      .catch((err) => {
+        setIsSubmitting(false);
+        setToastConfig(err);
+      });
+  }
+
+  const disableAssign = () => {
     if (selectedRecords.length === 0) return true;
     const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty && f?.serializedProduct);
     return flatArray.length === 0;
   };
 
+  const getProducts = (type = MATERIAL_TYPE.serializedAsset) => {
+    const productsMap = new Map();
+
+    selectedRecords
+      .filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
+      ?.forEach((e) => {
+        let diff = e?.qty - e?.assetQty;
+        if (diff > 0) {
+          if (productsMap.has(e.materialId)) {
+            const existingProduct = productsMap.get(e._id);
+            existingProduct.qty += diff;
+            existingProduct._id = [...existingProduct._id, e._id];
+          } else {
+            const productDetail = {
+              ...(type === OTHER_MATERIAL_TYPE.serialNumber ? { id: e?.materialId } : { product: e?.materialId }),
+              qty: diff,
+              productName: e?.detail,
+              _id: [e?._id]
+            };
+            productsMap.set(e.materialId, productDetail);
+          }
+        }
+      });
+
+    return Array.from(productsMap.values())
+  }
+
   const actionButtonMenuItems = () => {
     return (
       <>
         {permissions?.serializedPackages?.isUpdate && (
-          <MenuItem
-            disabled={disableAssignSerializedAssets()}
-            onClick={() => {
-              const productsMap = new Map();
-              selectedRecords
-                .filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
-                ?.forEach((e) => {
-                  let diff = e?.qty - e?.assetQty;
-                  if (diff > 0) {
-                    if (productsMap.has(e.materialId)) {
-                      const existingProduct = productsMap.get(e._id);
-                      existingProduct.qty += diff;
-                      existingProduct._id = [...existingProduct._id, e._id];
-                    } else {
-                      const productDetail = {
-                        product: e.materialId,
-                        qty: diff,
-                        productName: e?.detail,
-                        _id: [e?._id]
-                      };
-                      productsMap.set(e.materialId, productDetail);
-                    }
-                  }
+          selectedRecords?.length === 1 && selectedRecords[0]?.type === MATERIAL_TYPE.serializedAsset ? (
+            <MenuItem
+              onClick={() => {
+                const product = dataRows?.find(d => d?._id === selectedRecords[0]?._id && d?.materialId === selectedRecords[0]?.product && d?.type === MATERIAL_TYPE.product && d?.serializedProduct)
+                setAssignDialog({
+                  open: true,
+                  type: MATERIAL_TYPE.serializedAsset,
+                  replaceAsset: true,
+                  products: [{
+                    product: product?.materialId,
+                    qty: 1,
+                    productName: product?.detail,
+                    _id: [product?._id]
+                  }]
                 });
-              const products = Array.from(productsMap.values());
-              setAssignAssetDialog({ open: true, products: products });
+              }}
+            >
+              {`Replace ${resources?.serializedAsset?.titleSingular}`}
+            </MenuItem>
+          ) : (
+            <MenuItem
+              disabled={disableAssign()}
+              onClick={() => {
+                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+              }}
+            >
+              {`Assign ${resources?.serializedAsset?.titlePlural}`}
+            </MenuItem>
+          )
+        )}
+        {permissions?.serializedPackages?.isUpdate && (
+          <MenuItem
+            disabled={disableAssign()}
+            onClick={() => {
+              setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
             }}
           >
-            {`Assign ${resources?.serializedAsset?.titlePlural}`}
+            Assign Serial Numbers
           </MenuItem>
         )}
         {permissions?.serializedPackages?.isUpdate && (
           <MenuItem
-            disabled={selectedRecords?.some((e) => e?.canDelete && e.type === MATERIAL_TYPE.serializedAsset) ? false : true}
+            disabled={selectedRecords?.some((e) => e?.canDelete && [MATERIAL_TYPE.serializedAsset, OTHER_MATERIAL_TYPE.serialNumber]?.includes(e.type)) ? false : true}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}
@@ -386,15 +472,33 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      {assignAssetDialog.open && (
+      {assignDialog.open && assignDialog.type === MATERIAL_TYPE.serializedAsset && (
         <AssignSerializedAssetDialog
           reference={'serializedPackages'}
           ids={[]}
-          handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
-          handleSucess={handleAssignAssets}
-          isAssigning={isAssetAdding}
-          selectedProducts={assignAssetDialog.products}
+          handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
+          handleSucess={(rows) => {
+            if (assignDialog.replaceAsset) {
+              handleReplaceAssets(rows)
+            } else {
+              handleAssignAssets(rows)
+            }
+          }}
+          isAssigning={isSubmitting}
+          selectedProducts={assignDialog.products}
           referenceData={{ warehouse: serializedPackagesData?.warehouse?.optionValue }}
+        />
+      )}
+      {assignDialog.open && assignDialog.type === OTHER_MATERIAL_TYPE.serialNumber && (
+        <AssignSerialNumbersDialog
+          selectedProducts={assignDialog.products}
+          handleClose={() => setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] })}
+          handleSucess={handleAssignSerialNumbers}
+          referenceType={'serializedPackages'}
+          isAssigning={isSubmitting}
+          filterByPlant={serializedPackagesData?.warehouse}
+          ids={serialNumbers?.map((s) => s?.serialNumber)}
+          showWarehouseFilter={true}
         />
       )}
       {showDeleteConfirmBox && (
@@ -405,7 +509,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
           }}
-          okBtnLoading={isSubmitting}
+          okBtnLoading={isDeleting}
           onOk={handleDelete}
         />
       )}

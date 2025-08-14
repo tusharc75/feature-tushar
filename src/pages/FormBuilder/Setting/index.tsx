@@ -23,15 +23,18 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
     entityResources: [],
     policies: [],
     collaborateTools: false,
-    collaborateToolsField: ''
+    collaborateToolsField: '',
+    enableReport: false
   });
   const [resourceData, setResourceData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
 
+  const isDynamicResource = !Object.values(sidebarResource)?.includes(resource);
+
   useEffect(() => {
     fetchData();
-    fetchFields()
+    fetchFields();
   }, [resource]);
 
   const fetchData = async () => {
@@ -79,22 +82,26 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
           };
         }),
         collaborateTools: resourceData?.collaborateTools,
-        collaborateToolsField: resourceData?.collaborateToolsField
+        collaborateToolsField: resourceData?.collaborateToolsField,
+        enableReport: resourceData?.enableReport
       });
     }
   }, [resourceData]);
 
   const handleSave = (values) => {
     setIsSubmitting(true);
-    let updatedPolicy = values?.policies?.reduce((acc, { fieldName, data }) => { return { ...acc, [fieldName]: data } }, {});
+    let updatedPolicy = values?.policies?.reduce((acc, { fieldName, data }) => {
+      return { ...acc, [fieldName]: data };
+    }, {});
     let data = {
       policy: {
-        ...updatedPolicy,
+        ...updatedPolicy
       },
       entityResources: [...values?.entityResources],
       otherData: {
         collaborateTools: values?.collaborateTools,
-        collaborateToolsField: values?.collaborateTools ? values?.collaborateToolsField : ''
+        collaborateToolsField: values?.collaborateTools ? values?.collaborateToolsField : '',
+        enableReport: values?.enableReport
       }
     };
     axiosInstance()
@@ -177,13 +184,8 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
             ></CustomDialogHeader>
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <EntityResource
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  errors={errors}
-                  touched={touched}
-                  entities={entities} />
-                {!ACTIVITY_RESOURCE?.hasOwnProperty(camelCase(resource)) &&
+                <EntityResource values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} entities={entities} />
+                {!ACTIVITY_RESOURCE?.hasOwnProperty(camelCase(resource)) && (
                   <Box>
                     <FormControlLabel
                       control={
@@ -229,7 +231,22 @@ const SettingPolicyDialog = ({ entities, resource, onClose }) => {
                         />
                       </Box>
                     )}
-                  </Box>}
+                  </Box>
+                )}
+                {isDynamicResource && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="enableReport"
+                        checked={values['enableReport']}
+                        onChange={(e) => {
+                          setFieldValue('enableReport', e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Enable Report"
+                  />
+                )}
                 <Policy
                   values={values}
                   setFieldValue={setFieldValue}

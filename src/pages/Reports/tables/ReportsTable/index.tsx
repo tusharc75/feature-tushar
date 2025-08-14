@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { camelCase, isEmpty, isObject, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { MdFilterList } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,15 +10,29 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn, dateFormatToSend, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
+import {
+  cn,
+  CustomDialogTransition,
+  dateFormatToSend,
+  downloadExcel,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  primaryFields,
+  sidebarResource
+} from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import dayjs from 'dayjs';
+import SendMailMenu from '../../tables/StandardReportTable/SendMailMenu';
+import { isTablet } from 'react-device-detect';
+import { Dialog } from '@mui/material';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 let cancelTokenSource = null;
 
-const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableCommonProps) => {
+const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm = false }: TableCommonProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const {
@@ -30,7 +44,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    navigateToMainPage
+    navigateToMainPage,
+    reportList
   } = reportState;
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
@@ -39,11 +54,18 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
   const renderedFrom = `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
-  const [showGrid, setShowGrid] = React.useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
   const [selectedReportView, setSelectedReportView] = useState(null);
+  const [emailAttachments, setEmailAttachments] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(null);
+  const [isSendMail, setIsSendMail] = useState(false);
+  const [htmlContent, setHtmlContent] = useState(null);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  const reportConfig = reportList?.find((e) => e.type === resourceCamelCase);
 
   const fetchGridColumns = useCallback(async () => {
     setIsColumnsLoading(true);
@@ -125,11 +147,17 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
     });
 
-    let newColumns = generateColumns(
-      routes[resourceCamelCase]?.title,
-      data,
-      routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
-    );
+    let newColumns;
+    if (dynamicForm) {
+      const detailPagePath = `/${kebabCase(selectedReport?.resource)}/detail`;
+      newColumns = generateColumns(resourceStartCase, data, detailPagePath);
+    } else {
+      newColumns = generateColumns(
+        routes[resourceCamelCase]?.title,
+        data,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
+    }
     if (resourceStartCase === sidebarResource.quotation) {
       newColumns.push({
         accessor: 'versionComment',
@@ -223,10 +251,9 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     });
     setColumns([...columns]);
     setIsColumnsLoading(false);
-  }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
+  }, [generateColumns, resourceCamelCase, resourceStartCase, dynamicForm, setColumns, setIsColumnsLoading, setResourceColumns]);
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-
     let filterQuery = `?page=${page}&limit=${limit}&`;
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
@@ -277,7 +304,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     const dateFilter: any = [];
     const statusPeriodDateFilter: any = [];
 
-    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -331,48 +359,58 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     }
 
     return { query: `${filterQuery}`, deepFilter: newDeepFilter };
-
   };
 
-  const fetchResourceData = useCallback((deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    setShowGrid(true);
+  const fetchResourceData = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+      setShowGrid(true);
 
-    let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
-    setDeepFilters(deepFilter);
+      let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+      setDeepFilters(deepFilter);
 
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel();
-    }
-    cancelTokenSource = axios.CancelToken.source();
-    dispatch({ type: 'loading', loading: true });
-
-    let api = `/report${routes[resourceCamelCase].path}${query}`;
-    if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder${query}`;
-    } else {
-      api = `/report${routes[resourceCamelCase].path}${query}`;
-    }
-
-    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      data = data.map((u: any) => {
-        let finalObject = prepareDataForGrid(u);
-        return finalObject;
-      });
-
-      dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    }).catch((err) => {
-      if (!axios.isCancel(err)) {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        toastConfig.setToastConfig(err);
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel();
       }
-    });
-  },
-    [dispatch, getQueryString, resourceCamelCase, toastConfig]
+      cancelTokenSource = axios.CancelToken.source();
+      dispatch({ type: 'loading', loading: true });
+
+      let api = dynamicForm ? `/report/dynamic-form${query}` : `/report${routes[resourceCamelCase].path}${query}`;
+      if (resourceCamelCase === 'quotes') {
+        api = `/report/quote-builder${query}`;
+      } else if (!dynamicForm) {
+        api = `/report${routes[resourceCamelCase].path}${query}`;
+      }
+
+      const requestConfig: any = { cancelToken: cancelTokenSource?.token };
+      if (dynamicForm) {
+        requestConfig.headers = {
+          resource: resourceStartCase
+        };
+      }
+
+      axiosInstance()
+        .get(api, requestConfig)
+        .then(({ data: { data, count } }) => {
+          data = data.map((u: any) => {
+            let finalObject = prepareDataForGrid(u);
+            return finalObject;
+          });
+
+          dispatch({ type: 'initialize', data: data, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((err) => {
+          if (!axios.isCancel(err)) {
+            setTimeout(() => {
+              dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
+            toastConfig.setToastConfig(err);
+          }
+        });
+    },
+    [dispatch, getQueryString, resourceCamelCase, resourceStartCase, dynamicForm, toastConfig]
   );
 
   const getApi = () => {
@@ -415,11 +453,116 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     fetchGridColumns();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (emailAttachments?.length > 0 || htmlContent) {
+      setIsProcessing(null);
+      setIsSendMail(true);
+    }
+  }, [emailAttachments, htmlContent]);
+
+  useEffect(() => {
     if (showGrid) {
       fetchResourceData();
     }
   }, [page, sorting, search, limit, filters, pageSizes, showGrid]);
+
+  const generateBase64forFile = (blobData, fileName, extension) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      const attachments = {
+        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${extension}`,
+        name: fileName
+      };
+      setEmailAttachments((prevState) => {
+        return [...prevState, attachments];
+      });
+    };
+  };
+
+  const exportData = (exportType = 'excel', processType = 'excel') => {
+    toastConfig.setToastConfig({
+      open: true,
+      message: `Please wait ${processType === 'sendMail' ? '' : 'exporting data'}`,
+      type: 'info'
+    });
+
+    setIsProcessing(processType);
+
+    let { query: filterQuery } = getQueryString(true);
+
+    var api = '';
+    if (exportType === 'pdf') {
+      api = `/report/dynamic-form/pdf`;
+    } else if (exportType === 'html') {
+      api = `/report/dynamic-form/pdf`;
+    } else {
+      api = `/report/dynamic-form/export`;
+    }
+    const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
+    const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+    if (processType === 'sendMail' && exportType === 'html') {
+      axiosInstance()
+        .get(`${api}${filterQuery}&html=true`, {
+          headers: {
+            resource: resourceStartCase
+          }
+        })
+        .then((res) => {
+          setHtmlContent(res.data);
+          setIsProcessing(null);
+        })
+        .catch((err) => {
+          setIsProcessing(null);
+          toastConfig.setToastConfig(err);
+        });
+      return;
+    }
+
+    axiosInstance()
+      .get(`${api}${filterQuery}`, {
+        responseType: 'arraybuffer',
+        headers: {
+          resource: resourceStartCase
+        }
+      })
+      .then((res) => {
+        const fileName = res.headers['content-disposition'].split('filename=')[1];
+        if (processType === 'sendMail') {
+          const blobData = new Blob([res.data], { type: contentType });
+          generateBase64forFile(blobData, fileName, extension);
+        } else if (processType === 'pdf') {
+          const url = window.URL.createObjectURL(new Blob([res.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName + '.pdf');
+          document.body.appendChild(link);
+          link.click();
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        } else {
+          downloadExcel(res.data, fileName);
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        }
+      })
+      .catch((err) => {
+        setIsProcessing(null);
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   return (
     <>
@@ -440,16 +583,40 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
                 Show Filters
               </ThemeButton>
             )}
-            <AsynImportExportMenu
-              resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-              subResource={'report'}
-              permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-              module={''}
-              api={getApi()}
-              afterImportCompleted={() => { }}
-              onlyExport={true}
-              additionalParams={getQueryString(true).query}
-            />
+            {dynamicForm ? (
+              <>
+                {reportConfig?.isSendMail && <SendMailMenu exportData={exportData} isProcessing={isProcessing} />}
+                {reportConfig?.isExportPdf && (
+                  <ThemeButton
+                    iconForMobile={false}
+                    disabled={isProcessing === 'pdf'}
+                    onClick={() => exportData('pdf', 'pdf')}
+                    isLoading={isProcessing === 'pdf'}
+                  >
+                    Export To PDF
+                  </ThemeButton>
+                )}
+                <ThemeButton
+                  iconForMobile={false}
+                  disabled={isProcessing === 'excel'}
+                  onClick={() => exportData('excel', 'excel')}
+                  isLoading={isProcessing === 'excel'}
+                >
+                  Export To Excel
+                </ThemeButton>
+              </>
+            ) : (
+              <AsynImportExportMenu
+                resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                subResource={'report'}
+                permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                module={''}
+                api={getApi()}
+                afterImportCompleted={() => {}}
+                onlyExport={true}
+                additionalParams={getQueryString(true).query}
+              />
+            )}
           </>
         )}
       </div>
@@ -474,7 +641,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               : columns
           }
           state={state}
-          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchResourceData}
@@ -495,7 +662,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           }}
           loading={isColumnsLoading}
           filterTitle={selectedReport.title}
-          resource={sidebarResource[resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase]}
           columns={resourceColumns}
           onApplyFilter={fetchResourceData}
           deepFilters={deepFilters}
@@ -506,6 +673,46 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           setFilterTerm={setFilterTerm}
           onCloseWithErrors={navigateToMainPage}
         />
+      )}
+      {isSendMail && (
+        <Dialog
+          open={isSendMail}
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
+            setEmailAttachments([]);
+            setHtmlContent(null);
+            setFullScreen(false);
+            setIsSendMail(false);
+          }}
+          fullWidth
+          disableEnforceFocus={true}
+        >
+          <CreateEmail
+            isQuoteBuilder={true}
+            relatedTo={null}
+            emailId={null}
+            handleClose={() => {
+              setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
+            }}
+            fetchData={() => {
+              setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
+            }}
+            qouteBuilderAttachments={emailAttachments}
+            isMinimized={true}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+            content={htmlContent}
+          />
+        </Dialog>
       )}
     </>
   );

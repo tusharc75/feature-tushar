@@ -1,9 +1,8 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { ReportType, UseReport } from 'src/pages/Reports/types';
 import analytics from 'src/assets/newSvgs/analytics.svg';
 import ReportsTable from 'src/pages/Reports/tables/ReportsTable';
 import StandardReportsTable from 'src/pages/Reports/tables/StandardReportTable';
-import { REPORT_LIST } from 'src/constants/helpers';
 import { startCase } from 'lodash';
 
 type ReportsContentProps = {
@@ -12,12 +11,12 @@ type ReportsContentProps = {
   isMobile: boolean;
 };
 
-const getTableComponent = (selectedReport) => {
+const getTableComponent = (selectedReport, reportList) => {
   const type: ReportType | undefined = selectedReport?.type;
   const isStanderdCustomReport =
     selectedReport?.type === 'custom-report' &&
-    selectedReport?.customReportData &&
-    REPORT_LIST?.some((c) => c?.title === startCase(selectedReport?.customReportData?.resource) && c?.key === 'standardReport')
+      selectedReport?.customReportData &&
+      reportList?.some((c) => c?.title === startCase(selectedReport?.customReportData?.resource) && c?.key === 'standardReport')
       ? true
       : false;
 
@@ -26,6 +25,8 @@ const getTableComponent = (selectedReport) => {
       return ReportsTable;
     case 'standard-report':
       return StandardReportsTable;
+    case 'dynamicForm':
+      return ReportsTable;
     case 'custom-report':
       switch (isStanderdCustomReport) {
         case true:
@@ -39,13 +40,19 @@ const getTableComponent = (selectedReport) => {
 };
 
 const ReportsContent = ({ state, isSidebarOpen, isMobile }: ReportsContentProps) => {
-  const { selectedReport } = state;
-  let TableComponent = useMemo(() => getTableComponent(selectedReport), [selectedReport]);
+  const { selectedReport, reportList } = state;
+  let TableComponent = useMemo(() => getTableComponent(selectedReport, reportList), [selectedReport, reportList]);
 
   return (
     <>
       {selectedReport ? (
-        <TableComponent state={state} key={selectedReport.route} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
+        <TableComponent
+          state={state}
+          key={selectedReport.route}
+          isSidebarOpen={isSidebarOpen}
+          isMobile={isMobile}
+          dynamicForm={selectedReport?.type === 'dynamicForm'}
+        />
       ) : (
         <div className="absolute bottom-0 left-4 right-4 top-[200px] text-center">
           <div className="mx-auto mb-[20px] h-[69px] w-[69px]">

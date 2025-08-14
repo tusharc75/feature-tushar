@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
 import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
+import QrAuthPage from 'src/pages/QrAuth/QrAuthPage';
 import CustomIntro from 'src/components/CustomIntro';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 import CustomMessageDialog from 'src/components/MessageDialog';
@@ -294,6 +295,10 @@ import UserManualNew from './pages/UserManualNew';
 import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
 import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
 import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
+import { useSetWalkmeData } from './components/CustomIntroNew/useSetWalkmeSteps';
+import { useStore, WALK_ME_STEPS } from './StateProvider/fastContext';
+import ContentPostPlanning from './pages/ContentPostPlanning';
+import ContentPostPlanningDetail from './pages/ContentPostPlanning/contentPostPlanningDetail';
 import Walkme from 'src/components/Walkme';
 
 var notificationInterval: any = null;
@@ -1017,6 +1022,12 @@ function App() {
             <PrivateRoute exact path={`${routes.planning.path}`}>
               <Planning />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contentPostPlanning.path}`}>
+              <ContentPostPlanning />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.contentPostPlanningDetail.path}/:id`}>
+              <ContentPostPlanningDetail />
+            </PrivateRoute>
             <PrivateRoute exact path={`${routes.planningDetail.path}/:id`}>
               <PlanningDetail />
             </PrivateRoute>
@@ -1313,6 +1324,9 @@ function App() {
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
+            </Route>
+            <Route exact path={'/qrauth/:qrLoginId'}>
+              <QrAuthPage />
             </Route>
             <PrivateRoute exact path={`/:route`}>
               <DynamicForm />

@@ -236,12 +236,6 @@ export const resourcePolicy = [
     resource: sidebarResource.workOrder,
     policy: [
       {
-        fieldName: 'showBom',
-        fieldLabel: 'Show BOM',
-        type: 'checkBox',
-        defaultValue: false
-      },
-      {
         fieldName: 'consumablesSerialNumberRequired',
         fieldLabel: 'Consumables Serial Number Required',
         type: 'checkBox',
@@ -557,6 +551,12 @@ export const resourcePolicy = [
       {
         fieldName: 'autoCreateFolderInDMS',
         fieldLabel: 'Auto Create Folder In DMS',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'splitQuantity',
+        fieldLabel: 'Split Quantity',
         type: 'checkBox',
         defaultValue: false
       },

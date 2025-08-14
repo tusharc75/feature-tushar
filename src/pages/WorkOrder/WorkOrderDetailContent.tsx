@@ -653,11 +653,10 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               {resource === sidebarResource.workOrder && <CustomTab value={0}>Header</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={1}>Services</CustomTab>}
               {!user?.user?.brandPolicy?.workOrderConsumableHide && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
-                <CustomTab value={2}>Products/Consumables</CustomTab>
+                <CustomTab value={2}>Consumables</CustomTab>
               )}
               {[WORK_ORDER_TYPE.productionOrder, WORK_ORDER_TYPE.assemblyOrder]?.includes(workOrderData?.type) &&
-                workOrderPolicyData?.policy?.showBom &&
-                workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>BOM</CustomTab>}
+                workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={3}>Child Items</CustomTab>}
               {workOrderData?.status !== WORK_ORDER_STATUS.deleted && <CustomTab value={4}>Drawings</CustomTab>}
               {!(isMobile && !isTablet) && resource === sidebarResource.workOrder && workOrderData?.status !== WORK_ORDER_STATUS.deleted && (
                 <CustomTab value={5}>Views</CustomTab>
@@ -796,7 +795,7 @@ const WorkOrderDetailContent = ({ id, tab, resource, sendWorkOrderData = null, d
               stepId={null}
               serviceName={null}
               defaultServiceUniqueId={defaultSelectedService}
-              materialSubType={MATERIAL_SUB_TYPE.bom}
+              materialSubType={MATERIAL_SUB_TYPE.childItem}
               workOrderData={workOrderData}
               serialNumberRequired={workOrderPolicyData?.policy?.consumablesSerialNumberRequired}
             />
