@@ -12,9 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import {
   cn,
-  CustomDialogTransition,
   dateFormatToSend,
-  downloadExcel,
   gridLoadingTimeout,
   isObjectEmpty,
   prepareDataForGrid,
@@ -25,14 +23,10 @@ import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import dayjs from 'dayjs';
-import SendMailMenu from '../../tables/StandardReportTable/SendMailMenu';
-import { isTablet } from 'react-device-detect';
-import { Dialog } from '@mui/material';
-import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 let cancelTokenSource = null;
 
-const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm = false }: TableCommonProps) => {
+const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }: TableCommonProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const {
@@ -44,8 +38,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    navigateToMainPage,
-    reportList
+    navigateToMainPage
   } = reportState;
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
@@ -64,14 +57,20 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
     setIsColumnsLoading(true);
     const {
       data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}&view=true`);
+    }: any = await axiosInstance().get(`/report/columns?resource=${resourceStartCase}&view=true`);
 
     if (resourceStartCase === sidebarResource.serializedAsset) {
       const {
         data: { data: lookupResource }
       } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
       if (lookupResource) {
-        data?.forEach((e) => {
+        data?.filterFields?.forEach((e: any) => {
+          if (e?.fieldData?.fieldName === 'currentOwner') {
+            e.fieldData.lookup = false;
+            e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
+          }
+        });
+        data?.columnFields?.forEach((e: any) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
             e.fieldData.lookup = false;
             e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
@@ -80,61 +79,10 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
       }
     }
 
-    const resourceColumns = [...data];
-    if (resourceStartCase === sidebarResource.purchaseOrder) {
-      resourceColumns.push({
-        fieldData: {
-          _id: '630dc2429ec41861052355a9',
-          fieldLabel: 'Received Date',
-          type: 'date',
-          option: [],
-          required: false,
-          isTooltip: false,
-          tooltipMessage: '',
-          editAble: true,
-          deletAble: true,
-          order: 6,
-          fieldName: 'receivedDate',
-          sectionName: 'PO Information',
-          resource: 'Purchase Order',
-          brand: data[0]?.fieldData?.brand,
-          timeFrame: 'custom'
-        },
-        isCreate: true,
-        isRead: true,
-        isUpdate: true
-      });
-    }
-    if (resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status')) {
-      const index = resourceColumns?.findIndex((r) => r?.fieldData?.fieldName === 'status');
-      if (index !== -1) {
-        resourceColumns?.splice(index + 1, 0, {
-          fieldData: {
-            _id: '630dc2429ec41869052355b1',
-            fieldLabel: 'Status Period',
-            type: 'date',
-            option: [],
-            required: false,
-            isTooltip: false,
-            tooltipMessage: '',
-            editAble: true,
-            deletAble: true,
-            order: 71,
-            fieldName: 'statusPeriod',
-            sectionName: 'Product Inventory',
-            resource: 'Serialized Asset',
-            brand: data[0]?.fieldData?.brand,
-            timeFrame: 'custom'
-          },
-          isCreate: true,
-          isRead: true,
-          isUpdate: true
-        });
-      }
-    }
+    const resourceColumns = [...data?.filterFields];
     setResourceColumns(resourceColumns);
     let columns = [];
-    data.forEach((o) => {
+    data?.columnFields?.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
@@ -143,102 +91,15 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm
     let newColumns;
     if (dynamicForm) {
       const detailPagePath = `/${kebabCase(selectedReport?.resource)}/detail`;
-      newColumns = generateColumns(resourceStartCase, data, detailPagePath);
+      newColumns = generateColumns(resourceStartCase, data?.columnFields, detailPagePath);
     } else {
       newColumns = generateColumns(
         routes[resourceCamelCase]?.title,
-        data,
+        data?.columnFields,
         routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
       );
     }
-    if (resourceStartCase === sidebarResource.quotation) {
-      newColumns.push({
-        accessor: 'versionComment',
-        Header: 'Version Comment',
-        show: true,
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
     columns = [...newColumns, ...getStaticFields()];
-    if (resourceStartCase === sidebarResource.purchaseOrder) {
-      columns.splice(1, 0, {
-        accessor: 'poAmount',
-        Header: 'Purchase Order Amount',
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
-    if ([sidebarResource.invoice, sidebarResource.fieldTicket].includes(resourceStartCase)) {
-      const extraColumns = [
-        {
-          accessor: 'amount',
-          Header: 'Amount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['amount'] ? row.original['amount'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'tax',
-          Header: 'Tax',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['tax'] ? row.original['tax'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'discount',
-          Header: 'Discount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['discount'] ? row.original['discount'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'totalAmount',
-          Header: 'Total Amount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['totalAmount'] ? row.original['totalAmount'] : <NoDataCell />}</h5>
-            </>
-          )
-        }
-      ];
-      columns = [...columns, ...extraColumns];
-    }
-    if (resourceStartCase === sidebarResource.workOrder) {
-      columns.push({
-        accessor: 'totalConsumablesCost',
-        Header: 'Total Consumables Cost',
-        show: true,
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
     columns?.forEach((e) => {
       e.editable = false;
     });
