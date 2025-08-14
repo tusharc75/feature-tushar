@@ -4830,19 +4830,27 @@ td.google-visualization-orgchart-node {
 }
 .vis-timeline {
   background-color: var(--dark-primary, white);
-  border-left: 0px !important;
+}
+
+.vis-align-right {
+  .vis-timeline {
+    border-left: 0px !important;
+  }
 }
 .vis-text.vis-minor {
   border-top: 1px solid var(--common-border-color);
 }
-.vis-panel.vis-left {
-  left: unset !important;
-  right: -1px !important;
-  touch-action: auto !important;
-  user-select: auto !important;
-  -webkit-user-drag: auto !important;
-  .vis-labelset {
-    border-left: 1px solid var(--common-border-color) !important;
+
+.vis-align-right {
+  .vis-panel.vis-left {
+    left: unset !important;
+    right: -1px !important;
+    touch-action: auto !important;
+    user-select: auto !important;
+    -webkit-user-drag: auto !important;
+    .vis-labelset {
+      border-left: 1px solid var(--common-border-color) !important;
+    }
   }
 }
 
@@ -4855,10 +4863,12 @@ td.google-visualization-orgchart-node {
 .technician-group {
   -webkit-user-drag: element !important;
 }
-.vis-panel.vis-background,
-.vis-panel.vis-top,
-.vis-panel.vis-center {
-  left: 0px !important;
+.vis-align-right {
+  .vis-panel.vis-background,
+  .vis-panel.vis-top,
+  .vis-panel.vis-center {
+    left: 0px !important;
+  }
 }
 .vis-labelset .vis-label .vis-inner {
   padding: 0px !important;
@@ -4868,9 +4878,11 @@ td.google-visualization-orgchart-node {
     opacity: 1 !important;
   }
 }
-.vis-timeline {
-  .vis-left.vis-panel.vis-vertical-scroll {
-    direction: ltr;
+.vis-align-right {
+  .vis-timeline {
+    .vis-left.vis-panel.vis-vertical-scroll {
+      direction: ltr;
+    }
   }
 }
 .vis-panel.vis-top .vis-text {
