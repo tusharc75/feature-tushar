@@ -146,6 +146,7 @@ function PreviewDownloadNew({
         iconForMobile={<VisibilityIcon />}
         startIcon={<VisibilityIcon />}
         disabled={btnLoading === 'Preview'}
+        isLoading={btnLoading === 'Preview'}
         onClick={(e) => {
           if (isAsyncDownload) {
             setOpenAsynDialog(true)
@@ -163,6 +164,7 @@ function PreviewDownloadNew({
         mobileTooltip="Download"
         startIcon={<DownloadIcon />}
         disabled={btnLoading === 'Download'}
+        isLoading={btnLoading === 'Download'}
         onClick={(e) => {
           if (isAsyncDownload) {
             setOpenAsynDialog(true)
