@@ -14,6 +14,8 @@ import { ThemeButton } from "src/components/Helpers/Buttons";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import InputField from "src/components/Helpers/InputField";
 import MultiFileUpload from "src/components/Activity/AttachmentsNew/MultiFileUpload";
+import { useData } from "src/StateProvider/Provider";
+import { SET_UPLOADER } from "src/StateProvider/actionTypes";
 
 const ManageFile = ({
   relatedTo,
@@ -23,11 +25,14 @@ const ManageFile = ({
   onClose,
   parentId = null,
   attachmentType = null,
-  fetchData = null,
-  setUploads
+  fetchData = null
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
+
+  const {
+    dispatch
+  }: any = useData();
 
   const [loading, setLoading] = useState(false)
   const [initialData, setInitialData] = useState({ fields: [], values: null });
@@ -61,8 +66,11 @@ const ManageFile = ({
 
     onClose()
     if (files?.length) {
-      const newUploads = files?.map(file => ({ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }))
-      setUploads((prev) => [...prev, ...newUploads]);
+      const newUploads = files?.map(file => {
+        const obj = { file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }
+        dispatch({ type: SET_UPLOADER, payload: obj })
+        return obj;
+      })
 
       await Promise.allSettled(
         newUploads.map(({ file, _id }) => {
@@ -76,7 +84,7 @@ const ManageFile = ({
             let fake = 0;
             const fakeInterval = setInterval(() => {
               fake = Math.min(fake + Math.random() * 15, 90);
-              setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, progress: Math.round(fake) } : u)));
+              dispatch({ type: SET_UPLOADER, payload: { _id, progress: Math.round(fake) } })
             }, 200);
 
             axiosInstance()
@@ -85,7 +93,7 @@ const ManageFile = ({
               })
               .then(({ data }) => {
                 clearInterval(fakeInterval);
-                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'completed', progress: 100 } : u)));
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'completed', progress: 100 } })
                 toastConfig.setToastConfig({
                   open: true,
                   type: 'success',
@@ -95,7 +103,7 @@ const ManageFile = ({
               })
               .catch((error) => {
                 clearInterval(fakeInterval);
-                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'failed' } : u)));
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'failed' } })
                 toastConfig.setToastConfig(error);
                 reject('failed');
               });

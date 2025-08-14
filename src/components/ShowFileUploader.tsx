@@ -3,22 +3,30 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Cancel, CheckCircle, UploadFile } from "@mui/icons-material";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { formatBytes } from "src/hooks";
+import { useData } from "src/StateProvider/Provider";
+import { SET_UPLOADER } from "src/StateProvider/actionTypes";
 
-const ShowFileUploader = ({ uploads, setUploads }) => {
+const ShowFileUploader = () => {
+  const {
+    state: { uploads },
+    dispatch
+  }: any = useData();
 
   if (uploads?.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 w-80 rounded-lg border bg-primary-foreground shadow-lg">
+    <div className="fixed bottom-5 right-5 z-[5000] w-80 rounded-lg border bg-primary-foreground shadow-lg">
       <div className="flex items-center justify-between border-b p-3">
         <h3 className="text-lg font-medium">Uploads</h3>
-        <IconButton onClick={() => setUploads([])}>
+        <IconButton onClick={() => {
+          dispatch({ type: SET_UPLOADER, payload: null })
+        }}>
           <CloseIcon fontSize="small" color="primary" />
         </IconButton>
       </div>
       <div className="max-h-60 space-y-2 overflow-y-auto p-3">
         {uploads?.map((upload) => (
-          <div key={upload?._id || upload.id} className="flex items-center gap-2 rounded-lg border border-b p-2">
+          <div key={upload?._id} className="flex items-center gap-2 rounded-lg border border-b p-2">
             <UploadFile className="text-blue-500 dark:text-blue-700" />
             <div className="flex-grow">
               <div className="mb-1 flex items-center justify-between gap-2">

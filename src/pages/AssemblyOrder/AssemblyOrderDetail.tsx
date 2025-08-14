@@ -42,7 +42,6 @@ import { ExpandMore } from '@mui/icons-material';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import ManageFile from 'src/components/Activity/AttachmentsNew/ManageFile';
-import ShowFileUploader from 'src/components/ShowFileUploader';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -74,7 +73,6 @@ const AssemblyOrderDetail = () => {
   const [assemblySteps, setAssemblySteps] = useState([]);
   const [openUploadFile, setOpenUploadFile] = useState({ open: false })
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [uploads, setUploads] = useState([])
 
   useEffect(() => {
     return history.listen((location) => {
@@ -480,10 +478,8 @@ const AssemblyOrderDetail = () => {
           }}
           showManimizeMaximize={true}
           parentId={assemblyOrderData?.dmsFolder?._id}
-          setUploads={setUploads}
         />
       </Dialog>
-      <ShowFileUploader uploads={uploads} setUploads={setUploads} />
     </Box>
   );
 };
