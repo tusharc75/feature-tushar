@@ -2871,7 +2871,7 @@ export const PRODUCT_SERIAL_NUMBER_STATUS = {
   unAvailable: 'Unavailable'
 };
 
-export const CONTENT_POST_PLANNING_STATUS ={
+export const CONTENT_POST_PLANNING_STATUS = {
   pendingApproval: 'Pending Approval',
   published: 'Published',
   scheduled: 'Scheduled',
@@ -3146,7 +3146,8 @@ export const SERIALIZED_PACKAGES_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',
-  customerPossession: 'Customer Possession'
+  customerPossession: 'Customer Possession',
+  disassembled: 'Disassembled'
 };
 
 export const PACKAGE_TYPE = {
