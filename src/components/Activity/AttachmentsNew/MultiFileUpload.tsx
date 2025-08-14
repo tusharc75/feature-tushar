@@ -1,9 +1,9 @@
 import React, { Fragment, useContext, useState } from 'react';
 import BackupOutlinedIcon from '@mui/icons-material/BackupOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import { IconButton, Typography } from '@mui/material';
+import { IconButton, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { documentUploadMaxSize } from 'src/constants/helpers';
+import { documentUploadMaxSize, getFileIconSrc } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isArray } from 'lodash';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -115,24 +115,37 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
 
       {values[name] && isArray(values[name]) && values[name].length > 0 && (
         <div className='mt-4'>
-          {values[name].map((item, i) => (
-            <div key={`${item.name}-${i}`} className='flex items-center justify-between'>
-              <Typography variant="body2" className="text-truncate" color="textPrimary" sx={{ maxWidth: '80%' }}>
-                {item?.name}
-              </Typography>
-              <HtmlTooltip title="Remove">
-                <IconButton
-                  size="small"
-                  disabled={!values[name]}
-                  onClick={() =>
-                    setFieldValue(name, values[name].filter((d) => d.name !== item.name))
-                  }
-                >
-                  <DeleteIcon fontSize="small" color="error" />
-                </IconButton>
-              </HtmlTooltip>
-            </div>
-          ))}
+          <List dense>
+            {values[name]?.map((file, index) => {
+              const Icon = getFileIconSrc(file.name);
+              return (
+                <ListItem key={`selected-${index}`} divider>
+                  <ListItemIcon>
+                    <Icon size={24} className="mx-auto" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <p className="truncate text-[15px] font-medium text-[#232529] dark:text-white">
+                        {file?.name}
+                      </p>
+                    }
+                    secondary={`${(file.size / 1024 / 1024).toFixed(2)} MB`}
+                  />
+                  <HtmlTooltip title="Remove">
+                    <IconButton
+                      size="small"
+                      disabled={!values[name]}
+                      onClick={() =>
+                        setFieldValue(name, values[name].filter((_, i) => i !== index))
+                      }
+                    >
+                      <DeleteIcon fontSize="small" color="error" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </ListItem>
+              )
+            })}
+          </List>
         </div>
       )}
 
