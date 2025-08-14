@@ -21,9 +21,10 @@ const ManageFile = ({
   onMinimizeMaximize,
   showManimizeMaximize,
   onClose,
-  onSuccess,
   parentId = null,
-  attachmentType = null
+  attachmentType = null,
+  fetchData = null,
+  setUploads
 }) => {
 
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +32,6 @@ const ManageFile = ({
   const [loading, setLoading] = useState(false)
   const [initialData, setInitialData] = useState({ fields: [], values: null });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     fetchFields()
@@ -56,35 +56,56 @@ const ManageFile = ({
     }
   }
 
-  const handleSubmit = (values) => {
-    setSubmitting(true)
-    const formData = new FormData();
+  const handleSubmit = async (values) => {
     const { files, ...rest } = values
-    for (const file of files) {
-      formData.append('files', file);
+
+    onClose()
+    if (files?.length) {
+      const newUploads = files?.map(file => ({ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }))
+      setUploads((prev) => [...prev, ...newUploads]);
+
+      await Promise.allSettled(
+        newUploads.map(({ file, _id }) => {
+          return new Promise(async (resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('data', JSON.stringify(rest))
+            if (parentId) formData.append('parentId', parentId);
+            formData.append('relatedTo', JSON.stringify(relatedTo))
+
+            let fake = 0;
+            const fakeInterval = setInterval(() => {
+              fake = Math.min(fake + Math.random() * 15, 90);
+              setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, progress: Math.round(fake) } : u)));
+            }, 200);
+
+            axiosInstance()
+              .post(`/attachment-new`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+              })
+              .then(({ data }) => {
+                clearInterval(fakeInterval);
+                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'completed', progress: 100 } : u)));
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: data.message
+                });
+                resolve('success');
+              })
+              .catch((error) => {
+                clearInterval(fakeInterval);
+                setUploads((prev) => prev.map((u) => (u?._id === _id ? { ...u, status: 'failed' } : u)));
+                toastConfig.setToastConfig(error);
+                reject('failed');
+              });
+          });
+        })
+      );
     }
-    formData.append('data', JSON.stringify(rest))
-    formData.append('relatedTo', JSON.stringify(relatedTo))
-    if (parentId) {
-      formData.append('parentId', parentId)
+    if (fetchData) {
+      fetchData()
     }
-    axiosInstance()
-      .post(`/attachment-new`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
   }
 
   const validate = (values) => {
@@ -155,8 +176,7 @@ const ManageFile = ({
                 </ThemeButton>
                 <ThemeButton
                   buttonType="theme"
-                  disabled={submitting || isEqual(initialData?.values, values)}
-                  isLoading={submitting}
+                  disabled={isEqual(initialData?.values, values)}
                   onClick={submitForm}
                 >
                   Upload
