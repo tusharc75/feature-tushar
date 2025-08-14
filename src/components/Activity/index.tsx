@@ -33,6 +33,7 @@ import { CreateTask } from './Task/CreateTask';
 import ManageFile from 'src/components/Activity/AttachmentsNew/ManageFile';
 import AttachmentsNew from 'src/components/Activity/AttachmentsNew';
 import ManageFolder from 'src/components/Activity/AttachmentsNew/ManageFolder';
+import ShowFileUploader from 'src/components/ShowFileUploader';
 
 const Activity = (props) => {
   const {
@@ -71,6 +72,7 @@ const Activity = (props) => {
   const [tabs, setTabs] = useState([]);
   const [viewRelatedTo, setViewRelatedTo] = useState([]);
   const [addRelatedTo, setAddRelatedTo] = useState([]);
+  const [uploads, setUploads] = useState([])
 
   useEffect(() => {
     let addTemprelated = [...relatedTo];
@@ -438,16 +440,13 @@ const Activity = (props) => {
                 handleClose();
                 setFullScreen(false);
               }}
-              onSuccess={() => {
-                handleClose()
-                setFullScreen(false);
-              }}
               relatedTo={[{ resource: sidebarResource[resource] || startCase(resource), referenceId: resourceId, label: resourceLabel }]}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
+              setUploads={setUploads}
             />
           )}
           {type === 'Attachment' && import.meta.env.VITE_APP_ATTACHMENT != 'new' ? (
@@ -492,6 +491,7 @@ const Activity = (props) => {
           onClose={() => setShowHistory(false)}
         />
       ) : null}
+      <ShowFileUploader uploads={uploads} setUploads={setUploads} />
     </>
   );
 };

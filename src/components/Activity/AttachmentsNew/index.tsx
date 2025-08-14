@@ -21,6 +21,7 @@ import { FiEdit2 } from "react-icons/fi";
 import AttachmentDelete from "src/components/Activity/AttachmentsNew/AttachmentDelete";
 import { isEmpty } from "lodash";
 import DeleteRequest, { DeleteRequestIcon } from "src/components/Activity/AttachmentsNew/DeleteRequest";
+import ShowFileUploader from "src/components/ShowFileUploader";
 
 const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -37,6 +38,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
   const [anchorElFile, setAnchorElFile] = useState({ anchor: null, data: null });
   const [openDelete, setOpenDelete] = useState({ open: false, request: false, attachment: null })
   const [openDeleteRequest, setOpenDeleteRequest] = useState({ ancherEl: null, attachment: null })
+  const [uploads, setUploads] = useState([])
 
   useEffect(() => {
     fetchData();
@@ -296,10 +298,6 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
         {open?.type === 'file' && (
           <ManageFile
             onClose={() => {
-              setOpen({ open: false, type: '', data: null, isUpdate: false });
-              setFullScreen(false);
-            }}
-            onSuccess={() => {
               fetchData()
               setOpen({ open: false, type: '', data: null, isUpdate: false });
               setFullScreen(false);
@@ -311,6 +309,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
             }}
             showManimizeMaximize={true}
             parentId={open.data?._id}
+            setUploads={setUploads}
           />
         )}
         {open?.type === 'folder' && (
@@ -371,6 +370,7 @@ const AttachmentsNew = ({ resource, referenceId, label, onSetCount }) => {
           />
         </div>
       </Popover>
+      <ShowFileUploader uploads={uploads} setUploads={setUploads} />
     </Box >
   )
 
