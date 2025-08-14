@@ -1,12 +1,15 @@
 import { CssBaseline } from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import queryString from 'query-string';
-import { lazy, Suspense, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import QrAuthPage from 'src/pages/QrAuth/QrAuthPage';
 import CustomIntro from 'src/components/CustomIntro';
+import DesktopDM from 'src/components/DesktopDM';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
+import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
+import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
 import CustomMessageDialog from 'src/components/MessageDialog';
+// import Walkme from 'src/components/Walkme';
 import { VITE_APP_ENV } from 'src/config';
 import AssemblyOrder from 'src/pages/AssemblyOrder';
 import AssemblyOrderDetail from 'src/pages/AssemblyOrder/AssemblyOrderDetail';
@@ -18,13 +21,17 @@ import Expenses from 'src/pages/Expenses';
 import ExpenseDetailsPage from 'src/pages/Expenses/ExpenseDetail';
 import ExpenseReport from 'src/pages/ExpensesReport';
 import ExpenseReportDetailsPage from 'src/pages/ExpensesReport/ExpenseReportDetail';
+import FieldView from 'src/pages/FieldView';
 import Integration from 'src/pages/Integration';
 import PackageCategory from 'src/pages/PackageCategory';
 import PackageCategoryDetail from 'src/pages/PackageCategory/PackageCategoryDetail';
 import PackageInventory from 'src/pages/PackageInventory';
 import ProductTypes from 'src/pages/ProductTypes';
 import ProductTypesDetail from 'src/pages/ProductTypes/ProductTypesDetail';
+import QrAuthPage from 'src/pages/QrAuth/QrAuthPage';
+import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
 import ReportsCenter from 'src/pages/Reports';
+import ResourceDataMapping from 'src/pages/ResourceDataMapping';
 import ResourceDoaRequestDetail from 'src/pages/ResourceDoaRequest/ResourceDoaRequestDetail';
 import ScheduleAndDispatch from 'src/pages/ScheduleAndDispatch';
 import ScheduleMaintenance from 'src/pages/ScheduleMaintenance';
@@ -35,6 +42,8 @@ import ServiceCategory from 'src/pages/ServiceCategory';
 import ServiceCategoryDetail from 'src/pages/ServiceCategory/ServiceCategoryDetail';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
+import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
+import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
 import WorkFlow from 'src/pages/WorkFlow';
 import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
 import WorkFlowReport from 'src/pages/workFlowReport';
@@ -51,6 +60,8 @@ import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientat
 import ColorModeProvider from './constants/AppConfig';
 import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
+import { firebaseConfig } from './firebase';
+import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
 import AccountDetailPage from './pages/Account/AccountDetailPage';
 import Account from './pages/Account/index';
 import Activity from './pages/Activity';
@@ -88,10 +99,14 @@ import Contact from './pages/Contact';
 import ContactDetailPage from './pages/Contact/ContactDetailPage';
 import ContactUs from './pages/ContactUs';
 import ContactUsDetail from './pages/ContactUs/ContactUsDetail';
+import ContentPostPlanning from './pages/ContentPostPlanning';
+import ContentPostPlanningDetail from './pages/ContentPostPlanning/contentPostPlanningDetail';
 import ConvertInventory from './pages/ConvertInventory';
 import CreditMemo from './pages/CreditMemo';
 import CreditMemoDetail from './pages/CreditMemo/CreditMemoDetail';
 import CurrencyConverter from './pages/CurrencyConverter';
+import CustomPdfTemplate from './pages/CustomPdfTemplate';
+import CreateCustomPdfTemplate from './pages/CustomPdfTemplate/CreateCustomPdfTemplate';
 import CycleCountDetermination from './pages/CycleCountDetermination';
 import CycleCountPhysicalInventory from './pages/CycleCountPhysicalInventory';
 import Dashboard from './pages/Dashboard';
@@ -261,6 +276,7 @@ import UserDetailsPage from './pages/User/UserDetailsPage';
 import UserAttendance from './pages/UserAttendance';
 import UserDownloadRequest from './pages/UserDownloadRequest';
 import UserManual from './pages/UserManual';
+import UserManualNew from './pages/UserManualNew';
 import Warehouse from './pages/Warehouse';
 import WarehouseDetailsPage from './pages/Warehouse/WarehouseDetailsPage';
 import WellMaster from './pages/WellMaster';
@@ -282,23 +298,7 @@ import { CustomNotificationCountContext } from './StateProvider/CustomNotificati
 import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
-import DesktopDM from 'src/components/DesktopDM';
-import ResourceDataMapping from 'src/pages/ResourceDataMapping';
-import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
-import TechnicianUnavailability from 'src/pages/TechnicianUnavailability';
-import TechnicianUnavailabilityDetail from 'src/pages/TechnicianUnavailability/Detail';
-import FieldView from 'src/pages/FieldView';
-import { firebaseConfig } from './firebase';
-import CustomPdfTemplate from './pages/CustomPdfTemplate';
-import CreateCustomPdfTemplate from './pages/CustomPdfTemplate/CreateCustomPdfTemplate';
-import UserManualNew from './pages/UserManualNew';
-import RenderAllInfoButtons from 'src/components/InfoSidebar/RenderAllInfoButtons';
-import RenderInfoInspector from 'src/components/InfoSidebar/RenderInfoInspector';
-import RentalJobTechnicianView from 'src/pages/RentalJobTechnicianView';
-import { useSetWalkmeData } from './components/CustomIntroNew/useSetWalkmeSteps';
-import { useStore, WALK_ME_STEPS } from './StateProvider/fastContext';
-import ContentPostPlanning from './pages/ContentPostPlanning';
-import ContentPostPlanningDetail from './pages/ContentPostPlanning/contentPostPlanningDetail';
+
 var notificationInterval: any = null;
 
 function App() {
@@ -307,26 +307,6 @@ function App() {
       registerSW();
     }
   }, []);
-
-  const { setWalkmeData } = useSetWalkmeData();
-  const [walkMeStepsData] = useStore((store) => store[WALK_ME_STEPS]);
-
-  useEffect(() => {
-    if (walkMeStepsData.length === 0) {
-      const fetchWalkmeData = async () => {
-        try {
-          const { data } = await axiosInstance().get('/resource-walkme');
-          if (data?.data) {
-            setWalkmeData(data.data);
-          }
-        } catch (error) {
-          console.error('Failed to fetch Walkme data:', error);
-        }
-      };
-      fetchWalkmeData();
-    }
-  }, []);
-
 
   useEffect(() => {
     if (import.meta.env.DEV) return;
@@ -395,7 +375,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1357,6 +1337,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="portrait" device="tablet" />
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
           <CustomIntro />
+          {/* <Walkme /> */}
           {/* <CustomIntroNew />  // the new component*/}
           {user && <DesktopDM />}
           <RenderAllInfoButtons />

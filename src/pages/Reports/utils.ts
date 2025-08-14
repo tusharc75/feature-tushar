@@ -15,8 +15,14 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
   const routeArr = route.split('/');
   const isStandardReport = routeArr[2] === 'standard-report';
   const isCustomReport = routeArr[2] === 'custom-report';
+  const isDynamicForm = routeArr[2] === 'dynamic-form';
   if (isStandardReport) {
     data.type = 'standard-report';
+    data.resource = routeArr[3];
+    return data;
+  }
+  if (isDynamicForm) {
+    data.type = 'dynamicForm';
     data.resource = routeArr[3];
     return data;
   }
@@ -27,9 +33,9 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
 
     data.type = 'custom-report';
     data.resource = kebabCase(customData?.resource);
-    customData?.filters.forEach(ele => {
+    customData?.filters.forEach((ele) => {
       if (ele?.type === 'date' && ele?.value?.to === '') {
-        ele.value.to = dayjs().tz().format(dateFormat)
+        ele.value.to = dayjs().tz().format(dateFormat);
       }
     });
     data.customReportData = { ...customData };
@@ -42,7 +48,7 @@ export const handleGetRoute = async ({ route, title }: { route: string; title: s
 export const createUserFavouriteObj = (item: Report | CustomReport) => {
   const name = (item as CustomReport)._id || (item as Report).label;
   const type: 'standard' | 'custom' = (item as CustomReport)._id ? 'custom' : 'standard';
-  let obj: FavouriteReport = { identifier: name };
+  let obj: FavouriteReport = { identifier: name, route: '' };
   if (isCustomReport(item)) {
     obj = {
       identifier: name,

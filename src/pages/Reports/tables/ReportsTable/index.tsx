@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { camelCase, isEmpty, isObject, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { MdFilterList } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,15 +10,29 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn, dateFormatToSend, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
+import {
+  cn,
+  CustomDialogTransition,
+  dateFormatToSend,
+  downloadExcel,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  primaryFields,
+  sidebarResource
+} from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
 import dayjs from 'dayjs';
+import SendMailMenu from '../../tables/StandardReportTable/SendMailMenu';
+import { isTablet } from 'react-device-detect';
+import { Dialog } from '@mui/material';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 
 let cancelTokenSource = null;
 
-const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableCommonProps) => {
+const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen, dynamicForm = false }: TableCommonProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const {
@@ -30,16 +44,17 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     setIsColumnsLoading,
     permissions,
     isColumnsLoading,
-    navigateToMainPage
+    navigateToMainPage,
+    reportList
   } = reportState;
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
-  const resourceStartCase = startCase(selectedReport.resource);
+  const resourceStartCase: any = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
-  const [showGrid, setShowGrid] = React.useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
@@ -125,11 +140,17 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
     });
 
-    let newColumns = generateColumns(
-      routes[resourceCamelCase]?.title,
-      data,
-      routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
-    );
+    let newColumns;
+    if (dynamicForm) {
+      const detailPagePath = `/${kebabCase(selectedReport?.resource)}/detail`;
+      newColumns = generateColumns(resourceStartCase, data, detailPagePath);
+    } else {
+      newColumns = generateColumns(
+        routes[resourceCamelCase]?.title,
+        data,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
+    }
     if (resourceStartCase === sidebarResource.quotation) {
       newColumns.push({
         accessor: 'versionComment',
@@ -223,10 +244,9 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     });
     setColumns([...columns]);
     setIsColumnsLoading(false);
-  }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
+  }, [generateColumns, resourceCamelCase, resourceStartCase, dynamicForm, setColumns, setIsColumnsLoading, setResourceColumns]);
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-
     let filterQuery = `?page=${page}&limit=${limit}&`;
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
@@ -277,7 +297,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     const dateFilter: any = [];
     const statusPeriodDateFilter: any = [];
 
-    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -331,53 +352,62 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     }
 
     return { query: `${filterQuery}`, deepFilter: newDeepFilter };
-
   };
 
-  const fetchResourceData = useCallback((deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    setShowGrid(true);
+  const fetchResourceData = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+      setShowGrid(true);
 
-    let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
-    setDeepFilters(deepFilter);
+      let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+      setDeepFilters(deepFilter);
 
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel();
-    }
-    cancelTokenSource = axios.CancelToken.source();
-    dispatch({ type: 'loading', loading: true });
-
-    let api = `/report${routes[resourceCamelCase].path}${query}`;
-    if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder${query}`;
-    } else {
-      api = `/report${routes[resourceCamelCase].path}${query}`;
-    }
-
-    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      data = data.map((u: any) => {
-        let finalObject = prepareDataForGrid(u);
-        return finalObject;
-      });
-
-      dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    }).catch((err) => {
-      if (!axios.isCancel(err)) {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        toastConfig.setToastConfig(err);
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel();
       }
-    });
-  },
-    [dispatch, getQueryString, resourceCamelCase, toastConfig]
+      cancelTokenSource = axios.CancelToken.source();
+      dispatch({ type: 'loading', loading: true });
+
+      let api = dynamicForm ? `/report/dynamic-form${query}` : `/report${routes[resourceCamelCase].path}${query}`;
+      if (resourceCamelCase === 'quotes') {
+        api = `/report/quote-builder${query}`;
+      }
+      const requestConfig: any = { cancelToken: cancelTokenSource?.token };
+      if (dynamicForm) {
+        requestConfig.headers = {
+          resource: resourceStartCase
+        };
+      }
+
+      axiosInstance()
+        .get(api, requestConfig)
+        .then(({ data: { data, count } }) => {
+          data = data.map((u: any) => {
+            let finalObject = prepareDataForGrid(u);
+            return finalObject;
+          });
+
+          dispatch({ type: 'initialize', data: data, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((err) => {
+          if (!axios.isCancel(err)) {
+            setTimeout(() => {
+              dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
+            toastConfig.setToastConfig(err);
+          }
+        });
+    },
+    [dispatch, getQueryString, resourceCamelCase, resourceStartCase, dynamicForm, toastConfig]
   );
 
   const getApi = () => {
     let api = null;
-    if (resourceCamelCase === 'quotes') {
+    if (dynamicForm) {
+      api = `/report/dynamic-form`;
+    } else if (resourceCamelCase === 'quotes') {
       api = `/report/quote-builder`;
     } else {
       api = `/report${routes[resourceCamelCase].path}`;
@@ -415,7 +445,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     fetchGridColumns();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (showGrid) {
       fetchResourceData();
     }
@@ -441,7 +471,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               </ThemeButton>
             )}
             <AsynImportExportMenu
-              resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+              resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               subResource={'report'}
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
@@ -449,6 +479,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               afterImportCompleted={() => { }}
               onlyExport={true}
               additionalParams={getQueryString(true).query}
+              additionalHeaders={dynamicForm ? { resource: resourceStartCase } : null}
             />
           </>
         )}
@@ -474,7 +505,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               : columns
           }
           state={state}
-          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchResourceData}
@@ -495,7 +526,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           }}
           loading={isColumnsLoading}
           filterTitle={selectedReport.title}
-          resource={sidebarResource[resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase]}
           columns={resourceColumns}
           onApplyFilter={fetchResourceData}
           deepFilters={deepFilters}

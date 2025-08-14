@@ -25,6 +25,8 @@ const getTableComponent = (selectedReport, reportList) => {
       return ReportsTable;
     case 'standard-report':
       return StandardReportsTable;
+    case 'dynamicForm':
+      return ReportsTable;
     case 'custom-report':
       switch (isStanderdCustomReport) {
         case true:
@@ -44,7 +46,13 @@ const ReportsContent = ({ state, isSidebarOpen, isMobile }: ReportsContentProps)
   return (
     <>
       {selectedReport ? (
-        <TableComponent state={state} key={selectedReport.route} isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
+        <TableComponent
+          state={state}
+          key={selectedReport.route}
+          isSidebarOpen={isSidebarOpen}
+          isMobile={isMobile}
+          dynamicForm={selectedReport?.type === 'dynamicForm'}
+        />
       ) : (
         <div className="absolute bottom-0 left-4 right-4 top-[200px] text-center">
           <div className="mx-auto mb-[20px] h-[69px] w-[69px]">

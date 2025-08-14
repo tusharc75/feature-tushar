@@ -39,7 +39,7 @@ export const isCustomReport = (item: any): item is CustomReport => {
   return (item as CustomReport)._id !== undefined;
 };
 
-export type ReportType = 'standard-report' | 'custom-report' | 'report';
+export type ReportType = 'standard-report' | 'custom-report' | 'report' | 'dynamicForm';
 export type SelectedReport = {
   title: string;
   route: string;
@@ -81,6 +81,7 @@ export type TableCommonProps = {
   state: UseReport;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  dynamicForm?: boolean;
 };
 
 export type ResourceColumn = {
