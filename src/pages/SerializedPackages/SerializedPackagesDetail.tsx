@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, SERIALIZED_PACKAGES_STATUS, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -106,6 +106,22 @@ const SerializedPackagesDetail = () => {
     setTabValue(newValue);
   };
 
+  const handleDisasseble = () => {
+    axiosInstance()
+      .put(`${routes.serializedPackages?.path}/disassemble`, { _id: serializedPackagesData?._id, status: SERIALIZED_PACKAGES_STATUS.disassembled })
+      .then(({ data }: any) => {
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -115,8 +131,17 @@ const SerializedPackagesDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
+              {permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
+                <ThemeButton
+                  id={'serialized-package-disassemble'}
+                  buttonType="theme"
+                  onClick={handleDisasseble}
+                >
+                  Disassemble
+                </ThemeButton>
+              )}
               {permissions?.serializedPackages?.isUpdate && (
-                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'} disabled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled}>
                   {'Edit'}
                 </ThemeButton>
               )}
@@ -157,7 +182,7 @@ const SerializedPackagesDetail = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} />
+          <Assign serializedPackagesData={serializedPackagesData} fetchSerializedPackagesData={fetchData} disAssembled={serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.disassembled} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <History id={serializedPackagesData?._id} />
