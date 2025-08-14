@@ -35,7 +35,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
-import KanbanView, { FetchCanbanDataPayload, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
+import KanbanView, { FetchCanbanDataPayload, getPivotColoum, KanbanViewRef, PivotColumnSelector, RenderViewTabs, useCanbanStore } from 'src/components/KanbanView';
 
 const renderedFrom = camelCase(sidebarResource.lead);
 
@@ -699,7 +699,7 @@ const Leads = () => {
               />
             ) : null
           }
-          rightSideContents={<RenderViewTabs renderedFrom={renderedFrom} setViewType={setViewType} viewType={viewType} />}
+          rightSideContents={getPivotColoum(columns)?.length ? <RenderViewTabs renderedFrom={renderedFrom} setViewType={setViewType} viewType={viewType} /> : null}
         />
         {columns ? (
           <>

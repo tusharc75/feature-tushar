@@ -13,6 +13,10 @@ type RenderPivotColumnProps<D> = {
   renderedFrom: string;
 };
 
+export const getPivotColoum = (columns) => {
+  return columns?.filter((c) => c.option?.length > 0 && c.option.length < 11 && !c.lookup && PIVOTABLE_COLUMN_TYPES.includes(c.type)) || [];
+}
+
 const getOptionLabel = <D,>(column: Column<D>) => {
   const header = column.Header || column.header;
   let renderedHead = '';
