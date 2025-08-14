@@ -97,8 +97,9 @@ const ContentPostPlanningDetail = () => {
   };
 
   const handleChangeStatus = (status) => {
+    const ids = [id]
     axiosInstance()
-      .put('content-post-planning/update-status', { _id: id, status: status })
+      .put('content-post-planning/update-status', { _id: ids, status: status })
       .then(({ data: { data } }) => {
         fetchData();
         toastConfig.setToastConfig({
@@ -146,10 +147,9 @@ const ContentPostPlanningDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              {permissions?.contentPostPlanning?.isUpdate && (
+              {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
                 <ThemeButton
                   onClick={openActions}
-                  disabled={postData?.status === 'Published'}
                   endIcon={<ExpandMore />}
                   mobileTooltip="Change Status"
                   iconForMobile={<RiExchange2Line size={24} style={{ color: 'var(--primary-text)' }} />}
@@ -184,18 +184,13 @@ const ContentPostPlanningDetail = () => {
                   );
                 })}
               </Menu>
-              {permissions?.contentPostPlanning?.isUpdate && (
-                <ThemeButton
-                  iconForMobile={<EditIcon />}
-                  disabled={postData?.status === 'Published'}
-                  onClick={handleOpenUpdateDialog}
-                  mobileTooltip={'Edit'}
-                >
+              {permissions?.contentPostPlanning?.isUpdate && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
+                <ThemeButton iconForMobile={<EditIcon />} onClick={handleOpenUpdateDialog} mobileTooltip={'Edit'}>
                   {'Edit'}
                 </ThemeButton>
               )}
-              {permissions?.contentPostPlanning?.isDelete && (
-                <DeleteButton text="Delete" disabled={postData?.status === 'Published'} onClick={() => setShowConfirmBox(true)} />
+              {permissions?.contentPostPlanning?.isDelete && postData?.status !== CONTENT_POST_PLANNING_STATUS.published && (
+                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton
                 referenceId={id}
