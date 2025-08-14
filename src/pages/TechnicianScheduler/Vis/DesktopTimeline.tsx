@@ -11,7 +11,8 @@ import GroupTemplate from 'src/pages/TechnicianScheduler/Vis/Templates/GroupTemp
 import { ItemTemplate } from 'src/pages/TechnicianScheduler/Vis/Templates/ItemTemplate';
 import { Activity, DNDData, Service } from 'src/pages/TechnicianScheduler/Vis/types';
 import { useTimelineStore } from 'src/pages/TechnicianScheduler/Vis/useTimelineStore';
-import { calculateRatio, GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { GROUP_HIGHLIGHT_CLASSES } from 'src/pages/TechnicianScheduler/Vis/utils';
+import { calculateRatio } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { DataSet, Timeline, TimelineOptions } from 'vis-timeline/standalone';
 
@@ -187,7 +188,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
               setMinHeight('');
               try {
                 item.removeChild(collapseButton);
-              } catch { }
+              } catch {}
             };
 
             const button = document.createElement('button');
@@ -203,7 +204,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
 
               try {
                 item.removeChild(button);
-              } catch (error) { }
+              } catch (error) {}
             };
             button.classList.add('timeline-show-all-button');
             item.appendChild(button);
@@ -274,7 +275,7 @@ const DesktopTimeline = ({ timelineData, loading, onDragEnd }: DesktopTimelinePr
   }
 
   return (
-    <div className="relative isolate w-full">
+    <div className="vis-align-right relative isolate w-full">
       <div className="absolute inset-0 -z-[1] flex animate-pulse items-center justify-center rounded-md bg-gray-200 dark:bg-gray-800"></div>
       <Map />
       <div className="relative">

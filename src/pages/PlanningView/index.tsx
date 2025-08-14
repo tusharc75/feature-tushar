@@ -1,37 +1,33 @@
-import { Box, IconButton } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Box } from '@mui/material';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
+import { useCardReducer } from 'src/components/CardColTimeline';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
+import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
+import ManageDemandOrderDialog from 'src/pages/DemandOrder/ManageDemandOrderDialog';
+import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
+import ManagePlanning from 'src/pages/Planning/ManagePlanning';
+import ManageProductionOrder from 'src/pages/ProductionOrder/ManageProductionOrder';
+import CreateProjectSales from 'src/pages/ProjectSales/CreateProjectSales';
+import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
+import ManagePurchaseRequisition from 'src/pages/PurchaseRequisition/ManagePurchaseRequisition';
+import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
+import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
+import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
+import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CalendarView from './Calendar';
 import ListView from './List';
-import IconButtonTabs from 'src/components/IconButtonTabs';
-import { TfiLayoutListThumbAlt } from 'react-icons/tfi';
-import { FaRegCalendar } from 'react-icons/fa';
-import { useTableReducer } from 'src/components/CustomReactTable';
-import { useCardReducer } from 'src/components/CardColTimeline';
-import { AddOutlined } from '@mui/icons-material';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
-import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
-import ManagePlanning from 'src/pages/Planning/ManagePlanning';
-import ManageDemandOrderDialog from 'src/pages/DemandOrder/ManageDemandOrderDialog';
-import ManageProductionOrder from 'src/pages/ProductionOrder/ManageProductionOrder';
-import ManagePurchaseRequisition from 'src/pages/PurchaseRequisition/ManagePurchaseRequisition';
-import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
-import ManageRepairJob from 'src/pages/RepairJob/ManageRepairJob';
-import ManageSublease from 'src/pages/Sublease/ManageSublease';
-import CreateProjectSales from 'src/pages/ProjectSales/CreateProjectSales';
-import ManageQuotationDialog from 'src/pages/Quotation/ManageQuotationDialog';
-import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import TopRightButtons from 'src/pages/PlanningView/TopRightButtons';
+import GanttView, { GantttViewRef } from 'src/pages/PlanningView/GanttView';
+import { PlanningResource, usePlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 
 function PlanningView() {
   const {
@@ -45,186 +41,22 @@ function PlanningView() {
     dispatch({ type: 'selection', selectedRecords: [] });
     tableDispatch({ type: 'selection', selectedRecords: [] });
   };
-
-  const [resourceList, setResourceList] = useState([]);
-  const [selectedResource, setSelectedResource] = useState(null);
+  const resourceList = usePlanningResource();
+  const [selectedResource, setSelectedResource] = useState<PlanningResource>(null);
   const [queryString, setQueryString] = useState(null);
 
-  const [view, setView] = useState('calendar');
+  const [view, setView] = useState<'calendar' | 'list' | 'gantt'>('calendar');
   const [createDialog, setCreateDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [resourcePolicy, setResourcePolicy] = useState(null);
 
-  const ref: any = useRef();
+  const isProductSelected = selectedResource?.resource === sidebarResource.product;
 
-  const PLANNING_RESOURCE = [
-    {
-      key: 'rentalManagement',
-      resource: sidebarResource.rentalManagement,
-      title: resources?.rentalManagement?.titlePlural,
-      path: routes.rentalManagementDetail.path,
-      fieldName: 'rentalJobName',
-      start: 'startDate',
-      end: 'endDate'
-    },
-    {
-      key: 'planning',
-      resource: sidebarResource.planning,
-      title: resources?.planning?.titlePlural,
-      path: routes.planningDetail.path,
-      fieldName: 'planningNumber',
-      start: 'startDate',
-      end: 'endDate'
-    },
-    {
-      key: 'demandOrder',
-      resource: sidebarResource.demandOrder,
-      title: resources?.demandOrder?.titlePlural,
-      path: routes.demandOrderDetail.path,
-      fieldName: 'demandOrderNumber',
-      start: 'createDate',
-      end: 'estimateDeliveryDate'
-    },
-    {
-      key: 'productionOrder',
-      resource: sidebarResource.productionOrder,
-      title: resources?.productionOrder?.titlePlural,
-      path: routes?.productionOrderDetail?.path,
-      fieldName: 'productionOrderNumber',
-      start: 'createDate',
-      end: 'estimateDeliveryDate'
-    },
-    {
-      key: 'purchaseRequisition',
-      resource: sidebarResource.purchaseRequisition,
-      title: resources?.purchaseRequisition?.titlePlural,
-      path: routes.purchaseRequisitionDetail.path,
-      fieldName: 'purchaseRequisitionNumber',
-      start: 'createDate',
-      end: 'estimateDeliveryDate'
-    },
-    {
-      key: 'purchaseOrder',
-      resource: sidebarResource.purchaseOrder,
-      title: resources?.purchaseOrder?.titlePlural,
-      path: routes.purchaseOrderDetail.path,
-      fieldName: 'purchaseOrderNumber',
-      start: 'purchaseOrderDate',
-      end: 'deliveryDate'
-    },
-    {
-      key: 'repairJob',
-      resource: sidebarResource.repairJob,
-      title: resources?.repairJob?.titlePlural,
-      path: routes.repairJobDetail.path,
-      fieldName: 'repairJobName',
-      start: 'startDate',
-      end: 'expectedCompletionDate'
-    },
-    {
-      key: 'repairOrder',
-      resource: sidebarResource.repairOrder,
-      title: resources?.repairOrder?.titlePlural,
-      path: routes.repairOrderDetail.path,
-      fieldName: 'repairOrderNumber',
-      start: 'createDate',
-      end: 'expectedCompletionDate'
-    },
-    {
-      key: 'sublease',
-      resource: sidebarResource.sublease,
-      title: resources?.sublease?.titlePlural,
-      path: routes.subleaseDetail.path,
-      fieldName: 'subleaseName',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
-    },
-    {
-      key: 'projectSales',
-      resource: sidebarResource.projectSales,
-      title: resources?.projectSales?.titlePlural,
-      path: routes.projectSalesDetail.path,
-      fieldName: 'projectName',
-      start: 'startDate',
-      end: 'endDate'
-    },
-    {
-      key: 'fieldServiceOrder',
-      resource: sidebarResource.fieldServiceOrder,
-      title: resources?.fieldServiceOrder?.titlePlural,
-      path: routes?.fieldServiceOrderDetail?.path,
-      fieldName: 'fieldServiceOrderNumber',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
-    },
-    {
-      key: 'quotation',
-      resource: sidebarResource.quotation,
-      title: resources?.quotation?.titlePlural,
-      path: routes?.quotationDetail.path,
-      fieldName: 'quotationNumber',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
-    },
-    {
-      key: 'serializedAsset',
-      resource: sidebarResource.serializedAsset,
-      title: resources?.serializedAsset?.titlePlural,
-      path: routes.serializedAssetDetail.path,
-      fieldName: 'assetNumber',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
-    },
-    {
-      key: 'product',
-      resource: sidebarResource.product,
-      title: resources?.product?.titlePlural,
-      path: routes.productDetail.path,
-      fieldName: 'productName',
-      start: 'estimateStartDate',
-      end: 'estimateEndDate'
-    },
-    {
-      key: 'employeeMaster',
-      resource: sidebarResource.employeeMaster,
-      title: resources?.employeeMaster?.titlePlural,
-      path: routes.employeeMasterDetail.path,
-      fieldName: 'technician',
-      start: 'startDate',
-      end: 'endDate'
-    },
-    {
-      key: 'assemblyOrder',
-      resource: sidebarResource.assemblyOrder,
-      title: resources?.assemblyOrder?.titlePlural,
-      path: routes.assemblyOrderDetail.path,
-      fieldName: 'assemblyOrderNumber',
-      start: 'createDate',
-      end: 'estimateCompleteDate'
-    },
-    {
-      key: 'subcontractAssembly',
-      resource: sidebarResource.subcontractAssembly,
-      title: resources?.subcontractAssembly?.titlePlural,
-      path: routes.subcontractAssemblyDetail.path,
-      fieldName: 'subcontractAssemblyNumber',
-      start: 'createDate',
-      end: 'expectedDeliveryDate'
-    }
-  ];
+  const ref: any = useRef();
+  const ganttRef = useRef<GantttViewRef>();
 
   useEffect(() => {
     fetchPolicy();
-  }, []);
-
-  useEffect(() => {
-    const options: any = [];
-    PLANNING_RESOURCE?.forEach((item) => {
-      if (permissions[item.key] && permissions[item.key]?.isRead) {
-        options.push(item);
-      }
-    });
-    setResourceList(options);
   }, []);
 
   useEffect(() => {
@@ -238,6 +70,9 @@ function PlanningView() {
     if (ref?.current) {
       ref?.current?.fetchData();
       setCreateDialog(false);
+    }
+    if (ganttRef.current) {
+      ganttRef.current?.fetchData();
     }
   };
 
@@ -257,8 +92,10 @@ function PlanningView() {
   useEffect(() => {
     if ([sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && view === 'list') {
       setView('calendar');
+    } else if (view === 'gantt' && selectedResource?.resource !== sidebarResource.product) {
+      setView('calendar');
     }
-  }, [selectedResource]);
+  }, [selectedResource, view]);
 
   return (
     <>
@@ -272,8 +109,8 @@ function PlanningView() {
               permissions={permissions?.planningView}
               module={resources?.planningView?.titlePlural}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
             />
@@ -284,6 +121,7 @@ function PlanningView() {
             <CalendarView
               topRightSlot={
                 <TopRightButtons
+                  isProductSelected={isProductSelected}
                   onClickRefreshIcon={onClickRefreshIcon}
                   resetSelectedRecords={resetSelectedRecords}
                   selectedResource={selectedResource}
@@ -304,6 +142,7 @@ function PlanningView() {
             <ListView
               topRightSlot={
                 <TopRightButtons
+                  isProductSelected={isProductSelected}
                   onClickRefreshIcon={onClickRefreshIcon}
                   resetSelectedRecords={resetSelectedRecords}
                   selectedResource={selectedResource}
@@ -317,6 +156,25 @@ function PlanningView() {
               setSelectedResource={setSelectedResource}
               setQueryString={setQueryString}
               ref={ref}
+            />
+          )}
+          {view === 'gantt' && (
+            <GanttView
+              topRightSlot={
+                <TopRightButtons
+                  isProductSelected={isProductSelected}
+                  onClickRefreshIcon={onClickRefreshIcon}
+                  resetSelectedRecords={resetSelectedRecords}
+                  selectedResource={selectedResource}
+                  setCreateDialog={setCreateDialog}
+                  setView={setView}
+                  view={view}
+                />
+              }
+              ref={ganttRef}
+              resourceList={resourceList}
+              selectedResource={selectedResource}
+              setSelectedResource={setSelectedResource}
             />
           )}
         </Box>
@@ -418,7 +276,7 @@ function PlanningView() {
           isClone={false}
           projectSalesId={false}
           close={() => setCreateDialog(false)}
-          fetchData={() => { }}
+          fetchData={() => {}}
           onSuccess={() => {
             onClickRefreshIcon();
           }}
@@ -475,54 +333,3 @@ function PlanningView() {
 }
 
 export default PlanningView;
-
-const TopRightButtons = ({ selectedResource, setCreateDialog, resetSelectedRecords, setView, view, onClickRefreshIcon }) => {
-  const {
-    state: { permissions }
-  }: any = useData();
-  return (
-    <div className="flex justify-end gap-1 ">
-      {selectedResource &&
-        permissions[selectedResource?.key]?.isCreate &&
-        ![sidebarResource.product, sidebarResource.employeeMaster, sidebarResource.serializedAsset]?.includes(selectedResource?.resource) && (
-          <ThemeButton
-            className="mr-2"
-            buttonType="theme"
-            id={'add-button'}
-            onClick={(e) => {
-              setCreateDialog(true);
-            }}
-            startIcon={<AddOutlined />}
-          >
-            Create
-          </ThemeButton>
-        )}
-      {![sidebarResource.product, sidebarResource.employeeMaster]?.includes(selectedResource?.resource) && (
-        <IconButtonTabs
-          onItemClick={resetSelectedRecords}
-          items={
-            [
-              {
-                value: 'calendar',
-                icon: <FaRegCalendar />,
-                tooltip: 'Calendar View'
-              },
-              {
-                value: 'list',
-                icon: <TfiLayoutListThumbAlt />,
-                tooltip: 'List View'
-              }
-            ] as const
-          }
-          setValue={setView}
-          value={view}
-        />
-      )}
-      <HtmlTooltip title={'Refresh'}>
-        <IconButton style={{ width: 32, height: 32 }} size="small" onClick={onClickRefreshIcon}>
-          <RefreshIcon fontSize="small" color="primary" />
-        </IconButton>
-      </HtmlTooltip>
-    </div>
-  );
-};
