@@ -6,3 +6,4 @@ export const SET_CHATTER = 'SET_CHATTER';
 export const SET_CART = 'SET_CART';
 export const SET_START_TOUR = 'SET_START_TOUR';
 export const SET_SEARCH = 'SET_SEARCH';
+export const SET_UPLOADER = 'SET_UPLOADER'

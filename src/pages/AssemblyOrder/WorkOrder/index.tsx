@@ -454,7 +454,7 @@ const WorkOrder = ({
       }
     });
 
-    if (rows?.every((r) => r?.workOrderStatus === WORK_ORDER_STATUS.completed)) {
+    if (flattenArray(rows)?.find((r) => r?.workOrderStatus === WORK_ORDER_STATUS.completed)) {
       setNextStep(true);
     }
 

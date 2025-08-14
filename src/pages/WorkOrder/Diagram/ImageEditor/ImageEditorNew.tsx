@@ -5,15 +5,19 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { b64toBlob, cn } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
+import { SET_UPLOADER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const {
+    dispatch
+  }: any = useData();
+
   const editorRef = useRef<EditorRef>(null);
-  const isMomile = useMediaQuery('(max-width:768px)');
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
 
   useEffect(() => {
@@ -37,33 +41,56 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
 
   const handleSave = async () => {
     if (!editorRef.current) return;
-    setSubmitting(true);
     const instance = editorRef.current.getInstance();
     const imageData = instance.toDataURL();
     const blob: any = b64toBlob(imageData);
     const type = `image/${data?.fileName?.split('.')[1]}`;
     const file: any = new File([blob], data?.name, { type });
-    let formData = new FormData();
-    formData.append('file', file);
 
-    axiosInstance()
-      .put(`/attachment-new/replace/${data?._id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        fetchData();
-        setSelectedFile(null);
-        setSubmitting(false);
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+    handleClose()
+    if (file) {
+      const newUploads = [{ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }]
+      dispatch({ type: SET_UPLOADER, payload: newUploads[0] })
+
+
+      await Promise.allSettled(
+        newUploads.map(({ file, _id }) => {
+          return new Promise(async (resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('_id', data?._id)
+
+            let fake = 0;
+            const fakeInterval = setInterval(() => {
+              fake = Math.min(fake + Math.random() * 15, 90);
+              dispatch({ type: SET_UPLOADER, payload: { _id, progress: Math.round(fake) } })
+            }, 200);
+
+            axiosInstance()
+              .put(`/attachment-new/replace`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+              })
+              .then(({ data }) => {
+                clearInterval(fakeInterval);
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'completed', progress: 100 } })
+                toastConfig.setToastConfig({
+                  open: true,
+                  type: 'success',
+                  message: data.message
+                });
+                resolve('success');
+              })
+              .catch((error) => {
+                clearInterval(fakeInterval);
+                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'failed' } })
+                toastConfig.setToastConfig(error);
+                reject('failed');
+              });
+          });
+        })
+      );
+    }
+    fetchData()
   };
 
   const handleDownload = () => {
@@ -82,7 +109,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
       <head className="flex items-center justify-between gap-2 border-b px-4 py-3">
         {data.name && <h6 className="line-clamp-1 text-base font-semibold">{data.name}</h6>}
         <div className="flex items-center gap-2">
-          <ThemeButton disabled={isSubmitting || loading} isLoading={isSubmitting} buttonType="theme" onClick={handleSave}>
+          <ThemeButton disabled={loading} isLoading={false} buttonType="theme" onClick={handleSave}>
             Save
           </ThemeButton>
           <ThemeButton disabled={loading} onClick={handleDownload} buttonType="theme">

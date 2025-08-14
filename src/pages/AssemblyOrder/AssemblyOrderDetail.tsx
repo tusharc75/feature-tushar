@@ -1,4 +1,4 @@
-import { Box, Menu, MenuItem } from '@mui/material';
+import { Box, Dialog, Menu, MenuItem } from '@mui/material';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -14,6 +14,7 @@ import {
   assemblyOrderSteps,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
+  CustomDialogTransition,
   getResourceNormalizeData,
   sidebarResource
 } from 'src/constants/helpers';
@@ -38,9 +39,9 @@ import Invoice from 'src/pages/AssemblyOrder/Invoice';
 import RoadmapViews from './RoadMapViews';
 import ManageRentalManagementDialog from 'src/pages/RentalManagement/ManageRental';
 import { ExpandMore } from '@mui/icons-material';
-import { VITE_APP_DMS_URL } from 'src/config';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import ManageFile from 'src/components/Activity/AttachmentsNew/ManageFile';
 
 const AssemblyOrderDetail = () => {
   const renderedFrom = camelCase(sidebarResource.assemblyOrder);
@@ -69,8 +70,9 @@ const AssemblyOrderDetail = () => {
   const [resourcePolicyData, setResourcePolicyData] = useState(null);
   const [openRentalDialog, setOpenRentalDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-
   const [assemblySteps, setAssemblySteps] = useState([]);
+  const [openUploadFile, setOpenUploadFile] = useState({ open: false })
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -229,7 +231,7 @@ const AssemblyOrderDetail = () => {
                     />
                     <ThemeButton
                       onClick={() => {
-                        window.open(`${VITE_APP_DMS_URL}/document/${assemblyOrderData?.dmsFolder?._id}`, '_blank');
+                        setOpenUploadFile({ open: true });
                       }}
                     >
                       {`Upload Documents`}
@@ -450,6 +452,34 @@ const AssemblyOrderDetail = () => {
           )}
         />
       )}
+
+      <Dialog
+        open={openUploadFile.open}
+        aria-labelledby="customized-dialog-title"
+        maxWidth={'md'}
+        onClose={(e, reason) => {
+          if (reason !== 'backdropClick') {
+
+          }
+        }}
+        fullWidth
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+      >
+        <ManageFile
+          onClose={() => {
+            setOpenUploadFile({ open: false });
+            setFullScreen(false);
+          }}
+          relatedTo={[{ resource: sidebarResource.assemblyOrder, referenceId: assemblyOrderData?._id, label: assemblyOrderData?.assemblyOrderNumber }]}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+          parentId={assemblyOrderData?.dmsFolder?._id}
+        />
+      </Dialog>
     </Box>
   );
 };

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { camelCase, isEmpty, isObject, startCase } from 'lodash';
+import { camelCase, kebabCase, startCase } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { MdFilterList } from 'react-icons/md';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -10,7 +10,15 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { cn, dateFormatToSend, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, primaryFields, sidebarResource } from 'src/constants/helpers';
+import {
+  cn,
+  dateFormatToSend,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  primaryFields,
+  sidebarResource
+} from 'src/constants/helpers';
 import { TableCommonProps } from 'src/pages/Reports/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import DisplayFilterChip from 'src/pages/Reports/tables/DisplayFilterChip';
@@ -18,7 +26,7 @@ import dayjs from 'dayjs';
 
 let cancelTokenSource = null;
 
-const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableCommonProps) => {
+const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }: TableCommonProps) => {
   const toastConfig = React.useContext(CustomToastContext);
   const { generateColumns } = useColumns();
   const {
@@ -35,11 +43,11 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
 
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
-  const resourceStartCase = startCase(selectedReport.resource);
+  const resourceStartCase: any = startCase(selectedReport.resource);
   const renderedFrom = `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
-  const [showGrid, setShowGrid] = React.useState(false);
+  const [showGrid, setShowGrid] = useState(false);
   const [deepFilters, setDeepFilters] = useState([]);
   const [filterByIds, setFilterByIds] = useState([]);
   const [filterTerm, setFilterTerm] = useState({});
@@ -49,14 +57,14 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     setIsColumnsLoading(true);
     const {
       data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}&view=true`);
+    }: any = await axiosInstance().get(`/report/columns?resource=${resourceStartCase}&view=true`);
 
     if (resourceStartCase === sidebarResource.serializedAsset) {
       const {
         data: { data: lookupResource }
       } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
       if (lookupResource) {
-        data?.forEach((e) => {
+        data?.filterFields?.forEach((e: any) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
             e.fieldData.lookup = false;
             e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
@@ -65,168 +73,35 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
       }
     }
 
-    const resourceColumns = [...data];
-    if (resourceStartCase === sidebarResource.purchaseOrder) {
-      resourceColumns.push({
-        fieldData: {
-          _id: '630dc2429ec41861052355a9',
-          fieldLabel: 'Received Date',
-          type: 'date',
-          option: [],
-          required: false,
-          isTooltip: false,
-          tooltipMessage: '',
-          editAble: true,
-          deletAble: true,
-          order: 6,
-          fieldName: 'receivedDate',
-          sectionName: 'PO Information',
-          resource: 'Purchase Order',
-          brand: data[0]?.fieldData?.brand,
-          timeFrame: 'custom'
-        },
-        isCreate: true,
-        isRead: true,
-        isUpdate: true
-      });
-    }
-    if (resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status')) {
-      const index = resourceColumns?.findIndex((r) => r?.fieldData?.fieldName === 'status');
-      if (index !== -1) {
-        resourceColumns?.splice(index + 1, 0, {
-          fieldData: {
-            _id: '630dc2429ec41869052355b1',
-            fieldLabel: 'Status Period',
-            type: 'date',
-            option: [],
-            required: false,
-            isTooltip: false,
-            tooltipMessage: '',
-            editAble: true,
-            deletAble: true,
-            order: 71,
-            fieldName: 'statusPeriod',
-            sectionName: 'Product Inventory',
-            resource: 'Serialized Asset',
-            brand: data[0]?.fieldData?.brand,
-            timeFrame: 'custom'
-          },
-          isCreate: true,
-          isRead: true,
-          isUpdate: true
-        });
-      }
-    }
+    const resourceColumns = [...data?.filterFields];
     setResourceColumns(resourceColumns);
     let columns = [];
-    data.forEach((o) => {
+    data?.columnFields?.forEach((o) => {
       if (o?.fieldData?.fieldName === primaryFields[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]) {
         o.fieldData.primaryField = true;
       }
     });
 
-    let newColumns = generateColumns(
-      routes[resourceCamelCase]?.title,
-      data,
-      routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
-    );
-    if (resourceStartCase === sidebarResource.quotation) {
-      newColumns.push({
-        accessor: 'versionComment',
-        Header: 'Version Comment',
-        show: true,
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
+    let newColumns;
+    if (dynamicForm) {
+      const detailPagePath = `/${kebabCase(selectedReport?.resource)}/detail`;
+      newColumns = generateColumns(resourceStartCase, data?.columnFields, detailPagePath);
+    } else {
+      newColumns = generateColumns(
+        routes[resourceCamelCase]?.title,
+        data?.columnFields,
+        routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
+      );
     }
     columns = [...newColumns, ...getStaticFields()];
-    if (resourceStartCase === sidebarResource.purchaseOrder) {
-      columns.splice(1, 0, {
-        accessor: 'poAmount',
-        Header: 'Purchase Order Amount',
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['poAmount'] ? row.original['poAmount'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
-    if ([sidebarResource.invoice, sidebarResource.fieldTicket].includes(resourceStartCase)) {
-      const extraColumns = [
-        {
-          accessor: 'amount',
-          Header: 'Amount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['amount'] ? row.original['amount'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'tax',
-          Header: 'Tax',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['tax'] ? row.original['tax'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'discount',
-          Header: 'Discount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['discount'] ? row.original['discount'] : <NoDataCell />}</h5>
-            </>
-          )
-        },
-        {
-          accessor: 'totalAmount',
-          Header: 'Total Amount',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <>
-              <h5 className="text-truncate">{row.original['totalAmount'] ? row.original['totalAmount'] : <NoDataCell />}</h5>
-            </>
-          )
-        }
-      ];
-      columns = [...columns, ...extraColumns];
-    }
-    if (resourceStartCase === sidebarResource.workOrder) {
-      columns.push({
-        accessor: 'totalConsumablesCost',
-        Header: 'Total Consumables Cost',
-        show: true,
-        disabled: false,
-        Cell: ({ row }) => (
-          <>
-            <h5 className="text-truncate">{row.original['totalConsumablesCost'] ? row.original['totalConsumablesCost'] : <NoDataCell />}</h5>
-          </>
-        )
-      });
-    }
     columns?.forEach((e) => {
       e.editable = false;
     });
     setColumns([...columns]);
     setIsColumnsLoading(false);
-  }, [generateColumns, resourceCamelCase, resourceStartCase, setColumns, setIsColumnsLoading, setResourceColumns]);
+  }, [generateColumns, resourceCamelCase, resourceStartCase, dynamicForm, setColumns, setIsColumnsLoading, setResourceColumns]);
 
   const getQueryString = (isExport = false, deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-
     let filterQuery = `?page=${page}&limit=${limit}&`;
     let deepFilter = [];
     let newDeepFilter = [...deepFiltersP];
@@ -277,7 +152,8 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     const dateFilter: any = [];
     const statusPeriodDateFilter: any = [];
 
-    const isStatusPeriod = resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
+    const isStatusPeriod =
+      resourceStartCase === sidebarResource.serializedAsset && resourceColumns?.some((r) => r?.fieldData?.fieldName === 'status');
 
     if (deepFiltersP?.length > 0) {
       deepFilter = [
@@ -331,53 +207,62 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     }
 
     return { query: `${filterQuery}`, deepFilter: newDeepFilter };
-
   };
 
-  const fetchResourceData = useCallback((deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
-    setShowGrid(true);
+  const fetchResourceData = useCallback(
+    (deepFiltersP = deepFilters, filterByIdsP = filterByIds) => {
+      setShowGrid(true);
 
-    let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
-    setDeepFilters(deepFilter);
+      let { query, deepFilter } = getQueryString(false, deepFiltersP, filterByIdsP);
+      setDeepFilters(deepFilter);
 
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel();
-    }
-    cancelTokenSource = axios.CancelToken.source();
-    dispatch({ type: 'loading', loading: true });
-
-    let api = `/report${routes[resourceCamelCase].path}${query}`;
-    if (resourceCamelCase === 'quotes') {
-      api = `/report/quote-builder${query}`;
-    } else {
-      api = `/report${routes[resourceCamelCase].path}${query}`;
-    }
-
-    axiosInstance().get(api, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      data = data.map((u: any) => {
-        let finalObject = prepareDataForGrid(u);
-        return finalObject;
-      });
-
-      dispatch({ type: 'initialize', data: data, count: count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    }).catch((err) => {
-      if (!axios.isCancel(err)) {
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-        toastConfig.setToastConfig(err);
+      if (cancelTokenSource) {
+        cancelTokenSource.cancel();
       }
-    });
-  },
-    [dispatch, getQueryString, resourceCamelCase, toastConfig]
+      cancelTokenSource = axios.CancelToken.source();
+      dispatch({ type: 'loading', loading: true });
+
+      let api = dynamicForm ? `/report/dynamic-form${query}` : `/report${routes[resourceCamelCase].path}${query}`;
+      if (resourceCamelCase === 'quotes') {
+        api = `/report/quote-builder${query}`;
+      }
+      const requestConfig: any = { cancelToken: cancelTokenSource?.token };
+      if (dynamicForm) {
+        requestConfig.headers = {
+          resource: resourceStartCase
+        };
+      }
+
+      axiosInstance()
+        .get(api, requestConfig)
+        .then(({ data: { data, count } }) => {
+          data = data.map((u: any) => {
+            let finalObject = prepareDataForGrid(u);
+            return finalObject;
+          });
+
+          dispatch({ type: 'initialize', data: data, count: count });
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+        })
+        .catch((err) => {
+          if (!axios.isCancel(err)) {
+            setTimeout(() => {
+              dispatch({ type: 'loading', loading: false });
+            }, gridLoadingTimeout);
+            toastConfig.setToastConfig(err);
+          }
+        });
+    },
+    [dispatch, getQueryString, resourceCamelCase, resourceStartCase, dynamicForm, toastConfig]
   );
 
   const getApi = () => {
     let api = null;
-    if (resourceCamelCase === 'quotes') {
+    if (dynamicForm) {
+      api = `/report/dynamic-form`;
+    } else if (resourceCamelCase === 'quotes') {
       api = `/report/quote-builder`;
     } else {
       api = `/report${routes[resourceCamelCase].path}`;
@@ -415,7 +300,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
     fetchGridColumns();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (showGrid) {
       fetchResourceData();
     }
@@ -441,7 +326,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               </ThemeButton>
             )}
             <AsynImportExportMenu
-              resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+              resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               subResource={'report'}
               permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
               module={''}
@@ -449,6 +334,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               afterImportCompleted={() => { }}
               onlyExport={true}
               additionalParams={getQueryString(true).query}
+              additionalHeaders={dynamicForm ? { resource: resourceStartCase } : null}
             />
           </>
         )}
@@ -474,7 +360,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
               : columns
           }
           state={state}
-          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchResourceData}
@@ -495,7 +381,7 @@ const ReportsTable = ({ state: reportState, isMobile, isSidebarOpen }: TableComm
           }}
           loading={isColumnsLoading}
           filterTitle={selectedReport.title}
-          resource={sidebarResource[resourceCamelCase]}
+          resource={dynamicForm ? resourceStartCase : sidebarResource[resourceCamelCase]}
           columns={resourceColumns}
           onApplyFilter={fetchResourceData}
           deepFilters={deepFilters}
