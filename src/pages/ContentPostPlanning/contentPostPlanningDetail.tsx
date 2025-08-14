@@ -97,8 +97,9 @@ const ContentPostPlanningDetail = () => {
   };
 
   const handleChangeStatus = (status) => {
+    const ids = [id]
     axiosInstance()
-      .put('content-post-planning/update-status', { _id: id, status: status })
+      .put('content-post-planning/update-status', { _id: ids, status: status })
       .then(({ data: { data } }) => {
         fetchData();
         toastConfig.setToastConfig({
