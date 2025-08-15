@@ -3142,7 +3142,8 @@ export const SERIALIZED_PACKAGES_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',
-  customerPossession: 'Customer Possession'
+  customerPossession: 'Customer Possession',
+  disassembled: 'Disassembled'
 };
 
 export const PACKAGE_TYPE = {
