@@ -14,6 +14,10 @@ import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import MyProfile from 'src/pages/ProfilePage/components/MyProfile';
+import SecurityLogin from 'src/pages/ProfilePage/components/SecurityLogin';
+import ProxiesDelegations from 'src/pages/ProfilePage/components/ProxiesDelegations';
 
 const useStyles = makeStyles((theme: Theme) => ({
   paper: {
@@ -55,6 +59,7 @@ export default function ProfilePage(props) {
   const [userFields, setUserFields] = useState([]);
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
+  const [tabValue, setTabValue] = useState(0);
 
   const handleItemClick = (obj) => {
     if (obj.id) setActiveItem(obj.id);
@@ -118,6 +123,10 @@ export default function ProfilePage(props) {
       });
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
   return (
     <Fragment>
       <Grid container className="headerbox">
@@ -125,52 +134,64 @@ export default function ProfilePage(props) {
           <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
         </Grid>
       </Grid>
-      <CustomContainer>
-        <Box p={{ xs: 0, md: 2 }}>
-          <Grid container spacing={3}>
-            <Grid size={{ sm: 12, md: 4, lg: 3 }}>
-              <div>
-                <ProfileSidebar
-                  onItemClick={handleItemClick}
-                  activeLink={activeItem}
-                  userData={userData}
-                  onFetchUserData={fetchUserData}
-                  otherDetails={otherDetails}
-                />
-              </div>
-            </Grid>
-            <Grid size={{ sm: 12, md: 8, lg: 9 }} className="bgbox">
-              {activeItem === profileMenuItems.profile ? (
-                <ManageProfile
-                  displayUserDetails={true}
-                  userFields={userFields}
-                  userData={userData}
-                  userProxy={proxyBy}
-                  loading={loading}
-                  userLoading={userLoading}
-                  onFetchUserData={fetchUserData}
-                  otherDetails={otherDetails}
-                />
-              ) : activeItem === profileMenuItems.notification ? (
-                <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData?._id} onSuccess={fetchUserData} />
-              ) : activeItem === profileMenuItems.uiPreference ? (
-                <UiPreference
-                  userData={userData}
-                  onSuccess={() => {
-                    fetchUserData(true);
-                  }}
-                />
-              ) : activeItem === profileMenuItems.setting ? (
-                <Paper className={classes.paper}>setting</Paper>
-              ) : activeItem === profileMenuItems.users ? (
-                <Paper className={classes.paper}>users</Paper>
-              ) : activeItem === profileMenuItems.securityPrivacy ? (
-                <Paper className={classes.paper}>securityPrivacy</Paper>
-              ) : null}
-            </Grid>
-          </Grid>
+
+      {/* <CustomContainer> */}
+      <Box p={{ xs: 0, md: 2 }}>
+        <Box className={`detail-container-v1`}>
+          <CustomTabs value={tabValue} onChange={handleTabChange}>
+            <CustomTab value={0}>My Profile</CustomTab>
+            <CustomTab value={1}>Security & Login</CustomTab>
+            <CustomTab value={2}>Proxies & Delegations</CustomTab>
+            <CustomTab value={3}>Notification Preferences</CustomTab>
+            <CustomTab value={4}>UI Preferences</CustomTab>
+          </CustomTabs>
+          <TabPanel value={tabValue} index={0}>
+            <MyProfile handleItemClick={handleItemClick} activeItem={activeItem} userData={userData} onFetchUserData={fetchUserData} otherDetails={otherDetails} proxyBy={proxyBy} userFields={userFields} loading={loading} userLoading={userLoading} />
+          </TabPanel>
+          <TabPanel value={tabValue} index={1}>
+            <SecurityLogin userData={userData} dispatch={dispatch} onFetchUserData={fetchUserData} toastConfig={toastConfig} permissions={permissions} />
+          </TabPanel>
+          <TabPanel value={tabValue} index={2}>
+            <ProxiesDelegations userData={userData} userProxy={proxyBy} onFetchUserData={fetchUserData} />
+          </TabPanel>
+          <TabPanel value={tabValue} index={3}>
+            <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData?._id} onSuccess={fetchUserData} />
+          </TabPanel>
+          <TabPanel value={tabValue} index={4}>
+            <UiPreference
+              userData={userData}
+              onSuccess={() => {
+                fetchUserData(true);
+              }}
+            />
+          </TabPanel>
         </Box>
-      </CustomContainer>
+      </Box>
+
+      {/* <Grid container spacing={3}> */}
+      {/* <Grid>
+        <ProfileSidebar
+          onItemClick={handleItemClick}
+          activeLink={activeItem}
+          userData={userData}
+          onFetchUserData={fetchUserData}
+          otherDetails={otherDetails}
+        />
+      </Grid>
+      <Grid>
+        <ManageProfile
+          displayUserDetails={true}
+          userFields={userFields}
+          userData={userData}
+          userProxy={proxyBy}
+          loading={loading}
+          userLoading={userLoading}
+          onFetchUserData={fetchUserData}
+          otherDetails={otherDetails}
+        />
+      </Grid> */}
+      {/* </Grid> */}
+
     </Fragment>
   );
 }
