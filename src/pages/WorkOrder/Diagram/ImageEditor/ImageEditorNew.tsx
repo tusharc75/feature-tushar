@@ -5,7 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { b64toBlob, cn } from 'src/constants/helpers';
 import Editor, { EditorRef } from 'src/pages/WorkOrder/Diagram/ImageEditor/Editor';
-import { SET_UPLOADER } from 'src/StateProvider/actionTypes';
+import { SET_FILES_UPLOAD_PROGRESS } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 
@@ -50,7 +50,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
     handleClose()
     if (file) {
       const newUploads = [{ file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }]
-      dispatch({ type: SET_UPLOADER, payload: newUploads[0] })
+      dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: newUploads[0] })
 
 
       await Promise.allSettled(
@@ -63,7 +63,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
             let fake = 0;
             const fakeInterval = setInterval(() => {
               fake = Math.min(fake + Math.random() * 15, 90);
-              dispatch({ type: SET_UPLOADER, payload: { _id, progress: Math.round(fake) } })
+              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, progress: Math.round(fake) } })
             }, 200);
 
             axiosInstance()
@@ -72,7 +72,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
               })
               .then(({ data }) => {
                 clearInterval(fakeInterval);
-                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'completed', progress: 100 } })
+                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'completed', progress: 100 } })
                 toastConfig.setToastConfig({
                   open: true,
                   type: 'success',
@@ -82,7 +82,7 @@ const ToastImageEditor = ({ data, fetchData, setSelectedFile, handleClose = null
               })
               .catch((error) => {
                 clearInterval(fakeInterval);
-                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'failed' } })
+                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'failed' } })
                 toastConfig.setToastConfig(error);
                 reject('failed');
               });

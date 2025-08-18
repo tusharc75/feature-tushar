@@ -117,7 +117,6 @@ const ListView = ({ topRightSlot }) => {
               aria-label="Edit"
               disabled={permissions?.contentPostPlanning?.isUpdate && row?.original?.status !== CONTENT_POST_PLANNING_STATUS.published ? false : true}
               onClick={() => {
-                console.log(row?.original?.status);
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
@@ -422,11 +421,10 @@ const ListView = ({ topRightSlot }) => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${
-              deleteRecord
-                ? `${resources?.contentPostPlanning?.titleSingular?.toLowerCase()} : ${deleteRecord?.title || deleteRecord?.name}`
-                : `selected ${resources?.contentPostPlanning?.titlePlural?.toLowerCase()}`
-            } ?`}
+            message={`Are you sure you want to delete ${deleteRecord
+              ? `${resources?.contentPostPlanning?.titleSingular?.toLowerCase()} : ${deleteRecord?.title || deleteRecord?.name}`
+              : `selected ${resources?.contentPostPlanning?.titlePlural?.toLowerCase()}`
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
