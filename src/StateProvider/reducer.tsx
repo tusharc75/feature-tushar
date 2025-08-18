@@ -1,5 +1,5 @@
 import { getPermissions } from '../constants/helpers';
-import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH, SET_UPLOADER } from './actionTypes';
+import { SET_USER, USER_LOADING, SET_ROLE, SET_SELECTED_ENTITY, SET_CHATTER, SET_CART, SET_START_TOUR, SET_SEARCH, SET_FILES_UPLOAD_PROGRESS } from './actionTypes';
 
 export const initialState = {
   user: null,
@@ -17,7 +17,7 @@ export const initialState = {
     stepIndex: 0
   },
   gridMetaData: {},
-  uploads: []
+  filesUploadProgress: []
 };
 
 const reducer = (state = initialState, action) => {
@@ -55,10 +55,10 @@ const reducer = (state = initialState, action) => {
         resources: nResources
       };
 
-    case SET_UPLOADER:
-      let uploads = [...state?.uploads]
-      if (action?.payload && uploads?.some(u => u?._id === action?.payload?._id)) {
-        uploads = uploads?.map(u => {
+    case SET_FILES_UPLOAD_PROGRESS:
+      let filesUploadProgress = [...state?.filesUploadProgress]
+      if (action?.payload && filesUploadProgress?.some(u => u?._id === action?.payload?._id)) {
+        filesUploadProgress = filesUploadProgress?.map(u => {
           if (u?._id === action?.payload?._id) {
             const { _id, ...rest } = action?.payload
             return {
@@ -69,11 +69,15 @@ const reducer = (state = initialState, action) => {
           return u
         })
       } else if (action?.payload) {
-        uploads = [...uploads, action?.payload]
+        filesUploadProgress = [...filesUploadProgress, action?.payload]
       } else {
-        uploads = []
+        filesUploadProgress = []
       }
-      return { ...state, uploads: [...uploads] }
+      return {
+        ...state, filesUploadProgress:
+          [...filesUploadProgress],
+        isFilesUploading: filesUploadProgress?.find((e) => e?.status === 'uploading') ? true : false
+      }
     default:
       return state;
   }
