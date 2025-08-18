@@ -272,6 +272,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           const initial: TimeRange = { start: win.start, end: win.end };
           currentRangeRef.current = initial;
 
+          setLoading(false);
+          setMoreDataLoading(false);
           // only fetch the visible window, first page
           fetchVisible(pagerRef.current.getParamsForVisible(initial));
 

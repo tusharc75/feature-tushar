@@ -86,21 +86,21 @@ export class VisibleWindowPager {
     const isInitial =
       this.clientHeight === 0 && this.scrollHeight === 0 && this.scrollTop === 0 && this.totalGroups === 0 && this.groupHeights.length === 0;
 
+    // Compute indices with prefetch margin
+    const prefetchPx = Math.max(0, opts?.prefetchPx ?? 0);
+    const { startIdx, endIdx } = this.getVisibleIndices(prefetchPx);
+
     if (isInitial || win.loadedSkips.size === 0) {
-      if (!win.loadedSkips.has(0)) return this.buildParams(n, 0);
+      if (!win.loadedSkips.has(0)) return this.buildParams(n, opts?.skipLimit ? 0 : startIdx + 1);
       // if we already loaded skip 0, continue to visible math
     }
 
     this.recomputeIfDirty();
 
-    // Compute indices with prefetch margin
-    const prefetchPx = Math.max(0, opts?.prefetchPx ?? 0);
-    const { startIdx, endIdx } = this.getVisibleIndices(prefetchPx);
-
     if (startIdx === -1 || endIdx === -1) {
       // No computable viewport; try a safe fallback (first page if not loaded)
-      console.log({ startIdx, endIdx, this: this, skip: opts.skipLimit ? skip : startIdx + 1 });
-      if (!win.loadedSkips.has(0)) return this.buildParams(n, opts.skipLimit ? 0 : startIdx + 1);
+      console.log({ startIdx, endIdx, this: this, skip: opts?.skipLimit ? 0 : startIdx + 1 });
+      if (!win.loadedSkips.has(0)) return this.buildParams(n, opts?.skipLimit ? 0 : startIdx + 1);
       return null;
     }
 
@@ -109,8 +109,8 @@ export class VisibleWindowPager {
 
     for (let skip = firstSkip; skip <= lastSkip; skip += this.limit) {
       if (!win.loadedSkips.has(skip)) {
-        console.log({ startIdx, endIdx, this: this, skip: opts.skipLimit ? skip : startIdx + 1 });
-        return this.buildParams(n, opts.skipLimit ? skip : startIdx + 1);
+        console.log({ startIdx, endIdx, this: this, skip: opts?.skipLimit ? skip : startIdx + 1 });
+        return this.buildParams(n, opts?.skipLimit ? skip : startIdx + 1);
       }
     }
 
