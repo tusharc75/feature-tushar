@@ -15,7 +15,7 @@ import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent
 import InputField from "src/components/Helpers/InputField";
 import MultiFileUpload from "src/components/Activity/AttachmentsNew/MultiFileUpload";
 import { useData } from "src/StateProvider/Provider";
-import { SET_UPLOADER } from "src/StateProvider/actionTypes";
+import { SET_FILES_UPLOAD_PROGRESS } from "src/StateProvider/actionTypes";
 
 const ManageFile = ({
   relatedTo,
@@ -45,7 +45,7 @@ const ManageFile = ({
   const fetchFields = async () => {
     try {
       setLoading(true)
-      let { fieldsDataAll, fieldsDataForCreate, fieldsDataForUpdate } = await fetch_resource_fields(sidebarResource.attachment);
+      let { fieldsDataForCreate } = await fetch_resource_fields(sidebarResource.attachment);
       const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
       if (attachmentType) {
         tempInitialData.attachmentType = attachmentType
@@ -68,42 +68,39 @@ const ManageFile = ({
     if (files?.length) {
       const newUploads = files?.map(file => {
         const obj = { file, progress: 0, status: 'uploading', _id: Math.random().toString(36).substring(7) }
-        dispatch({ type: SET_UPLOADER, payload: obj })
+        dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: obj })
         return obj;
       })
-
       await Promise.allSettled(
         newUploads.map(({ file, _id }) => {
           return new Promise(async (resolve, reject) => {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('data', JSON.stringify(rest))
-            if (parentId) formData.append('parentId', parentId);
+            if (parentId) {
+              formData.append('parentId', parentId);
+            }
             formData.append('relatedTo', JSON.stringify(relatedTo))
-
             let fake = 0;
             const fakeInterval = setInterval(() => {
               fake = Math.min(fake + Math.random() * 15, 90);
-              dispatch({ type: SET_UPLOADER, payload: { _id, progress: Math.round(fake) } })
+              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, progress: Math.round(fake) } })
             }, 200);
-
-            axiosInstance()
-              .post(`/attachment-new`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-              })
-              .then(({ data }) => {
-                clearInterval(fakeInterval);
-                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'completed', progress: 100 } })
-                toastConfig.setToastConfig({
-                  open: true,
-                  type: 'success',
-                  message: data.message
-                });
-                resolve('success');
-              })
+            axiosInstance().post(`/attachment-new`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            }).then(({ data }) => {
+              clearInterval(fakeInterval);
+              dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'completed', progress: 100 } })
+              toastConfig.setToastConfig({
+                open: true,
+                type: 'success',
+                message: data.message
+              });
+              resolve('success');
+            })
               .catch((error) => {
                 clearInterval(fakeInterval);
-                dispatch({ type: SET_UPLOADER, payload: { _id, status: 'failed' } })
+                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: { _id, status: 'failed' } })
                 toastConfig.setToastConfig(error);
                 reject('failed');
               });
@@ -118,11 +115,9 @@ const ManageFile = ({
 
   const validate = (values) => {
     const errors: any = {}
-
     if (!values?.files?.length) {
       errors['files'] = 'Select at least one file'
     }
-
     return errors;
   }
 
