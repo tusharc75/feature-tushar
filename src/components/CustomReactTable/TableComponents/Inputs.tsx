@@ -145,7 +145,7 @@ const RenderTextInput = ({
         onKeyDown={handleKeyDown}
         onChange={(e) => {
           let value: string | number = e.target.value;
-          if (value !== '' && !/^\d+$/.test(value) && type === 'number' && !columnDef.isAllowedMinus) {
+          if (value !== '' && !/^\d*\.?\d*$/.test(value) && type === 'number' && !columnDef.isAllowedMinus) {
             return;
           }
           if (type === 'number' && value) {
@@ -586,6 +586,6 @@ export const RenderInputField = memo((props: InputProps) => {
       return <RenderCurrencyAutoComplete {...props} validationSchema={validationSchema} />;
     }
     default:
-      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces)} type={'number'} forceUpdate />;
+      return <RenderTextInput {...props} validationSchema={decimalPlaceValidator(props.columnDef.decimalPlaces || 2)} type={'number'} forceUpdate />;
   }
 });
