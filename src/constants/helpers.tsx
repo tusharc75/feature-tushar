@@ -961,8 +961,7 @@ export const getObjKeys = (val: string | boolean = '', fields: any[]) => {
     if (ele?.isDefaultValue && fields?.find((e) => e?.inputFields?.includes(ele?.fieldName))) {
       const calValues = autoCalculateSpecificFields({ [ele?.fieldName]: obj[ele?.fieldName] }, obj, fields);
       Object.assign(obj, calValues);
-    }
-    else if (ele?.type === 'formula') {
+    } else if (ele?.type === 'formula') {
       if (ele?.inputFields?.length) {
         const calValues = autoCalculateSpecificFields({ [ele?.inputFields[0]]: obj[ele?.inputFields[0]] }, obj, fields);
         Object.assign(obj, calValues);
@@ -1088,8 +1087,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'formula') {
       if (key?.returnType === 'number') {
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : 0;
-      }
-      else {
+      } else {
         obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
     } else {
@@ -1271,7 +1269,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1475,16 +1473,14 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'formula') {
       if (input?.returnType === 'string') {
         schema[input.fieldName] = input.required ? string().required(message) : string();
-      }
-      else if (input?.returnType === 'boolean') {
+      } else if (input?.returnType === 'boolean') {
         schema[input.fieldName] = input.required ? boolean().required(message) : boolean();
-      }
-      else {
-        schema[input.fieldName] = input.required ? number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+      } else {
+        schema[input.fieldName] = input.required
+          ? number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
           : number().nullable();
       }
-    }
-    else {
+    } else {
       if (uniqueDependentFields.length > 0) {
         schema[input.fieldName] = string().when(uniqueDependentFields, {
           is: (...args) => combinedValidation(...args),
@@ -1560,7 +1556,7 @@ export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/Y
 export const cardDateFormat = 'MMM DD, YYYY';
 export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
-export const DEFAULT_TIME_ZONE = 'America/Chicago'
+export const DEFAULT_TIME_ZONE = 'America/Chicago';
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/DD/YYYY';
 
@@ -1680,7 +1676,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) { }
+    } catch (e) {}
   }
 };
 
@@ -2871,11 +2867,11 @@ export const PRODUCT_SERIAL_NUMBER_STATUS = {
   unAvailable: 'Unavailable'
 };
 
-export const CONTENT_POST_PLANNING_STATUS ={
+export const CONTENT_POST_PLANNING_STATUS = {
   pendingApproval: 'Pending Approval',
   published: 'Published',
-  scheduled: 'Scheduled',
-}
+  scheduled: 'Scheduled'
+};
 
 type ChipStatus =
   | 'Pending'
@@ -3146,7 +3142,8 @@ export const SERIALIZED_PACKAGES_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',
-  customerPossession: 'Customer Possession'
+  customerPossession: 'Customer Possession',
+  disassembled: 'Disassembled'
 };
 
 export const PACKAGE_TYPE = {
@@ -3381,7 +3378,11 @@ export const DEAL_STAGE = {
 
 export const cloneResourceData = (fromFields, toFields, data, currency) => {
   const overlappingFields = fromFields.filter(
-    (e) => toFields?.filter((e) => !['lookUpDisplay']?.includes(e?.type))?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
+    (e) =>
+      toFields
+        ?.filter((e) => !['lookUpDisplay']?.includes(e?.type))
+        ?.map((e) => e.fieldName)
+        .includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
   );
   const result: any = {};
   overlappingFields?.forEach((e) => {
@@ -3721,8 +3722,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -4055,12 +4056,17 @@ export const checkImageUrl = (url) => {
 };
 
 export const reverseLookupDependentOn = (lookupDependentOn, options = [], value, fields) => {
-  const field = fields?.find(f => f?.fieldName === lookupDependentOn)
-  const option = options?.find(f => f?.optionValue === value)
+  const field = fields?.find((f) => f?.fieldName === lookupDependentOn);
+  const option = options?.find((f) => f?.optionValue === value);
 
   if (option[lookupDependentOn] && field?.type === 'multiSelect' && typeof option[lookupDependentOn] === 'string') {
-    return [option[lookupDependentOn]]
+    return [option[lookupDependentOn]];
   }
-  return option[lookupDependentOn]
-
+  return option[lookupDependentOn];
 };
+export function calculateRatio(a: number, b: number, c: number): number {
+  if (b === 0 || c === 0) {
+    throw new Error('Denominators cannot be zero.');
+  }
+  return c * (b / a);
+}

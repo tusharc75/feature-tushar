@@ -148,7 +148,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         }
       }
       filterColumns = filterFields;
-      setResourceColumns(filterFields);
+      setResourceColumns(columnFields);
     }
     setFilterColumns([...filterColumns]);
   };

@@ -18,7 +18,7 @@ import { Delete } from '@mui/icons-material';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
-const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
+const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssembled = false }) => {
 
   const renderedFrom = `${camelCase(sidebarResource?.serializedPackages)}_Assign`;
   const { setToastConfig } = useContext(CustomToastContext);
@@ -343,7 +343,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
   const handleReplaceAssets = (data) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: [{ oldAssetId: selectedRecords[0]?.asset, newAssetId: data[0]?.asset }] })
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: data })
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });
@@ -356,18 +356,26 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
       });
   }
 
-  const disableAssign = () => {
-    if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty && f?.serializedProduct);
-    return flatArray.length === 0;
-  };
-
-  const getProducts = (type = MATERIAL_TYPE.serializedAsset) => {
+  const getProducts = (type = MATERIAL_TYPE.serializedAsset, action = '') => {
     const productsMap = new Map();
 
-    selectedRecords
-      .filter((i) => i.type === MATERIAL_TYPE.product && i.serializedProduct)
-      ?.forEach((e) => {
+    if (action === 'replaceAsset') {
+      selectedRecords?.forEach(ele => {
+        if (ele?.type === MATERIAL_TYPE.serializedAsset) {
+          const product = dataRows?.find(d => d?.type === MATERIAL_TYPE.product && d?.serializedProduct && d?.materialId === ele?.product && d?._id === ele?._id)
+          if (product) {
+            if (productsMap.has(ele.product)) {
+              const existingProduct = productsMap.get(ele.product);
+              existingProduct.qty += 1;
+              existingProduct._id = [...existingProduct._id, product._id];
+            } else {
+              productsMap.set(ele.product, { product: product?.materialId, qty: 1, productName: product?.detail, _id: [product?._id] })
+            }
+          }
+        }
+      });
+    } else {
+      selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.product && r?.serializedProduct)?.forEach((e) => {
         let diff = e?.qty - e?.assetQty;
         if (diff > 0) {
           if (productsMap.has(e.materialId)) {
@@ -385,47 +393,43 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
           }
         }
       });
+    }
 
     return Array.from(productsMap.values())
+  }
+
+  const isVisible = (action = '') => {
+    if (selectedRecords.length === 0 || !permissions?.serializedPackages?.isUpdate) return false;
+    if (action === 'replaceAsset') {
+      return selectedRecords.some((f) => f.type === MATERIAL_TYPE.serializedAsset);
+    }
+    const flatArray = selectedRecords.filter((f) => f.type === MATERIAL_TYPE.product && f.qty > f.assetQty && f?.serializedProduct);
+    return flatArray.length > 0;
   }
 
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.serializedPackages?.isUpdate && (
-          selectedRecords?.length === 1 && selectedRecords[0]?.type === MATERIAL_TYPE.serializedAsset ? (
-            <MenuItem
-              onClick={() => {
-                const product = dataRows?.find(d => d?._id === selectedRecords[0]?._id && d?.materialId === selectedRecords[0]?.product && d?.type === MATERIAL_TYPE.product && d?.serializedProduct)
-                setAssignDialog({
-                  open: true,
-                  type: MATERIAL_TYPE.serializedAsset,
-                  replaceAsset: true,
-                  products: [{
-                    product: product?.materialId,
-                    qty: 1,
-                    productName: product?.detail,
-                    _id: [product?._id]
-                  }]
-                });
-              }}
-            >
-              {`Replace ${resources?.serializedAsset?.titleSingular}`}
-            </MenuItem>
-          ) : (
-            <MenuItem
-              disabled={disableAssign()}
-              onClick={() => {
-                setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
-              }}
-            >
-              {`Assign ${resources?.serializedAsset?.titlePlural}`}
-            </MenuItem>
-          )
-        )}
-        {permissions?.serializedPackages?.isUpdate && (
+        {isVisible() && (
           <MenuItem
-            disabled={disableAssign()}
+            onClick={() => {
+              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: false, products: getProducts() });
+            }}
+          >
+            {`Assign ${resources?.serializedAsset?.titlePlural}`}
+          </MenuItem>
+        )}
+        {isVisible('replaceAsset') && (
+          <MenuItem
+            onClick={() => {
+              setAssignDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, replaceAsset: true, products: getProducts(MATERIAL_TYPE.serializedAsset, 'replaceAsset') });
+            }}
+          >
+            {`Replace ${resources?.serializedAsset?.titlePlural}`}
+          </MenuItem>
+        )}
+        {isVisible() && (
+          <MenuItem
             onClick={() => {
               setAssignDialog({ open: true, type: OTHER_MATERIAL_TYPE.serialNumber, replaceAsset: false, products: getProducts(OTHER_MATERIAL_TYPE.serialNumber) });
             }}
@@ -451,7 +455,7 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
+        isActionButtonVisible={!disAssembled}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: !selectedRecords.length }}
         hasXpadding
@@ -466,6 +470,8 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           expander={true}
+          hideAction={disAssembled}
+          hideSelection={disAssembled}
         />
       ) : (
         <Box p={2} height={500}>
