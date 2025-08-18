@@ -143,7 +143,6 @@ const SerializedPackagesDetail = () => {
               {permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
                 <ThemeButton
                   id={'serialized-package-disassemble'}
-                  buttonType="theme"
                   onClick={() => setShowConfirmBoxDisassembled(true)}
                 >
                   Disassemble
