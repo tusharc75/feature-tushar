@@ -11,7 +11,7 @@ import useSearchHistory from 'src/components/Header/SearchBar/useSearchHistory';
 
 const SearchBar = () => {
   const { items, globalSearch, setGlobalSearch, inputRef, inputValue, optionValue, setInputValue, setOptionValue } = useSearch();
-  const { handleSelectItem, historyItems, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory();
+  const { handleSelectItem, historyItems, handleRemoveItemFromHistory, handleRemoveKeywordFromHistory } = useSearchHistory(items);
 
   return (
     <div className="relative flex flex-grow overflow-hidden rounded-[4px] max-md:my-1 md:max-w-[564px]">
