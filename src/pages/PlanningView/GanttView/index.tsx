@@ -9,18 +9,8 @@ import { DEFAULT_TIME_ZONE, sidebarResource } from 'src/constants/helpers';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import PlanningGroupTemplate from 'src/pages/PlanningView/GanttView/Templates/PlanningGroupTemplate';
 import { PlanningItemTemplate } from 'src/pages/PlanningView/GanttView/Templates/PlanningItemTemplate';
-import {
-  buildOneItem,
-  fmt,
-  getWindow,
-  handleTimelineCLick,
-  mergeCoverage,
-  normalizeRange,
-  RawDay,
-  RawGroup,
-  subtractCoverage,
-  TimeRange
-} from 'src/pages/PlanningView/GanttView/utils';
+import { buildOneItem, getWindow, handleTimelineCLick, RawDay, RawGroup, TimeRange } from 'src/pages/PlanningView/GanttView/utils';
+import { Params, VisibleWindowPager } from 'src/pages/PlanningView/GanttView/VisibleWindowPager';
 import { PlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -45,28 +35,32 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     state: { user, resources }
   }: any = useData();
 
-  const [anchor, setAnchor] = useState(null);
-  const [isOpen, setOpen] = useState({ open: false, data: [], eventData: null });
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [isOpen, setOpen] = useState<{ open: boolean; data: any[]; eventData: any }>({
+    open: false,
+    data: [],
+    eventData: null
+  });
 
-  // Stable datasets (reused; we append/update instead of replacing)
-  const groupsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
-  const itemsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
-
-  // Keep state handles for options and timeline
   const [resourcePolicy, setResourcePolicy] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [moreDataLoading, setMoreDataLoading] = useState(false);
+  const [moreDataLoading, setMoreDataLoading] = useState<boolean>(false);
 
+  const groupsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
+  const itemsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
   const timelineRef = useRef<Timeline | null>(null);
   const timelineContainer = useRef<HTMLDivElement>(null);
 
-  // Range cache/in-flight management
-  const coveredRef = useRef<TimeRange[]>([]);
   const inflightRef = useRef<Map<string, CancelTokenSource>>(new Map());
   const currentRangeRef = useRef<TimeRange | null>(null);
   const initialDrawn = useRef(false);
+  const scrollElement = useRef<HTMLDivElement>();
+  const hasMoreRef = useRef<boolean>(true);
 
-  const PREFETCH_DAYS = 3;
+  const pagerRef = useRef(new VisibleWindowPager(LIMIT));
+  const currentWindowKeyRef = useRef<string | null>(null);
+
+  const scrollThrottleRef = useRef<number | null>(null);
 
   const buildFromRows = useCallback(
     (rows: RawGroup[]) => {
@@ -81,11 +75,14 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         const groupId = rawGroup._id;
         return rawGroup.data.flatMap((d: RawDay, i: number) => {
           const baseId = d._id ?? `item-${i}_${groupId}`;
-          const localDate = dayjs(d.date).tz();
+
+          // local date boundaries for the band
+          const localDate = dayjs(d.date);
           const start = localDate.startOf('day').toDate();
           const end = localDate.endOf('day').toDate();
 
-          const ledgerDate = dayjs.utc(d.date).tz();
+          // ledger comparisons against "today"
+          const ledgerDate = dayjs(d.date);
           const isPast = ledgerDate.isBefore(today, 'day');
           const isFuture = ledgerDate.isAfter(today, 'day');
 
@@ -99,15 +96,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
             resource: selectedResource?.resource
           };
 
-          const one = buildOneItem({
-            baseId,
-            d,
-            base,
-            isPast,
-            isFuture,
-            resourcePolicy
-          });
-
+          const one = buildOneItem({ baseId, d, base, isPast, isFuture, resourcePolicy });
           return one ? [one] : [];
         });
       });
@@ -117,72 +106,123 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     [resourcePolicy, selectedResource?.resource]
   );
 
-  // Fetch a specific range if not already in-flight; append to datasets on success
-  const fetchRange = async (range: TimeRange) => {
-    const norm = normalizeRange(range);
-    const key = `${fmt(norm.start)}__${fmt(norm.end)}`;
+  const fetchVisible = useCallback(
+    async (params: Params) => {
+      const pager = pagerRef.current;
 
-    if (inflightRef.current.has(key)) return; // already fetching
+      if (!params) return;
+      const range = { end: dayjs(params.date.to, 'MM/DD/YYYY').toDate(), start: dayjs(params.date.from, 'MM/DD/YYYY').toDate() };
 
-    const source = axios.CancelToken.source();
-    inflightRef.current.set(key, source);
-    if (coveredRef.current.length === 0) {
-      setLoading(true);
-    } else {
+      const windowKey = pager.key(range);
+      currentWindowKeyRef.current = windowKey;
+
+      const inflightKey = `${windowKey}__skip:${params.skip}`;
+      if (inflightRef.current.has(inflightKey)) return;
+
+      const source = axios.CancelToken.source();
+      inflightRef.current.set(inflightKey, source);
       setMoreDataLoading(true);
-    }
-    try {
-      const resp = await axiosInstance().get('/planning-view/products-planning', {
-        cancelToken: source.token,
-        params: {
-          limit: LIMIT,
-          date: { from: fmt(norm.start), to: fmt(norm.end) }
+
+      try {
+        const resp = await axiosInstance().get('/planning-view/products-planning', {
+          cancelToken: source.token,
+          params
+        });
+        pager.setTotalGroups(resp.data.count);
+
+        const rows: RawGroup[] = resp?.data?.data ?? [];
+        pager.markResult(range, params.skip, rows.length);
+        hasMoreRef.current = rows.length >= LIMIT;
+
+        const { groups, items } = buildFromRows(rows);
+        if (groups.length) groupsDSRef.current.update(groups);
+        if (items.length) itemsDSRef.current.update(items);
+        timelineRef.current?.redraw();
+        setLoading(false);
+        setMoreDataLoading(false);
+      } catch (error) {
+        if (!axios.isCancel(error)) {
+          setLoading(false);
+          setMoreDataLoading(false);
+          toastConfig.setToastConfig(error);
         }
-      });
-      coveredRef.current = mergeCoverage(coveredRef.current, norm);
-
-      const rows: RawGroup[] = resp?.data?.data ?? [];
-      const { groups, items } = buildFromRows(rows);
-
-      if (!groupsDSRef.current || !itemsDSRef.current) {
-        return;
+      } finally {
+        queueMicrotask(() => {
+          inflightRef.current.get(inflightKey)?.cancel?.();
+          inflightRef.current.delete(inflightKey);
+        });
+        setMoreDataLoading(false);
       }
+    },
+    [buildFromRows]
+  );
 
-      if (groups.length) {
-        groupsDSRef.current.update(groups);
-      }
-      if (items.length) {
-        itemsDSRef.current.update(items);
-      }
+  // Infinite vertical scroll within the visible window: uses skip/limit
+  const getVerticalScrollTarget = useCallback(() => {
+    const container = timelineContainer.current;
+    if (!container) return null;
+    return (
+      (container.querySelector('.vis-left') as HTMLDivElement | null) ||
+      (container.querySelector('.vis-panel.vis-center') as HTMLDivElement | null) ||
+      container
+    );
+  }, []);
 
-      timelineRef.current?.redraw();
-    } catch (error) {
-      if (!axios.isCancel(error)) {
-        toastConfig.setToastConfig(error);
-      }
-    } finally {
-      queueMicrotask(() => {
-        inflightRef.current.get(key)?.cancel?.();
-        inflightRef.current.delete(key);
-      });
+  useEffect(() => {
+    setTimeout(() => {
+      const target = getVerticalScrollTarget();
+      if (!target) return;
 
-      setLoading(false);
-      setMoreDataLoading(false);
-    }
-  };
+      const onScroll = () => {
+        if (scrollThrottleRef.current) return;
+        scrollThrottleRef.current = window.setTimeout(() => {
+          scrollThrottleRef.current = null;
 
-  const ensureRangeCached = async (visible: TimeRange) => {
-    const expanded: TimeRange = {
-      start: dayjs(visible.start).subtract(PREFETCH_DAYS, 'day').toDate(),
-      end: dayjs(visible.end).add(PREFETCH_DAYS, 'day').toDate()
-    };
-    const norm = normalizeRange(expanded);
-    const missing = subtractCoverage(coveredRef.current, norm);
-    if (!missing.length) return;
-    for (const r of missing) {
-      await fetchRange(r);
-    }
-  };
+          const target = getVerticalScrollTarget();
+          if (!target) return;
+
+          // Optional: comment out height writes unless you map to absolute indices
+          const groups = [...timelineContainer.current?.querySelectorAll('.vis-left .vis-label.vis-group-level-0')];
+          groups.forEach((g, i) => {
+            const height = g.getBoundingClientRect().height;
+            pagerRef.current.setGroupItemHeight(i, height);
+          });
+
+          pagerRef.current.setScrollData({
+            scrollTop: target.scrollTop,
+            clientHeight: target.clientHeight,
+            scrollHeight: target.scrollHeight
+          });
+
+          const nearBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 200;
+          const win = currentRangeRef.current ?? timelineRef.current?.getWindow();
+          if (!win) return;
+
+          const params = pagerRef.current.getParamsForVisible(
+            { start: win.start, end: win.end },
+            { prefetchPx: nearBottom ? target.clientHeight * 1.5 : 0, skipLimit: true } // prefetch below the fold
+          );
+
+          if (params && !moreDataLoading && hasMoreRef.current) {
+            fetchVisible(params);
+          }
+        }, 120);
+      };
+
+      target.addEventListener('scroll', onScroll);
+      return () => {
+        target.removeEventListener('scroll', onScroll);
+        if (scrollThrottleRef.current) {
+          clearTimeout(scrollThrottleRef.current);
+          scrollThrottleRef.current = null;
+        }
+      };
+    }, 1000);
+  }, [moreDataLoading]);
+
+  const handleTimelineCLickWrapper = useCallback((e: MouseEvent) => {
+    handleTimelineCLick(e, timelineRef.current, timelineContainer.current);
+  }, []);
 
   const options = useMemo(() => {
     const optionsData: TimelineOptions = {
@@ -197,11 +237,11 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       selectable: false,
       groupHeightMode: 'auto',
       dataAttributes: ['id'],
-      zoomMax: 31556952000, // 1 year
+      zoomMax: 31556952000, // ~1 year
       zoomMin: 60000, // 1 minute
       editable: { updateGroup: false },
       orientation: { item: 'top', axis: 'top' },
-      moment: function (date: Date) {
+      moment(date: Date) {
         return moment(date).tz(user?.user?.timezone || DEFAULT_TIME_ZONE);
       },
       template: (item, element, data) => {
@@ -223,16 +263,20 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         ) as unknown as string;
       },
       onInitialDrawComplete() {
+        scrollElement.current = document.querySelector('.vis-left') as HTMLDivElement | undefined;
         if (initialDrawn.current) return;
         initialDrawn.current = true;
-        // Ensure initial visible window is cached
+
         const win = timelineRef.current?.getWindow();
         if (win) {
           const initial: TimeRange = { start: win.start, end: win.end };
           currentRangeRef.current = initial;
-          ensureRangeCached(initial);
+
+          // only fetch the visible window, first page
+          fetchVisible(pagerRef.current.getParamsForVisible(initial));
+
           const { start, end } = getWindow(timelineContainer.current);
-          timelineRef.current.setWindow(start, end);
+          timelineRef.current?.setWindow(start, end);
           timelineRef.current?.redraw();
         }
       }
@@ -241,28 +285,40 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.user?.timezone]);
 
-  const handleTimelineCLickWrapper = useCallback((e: MouseEvent) => {
-    handleTimelineCLick(e, timelineRef.current, timelineContainer.current);
-  }, []);
-
   // Create/destroy the timeline on dataset/options changes
   const handleDisplayTimeline = useCallback(() => {
-    // Destroy existing
     timelineRef.current?.destroy();
     timelineRef.current = null;
 
-    // Create new
     if (timelineContainer.current) {
       timelineRef.current = new Timeline(timelineContainer.current, itemsDSRef.current, groupsDSRef.current, options);
+
       let minors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-minor');
       let majors = document.querySelectorAll<HTMLDivElement>('.vis-panel.vis-top .vis-text.vis-major');
-      // Listen to range changes to dynamically fetch what's missing
+
       const onRangeChanged = (props: { start: Date; end: Date }) => {
         const visible: TimeRange = { start: props.start, end: props.end };
         currentRangeRef.current = visible;
-        ensureRangeCached(visible);
 
-        // Remove all previous listeners to prevent memory leak
+        // when window changes, reset pager and keep data to only this window
+        const newKey = pagerRef.current.key(visible);
+        if (newKey !== currentWindowKeyRef.current) {
+          // cancel inflight
+          inflightRef.current.forEach((src) => src.cancel?.('window changed'));
+          inflightRef.current.clear();
+
+          pagerRef.current.reset(visible); // resets skip for this window
+          hasMoreRef.current = true;
+
+          // // keep memory tight: only visible window in datasets
+          // groupsDSRef.current.clear();
+          // itemsDSRef.current.clear();
+          const params = pagerRef.current.getParamsForVisible(visible);
+
+          fetchVisible(params);
+        }
+
+        // re-bind header click handlers
         minors?.forEach((e) => e?.removeEventListener('click', handleTimelineCLickWrapper));
         majors?.forEach((e) => e?.removeEventListener('click', handleTimelineCLickWrapper));
 
@@ -275,13 +331,13 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
       timelineRef.current.on('rangechanged', onRangeChanged);
 
-      // Clean up event on re-init or unmount
       return () => {
         timelineRef.current?.off('rangechanged', onRangeChanged);
         timelineRef.current?.destroy();
         timelineRef.current = null;
       };
     }
+
     return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options]);
@@ -292,6 +348,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Fetch resource policy
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
@@ -310,40 +367,31 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   }, []);
 
   useEffect(() => {
-    // Cancel in-flight
     inflightRef.current.forEach((src) => src.cancel?.('resource switched'));
     inflightRef.current.clear();
-
-    // Clear coverage
-    coveredRef.current = [];
-
-    // Clear datasets
+    pagerRef.current.reset();
+    hasMoreRef.current = true;
     groupsDSRef.current.clear();
     itemsDSRef.current.clear();
-
-    // Re-fetch for the current window
+    setLoading(true);
     const win = timelineRef.current?.getWindow();
     if (win) {
       const visible: TimeRange = { start: win.start, end: win.end };
       currentRangeRef.current = visible;
-      ensureRangeCached(visible);
+      fetchVisible(pagerRef.current.getParamsForVisible(visible));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedResource]);
 
-  // Expose an imperative ref to force-fetch the current range
   useImperativeHandle(ref, () => ({
     fetchData: async () => {
+      setLoading(true);
       const win = timelineRef.current?.getWindow();
-      if (win) {
-        // Clear coverage
-        coveredRef.current = [];
-
-        // Clear datasets
-        groupsDSRef.current.clear();
-        itemsDSRef.current.clear();
-        await ensureRangeCached({ start: win.start, end: win.end });
-      }
+      if (!win) return;
+      pagerRef.current.reset();
+      hasMoreRef.current = true;
+      groupsDSRef.current.clear();
+      itemsDSRef.current.clear();
+      await fetchVisible(pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }));
     }
   }));
 
