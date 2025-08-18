@@ -706,17 +706,14 @@ export const createFilterSetData = (val, columns) => {
 export const filtermodelToFormValue = (filtermodel: FilterModel) => {
   const formValues = {};
   for (const [key, value] of Object.entries(filtermodel)) {
-    if (value.filter && (value.filter['from'] || value.filter['to'])) {
-      formValues[`from_${snakeCase(key)}`] = value.filter['from'] ? new Date(value.filter['from']) : null;
-      formValues[`to_${snakeCase(key)}`] = value.filter['to'] ? new Date(value.filter['to']) : null;
-    }
-    else if (value.operator === 'OR' && value.condition1) {
-      formValues[key] = value.condition1.filter.map((e) => e.optionValue);
-    }
-    else if (Array.isArray(value.filter)) {
+    if (value.filter?.['from'] || value.filter?.['to']) {
+      formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
+      formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
+    } else if (value['operator'] === 'OR') {
+      formValues[key] = value.condition1?.filter.map((e) => e.optionValue);
+    } else if (Array.isArray(value.filter)) {
       formValues[key] = value.filter;
-    }
-    else if (value.filter) {
+    } else if (value.filter) {
       formValues[key] = value.filter;
     }
   }
