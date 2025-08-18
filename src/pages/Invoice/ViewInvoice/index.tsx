@@ -378,6 +378,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           resource={resource}
           resourceLabel={invoiceData?.invoiceNumber}
           resourceData={invoiceData}
+          createPortal={true}
         />
       </>
     );
