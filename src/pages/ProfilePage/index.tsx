@@ -168,30 +168,6 @@ export default function ProfilePage(props) {
         </Box>
       </Box>
 
-      {/* <Grid container spacing={3}> */}
-      {/* <Grid>
-        <ProfileSidebar
-          onItemClick={handleItemClick}
-          activeLink={activeItem}
-          userData={userData}
-          onFetchUserData={fetchUserData}
-          otherDetails={otherDetails}
-        />
-      </Grid>
-      <Grid>
-        <ManageProfile
-          displayUserDetails={true}
-          userFields={userFields}
-          userData={userData}
-          userProxy={proxyBy}
-          loading={loading}
-          userLoading={userLoading}
-          onFetchUserData={fetchUserData}
-          otherDetails={otherDetails}
-        />
-      </Grid> */}
-      {/* </Grid> */}
-
     </Fragment>
   );
 }
