@@ -638,15 +638,12 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
               to: d?.term?.to ? dateFormatToSend(d?.term?.to) : null
             }
           });
-          return;
-        }
-
-        if (d?.type === 'number' || d?.type === 'decimal') {
+        } if (d?.type === 'number' || d?.type === 'decimal') {
           filterModel.set(d?.field, { filter: d?.term });
           return;
+        } else {
+          filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
         }
-
-        filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
       });
   }
 
