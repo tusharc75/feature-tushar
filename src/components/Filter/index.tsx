@@ -143,8 +143,6 @@ const Filter = ({
       setDeepFilters([]);
       setFilterTerm({});
     }
-    console.log(val);
-    console.log(filterByIds, deepFilters, val?.filterTerm);
   };
 
   const handleDeleteUserFilter = () => {

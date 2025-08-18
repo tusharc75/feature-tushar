@@ -529,7 +529,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'number':
       case 'decimal':
         if (formValues[fieldName]) {
-          // formValues[fieldName] may already be an array of {operation,value} or a simple value
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
         break;
@@ -626,7 +625,6 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
             return (isoFromDate.isValid() && d?.term?.from instanceof Date) || (isoToDate.isValid() && d?.term?.to instanceof Date);
           else return isoFromDate.isValid() && d?.term?.from instanceof Date && isoToDate.isValid() && d?.term?.to instanceof Date;
         }
-        // For number/decimal, ensure term array exists
         if (d?.type === 'number' || d?.type === 'decimal') {
           return Array.isArray(d?.term) && d.term.length > 0;
         }
@@ -643,7 +641,6 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
           return;
         }
 
-        // For numbers/decimals: d.term is expected to be an array of { operation, value }
         if (d?.type === 'number' || d?.type === 'decimal') {
           filterModel.set(d?.field, { filter: d?.term });
           return;
