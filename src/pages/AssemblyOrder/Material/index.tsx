@@ -38,7 +38,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
   const { dataRows, selectedRecords } = state;
 
   const {
-    state: { resources, permissions }
+    state: { resources, permissions, isFilesUploading }
   }: any = useData();
 
   const [isUpdating, setUpdating] = useState(false);
@@ -204,7 +204,7 @@ const Material = ({ assemblyOrderData, setNextStep, renderedFrom, stepFullScreen
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isFilesUploading]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });

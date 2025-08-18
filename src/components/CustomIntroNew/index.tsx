@@ -29,7 +29,6 @@ export type StepDefination = {
 const CustomIntroNew = () => {
   const [selectedIntro, setSelectedIntro] = useState<WalkmeData | null>(null);
   const handleStart = (intro: WalkmeData) => {
-    console.log('started');
   };
 
   return <SelectIntro handleStart={handleStart} />;
