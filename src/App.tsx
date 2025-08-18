@@ -299,6 +299,8 @@ import { CustomToastContext } from './StateProvider/CustomToastContext/CustomToa
 import { CustomOfflineContext } from './StateProvider/OfflineContext/OfflineContext';
 import { useData } from './StateProvider/Provider';
 import ShowFileUploader from 'src/components/ShowFileUploader';
+import OnboardingTemplate from 'src/pages/OnboardingTemplate';
+import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
 
 var notificationInterval: any = null;
 
@@ -1320,6 +1322,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.fieldView.path}/:padId/:wellId`}>
               <FieldView />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.onboardingTemplate.path}`}>
+              <OnboardingTemplate />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.onboardingTemplateDetail.path}/:id`}>
+              <OnboardingTemplateDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
