@@ -4,9 +4,17 @@ import { Item, SearchKeyword } from 'src/components/Header/SearchBar/types';
 import { useUrlWithoutMongoId } from 'src/hooks/useUrlWithoutMongoId';
 import { useData } from 'src/StateProvider/Provider';
 
-const useSearchHistory = () => {
+const useSearchHistory = (items?: Item[]) => {
   const { state }: any = useData();
   const user = state.user || {};
+  const itemsIdMap = useMemo(() => {
+    const mapData = new Map<string, Item>();
+    if (!items || items?.length === 0) return mapData;
+    for (const item of items) {
+      mapData.set(item.resourceId, item);
+    }
+    return mapData;
+  }, [items]);
 
   const userAndBrandId = useMemo(() => `${user?.user?._id}_${user?.user?.brand}`, [user?.user?._id, user.user?.brand]);
 
@@ -47,11 +55,30 @@ const useSearchHistory = () => {
     try {
       await itemDb.open();
       const data = await itemDb.table<Item>(tables.ITEMS_TABLE).where('userAndBrandId').equals(userAndBrandId).sortBy('timeStamp', 'desc').toArray();
-      setSearchItems(data);
+      let newData = data;
+      if (itemsIdMap.size > 0) {
+        newData = data.map((d) => {
+          if (itemsIdMap.has(d.resourceId)) {
+            const itemFromMap = itemsIdMap.get(d.resourceId);
+            return {
+              ...d,
+              resourceLabel: itemFromMap.resourceLabel,
+              resourceLabelLowerCase: itemFromMap.resourceLabelLowerCase,
+              homePageLabel: itemFromMap.homePageLabel,
+              name: itemFromMap.name,
+              sectionName: itemFromMap.sectionName,
+              sectionNameLowerCase: itemFromMap.sectionNameLowerCase
+            };
+          }
+          return d;
+        });
+      }
+
+      setSearchItems(newData);
     } catch (error) {
       console.error(error);
     }
-  }, [userAndBrandId]);
+  }, [userAndBrandId, itemsIdMap]);
 
   useEffect(() => {
     fetchAllItemData();
