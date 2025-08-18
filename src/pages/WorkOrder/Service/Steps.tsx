@@ -1138,6 +1138,8 @@ const Steps = ({
                       element="li"
                       className="border"
                       toggleTriggerArea="onlyToggleButton"
+                      toggleIconPosition={workOrderPolicyData?.policy?.hideStepsProductsConsumables &&
+                        workOrderPolicyData?.policy?.hideStepsDrawings ? 'hidden' : 'end'}
                       head={
                         <Box
                           key={step._id}

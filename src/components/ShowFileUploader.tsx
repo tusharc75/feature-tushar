@@ -4,16 +4,16 @@ import { Cancel, CheckCircle, UploadFile } from '@mui/icons-material';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { formatBytes } from 'src/hooks';
 import { useData } from 'src/StateProvider/Provider';
-import { SET_UPLOADER } from 'src/StateProvider/actionTypes';
+import { SET_FILES_UPLOAD_PROGRESS } from 'src/StateProvider/actionTypes';
 import { createPortal } from 'react-dom';
 
 const ShowFileUploader = () => {
   const {
-    state: { uploads },
+    state: { filesUploadProgress, isFilesUploading },
     dispatch
   }: any = useData();
 
-  if (uploads?.length === 0) return null;
+  if (filesUploadProgress?.length === 0 || !isFilesUploading) return null;
 
   return (
     <>
@@ -23,14 +23,14 @@ const ShowFileUploader = () => {
             <h3 className="text-lg font-medium">Uploads</h3>
             <IconButton
               onClick={() => {
-                dispatch({ type: SET_UPLOADER, payload: null });
+                dispatch({ type: SET_FILES_UPLOAD_PROGRESS, payload: null });
               }}
             >
               <CloseIcon fontSize="small" color="primary" />
             </IconButton>
           </div>
           <div className="max-h-60 space-y-2 overflow-y-auto p-3">
-            {uploads?.map((upload) => (
+            {filesUploadProgress?.map((upload) => (
               <div key={upload?._id} className="flex items-center gap-2 rounded-lg border border-b p-2">
                 <UploadFile className="text-blue-500 dark:text-blue-700" />
                 <div className="flex-grow">

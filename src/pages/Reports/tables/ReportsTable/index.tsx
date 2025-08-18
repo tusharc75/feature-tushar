@@ -44,7 +44,7 @@ const ReportsTable = ({ state: reportState, isSidebarOpen, dynamicForm = false }
   const customReportData = selectedReport?.customReportData ? selectedReport?.customReportData : null;
   const resourceCamelCase = camelCase(selectedReport.resource);
   const resourceStartCase: any = startCase(selectedReport.resource);
-  const renderedFrom = `${selectedReport.resource}_report_new`;
+  const renderedFrom = selectedReport?.type === 'custom-report'? `${selectedReport.resource}_custom_report_new`: `${selectedReport.resource}_report_new`;
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, sorting, search, limit, filters, pageSizes, visibleColumns, columnOrder } = state;
   const [showGrid, setShowGrid] = useState(false);
