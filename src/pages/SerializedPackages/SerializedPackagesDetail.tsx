@@ -32,7 +32,9 @@ const SerializedPackagesDetail = () => {
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+  const [showConfirmBoxDisassembled, setShowConfirmBoxDisassembled] = useState(false)
   const [tabValue, setTabValue] = useState(0);
+  const [isOkButtonLoading, setIsOkButtonLoading] = useState(false)
   const {
     state: { permissions, resources }
   }: any = useData();
@@ -74,10 +76,12 @@ const SerializedPackagesDetail = () => {
   const handleDelete = () => {
     if (id) {
       if (permissions?.serializedPackages?.isDelete) {
+        setIsOkButtonLoading(true)
         axiosInstance()
           .put(`${routes.serializedPackages.path}/remove`, { ids: [id] })
           .then(({ data }) => {
             setShowConfirmBox(false);
+            setIsOkButtonLoading(false)
             toastConfig.setToastConfig({
               open: true,
               type: 'success',
@@ -86,6 +90,7 @@ const SerializedPackagesDetail = () => {
             history.push(`${routes.serializedPackages.path}`);
           })
           .catch((err) => {
+            setIsOkButtonLoading(false)
             setShowConfirmBox(false);
           });
       }
@@ -106,11 +111,14 @@ const SerializedPackagesDetail = () => {
     setTabValue(newValue);
   };
 
-  const handleDisasseble = () => {
+  const handleDisassemble = () => {
+    setIsOkButtonLoading(true)
     axiosInstance()
       .put(`${routes.serializedPackages?.path}/disassemble`, { _id: serializedPackagesData?._id, status: SERIALIZED_PACKAGES_STATUS.disassembled })
       .then(({ data }: any) => {
         fetchData()
+        setIsOkButtonLoading(false)
+        setShowConfirmBoxDisassembled(false)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -118,6 +126,7 @@ const SerializedPackagesDetail = () => {
         });
       })
       .catch((error) => {
+        setIsOkButtonLoading(false)
         toastConfig.setToastConfig(error);
       });
   }
@@ -134,8 +143,7 @@ const SerializedPackagesDetail = () => {
               {permissions?.serializedPackages?.isUpdate && serializedPackagesData?.status === SERIALIZED_PACKAGES_STATUS.available && (
                 <ThemeButton
                   id={'serialized-package-disassemble'}
-                  buttonType="theme"
-                  onClick={handleDisasseble}
+                  onClick={() => setShowConfirmBoxDisassembled(true)}
                 >
                   Disassemble
                 </ThemeButton>
@@ -195,10 +203,18 @@ const SerializedPackagesDetail = () => {
         <ConfirmationDialog
           open={showConfirmBox}
           message={`Are you sure you want to delete ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${serializedPackagesData?.serializedPackageNumber} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
+          onClose={() => setShowConfirmBox(false)}
           onOk={handleDelete}
+          okBtnLoading={isOkButtonLoading}
+        />
+      )}
+      {showConfirmBoxDisassembled && (
+        <ConfirmationDialog
+          open={showConfirmBoxDisassembled}
+          message={`Are you sure you want to disassemble ${resources?.serializedPackages?.titleSingular?.toLowerCase()} : ${serializedPackagesData?.serializedPackageNumber} ?`}
+          onClose={() => setShowConfirmBoxDisassembled(false)}
+          onOk={handleDisassemble}
+          okBtnLoading={isOkButtonLoading}
         />
       )}
       {openUpdateDialog && (

@@ -109,7 +109,6 @@ export class CheckInputs {
 
       // Skip immediately if requested and a current value already exists and is valid
       if (step.skipIfValueExist === true && currentValidity()) {
-        console.log('pre-skipping', targetElement);
         this.passedFailedIndexes[index] = true;
         this.handleNext();
         return finalize();
@@ -120,7 +119,7 @@ export class CheckInputs {
       // When true, we allow immediate evaluation (which won't auto-advance here because we already checked above).
       const immediateEvaluate = step.skipIfValueExist === true;
 
-      let cleanup: () => void = () => {};
+      let cleanup: () => void = () => { };
       if (isMultiSelect) {
         cleanup = multiSelectAutocompleteCallback({
           targetElement,
