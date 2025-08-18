@@ -89,9 +89,20 @@ const useSearchHistory = (items?: Item[]) => {
       data = { ...data, timeStamp: Date.now(), type: 'history', sectionName: 'History', frequency: 1, userAndBrandId: userAndBrandId };
       try {
         await itemDb.open();
-        const isInDatabase = (
-          await itemDb.table<Item>(tables.ITEMS_TABLE).where('name').equals(data.name).where('userAndBrandId').equals(userAndBrandId).toArray()
-        )[0];
+        const isInDatabase = ((await itemDb
+          .table<Item>(tables.ITEMS_TABLE)
+          .where('name')
+          .equals(data.name)
+          .where('userAndBrandId')
+          .equals(userAndBrandId)
+          .toArray()) ||
+          (await itemDb
+            .table<Item>(tables.ITEMS_TABLE)
+            .where('resourceId')
+            .equals(data.resourceId)
+            .where('userAndBrandId')
+            .equals(userAndBrandId)
+            .toArray()))[0];
         // if already exist in history update the timestamp and frequency only
         if (isInDatabase) {
           await itemDb.table<Item>(tables.ITEMS_TABLE).put({ ...isInDatabase, timeStamp: Date.now(), frequency: isInDatabase.frequency + 1 });
