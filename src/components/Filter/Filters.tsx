@@ -194,7 +194,7 @@ const Filters = ({
             sidebarIcon={isMobile && <ToggleSidebar toggleSidebar={() => toggleSidebar()} />}
             selectedUserFilter={selectedUserFilter}
           />
-        ) : selectedField?.type === 'number' ? (
+        ) : selectedField?.type === 'number' || selectedField?.type === 'decimal' ? (
           <NumberFilter
             key={selectedField._id || selectedField.fieldName}
             fieldData={selectedField}
