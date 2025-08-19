@@ -8,7 +8,8 @@ const operators = {
   'gt': ' >',
   'lte': ' <=',
   'lt': ' <',
-  'eq': ' ='
+  'eq': ' =',
+  'ne': ' ≠'
 };
 
 const DisplayChips = (props) => {
@@ -115,13 +116,14 @@ const DisplayChips = (props) => {
               {chipData?.map((filter) => {
                 const filterValue = getFilterValue(filter?.value);
                 if (!filterValue) return null;
+                const prefix = (Array.isArray(filter?.value) && filter?.value.length > 0 && filter?.value[0]?.operation) ? ' ' : (filter?.['$nin']) ? '≠' : '=';
                 return (
                   <Chip
                     onClick={handleFilterOpen}
                     className={'filter-chip'}
                     deleteIcon={<CloseIcon />}
-                    label={`${filter?.title}${filter?.['$nin'] ? '≠' : '='}${filterValue}`}
-                    title={`${filter?.title}${filter?.['$nin'] ? '≠' : '='}${filterValue}`}
+                    label={`${filter?.title}${prefix}${filterValue}`}
+                    title={`${filter?.title}${prefix}${filterValue}`}
                     onDelete={() => clearSingleFilter(filter.name)}
                   />
                 );
