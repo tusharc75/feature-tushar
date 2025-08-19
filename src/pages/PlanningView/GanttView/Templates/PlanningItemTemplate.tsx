@@ -26,7 +26,7 @@ export const PlanningItemTemplate = memo(
       return null;
     }
 
-    let backgroundColor = 'bg-[rgb(234,239,254)] dark:bg-[rgb(185,183,219)]',
+    let backgroundColor = 'bg-[rgb(234,239,254)] dark:bg-[rgb(54,51,102)]',
       color = '';
 
     if (data?.dataType === 'credit') {
@@ -58,10 +58,23 @@ export const PlanningItemTemplate = memo(
       }
     };
 
+    const isClickable =
+      data?.dataType === 'assetStatus' ||
+      data?.dataType === 'assetStatusTotal' ||
+      (!(data?.dataType === 'availableByPlanning' || data?.dataType === 'inUseByPlanning') && data?.dataType);
+
     return (
       <>
-        <div className=" " onClick={handleClick}>
-          <div className={cn('mx-2 overflow-hidden rounded-md border px-2 py-1', backgroundColor, color, !color ? 'text-black dark:text-white' : '')}>
+        <div className={cn(' ', isClickable ? 'cursor-pointer' : '')} onClick={handleClick}>
+          <div
+            className={cn(
+              'mx-2 overflow-hidden rounded-md border px-2 py-1',
+              backgroundColor,
+              color,
+              !color ? 'text-black dark:text-white' : '',
+              isClickable ? 'transition-shadow hover:shadow-md hover:dark:shadow-theme/20' : ''
+            )}
+          >
             <p className="text-xs">{data.title}</p>
           </div>
         </div>
