@@ -242,11 +242,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                   </Box>
                 )}
 
-                {/* Show Create Record Notifications Form */}
-                {editDialog.open && editDialog.type === 'createRecordNotifications' && (
+                {/* Show Create/Update Record Notifications Form */}
+                {editDialog.open && (editDialog.type === 'createRecordNotifications' || editDialog.type === 'updateRecordNotifications') && (
                   <Box>
                     <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-                      <h3>Create Record Notifications</h3>
+                      <h3>{editDialog.type === 'createRecordNotifications' ? 'Create Record Notifications' : 'Update Record Notifications'}</h3>
                       <ThemeButton
                         buttonType="transparent"
                         onClick={() => setEditDialog({ open: false, type: null })}
@@ -260,11 +260,18 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           multiple
                           options={users}
                           getOptionLabel={(option) => option.label || ''}
-                          value={users.filter(user => createRecordNotifications.users?.includes(user.value)) || []}
+                          value={users.filter(user =>
+                          (editDialog.type === 'createRecordNotifications'
+                            ? createRecordNotifications.users?.includes(user.value)
+                            : updateRecordNotifications.users?.includes(user.value)
+                          )) || []}
                           onChange={(e, newValue) => {
-                            setCreateRecordNotifications(prev => ({
+                            const setter = editDialog.type === 'createRecordNotifications'
+                              ? setCreateRecordNotifications
+                              : setUpdateRecordNotifications;
+                            setter(prev => ({
                               ...prev,
-                              users: newValue.map(user => user.value) // Store only user IDs
+                              users: newValue.map(user => user.value)
                             }));
                           }}
                           renderInput={(params) => (
@@ -285,9 +292,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           variant="outlined"
                           multiline
                           rows={3}
-                          value={createRecordNotifications.message || ''}
+                          value={editDialog.type === 'createRecordNotifications'
+                            ? createRecordNotifications.message
+                            : updateRecordNotifications.message}
                           onChange={(e) => {
-                            setCreateRecordNotifications(prev => ({
+                            const setter = editDialog.type === 'createRecordNotifications'
+                              ? setCreateRecordNotifications
+                              : setUpdateRecordNotifications;
+                            setter(prev => ({
                               ...prev,
                               message: e.target.value
                             }));
@@ -299,9 +311,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                         <FormControlLabel
                           control={
                             <Checkbox
-                              checked={createRecordNotifications.sendMail || false}
+                              checked={editDialog.type === 'createRecordNotifications'
+                                ? createRecordNotifications.sendMail
+                                : updateRecordNotifications.sendMail}
                               onChange={(e) => {
-                                setCreateRecordNotifications(prev => ({
+                                const setter = editDialog.type === 'createRecordNotifications'
+                                  ? setCreateRecordNotifications
+                                  : setUpdateRecordNotifications;
+                                setter(prev => ({
                                   ...prev,
                                   sendMail: e.target.checked
                                 }));
@@ -316,100 +333,14 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                         <FormControlLabel
                           control={
                             <Checkbox
-                              checked={createRecordNotifications.sendNotification || false}
+                              checked={editDialog.type === 'createRecordNotifications'
+                                ? createRecordNotifications.sendNotification
+                                : updateRecordNotifications.sendNotification}
                               onChange={(e) => {
-                                setCreateRecordNotifications(prev => ({
-                                  ...prev,
-                                  sendNotification: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Send In-App Notification"
-                        />
-                      </Grid>
-                    </Grid>
-                  </Box>
-                )}
-
-                {/* Show Update Record Notifications Form */}
-                {editDialog.open && editDialog.type === 'updateRecordNotifications' && (
-                  <Box>
-                    <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
-                      <h3>Update Record Notifications</h3>
-                      <ThemeButton
-                        buttonType="transparent"
-                        onClick={() => setEditDialog({ open: false, type: null })}
-                      >
-                        Back
-                      </ThemeButton>
-                    </Box>
-                    <Grid container spacing={2}>
-                      <Grid size={12}>
-                        <Autocomplete
-                          multiple
-                          options={users}
-                          getOptionLabel={(option) => option.label || ''}
-                          value={users.filter(user => updateRecordNotifications.users?.includes(user.value)) || []}
-                          onChange={(e, newValue) => {
-                            setUpdateRecordNotifications(prev => ({
-                              ...prev,
-                              users: newValue.map(user => user.value) // Store only user IDs
-                            }));
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Select Users"
-                              placeholder="Choose users to notify"
-                              variant="outlined"
-                              size="small"
-                            />
-                          )}
-                        />
-                      </Grid>
-                      <Grid size={12}>
-                        <TextField
-                          fullWidth
-                          label="Message"
-                          variant="outlined"
-                          multiline
-                          rows={3}
-                          value={updateRecordNotifications.message || ''}
-                          onChange={(e) => {
-                            setUpdateRecordNotifications(prev => ({
-                              ...prev,
-                              message: e.target.value
-                            }));
-                          }}
-                          placeholder="Enter notification message"
-                        />
-                      </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={updateRecordNotifications.sendMail || false}
-                              onChange={(e) => {
-                                setUpdateRecordNotifications(prev => ({
-                                  ...prev,
-                                  sendMail: e.target.checked
-                                }));
-                              }}
-                              color="primary"
-                            />
-                          }
-                          label="Send Email"
-                        />
-                      </Grid>
-                      <Grid size={6}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={updateRecordNotifications.sendNotification || false}
-                              onChange={(e) => {
-                                setUpdateRecordNotifications(prev => ({
+                                const setter = editDialog.type === 'createRecordNotifications'
+                                  ? setCreateRecordNotifications
+                                  : setUpdateRecordNotifications;
+                                setter(prev => ({
                                   ...prev,
                                   sendNotification: e.target.checked
                                 }));
