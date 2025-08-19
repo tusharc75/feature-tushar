@@ -124,70 +124,63 @@ export default function ProfilePage(props) {
     history.push(`?tab=${newValue}`);
   };
 
-  return (
-    <Fragment>
-      <Grid container className="headerbox">
-        <Grid size={{ md: 12, sm: 12, xs: 12 }}>
-          <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
-        </Grid>
-      </Grid>
-
-      {/* <CustomContainer> */}
-      <Box p={{ xs: 0, md: 2 }}>
-        <Box className={`detail-container-v1`}>
-          <CustomTabs value={tabValue} onChange={handleTabChange}>
-            <CustomTab value={0}>My Profile</CustomTab>
-            <CustomTab value={1}>Security & Login</CustomTab>
-            <CustomTab value={2}>Proxies & Delegations</CustomTab>
-            <CustomTab value={3}>Notification Preferences</CustomTab>
-            <CustomTab value={4}>UI Preferences</CustomTab>
-          </CustomTabs>
-
-          <TabPanel value={tabValue} index={0}>
-            <MyProfile
-              userData={userData}
-              onFetchUserData={fetchUserData}
-              otherDetails={otherDetails}
-              proxyBy={proxyBy}
-              userFields={userFields}
-              loading={loading}
-              userLoading={userLoading}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <SecurityLogin
-              userData={userData}
-              dispatch={dispatch}
-              onFetchUserData={fetchUserData}
-              toastConfig={toastConfig}
-              permissions={permissions}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <ProxiesDelegations
-              userData={userData}
-              userProxy={proxyBy}
-              onFetchUserData={fetchUserData}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={3}>
-            <NotificationPreference
-              notificationPreferenceData={notificationPreferenceData}
-              user={userData?._id}
-              onSuccess={fetchUserData}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={4}>
-            <UiPreference
-              userData={userData}
-              onSuccess={() => {
-                fetchUserData(true);
-              }}
-            />
-          </TabPanel>
-        </Box>
+  return (<Box className="main-container-v1">
+    <Box className="headerbox-v1">
+      <Box className="nav-v1">
+        <CustomBreadCrumbs routes={[profileBreadCrumbs]} />
       </Box>
-
-    </Fragment>
+    </Box>
+    <Box className={`detail-container-v1`}>
+      <CustomTabs value={tabValue} onChange={handleTabChange}>
+        <CustomTab value={0}>My Profile</CustomTab>
+        <CustomTab value={1}>Security & Login</CustomTab>
+        <CustomTab value={2}>Proxies & Delegations</CustomTab>
+        <CustomTab value={3}>Notification Preferences</CustomTab>
+        <CustomTab value={4}>UI Preferences</CustomTab>
+      </CustomTabs>
+      <TabPanel value={tabValue} index={0}>
+        <MyProfile
+          userData={userData}
+          onFetchUserData={fetchUserData}
+          otherDetails={otherDetails}
+          proxyBy={proxyBy}
+          userFields={userFields}
+          loading={loading}
+          userLoading={userLoading}
+        />
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        <SecurityLogin
+          userData={userData}
+          dispatch={dispatch}
+          onFetchUserData={fetchUserData}
+          toastConfig={toastConfig}
+          permissions={permissions}
+        />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <ProxiesDelegations
+          userData={userData}
+          userProxy={proxyBy}
+          onFetchUserData={fetchUserData}
+        />
+      </TabPanel>
+      <TabPanel value={tabValue} index={3}>
+        <NotificationPreference
+          notificationPreferenceData={notificationPreferenceData}
+          user={userData?._id}
+          onSuccess={fetchUserData}
+        />
+      </TabPanel>
+      <TabPanel value={tabValue} index={4}>
+        <UiPreference
+          userData={userData}
+          onSuccess={() => {
+            fetchUserData(true);
+          }}
+        />
+      </TabPanel>
+    </Box>
+  </Box>
   );
 }
