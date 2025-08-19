@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -14,6 +14,9 @@ import ManageAssemblyOrder from 'src/pages/AssemblyOrder/ManageAssemblyOrder';
 import ManageDemandOrderDialog from 'src/pages/DemandOrder/ManageDemandOrderDialog';
 import ManageServiceOrderDialog from 'src/pages/FieldServiceOrder/ManageServiceOrder';
 import ManagePlanning from 'src/pages/Planning/ManagePlanning';
+import GanttView, { GantttViewRef } from 'src/pages/PlanningView/GanttView';
+import TopRightButtons from 'src/pages/PlanningView/TopRightButtons';
+import { PlanningResource, usePlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 import ManageProductionOrder from 'src/pages/ProductionOrder/ManageProductionOrder';
 import CreateProjectSales from 'src/pages/ProjectSales/CreateProjectSales';
 import ManagePurchaseOrder from 'src/pages/PurchaseOrder/ManagePurchaseOrder';
@@ -25,9 +28,6 @@ import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubco
 import ManageSublease from 'src/pages/Sublease/ManageSublease';
 import CalendarView from './Calendar';
 import ListView from './List';
-import TopRightButtons from 'src/pages/PlanningView/TopRightButtons';
-import GanttView, { GantttViewRef } from 'src/pages/PlanningView/GanttView';
-import { PlanningResource, usePlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 
 function PlanningView() {
   const {

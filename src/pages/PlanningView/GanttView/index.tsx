@@ -9,7 +9,7 @@ import { DEFAULT_TIME_ZONE, sidebarResource } from 'src/constants/helpers';
 import ResourcePopover from 'src/pages/PlanningView/Calendar/ResourcePopover';
 import PlanningGroupTemplate from 'src/pages/PlanningView/GanttView/Templates/PlanningGroupTemplate';
 import { PlanningItemTemplate } from 'src/pages/PlanningView/GanttView/Templates/PlanningItemTemplate';
-import { buildOneItem, getWindow, handleTimelineCLick, RawDay, RawGroup, TimeRange } from 'src/pages/PlanningView/GanttView/utils';
+import { buildFromRows, getWindow, handleTimelineCLick, RawGroup, TimeRange } from 'src/pages/PlanningView/GanttView/utils';
 import { Params, VisibleWindowPager } from 'src/pages/PlanningView/GanttView/VisibleWindowPager';
 import { PlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -27,8 +27,6 @@ type GanttViewProps = {
 
 const LIMIT = 15;
 
-const today = dayjs.tz();
-
 const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceList, selectedResource, setSelectedResource, topRightSlot }, ref) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -45,116 +43,81 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const [resourcePolicy, setResourcePolicy] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [moreDataLoading, setMoreDataLoading] = useState<boolean>(false);
-
   const groupsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
   const itemsDSRef = useRef<DataSet<any, 'id'>>(new DataSet([]));
   const timelineRef = useRef<Timeline | null>(null);
   const timelineContainer = useRef<HTMLDivElement>(null);
-
   const inflightRef = useRef<Map<string, CancelTokenSource>>(new Map());
   const currentRangeRef = useRef<TimeRange | null>(null);
   const initialDrawn = useRef(false);
   const scrollElement = useRef<HTMLDivElement>();
   const hasMoreRef = useRef<boolean>(true);
-
-  const pagerRef = useRef(new VisibleWindowPager(LIMIT));
+  const pagerRef = useRef(new VisibleWindowPager({ limit: LIMIT }));
   const currentWindowKeyRef = useRef<string | null>(null);
 
   const scrollThrottleRef = useRef<number | null>(null);
 
-  const buildFromRows = useCallback(
-    (rows: RawGroup[]) => {
-      const groups = rows.map((g) => ({
-        productName: g.productName,
-        _id: g._id,
-        id: g._id,
-        productDescription: g.productDescription
-      }));
-
-      const items = rows.flatMap((rawGroup) => {
-        const groupId = rawGroup._id;
-        return rawGroup.data.flatMap((d: RawDay, i: number) => {
-          const baseId = d._id ?? `item-${i}_${groupId}`;
-
-          // local date boundaries for the band
-          const localDate = dayjs(d.date);
-          const start = localDate.startOf('day').toDate();
-          const end = localDate.endOf('day').toDate();
-
-          // ledger comparisons against "today"
-          const ledgerDate = dayjs(d.date);
-          const isPast = ledgerDate.isBefore(today, 'day');
-          const isFuture = ledgerDate.isAfter(today, 'day');
-
-          const base = {
-            group: groupId,
-            groupName: rawGroup.productName,
-            originalDate: d.date,
-            start,
-            end,
-            allDay: true,
-            resource: selectedResource?.resource
-          };
-
-          const one = buildOneItem({ baseId, d, base, isPast, isFuture, resourcePolicy });
-          return one ? [one] : [];
-        });
-      });
-
-      return { groups, items };
-    },
-    [resourcePolicy, selectedResource?.resource]
-  );
-
   const fetchVisible = useCallback(
-    async (params: Params) => {
+    async ({ params, initial = false }: { params: Params; initial?: boolean }) => {
+      if (initial) {
+        setLoading(true);
+      } else {
+        setMoreDataLoading(true);
+      }
       const pager = pagerRef.current;
 
-      if (!params) return;
-      const range = { end: dayjs(params.date.to, 'MM/DD/YYYY').toDate(), start: dayjs(params.date.from, 'MM/DD/YYYY').toDate() };
+      if (!params || !pager) return;
 
-      const windowKey = pager.key(range);
-      currentWindowKeyRef.current = windowKey;
-
-      const inflightKey = `${windowKey}__skip:${params.skip}`;
+      const inflightKey = pager.crateKey(params);
+      currentWindowKeyRef.current = inflightKey;
       if (inflightRef.current.has(inflightKey)) return;
 
       const source = axios.CancelToken.source();
       inflightRef.current.set(inflightKey, source);
-      setMoreDataLoading(true);
 
       try {
         const resp = await axiosInstance().get('/planning-view/products-planning', {
           cancelToken: source.token,
-          params
+          params: {
+            ...params,
+            date: {
+              from: dayjs(params.date.from).format('MM/DD/YYYY'),
+              to: dayjs(params.date.to).format('MM/DD/YYYY')
+            }
+          }
         });
-        pager.setTotalGroups(resp.data.count);
-
         const rows: RawGroup[] = resp?.data?.data ?? [];
-        pager.markResult(range, params.skip, rows.length);
-        hasMoreRef.current = rows.length >= LIMIT;
 
-        const { groups, items } = buildFromRows(rows);
+        hasMoreRef.current = groupsDSRef.current.length < resp?.data?.count;
+
+        // if (hasMore === true) {
+        //  hasMoreRef.current = hasMore
+        // } else {
+        //   hasMoreRef.current = rows.length >= LIMIT;
+        //   pager.setHasMoreData(hasMoreRef.current);
+        // }
+
+        const { groups, items } = buildFromRows({ rows, resourcePolicy, selectedResource });
         if (groups.length) groupsDSRef.current.update(groups);
         if (items.length) itemsDSRef.current.update(items);
+        console.log(groupsDSRef.current?.length);
         timelineRef.current?.redraw();
         setLoading(false);
         setMoreDataLoading(false);
+        pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: true });
       } catch (error) {
         if (!axios.isCancel(error)) {
-          setLoading(false);
-          setMoreDataLoading(false);
           toastConfig.setToastConfig(error);
         }
+        pager.onRequestResult({ date: params.date, skip: params.skip, limit: params.limit, ok: false });
       } finally {
         queueMicrotask(() => {
           inflightRef.current.get(inflightKey)?.cancel?.();
           inflightRef.current.delete(inflightKey);
         });
-        setMoreDataLoading(false);
       }
     },
-    [buildFromRows]
+    [buildFromRows, resourcePolicy, selectedResource]
   );
 
   // Infinite vertical scroll within the visible window: uses skip/limit
@@ -168,57 +131,16 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     );
   }, []);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const target = getVerticalScrollTarget();
-      if (!target) return;
-
-      const onScroll = () => {
-        if (scrollThrottleRef.current) return;
-        scrollThrottleRef.current = window.setTimeout(() => {
-          scrollThrottleRef.current = null;
-
-          const target = getVerticalScrollTarget();
-          if (!target) return;
-
-          // Optional: comment out height writes unless you map to absolute indices
-          const groups = [...timelineContainer.current?.querySelectorAll('.vis-left .vis-label.vis-group-level-0')];
-          groups.forEach((g, i) => {
-            const height = g.getBoundingClientRect().height;
-            pagerRef.current.setGroupItemHeight(i, height);
-          });
-
-          pagerRef.current.setScrollData({
-            scrollTop: target.scrollTop,
-            clientHeight: target.clientHeight,
-            scrollHeight: target.scrollHeight
-          });
-
-          const nearBottom = target.scrollTop + target.clientHeight >= target.scrollHeight - 200;
-          const win = currentRangeRef.current ?? timelineRef.current?.getWindow();
-          if (!win) return;
-
-          const params = pagerRef.current.getParamsForVisible(
-            { start: win.start, end: win.end },
-            { prefetchPx: nearBottom ? target.clientHeight * 1.5 : 0, skipLimit: true } // prefetch below the fold
-          );
-
-          if (params && !moreDataLoading && hasMoreRef.current) {
-            fetchVisible(params);
-          }
-        }, 120);
-      };
-
-      target.addEventListener('scroll', onScroll);
-      return () => {
-        target.removeEventListener('scroll', onScroll);
-        if (scrollThrottleRef.current) {
-          clearTimeout(scrollThrottleRef.current);
-          scrollThrottleRef.current = null;
-        }
-      };
-    }, 1000);
-  }, [moreDataLoading]);
+  const setGroupHeights = () => {
+    const groups = [...timelineContainer.current?.querySelectorAll('.vis-left .vis-label.vis-group-level-0')];
+    if (groups.length === 0) return;
+    const heights: number[] = [];
+    groups.forEach((g, i) => {
+      const height = g.getBoundingClientRect().height;
+      heights.push(height);
+    });
+    pagerRef.current.setGroupHeights(heights);
+  };
 
   const handleTimelineCLickWrapper = useCallback((e: MouseEvent) => {
     handleTimelineCLick(e, timelineRef.current, timelineContainer.current);
@@ -232,8 +154,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       margin: { item: 10 },
       zoomKey: 'ctrlKey',
       ...getWindow(timelineContainer.current),
-      minHeight: 62,
-      maxHeight: window.innerHeight - 200,
+      minHeight: 400,
+      maxHeight: Math.min(window.innerHeight - 200, 720),
       selectable: false,
       groupHeightMode: 'auto',
       dataAttributes: ['id'],
@@ -241,7 +163,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       zoomMin: 60000, // 1 minute
       editable: { updateGroup: false },
       orientation: { item: 'top', axis: 'top' },
-      moment(date: Date) {
+      moment: function (date: Date) {
         return moment(date).tz(user?.user?.timezone || DEFAULT_TIME_ZONE);
       },
       template: (item, element, data) => {
@@ -264,6 +186,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       },
       onInitialDrawComplete() {
         scrollElement.current = document.querySelector('.vis-left') as HTMLDivElement | undefined;
+        setGroupHeights();
         if (initialDrawn.current) return;
         initialDrawn.current = true;
 
@@ -271,11 +194,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         if (win) {
           const initial: TimeRange = { start: win.start, end: win.end };
           currentRangeRef.current = initial;
-
-          setLoading(false);
-          setMoreDataLoading(false);
           // only fetch the visible window, first page
-          fetchVisible(pagerRef.current.getParamsForVisible(initial));
+          fetchVisible({ params: pagerRef.current.getParamsForVisible(initial), initial: true });
 
           const { start, end } = getWindow(timelineContainer.current);
           timelineRef.current?.setWindow(start, end);
@@ -303,21 +223,16 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         currentRangeRef.current = visible;
 
         // when window changes, reset pager and keep data to only this window
-        const newKey = pagerRef.current.key(visible);
-        if (newKey !== currentWindowKeyRef.current) {
+        const params = pagerRef.current.getParamsForVisible(visible);
+        const newKey = pagerRef.current.crateKey(params);
+        if (newKey !== currentWindowKeyRef.current && params) {
           // cancel inflight
           inflightRef.current.forEach((src) => src.cancel?.('window changed'));
           inflightRef.current.clear();
 
-          pagerRef.current.reset(visible); // resets skip for this window
+          // pagerRef.current.reset(visible); // resets skip for this window
           hasMoreRef.current = true;
-
-          // // keep memory tight: only visible window in datasets
-          // groupsDSRef.current.clear();
-          // itemsDSRef.current.clear();
-          const params = pagerRef.current.getParamsForVisible(visible);
-
-          fetchVisible(params);
+          fetchVisible({ params });
         }
 
         // re-bind header click handlers
@@ -337,6 +252,12 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         timelineRef.current?.off('rangechanged', onRangeChanged);
         timelineRef.current?.destroy();
         timelineRef.current = null;
+        pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
+        hasMoreRef.current = true;
+        groupsDSRef.current.clear();
+        itemsDSRef.current.clear();
+        inflightRef.current.forEach((src) => src.cancel?.('Resource switched'));
+        inflightRef.current.clear();
       };
     }
 
@@ -349,6 +270,70 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     return cleanup;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const target = getVerticalScrollTarget();
+      if (!target) return;
+
+      const onScroll = () => {
+        if (scrollThrottleRef.current) return;
+        scrollThrottleRef.current = window.setTimeout(() => {
+          if (!initialDrawn.current) return;
+          scrollThrottleRef.current = null;
+          const target = getVerticalScrollTarget();
+          if (!target) return;
+          setGroupHeights();
+
+          pagerRef.current.setScrollMetrics({
+            scrollTop: target.scrollTop,
+            clientHeight: target.clientHeight,
+            scrollHeight: target.scrollHeight
+          });
+          const win = currentRangeRef.current ?? timelineRef.current?.getWindow();
+          if (!win) return;
+
+          const fromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+
+          if (fromBottom > 45) {
+            const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
+            if (params && !moreDataLoading && hasMoreRef.current) {
+              fetchVisible({ params });
+            }
+          } else {
+            const params = pagerRef.current.getParamsForNextPage({ start: win.start, end: win.end });
+            console.log({ params, fromBottom });
+            if (params && !moreDataLoading && hasMoreRef.current) {
+              fetchVisible({ params });
+            }
+          }
+        }, 120);
+      };
+
+      setGroupHeights();
+
+      target.addEventListener('scroll', onScroll);
+      return () => {
+        target.removeEventListener('scroll', onScroll);
+        if (scrollThrottleRef.current) {
+          clearTimeout(scrollThrottleRef.current);
+          scrollThrottleRef.current = null;
+        }
+      };
+    }, 1000);
+  }, [moreDataLoading]);
+
+  useImperativeHandle(ref, () => ({
+    fetchData: async () => {
+      const win = timelineRef.current?.getWindow();
+      if (!win) return;
+      pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
+      hasMoreRef.current = true;
+      groupsDSRef.current.clear();
+      itemsDSRef.current.clear();
+      await fetchVisible({ params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }), initial: true });
+    }
+  }));
 
   // Fetch resource policy
   useEffect(() => {
@@ -367,35 +352,6 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
     fetchPolicy();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    inflightRef.current.forEach((src) => src.cancel?.('resource switched'));
-    inflightRef.current.clear();
-    pagerRef.current.reset();
-    hasMoreRef.current = true;
-    groupsDSRef.current.clear();
-    itemsDSRef.current.clear();
-    setLoading(true);
-    const win = timelineRef.current?.getWindow();
-    if (win) {
-      const visible: TimeRange = { start: win.start, end: win.end };
-      currentRangeRef.current = visible;
-      fetchVisible(pagerRef.current.getParamsForVisible(visible));
-    }
-  }, [selectedResource]);
-
-  useImperativeHandle(ref, () => ({
-    fetchData: async () => {
-      setLoading(true);
-      const win = timelineRef.current?.getWindow();
-      if (!win) return;
-      pagerRef.current.reset();
-      hasMoreRef.current = true;
-      groupsDSRef.current.clear();
-      itemsDSRef.current.clear();
-      await fetchVisible(pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }));
-    }
-  }));
 
   return (
     <>
@@ -423,12 +379,12 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         ></div>
 
         {loading && (
-          <div className="absolute inset-0 flex min-h-[calc(100vh-200px)] items-center justify-center  bg-gray-200 dark:bg-gray-600">
+          <div className="absolute inset-0 z-10 flex h-[min(calc(100vh-200px),720px)] min-h-[400px] items-center justify-center  bg-gray-200 dark:bg-gray-600">
             <h3 className="animate-pulse text-[20px] font-semibold">Loading...</h3>
           </div>
         )}
         {moreDataLoading && (
-          <div className="absolute left-4 top-[19px] flex items-center gap-2">
+          <div className="absolute left-4 top-[19px] flex items-center gap-2 ">
             <CircularProgress size={25} />
             <p className="text-[12px] font-semibold text-gray-500">loading...</p>
           </div>
