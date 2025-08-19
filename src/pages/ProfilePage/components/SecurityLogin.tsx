@@ -215,17 +215,15 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
         )
       }
 
-      {
-        isPasswordUpdate ? (
-          <ManageUpdateEmailPasswordDialog
-            isUpdatePassword={true}
-            open={isPasswordUpdate}
-            onFetchUserData={onFetchUserData}
-            onClose={() => setPasswordUpdate(false)}
-            logoutUser={logoutUser}
-          />
-        ) : null
-      }
+      {isPasswordUpdate ? (
+        <ManageUpdateEmailPasswordDialog
+          isUpdatePassword={true}
+          open={isPasswordUpdate}
+          onFetchUserData={onFetchUserData}
+          onClose={() => setPasswordUpdate(false)}
+          logoutUser={logoutUser}
+        />
+      ) : null}
 
       {/* Multi-Factor Authentication */}
       {
