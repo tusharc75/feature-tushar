@@ -1,10 +1,8 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { sidebarResource } from '../../constants/helpers';
 import NotificationPreference from './components/NotificationPreference';
-import UiPreference from './components/UiPreference';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -16,6 +14,7 @@ import SecurityLogin from 'src/pages/ProfilePage/components/SecurityLogin';
 import ProxiesDelegations from 'src/pages/ProfilePage/components/ProxiesDelegations';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
+import UiPreference from 'src/pages/ProfilePage/components/UiPreference/DefaultRecordDialog';
 
 export default function ProfilePage(props) {
   const {

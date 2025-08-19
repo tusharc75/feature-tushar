@@ -21,7 +21,7 @@ import { cn } from 'src/constants/helpers';
 
 const recordOptions: string[] = ['All', 'My', 'Open'];
 
-const DefaultRecordDialog = ({ userData, onSuccess }) => {
+const UiPreference = ({ userData, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialValues, setInitialValues] = useState({ data: [] });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,7 +93,7 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
     setSearchQuery(e.target.value);
   };
   return (
-    <>
+    <Box style={{ marginTop: '16px' }}>
       {initialValues?.data?.length ? (
         <Formik initialValues={initialValues} onSubmit={updateData}>
           {({ values, submitForm }) => (
@@ -179,8 +179,8 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 
-export default DefaultRecordDialog;
+export default UiPreference;
