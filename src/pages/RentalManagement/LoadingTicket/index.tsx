@@ -759,7 +759,6 @@ const LoadingTicket = ({
       });
 
       productAssets = processAssets(productAssets, loadingTicketAssets);
-
       if (view === 'flat') {
         newRows = [...productAssets];
 
@@ -803,7 +802,7 @@ const LoadingTicket = ({
               ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
             }
           }
-          const serializedPackage = material?.find(m => m?._id === ele?.uniqueId && m?.materialId === ele?.productId)?.serializedPackage
+          const serializedPackage = material?.find(m => m?._id === ele?.uniqueId && m?.materialId === ele?.materialId)?.serializedPackage
           if (serializedPackage) {
             ele.serializedPackage = serializedPackage?.optionLabel;
             ele.serializedPackageId = serializedPackage?.optionValue

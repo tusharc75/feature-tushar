@@ -7,6 +7,7 @@ import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
   MATERIAL_TYPE,
@@ -35,6 +36,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
   const renderedFrom = `${camelCase(sidebarResource.rentalManagementInvoice)}_view_invoice`;
@@ -447,6 +449,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     Delete
                   </MenuItem>
                 </Menu>
+                <Box ml={1} />
+                <ActivityButton
+                  referenceId={invoiceData?._id}
+                  resource={ACTIVITY_RESOURCE.invoice}
+                  resourceLabel={invoiceData?.invoiceNumber}
+                  resourceData={invoiceData}
+                />
               </Box>
             </Box>
             {columns ? (
