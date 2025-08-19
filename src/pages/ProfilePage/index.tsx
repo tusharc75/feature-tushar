@@ -165,11 +165,7 @@ export default function ProfilePage(props) {
         />
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
-        <NotificationPreference
-          notificationPreferenceData={notificationPreferenceData}
-          user={userData?._id}
-          onSuccess={fetchUserData}
-        />
+        <NotificationPreference />
       </TabPanel>
       <TabPanel value={tabValue} index={4}>
         <UiPreference
