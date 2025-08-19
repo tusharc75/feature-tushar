@@ -301,6 +301,7 @@ import { useData } from './StateProvider/Provider';
 import ShowFileUploader from 'src/components/ShowFileUploader';
 import OnboardingTemplate from 'src/pages/OnboardingTemplate';
 import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
+import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
 
 var notificationInterval: any = null;
 
@@ -475,6 +476,7 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
+            
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -499,7 +501,7 @@ function App() {
             <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
-
+            <Route exact path="/integration/quick-books/callback" render={() => <QuickBookProxy />} />
             <PrivateRoute exact path="/">
               <Home />
             </PrivateRoute>
