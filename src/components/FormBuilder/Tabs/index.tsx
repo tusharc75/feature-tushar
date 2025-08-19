@@ -175,7 +175,7 @@ const DynamicTabs = ({ workflowId = null, resource }) => {
                 </IconButton>
               </HtmlTooltip>
             )}
-            <HtmlTooltip title={'Notifications Panda'}>
+            <HtmlTooltip title={'Notifications'}>
               <IconButton
                 aria-label="Notifications"
                 onClick={() => {

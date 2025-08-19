@@ -24,8 +24,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [notificationUserField, setNotificationUserField] = useState([]);
   const [users, setUsers] = useState([]);
 
-  console.log("resourceData : ", resourceData)
-
   const [createRecordNotifications, setCreateRecordNotifications] = useState({
     users: [],
     message: '',
@@ -134,7 +132,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
           values?.notifications || [],
       type: editDialog.type
     };
-    console.log("submitData : ", submitData)
 
     axiosInstance()
       .put(`/sa-formbuilder/tabs/notifications/${resource}`, submitData)
