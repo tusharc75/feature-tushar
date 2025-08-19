@@ -265,13 +265,15 @@ const ScheduleReport = () => {
         <ListingPageHeader
           isActionButtonVisible={permissions?.scheduleReport?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          addButtonProps={{
+            textAddShow: true
+          }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, id: null });
           }}
           isAddButtonVisible={permissions?.scheduleReport?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
