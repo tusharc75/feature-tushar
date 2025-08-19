@@ -12,12 +12,13 @@ const UiPreference = ({ userData, onSuccess }) => {
               Your UI Preference
             </h3>
           </div>
-          <Box style={{ marginTop: '16px' }}>
-            <DefaultRecordDialog
-              userData={userData}
-              onSuccess={onSuccess}
-            />
-          </Box>
+
+        </Box>
+        <Box style={{ marginTop: '16px' }}>
+          <DefaultRecordDialog
+            userData={userData}
+            onSuccess={onSuccess}
+          />
         </Box>
       </Box>
     </>
