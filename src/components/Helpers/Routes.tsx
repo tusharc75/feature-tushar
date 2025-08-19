@@ -783,6 +783,12 @@ const routes = {
   fieldView: {
     path: '/field-view'
   },
+  onboardingTemplate: {
+    path: '/onboarding-template'
+  },
+  onboardingTemplateDetail: {
+    path: '/onboarding-template/detail'
+  },
   customPdfTemplate: {
     path: '/custom-pdf-template'
   },

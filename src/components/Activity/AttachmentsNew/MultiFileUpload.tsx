@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import BackupOutlinedIcon from '@mui/icons-material/BackupOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { IconButton, List, ListItem, ListItemIcon, ListItemText, Typography } from '@mui/material';
@@ -17,9 +17,7 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
   const handleSelectFile = (ev) => {
     if (ev.target.files && ev.target.files.length) {
       const selectedFiles = ev.target.files;
-
       const files = Array.isArray(values[name]) ? [...values[name]] : [];
-
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i];
         if (file.size > fileUploadMaxSize.size) {
@@ -41,7 +39,6 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
     e.preventDefault();
     const items = e.clipboardData?.items;
     const fileItems: File[] = [];
-
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.kind === 'file') {
@@ -49,7 +46,6 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
         if (file) fileItems.push(file);
       }
     }
-
     if (fileItems.length) {
       const dt = new DataTransfer();
       fileItems.forEach((f) => dt.items.add(f));
@@ -112,7 +108,6 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
           </Typography>
         </div>
       )}
-
       {values[name] && isArray(values[name]) && values[name].length > 0 && (
         <div className='mt-4'>
           <List dense>
@@ -148,7 +143,6 @@ const MultiFileUpload = ({ name, required = false, accept = '', values, setField
           </List>
         </div>
       )}
-
       {documentScanDialog && (
         <DocumentScannerNew
           name={name}
