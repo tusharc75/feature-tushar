@@ -56,9 +56,9 @@ const Integration = () => {
     }
   };
 
-  const handleRemoveIntegration = async (integrationName: string) => {
+  const handleRemoveIntegration = async (id: string) => {
     try {
-      const response = await axiosInstance().delete('/integration', { data: { names: [integrationName] } });
+      const response = await axiosInstance().delete('/integration', { data: { ids: [id] } });
       toastConfig.setToastConfig(response);
       fetchIntegratedApps();
     } catch (error) {
@@ -90,10 +90,10 @@ const Integration = () => {
             {integratedApps.map((integration, index) => {
               const colors = getColors(index);
               const isIntegrated = integration.isActive;
-              const logo = logoMap[integration.name];
+              const logo = logoMap[integration.type];
 
               return (
-                <div key={integration.name} className={styles.singleCard}>
+                <div key={integration.type} className={styles.singleCard}>
                   <IntegrationCardShell
                     darkThemeBackgroundColor="var(--dark-secondary)"
                     background={'#efefefff'}
@@ -104,7 +104,7 @@ const Integration = () => {
                     {logo ? (
                       <img
                         src={logo}
-                        alt={integration.name}
+                        alt={integration.type}
                         className={styles.floatIcon}
                         style={{ width: '60px', height: '60px', padding: '2px 2px' }}
                       />
@@ -120,7 +120,7 @@ const Integration = () => {
                     {!isIntegrated && (
                       <div
                         className={styles.integrateText}
-                        onClick={() => handleIntegration(integration.name)}
+                        onClick={() => handleIntegration(integration.type)}
                       >
                         <span>Click here to integrate</span>{' '}
                         <HiArrowRight className={styles.arrow} />
@@ -138,7 +138,7 @@ const Integration = () => {
                         <IconButton
                           disabled={!isIntegrated}
                           aria-label="Delete"
-                          onClick={() => handleRemoveIntegration(integration.name)}
+                          onClick={() => handleRemoveIntegration(integration.id)}
                         >
                           <Delete fontSize="small" color={isIntegrated ? 'error' : 'disabled'} />
                         </IconButton>
