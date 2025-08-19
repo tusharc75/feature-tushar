@@ -10,7 +10,7 @@ import {
   TableRow,
   Typography
 } from '@mui/material';
-import { useStyles } from 'src/pages/ProfilePage/components/ManageProfile';
+import { useStyles } from 'src/pages/ProfilePage/MyProfile/ManageProfile';
 import { Link } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { displayDate } from '../../../constants/helpers';
@@ -20,7 +20,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import AddProxyDialog from 'src/pages/ProfilePage/components/AddProxyDialog';
+import AddProxyDialog from 'src/pages/ProfilePage/ProxiesDelegations/AddProxyDialog';
 import { PersonAdd } from '@mui/icons-material';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 

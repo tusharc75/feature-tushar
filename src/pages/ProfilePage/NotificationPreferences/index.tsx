@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import { BsDisplay, BsEnvelopeOpen } from 'react-icons/bs';
-import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/components/ResourceWiseNotificationPreference';
+import ResourceWiseNotificationPreference from 'src/pages/ProfilePage/NotificationPreferences/ResourceWiseNotificationPreference';
 
 const PreferenceOptions = ({ id, icon, heading, subtitle }) => (
   <div className="flex items-center gap-4 ">

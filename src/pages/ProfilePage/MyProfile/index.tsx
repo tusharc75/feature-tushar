@@ -1,5 +1,5 @@
 import Grid from '@mui/material/Grid2';
-import ManageProfile from './../components/ManageProfile';
+import ManageProfile from './ManageProfile';
 import { Box } from '@mui/material';
 
 const MyProfile = ({ userData, onFetchUserData, otherDetails, proxyBy, userFields, loading, userLoading }) => {
@@ -27,7 +27,6 @@ const MyProfile = ({ userData, onFetchUserData, otherDetails, proxyBy, userField
       </Grid>
     </Grid>
   </Box>
-
   )
 }
 

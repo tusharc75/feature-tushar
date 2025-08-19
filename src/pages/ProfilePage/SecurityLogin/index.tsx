@@ -1,17 +1,17 @@
 
-import { Box, Typography, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { useState } from 'react';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import { useHistory } from 'react-router-dom';
 import { SET_USER } from '../../../StateProvider/actionTypes';
-import SetUpMfaDialog from 'src/pages/ProfilePage/components/SetUpMfaDialog';
+import SetUpMfaDialog from 'src/pages/ProfilePage/SecurityLogin/SetUpMfaDialog';
 import axiosInstance from 'src/axios/axiosInstance';
-import ViewQRCodeDialog from 'src/pages/ProfilePage/components/ViewQRCodeDialog';
-import SetUpQRDialog from 'src/pages/ProfilePage/components/SetUpQRDialog';
+import ViewQRCodeDialog from 'src/pages/ProfilePage/SecurityLogin/ViewQRCodeDialog';
+import SetUpQRDialog from 'src/pages/ProfilePage/SecurityLogin/SetUpQRDialog';
 import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 import { RiDeleteBin6Line } from 'react-icons/ri';
+import ManageUpdateEmailPasswordDialog from '../components/ManageUpdateEmailAndPassword';
 
 const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permissions }) => {
   const history = useHistory();
@@ -118,7 +118,6 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
           </h3>
         </div>
         <div className='px-7 py-3'>
-
           <Box my={1}>
             <ThemeButton onClick={() => setPasswordUpdate(true)}>
               Change Password
@@ -188,32 +187,30 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
       )}
 
       {/* Face ID Authentication */}
-      {
-        permissions?.payrollPolicy && (
-          <Box mb={2} border={1} borderColor="grey.300" borderRadius={2}>
-            <div className={'form-head-v1'}>
-              <h3 className="form-label-style-v1" title="Face ID Authentication">
-                Face ID Authentication
-              </h3>
-            </div>
-            <div className='px-7 py-3'>
-              <Box my={1}>
-                <Stack direction="row" spacing={2}>
-                  {userData?.faceId || userData?.faceData ? (
-                    <ThemeButton buttonType='red' startIcon={<RiDeleteBin6Line />} onClick={() => setRemoveFaceConfirmBox(true)}>
-                      Remove Face
-                    </ThemeButton>
-                  ) : (
-                    <ThemeButton onClick={() => setAddFaceDialog(true)}>
-                      Add Face
-                    </ThemeButton>
-                  )}
-                </Stack>
-              </Box>
-            </div>
-          </Box>
-        )
-      }
+      {permissions?.payrollPolicy && (
+        <Box mb={2} border={1} borderColor="grey.300" borderRadius={2}>
+          <div className={'form-head-v1'}>
+            <h3 className="form-label-style-v1" title="Face ID Authentication">
+              Face ID Authentication
+            </h3>
+          </div>
+          <div className='px-7 py-3'>
+            <Box my={1}>
+              <Stack direction="row" spacing={2}>
+                {userData?.faceId || userData?.faceData ? (
+                  <ThemeButton buttonType='red' startIcon={<RiDeleteBin6Line />} onClick={() => setRemoveFaceConfirmBox(true)}>
+                    Remove Face
+                  </ThemeButton>
+                ) : (
+                  <ThemeButton onClick={() => setAddFaceDialog(true)}>
+                    Add Face
+                  </ThemeButton>
+                )}
+              </Stack>
+            </Box>
+          </div>
+        </Box>
+      )}
 
       {isPasswordUpdate ? (
         <ManageUpdateEmailPasswordDialog
@@ -226,88 +223,73 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
       ) : null}
 
       {/* Multi-Factor Authentication */}
-      {
-        setUpMfaDialog && (
-          <SetUpMfaDialog
-            onClose={() => {
-              setSetUpMfaDialog(false);
-              onFetchUserData();
-            }}
-          />
-        )
-      }
-      {
-        removeMFAConfirmBox ? (
-          <ConfirmationDialog
-            open={removeMFAConfirmBox}
-            message={`Are you sure you want to remove MFA ?`}
-            onClose={() => setRemoveMFAConfirmBox(false)}
-            onOk={handleRemoveMFA}
-            okBtnLoading={removingFace}
-          />
-        ) : null
-      }
+      {setUpMfaDialog && (
+        <SetUpMfaDialog
+          onClose={() => {
+            setSetUpMfaDialog(false);
+            onFetchUserData();
+          }}
+        />
+      )}
+      {removeMFAConfirmBox ? (
+        <ConfirmationDialog
+          open={removeMFAConfirmBox}
+          message={`Are you sure you want to remove MFA ?`}
+          onClose={() => setRemoveMFAConfirmBox(false)}
+          onOk={handleRemoveMFA}
+          okBtnLoading={removingFace}
+        />
+      ) : null}
 
       {/* QR Code Login */}
-      {
-        setUpQRCodeDialog && (
-          <SetUpQRDialog
-            onClose={() => {
-              setSetUpQRCodeDialog(false);
-            }}
-            onSubmit={() => {
-              onFetchUserData();
-              setViewQRCodeDialog(true);
-            }}
-          />
-        )
-      }
-      {
-        changeQRCodeDialog && (
-          <SetUpQRDialog
-            onClose={() => {
-              setChangeQRCodeDialog(false);
-            }}
-            onSubmit={() => {
-              onFetchUserData();
-            }}
-            mode="change"
-            qrLoginId={userData?.qrLoginId}
-          />
-        )
-      }
-      {
-        viewQRCodeDialog && (
-          <ViewQRCodeDialog
-            onClose={() => setViewQRCodeDialog(false)}
-          />
-        )
-      }
-      {
-        removeQRConfirmBox && (
-          <ConfirmationDialog
-            open={removeQRConfirmBox}
-            message={`Are you sure you want to remove QR code ?`}
-            onClose={() => setRemoveQRConfirmBox(false)}
-            onOk={handleRemoveQR}
-          />
-        )
-      }
+      {setUpQRCodeDialog && (
+        <SetUpQRDialog
+          onClose={() => {
+            setSetUpQRCodeDialog(false);
+          }}
+          onSubmit={() => {
+            onFetchUserData();
+            setViewQRCodeDialog(true);
+          }}
+        />
+      )}
+      {changeQRCodeDialog && (
+        <SetUpQRDialog
+          onClose={() => {
+            setChangeQRCodeDialog(false);
+          }}
+          onSubmit={() => {
+            onFetchUserData();
+          }}
+          mode="change"
+          qrLoginId={userData?.qrLoginId}
+        />
+      )}
+      {viewQRCodeDialog && (
+        <ViewQRCodeDialog
+          onClose={() => setViewQRCodeDialog(false)}
+        />
+      )}
+      {removeQRConfirmBox && (
+        <ConfirmationDialog
+          open={removeQRConfirmBox}
+          message={`Are you sure you want to remove QR code ?`}
+          onClose={() => setRemoveQRConfirmBox(false)}
+          onOk={handleRemoveQR}
+        />
+      )}
 
       {/* Face ID Authentication */}
       {addFaceDialog && <FaceLiveNess onClose={() => setAddFaceDialog(false)} onComplete={handleAddFace} />}
-      {
-        removeFaceConfirmBox ? (
-          <ConfirmationDialog
-            open={removeFaceConfirmBox}
-            message={`Are you sure you want to remove Face ?`}
-            onClose={() => setRemoveFaceConfirmBox(false)}
-            onOk={handleRemoveFace}
-            okBtnLoading={removingFace}
-          />
-        ) : null
-      }
-
+      {removeFaceConfirmBox ? (
+        <ConfirmationDialog
+          open={removeFaceConfirmBox}
+          message={`Are you sure you want to remove Face ?`}
+          onClose={() => setRemoveFaceConfirmBox(false)}
+          onOk={handleRemoveFace}
+          okBtnLoading={removingFace}
+        />
+      ) : null}
     </Box >
   );
 };

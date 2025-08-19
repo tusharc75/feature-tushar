@@ -9,8 +9,8 @@ import {
   TableCell,
   TableBody
 } from '@mui/material';
-import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
