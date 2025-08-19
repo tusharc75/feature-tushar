@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid2';
 import { Formik, Form } from 'formik';
@@ -33,7 +33,6 @@ export default function ManageUpdateEmailAndPassword({
   isUpdatePassword = false,
   isUpdateEmail = false,
   userData = null,
-  onFetchUserData,
   logoutUser
 }) {
   const toastConfig = useContext(CustomToastContext);

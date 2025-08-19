@@ -343,7 +343,11 @@ const Assign = ({ serializedPackagesData, fetchSerializedPackagesData, disAssemb
   const handleReplaceAssets = (data) => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`, { assets: data })
+      .put(`${routes.serializedPackages.path}/${serializedPackagesData?._id}/assets/replace`,
+        {
+          assets: selectedRecords?.filter(r => r?.type === MATERIAL_TYPE.serializedAsset)?.map(r => r?.asset),
+          newAssets: data
+        })
       .then(() => {
         fetchSerializedPackagesData()
         setAssignDialog({ open: false, type: '', replaceAsset: false, products: [] });

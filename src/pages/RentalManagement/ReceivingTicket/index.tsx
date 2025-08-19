@@ -769,6 +769,11 @@ const ReceivingTicket = ({
               ele['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
             }
           }
+          const serializedPackage = material?.find(m => m?._id === ele?.uniqueId && m?.materialId === ele?.productId)?.serializedPackage
+          if (serializedPackage) {
+            ele.serializedPackage = serializedPackage?.optionLabel;
+            ele.serializedPackageId = serializedPackage?.optionValue
+          }
         });
       } else {
         let rows = material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material));
@@ -1878,6 +1883,28 @@ const ReceivingTicket = ({
         Header: 'Consumed Qty',
         cell: ({ row }) => (row?.original?.consumeQty ? <h5 className="text-truncate">{row?.original?.consumeQty}</h5> : <NoDataCell />)
       });
+    }
+    if (permissions?.serializedPackages?.isRead) {
+      column.push({
+        accessor: 'serializedPackage',
+        Header: resources?.serializedPackages?.titleSingular,
+        cell: ({ row }) =>
+          row?.original?.serializedPackage ? (
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row?.original?.serializedPackage}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serializedPackagesDetail.path}/${row?.original?.serializedPackageId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      })
     }
     column.push({
       accessor: 'action',

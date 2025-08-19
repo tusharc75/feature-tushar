@@ -1270,7 +1270,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length; ) {
+        for (let i = 0; i < validationFields?.length;) {
           const field = validationFields[i];
           const condition =
             field?.type === 'section'
@@ -1677,7 +1677,7 @@ export const getPermissions = (user, selectedEntity = undefined): IGetPermission
         });
       }
       return { permissions, resources };
-    } catch (e) {}
+    } catch (e) { }
   }
 };
 
@@ -3143,6 +3143,7 @@ export const SERIALIZED_PACKAGES_STATUS = {
   available: 'Available',
   reserved: 'Reserved',
   underReview: 'Under Review',
+  inUse: 'In-Use',
   customerPossession: 'Customer Possession',
   disassembled: 'Disassembled'
 };
@@ -3723,8 +3724,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

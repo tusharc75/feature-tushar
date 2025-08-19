@@ -76,7 +76,7 @@ function SearchBox(
                   onChangeWrapper(e);
                   onChange(e);
                 }}
-                placeholder={placeholder || 'Search..'}
+                placeholder={placeholder || 'Search'}
                 type={'text'}
                 className={cn(
                   `small-searchbar h-[32px] w-full min-w-0 flex-grow rounded-[4px] bg-transparent p-[10px_5px_10px_32px] text-[13px] shadow-none outline-transparent [border:1px_solid_var(--common-border-color)] placeholder:text-[#737373] focus-within:[outline:1px_solid_var(--new-theme-color)] focus:[outline:1px_solid_var(--new-theme-color)] dark:bg-[var(--dark-secondary)] dark:text-white sm:min-w-[150px] `,

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { camelCase } from 'lodash';
 import { calculateRatio } from 'src/constants/helpers';
+import { PlanningResource } from 'src/pages/PlanningView/usePlanningResource';
 import { Timeline } from 'vis-timeline';
 
 export type RawDay = {
@@ -22,6 +23,7 @@ export type RawGroup = {
   productName: string;
   data: RawDay[];
   productDescription?: string;
+  isLoading?: boolean;
 };
 
 const KNOWN_KEYS = new Set(['_id', 'id', 'date', 'debit', 'credit', 'availableByPlanning', 'inUseByPlanning', 'inventory', 'assetCount', 'softhold']);
@@ -189,62 +191,57 @@ export const getWindow = (container) => {
   };
 };
 
-// Utilities: normalize, merge, subtract coverage
-export const startOfDay = (d: Date) => dayjs(d).startOf('day').toDate();
-export const endOfDay = (d: Date) => dayjs(d).endOf('day').toDate();
+const today = dayjs.tz();
 
-export const normalizeRange = (r: TimeRange): TimeRange => ({
-  start: startOfDay(r.start),
-  end: endOfDay(r.end)
-});
+export const buildFromRows = ({
+  rows,
+  selectedResource,
+  resourcePolicy
+}: {
+  rows: RawGroup[];
+  selectedResource: PlanningResource;
+  resourcePolicy: any;
+}) => {
+  const groups = rows.map((g) => ({
+    productName: g.productName,
+    _id: g._id,
+    id: g._id,
+    productDescription: g.productDescription,
+    isLoading: false
+  }));
 
-// Merge ranges; assumes r.start <= r.end
-export const mergeCoverage = (covered: TimeRange[], add: TimeRange): TimeRange[] => {
-  const next = [...covered, add].sort((a, b) => a.start.getTime() - b.start.getTime());
-  const merged: TimeRange[] = [];
-  for (const r of next) {
-    if (!merged.length) {
-      merged.push({ ...r });
-      continue;
-    }
-    const last = merged[merged.length - 1];
-    if (r.start.getTime() <= last.end.getTime() + 1) {
-      // overlap or adjacent
-      last.end = new Date(Math.max(last.end.getTime(), r.end.getTime()));
-    } else {
-      merged.push({ ...r });
-    }
-  }
-  return merged;
+  const items = rows.flatMap((rawGroup) => {
+    const groupId = rawGroup._id;
+    return rawGroup.data.flatMap((d: RawDay, i: number) => {
+      const baseId = d._id ?? `item-${i}_${groupId}`;
+
+      // local date boundaries for the band
+      const localDate = dayjs(d.date).tz();
+      const start = localDate.startOf('day').toDate();
+      const end = localDate.endOf('day').toDate();
+
+      // ledger comparisons against "today"
+      const ledgerDate = dayjs(d.date);
+      const isPast = ledgerDate.isBefore(today, 'day');
+      const isFuture = ledgerDate.isAfter(today, 'day');
+
+      const base = {
+        group: groupId,
+        groupName: rawGroup.productName,
+        originalDate: d.date,
+        start,
+        end,
+        allDay: true,
+        resource: selectedResource?.resource
+      };
+
+      const one = buildOneItem({ baseId, d, base, isPast, isFuture, resourcePolicy });
+      return one ? [one] : [];
+    });
+  });
+
+  return { groups, items };
 };
-
-// Subtract covered from target, returning missing disjoint ranges
-export const subtractCoverage = (covered: TimeRange[], target: TimeRange): TimeRange[] => {
-  if (!covered.length) return [target];
-
-  const result: TimeRange[] = [];
-  let cursor = target.start.getTime();
-  const targetEnd = target.end.getTime();
-
-  for (const c of covered) {
-    const cs = Math.max(c.start.getTime(), target.start.getTime());
-    const ce = Math.min(c.end.getTime(), target.end.getTime());
-    if (ce < cs) continue; // no overlap with target
-
-    if (cursor < cs) {
-      result.push({ start: new Date(cursor), end: new Date(cs - 1) });
-    }
-    cursor = Math.max(cursor, ce + 1);
-    if (cursor > targetEnd) break;
-  }
-
-  if (cursor <= targetEnd) {
-    result.push({ start: new Date(cursor), end: new Date(targetEnd) });
-  }
-  return result;
-};
-
-export const fmt = (d: Date) => dayjs(d).format('MM/DD/YYYY');
 
 export const mapObjectToList = (obj: { [key: string]: any[] }, resources) => {
   const data: { items: any[]; key: string; heading: string }[] = [];
