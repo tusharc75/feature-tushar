@@ -119,8 +119,7 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
         </div>
         <div className='px-7 py-3'>
 
-          <Typography color="textSecondary" mb={1}>Password</Typography>
-          <Box my={2}>
+          <Box my={1}>
             <ThemeButton onClick={() => setPasswordUpdate(true)}>
               Change Password
             </ThemeButton>
@@ -136,8 +135,7 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
           </h3>
         </div>
         <div className='px-7 py-3'>
-          <Typography color="textSecondary" mb={1}>Authenticator Apps</Typography>
-          <Box my={2}>
+          <Box my={1}>
             <Stack direction="row" spacing={2}>
               {userData?.isMFASetup ? (
                 <ThemeButton buttonType='red' startIcon={<RiDeleteBin6Line />} onClick={() => setRemoveMFAConfirmBox(true)}>
@@ -162,8 +160,7 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
             </h3>
           </div>
           <div className='px-7 py-3'>
-            <Typography color="textSecondary" mb={1}>QR code login is enabled. Use your mobile device to scan and authenticate.</Typography>
-            <Box my={2}>
+            <Box my={1}>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 {userData?.brandPolicy?.qRCodeLogin && (
                   <>
@@ -200,8 +197,7 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
               </h3>
             </div>
             <div className='px-7 py-3'>
-              <Typography color="textSecondary" mb={1}>Face ID is configured for quick and secure authentication.</Typography>
-              <Box my={2}>
+              <Box my={1}>
                 <Stack direction="row" spacing={2}>
                   {userData?.faceId || userData?.faceData ? (
                     <ThemeButton buttonType='red' startIcon={<RiDeleteBin6Line />} onClick={() => setRemoveFaceConfirmBox(true)}>

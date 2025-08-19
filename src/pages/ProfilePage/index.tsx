@@ -14,6 +14,8 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import MyProfile from 'src/pages/ProfilePage/components/MyProfile';
 import SecurityLogin from 'src/pages/ProfilePage/components/SecurityLogin';
 import ProxiesDelegations from 'src/pages/ProfilePage/components/ProxiesDelegations';
+import { useHistory } from 'react-router-dom';
+import queryString from 'query-string';
 
 export default function ProfilePage(props) {
   const {
@@ -29,8 +31,32 @@ export default function ProfilePage(props) {
   const [userLoading, setUserLoading] = useState(false);
   const [userFields, setUserFields] = useState([]);
   const toastConfig = useContext(CustomToastContext);
-  const [tabValue, setTabValue] = useState(0);
 
+  const history = useHistory();
+  const parsed = queryString.parse(history.location.search);
+  const { tab }: any = parsed;
+  const [locationKeys, setLocationKeys] = useState([]);
+  const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+
+  useEffect(() => {
+    return history.listen((location) => {
+      const { tab }: any = queryString.parse(history.location.search);
+      if (history.action === 'PUSH') {
+        setLocationKeys([location.key]);
+      }
+      if (history.action === 'POP') {
+        if (locationKeys[1] === location.key) {
+          setLocationKeys(([_, ...keys]) => keys);
+          // Handle forward event
+          setTabValue(tab ? parseInt(tab) : 0);
+        } else {
+          setLocationKeys((keys) => [location.key, ...keys]);
+          // Handle back event
+          setTabValue(tab ? parseInt(tab) : 0);
+        }
+      }
+    });
+  }, [locationKeys]);
 
   useEffect(() => {
     if (userFields.length === 0) {
@@ -90,8 +116,12 @@ export default function ProfilePage(props) {
       });
   };
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+    if (newValue === 0) {
+      fetchUserData();
+    }
+    history.push(`?tab=${newValue}`);
   };
 
   return (
