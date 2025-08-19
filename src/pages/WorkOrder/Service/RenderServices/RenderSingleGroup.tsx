@@ -60,18 +60,20 @@ const RenderSingleGroup = ({
                 <h6 className={'text-base font-medium leading-[24px]'}>{group.product}</h6>
                 <RenderServiceCountBadge serviceSteps={group.serviceSteps} />
               </div>
-              <RippleButton
-                onClickCapture={(e) => {
-                  setExpanded((prev) => !prev);
-                  e.preventDefault();
-                }}
-                className={cn(
-                  'rounded-[inherit] text-inherit ',
-                  isSelected ? 'hover:bg-[white] hover:!text-[black]' : 'hover:bg-gray-300 dark:hover:bg-gray-700'
-                )}
-              >
-                {expanded ? <KeyboardArrowUp color="inherit" /> : <KeyboardArrowDown color="inherit" />}
-              </RippleButton>
+              <HtmlTooltip title={expanded ? 'Collapse' : 'Expand'} className="block max-h-[24px] rounded-[inherit]">
+                <RippleButton
+                  onClickCapture={(e) => {
+                    setExpanded((prev) => !prev);
+                    e.preventDefault();
+                  }}
+                  className={cn(
+                    'rounded-[inherit] text-inherit ',
+                    isSelected ? 'hover:bg-[white] hover:!text-[black]' : 'hover:bg-gray-300 dark:hover:bg-gray-700'
+                  )}
+                >
+                  {expanded ? <KeyboardArrowUp color="inherit" /> : <KeyboardArrowDown color="inherit" />}
+                </RippleButton>
+              </HtmlTooltip>
             </>
           )}
         </div>
