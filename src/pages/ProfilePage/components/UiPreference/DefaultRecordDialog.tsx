@@ -95,7 +95,7 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
         <Formik initialValues={initialValues} onSubmit={updateData}>
           {({ values, submitForm }) => (
             <Form>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} px={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2} >
                 <SearchBox
                   onChange={handleSearch}
                   className="terms_header_search_bar"

@@ -186,7 +186,7 @@ export default function ManageProfile(props) {
       )}
       <>
         {displayUserProfileImage ? (
-          <div className="bg-[#f1f5ff] flex flex-col gap-2 px-6 py-2 rounded-[4px] mb-5">
+          <div className={styles.userDetail}>
             <div className={styles.profileAvatarContainer}>
               <>
                 <Box display="flex" flexDirection="row">
@@ -271,10 +271,6 @@ export default function ManageProfile(props) {
                   </span>
                 ))}
             </div>
-            {/* <Divider />
-            <ThemeButton fullWidth onClick={() => setPasswordUpdate(true)}>
-              Change Password
-            </ThemeButton> */}
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
