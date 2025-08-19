@@ -4,45 +4,31 @@ import {
   CircularProgress,
   Divider,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Theme,
   Typography
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Image } from '@mui/icons-material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
-import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { HiOutlinePencilAlt, HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import { SET_USER } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import routes from '../../../components/Helpers/Routes';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import UpdateDetailsDialog from '../../../components/Shared/UpdateDetailsDialog';
-import { displayDate, imageUploadMaxSize } from '../../../constants/helpers';
+import { imageUploadMaxSize } from '../../../constants/helpers';
 import styles from '../profilePage.module.scss';
-import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
-import SetUpMfaDialog from './SetUpMfaDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import SetUpQRDialog from 'src/pages/ProfilePage/components/SetUpQRDialog';
-import ViewQRCodeDialog from 'src/pages/ProfilePage/components/ViewQRCodeDialog';
 
-const useStyles = makeStyles((theme: Theme) => ({
+
+export const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
     position: 'absolute',
     bottom: 0,
@@ -83,21 +69,9 @@ export default function ManageProfile(props) {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
   const [isUploading, setUploading] = useState(false);
-  const [isDeleteProxy, setIsDeleteProxy] = useState(false);
   const [isEmailUpdate, setEmailUpdate] = useState(false);
   const [isPasswordUpdate, setPasswordUpdate] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const [removeFaceConfirmBox, setRemoveFaceConfirmBox] = useState(false);
-  const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
-  const [removingFace, setRemovingFace] = useState(false);
-  const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
-  const [addFaceDialog, setAddFaceDialog] = useState(false);
-  const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
-
-  const [setUpQRCodeDialog, setSetUpQRCodeDialog] = useState(false);
-  const [viewQRCodeDialog, setViewQRCodeDialog] = useState(false);
-  const [changeQRCodeDialog, setChangeQRCodeDialog] = useState(false);
-  const [removeQRConfirmBox, setRemoveQRConfirmBox] = useState(false);
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -180,22 +154,6 @@ export default function ManageProfile(props) {
     }
   };
 
-  const handleDeleteProxy = () => {
-    axiosInstance()
-      .delete('/user/doa/proxy')
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setShowDeleteConfirmBox(false);
-        onFetchUserData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const handleDeleteProfilePic = () => {
     let values = {
@@ -206,99 +164,12 @@ export default function ManageProfile(props) {
     handleUpdateUser({ ...values });
     setShowDeleteConfirmBox(false);
   };
+
   let filteredUserFields =
     userFields && userFields.length
       ? userFields.filter((field) => field?.fieldData?.sectionName !== 'Profile Image' && field?.fieldData?.fieldName !== 'reportsTo')
       : [];
 
-  const isActiveProxy = (startDate, endDate) => {
-    let result = false;
-    let parsedCurrentDate = new Date();
-    let parsedStartDate = new Date(startDate);
-    let parsedEndDate = new Date(endDate);
-
-    if (parsedCurrentDate >= parsedStartDate && parsedCurrentDate <= parsedEndDate) {
-      result = true;
-    } else {
-      result = false;
-    }
-    return result;
-  };
-
-  const handleRemoveFace = () => {
-    setRemovingFace(true);
-    axiosInstance()
-      .delete('/user/face/remove')
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setRemoveFaceConfirmBox(false);
-        setRemovingFace(false);
-        onFetchUserData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setRemovingFace(false);
-      });
-  };
-
-  const handleRemoveMFA = () => {
-    setRemovingFace(true);
-    axiosInstance()
-      .delete('/user/mfa-setup/remove')
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        setRemoveMFAConfirmBox(false);
-        onFetchUserData();
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setRemovingFace(false);
-      });
-  };
-
-  const handleAddFace = async (sessionId: string) => {
-    await axiosInstance()
-      .post('/user/face/add', { sessionId })
-      .then(({ data }) => {
-        setAddFaceDialog(false);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-        onFetchUserData();
-      })
-      .catch((err) => {
-        setAddFaceDialog(false);
-        toastConfig.setToastConfig(err);
-      });
-  };
-
-  const handleRemoveQR = () => {
-    axiosInstance()
-      .delete(`/user/qr-setup/${userData?.qrLoginId}`)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: "QR login removed successfully."
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      }).finally(() => {
-        setRemoveQRConfirmBox(false);
-        onFetchUserData();
-      });
-  };
 
   return (
     <>
@@ -400,62 +271,6 @@ export default function ManageProfile(props) {
                   </span>
                 ))}
             </div>
-            <Divider />
-            <ThemeButton fullWidth onClick={() => setPasswordUpdate(true)}>
-              Change Password
-            </ThemeButton>
-            <Divider />
-            <ThemeButton fullWidth onClick={() => setShowAddProxyDialog(true)}>
-              Add DOA Proxy
-            </ThemeButton>
-            <Divider />
-            {userData?.isMFASetup ? (
-              <ThemeButton fullWidth onClick={() => setRemoveMFAConfirmBox(true)}>
-                Remove MFA
-              </ThemeButton>
-            ) : (
-              <ThemeButton fullWidth onClick={() => setSetUpMfaDialog(true)}>
-                Setup MFA
-              </ThemeButton>
-            )}
-
-            {/* qrLoginId */}
-            {userData?.brandPolicy?.qRCodeLogin && (
-              <>
-                <Divider />
-                {userData?.qrLoginId ? (
-                  <>
-                    <ThemeButton fullWidth onClick={() => setViewQRCodeDialog(true)}>
-                      View QR Code
-                    </ThemeButton>
-                    <ThemeButton fullWidth onClick={() => setChangeQRCodeDialog(true)}>
-                      Change QR Pin
-                    </ThemeButton>
-                    <ThemeButton fullWidth onClick={() => setRemoveQRConfirmBox(true)}>
-                      Remove QR Login
-                    </ThemeButton>
-                  </>
-                ) : (<ThemeButton fullWidth onClick={() => setSetUpQRCodeDialog(true)}>
-                  Setup QR Login
-                </ThemeButton>)}
-              </>
-            )}
-
-
-            {permissions?.payrollPolicy && (
-              <>
-                <Divider />
-                {userData?.faceId || userData?.faceData ? (
-                  <ThemeButton fullWidth onClick={() => setRemoveFaceConfirmBox(true)}>
-                    Remove Face
-                  </ThemeButton>
-                ) : (
-                  <ThemeButton fullWidth onClick={() => setAddFaceDialog(true)}>
-                    Add Face
-                  </ThemeButton>
-                )}
-              </>
-            )}
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
@@ -480,7 +295,7 @@ export default function ManageProfile(props) {
                   <DetailsPage data={userData} fields={filteredUserFields} />
                 )}
               </Box>
-              <div className="detail-box">
+              {/* <div className="detail-box">
                 <div className={'detail-box-content'}>
                   <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                   <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>DOA Proxy</h2>
@@ -613,7 +428,7 @@ export default function ManageProfile(props) {
                     <Typography>No assigned proxy</Typography>
                   </Box>
                 )}
-              </div>
+              </div> */}
             </Box>
           ) : null}
           {isPasswordUpdate ? (
@@ -638,58 +453,14 @@ export default function ManageProfile(props) {
           {showDeleteConfirmBox ? (
             <ConfirmationDialog
               open={showDeleteConfirmBox}
-              message={isDeleteProxy ? `Are you sure you want to delete DOA proxy ?` : `Are you sure you want to remove profile picture ?`}
+              message={`Are you sure you want to remove profile picture ?`}
               onClose={() => setShowDeleteConfirmBox(false)}
               onOk={() => {
-                isDeleteProxy ? handleDeleteProxy() : handleDeleteProfilePic();
+                handleDeleteProfilePic();
               }}
             />
           ) : null}
-          {addFaceDialog && <FaceLiveNess onClose={() => setAddFaceDialog(false)} onComplete={handleAddFace} />}
-          {setUpMfaDialog && (
-            <SetUpMfaDialog
-              onClose={() => {
-                setSetUpMfaDialog(false);
-                onFetchUserData();
-              }}
-            />
-          )}
-          {setUpQRCodeDialog && (
-            <SetUpQRDialog
-              onClose={() => {
-                setSetUpQRCodeDialog(false);
-              }}
-              onSubmit={() => {
-                onFetchUserData();
-                setViewQRCodeDialog(true);
-              }}
-            />
-          )}
-          {changeQRCodeDialog && (
-            <SetUpQRDialog
-              onClose={() => {
-                setChangeQRCodeDialog(false);
-              }}
-              onSubmit={() => {
-                onFetchUserData();
-              }}
-              mode="change"
-              qrLoginId={userData?.qrLoginId}
-            />
-          )}
-          {viewQRCodeDialog && (
-            <ViewQRCodeDialog
-              onClose={() => setViewQRCodeDialog(false)}
-            />
-          )}
-          {removeQRConfirmBox && (
-            <ConfirmationDialog
-              open={removeQRConfirmBox}
-              message={`Are you sure you want to remove QR code ?`}
-              onClose={() => setRemoveQRConfirmBox(false)}
-              onOk={handleRemoveQR}
-            />
-          )}
+
           {/* {webCamDialog && (
             <WebcamDialog
               open={webCamDialog}
@@ -702,46 +473,7 @@ export default function ManageProfile(props) {
               }}
             />
           )} */}
-          {showAddProxyDialog && (
-            <AddProxyDialog
-              open={showAddProxyDialog}
-              onClose={() => {
-                setShowAddProxyDialog(false);
-              }}
-              onSuccess={(data) => {
-                axiosInstance()
-                  .post('/user/doa/proxy', data)
-                  .then(({ data }) => {
-                    toastConfig.setToastConfig({ open: true, type: 'success', message: data.message });
-                    setShowAddProxyDialog(false);
-                    onFetchUserData();
-                  })
-                  .catch((error) => {
-                    setShowAddProxyDialog(false);
-                    toastConfig.setToastConfig(error);
-                  });
-              }}
-              userId={user?.user?._id}
-            />
-          )}
-          {removeFaceConfirmBox ? (
-            <ConfirmationDialog
-              open={removeFaceConfirmBox}
-              message={`Are you sure you want to remove Face ?`}
-              onClose={() => setRemoveFaceConfirmBox(false)}
-              onOk={handleRemoveFace}
-              okBtnLoading={removingFace}
-            />
-          ) : null}
-          {removeMFAConfirmBox ? (
-            <ConfirmationDialog
-              open={removeMFAConfirmBox}
-              message={`Are you sure you want to remove MFA ?`}
-              onClose={() => setRemoveMFAConfirmBox(false)}
-              onOk={handleRemoveMFA}
-              okBtnLoading={removingFace}
-            />
-          ) : null}
+
         </div>
       </>
     </>

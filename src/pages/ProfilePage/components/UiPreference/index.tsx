@@ -1,41 +1,26 @@
-import { useState } from 'react';
-import { Box, Typography } from '@mui/material';
-import styles from '../../profilePage.module.scss';
+import { Box } from '@mui/material';
 import DefaultRecordDialog from './DefaultRecordDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const UiPreference = ({ userData, onSuccess }) => {
-  const [byDefaultRecordDialog, setByDefaultRecordDialog] = useState(false);
 
   return (
     <>
-      <div className={styles.preferenceHeader}>
-        <Typography variant="h5">Your UI Preference</Typography>
-      </div>
-      <Box style={{ padding: '8px' }}>
-        <div className="header-panel">
-          <ThemeButton
-            buttonType="theme"
-            onClick={() => {
-              setByDefaultRecordDialog(true);
-            }}
-          >
-            By Default Record
-          </ThemeButton>
-        </div>
+      <Box>
+        <Box mb={4} border={1} borderColor="grey.300" borderRadius={2}>
+          <div className={'form-head-v1'}>
+            <h3 className="form-label-style-v1" title="Your UI Preference">
+              Your UI Preference
+            </h3>
+          </div>
+
+        </Box>
+        <Box style={{ marginTop: '16px' }}>
+          <DefaultRecordDialog
+            userData={userData}
+            onSuccess={onSuccess}
+          />
+        </Box>
       </Box>
-      {byDefaultRecordDialog && (
-        <DefaultRecordDialog
-          userData={userData}
-          handleClose={() => {
-            setByDefaultRecordDialog(false);
-          }}
-          onSuccess={() => {
-            setByDefaultRecordDialog(false);
-            onSuccess();
-          }}
-        />
-      )}
     </>
   );
 };
