@@ -11,8 +11,8 @@ const PreferenceOptions = ({ icon, heading, subtitle }) => (
   <div className="flex items-center gap-4 ">
     <span className="flex-shrink-0">{icon}</span>
     <div>
-      <h6 className="text-lg font-bold ">{heading}</h6>
-      <p className="text-[13px] text-gray-500">{subtitle}</p>
+      <h6 className="text-[12px] font-bold ">{heading}</h6>
+      <p className="text-[10px] text-gray-500">{subtitle}</p>
     </div>
   </div>
 );
@@ -31,13 +31,13 @@ export default function NotificationPreference() {
 
   const options = [
     {
-      icon: <BsDisplay size={55} />,
+      icon: <BsDisplay size={20} />,
       heading: 'Portal',
       subtitle: 'A banner in corner of your website',
       id: 'Portal'
     },
     {
-      icon: <BsEnvelopeOpen size={50} />,
+      icon: <BsEnvelopeOpen size={20} />,
       heading: 'Email',
       subtitle: 'Conversation sent to your mail',
       id: 'Email3'
