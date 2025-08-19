@@ -13,44 +13,52 @@ import IntegrationCardShell from 'src/pages/Integration/IntegrationCardShell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, CheckBox } from '@mui/icons-material';
 import slackLogo from 'src/assets/slack-logo.png';
+import quickbooksLogo from 'src/assets/quickBooks-logo.png';
+import ExtensionIcon from '@mui/icons-material/Extension';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const Integration = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
-    state: { user, resources }
+    state: { user }
   } = useData();
 
-  const [integratedApps, setIntegratedApps] = useState(null);
+  const [integratedApps, setIntegratedApps] = useState<any[] | null>(null);
 
-  // const REDIRECT_URI = 'https://348c-2401-4900-5a5f-9e02-97ff-2d8-6bc6-b7d2.ngrok-free.app/integration/slack/oauth/callback'; //This is for demo purpose, below will be the actual REDIRECT_URI
-  const REDIRECT_URI = `${backendApi}/integration/slack/oauth/callback`;
+  const logoMap: Record<string, string> = {
+    "slack": slackLogo,
+    "quickBooks": quickbooksLogo,
+  };
 
-  const integrationList = [
-    {
-      title: 'Slack',
-      key: 'slack'
-    }
-  ];
-
-  const handleIntegration = async (integrationKey) => {
+  const handleIntegration = async (integrationKey: string) => {
     if (integrationKey === 'slack') {
       try {
         const response = await axiosInstance().get('/integration/slack');
         const slackAppClientId = response.data.data.slackAppClientId;
-        const scopes = encodeURIComponent('channels:read,chat:write,users:read'); // update this as needed
+        const scopes = encodeURIComponent('channels:read,chat:write,users:read');
         const state = encodeURIComponent(JSON.stringify({ brand: user?.user?.brand, frontendUrl: window.location.origin }));
         const authorizationUrl = `https://slack.com/oauth/v2/authorize?client_id=${slackAppClientId}&scope=${scopes}&redirect_uri=${REDIRECT_URI}&state=${state}`;
         window.location.href = authorizationUrl;
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
+    } else if (integrationKey === "quickBooks") {
+      try {
+        const res = await axiosInstance().post('/integration/quick-books/login', {
+          backendUrl: backendApi,
+          frontendUrl: window.location.href
+        });
+        window.location.href = res.data.loginUrl;
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
     }
   };
 
-  const handleRemoveIntegration = async (integratedId) => {
+  const handleRemoveIntegration = async (integrationName: string) => {
     try {
-      const response = await axiosInstance().delete('/integration', { data: { _ids: [integratedId] } });
+      const response = await axiosInstance().delete('/integration', { data: { names: [integrationName] } });
       toastConfig.setToastConfig(response);
       fetchIntegratedApps();
     } catch (error) {
@@ -60,7 +68,7 @@ const Integration = () => {
 
   const fetchIntegratedApps = async () => {
     try {
-      const response = await axiosInstance().get('/integration');
+      const response = await axiosInstance().get('/integration/list');
       setIntegratedApps(response.data.data || []);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -74,60 +82,78 @@ const Integration = () => {
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[{ title: resources?.integration?.titlePlural }]} />
+        <CustomBreadCrumbs routes={[{ title: 'Integrations' }]} />
       </div>
       <div className="detail-container-v1">
         {integratedApps !== null ? (
-          <>
-            <Box className={styles.reportGrid}>
-              {integrationList.map((integration: any, index: any) => {
-                const integratedApp = integratedApps.find((app) => app.type === integration.key);
-                const isIntegrated = Boolean(integratedApp);
-                const colors = getColors(index);
-                return (
-                  <div key={index} className={styles.singleCard}>
-                    <IntegrationCardShell
-                      darkThemeBackgroundColor="var(--dark-secondary)"
-                      background={'#fff'}
-                      gradientColors={colors.gradient}
-                      className={styles.cardInner}
-                      minHeight={false}
-                    >
-                      {/* <FaSlack className={styles.floatIcon} size={"60"} /> */}
-                      <img src={slackLogo} alt="Slack" className={styles.floatIcon} style={{ width: '60px', height: '60px' }} />
-                      <Typography variant="h5">{integration.title}</Typography>
-                      {isIntegrated ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>Integrated</span> <CheckBox />
-                        </div>
-                      ) : (
-                        <div className={styles.integrateText} onClick={() => handleIntegration(integration.key)}>
-                          <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} />
-                        </div>
-                      )}
-                      <HtmlTooltip title="Remove Integration" style={{ position: 'absolute', top: 1, right: 10 }}>
+          <Box className={styles.reportGrid} >
+            {integratedApps.map((integration, index) => {
+              const colors = getColors(index);
+              const isIntegrated = integration.isActive;
+              const logo = logoMap[integration.name];
+
+              return (
+                <div key={integration.name} className={styles.singleCard}>
+                  <IntegrationCardShell
+                    darkThemeBackgroundColor="var(--dark-secondary)"
+                    background={'#efefefff'}
+                    gradientColors={colors.gradient}
+                    className={styles.cardInner}
+                    minHeight={false}
+                  >
+                    {logo ? (
+                      <img
+                        src={logo}
+                        alt={integration.name}
+                        className={styles.floatIcon}
+                        style={{ width: '60px', height: '60px', padding: '2px 2px' }}
+                      />
+                    ) : (
+                      <ExtensionIcon
+                        className={styles.floatIcon}
+                        style={{ width: '60px', height: '60px', padding: '2px 2px' }}
+                      />
+                    )}
+
+                    <Typography variant="h5">{integration.title}</Typography>
+
+                    {!isIntegrated && (
+                      <div
+                        className={styles.integrateText}
+                        onClick={() => handleIntegration(integration.name)}
+                      >
+                        <span>Click here to integrate</span>{' '}
+                        <HiArrowRight className={styles.arrow} />
+                      </div>
+                    )}
+
+                    {isIntegrated && (
+                      <HtmlTooltip title="Integrated" style={{ position: 'absolute', top: 8, right: 16 }}>
+                        <CheckCircleOutlineIcon color="success" />
+                      </HtmlTooltip>
+                    )}
+
+                    {isIntegrated && (
+                      <HtmlTooltip title="Remove Integration" style={{ position: 'absolute', bottom: 8, right: 10 }}>
                         <IconButton
                           disabled={!isIntegrated}
                           aria-label="Delete"
-                          onClick={() => {
-                            handleRemoveIntegration(integratedApp._id);
-                          }}
+                          onClick={() => handleRemoveIntegration(integration.name)}
                         >
                           <Delete fontSize="small" color={isIntegrated ? 'error' : 'disabled'} />
                         </IconButton>
                       </HtmlTooltip>
-                    </IntegrationCardShell>
-                  </div>
-                );
-              })}
-            </Box>
-          </>
+                    )}
+                  </IntegrationCardShell>
+                </div>
+              );
+            })}
+
+          </Box>
         ) : (
-          <>
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          </>
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
         )}
       </div>
     </div>
