@@ -17,6 +17,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
   INVOICE_STATUS,
@@ -32,6 +33,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
 import { FiExternalLink } from 'react-icons/fi';
 import FinalPriceBox from 'src/components/FinalPriceBox';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -362,6 +364,12 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
               Cancel Invoice
             </ThemeButton>
           )}
+        <ActivityButton
+          referenceId={invoiceData?._id}
+          resource={ACTIVITY_RESOURCE.invoice}
+          resourceLabel={invoiceData?.invoiceNumber}
+          resourceData={invoiceData}
+        />
       </>
     );
   };
