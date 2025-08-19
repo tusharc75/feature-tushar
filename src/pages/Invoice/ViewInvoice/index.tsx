@@ -17,6 +17,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
+  ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   CustomDialogTransition,
   INVOICE_STATUS,
@@ -83,7 +84,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const fetchFields = async () => {
     try {
-
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}&view=true`);
       setResourceFields(response?.data?.data);
 
@@ -319,7 +319,6 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     ]
   };
 
-
   const leftSideContents = () => {
     return (
       <>
@@ -375,10 +374,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           )}
         <ActivityButton
           referenceId={invoiceData?._id}
-          resource={resource}
+          resource={ACTIVITY_RESOURCE.invoice}
           resourceLabel={invoiceData?.invoiceNumber}
           resourceData={invoiceData}
-          createPortal={true}
+          fromDialog={true}
         />
       </>
     );

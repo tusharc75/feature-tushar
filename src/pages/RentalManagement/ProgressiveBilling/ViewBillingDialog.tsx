@@ -454,12 +454,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                     Delete
                   </MenuItem>
                 </Menu>
+                <Box ml={1} />
                 <ActivityButton
                   referenceId={invoiceData?._id}
-                  resource={ACTIVITY_RESOURCE.rentalManagement}
+                  resource={ACTIVITY_RESOURCE.invoice}
                   resourceLabel={invoiceData?.invoiceNumber}
                   resourceData={invoiceData}
-                  createPortal={true}
+                  fromDialog={true}
                 />
               </Box>
             </Box>

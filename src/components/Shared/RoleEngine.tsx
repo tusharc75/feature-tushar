@@ -551,7 +551,7 @@ const RoleEngine = ({
         <TextField
           className="min-w-[300px]"
           variant="outlined"
-          placeholder={'Search...'}
+          placeholder={'Search'}
           size="small"
           type="search"
           value={tableSearchFilterState.search}

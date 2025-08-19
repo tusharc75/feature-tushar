@@ -2,7 +2,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import { Chip } from '@mui/material';
 import _ from 'lodash';
-import { displayDate } from 'src/constants/helpers';
+
+const operators = {
+  'gte': ' >=',
+  'gt': ' >',
+  'lte': ' <=',
+  'lt': ' <',
+  'eq': ' ='
+};
 
 const DisplayChips = (props) => {
   const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, setIsFilterPresent, customFilters, columns } =
@@ -72,8 +79,15 @@ const DisplayChips = (props) => {
     switch (true) {
       case typeof data === 'string':
         return data;
-      case Array.isArray(data):
-        return data.toString();
+      case Array.isArray(data): {
+        const formattedArray = data.map(item => {
+          if (typeof item === 'object' && item !== null && item.operation && item.value !== undefined) {
+            return `${operators[item.operation]}${item.value}`;
+          }
+          return item;
+        });
+        return formattedArray.join(' and ');
+      }
       case typeof data === 'object':
         return `${data.from ? data.from : ''}${data.to ? ' - ' + data.to : ''}`;
       default:

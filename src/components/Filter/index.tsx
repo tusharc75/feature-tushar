@@ -34,7 +34,7 @@ const Filter = ({
   loading = false,
   onCloseWithErrors = null,
   isVisibleFilterSet = false,
-  fetchUserFilters = () => {},
+  fetchUserFilters = () => { },
   userFilters = [],
   selectedFilter = null
 }) => {
