@@ -5,8 +5,18 @@ import { useData } from 'src/StateProvider/Provider';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import Activity from '.';
 import HideWhenOffline from '../HideWhenOffline';
+import { cn } from 'src/constants/helpers';
 
-const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceData = null, extraRelatedTo = null, handleClose = null, extraData = {} }) => {
+const ActivityButton = ({
+  referenceId,
+  resource,
+  resourceLabel = '',
+  resourceData = null,
+  extraRelatedTo = null,
+  handleClose = null,
+  extraData = {},
+  fromDialog = false
+}) => {
   const [showActivity, setActivityShow] = useState(false);
 
   useEffect(() => {
@@ -31,7 +41,7 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceDat
         </ThemeButton>
       </HideWhenOffline>
       {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
-      <div className={`activity-new-v1 ${showActivity ? 'show-activity-v1' : 'hide-activity-v1'}`}>
+      <div className={cn(`activity-new-v1`, showActivity ? 'show-activity-v1' : 'hide-activity-v1', fromDialog ? '[--from_top:54px]' : '')}>
         <Grid container>
           <Grid item xs={12}>
             <div>
@@ -54,14 +64,14 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', resourceDat
                   extraRelatedTo={
                     extraRelatedTo
                       ? {
-                        type: extraRelatedTo?.resource,
-                        referenceId: extraRelatedTo?.referenceId,
-                        access: true
-                      }
+                          type: extraRelatedTo?.resource,
+                          referenceId: extraRelatedTo?.referenceId,
+                          access: true
+                        }
                       : null
                   }
                   close={() => setActivityShow(false)}
-                  handleActivityRefresh={() => { }}
+                  handleActivityRefresh={() => {}}
                   emails={[]}
                   resourceData={resourceData}
                 />
