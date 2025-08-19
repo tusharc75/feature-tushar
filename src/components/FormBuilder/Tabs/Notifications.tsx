@@ -13,7 +13,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
-import { isArray } from 'lodash';
 
 export default function Notifications({ onClose, onSuccess, resource, resourceData }) {
   const toastConfig = useContext(CustomToastContext);
@@ -23,6 +22,24 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
   const [submitting, setSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
   const [notificationUserField, setNotificationUserField] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  console.log("resourceData : ", resourceData)
+
+  const [createRecordNotifications, setCreateRecordNotifications] = useState({
+    users: [],
+    message: '',
+    sendMail: true,
+    sendNotification: true
+  });
+
+  const [updateRecordNotifications, setUpdateRecordNotifications] = useState({
+    users: [],
+    message: '',
+    sendMail: true,
+    sendNotification: true
+  });
+
   const RULE = [
     {
       optionLabel: 'Less Then Current Date',
@@ -30,8 +47,21 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
     }
   ];
 
+  const [editDialog, setEditDialog] = useState({ open: false, type: null });
+
+
+  const handleEditClick = (type) => {
+    setEditDialog({ open: true, type });
+  };
+
   useEffect(() => {
-    setInitialValues({ notifications: [...(resourceData?.notifications || [])] });
+    setInitialValues({ notifications: [...(resourceData?.conditionNotifications || [])] });
+    if (resourceData?.createRecordNotifications) {
+      setCreateRecordNotifications(resourceData.createRecordNotifications[0]);
+    }
+    if (resourceData?.updateRecordNotifications) {
+      setUpdateRecordNotifications(resourceData.updateRecordNotifications[0]);
+    }
   }, [resourceData]);
 
   const addRemove = (values, type, index) => {
@@ -53,7 +83,25 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
   useEffect(() => {
     getFieldList(resource);
+    getUserList();
   }, []);
+
+  const getUserList = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/user`);
+      setUsers(
+        data?.map((user) => ({
+          value: user._id,
+          label: user.name || user.email,
+          ...user
+        })) || []
+      );
+    } catch (e) {
+      console.error('Error fetching users:', e);
+    }
+  };
 
   const getFieldList = async (resource) => {
     try {
@@ -74,13 +122,22 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel };
           })
       );
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
+
+    const submitData = {
+      notifications: editDialog.type === 'createRecordNotifications' ? [createRecordNotifications] :
+        editDialog.type === 'updateRecordNotifications' ? [updateRecordNotifications] :
+          values?.notifications || [],
+      type: editDialog.type
+    };
+    console.log("submitData : ", submitData)
+
     axiosInstance()
-      .put(`/sa-formbuilder/tabs/notifications/${resource}`, values?.notifications || [])
+      .put(`/sa-formbuilder/tabs/notifications/${resource}`, submitData)
       .then(({ data }) => {
         setSubmitting(false);
         onSuccess();
@@ -89,6 +146,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
           type: 'success',
           message: data.message
         });
+        // setEditDialog({ open: false, type: null });
       })
       .catch((error) => {
         setSubmitting(false);
@@ -157,241 +215,464 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
             />
             <CustomDialogContent>
               <Box>
-                <Box mb={2}>
-                  <ThemeButton
-                    buttonType="theme"
-                    onClick={() => {
-                      addRemove(values, 'add', values?.notifications?.length);
-                    }}
-                  >
-                    Add
-                  </ThemeButton>
-                </Box>
-                <Form>
-                  <FieldArray
-                    name="notifications"
-                    render={(arrayHelpers) => (
-                      <>
-                        {values?.notifications?.map((data, index) => (
-                          <Box mb={2} border={1} borderColor="var(--common-border-color)">
-                            <Box textAlign={'right'} p={1}>
-                              <HtmlTooltip title="Remove">
-                                <IconButton size="small" aria-label="remove" onClick={() => addRemove(values, 'remove', index)}>
-                                  <RemoveCircleOutlineIcon fontSize="small" color="primary" />
-                                </IconButton>
-                              </HtmlTooltip>
-                            </Box>
-                            <Box p={2} pt={1}>
-                              <Grid container spacing={2}>
-                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                  <Autocomplete
-                                    id="field"
-                                    options={fields}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
-                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
-                                    value={
-                                      fields && fields.filter((f) => f?.fieldName === data?.field).length
-                                        ? fields && fields.filter((f) => f?.fieldName === data?.field)[0]
-                                        : ''
-                                    }
-                                    onChange={(e, val) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['field']: val && val?.fieldName ? val?.fieldName : ''
-                                      });
-                                    }}
-                                    renderInput={(params) => (
+                {!editDialog.open && (
+                  <Box>
+                    <Box mb={2}>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => handleEditClick('createRecordNotifications')}
+                        style={{ marginRight: '8px' }}
+                      >
+                        Create Record Notifications
+                      </ThemeButton>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => handleEditClick('updateRecordNotifications')}
+                        style={{ marginRight: '8px' }}
+                      >
+                        Update Record Notifications
+                      </ThemeButton>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => handleEditClick('conditionNotifications')}
+                      >
+                        Conditional Notifications
+                      </ThemeButton>
+                    </Box>
+                  </Box>
+                )}
+
+                {/* Show Create Record Notifications Form */}
+                {editDialog.open && editDialog.type === 'createRecordNotifications' && (
+                  <Box>
+                    <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+                      <h3>Create Record Notifications</h3>
+                      <ThemeButton
+                        buttonType="transparent"
+                        onClick={() => setEditDialog({ open: false, type: null })}
+                      >
+                        Back
+                      </ThemeButton>
+                    </Box>
+                    <Grid container spacing={2}>
+                      <Grid size={12}>
+                        <Autocomplete
+                          multiple
+                          options={users}
+                          getOptionLabel={(option) => option.label || ''}
+                          value={users.filter(user => createRecordNotifications.users?.includes(user.value)) || []}
+                          onChange={(e, newValue) => {
+                            setCreateRecordNotifications(prev => ({
+                              ...prev,
+                              users: newValue.map(user => user.value) // Store only user IDs
+                            }));
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Select Users"
+                              placeholder="Choose users to notify"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Message"
+                          variant="outlined"
+                          multiline
+                          rows={3}
+                          value={createRecordNotifications.message || ''}
+                          onChange={(e) => {
+                            setCreateRecordNotifications(prev => ({
+                              ...prev,
+                              message: e.target.value
+                            }));
+                          }}
+                          placeholder="Enter notification message"
+                        />
+                      </Grid>
+                      <Grid size={6}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={createRecordNotifications.sendMail || false}
+                              onChange={(e) => {
+                                setCreateRecordNotifications(prev => ({
+                                  ...prev,
+                                  sendMail: e.target.checked
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Send Email"
+                        />
+                      </Grid>
+                      <Grid size={6}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={createRecordNotifications.sendNotification || false}
+                              onChange={(e) => {
+                                setCreateRecordNotifications(prev => ({
+                                  ...prev,
+                                  sendNotification: e.target.checked
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Send In-App Notification"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Show Update Record Notifications Form */}
+                {editDialog.open && editDialog.type === 'updateRecordNotifications' && (
+                  <Box>
+                    <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+                      <h3>Update Record Notifications</h3>
+                      <ThemeButton
+                        buttonType="transparent"
+                        onClick={() => setEditDialog({ open: false, type: null })}
+                      >
+                        Back
+                      </ThemeButton>
+                    </Box>
+                    <Grid container spacing={2}>
+                      <Grid size={12}>
+                        <Autocomplete
+                          multiple
+                          options={users}
+                          getOptionLabel={(option) => option.label || ''}
+                          value={users.filter(user => updateRecordNotifications.users?.includes(user.value)) || []}
+                          onChange={(e, newValue) => {
+                            setUpdateRecordNotifications(prev => ({
+                              ...prev,
+                              users: newValue.map(user => user.value) // Store only user IDs
+                            }));
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Select Users"
+                              placeholder="Choose users to notify"
+                              variant="outlined"
+                              size="small"
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Message"
+                          variant="outlined"
+                          multiline
+                          rows={3}
+                          value={updateRecordNotifications.message || ''}
+                          onChange={(e) => {
+                            setUpdateRecordNotifications(prev => ({
+                              ...prev,
+                              message: e.target.value
+                            }));
+                          }}
+                          placeholder="Enter notification message"
+                        />
+                      </Grid>
+                      <Grid size={6}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={updateRecordNotifications.sendMail || false}
+                              onChange={(e) => {
+                                setUpdateRecordNotifications(prev => ({
+                                  ...prev,
+                                  sendMail: e.target.checked
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Send Email"
+                        />
+                      </Grid>
+                      <Grid size={6}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={updateRecordNotifications.sendNotification || false}
+                              onChange={(e) => {
+                                setUpdateRecordNotifications(prev => ({
+                                  ...prev,
+                                  sendNotification: e.target.checked
+                                }));
+                              }}
+                              color="primary"
+                            />
+                          }
+                          label="Send In-App Notification"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Show Conditional Notifications Form */}
+                {editDialog.open && editDialog.type === 'conditionNotifications' && (
+                  <Box>
+                    <Box mb={2} display="flex" justifyContent="space-between" alignItems="center">
+                      <h3>Conditional Notifications</h3>
+                      <ThemeButton
+                        buttonType="transparent"
+                        onClick={() => setEditDialog({ open: false, type: null })}
+                      >
+                        Back
+                      </ThemeButton>
+                    </Box>
+                    <Box mb={2}>
+                      <ThemeButton
+                        buttonType="theme"
+                        onClick={() => {
+                          addRemove(values, 'add', values?.notifications?.length);
+                        }}
+                      >
+                        Add
+                      </ThemeButton>
+                    </Box>
+                    <Form>
+                      <FieldArray
+                        name="notifications"
+                        render={(arrayHelpers) => (
+                          <>
+                            {values?.notifications?.map((data, index) => (
+                              <Box mb={2} border={1} borderColor="var(--common-border-color)" key={index}>
+                                <Box textAlign={'right'} p={1}>
+                                  <HtmlTooltip title="Remove">
+                                    <IconButton size="small" aria-label="remove" onClick={() => addRemove(values, 'remove', index)}>
+                                      <RemoveCircleOutlineIcon fontSize="small" color="primary" />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                </Box>
+                                <Box p={2} pt={1}>
+                                  <Grid container spacing={2}>
+                                    <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
+                                      <Autocomplete
+                                        id="field"
+                                        options={fields}
+                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                                        isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
+                                        value={
+                                          fields && fields.filter((f) => f?.fieldName === data?.field).length
+                                            ? fields && fields.filter((f) => f?.fieldName === data?.field)[0]
+                                            : ''
+                                        }
+                                        onChange={(e, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.notifications[index],
+                                            ['field']: val && val?.fieldName ? val?.fieldName : ''
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            margin="dense"
+                                            size="small"
+                                            variant="outlined"
+                                            label="Field"
+                                            placeholder="Field"
+                                            name="field"
+                                            required
+                                            error={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.field &&
+                                              errors?.notifications &&
+                                              Boolean(errors?.notifications[index]?.field)
+                                            }
+                                            helperText={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.field &&
+                                              errors?.notifications &&
+                                              errors?.notifications[index]?.field
+                                            }
+                                          />
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
+                                      <Autocomplete
+                                        id="rule"
+                                        options={RULE}
+                                        getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
+                                        isOptionEqualToValue={(option: any, val) => option.optionValue === val}
+                                        value={
+                                          RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
+                                            ? RULE && RULE?.filter((d) => d?.optionValue === data?.rule)[0]
+                                            : ''
+                                        }
+                                        onChange={(e: any, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.notifications[index],
+                                            ['rule']: val && val?.optionValue ? val?.optionValue : ''
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            margin="dense"
+                                            size="small"
+                                            variant="outlined"
+                                            label="Rule"
+                                            placeholder="Rule"
+                                            name="rule"
+                                            required
+                                            error={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.rule &&
+                                              errors?.notifications &&
+                                              Boolean(errors?.notifications[index]?.rule)
+                                            }
+                                            helperText={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.rule &&
+                                              errors?.notifications &&
+                                              errors?.notifications[index]?.rule
+                                            }
+                                          />
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
+                                      <Autocomplete
+                                        id="notificationUserField"
+                                        options={notificationUserField}
+                                        getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
+                                        isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
+                                        value={
+                                          notificationUserField &&
+                                            notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
+                                            ? notificationUserField &&
+                                            notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
+                                            : ''
+                                        }
+                                        onChange={(e, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.notifications[index],
+                                            ['notificationUserField']: val && val?.fieldName ? val?.fieldName : ''
+                                          });
+                                        }}
+                                        renderInput={(params) => (
+                                          <TextField
+                                            {...params}
+                                            margin="dense"
+                                            size="small"
+                                            variant="outlined"
+                                            label="Notification User Field"
+                                            placeholder="Notification User Field"
+                                            name="notificationUserField"
+                                            required
+                                            error={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.notificationUserField &&
+                                              errors?.notifications &&
+                                              Boolean(errors?.notifications[index]?.notificationUserField)
+                                            }
+                                            helperText={
+                                              touched?.notifications &&
+                                              touched?.notifications[index]?.notificationUserField &&
+                                              errors?.notifications &&
+                                              errors?.notifications[index]?.notificationUserField
+                                            }
+                                          />
+                                        )}
+                                      />
+                                    </Grid>
+                                    <Grid size={{ md: 12, lg: 12, sm: 12, xs: 12 }}>
                                       <TextField
-                                        {...params}
-                                        margin="dense"
-                                        size="small"
+                                        fullWidth
+                                        label="Message"
                                         variant="outlined"
-                                        label="Field"
-                                        placeholder="Field"
-                                        name="field"
-                                        required
+                                        type="text"
+                                        size="small"
+                                        name="message"
+                                        placeholder="Message"
+                                        value={data.message}
+                                        onChange={(e) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values?.notifications[index],
+                                            ['message']: e.target.value
+                                          });
+                                        }}
                                         error={
                                           touched?.notifications &&
-                                          touched?.notifications[index]?.field &&
+                                          touched?.notifications[index]?.message &&
                                           errors?.notifications &&
-                                          Boolean(errors?.notifications[index]?.field)
+                                          Boolean(errors?.notifications[index]?.message)
                                         }
                                         helperText={
                                           touched?.notifications &&
-                                          touched?.notifications[index]?.field &&
+                                          touched?.notifications[index]?.message &&
                                           errors?.notifications &&
-                                          errors?.notifications[index]?.field
+                                          errors?.notifications[index]?.message
                                         }
                                       />
-                                    )}
-                                  />
-                                </Grid>
-                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                  <Autocomplete
-                                    id="rule"
-                                    options={RULE}
-                                    getOptionLabel={(option: any) => (option ? option?.optionLabel || '' : '')}
-                                    isOptionEqualToValue={(option: any, val) => option.optionValue === val}
-                                    value={
-                                      RULE && RULE?.filter((d) => d?.optionValue === data?.rule)?.length
-                                        ? RULE && RULE?.filter((d) => d?.optionValue === data?.rule)[0]
-                                        : ''
-                                    }
-                                    onChange={(e: any, val) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['rule']: val && val?.optionValue ? val?.optionValue : ''
-                                      });
-                                    }}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        margin="dense"
-                                        size="small"
-                                        variant="outlined"
-                                        label="Rule"
-                                        placeholder="Rule"
-                                        name="rule"
-                                        required
-                                        error={
-                                          touched?.notifications &&
-                                          touched?.notifications[index]?.rule &&
-                                          errors?.notifications &&
-                                          Boolean(errors?.notifications[index]?.rule)
-                                        }
-                                        helperText={
-                                          touched?.notifications &&
-                                          touched?.notifications[index]?.rule &&
-                                          errors?.notifications &&
-                                          errors?.notifications[index]?.rule
-                                        }
-                                      />
-                                    )}
-                                  />
-                                </Grid>
-                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                  <Autocomplete
-                                    id="notificationUserField"
-                                    options={notificationUserField}
-                                    getOptionLabel={(option: any) => (option ? option?.fieldLabel || '' : '')}
-                                    isOptionEqualToValue={(option: any, val) => option?.fieldName === val}
-                                    value={
-                                      notificationUserField &&
-                                      notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField).length
-                                        ? notificationUserField &&
-                                          notificationUserField.filter((f) => f?.fieldName === data?.notificationUserField)[0]
-                                        : ''
-                                    }
-                                    onChange={(e, val) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['notificationUserField']: val && val?.fieldName ? val?.fieldName : ''
-                                      });
-                                    }}
-                                    renderInput={(params) => (
-                                      <TextField
-                                        {...params}
-                                        margin="dense"
-                                        size="small"
-                                        variant="outlined"
-                                        label="Notification User Field"
-                                        placeholder="Notification User Field"
-                                        name="notificationUserField"
-                                        required
-                                        error={
-                                          touched?.notifications &&
-                                          touched?.notifications[index]?.notificationUserField &&
-                                          errors?.notifications &&
-                                          Boolean(errors?.notifications[index]?.notificationUserField)
-                                        }
-                                        helperText={
-                                          touched?.notifications &&
-                                          touched?.notifications[index]?.notificationUserField &&
-                                          errors?.notifications &&
-                                          errors?.notifications[index]?.notificationUserField
-                                        }
-                                      />
-                                    )}
-                                  />
-                                </Grid>
-                                <Grid size={{ md: 12, lg: 12, sm: 12, xs: 12 }}>
-                                  <TextField
-                                    fullWidth
-                                    label="Message"
-                                    variant="outlined"
-                                    type="text"
-                                    size="small"
-                                    name="message"
-                                    placeholder="Message"
-                                    value={data.message}
-                                    onChange={(e) => {
-                                      arrayHelpers.replace(index, {
-                                        ...values?.notifications[index],
-                                        ['message']: e.target.value
-                                      });
-                                    }}
-                                    error={
-                                      touched?.notifications &&
-                                      touched?.notifications[index]?.message &&
-                                      errors?.notifications &&
-                                      Boolean(errors?.notifications[index]?.message)
-                                    }
-                                    helperText={
-                                      touched?.notifications &&
-                                      touched?.notifications[index]?.message &&
-                                      errors?.notifications &&
-                                      errors?.notifications[index]?.message
-                                    }
-                                  />
-                                </Grid>
-                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                  <Box pt={0.5}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          name="sendMail"
-                                          checked={data?.sendMail}
-                                          onChange={(e) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values?.notifications[index],
-                                              ['sendMail']: e.target.checked
-                                            });
-                                          }}
-                                          color="primary"
+                                    </Grid>
+                                    <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
+                                      <Box pt={0.5}>
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              name="sendMail"
+                                              checked={data?.sendMail}
+                                              onChange={(e) => {
+                                                arrayHelpers.replace(index, {
+                                                  ...values?.notifications[index],
+                                                  ['sendMail']: e.target.checked
+                                                });
+                                              }}
+                                              color="primary"
+                                            />
+                                          }
+                                          label="Send Mail"
                                         />
-                                      }
-                                      label="Send Mail"
-                                    />
-                                  </Box>
-                                </Grid>
-                                <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
-                                  <Box pt={0.5}>
-                                    <FormControlLabel
-                                      control={
-                                        <Checkbox
-                                          name="sendNotification"
-                                          checked={data?.sendNotification}
-                                          onChange={(e) => {
-                                            arrayHelpers.replace(index, {
-                                              ...values?.notifications[index],
-                                              ['sendNotification']: e.target.checked
-                                            });
-                                          }}
-                                          color="primary"
+                                      </Box>
+                                    </Grid>
+                                    <Grid size={{ md: 4, lg: 4, sm: 6, xs: 12 }}>
+                                      <Box pt={0.5}>
+                                        <FormControlLabel
+                                          control={
+                                            <Checkbox
+                                              name="sendNotification"
+                                              checked={data?.sendNotification}
+                                              onChange={(e) => {
+                                                arrayHelpers.replace(index, {
+                                                  ...values?.notifications[index],
+                                                  ['sendNotification']: e.target.checked
+                                                });
+                                              }}
+                                              color="primary"
+                                            />
+                                          }
+                                          label="Send Notification"
                                         />
-                                      }
-                                      label="Send Notification"
-                                    />
-                                  </Box>
-                                </Grid>
-                              </Grid>
-                            </Box>
-                          </Box>
-                        ))}
-                      </>
-                    )}
-                  />
-                </Form>
+                                      </Box>
+                                    </Grid>
+                                  </Grid>
+                                </Box>
+                              </Box>
+                            ))}
+                          </>
+                        )}
+                      />
+                    </Form>
+                  </Box>
+                )}
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
