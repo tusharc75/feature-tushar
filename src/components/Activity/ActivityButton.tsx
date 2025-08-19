@@ -40,7 +40,7 @@ const ActivityButton = ({
           Workspace
         </ThemeButton>
       </HideWhenOffline>
-      {showActivity && <div className="backdrop-new-v1" onClick={() => setActivityShow(false)}></div>}
+      {showActivity && <div className="fixed inset-0 z-[6] bg-black/30" onClick={() => setActivityShow(false)}></div>}
       <div className={cn(`activity-new-v1`, showActivity ? 'show-activity-v1' : 'hide-activity-v1', fromDialog ? '[--from_top:54px]' : '')}>
         <Grid container>
           <Grid item xs={12}>
