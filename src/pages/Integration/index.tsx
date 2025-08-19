@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { HiArrowRight } from 'react-icons/hi';
 import { getColors } from '../Home/helpers';
 import styles from './index.module.scss';
@@ -11,7 +11,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import IntegrationCardShell from 'src/pages/Integration/IntegrationCardShell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete, CheckBox } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
 import slackLogo from 'src/assets/slack-logo.png';
 import quickbooksLogo from 'src/assets/quickBooks-logo.png';
 import ExtensionIcon from '@mui/icons-material/Extension';
@@ -58,7 +58,7 @@ const Integration = () => {
 
   const handleRemoveIntegration = async (id: string) => {
     try {
-      const response = await axiosInstance().delete('/integration', { data: { ids: [id] } });
+      const response: any = await axiosInstance().delete('/integration', { data: { ids: [id] } });
       toastConfig.setToastConfig(response);
       fetchIntegratedApps();
     } catch (error) {
@@ -100,39 +100,36 @@ const Integration = () => {
                     gradientColors={colors.gradient}
                     className={styles.cardInner}
                     minHeight={false}
+                    onClick={(e) => {
+                      if (!isIntegrated) {
+                        handleIntegration(integration.type)
+                      }
+                    }}
                   >
-                    {logo ? (
-                      <img
-                        src={logo}
-                        alt={integration.type}
-                        className={styles.floatIcon}
-                        style={{ width: '60px', height: '60px', padding: '2px 2px' }}
-                      />
+                    {logo ? (<img
+                      src={logo}
+                      alt={integration.type}
+                      className={styles.floatIcon}
+                      style={{ width: '60px', height: '60px', padding: '2px 2px' }}
+                    />
                     ) : (
                       <ExtensionIcon
                         className={styles.floatIcon}
                         style={{ width: '60px', height: '60px', padding: '2px 2px' }}
                       />
                     )}
-
-                    <Typography variant="h5">{integration.title}</Typography>
-
+                    <span className="text-xl font-semibold text-gray-800">{integration.title}</span>
                     {!isIntegrated && (
-                      <div
-                        className={styles.integrateText}
-                        onClick={() => handleIntegration(integration.type)}
-                      >
-                        <span>Click here to integrate</span>{' '}
-                        <HiArrowRight className={styles.arrow} />
+                      <div className={styles.integrateText}   >
+                        <span className="text-sm text-gray-500 mr-2">Click here to integrate</span>
+                        <HiArrowRight fontSize={10} />
                       </div>
                     )}
-
                     {isIntegrated && (
                       <HtmlTooltip title="Integrated" style={{ position: 'absolute', top: 8, right: 16 }}>
                         <CheckCircleOutlineIcon color="success" />
                       </HtmlTooltip>
                     )}
-
                     {isIntegrated && (
                       <HtmlTooltip title="Remove Integration" style={{ position: 'absolute', bottom: 8, right: 10 }}>
                         <IconButton
