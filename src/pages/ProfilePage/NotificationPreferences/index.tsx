@@ -6,7 +6,6 @@ import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { cn, UnCamelCase } from 'src/constants/helpers';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const PreferenceOptions = ({ icon, heading, subtitle }) => (
   <div className="flex items-center gap-4 ">
