@@ -625,6 +625,9 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
             return (isoFromDate.isValid() && d?.term?.from instanceof Date) || (isoToDate.isValid() && d?.term?.to instanceof Date);
           else return isoFromDate.isValid() && d?.term?.from instanceof Date && isoToDate.isValid() && d?.term?.to instanceof Date;
         }
+        if (d?.type === 'number' || d?.type === 'decimal') {
+          return Array.isArray(d?.term) && d.term.length > 0;
+        }
         return d?.term?.length ? true : false;
       })
       ?.map((d) => {
@@ -635,6 +638,9 @@ export const createFilterData = (filterByIds, deepFilters, filterTerm) => {
               to: d?.term?.to ? dateFormatToSend(d?.term?.to) : null
             }
           });
+        } if (d?.type === 'number' || d?.type === 'decimal') {
+          filterModel.set(d?.field, { filter: d?.term });
+          return;
         } else {
           filterModel.set(d?.field, { filter: d?.term, ['$nin']: filterTerm[d?.field] === '$nin' ? true : false });
         }
@@ -705,6 +711,8 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
       formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
     } else if (value['operator'] === 'OR') {
       formValues[key] = value.condition1?.filter.map((e) => e.optionValue);
+    } else if (Array.isArray(value.filter)) {
+      formValues[key] = value.filter;
     } else if (value.filter) {
       formValues[key] = value.filter;
     }
