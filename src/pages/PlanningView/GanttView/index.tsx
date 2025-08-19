@@ -51,14 +51,14 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
   const currentRangeRef = useRef<TimeRange | null>(null);
   const initialDrawn = useRef(false);
   const scrollElement = useRef<HTMLDivElement>();
-  const hasMoreRef = useRef<boolean>(true);
+  const hasMoreVerticalRef = useRef<boolean>(true);
   const pagerRef = useRef(new VisibleWindowPager({ limit: LIMIT }));
   const currentWindowKeyRef = useRef<string | null>(null);
 
   const scrollThrottleRef = useRef<number | null>(null);
 
   const fetchVisible = useCallback(
-    async ({ params, initial = false }: { params: Params; initial?: boolean }) => {
+    async ({ params, initial = false, hasMore }: { params: Params; initial?: boolean; hasMore?: boolean }) => {
       if (initial) {
         setLoading(true);
       } else {
@@ -88,19 +88,16 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         });
         const rows: RawGroup[] = resp?.data?.data ?? [];
 
-        hasMoreRef.current = groupsDSRef.current.length < resp?.data?.count;
+        hasMoreVerticalRef.current = groupsDSRef.current.length < resp?.data?.count;
 
-        // if (hasMore === true) {
-        //  hasMoreRef.current = hasMore
-        // } else {
-        //   hasMoreRef.current = rows.length >= LIMIT;
-        //   pager.setHasMoreData(hasMoreRef.current);
-        // }
+        if (hasMore === true) {
+          hasMoreVerticalRef.current = hasMore;
+        }
+        pager.setHasMoreData(hasMoreVerticalRef.current);
 
         const { groups, items } = buildFromRows({ rows, resourcePolicy, selectedResource });
         if (groups.length) groupsDSRef.current.update(groups);
         if (items.length) itemsDSRef.current.update(items);
-        console.log(groupsDSRef.current?.length);
         timelineRef.current?.redraw();
         setLoading(false);
         setMoreDataLoading(false);
@@ -231,8 +228,8 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
           inflightRef.current.clear();
 
           // pagerRef.current.reset(visible); // resets skip for this window
-          hasMoreRef.current = true;
-          fetchVisible({ params });
+          hasMoreVerticalRef.current = true;
+          fetchVisible({ params, hasMore: true });
         }
 
         // re-bind header click handlers
@@ -253,7 +250,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
         timelineRef.current?.destroy();
         timelineRef.current = null;
         pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
-        hasMoreRef.current = true;
+        hasMoreVerticalRef.current = true;
         groupsDSRef.current.clear();
         itemsDSRef.current.clear();
         inflightRef.current.forEach((src) => src.cancel?.('Resource switched'));
@@ -297,14 +294,13 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
 
           if (fromBottom > 45) {
             const params = pagerRef.current.getParamsForVisible({ start: win.start, end: win.end });
-            if (params && !moreDataLoading && hasMoreRef.current) {
+            if (params && !moreDataLoading && hasMoreVerticalRef.current) {
               fetchVisible({ params });
             }
           } else {
             const params = pagerRef.current.getParamsForNextPage({ start: win.start, end: win.end });
-            console.log({ params, fromBottom });
-            if (params && !moreDataLoading && hasMoreRef.current) {
-              fetchVisible({ params });
+            if (params && !moreDataLoading && hasMoreVerticalRef.current) {
+              fetchVisible({ params, hasMore: true });
             }
           }
         }, 120);
@@ -328,7 +324,7 @@ const GanttView = React.forwardRef<GantttViewRef, GanttViewProps>(({ resourceLis
       const win = timelineRef.current?.getWindow();
       if (!win) return;
       pagerRef.current.reset({ clearLoaded: true, clearPending: true, resetScroll: true });
-      hasMoreRef.current = true;
+      hasMoreVerticalRef.current = true;
       groupsDSRef.current.clear();
       itemsDSRef.current.clear();
       await fetchVisible({ params: pagerRef.current.getParamsForVisible({ start: win.start, end: win.end }), initial: true });
