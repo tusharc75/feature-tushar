@@ -45,10 +45,7 @@ const Integration = () => {
       }
     } else if (integrationKey === "quickBooks") {
       try {
-        const res = await axiosInstance().post('/integration/quick-books/login', {
-          backendUrl: backendApi,
-          frontendUrl: window.location.href
-        });
+        const res = await axiosInstance().get('/integration/quick-books/login');
         window.location.href = res.data.loginUrl;
       } catch (error) {
         toastConfig.setToastConfig(error);
