@@ -289,7 +289,6 @@ export default function ManageProfile(props) {
             isUpdateEmail={true}
             userData={userData}
             open={isEmailUpdate}
-            onFetchUserData={onFetchUserData}
             onClose={() => setEmailUpdate(false)}
             logoutUser={logoutUser}
           />

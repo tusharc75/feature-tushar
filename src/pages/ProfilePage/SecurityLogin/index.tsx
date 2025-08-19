@@ -216,7 +216,6 @@ const SecurityLogin = ({ userData, dispatch, onFetchUserData, toastConfig, permi
         <ManageUpdateEmailPasswordDialog
           isUpdatePassword={true}
           open={isPasswordUpdate}
-          onFetchUserData={onFetchUserData}
           onClose={() => setPasswordUpdate(false)}
           logoutUser={logoutUser}
         />
