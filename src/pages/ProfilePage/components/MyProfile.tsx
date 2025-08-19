@@ -1,14 +1,12 @@
-import ProfileSidebar from './../components/ProfileSidebar';
 import Grid from '@mui/material/Grid2';
 import ManageProfile from './../components/ManageProfile';
 
-const MyProfile = ({ handleItemClick, activeItem, userData, onFetchUserData, otherDetails, proxyBy, userFields, loading, userLoading }) => {
+const MyProfile = ({ userData, onFetchUserData, otherDetails, proxyBy, userFields, loading, userLoading }) => {
   return (
     <>
       <Grid>
-        <ProfileSidebar
-          onItemClick={handleItemClick}
-          activeLink={activeItem}
+        <ManageProfile
+          displayUserProfileImage={true}
           userData={userData}
           onFetchUserData={onFetchUserData}
           otherDetails={otherDetails}

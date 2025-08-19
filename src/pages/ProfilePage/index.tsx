@@ -1,16 +1,12 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Box, Paper, Theme } from '@mui/material';
+import { useState, useEffect, useContext, Fragment } from 'react';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { makeStyles } from '@mui/styles';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import ProfileSidebar from './components/ProfileSidebar';
-import { profileMenuItems, sidebarResource } from '../../constants/helpers';
-import ManageProfile from './components/ManageProfile';
+import { sidebarResource } from '../../constants/helpers';
 import NotificationPreference from './components/NotificationPreference';
 import UiPreference from './components/UiPreference';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomContainer from '../../components/CustomContainer';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
@@ -19,37 +15,12 @@ import MyProfile from 'src/pages/ProfilePage/components/MyProfile';
 import SecurityLogin from 'src/pages/ProfilePage/components/SecurityLogin';
 import ProxiesDelegations from 'src/pages/ProfilePage/components/ProxiesDelegations';
 
-const useStyles = makeStyles((theme: Theme) => ({
-  paper: {
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    whiteSpace: 'nowrap',
-    marginBottom: theme.spacing(1)
-  },
-  profileContainer: {
-    width: '90%',
-    margin: theme.spacing(4),
-    borderRadius: '8px',
-    textAlign: 'center',
-    backgroundColor: theme.palette.common.white
-  },
-  profileSidebar: {
-    position: 'fixed',
-    width: '23%',
-    height: 'calc(100vh - 142px)',
-    background: '#ececec !important',
-    borderRadius: '6px'
-    // borderRight: `2px solid ${theme.palette.primary.light}`
-  }
-}));
 export default function ProfilePage(props) {
   const {
     state: { user, permissions },
     dispatch
   }: any = useData();
   const { profileBreadCrumbs } = props;
-  const [activeItem, setActiveItem] = useState(profileMenuItems.profile);
   const [userData, setUserData] = useState(null);
   const [proxyBy, setProxyBy] = useState([]);
   const [otherDetails, setOtherDetails] = useState(null);
@@ -57,13 +28,9 @@ export default function ProfilePage(props) {
   const [loading, setLoading] = useState(false);
   const [userLoading, setUserLoading] = useState(false);
   const [userFields, setUserFields] = useState([]);
-  const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
   const [tabValue, setTabValue] = useState(0);
 
-  const handleItemClick = (obj) => {
-    if (obj.id) setActiveItem(obj.id);
-  };
 
   useEffect(() => {
     if (userFields.length === 0) {
@@ -145,17 +112,40 @@ export default function ProfilePage(props) {
             <CustomTab value={3}>Notification Preferences</CustomTab>
             <CustomTab value={4}>UI Preferences</CustomTab>
           </CustomTabs>
+
           <TabPanel value={tabValue} index={0}>
-            <MyProfile handleItemClick={handleItemClick} activeItem={activeItem} userData={userData} onFetchUserData={fetchUserData} otherDetails={otherDetails} proxyBy={proxyBy} userFields={userFields} loading={loading} userLoading={userLoading} />
+            <MyProfile
+              userData={userData}
+              onFetchUserData={fetchUserData}
+              otherDetails={otherDetails}
+              proxyBy={proxyBy}
+              userFields={userFields}
+              loading={loading}
+              userLoading={userLoading}
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={1}>
-            <SecurityLogin userData={userData} dispatch={dispatch} onFetchUserData={fetchUserData} toastConfig={toastConfig} permissions={permissions} />
+            <SecurityLogin
+              userData={userData}
+              dispatch={dispatch}
+              onFetchUserData={fetchUserData}
+              toastConfig={toastConfig}
+              permissions={permissions}
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
-            <ProxiesDelegations userData={userData} userProxy={proxyBy} onFetchUserData={fetchUserData} />
+            <ProxiesDelegations
+              userData={userData}
+              userProxy={proxyBy}
+              onFetchUserData={fetchUserData}
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={3}>
-            <NotificationPreference notificationPreferenceData={notificationPreferenceData} user={userData?._id} onSuccess={fetchUserData} />
+            <NotificationPreference
+              notificationPreferenceData={notificationPreferenceData}
+              user={userData?._id}
+              onSuccess={fetchUserData}
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
             <UiPreference

@@ -4,43 +4,29 @@ import {
   CircularProgress,
   Divider,
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Theme,
   Typography
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { Image } from '@mui/icons-material';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { cloneDeep } from 'lodash';
 import { useContext, useState } from 'react';
-import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import { HiOutlinePencilAlt, HiPencil } from 'react-icons/hi';
 import { IoMdTrash } from 'react-icons/io';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import { SET_USER } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import routes from '../../../components/Helpers/Routes';
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import UpdateDetailsDialog from '../../../components/Shared/UpdateDetailsDialog';
-import { displayDate, imageUploadMaxSize } from '../../../constants/helpers';
+import { imageUploadMaxSize } from '../../../constants/helpers';
 import styles from '../profilePage.module.scss';
-import AddProxyDialog from './AddProxyDialog';
 import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
-import SetUpMfaDialog from './SetUpMfaDialog';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import SetUpQRDialog from 'src/pages/ProfilePage/components/SetUpQRDialog';
-import ViewQRCodeDialog from 'src/pages/ProfilePage/components/ViewQRCodeDialog';
+
 
 export const useStyles = makeStyles((theme: Theme) => ({
   profileEdit: {
