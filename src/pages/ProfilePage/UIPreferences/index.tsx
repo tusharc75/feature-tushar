@@ -9,8 +9,8 @@ import {
   TableCell,
   TableBody
 } from '@mui/material';
-import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
-import axiosInstance from '../../../../axios/axiosInstance';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
 import Autocomplete from '@mui/material/Autocomplete';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -21,12 +21,13 @@ import { cn } from 'src/constants/helpers';
 
 const recordOptions: string[] = ['All', 'My', 'Open'];
 
-const DefaultRecordDialog = ({ userData, onSuccess }) => {
+const UiPreference = ({ userData, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [initialValues, setInitialValues] = useState({ data: [] });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resources, setResources] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {
     const userByDefaultRecord = userData?.uiPreference?.byDefaultRecord;
@@ -83,6 +84,8 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
+      }).finally(() => {
+        setIsEdit(false);
       });
   };
 
@@ -90,7 +93,7 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
     setSearchQuery(e.target.value);
   };
   return (
-    <>
+    <Box style={{ marginTop: '16px' }}>
       {initialValues?.data?.length ? (
         <Formik initialValues={initialValues} onSubmit={updateData}>
           {({ values, submitForm }) => (
@@ -102,14 +105,15 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
                   width="300px"
                   value={searchQuery}
                 />
-                <ThemeButton
-                  onClick={submitForm}
-                  disabled={isSubmitting}
-                  buttonType='theme'
-                  isLoading={isSubmitting}
-                >
-                  Save
-                </ThemeButton>
+                {isEdit ? (
+                  <ThemeButton onClick={submitForm} disabled={isSubmitting} buttonType="theme" isLoading={isSubmitting}>
+                    {isSubmitting ? 'Updating...' : 'Update'}
+                  </ThemeButton>
+                ) : (
+                  <ThemeButton onClick={() => setIsEdit(true)} buttonType="theme" disabled={isSubmitting}>
+                    Edit
+                  </ThemeButton>
+                )}
               </Box>
               <TableContainer
                 className={cn('min-h-[300px] rounded-md border')}
@@ -139,6 +143,7 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
                               <TableCell className='pl-4'>{data.resourceLabel}</TableCell>
                               <TableCell className='pl-4'>
                                 <Autocomplete
+                                  disabled={!isEdit}
                                   value={data.type}
                                   onChange={(e, val) => {
                                     arrayHelpers.replace(index, {
@@ -174,8 +179,8 @@ const DefaultRecordDialog = ({ userData, onSuccess }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 
-export default DefaultRecordDialog;
+export default UiPreference;

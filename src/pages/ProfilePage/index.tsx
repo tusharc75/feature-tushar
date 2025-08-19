@@ -1,21 +1,20 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Box } from '@mui/material';
-import Grid from '@mui/material/Grid2';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import { sidebarResource } from '../../constants/helpers';
-import NotificationPreference from './components/NotificationPreference';
-import UiPreference from './components/UiPreference';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_USER } from 'src/StateProvider/actionTypes';
 import { fetch_resource_view_fields } from 'src/components/ResourceFields';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import MyProfile from 'src/pages/ProfilePage/components/MyProfile';
-import SecurityLogin from 'src/pages/ProfilePage/components/SecurityLogin';
-import ProxiesDelegations from 'src/pages/ProfilePage/components/ProxiesDelegations';
 import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
+import MyProfile from 'src/pages/ProfilePage/MyProfile';
+import SecurityLogin from 'src/pages/ProfilePage/SecurityLogin';
+import ProxiesDelegations from 'src/pages/ProfilePage/ProxiesDelegations';
+import NotificationPreference from 'src/pages/ProfilePage/NotificationPreferences';
+import UiPreference from 'src/pages/ProfilePage/UIPreferences';
 
 export default function ProfilePage(props) {
   const {
@@ -166,11 +165,7 @@ export default function ProfilePage(props) {
         />
       </TabPanel>
       <TabPanel value={tabValue} index={3}>
-        <NotificationPreference
-          notificationPreferenceData={notificationPreferenceData}
-          user={userData?._id}
-          onSuccess={fetchUserData}
-        />
+        <NotificationPreference />
       </TabPanel>
       <TabPanel value={tabValue} index={4}>
         <UiPreference

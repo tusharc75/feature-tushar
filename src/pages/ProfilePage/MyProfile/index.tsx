@@ -1,9 +1,9 @@
 import Grid from '@mui/material/Grid2';
-import ManageProfile from './../components/ManageProfile';
+import ManageProfile from './ManageProfile';
 import { Box } from '@mui/material';
 
 const MyProfile = ({ userData, onFetchUserData, otherDetails, proxyBy, userFields, loading, userLoading }) => {
-  return (<Box p={{ xs: 0, md: 2 }}>
+  return (<Box>
     <Grid container spacing={3}>
       <Grid size={{ sm: 12, md: 4, lg: 3 }}>
         <ManageProfile
@@ -27,7 +27,6 @@ const MyProfile = ({ userData, onFetchUserData, otherDetails, proxyBy, userField
       </Grid>
     </Grid>
   </Box>
-
   )
 }
 
