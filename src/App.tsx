@@ -302,6 +302,8 @@ import ShowFileUploader from 'src/components/ShowFileUploader';
 import OnboardingTemplate from 'src/pages/OnboardingTemplate';
 import OnboardingTemplateDetail from 'src/pages/OnboardingTemplate/OnboardingTemplateDetail';
 import QuickBookProxy from 'src/pages/Integration/QuickBookProxy';
+import SerializedPackagesInspection from 'src/pages/SerializedPackagesInspection';
+import SerializedPackagesInspectionDetail from 'src/pages/SerializedPackagesInspection/SerializedPackagesInspectionDetail';
 
 var notificationInterval: any = null;
 
@@ -476,7 +478,7 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
-            
+
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -1246,6 +1248,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serializedPackagesDetail.path}/:id`}>
               <SerializedPackagesDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedPackagesInspection.path}>
+              <SerializedPackagesInspection />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedPackagesInspectionDetail.path}/:id`}>
+              <SerializedPackagesInspectionDetail />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
