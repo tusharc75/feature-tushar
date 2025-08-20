@@ -86,16 +86,8 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
 
   const getUserList = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/user`);
-      setUsers(
-        data?.map((user) => ({
-          value: user._id,
-          label: user.name || user.email,
-          ...user
-        })) || []
-      );
+      const { data: { data } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=User`);
+      setUsers(data?.User || []);
     } catch (e) {
       console.error('Error fetching users:', e);
     }
@@ -256,11 +248,11 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                         <Autocomplete
                           multiple
                           options={users}
-                          getOptionLabel={(option) => option.label || ''}
+                          getOptionLabel={(option) => option.optionLabel || ''}
                           value={users.filter(user =>
                           (editDialog.type === 'createRecordNotifications'
-                            ? createRecordNotifications.users?.includes(user.value)
-                            : updateRecordNotifications.users?.includes(user.value)
+                            ? createRecordNotifications.users?.includes(user.optionValue)
+                            : updateRecordNotifications.users?.includes(user.optionValue)
                           )) || []}
                           onChange={(e, newValue) => {
                             const setter = editDialog.type === 'createRecordNotifications'
@@ -268,7 +260,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                               : setUpdateRecordNotifications;
                             setter(prev => ({
                               ...prev,
-                              users: newValue.map(user => user.value)
+                              users: newValue.map(user => user.optionValue)
                             }));
                           }}
                           renderInput={(params) => (
@@ -287,8 +279,10 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                           fullWidth
                           label="Message"
                           variant="outlined"
-                          multiline
-                          rows={3}
+                          type="text"
+                          size="small"
+                          name="message"
+                          placeholder="Message"
                           value={editDialog.type === 'createRecordNotifications'
                             ? createRecordNotifications.message
                             : updateRecordNotifications.message}
@@ -301,7 +295,6 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                               message: e.target.value
                             }));
                           }}
-                          placeholder="Enter notification message"
                         />
                       </Grid>
                       <Grid size={6}>
@@ -323,7 +316,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                               color="primary"
                             />
                           }
-                          label="Send Email"
+                          label="Email"
                         />
                       </Grid>
                       <Grid size={6}>
@@ -345,7 +338,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                               color="primary"
                             />
                           }
-                          label="Send In-App Notification"
+                          label="Portal"
                         />
                       </Grid>
                     </Grid>
@@ -567,7 +560,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                               color="primary"
                                             />
                                           }
-                                          label="Send Mail"
+                                          label="Email"
                                         />
                                       </Box>
                                     </Grid>
@@ -587,7 +580,7 @@ export default function Notifications({ onClose, onSuccess, resource, resourceDa
                                               color="primary"
                                             />
                                           }
-                                          label="Send Notification"
+                                          label="Portal"
                                         />
                                       </Box>
                                     </Grid>
