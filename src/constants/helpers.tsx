@@ -399,6 +399,7 @@ export const sidebarResource = {
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
   serializedPackages: 'Serialized Packages',
+  serializedPackagesInspection: 'Serialized Packages Inspection',
   trainAiModel: 'Train Ai Model',
   assemblyOrder: 'Assembly Order',
   disassemblyOrder: 'Disassembly Order',

@@ -58,7 +58,7 @@ import routes from './components/Helpers/Routes';
 import PrivateRoute from './components/PrivateRoute';
 import ScreenOrientationOverlay from './components/ScreenMessages/ScreenOrientationOverlay';
 import ColorModeProvider from './constants/AppConfig';
-import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, sidebarResource, supplierAccount, supplierContact } from './constants/helpers';
 import ErrorBoundaryComponent from './ErrorBoundary';
 import { firebaseConfig } from './firebase';
 import { useLiveLocationTracking } from './hooks/useLiveLocationTracking';
@@ -476,7 +476,7 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
-            
+
             <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
@@ -1246,6 +1246,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serializedPackagesDetail.path}/:id`}>
               <SerializedPackagesDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.serializedPackagesInspection.path}>
+              <SerializedPackages resourceRendered={sidebarResource.serializedPackagesInspection} />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.serializedPackagesInspectionDetail.path}/:id`}>
+              <SerializedPackagesDetail resourceRendered={sidebarResource.serializedPackagesInspection} />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
